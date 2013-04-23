@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  .container
+    .btn-toolbar
+      .btn-group
+        a.btn.btn-primary(href='./builder') New Traveler
+      .btn-group
+        a.btn.btn-info(href='./about') About
+    .tabbable.tabs-left
+      ul.nav.nav-tabs
+        li.active
+          a(href='#traveler', data-toggle='tab') Traveler
+        li
+          a(href='#assigned', data-toggle='tab') Assigned
+        li
+          a(href='#completed', data-toggle='tab') Completed
+        li
+          a(href='#device', data-toggle='tab') Device
+      .tab-content
+        #traveler.tab-pane.active
+          p the list of Travelers
+        #assigned.tab-pane
+          p the list of assigned travelers
+        #completed.tab-pane
+          p the list of completed travelers
+        #device.tab-pane
+          p the list of devices
+
+block js
+  script(type='text/javascript', src='/javascripts/jquery-1.9.1.js')
+  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+
+

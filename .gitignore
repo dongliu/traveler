@@ -1,3 +1,16 @@
+# Node modules #
+node_modules/
+
+# Git related files. #
+*.orig
+
+# Editor bread crumbs. #
+*~
+# sublime stuff#
+*.sublime-project
+*.sublime-workspace
+
+
 lib-cov
 *.seed
 *.log

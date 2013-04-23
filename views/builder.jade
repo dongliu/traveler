@@ -1,0 +1,170 @@
+extends layout
+
+block content
+  .container
+    .builder
+      .pagination.pagination-left
+        ul
+          li.active
+            a(href='#1') 1
+      form#title
+        //- fieldset
+        input.input-xlarge#title(type='text', value='Untitled', style='font-size:1.5em')
+        span.help-inline The title of your form
+        br
+        textarea.input-xlarge#description(rows=3, cols=100)
+          | Form description
+      form.form-horizontal#output
+        //- .control-group
+        //-   .controls
+        //-     input#title(type='text', value='Untitled')
+        //-     textarea#description(rows=3, value='Form description')
+        //- fieldset
+
+
+      //- .builder.working
+      form.form-horizontal.disabled#add-item-form
+        fieldset
+          legend.add-item Form element to add
+          #general.add-item
+            .control-group
+              .control-label Label
+              .controls
+                input#label(type='text')
+                span.help-inline  Keep the label brief and unique
+            //- I think user will have difficult to create unique ids
+            //- .control-group
+            //-   .control-label ID
+            //-   .controls
+            //-     input#id(type='text',placeholder='Need to be Unique')
+          //- add multiple choice and select later
+          #input.add-item
+            .control-group
+              .control-label Placeholder
+              .controls
+                input(type='text',placeholder='Placeholder appears inside')
+            .control-group
+              .control-label Inline help
+              .controls
+                input(type='text',placeholder='Inline help')
+            //- reserve the help-block for update information
+            //- .control-group
+            //-   .control-label Block help
+            //-   .controls
+            //-     textarea(row=3,placeholder='Help block beneath the input')
+          #paragraph.add-item
+            .control-group
+              .control-label Row
+              .controls
+                input(type='text',placeholder='Number of rows')
+          //- #integer
+          //-   .control-group
+          //-     .control-label unit
+          //-     .controls
+          //-       input(type='text',placeholder='The unit')
+          #number.add-item
+            .control-group
+              .control-label Unit
+              .controls
+                .input-append
+                  input(type='text',placeholder='The unit')
+                  span.add-on unit
+          //- Starting specific inputs
+          #upload.add-item
+            .control-group
+              .control-label Name
+              .controls
+                input(type='text',placeholder='Name')
+          #link.add-item
+            .control-group
+              .control-label Text
+              .controls
+                input(type='text',placeholder='Link display text')
+            .control-group
+              .control-label Hyperlink
+              .controls
+                input(type='text',placeholder='Page or file link')
+            .control-group
+              .control-label Link to
+              .controls
+                .btn-group
+                  button.btn.btn-info Other traveler
+          #rich.add-item
+            .control-group
+              .control-label Add an image
+              .controls
+                input(type='file',name='instruction')
+          #hold.add-item
+            .control-group
+              .control-label Message
+              .controls
+                input(type='text',placeholder='Instruction message')
+          #button.add-item
+            .control-group
+              .controls
+                .btn-group
+                  button.btn#done Done
+                .btn-group
+                  button.btn#cancel Cancel
+
+      //- #default-form-element
+      #default-form-element(style='display: none;')
+        #general-element
+          .control-group
+            .control-label
+            .controls
+              label.checkbox
+                input(type='checkbox', disabled=true)
+                span to be updated
+
+      .btn-group.dropdown
+        a.btn.dropdown-toggle(data-toggle='dropdown')#input-items Inputs
+          span.caret
+        ul.dropdown-menu
+          li#add-checkbox
+            a(href='#') Checkbox
+          li#add-text
+            a(href='#') Text
+          li#add-par
+            a(href='#') Paragraph
+          li#add-int
+            a(href='#') Integer
+          li#add-float
+            a(href='#') Float
+          //- li#add-file
+          //-   a(href='#') Upload file
+          li#add-link
+            a(href='#') Link
+          //- li#add-
+          //-   a(href='#') Upload
+          li#add-rich
+            a(href='#') Rich instruction
+          li#add-hold
+            a(href='#') Hold point
+      .btn-group.dropdown
+        a.btn.dropdown-toggle(data-toggle='dropdown')#struct-itmes Structure
+          span.caret
+        ul.dropdown-menu
+          //- li#add-devider
+          //-   a(href='#') Divider
+          //- li#add-group
+          //-   a(href='#') Group
+          li#add-page
+            a(href='#') Page
+      .btn-group
+            button.btn.btn-success#save Save
+    .builder.control
+      .control-group.admin
+        .controls
+          label.checkbox
+            input(type='checkbox')
+            | I am ready to publish this form for data collection
+          .btn-group
+            button.btn#pub Publish
+
+block js
+  script(type='text/javascript', src='/javascripts/jquery-1.9.1.js')
+  script(type='text/javascript', src='/javascripts/jquery-ui-1.10.2.custom.js')
+  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='/javascripts/knockout-2.2.1.js')
+  script(type='text/javascript', src='/javascripts/builder.js')
