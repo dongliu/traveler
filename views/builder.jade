@@ -109,13 +109,20 @@ block content
 
       //- #default-form-element
       #default-form-element(style='display: none;')
-        #general-element
+        #checkbox-element
           .control-group
             .control-label
             .controls
               label.checkbox
                 input(type='checkbox', disabled=true)
                 span to be updated
+        #input-element
+          .control-group
+            .control-label
+              span label to be updated
+            .controls
+              input(type='text', disabled=true)
+              span to be updated
 
       .btn-group.dropdown
         a.btn.dropdown-toggle(data-toggle='dropdown')#input-items Inputs

@@ -25,10 +25,8 @@ function working () {
     // the output part
     var element = $('#general-element .control-group').clone().show();
     $('#output').append(element);
-    // $('#general-element .control-group').clone().show().appendTo('#output');
     $('#label').attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
     $('label span', element).attr("data-bind", "text: label");
-    // $('.control-label', element).html($('#label').val());
     var formModel = function (init) {
       this.label = ko.observable(init);
     }
@@ -45,6 +43,16 @@ function working () {
       $('#input').show();
       $('#button').show();
     });
+    var element1 = $('#general-element .control-group').clone().show();
+    $('#output').append(element);
+    var element2 = $('#general-element .control-group').clone().show();
+    $('#output').append(element);
+    $('#label').attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
+    $('label span', element).attr("data-bind", "text: label");
+    var formModel = function (init) {
+      this.label = ko.observable(init);
+    }
+    ko.applyBindings(new formModel("update me"));
     e.preventDefault();
   });
 
