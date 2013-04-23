@@ -1,0 +1,38 @@
+doctype 5
+html
+  head
+    meta(charset='urf-8')
+    title FRIB Traveler App
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
+    link(rel='stylesheet', href='/ui-lightness/jquery-ui-1.10.2.custom.css')
+
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    //- link(rel='stylesheet', href='/stylesheets/custom.css')
+    //- script(type='text/javascript', src='/javascripts/jquery-1.9.1.js')
+    //- script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+  body
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container
+          button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.brand(href='http://www.frib.msu.edu/') FRIB
+          .nav-collapse.collapse
+            ul.nav
+              li
+                a(href='http://liud-dev.nscl.msu.edu:3000') Cable
+              li.active
+                a(href='./') Traveler
+              li
+                a(href='other') Other
+              li
+                a(href='other') Another
+              li
+                a(href='./logout') Logout
+    block content
+
+    block js

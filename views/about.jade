@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  //- .jumbotron
+  .hero-unit
+    h1 FRIB Traveler App
+    if username
+      p Welcome #{username}!
+    else
+      p
+        a.btn.btn-large.btn-primary(href='https://liud-dev.nscl.msu.edu/cas/login?service=http://localhost:3000') Log In
