@@ -339,3 +339,13 @@ hr.soften {
   height: 3em;
   line-height: 1em;
 }
+
+.control-group-highlight {
+  background-color: #f5f5f5;
+}
+
+.control-group-buttons {
+  position: relative;
+  float: right;
+  display: none;
+}
