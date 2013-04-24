@@ -15,12 +15,6 @@ block content
         textarea.input-xxlarge#description(rows=3, cols=100, placeholder='Form description')
 
       form.form-horizontal#output
-        //- .control-group
-        //-   .controls
-        //-     input#title(type='text', value='Untitled')
-        //-     textarea#description(rows=3, value='Form description')
-        //- fieldset
-
 
       //- .builder.working
       form.form-horizontal.disabled#add-item-form
@@ -111,8 +105,6 @@ block content
       #default-form-element(style='display: none;')
         #checkbox-element
           .control-group
-            a.btn.btn-warning.control-group-buttons(href='#', data-toggle='tooltip', title='remove')
-              i.icon-trash.icon-large
             .control-label
             .controls
               label.checkbox
@@ -132,6 +124,14 @@ block content
             .controls
               textarea(disabled=true)
               span.help-inline
+        #control-group-buttons
+          .btn-group.control-group-buttons
+              a.btn.btn-info(href='#', data-toggle='tooltip', title='edit')
+                i.icon-edit.icon-large
+              a.btn.btn-info(href='#', data-toggle='tooltip', title='duplicate')
+                i.icon-copy.icon-large
+              a.btn.btn-warning(href='#', data-toggle='tooltip', title='remove')
+                i.icon-trash.icon-large
 
       .btn-group.dropdown
         a.btn.dropdown-toggle(data-toggle='dropdown')#input-items Inputs

@@ -34,6 +34,7 @@ function working () {
     });
     // the output part
     var element = $('#checkbox-element .control-group').clone().show();
+    element.prepend($('#control-group-buttons .btn-group').clone());
     $('#output').append(element);
     $('#label').attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
     $('label span', element).attr("data-bind", "text: label");
