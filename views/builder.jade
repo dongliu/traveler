@@ -9,11 +9,11 @@ block content
             a(href='#1') 1
       form#title
         //- fieldset
-        input.input-xlarge#title(type='text', value='Untitled', style='font-size:1.5em')
+        input.input-xxlarge#title(type='text', value='Untitled', style='font-size:1.5em')
         span.help-inline The title of your form
         br
-        textarea.input-xlarge#description(rows=3, cols=100)
-          | Form description
+        textarea.input-xxlarge#description(rows=3, cols=100, placeholder='Form description')
+
       form.form-horizontal#output
         //- .control-group
         //-   .controls
@@ -42,11 +42,11 @@ block content
             .control-group
               .control-label Placeholder
               .controls
-                input(type='text',placeholder='Placeholder appears inside')
+                input#placeholder(type='text',placeholder='Placeholder appears inside')
             .control-group
               .control-label Inline help
               .controls
-                input(type='text',placeholder='Inline help')
+                input#inline(type='text',placeholder='Inline help')
             //- reserve the help-block for update information
             //- .control-group
             //-   .control-label Block help
@@ -56,7 +56,7 @@ block content
             .control-group
               .control-label Row
               .controls
-                input(type='text',placeholder='Number of rows')
+                input#rows(type='text',placeholder='Number of rows')
           //- #integer
           //-   .control-group
           //-     .control-label unit
@@ -111,18 +111,27 @@ block content
       #default-form-element(style='display: none;')
         #checkbox-element
           .control-group
+            a.btn.btn-warning.control-group-buttons(href='#', data-toggle='tooltip', title='remove')
+              i.icon-trash.icon-large
             .control-label
             .controls
               label.checkbox
                 input(type='checkbox', disabled=true)
                 span to be updated
-        #input-element
+        #text-element
           .control-group
             .control-label
-              span label to be updated
+              span Label to be updated
             .controls
-              input(type='text', disabled=true)
-              span to be updated
+              input(type='text', disabled=true, placeholder='')
+              span.help-inline
+        #textarea-element
+          .control-group
+            .control-label
+              span Label to be updated
+            .controls
+              textarea(disabled=true)
+              span.help-inline
 
       .btn-group.dropdown
         a.btn.dropdown-toggle(data-toggle='dropdown')#input-items Inputs
@@ -144,8 +153,8 @@ block content
             a(href='#') Link
           //- li#add-
           //-   a(href='#') Upload
-          li#add-rich
-            a(href='#') Rich instruction
+          //- li#add-rich
+          //-   a(href='#') Rich instruction
           li#add-hold
             a(href='#') Hold point
       .btn-group.dropdown
