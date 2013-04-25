@@ -56,6 +56,7 @@ function working () {
       $('#button').show();
     });
     var element = $('#text-element .control-group').clone().show();
+    element.prepend($('#control-group-buttons .btn-group').clone());
     $('#output').append(element);
 
     $('#label').attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
@@ -90,6 +91,7 @@ function working () {
     });
 
     var element = $('#textarea-element .control-group').clone().show();
+    element.prepend($('#control-group-buttons .btn-group').clone());
     $('#output').append(element);
     $('#label').attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
     $('#placeholder').attr("data-bind", "value: placeholder, valueUpdate: 'afterkeydown'");
