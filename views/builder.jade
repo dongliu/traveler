@@ -17,91 +17,175 @@ block content
       form.form-horizontal#output
 
       //- .builder.working
-      form.form-horizontal.disabled#add-item-form
-        fieldset
-          legend.add-item Form element to add
-          #general.add-item
-            .control-group
-              .control-label Label
-              .controls
-                input#label(type='text')
-                span.help-inline  Keep the label brief and unique
-            //- I think user will have difficult to create unique ids
-            //- .control-group
-            //-   .control-label ID
-            //-   .controls
-            //-     input#id(type='text',placeholder='Need to be Unique')
-          //- add multiple choice and select later
-          #input.add-item
-            .control-group
-              .control-label Placeholder
-              .controls
-                input#placeholder(type='text',placeholder='Placeholder appears inside')
-            .control-group
-              .control-label Inline help
-              .controls
-                input#inline(type='text',placeholder='Inline help')
-            //- reserve the help-block for update information
-            //- .control-group
-            //-   .control-label Block help
-            //-   .controls
-            //-     textarea(row=3,placeholder='Help block beneath the input')
-          #paragraph.add-item
-            .control-group
-              .control-label Row
-              .controls
-                input#rows(type='text',placeholder='Number of rows')
-          //- #integer
+      form.form-horizontal#add-item-form(style='display: none;')
+        //- fieldset
+          //- legend.add-item Form element to add
+          //- #general.add-item
           //-   .control-group
-          //-     .control-label unit
+          //-     .control-label Label
           //-     .controls
-          //-       input(type='text',placeholder='The unit')
-          #number.add-item
-            .control-group
-              .control-label Unit
-              .controls
-                .input-append
-                  input(type='text',placeholder='The unit')
-                  span.add-on unit
-          //- Starting specific inputs
-          #upload.add-item
-            .control-group
-              .control-label Name
-              .controls
-                input(type='text',placeholder='Name')
-          #link.add-item
-            .control-group
-              .control-label Text
-              .controls
-                input(type='text',placeholder='Link display text')
-            .control-group
-              .control-label Hyperlink
-              .controls
-                input(type='text',placeholder='Page or file link')
-            .control-group
-              .control-label Link to
-              .controls
-                .btn-group
-                  button.btn.btn-info Other traveler
-          #rich.add-item
-            .control-group
-              .control-label Add an image
-              .controls
-                input(type='file',name='instruction')
-          #hold.add-item
-            .control-group
-              .control-label Message
-              .controls
-                input(type='text',placeholder='Instruction message')
-          #button.add-item
-            .control-group
-              .controls
-                .btn-group
-                  button.btn#done Done
-                .btn-group
-                  button.btn#cancel Cancel
-
-      //- #default-form-element
+          //-       input#label(type='text')
+          //-       span.help-inline  Keep the label brief and unique
+          //-   //- I think user will have difficult to create unique ids
+          //-   //- .control-group
+          //-   //-   .control-label ID
+          //-   //-   .controls
+          //-   //-     input#id(type='text',placeholder='Need to be Unique')
+          //- //- add multiple choice and select later
+          //- #input.add-item
+          //-   .control-group
+          //-     .control-label Placeholder
+          //-     .controls
+          //-       input#placeholder(type='text',placeholder='Placeholder appears inside')
+          //-   .control-group
+          //-     .control-label Inline help
+          //-     .controls
+          //-       input#inline(type='text',placeholder='Inline help')
+          //-   //- reserve the help-block for update information
+          //-   //- .control-group
+          //-   //-   .control-label Block help
+          //-   //-   .controls
+          //-   //-     textarea(row=3,placeholder='Help block beneath the input')
+          //- #paragraph.add-item
+          //-   .control-group
+          //-     .control-label Row
+          //-     .controls
+          //-       input#rows(type='text',placeholder='Number of rows')
+          //- //- #integer
+          //- //-   .control-group
+          //- //-     .control-label unit
+          //- //-     .controls
+          //- //-       input(type='text',placeholder='The unit')
+          //- #number.add-item
+          //-   .control-group
+          //-     .control-label Unit
+          //-     .controls
+          //-       .input-append
+          //-         input(type='text',placeholder='The unit')
+          //-         span.add-on unit
+          //- //- Starting specific inputs
+          //- #upload.add-item
+          //-   .control-group
+          //-     .control-label Name
+          //-     .controls
+          //-       input(type='text',placeholder='Name')
+          //- #link.add-item
+          //-   .control-group
+          //-     .control-label Text
+          //-     .controls
+          //-       input(type='text',placeholder='Link display text')
+          //-   .control-group
+          //-     .control-label Hyperlink
+          //-     .controls
+          //-       input(type='text',placeholder='Page or file link')
+          //-   .control-group
+          //-     .control-label Link to
+          //-     .controls
+          //-       .btn-group
+          //-         button.btn.btn-info Other traveler
+          //- #rich.add-item
+          //-   .control-group
+          //-     .control-label Add an image
+          //-     .controls
+          //-       input(type='file',name='instruction')
+          //- #hold.add-item
+          //-   .control-group
+          //-     .control-label Message
+          //-     .controls
+          //-       input(type='text',placeholder='Instruction message')
+          //- #button.add-item
+          //-   .control-group
+          //-     .controls
+          //-       .btn-group
+          //-         button.btn#done Done
+          //-       .btn-group
+          //-         button.btn#cancel Cancel
+      //- default-add-form-element
+      #default-add-form-element(style='display: none;')
+        #legend
+          legend Form element to add
+        #label
+          .control-group
+            .control-label Label
+            .controls
+              input(type='text')
+              span.help-inline  Keep the label brief and unique
+          //- I think user will have difficult to create unique ids
+          //- .control-group
+          //-   .control-label ID
+          //-   .controls
+          //-     input#id(type='text',placeholder='Need to be Unique')
+        //- add multiple choice and select later
+        #placeholder
+          .control-group
+            .control-label Placeholder
+            .controls
+              input(type='text')
+        #inline
+          .control-group
+            .control-label Inline help
+            .controls
+              input(type='text',placeholder='Inline help')
+          //- reserve the help-block for update information
+          //- .control-group
+          //-   .control-label Block help
+          //-   .controls
+          //-     textarea(row=3,placeholder='Help block beneath the input')
+        #rows
+          .control-group
+            .control-label Row
+            .controls
+              input(type='text',placeholder='Number of rows')
+        //- #integer
+        //-   .control-group
+        //-     .control-label unit
+        //-     .controls
+        //-       input(type='text',placeholder='The unit')
+        #unit
+          .control-group
+            .control-label Unit
+            .controls
+              .input-append
+                input(type='text')
+                span.add-on unit
+        //- Starting specific inputs
+        #upload
+          .control-group
+            .control-label Name
+            .controls
+              input(type='text',placeholder='Name')
+        #linktext
+          .control-group
+            .control-label Text
+            .controls
+              input(type='text',placeholder='Link display text')
+        #hyperlink
+          .control-group
+            .control-label Hyperlink
+            .controls
+              input(type='text',placeholder='Page or file link')
+        #othertraveler
+          .control-group
+            .control-label Link to
+            .controls
+              .btn-group
+                button.btn.btn-info Other traveler
+        //- #rich
+        //-   .control-group
+        //-     .control-label Add an image
+        //-     .controls
+        //-       input(type='file',name='instruction')
+        #hold
+          .control-group
+            .control-label Message
+            .controls
+              input(type='text',placeholder='Instruction message')
+        #button
+          .form-actions
+            button.btn.btn-primary(type='submit') Done
+            | &nbsp;
+            button.btn(type='button') Cancel
+      //- default-form-element
       #default-form-element(style='display: none;')
         #checkbox-element
           .control-group
