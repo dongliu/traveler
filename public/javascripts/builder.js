@@ -85,24 +85,29 @@ function working () {
   });
 
   $('#add-par').click(function(e){
-    $('#add-item-form').show();
     cleanko();
-    $('#add-item-form legend').text('Paragraph');
-    $('.add-item').hide(100, function(){
-      $('#add-item-form legend').show();
-      $('#general').show();
-      $('#input').show();
-      $('#paragraph').show();
-      $('#button').show();
-    });
+    $('#add-item-form').empty();
+    $('#add-item-form').show();
+    var legend = $('#legend legend').clone().text('Add paragraph input').show();
+    var label = $('#label .control-group').clone().show();
+    var placeholder = $('#placeholder .control-group').clone().show();
+    var inline = $('#inline .control-group').clone().show();
+    var rows = $('#rows .control-group').clone().show();
+    var button = $('#button .form-actions').clone().show();
+    $('#add-item-form').append(legend);
+    $('#add-item-form').append(label);
+    $('#add-item-form').append(placeholder);
+    $('#add-item-form').append(inline);
+    $('#add-item-form').append(rows);
+    $('#add-item-form').append(button);
 
     var element = $('#textarea-element .control-group').clone().show();
     element.prepend($('#control-group-buttons .btn-group').clone());
     $('#output').append(element);
-    $('#label').attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-    $('#placeholder').attr("data-bind", "value: placeholder, valueUpdate: 'afterkeydown'");
-    $('#rows').attr("data-bind", "value: rows, valueUpdate: 'afterkeydown'");
-    $('#inline').attr("data-bind", "value: inline, valueUpdate: 'afterkeydown'");
+    $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
+    $('input', placeholder).attr("data-bind", "value: placeholder, valueUpdate: 'afterkeydown'");
+    $('input', rows).attr("data-bind", "value: rows, valueUpdate: 'afterkeydown'");
+    $('input', inline).attr("data-bind", "value: inline, valueUpdate: 'afterkeydown'");
 
     $('span.help-inline', element).attr("data-bind", "text: inline");
     $('.control-label span', element).attr("data-bind", "text: label");
@@ -115,117 +120,180 @@ function working () {
       this.rows = ko.observable(3);
     };
     ko.applyBindings(new formModel("Update me"));
-
+    bindingButton();
     e.preventDefault();
   });
 
   $('#add-int').click(function(e){
-    $('#add-item-form').show();
     cleanko();
-    $('#add-item-form legend').text('Integer');
-    $('.add-item').hide(100, function(){
-      $('#add-item-form legend').show();
-      $('#general').show();
-      $('#input').show();
-      $('#number').show();
-      $('#button').show();
-    });
+    $('#add-item-form').empty();
+    $('#add-item-form').show();
+    var legend = $('#legend legend').clone().text('Add integer input').show();
+    var label = $('#label .control-group').clone().show();
+    var placeholder = $('#placeholder .control-group').clone().show();
+    var inline = $('#inline .control-group').clone().show();
+    var unit = $('#unit .control-group').clone().show();
+    var button = $('#button .form-actions').clone().show();
+    $('#add-item-form').append(legend);
+    $('#add-item-form').append(label);
+    $('#add-item-form').append(placeholder);
+    $('#add-item-form').append(unit);
+    $('#add-item-form').append(inline);
+    $('#add-item-form').append(button);
+
+    var element = $('#number-element .control-group').clone().show();
+    element.prepend($('#control-group-buttons .btn-group').clone());
+    $('#output').append(element);
+
+    $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
+    $('.control-label span', element).attr("data-bind", "text: label");
+
+    $('input', placeholder).attr("data-bind", "value: placeholder, valueUpdate: 'afterkeydown'");
+    $('input', element).attr("data-bind", "attr: {placeholder: placeholder}");
+
+    $('input', unit).attr("data-bind", "value: unit, valueUpdate: 'afterkeydown'");
+    $('span.add-on', element).attr("data-bind", "text: unit");
+
+    $('input', inline).attr("data-bind", "value: inline, valueUpdate: 'afterkeydown'");
+    $('span.help-inline', element).attr("data-bind", "text: inline");
+
+    var formModel = function (init) {
+      this.label = ko.observable(init);
+      this.placeholder = ko.observable("");
+      this.unit = ko.observable("U");
+      this.inline = ko.observable("");
+    };
+    ko.applyBindings(new formModel("Update me"));
+    // TODO: add integer validation rule
+    bindingButton();
     e.preventDefault();
   });
 
   $('#add-float').click(function(e){
-    $('#add-item-form').show();
     cleanko();
-    $('#add-item-form legend').text('Float');
-    $('.add-item').hide(100, function(){
-      $('#add-item-form legend').show();
-      $('#general').show();
-      $('#input').show();
-      $('#number').show();
-    });
+    $('#add-item-form').empty();
+    $('#add-item-form').show();
+    var legend = $('#legend legend').clone().text('Add float input').show();
+    var label = $('#label .control-group').clone().show();
+    var placeholder = $('#placeholder .control-group').clone().show();
+    var inline = $('#inline .control-group').clone().show();
+    var unit = $('#unit .control-group').clone().show();
+    var button = $('#button .form-actions').clone().show();
+    $('#add-item-form').append(legend);
+    $('#add-item-form').append(label);
+    $('#add-item-form').append(placeholder);
+    $('#add-item-form').append(unit);
+    $('#add-item-form').append(inline);
+    $('#add-item-form').append(button);
+
+    var element = $('#number-element .control-group').clone().show();
+    element.prepend($('#control-group-buttons .btn-group').clone());
+    $('#output').append(element);
+
+    $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
+    $('.control-label span', element).attr("data-bind", "text: label");
+
+    $('input', placeholder).attr("data-bind", "value: placeholder, valueUpdate: 'afterkeydown'");
+    $('input', element).attr("data-bind", "attr: {placeholder: placeholder}");
+
+    $('input', unit).attr("data-bind", "value: unit, valueUpdate: 'afterkeydown'");
+    $('span.add-on', element).attr("data-bind", "text: unit");
+
+    $('input', inline).attr("data-bind", "value: inline, valueUpdate: 'afterkeydown'");
+    $('span.help-inline', element).attr("data-bind", "text: inline");
+
+    var formModel = function (init) {
+      this.label = ko.observable(init);
+      this.placeholder = ko.observable("");
+      this.unit = ko.observable("U");
+      this.inline = ko.observable("");
+    };
+    ko.applyBindings(new formModel("Update me"));
+    // TODO: add float validation rule
+    bindingButton();
     e.preventDefault();
   });
 
-  $('#add-file').click(function(e){
-    $('#add-item-form').show();
-    cleanko();
-    $('#add-item-form legend').text('File');
-    $('.add-item').hide(100, function(){
-      $('#add-item-form legend').show();
-      $('#upload').show();
-      $('#button').show();
-    });
-    e.preventDefault();
-  });
+  // $('#add-file').click(function(e){
+  //   $('#add-item-form').show();
+  //   cleanko();
+  //   $('#add-item-form legend').text('File');
+  //   $('.add-item').hide(100, function(){
+  //     $('#add-item-form legend').show();
+  //     $('#upload').show();
+  //     $('#button').show();
+  //   });
+  //   e.preventDefault();
+  // });
 
-  $('#add-link').click(function(e){
-    $('#add-item-form').show();
-    cleanko();
-    $('#add-item-form legend').text('Link');
-    $('.add-item').hide(100, function(){
-      $('#add-item-form legend').show();
-      $('#link').show();
-      $('#button').show();
-    });
-    e.preventDefault();
-  });
+  // $('#add-link').click(function(e){
+  //   $('#add-item-form').show();
+  //   cleanko();
+  //   $('#add-item-form legend').text('Link');
+  //   $('.add-item').hide(100, function(){
+  //     $('#add-item-form legend').show();
+  //     $('#link').show();
+  //     $('#button').show();
+  //   });
+  //   e.preventDefault();
+  // });
 
   $('#add-rich').click(function(e){
-    $('#add-item-form').show();
     cleanko();
-    $('#add-item-form legend').text('Rich instruction');
-    $('.add-item').hide(100, function(){
-      $('#add-item-form legend').show();
-      $('#rich').show();
-      $('#button').show();
-    });
+    $('#add-item-form').empty();
+    $('#add-item-form').show();
+    var legend = $('#legend legend').clone().text('Add rich instruction').show();
+    var title = $('#instuction-title .control-group').clone().show();
+    var button = $('#button .form-actions').clone().show();
+    $('#add-item-form').append(legend);
+    $('#add-item-form').append(title);
+    $('#add-item-form').append(button);
+
+    // the output part
+    var element = $('#rich-element .control-group').clone().show();
+    element.prepend($('#control-group-buttons .btn-group').clone());
+    $('#output').append(element);
+
+    $('input', title).attr("data-bind", "value: title, valueUpdate: 'afterkeydown'");
+    $('h4 span', element).attr("data-bind", "text: title");
+
+    var formModel = function (init) {
+      this.title = ko.observable(init);
+    };
+    ko.applyBindings(new formModel("Update me"));
+    bindingButton();
+
     e.preventDefault();
   });
 
   $('#add-hold').click(function(e){
-    $('#add-item-form').show();
     cleanko();
-    $('#add-item-form legend').text('Hold point');
-    $('.add-item').hide(100, function(){
-      $('#add-item-form legend').show();
-      $('#hold').show();
-      $('#button').show();
-    });
+    $('#add-item-form').empty();
+    $('#add-item-form').show();
+    var legend = $('#legend legend').clone().text('Add hold point').show();
+    var hold = $('#hold .control-group').clone().show();
+    var button = $('#button .form-actions').clone().show();
+    $('#add-item-form').append(legend);
+    $('#add-item-form').append(hold);
+    $('#add-item-form').append(button);
+
+    // the output part
+    var element = $('#hold-element .control-group').clone().show();
+    element.prepend($('#control-group-buttons .btn-group').clone());
+    $('#output').append(element);
+    $('input', hold).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
+    $('.holder span', element).attr("data-bind", "text: label");
+    var formModel = function (init) {
+      this.label = ko.observable(init);
+    };
+    ko.applyBindings(new formModel("Name"));
+    bindingButton();
     e.preventDefault();
   });
 
-  // $('#done').click(function(e){
-  //   // clean the ko binding
-  //   cleanko();
-  //   // hide the add-item-form
-  //   $('.add-item').hide();
-  //   $('#add-item-form').hide();
-
-  //   // $('#output .control-group').hover(
-  //   // function(){
-  //   //   $(this).addClass('control-group-highlight');
-  //   // },
-  //   // function(){
-  //   //   $(this).removeClass('control-group-highlight');
-  //   // }
-  //   // );
-
-  //   e.preventDefault();
-  // });
-
-  // $('#cancel').click(function(e){
-  //   // clean the ko binding
-  //   cleanko();
-
-  //   // remove the last element just appended
-  //   $('#output .control-group').last().remove();
-
-  //   // hide the add-item-form
-  //   $('.add-item').hide();
-  //   $('#add-item-form').hide();
-
-  //   e.preventDefault();
-  // });
+  $('#add-page').click(function(e){
+    e.preventDefault();
+  });
 
 }
 
