@@ -8,13 +8,16 @@ function init () {
   $('#form-title h3.tinymce').tinymce({
     inline: true,
     toolbar: "undo redo",
-    menubar: false
+    menubar: false,
+    statusbar: false
   });
   $('#form-title div.tinymce').tinymce({
     inline: true,
-    plugins: ["advlist autolink lists link image charmap print preview anchor", "searchreplace visualblocks code fullscreen", "insertdatetime media table contextmenu paste"],
-    toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
-    menubar: false
+    plugins: [["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
+        ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
+        ["save table contextmenu directionality emoticons template paste"]],
+    toolbar: "undo redo | styleselect | bold italic | subscript superscript | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+    statusbar: false
   });
   $('#adjust').click(function(e){
     if ($(this).text() == 'Adjust') {
