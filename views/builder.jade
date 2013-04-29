@@ -7,12 +7,16 @@ block content
         ul
           li.active
             a(href='#1') 1
-      form#title
-        //- fieldset
-        input.input-xxlarge#title(type='text', value='Untitled', style='font-size:1.5em')
-        span.help-inline The title of your form
-        br
-        textarea.input-xxlarge#description(rows=3, cols=100, placeholder='Form description')
+      //- form#title
+      //-   //- fieldset
+      //-   input.input-xxlarge#title(type='text', value='Untitled', style='font-size:1.5em')
+      //-   span.help-inline The title of your form
+      //-   br
+      //-   textarea.input-xxlarge#description(rows=3, cols=100, placeholder='Form description')
+
+      #form-title
+        h3.tinymce Form Title
+        .tinymce Detailed information
 
       form.form-horizontal#output
 
@@ -29,10 +33,6 @@ block content
               input(type='text')
               span.help-inline  Keep the label brief and unique
           //- I think user will have difficult to create unique ids
-          //- .control-group
-          //-   .control-label ID
-          //-   .controls
-          //-     input#id(type='text',placeholder='Need to be Unique')
         //- add multiple choice and select later
         #placeholder
           .control-group
@@ -45,20 +45,11 @@ block content
             .controls
               input(type='text',placeholder='Inline help')
           //- reserve the help-block for update information
-          //- .control-group
-          //-   .control-label Block help
-          //-   .controls
-          //-     textarea(row=3,placeholder='Help block beneath the input')
         #rows
           .control-group
             .control-label Row
             .controls
               input(type='text',placeholder='Number of rows')
-        //- #integer
-        //-   .control-group
-        //-     .control-label unit
-        //-     .controls
-        //-       input(type='text',placeholder='The unit')
         #unit
           .control-group
             .control-label Unit
@@ -70,16 +61,6 @@ block content
         //-     .control-label Name
         //-     .controls
         //-       input(type='text',placeholder='Name')
-        //- #linktext
-        //-   .control-group
-        //-     .control-label Text
-        //-     .controls
-        //-       input(type='text',placeholder='Link display text')
-        //- #hyperlink
-        //-   .control-group
-        //-     .control-label Hyperlink
-        //-     .controls
-        //-       input(type='text',placeholder='Page or file link')
         //- #othertraveler
         //-   .control-group
         //-     .control-label Link to
@@ -92,6 +73,10 @@ block content
             .controls
               input(type='text',placeholder='title')
         #instruction-editor
+          .control-group
+            .control-label Instruction content
+            .controls
+
         #hold
           .control-group
             .control-label Holder
@@ -136,15 +121,15 @@ block content
               span.help-inline
         #rich-element
           .control-group
-            h4
-              span title
             .well
+              h3.instruction-title Instruction title
+              .instruction-content Instruction details here
         #hold-element
           .control-group
             h4.holder The flow is currently hold by&nbsp;
               span holderName
             .form-actions
-              button.btn.btn-primary(type='submit') Resume
+              button.btn.btn-primary(type='submit') Continue
 
         #control-group-buttons
           .btn-group.control-group-buttons
@@ -171,16 +156,12 @@ block content
             a(href='#') Float
           //- li#add-file
           //-   a(href='#') Upload file
-          //- li#add-link
-          //-   a(href='#') Link
-          //- li#add-
-          //-   a(href='#') Upload
           li#add-rich
             a(href='#') Rich instruction
           li#add-hold
             a(href='#') Hold point
       .btn-group.dropdown
-        a.btn.dropdown-toggle(data-toggle='dropdown')#struct-itmes Structure
+        a.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Structure
           span.caret
         ul.dropdown-menu
           //- li#add-devider
@@ -190,7 +171,9 @@ block content
           li#add-page
             a(href='#') Page
       .btn-group
-            button.btn.btn-success.disabled#save Save
+        button.btn#adjust Adjust
+      .btn-group
+        button.btn.btn-success.disabled#save Save
             //- button.btn.btn-success#save Save
     //- .builder.control
     //-   .control-group.admin
@@ -206,4 +189,7 @@ block js
   script(type='text/javascript', src='/javascripts/jquery-ui-1.10.2.custom.js')
   script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='/javascripts/knockout-2.2.1.js')
+  script(type='text/javascript', src='/tinymce/tinymce.min.js')
+  script(type='text/javascript', src='/tinymce/jquery.tinymce.min.js')
   script(type='text/javascript', src='/javascripts/builder.js')
+  //- script(type='text/javascript', src='/javascripts/tinymce-inline.js')

@@ -5,8 +5,34 @@ $(function() {
 
 function init () {
   $('#add-item-form').hide();
-  $('#output').sortable({
-    placeholder: "ui-state-highlight"
+  $('#form-title h3.tinymce').tinymce({
+    inline: true,
+    toolbar: "undo redo",
+    menubar: false
+  });
+  $('#form-title div.tinymce').tinymce({
+    inline: true,
+    plugins: ["advlist autolink lists link image charmap print preview anchor", "searchreplace visualblocks code fullscreen", "insertdatetime media table contextmenu paste"],
+    toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+    menubar: false
+  });
+  $('#adjust').click(function(e){
+    if ($(this).text() == 'Adjust') {
+      $(this).text('Done');
+      $('#input-items').attr('disabled', true);
+      $('#struct-items').attr('disabled', true);
+      $('#save').attr('disabled', true);
+      $('#output').sortable({
+        placeholder: "ui-state-highlight"
+      });
+    } else {
+      $(this).text('Adjust');
+      $('#input-items').removeAttr('disabled');
+      $('#struct-items').removeAttr('disabled');
+      $('#save').removeAttr('disabled');
+      $('#output').sortable('destroy');
+    }
+    e.preventDefault();
   });
   $('#output').on('mouseover', '.control-group', function(){
     $(this).addClass('control-group-highlight');
@@ -17,7 +43,6 @@ function init () {
     $('.control-group-buttons', this).hide();
   });
 
-  $('#output').disableSelection();
 }
 
 function working () {
@@ -226,43 +251,22 @@ function working () {
   //   e.preventDefault();
   // });
 
-  // $('#add-link').click(function(e){
-  //   $('#add-item-form').show();
-  //   cleanko();
-  //   $('#add-item-form legend').text('Link');
-  //   $('.add-item').hide(100, function(){
-  //     $('#add-item-form legend').show();
-  //     $('#link').show();
-  //     $('#button').show();
-  //   });
-  //   e.preventDefault();
-  // });
-
   $('#add-rich').click(function(e){
-    cleanko();
-    $('#add-item-form').empty();
-    $('#add-item-form').show();
-    var legend = $('#legend legend').clone().text('Add rich instruction').show();
-    var title = $('#instuction-title .control-group').clone().show();
-    var button = $('#button .form-actions').clone().show();
-    $('#add-item-form').append(legend);
-    $('#add-item-form').append(title);
-    $('#add-item-form').append(button);
-
     // the output part
     var element = $('#rich-element .control-group').clone().show();
     element.prepend($('#control-group-buttons .btn-group').clone());
     $('#output').append(element);
-
-    $('input', title).attr("data-bind", "value: title, valueUpdate: 'afterkeydown'");
-    $('h4 span', element).attr("data-bind", "text: title");
-
-    var formModel = function (init) {
-      this.title = ko.observable(init);
-    };
-    ko.applyBindings(new formModel("Update me"));
-    bindingButton();
-
+    $('h3.instruction-title', element).tinymce({
+      inline: true,
+      toolbar: "undo redo",
+      menubar: false
+    });
+    $('.instruction-content', element).tinymce({
+      inline: true,
+      plugins: ["advlist autolink lists link image charmap print preview anchor", "searchreplace visualblocks code fullscreen", "insertdatetime media table contextmenu paste"],
+      toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+      menubar: false
+    });
     e.preventDefault();
   });
 
