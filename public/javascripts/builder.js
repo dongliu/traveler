@@ -7,16 +7,20 @@ function init () {
   $('#add-item-form').hide();
   $('#form-title h3.tinymce').tinymce({
     inline: true,
-    toolbar: "undo redo",
+    browser_spellcheck : true,
+    plugins: "charmap",
+    toolbar: "undo redo | subscript superscript charmap",
     menubar: false,
     statusbar: false
   });
   $('#form-title div.tinymce').tinymce({
     inline: true,
+    browser_spellcheck : true,
     plugins: [["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
         ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
         ["save table contextmenu directionality emoticons template paste"]],
-    toolbar: "undo redo | styleselect | bold italic | subscript superscript | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+    toolbar: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough | subscript superscript charmap hr | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+    menubar: false,
     statusbar: false
   });
   $('#adjust').click(function(e){
@@ -261,14 +265,21 @@ function working () {
     $('#output').append(element);
     $('h3.instruction-title', element).tinymce({
       inline: true,
-      toolbar: "undo redo",
-      menubar: false
+      browser_spellcheck : true,
+      plugins: "charmap",
+      toolbar: "undo redo | subscript superscript charmap",
+      menubar: false,
+      statusbar: false
     });
     $('.instruction-content', element).tinymce({
       inline: true,
-      plugins: ["advlist autolink lists link image charmap print preview anchor", "searchreplace visualblocks code fullscreen", "insertdatetime media table contextmenu paste"],
-      toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
-      menubar: false
+      browser_spellcheck : true,
+      plugins: [["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
+        ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
+        ["save table contextmenu directionality emoticons template paste"]],
+      toolbar: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough | subscript superscript charmap hr | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+      menubar: false,
+      statusbar: false
     });
     e.preventDefault();
   });
