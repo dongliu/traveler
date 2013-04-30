@@ -13,7 +13,8 @@ var mce_content = {
   plugins: [["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
       ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
       ["save table contextmenu directionality emoticons template paste"]],
-  toolbar: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough | subscript superscript charmap | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+  toolbar1: "subscript superscript charmap | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+  toolbar2: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough",
   contextmenu: "charmap link image",
   menubar: false,
   statusbar: false
@@ -270,7 +271,7 @@ function working () {
     var element = $('#rich-element .control-group').clone().show();
     element.prepend($('#control-group-buttons .btn-group').clone());
     $('#output').append(element);
-    $('h3.instruction-title', element).tinymce(mce_head);
+    // $('h3.instruction-title', element).tinymce(mce_head);
     $('.instruction-content', element).tinymce(mce_content);
     e.preventDefault();
   });
@@ -296,6 +297,31 @@ function working () {
       this.label = ko.observable(init);
     };
     ko.applyBindings(new formModel("Name"));
+    binding_button();
+    e.preventDefault();
+  });
+
+  $('#add-file').click(function(e){
+    clean_ko();
+    $('#add-item-form').empty();
+    $('#add-item-form').show();
+    var legend = $('#legend legend').clone().text('Add upload file').show();
+    var label = $('#upload .control-group').clone().show();
+    var button = $('#button .form-actions').clone().show();
+    $('#add-item-form').append(legend);
+    $('#add-item-form').append(label);
+    $('#add-item-form').append(button);
+
+    // the output part
+    var element = $('#upload-element .control-group').clone().show();
+    element.prepend($('#control-group-buttons .btn-group').clone());
+    $('#output').append(element);
+    $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
+    $('.control-label span', element).attr("data-bind", "text: label");
+    var formModel = function (init) {
+      this.label = ko.observable(init);
+    };
+    ko.applyBindings(new formModel("update me"));
     binding_button();
     e.preventDefault();
   });

@@ -56,22 +56,22 @@ block content
             .controls
               input(type='text')
         //- Starting specific inputs
-        //- #upload
-        //-   .control-group
-        //-     .control-label Name
-        //-     .controls
-        //-       input(type='text',placeholder='Name')
+        #upload
+          .control-group
+            .control-label Label
+            .controls
+              input(type='text')
         //- #othertraveler
         //-   .control-group
         //-     .control-label Link to
         //-     .controls
         //-       .btn-group
         //-         button.btn.btn-info Other traveler
-        #instuction-title
-          .control-group
-            .control-label Instruction title
-            .controls
-              input(type='text',placeholder='title')
+        //- #instuction-title
+        //-   .control-group
+        //-     .control-label Instruction title
+        //-     .controls
+        //-       input(type='text',placeholder='title')
         #instruction-editor
           .control-group
             .control-label Instruction content
@@ -130,6 +130,12 @@ block content
               span holderName
             .form-actions
               button.btn.btn-primary(type='submit') Continue
+        #upload-element
+          .control-group
+            .control-label
+              span Label to be updated
+            .controls
+              button.btn(type='file') Upload
 
         #control-group-buttons
           .btn-group.control-group-buttons
@@ -154,8 +160,8 @@ block content
             a(href='#') Integer
           li#add-float
             a(href='#') Float
-          //- li#add-file
-          //-   a(href='#') Upload file
+          li#add-file
+            a(href='#') Upload file
           li#add-rich
             a(href='#') Rich instruction
           li#add-hold
