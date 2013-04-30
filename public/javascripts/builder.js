@@ -1,3 +1,25 @@
+var mce_head = {
+  inline: true,
+  browser_spellcheck : true,
+  plugins: "charmap",
+  toolbar: "undo redo | subscript superscript charmap",
+  menubar: false,
+  statusbar: false
+};
+
+var mce_content = {
+  inline: true,
+  browser_spellcheck : true,
+  plugins: [["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
+      ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
+      ["save table contextmenu directionality emoticons template paste"]],
+  toolbar: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough | subscript superscript charmap | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+  contextmenu: "charmap link image",
+  menubar: false,
+  statusbar: false
+};
+
+
 $(function() {
   init();
   working();
@@ -6,24 +28,8 @@ $(function() {
 
 function init () {
   $('#add-item-form').hide();
-  $('#form-title h3.tinymce').tinymce({
-    inline: true,
-    browser_spellcheck : true,
-    plugins: "charmap",
-    toolbar: "undo redo | subscript superscript charmap",
-    menubar: false,
-    statusbar: false
-  });
-  $('#form-title div.tinymce').tinymce({
-    inline: true,
-    browser_spellcheck : true,
-    plugins: [["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
-        ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
-        ["save table contextmenu directionality emoticons template paste"]],
-    toolbar: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough | subscript superscript charmap | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
-    menubar: false,
-    statusbar: false
-  });
+  $('#form-title h3.tinymce').tinymce(mce_head);
+  $('#form-title div.tinymce').tinymce(mce_content);
   $('#adjust').click(function(e){
     if ($(this).text() == 'Adjust') {
       $(this).text('Done');
@@ -264,24 +270,8 @@ function working () {
     var element = $('#rich-element .control-group').clone().show();
     element.prepend($('#control-group-buttons .btn-group').clone());
     $('#output').append(element);
-    $('h3.instruction-title', element).tinymce({
-      inline: true,
-      browser_spellcheck : true,
-      plugins: "charmap",
-      toolbar: "undo redo | subscript superscript charmap",
-      menubar: false,
-      statusbar: false
-    });
-    $('.instruction-content', element).tinymce({
-      inline: true,
-      browser_spellcheck : true,
-      plugins: [["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
-        ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
-        ["save table contextmenu directionality emoticons template paste"]],
-      toolbar: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough | subscript superscript charmap hr | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
-      menubar: false,
-      statusbar: false
-    });
+    $('h3.instruction-title', element).tinymce(mce_head);
+    $('.instruction-content', element).tinymce(mce_content);
     e.preventDefault();
   });
 
@@ -317,8 +307,9 @@ function working () {
 }
 
 function item_click() {
-  $('#output').on('click', 'a.btn.btn-warning[title="remove"]', function(){
+  $('#output').on('click', 'a.btn.btn-warning[title="remove"]', function(e){
     $(this).closest('.control-group').remove();
+    e.preventDefault();
   });
 }
 
