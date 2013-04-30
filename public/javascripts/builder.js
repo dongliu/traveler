@@ -1,6 +1,7 @@
 $(function() {
   init();
   working();
+  item_click();
 });
 
 function init () {
@@ -19,7 +20,7 @@ function init () {
     plugins: [["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
         ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
         ["save table contextmenu directionality emoticons template paste"]],
-    toolbar: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough | subscript superscript charmap hr | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+    toolbar: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough | subscript superscript charmap | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
     menubar: false,
     statusbar: false
   });
@@ -54,7 +55,7 @@ function init () {
 
 function working () {
   $('#add-checkbox').click(function(e){
-    cleanko();
+    clean_ko();
     $('#add-item-form').empty();
     $('#add-item-form').show();
     var legend = $('#legend legend').clone().text('Add checkbox').show();
@@ -74,12 +75,12 @@ function working () {
       this.label = ko.observable(init);
     };
     ko.applyBindings(new formModel("update me"));
-    bindingButton();
+    binding_button();
     e.preventDefault();
   });
 
   $('#add-text').click(function(e){
-    cleanko();
+    clean_ko();
     $('#add-item-form').empty();
     $('#add-item-form').show();
     var legend = $('#legend legend').clone().text('Add text input').show();
@@ -112,12 +113,12 @@ function working () {
       this.inline = ko.observable("");
     };
     ko.applyBindings(new formModel("Update me"));
-    bindingButton();
+    binding_button();
     e.preventDefault();
   });
 
   $('#add-par').click(function(e){
-    cleanko();
+    clean_ko();
     $('#add-item-form').empty();
     $('#add-item-form').show();
     var legend = $('#legend legend').clone().text('Add paragraph input').show();
@@ -152,12 +153,12 @@ function working () {
       this.rows = ko.observable(3);
     };
     ko.applyBindings(new formModel("Update me"));
-    bindingButton();
+    binding_button();
     e.preventDefault();
   });
 
   $('#add-int').click(function(e){
-    cleanko();
+    clean_ko();
     $('#add-item-form').empty();
     $('#add-item-form').show();
     var legend = $('#legend legend').clone().text('Add integer input').show();
@@ -197,12 +198,12 @@ function working () {
     };
     ko.applyBindings(new formModel("Update me"));
     // TODO: add integer validation rule
-    bindingButton();
+    binding_button();
     e.preventDefault();
   });
 
   $('#add-float').click(function(e){
-    cleanko();
+    clean_ko();
     $('#add-item-form').empty();
     $('#add-item-form').show();
     var legend = $('#legend legend').clone().text('Add float input').show();
@@ -242,13 +243,13 @@ function working () {
     };
     ko.applyBindings(new formModel("Update me"));
     // TODO: add float validation rule
-    bindingButton();
+    binding_button();
     e.preventDefault();
   });
 
   // $('#add-file').click(function(e){
   //   $('#add-item-form').show();
-  //   cleanko();
+  //   clean_ko();
   //   $('#add-item-form legend').text('File');
   //   $('.add-item').hide(100, function(){
   //     $('#add-item-form legend').show();
@@ -285,7 +286,7 @@ function working () {
   });
 
   $('#add-hold').click(function(e){
-    cleanko();
+    clean_ko();
     $('#add-item-form').empty();
     $('#add-item-form').show();
     var legend = $('#legend legend').clone().text('Add hold point').show();
@@ -305,7 +306,7 @@ function working () {
       this.label = ko.observable(init);
     };
     ko.applyBindings(new formModel("Name"));
-    bindingButton();
+    binding_button();
     e.preventDefault();
   });
 
@@ -315,7 +316,13 @@ function working () {
 
 }
 
-function cleanko() {
+function item_click() {
+  $('#output').on('click', 'a.btn.btn-warning[title="remove"]', function(){
+    $(this).closest('.control-group').remove();
+  });
+}
+
+function clean_ko() {
   $('#add-item-form input').each(function(index) {
     ko.cleanNode(this);
   });
@@ -324,14 +331,14 @@ function cleanko() {
   $('#add-item-form [data-bind]').removeAttr('data-bind');
 }
 
-function bindingButton () {
+function binding_button() {
   $('#add-item-form button[type="submit"]').click(function(e){
-    cleanko();
+    clean_ko();
     $('#add-item-form').hide();
     e.preventDefault();
   });
   $('#add-item-form button[type="button"]').click(function(e){
-    cleanko();
+    clean_ko();
     $('#add-item-form').hide();
     $('#output .control-group').last().remove();
     e.preventDefault(e);
