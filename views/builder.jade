@@ -34,6 +34,11 @@ block content
               span.help-inline  Keep the label brief and unique
           //- I think user will have difficult to create unique ids
         //- add multiple choice and select later
+        #label-text
+          .control-group
+            .control-label Text
+            .controls
+              input(type='text')
         #placeholder
           .control-group
             .control-label Placeholder
@@ -92,6 +97,7 @@ block content
         #checkbox-element
           .control-group
             .control-label
+              span Label to be updated
             .controls
               label.checkbox
                 input(type='checkbox', disabled=true)

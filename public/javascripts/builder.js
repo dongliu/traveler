@@ -67,9 +67,11 @@ function working () {
     $('#add-item-form').show();
     var legend = $('#legend legend').clone().text('Add checkbox').show();
     var label = $('#label .control-group').clone().show();
+    var label_text = $('#label-text .control-group').clone().show();
     var button = $('#button .form-actions').clone().show();
     $('#add-item-form').append(legend);
     $('#add-item-form').append(label);
+    $('#add-item-form').append(label_text);
     $('#add-item-form').append(button);
 
     // the output part
@@ -77,9 +79,12 @@ function working () {
     element.prepend($('#control-group-buttons .btn-group').clone());
     $('#output').append(element);
     $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-    $('label span', element).attr("data-bind", "text: label");
+    $('input', label_text).attr("data-bind", "value: label_text, valueUpdate: 'afterkeydown'");
+    $('.control-label span', element).attr("data-bind", "text: label");
+    $('label span', element).attr("data-bind", "text: label_text");
     var formModel = function (init) {
       this.label = ko.observable(init);
+      this.label_text = ko.observable("");
     };
     ko.applyBindings(new formModel("update me"));
     binding_button();
