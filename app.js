@@ -10,9 +10,12 @@ var express = require('express'),
   test = require('./routes/test'),
   http = require('http'),
   Client = require('cas.js'),
+  fs = require('fs'),
   path = require('path');
 
 var app = express();
+
+var access_logfile = fs.createWriteStream('./logs/access.log', {flags: 'a'});
 
 var cas = new Client({
   base_url: 'https://liud-dev.nscl.msu.edu/cas',
@@ -25,7 +28,7 @@ app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.favicon(__dirname + '/public/favicon.ico'));
-  app.use(express.logger('dev'));
+  app.use(express.logger({stream: access_logfile}));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(express.cookieParser('cable_secret'));
@@ -46,6 +49,7 @@ app.get('/builder', builder.index);
 app.get('/test', test.index);
 
 http.createServer(app).listen(app.get('port'), function(){
+  // logger.info("Express server listening on port " + app.get('port'));
   console.log("Express server listening on port " + app.get('port'));
 });
 
