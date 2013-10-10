@@ -292,60 +292,40 @@ hr.soften {
     background-image: none;
   }*/
 
+/*d3 stuff*/
 
-/*builder style*/
-.builder {
-  position: relative;
-  margin: 15px 0;
-  padding: 39px 19px 14px;
-  *padding-top: 19px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  -webkit-border-radius: 4px;
-     -moz-border-radius: 4px;
-          border-radius: 4px;
+.chart {
+  display: block;
+  margin: auto;
+  margin-top: 60px;
+  font-size: 11px;
 }
 
-.builder:after {
-  content: "Output";
-  position: absolute;
-  top: -1px;
-  left: -1px;
-  padding: 3px 7px;
-  font-size: 12px;
-  font-weight: bold;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  color: #9da0a4;
-  -webkit-border-radius: 4px 0 4px 0;
-     -moz-border-radius: 4px 0 4px 0;
-          border-radius: 4px 0 4px 0;
+rect {
+  stroke: #eee;
+  fill: #aaa;
+  fill-opacity: .8;
 }
 
-.builder.working:after {
-  content: "Working";
+rect.parent {
+  cursor: pointer;
+  fill: steelblue;
 }
 
-.builder.control:after {
-  content: "Control";
+text {
+  pointer-events: none;
 }
 
-/*helpers*/
-.hide {
-    display: none;
+.nowrap { white-space: nowrap; text-overflow: ellipsis; overflow:hidden;}
+
+.row-selected td{
+  background-color: #c09853 !important;
 }
 
-.ui-state-highlight {
-  height: 3em;
-  line-height: 1em;
+ul.dropdown-menu input[type="checkbox"] {
+  margin-left: 0;
 }
 
-.control-group-highlight {
-  background-color: #f5f5f5;
-}
-
-.control-group-buttons {
-  position: relative;
-  float: right;
-  display: none;
+.ui-autocomplete {
+  z-index: 1510 !important;
 }
