@@ -1,0 +1,49 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title FRIB traveler :: user profile
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='/ui-lightness/jquery-ui-1.10.2.custom.css')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+block content
+  .container(style="margin-top: 10px")
+    #message
+    #profile.well
+      img(src="/adusers/#{user.id}/photo")
+      dl
+        dt Name
+        dd #{user.name}
+        dt Email
+        dd #{user.email}
+        dt Office
+        dd #{user.office}
+        dt Office phone
+        dd #{user.phone}
+        dt Mobile phone
+        dd #{user.mobile}
+        dt Last visited on
+        dd #{user.lastVisitedOn}
+        dt Roles
+        dd #{user.roles}
+        dt Notice
+        dd
+          form.form-inline
+            label.checkbox
+              if (user.subscribe)
+                input#sub(type='checkbox', checked)
+              else
+                input#sub(type='checkbox')
+              | subscribe &nbsp
+            button#modify.btn(type='submit') Modify
+
+block js
+  script(type='text/javascript', src='/javascripts/jquery-1.9.1.js')
+  //- script(type='text/javascript', src='/javascripts/jquery-ui-1.10.2.custom.js')
+  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+  //- script(type='text/javascript', src='/javascripts/util.js')
+  script(type='text/javascript', src='/javascripts/moment.js')
+  script(type='text/javascript', src='/javascripts/profile.js')

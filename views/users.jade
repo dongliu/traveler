@@ -1,0 +1,34 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title FRIB traveler :: user management
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='/ui-lightness/jquery-ui-1.10.2.custom.css')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+block content
+  .container(style="margin-top: 10px")
+    #message
+    form.form-inline(method='post')
+      input#user-name.input-medium(type='text', placeholder='Last, First', name='name')
+      = ' '
+      button.btn.btn-primary(type='submit') Add
+
+    table#users.table.table-bordered.table-hover
+
+block js
+  script(type='text/javascript', src='/javascripts/jquery-1.9.1.js')
+  script(type='text/javascript', src='/javascripts/jquery-ui-1.10.2.custom.js')
+  script(type='text/javascript', src='/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='/datatables/js/TableTools.js')
+  script(type='text/javascript', src='/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='/javascripts/moment.js')
+  //- script(type='text/javascript', src='/javascripts/table.js')
+  script(type='text/javascript', src='/javascripts/util.js')
+  script(type='text/javascript', src='/javascripts/users.js')
