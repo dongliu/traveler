@@ -54,12 +54,3 @@ $(function() {
   }).always();
 
 });
-
-// function rolesForm(roles) {
-//   var form = $('form[name = "roles"]').clone();
-//   form.show();
-//   for (var i = 0; i < roles.length; i += 1) {
-//     $('input[value= "' + roles[i] + '"]', form).attr('checked', 'checked');
-//   }
-//   return form.html();
-// }

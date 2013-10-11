@@ -4,28 +4,28 @@ block content
   .container
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary(href='./builder') New Traveler
+        a.btn.btn-primary(href='./builder') New Form
       .btn-group
         a.btn.btn-info(href='./about') About
     .tabbable.tabs-left
       ul.nav.nav-tabs
         li.active
-          a(href='#traveler', data-toggle='tab') Traveler
+          a(href='#form', data-toggle='tab') Forms
         li
-          a(href='#assigned', data-toggle='tab') Assigned
+          a(href='#working', data-toggle='tab') Working travelers
         li
-          a(href='#completed', data-toggle='tab') Completed
-        li
-          a(href='#device', data-toggle='tab') Device
+          a(href='#completed', data-toggle='tab') Completed travelers
+        //- li
+        //-   a(href='#device', data-toggle='tab') Device
       .tab-content
-        #traveler.tab-pane.active
-          p the list of Travelers
-        #assigned.tab-pane
-          p the list of assigned travelers
+        #form.tab-pane.active
+          p the list of forms
+        #working.tab-pane
+          p the list of travelers
         #completed.tab-pane
           p the list of completed travelers
-        #device.tab-pane
-          p the list of devices
+        //- #device.tab-pane
+        //-   p the list of devices
 
 block js
   script(type='text/javascript', src='/javascripts/jquery-1.9.1.js')
