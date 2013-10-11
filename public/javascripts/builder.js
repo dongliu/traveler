@@ -50,11 +50,11 @@ function init () {
     e.preventDefault();
   });
   $('#output').on('mouseover', '.control-group', function(){
-    $(this).addClass('control-group-highlight');
+    $(this).addClass('well');
     $('.control-group-buttons', this).show();
   });
   $('#output').on('mouseout', '.control-group', function(){
-    $(this).removeClass('control-group-highlight');
+    $(this).removeClass('well');
     $('.control-group-buttons', this).hide();
   });
 

@@ -329,3 +329,18 @@ ul.dropdown-menu input[type="checkbox"] {
 .ui-autocomplete {
   z-index: 1510 !important;
 }
+
+.ui-state-highlight {
+  height: 3em;
+  line-height: 1em;
+}
+
+.control-group-highlight {
+  background-color: #c09853;
+}
+
+.control-group-buttons {
+  position: relative;
+  float: right;
+  display: none;
+}
