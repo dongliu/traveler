@@ -20,52 +20,16 @@ var mce_content = {
   statusbar: false
 };
 
-
-// var input_test = require(['../builder/input']);
-
 $(function() {
   init();
   working();
-  item_click();
+  binding_events();
 });
 
 function init () {
   $('#add-item-form').hide();
   $('#form-title h3.tinymce').tinymce(mce_head);
   $('#form-title div.tinymce').tinymce(mce_content);
-  $('#adjust').click(function(e){
-    if ($(this).text() == 'Adjust') {
-      $(this).text('Done');
-      $('#input-items').attr('disabled', true);
-      $('#struct-items').attr('disabled', true);
-      $('#save').attr('disabled', true);
-      $('#output').sortable({
-        placeholder: "ui-state-highlight"
-      });
-    } else {
-      $(this).text('Adjust');
-      $('#input-items').removeAttr('disabled');
-      $('#struct-items').removeAttr('disabled');
-      $('#save').removeAttr('disabled');
-      $('#output').sortable('destroy');
-    }
-    e.preventDefault();
-  });
-  $('#output').on('mouseenter', '.control-group-wrap', function(e){
-    e.preventDefault();
-    if (!$(this).hasClass('control-focus')) {
-      $(this).addClass('control-focus');
-      $(this).prepend(input.button());
-    }
-  });
-  $('#output').on('mouseleave', '.control-group-wrap', function(e){
-    e.preventDefault();
-    if ($(this).hasClass('control-focus')) {
-      $(this).removeClass('control-focus');
-      $('.control-group-buttons', $(this)).remove();
-    }
-  });
-
 }
 
 function working () {
@@ -99,12 +63,16 @@ function working () {
     e.preventDefault();
   });*/
   $('#add-checkbox').click(function(e){
+    // remove the opened .well.spec
+    $('#output .well.spec').remove();
     var checkbox = $(input.checkbox());
     $('#output').append($('<div class="control-group-wrap"></div>').append(checkbox));
     var label = $(spec.label());
     var checkbox_text = $(spec.checkbox_text());
+    var type = $(spec.type());
+    type.val('checkbox');
     var done = $(spec.done());
-    var edit = $('<div class="well spec"></div>').append(label, checkbox_text, done);
+    var edit = $('<div class="well spec"></div>').append(label, checkbox_text, type, done);
     $('#output').append(edit);
     $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
     $('input', checkbox_text).attr("data-bind", "value: label_text, valueUpdate: 'afterkeydown'");
@@ -365,11 +333,57 @@ function working () {
 
 }
 
-function item_click() {
-  $('#output').on('click', 'a.btn.btn-warning[title="remove"]', function(e){
-    $(this).closest('.control-group').remove();
+function binding_events() {
+  $('#adjust').click(function(e){
+    if ($(this).text() == 'Adjust') {
+      $(this).text('Done');
+      $('#input-items').attr('disabled', true);
+      $('#struct-items').attr('disabled', true);
+      $('#save').attr('disabled', true);
+      $('#output').sortable({
+        placeholder: "ui-state-highlight"
+      });
+    } else {
+      $(this).text('Adjust');
+      $('#input-items').removeAttr('disabled');
+      $('#struct-items').removeAttr('disabled');
+      $('#save').removeAttr('disabled');
+      $('#output').sortable('destroy');
+    }
     e.preventDefault();
   });
+  $('#output').on('mouseenter', '.control-group-wrap', function(e){
+    e.preventDefault();
+    if (!$(this).hasClass('control-focus')) {
+      $(this).addClass('control-focus');
+      $(this).prepend(input.button());
+    }
+  });
+  $('#output').on('mouseleave', '.control-group-wrap', function(e){
+    e.preventDefault();
+    if ($(this).hasClass('control-focus')) {
+      $(this).removeClass('control-focus');
+      $('.control-group-buttons', $(this)).remove();
+    }
+  });
+  $('#output').on('click', '.control-focus a.btn.btn-warning[title="remove"]', function(e){
+    e.preventDefault();
+    $(this).closest('.control-group-wrap').remove();
+  });
+  $('#output').on('click', '.control-focus a.btn[title="duplicate"]', function(e){
+    e.preventDefault();
+    var that = this;
+    var cloned = $(that).closest('.control-group-wrap').clone();
+    $('.control-group-buttons', $(cloned)).remove();
+    $(cloned).removeClass('control-focus');
+    $(that).closest('.control-group-wrap').after(cloned);
+  });
+  $('#output').on('click', '.control-focus a.btn[title="edit"]', function(e){
+    e.preventDefault();
+    var that = this;
+    $(that).closest('.control-group-wrap').after(edit_form());
+  });
+
 }
 
 function clean_ko() {
