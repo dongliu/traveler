@@ -342,5 +342,11 @@ ul.dropdown-menu input[type="checkbox"] {
 .control-group-buttons {
   position: relative;
   float: right;
-  display: none;
+  /*clear: right;*/
+  margin-top: inherit;
+  /*display: none;*/
+}
+
+.control-focus {
+  background-color: #f5f5f5;
 }
