@@ -69,8 +69,8 @@ function working () {
     $('#output').append($('<div class="control-group-wrap"></div>').append(checkbox));
     var label = $(spec.label());
     var checkbox_text = $(spec.checkbox_text());
-    var type = $(spec.type());
-    type.val('checkbox');
+    // var type = $(spec.type());
+    // type.val('checkbox');
     var done = $(spec.done());
     var edit = $('<div class="well spec"></div>').append(label, checkbox_text, type, done);
     $('#output').append(edit);
@@ -79,8 +79,12 @@ function working () {
     $('.control-label span', checkbox).attr("data-bind", "text: label");
     $('label span', checkbox).attr("data-bind", "text: label_text");
     var formModel = function (init) {
-      this.label = ko.observable(init);
-      this.label_text = ko.observable("update me as well");
+      if (init) {
+        this.label = ko.observable("please update");
+        this.label_text = ko.observable("please update");
+      } else {
+
+      }
     };
     ko.applyBindings(new formModel("update me"));
     binding_button(done);
@@ -380,14 +384,16 @@ function binding_events() {
   });
   $('#output').on('click', '.control-focus a.btn[title="edit"]', function(e){
     e.preventDefault();
-    var that = this;
-    $(that).closest('.control-group-wrap').after(edit_form());
+    var cg = $(this).closest('.control-group');
+    var spec_form = $(edit_form($('.control-group').attr('data-type')));
+    $(this).closest('.control-group-wrap').after();
+    binding($(this).closest('.control-group'), spec_form);
   });
 
 }
 
 function clean_ko() {
-  $('#add-item-form input').each(function(index) {
+  $('#output .well.spec input').each(function(index) {
     ko.cleanNode(this);
   });
 
