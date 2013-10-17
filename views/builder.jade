@@ -21,144 +21,144 @@ block content
 
 
       //- .builder.working
-    form.form-horizontal#add-item-form(style='display: none;')
+    //- form.form-horizontal#add-item-form(style='display: none;')
     //- default-add-form-element
-    #default-add-form-element(style='display: none;')
-      #legend
-        legend Form element to add
-      #label
-        .control-group
-          .control-label Label
-          .controls
-            input(type='text')
-            span.help-inline  Keep the label brief and unique
-      #help
-        .control-group
-          .control-label Help
-          .controls
-            input(type='text',placeholder='help')
-      //- add multiple choice and select later
-      #input-type
-        .control-group
-          .control-label Type
-          .controls
-            select
-              include inputtype
+    //- #default-add-form-element(style='display: none;')
+    //-   #legend
+    //-     legend Form element to add
+    //-   #label
+    //-     .control-group
+    //-       .control-label Label
+    //-       .controls
+    //-         input(type='text')
+    //-         span.help-inline  Keep the label brief and unique
+    //-   #help
+    //-     .control-group
+    //-       .control-label Help
+    //-       .controls
+    //-         input(type='text',placeholder='help')
+    //-   //- add multiple choice and select later
+    //-   #input-type
+    //-     .control-group
+    //-       .control-label Type
+    //-       .controls
+    //-         select
+    //-           include inputtype
 
-      #label-text
-        .control-group
-          .control-label Text
-          .controls
-            input(type='text')
-      #placeholder
-        .control-group
-          .control-label Placeholder
-          .controls
-            input(type='text')
+    //-   #label-text
+    //-     .control-group
+    //-       .control-label Text
+    //-       .controls
+    //-         input(type='text')
+    //-   #placeholder
+    //-     .control-group
+    //-       .control-label Placeholder
+    //-       .controls
+    //-         input(type='text')
 
-      #rows
-        .control-group
-          .control-label Row
-          .controls
-            input(type='text',placeholder='Number of rows')
-      #unit
-        .control-group
-          .control-label Unit
-          .controls
-            input(type='text')
-      //- Starting specific inputs
-      #upload
-        .control-group
-          .control-label Label
-          .controls
-            input(type='text')
-      //- #othertraveler
-      //-   .control-group
-      //-     .control-label Link to
-      //-     .controls
-      //-       .btn-group
-      //-         button.btn.btn-info Other traveler
-      //- #instuction-title
-      //-   .control-group
-      //-     .control-label Instruction title
-      //-     .controls
-      //-       input(type='text',placeholder='title')
-      //- #instruction-editor
-      //-   .control-group
-      //-     .control-label Instruction content
-      //-     .controls
-      //-       button.btn.dropdown-toggle(data-toggle='dropdown') Type
-      //-         span.caret
-      //-       include inputtype
-      #hold
-        .control-group
-          .control-label Holder
-          .controls
-            input(type='text',placeholder='Hold owner')
-      #button
-        .form-actions
-          button.btn.btn-primary(type='submit') Done
-          | &nbsp;
-          button.btn(type='button') Cancel
+    //-   #rows
+    //-     .control-group
+    //-       .control-label Row
+    //-       .controls
+    //-         input(type='text',placeholder='Number of rows')
+    //-   #unit
+    //-     .control-group
+    //-       .control-label Unit
+    //-       .controls
+    //-         input(type='text')
+    //-   //- Starting specific inputs
+    //-   #upload
+    //-     .control-group
+    //-       .control-label Label
+    //-       .controls
+    //-         input(type='text')
+    //-   //- #othertraveler
+    //-   //-   .control-group
+    //-   //-     .control-label Link to
+    //-   //-     .controls
+    //-   //-       .btn-group
+    //-   //-         button.btn.btn-info Other traveler
+    //-   //- #instuction-title
+    //-   //-   .control-group
+    //-   //-     .control-label Instruction title
+    //-   //-     .controls
+    //-   //-       input(type='text',placeholder='title')
+    //-   //- #instruction-editor
+    //-   //-   .control-group
+    //-   //-     .control-label Instruction content
+    //-   //-     .controls
+    //-   //-       button.btn.dropdown-toggle(data-toggle='dropdown') Type
+    //-   //-         span.caret
+    //-   //-       include inputtype
+    //-   #hold
+    //-     .control-group
+    //-       .control-label Holder
+    //-       .controls
+    //-         input(type='text',placeholder='Hold owner')
+    //-   #button
+    //-     .form-actions
+    //-       button.btn.btn-primary(type='submit') Done
+    //-       | &nbsp;
+    //-       button.btn(type='button') Cancel
     //- default-form-element
-    #default-form-element(style='display: none;')
-      #checkbox-element
-        .control-group
-          .control-label
-            span Label to be updated
-          .controls
-            label.checkbox
-              input(type='checkbox', disabled=true)
-              span to be updated
-      #text-element
-        .control-group
-          .control-label
-            span Label to be updated
-          .controls
-            input(type='text', disabled=true, placeholder='')
-            span.help-inline
-      #textarea-element
-        .control-group
-          .control-label
-            span Label to be updated
-          .controls
-            textarea(disabled=true)
-            span.help-inline
-      #number-element
-        .control-group
-          .control-label
-            span Label to be updated
-          .controls
-            .input-append
-              input(type='text', disabled=true)
-              span.add-on U
-            span.help-inline
-      #rich-element
-        .control-group
-          .well
-            //- h3.instruction-title Instruction title
-            .instruction-content Instruction details here
-      #hold-element
-        .control-group
-          h4.holder The flow is currently hold by&nbsp;
-            span holderName
-          .form-actions
-            button.btn.btn-primary(type='submit') Continue
-      #upload-element
-        .control-group
-          .control-label
-            span Label to be updated
-          .controls
-            button.btn(type='file') Upload
+    //- #default-form-element(style='display: none;')
+    //-   #checkbox-element
+    //-     .control-group
+    //-       .control-label
+    //-         span Label to be updated
+    //-       .controls
+    //-         label.checkbox
+    //-           input(type='checkbox', disabled=true)
+    //-           span to be updated
+    //-   #text-element
+    //-     .control-group
+    //-       .control-label
+    //-         span Label to be updated
+    //-       .controls
+    //-         input(type='text', disabled=true, placeholder='')
+    //-         span.help-inline
+    //-   #textarea-element
+    //-     .control-group
+    //-       .control-label
+    //-         span Label to be updated
+    //-       .controls
+    //-         textarea(disabled=true)
+    //-         span.help-inline
+    //-   #number-element
+    //-     .control-group
+    //-       .control-label
+    //-         span Label to be updated
+    //-       .controls
+    //-         .input-append
+    //-           input(type='text', disabled=true)
+    //-           span.add-on U
+    //-         span.help-inline
+    //-   #rich-element
+    //-     .control-group
+    //-       .well
+    //-         //- h3.instruction-title Instruction title
+    //-         .instruction-content Instruction details here
+    //-   #hold-element
+    //-     .control-group
+    //-       h4.holder The flow is currently hold by&nbsp;
+    //-         span holderName
+    //-       .form-actions
+    //-         button.btn.btn-primary(type='submit') Continue
+    //-   #upload-element
+    //-     .control-group
+    //-       .control-label
+    //-         span Label to be updated
+    //-       .controls
+    //-         button.btn(type='file') Upload
 
-      #control-group-buttons
-        .btn-group.control-group-buttons
-            a.btn.btn-info(href='#', data-toggle='tooltip', title='edit')
-              i.icon-edit.icon-large
-            a.btn.btn-info(href='#', data-toggle='tooltip', title='duplicate')
-              i.icon-copy.icon-large
-            a.btn.btn-warning(href='#', data-toggle='tooltip', title='remove')
-              i.icon-trash.icon-large
+    //-   #control-group-buttons
+    //-     .btn-group.control-group-buttons
+    //-         a.btn.btn-info(href='#', data-toggle='tooltip', title='edit')
+    //-           i.icon-edit.icon-large
+    //-         a.btn.btn-info(href='#', data-toggle='tooltip', title='duplicate')
+    //-           i.icon-copy.icon-large
+    //-         a.btn.btn-warning(href='#', data-toggle='tooltip', title='remove')
+    //-           i.icon-trash.icon-large
 
     .btn-group.dropdown
       a.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
@@ -210,4 +210,7 @@ block js
   script(type='text/javascript', src='/javascripts/knockout-2.2.1.js')
   script(type='text/javascript', src='/tinymce/tinymce.min.js')
   script(type='text/javascript', src='/tinymce/jquery.tinymce.min.js')
+  script(type='text/javascript', src='/builder/input.js')
+  script(type='text/javascript', src='/builder/spec.js')
+  //- script(type='text/javascript', src='/javascripts/require.js')
   script(type='text/javascript', src='/javascripts/builder.js')
