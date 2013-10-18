@@ -1,8 +1,8 @@
 .control-group.output-control-group
   .control-label
-    span Label to be updated
+    span { model.label }
   .controls
     .input-append
-      input(type='text', disabled=true)
-      span.add-on U
+      input(type='text', disabled=true, rv-placeholder='model.placeholder')
+      span.add-on { model.unit }
     span.help-block

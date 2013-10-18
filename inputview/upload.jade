@@ -1,5 +1,6 @@
 .control-group.output-control-group
   .control-label
-    span Label to be updated
+    span { model.label }
   .controls
     button.btn(type='file') Upload
+    span.help-block { model.help }

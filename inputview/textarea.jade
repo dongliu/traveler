@@ -1,6 +1,6 @@
 .control-group.output-control-group
   .control-label
-    span Label to be updated
+    span { model.lable }
   .controls
-    textarea(disabled=true)
-    span.help-block
+    textarea(disabled=true, rv-placeholder='model.placeholder', rv-rows = model.rows)
+    span.help-block { model.help }
