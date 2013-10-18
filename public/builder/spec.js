@@ -9,7 +9,7 @@ var jade = exports.jade=function(exports){Array.isArray||(Array.isArray=function
 // checkbox_text.jade compiled template
 exports.checkbox_text = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Text</div><div class="controls"><input type="text"/></div></div>');
+    buf.push('<div class="control-group"><div class="control-label">Text</div><div class="controls"><input type="text" name="checkbox_text"/></div></div>');
     return buf.join("");
 };
 
@@ -44,7 +44,7 @@ exports.inputtype = function anonymous(locals) {
 // label.jade compiled template
 exports.label = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Label</div><div class="controls"><input type="text"/><span class="help-inline"> Keep the label brief and unique</span></div></div>');
+    buf.push('<div class="control-group"><div class="control-label">Label</div><div class="controls"><input type="text" name="label"/><span class="help-inline"> Keep the label brief and unique</span></div></div>');
     return buf.join("");
 };
 
