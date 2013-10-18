@@ -16,7 +16,7 @@ exports.button = function anonymous(locals) {
 // checkbox.jade compiled template
 exports.checkbox = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>Label to be updated</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled"/><span>text to be updated</span></label></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled"/><span>{ model.checkbox_text }</span></label></div></div>');
     return buf.join("");
 };
 

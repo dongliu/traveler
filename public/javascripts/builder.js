@@ -65,19 +65,32 @@ function working () {
   $('#add-checkbox').click(function(e){
     // remove the opened .well.spec
     $('#output .well.spec').remove();
-    var checkbox = $(input.checkbox());
-    $('#output').append($('<div class="control-group-wrap"></div>').append(checkbox));
-    var label = $(spec.label());
-    var checkbox_text = $(spec.checkbox_text());
+    var $checkbox = $(input.checkbox());
+    $('#output').append($('<div class="control-group-wrap"></div>').append($checkbox));
+    var $label = $(spec.label());
+    var $checkbox_text = $(spec.checkbox_text());
     // var type = $(spec.type());
     // type.val('checkbox');
-    var done = $(spec.done());
-    var edit = $('<div class="well spec"></div>').append(label, checkbox_text, type, done);
-    $('#output').append(edit);
-    $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-    $('input', checkbox_text).attr("data-bind", "value: label_text, valueUpdate: 'afterkeydown'");
-    $('.control-label span', checkbox).attr("data-bind", "text: label");
-    $('label span', checkbox).attr("data-bind", "text: label_text");
+    var $done = $(spec.done());
+    var $edit = $('<div class="well spec"></div>').append($label, $checkbox_text, $done);
+    $('#output').append($edit);
+    var model = {
+      label: 'label',
+      checkbox_text: 'checkbox text'
+    };
+    $label.keydown(function(e) {
+      model.label = $('input', $label).val();
+    });
+    var view = rivets.bind($checkbox, {
+      // label : model.label,
+      // label : 'model.label',
+      // checkbox_text: model.checkbox_text
+      model: model
+    });
+    // $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
+    // $('input', checkbox_text).attr("data-bind", "value: label_text, valueUpdate: 'afterkeydown'");
+    // $('.control-label span', checkbox).attr("data-bind", "text: label");
+    // $('label span', checkbox).attr("data-bind", "text: label_text");
     // var formModel = function (init) {
     //   if (init) {
     //     this.label = ko.observable("please update");
@@ -88,7 +101,7 @@ function working () {
     // };
     // ko.applyBindings(new formModel("update me"));
     // binding_button(done);
-    e.preventDefault();
+    // e.preventDefault();
   });
 
 //   $('#add-text').click(function(e){
@@ -335,7 +348,7 @@ function working () {
 //     e.preventDefault();
 //   });
 
-// }
+}
 
 function binding_events() {
   $('#adjust').click(function(e){
@@ -408,3 +421,4 @@ function binding_events() {
 //     e.preventDefault();
 //   });
 // }
+

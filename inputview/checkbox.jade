@@ -1,7 +1,7 @@
-.control-group.output-control-group(data-type='checkbox')
+.control-group.output-control-group
   .control-label
-    span Label to be updated
+    span { model.label }
   .controls
     label.checkbox
       input(type='checkbox', disabled=true)
-      span text to be updated
+      span { model.checkbox_text }
