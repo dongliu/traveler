@@ -66,7 +66,7 @@ exports.placeholder = function anonymous(locals) {
 // rows.jade compiled template
 exports.rows = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Row</div><div class="controls"><input type="text" placeholder="Number of rows" name="row"/></div></div>');
+    buf.push('<div class="control-group"><div class="control-label">Row</div><div class="controls"><input type="text" placeholder="Number of rows" name="rows"/></div></div>');
     return buf.join("");
 };
 

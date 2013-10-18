@@ -84,45 +84,32 @@ function working () {
     $done.click(done_button(view));
   });
 
-//   $('#add-par').click(function(e){
-//     clean_ko();
-//     $('#add-item-form').empty();
-//     $('#add-item-form').show();
-//     var legend = $('#legend legend').clone().text('Add paragraph input').show();
-//     var label = $('#label .control-group').clone().show();
-//     var placeholder = $('#placeholder .control-group').clone().show();
-//     var inline = $('#inline .control-group').clone().show();
-//     var rows = $('#rows .control-group').clone().show();
-//     var button = $('#button .form-actions').clone().show();
-//     $('#add-item-form').append(legend);
-//     $('#add-item-form').append(label);
-//     $('#add-item-form').append(placeholder);
-//     $('#add-item-form').append(inline);
-//     $('#add-item-form').append(rows);
-//     $('#add-item-form').append(button);
-
-//     var element = $('#textarea-element .control-group').clone().show();
-//     element.prepend($('#control-group-buttons .btn-group').clone());
-//     $('#output').append(element);
-//     $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-//     $('input', placeholder).attr("data-bind", "value: placeholder, valueUpdate: 'afterkeydown'");
-//     $('input', rows).attr("data-bind", "value: rows, valueUpdate: 'afterkeydown'");
-//     $('input', inline).attr("data-bind", "value: inline, valueUpdate: 'afterkeydown'");
-
-//     $('span.help-inline', element).attr("data-bind", "text: inline");
-//     $('.control-label span', element).attr("data-bind", "text: label");
-//     $('textarea', element).attr("data-bind", "attr: {placeholder: placeholder, rows: rows}");
-
-//     var formModel = function (init) {
-//       this.label = ko.observable(init);
-//       this.placeholder = ko.observable("");
-//       this.inline = ko.observable("");
-//       this.rows = ko.observable(3);
-//     };
-//     ko.applyBindings(new formModel("Update me"));
-//     binding_button();
-//     e.preventDefault();
-//   });
+  $('#add-par').click(function(e){
+    e.preventDefault();
+    $('#output .well.spec').remove();
+    var $textarea = $(input.textarea());
+    $('#output').append($('<div class="control-group-wrap"></div>').append($textarea));
+    var $label = $(spec.label());
+    var $placeholder = $(spec.placeholder());
+    var $rows = $(spec.rows());
+    var $help = $(spec.help());
+    var $done = $(spec.done());
+    var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $rows, $help, $done);
+    $('#output').append($edit);
+    var model = {
+      label: 'label',
+      placeholder: '',
+      rows: 3,
+      help: ''
+    };
+    $('input', $edit).keyup(function(e){
+      model[$(this).attr('name')] = $(this).val();
+    });
+    var view = rivets.bind($textarea, {
+      model: model
+    });
+    $done.click(done_button(view));
+  });
 
 //   $('#add-int').click(function(e){
 //     clean_ko();
