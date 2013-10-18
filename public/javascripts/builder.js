@@ -78,13 +78,13 @@ function working () {
       label: 'label',
       checkbox_text: 'checkbox text'
     };
-    $label.keydown(function(e) {
-      model.label = $('input', $label).val();
+    $('input', $edit).keyup(function(e){
+      model[$(this).attr('name')] = $(this).val();
     });
+    // $label.keydown(function(e) {
+    //   model.label = $('input', $label).val();
+    // });
     var view = rivets.bind($checkbox, {
-      // label : model.label,
-      // label : 'model.label',
-      // checkbox_text: model.checkbox_text
       model: model
     });
     // $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
