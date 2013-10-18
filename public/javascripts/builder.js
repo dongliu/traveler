@@ -33,35 +33,6 @@ function init () {
 }
 
 function working () {
-/*  $('#add-checkbox').click(function(e){
-    clean_ko();
-    $('#add-item-form').empty();
-    $('#add-item-form').show();
-    var legend = $('#legend legend').clone().text('Add checkbox').show();
-    var label = $('#label .control-group').clone().show();
-    var label_text = $('#label-text .control-group').clone().show();
-    var button = $('#button .form-actions').clone().show();
-    $('#add-item-form').append(legend);
-    $('#add-item-form').append(label);
-    $('#add-item-form').append(label_text);
-    $('#add-item-form').append(button);
-
-    // the output part
-    var element = $('#checkbox-element .control-group').clone().show();
-    element.prepend($('#control-group-buttons .btn-group').clone());
-    $('#output').append(element);
-    $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-    $('input', label_text).attr("data-bind", "value: label_text, valueUpdate: 'afterkeydown'");
-    $('.control-label span', element).attr("data-bind", "text: label");
-    $('label span', element).attr("data-bind", "text: label_text");
-    var formModel = function (init) {
-      this.label = ko.observable(init);
-      this.label_text = ko.observable("");
-    };
-    ko.applyBindings(new formModel("update me"));
-    binding_button();
-    e.preventDefault();
-  });*/
   $('#add-checkbox').click(function(e){
     // remove the opened .well.spec
     $('#output .well.spec').remove();
@@ -81,27 +52,10 @@ function working () {
     $('input', $edit).keyup(function(e){
       model[$(this).attr('name')] = $(this).val();
     });
-    // $label.keydown(function(e) {
-    //   model.label = $('input', $label).val();
-    // });
     var view = rivets.bind($checkbox, {
       model: model
     });
-    // $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-    // $('input', checkbox_text).attr("data-bind", "value: label_text, valueUpdate: 'afterkeydown'");
-    // $('.control-label span', checkbox).attr("data-bind", "text: label");
-    // $('label span', checkbox).attr("data-bind", "text: label_text");
-    // var formModel = function (init) {
-    //   if (init) {
-    //     this.label = ko.observable("please update");
-    //     this.label_text = ko.observable("please update");
-    //   } else {
-
-    //   }
-    // };
-    // ko.applyBindings(new formModel("update me"));
-    // binding_button(done);
-    // e.preventDefault();
+    $done.click(done_button(view));
   });
 
 //   $('#add-text').click(function(e){
@@ -414,11 +368,11 @@ function binding_events() {
 //   $('#add-item-form [data-bind]').removeAttr('data-bind');
 // }
 
-// function binding_button(done) {
-//   $('button[type="submit"]', done).click(function(e){
-//     clean_ko();
-//     $(done).closest('.spec').remove();
-//     e.preventDefault();
-//   });
-// }
+function done_button(view) {
+  return function(e) {
+    view.unbind();
+    $(this).closest('.spec').remove();
+    e.preventDefault();
+  };
+}
 
