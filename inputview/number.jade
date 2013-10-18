@@ -1,6 +1,6 @@
 .control-group.output-control-group
   .control-label
-    span Label to be updated
+    span { model.label }
   .controls
-    input(type='text', disabled=true)
-    span.help-block
+    input(type='text', disabled=true, rv-placeholder='model.placeholder')
+    span.help-block { model.help }

@@ -23,14 +23,14 @@ exports.done = function anonymous(locals) {
 // help.jade compiled template
 exports.help = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Help</div><div class="controls"><input type="text"/></div></div>');
+    buf.push('<div class="control-group"><div class="control-label">Help</div><div class="controls"><input type="text" name="help"/></div></div>');
     return buf.join("");
 };
 
 // hold.jade compiled template
 exports.hold = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Holder</div><div class="controls"><input type="text" placeholder="Hold owner"/></div></div>');
+    buf.push('<div class="control-group"><div class="control-label">Holder</div><div class="controls"><input type="text" placeholder="Hold owner" name="holder"/></div></div>');
     return buf.join("");
 };
 
@@ -59,14 +59,14 @@ exports.legend = function anonymous(locals) {
 // placeholder.jade compiled template
 exports.placeholder = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Placeholder</div><div class="controls"><input type="text"/></div></div>');
+    buf.push('<div class="control-group"><div class="control-label">Placeholder</div><div class="controls"><input type="text" name="placeholder"/></div></div>');
     return buf.join("");
 };
 
 // rows.jade compiled template
 exports.rows = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Row</div><div class="controls"><input type="text" placeholder="Number of rows"/></div></div>');
+    buf.push('<div class="control-group"><div class="control-label">Row</div><div class="controls"><input type="text" placeholder="Number of rows" name="row"/></div></div>');
     return buf.join("");
 };
 
@@ -80,14 +80,7 @@ exports.type = function anonymous(locals) {
 // unit.jade compiled template
 exports.unit = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Unit</div><div class="controls"><input type="text"/></div></div>');
-    return buf.join("");
-};
-
-// upload.jade compiled template
-exports.upload = function anonymous(locals) {
-    var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Label</div><div class="controls"><input type="text"/></div></div>');
+    buf.push('<div class="control-group"><div class="control-label">Unit</div><div class="controls"><input type="text" name="unit"/></div></div>');
     return buf.join("");
 };
 

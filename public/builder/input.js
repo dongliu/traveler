@@ -23,21 +23,21 @@ exports.checkbox = function anonymous(locals) {
 // hold.jade compiled template
 exports.hold = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><h4 class="holder">The flow is currently hold by&nbsp;<span>holderName</span></h4><div class="form-actions"><button type="submit" class="btn btn-primary">Continue</button></div></div>');
+    buf.push('<div class="control-group output-control-group"><h4 class="holder">The flow is currently hold by&nbsp;<span>{ model.holder }</span></h4><div class="form-actions"><button type="submit" class="btn btn-primary">Continue</button></div></div>');
     return buf.join("");
 };
 
 // number.jade compiled template
 exports.number = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>Label to be updated</span></div><div class="controls"><input type="text" disabled="disabled"/><span class="help-block"></span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
 // numberunit.jade compiled template
 exports.numberunit = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>Label to be updated</span></div><div class="controls"><div class="input-append"><input type="text" disabled="disabled"/><span class="add-on">U</span></div><span class="help-block"></span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><div class="input-append"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="add-on">{ model.unit }</span></div><span class="help-block"></span></div></div>');
     return buf.join("");
 };
 
@@ -51,21 +51,30 @@ exports.rich = function anonymous(locals) {
 // text.jade compiled template
 exports.text = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>Label to be updated</span></div><div class="controls"><input type="text" disabled="disabled" placeholder=""/><span class="help-block"></span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
 // textarea.jade compiled template
 exports.textarea = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>Label to be updated</span></div><div class="controls"><textarea disabled="disabled"></textarea><span class="help-block"></span></div></div>');
+    var locals_ = locals || {}, model = locals_.model;
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.lable }</span></div><div class="controls"><textarea' + jade.attrs({
+        disabled: true,
+        "rv-placeholder": "model.placeholder",
+        "rv-rows": model.rows
+    }, {
+        disabled: true,
+        "rv-placeholder": true,
+        "rv-rows": true
+    }) + '></textarea><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
 // upload.jade compiled template
 exports.upload = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>Label to be updated</span></div><div class="controls"><button type="file" class="btn">Upload</button></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><button type="file" class="btn">Upload</button><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
