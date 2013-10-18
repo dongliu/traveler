@@ -58,16 +58,7 @@ exports.text = function anonymous(locals) {
 // textarea.jade compiled template
 exports.textarea = function anonymous(locals) {
     var buf = [];
-    var locals_ = locals || {}, model = locals_.model;
-    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.lable }</span></div><div class="controls"><textarea' + jade.attrs({
-        disabled: true,
-        "rv-placeholder": "model.placeholder",
-        "rv-rows": model.rows
-    }, {
-        disabled: true,
-        "rv-placeholder": true,
-        "rv-rows": true
-    }) + '></textarea><span class="help-block">{ model.help }</span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows"></textarea><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
