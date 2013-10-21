@@ -51,8 +51,7 @@ exports.label = function anonymous(locals) {
 // legend.jade compiled template
 exports.legend = function anonymous(locals) {
     var buf = [];
-    var locals_ = locals || {}, input = locals_.input;
-    buf.push("<legend>Add " + jade.escape((jade.interp = input) == null ? "" : jade.interp) + "</legend>");
+    buf.push('<div class="control-group"><div class="control-label">Section legend</div><div class="controls"><input type="text" name="legend"/></div></div>');
     return buf.join("");
 };
 
