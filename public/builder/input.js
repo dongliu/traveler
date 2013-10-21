@@ -9,7 +9,7 @@ var jade = exports.jade=function(exports){Array.isArray||(Array.isArray=function
 // button.jade compiled template
 exports.button = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="pull-right control-group-buttons"><div class="btn-group"><a href="#" data-toggle="tooltip" title="edit" class="btn btn-info"><i class="icon-edit icon-large"></i></a><a href="#" data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="icon-copy icon-large"></i></a><a href="#" data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="icon-trash icon-large"></i></a></div></div>');
+    buf.push('<div class="pull-right control-group-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="icon-edit icon-large"></i></a><a data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="icon-copy icon-large"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="icon-trash icon-large"></i></a></div></div>');
     return buf.join("");
 };
 
@@ -45,6 +45,13 @@ exports.numberunit = function anonymous(locals) {
 exports.rich = function anonymous(locals) {
     var buf = [];
     buf.push('<div class="control-group output-control-group"><div class="instruction-content">Instruction details here</div></div>');
+    return buf.join("");
+};
+
+// section.jade compiled template
+exports.section = function anonymous(locals) {
+    var buf = [];
+    buf.push('<div class="control-group output-control-group"><legend>{ model.legend }</legend></div>');
     return buf.join("");
 };
 

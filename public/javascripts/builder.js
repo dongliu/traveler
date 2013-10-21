@@ -192,6 +192,28 @@ function working () {
 //     e.preventDefault();
 //   });
 
+  $('#add-section').click(function(e){
+    e.preventDefault();
+    $('#output .well.spec').remove();
+    var $section = $(input.section());
+    $('#output').append($('<div class="control-group-wrap"></div>').append($section));
+    var $legend = $(spec.legend());
+    var $done = $(spec.done());
+    var $edit = $('<div class="well spec"></div>').append($legend, $done);
+    $('#output').append($edit);
+    var model = {
+      legend: 'Section name',
+    };
+    $('input', $edit).keyup(function(e){
+      model[$(this).attr('name')] = $(this).val();
+    });
+    var view = rivets.bind($section, {
+      model: model
+    });
+    $done.click(done_button(view));
+  });
+
+
 //   $('#add-page').click(function(e){
 //     e.preventDefault();
 //   });
