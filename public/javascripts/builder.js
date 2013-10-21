@@ -111,107 +111,53 @@ function working () {
     $done.click(done_button(view));
   });
 
-//   $('#add-int').click(function(e){
-//     clean_ko();
-//     $('#add-item-form').empty();
-//     $('#add-item-form').show();
-//     var legend = $('#legend legend').clone().text('Add integer input').show();
-//     var label = $('#label .control-group').clone().show();
-//     var placeholder = $('#placeholder .control-group').clone().show();
-//     var inline = $('#inline .control-group').clone().show();
-//     var unit = $('#unit .control-group').clone().show();
-//     var button = $('#button .form-actions').clone().show();
-//     $('#add-item-form').append(legend);
-//     $('#add-item-form').append(label);
-//     $('#add-item-form').append(placeholder);
-//     $('#add-item-form').append(unit);
-//     $('#add-item-form').append(inline);
-//     $('#add-item-form').append(button);
+  $('#add-number').click(function(e){
+    e.preventDefault();
+    $('#output .well.spec').remove();
+    var $number = $(input.number());
+    $('#output').append($('<div class="control-group-wrap"></div>').append($number));
+    var $label = $(spec.label());
+    var $placeholder = $(spec.placeholder());
+    var $help = $(spec.help());
+    var $done = $(spec.done());
+    var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $done);
+    $('#output').append($edit);
+    var model = {
+      label: 'label',
+      placeholder: '',
+      help: ''
+    };
+    $('input', $edit).keyup(function(e){
+      model[$(this).attr('name')] = $(this).val();
+    });
+    var view = rivets.bind($textarea, {
+      model: model
+    });
+    $done.click(done_button(view));
+  });
 
-//     var element = $('#number-element .control-group').clone().show();
-//     element.prepend($('#control-group-buttons .btn-group').clone());
-//     $('#output').append(element);
-
-//     $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-//     $('.control-label span', element).attr("data-bind", "text: label");
-
-//     $('input', placeholder).attr("data-bind", "value: placeholder, valueUpdate: 'afterkeydown'");
-//     $('input', element).attr("data-bind", "attr: {placeholder: placeholder}");
-
-//     $('input', unit).attr("data-bind", "value: unit, valueUpdate: 'afterkeydown'");
-//     $('span.add-on', element).attr("data-bind", "text: unit");
-
-//     $('input', inline).attr("data-bind", "value: inline, valueUpdate: 'afterkeydown'");
-//     $('span.help-inline', element).attr("data-bind", "text: inline");
-
-//     var formModel = function (init) {
-//       this.label = ko.observable(init);
-//       this.placeholder = ko.observable("");
-//       this.unit = ko.observable("U");
-//       this.inline = ko.observable("");
-//     };
-//     ko.applyBindings(new formModel("Update me"));
-//     // TODO: add integer validation rule
-//     binding_button();
-//     e.preventDefault();
-//   });
-
-//   $('#add-float').click(function(e){
-//     clean_ko();
-//     $('#add-item-form').empty();
-//     $('#add-item-form').show();
-//     var legend = $('#legend legend').clone().text('Add float input').show();
-//     var label = $('#label .control-group').clone().show();
-//     var placeholder = $('#placeholder .control-group').clone().show();
-//     var inline = $('#inline .control-group').clone().show();
-//     var unit = $('#unit .control-group').clone().show();
-//     var button = $('#button .form-actions').clone().show();
-//     $('#add-item-form').append(legend);
-//     $('#add-item-form').append(label);
-//     $('#add-item-form').append(placeholder);
-//     $('#add-item-form').append(unit);
-//     $('#add-item-form').append(inline);
-//     $('#add-item-form').append(button);
-
-//     var element = $('#number-element .control-group').clone().show();
-//     element.prepend($('#control-group-buttons .btn-group').clone());
-//     $('#output').append(element);
-
-//     $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-//     $('.control-label span', element).attr("data-bind", "text: label");
-
-//     $('input', placeholder).attr("data-bind", "value: placeholder, valueUpdate: 'afterkeydown'");
-//     $('input', element).attr("data-bind", "attr: {placeholder: placeholder}");
-
-//     $('input', unit).attr("data-bind", "value: unit, valueUpdate: 'afterkeydown'");
-//     $('span.add-on', element).attr("data-bind", "text: unit");
-
-//     $('input', inline).attr("data-bind", "value: inline, valueUpdate: 'afterkeydown'");
-//     $('span.help-inline', element).attr("data-bind", "text: inline");
-
-//     var formModel = function (init) {
-//       this.label = ko.observable(init);
-//       this.placeholder = ko.observable("");
-//       this.unit = ko.observable("U");
-//       this.inline = ko.observable("");
-//     };
-//     ko.applyBindings(new formModel("Update me"));
-//     // TODO: add float validation rule
-//     binding_button();
-//     e.preventDefault();
-//   });
-
-//   // $('#add-file').click(function(e){
-//   //   $('#add-item-form').show();
-//   //   clean_ko();
-//   //   $('#add-item-form legend').text('File');
-//   //   $('.add-item').hide(100, function(){
-//   //     $('#add-item-form legend').show();
-//   //     $('#upload').show();
-//   //     $('#button').show();
-//   //   });
-//   //   e.preventDefault();
-//   // });
+  $('#add-file').click(function(e){
+    e.preventDefault();
+    $('#output .well.spec').remove();
+    var $upload = $(input.upload());
+    $('#output').append($('<div class="control-group-wrap"></div>').append($upload));
+    var $label = $(spec.label());
+    var $help = $(spec.help());
+    var $done = $(spec.done());
+    var $edit = $('<div class="well spec"></div>').append($label, $help, $done);
+    $('#output').append($edit);
+    var model = {
+      label: 'label',
+      help: ''
+    };
+    $('input', $edit).keyup(function(e){
+      model[$(this).attr('name')] = $(this).val();
+    });
+    var view = rivets.bind($upload, {
+      model: model
+    });
+    $done.click(done_button(view));
+  });
 
 //   $('#add-rich').click(function(e){
 //     // the output part
