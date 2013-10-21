@@ -159,15 +159,13 @@ function working () {
     $done.click(done_button(view));
   });
 
-//   $('#add-rich').click(function(e){
-//     // the output part
-//     var element = $('#rich-element .control-group').clone().show();
-//     element.prepend($('#control-group-buttons .btn-group').clone());
-//     $('#output').append(element);
-//     // $('h3.instruction-title', element).tinymce(mce_head);
-//     $('.instruction-content', element).tinymce(mce_content);
-//     e.preventDefault();
-//   });
+  $('#add-rich').click(function(e){
+    e.preventDefault();
+    $('#output .well.spec').remove();
+    var $rich = $(input.rich());
+    $('#output').append($('<div class="control-group-wrap"></div>').append($rich));
+    $rich.tinymce(mce_content);
+  });
 
 //   $('#add-hold').click(function(e){
 //     clean_ko();
