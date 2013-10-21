@@ -192,31 +192,6 @@ function working () {
 //     e.preventDefault();
 //   });
 
-//   $('#add-file').click(function(e){
-//     clean_ko();
-//     $('#add-item-form').empty();
-//     $('#add-item-form').show();
-//     var legend = $('#legend legend').clone().text('Add upload file').show();
-//     var label = $('#upload .control-group').clone().show();
-//     var button = $('#button .form-actions').clone().show();
-//     $('#add-item-form').append(legend);
-//     $('#add-item-form').append(label);
-//     $('#add-item-form').append(button);
-
-//     // the output part
-//     var element = $('#upload-element .control-group').clone().show();
-//     element.prepend($('#control-group-buttons .btn-group').clone());
-//     $('#output').append(element);
-//     $('input', label).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-//     $('.control-label span', element).attr("data-bind", "text: label");
-//     var formModel = function (init) {
-//       this.label = ko.observable(init);
-//     };
-//     ko.applyBindings(new formModel("update me"));
-//     binding_button();
-//     e.preventDefault();
-//   });
-
 //   $('#add-page').click(function(e){
 //     e.preventDefault();
 //   });
