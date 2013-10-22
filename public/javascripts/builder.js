@@ -265,12 +265,19 @@ function binding_events() {
     $(cloned).removeClass('control-focus');
     $(that).closest('.control-group-wrap').after(cloned);
   });
+
   $('#output').on('click', '.control-focus a.btn[title="edit"]', function(e){
     e.preventDefault();
     var cg = $(this).closest('.control-group');
-    var spec_form = $(edit_form($('.control-group').attr('data-type')));
-    $(this).closest('.control-group-wrap').after();
-    binding($(this).closest('.control-group'), spec_form);
+    var type = $('.control-group').attr('data-type');
+    // var spec_form = $(edit_form($('.control-group').attr('data-type')));
+    // some input types do not need the spec form
+    if (['rich'].indexOf(type) !== -1 ) {
+      alert('Please edit it directly.');
+    } else {
+      $(this).closest('.control-group-wrap').after();
+      binding($(this).closest('.control-group'), spec_form);
+    }
   });
 
 }
