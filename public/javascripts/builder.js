@@ -58,25 +58,7 @@ function working() {
 
   $('#add-file').click(function(e) {
     e.preventDefault();
-    $('#output .well.spec').remove();
-    var $upload = $(input.upload());
-    $('#output').append($('<div class="control-group-wrap" data-type="file"></div>').append($upload));
-    var $label = $(spec.label());
-    var $help = $(spec.help());
-    var $done = $(spec.done());
-    var $edit = $('<div class="well spec"></div>').append($label, $help, $done);
-    $('#output').append($edit);
-    var model = {
-      label: 'label',
-      help: ''
-    };
-    $('input', $edit).keyup(function(e) {
-      model[$(this).attr('name')] = $(this).val();
-    });
-    var view = rivets.bind($upload, {
-      model: model
-    });
-    $done.click(done_button(view));
+    file_edit();
   });
 
   $('#add-rich').click(function(e) {
@@ -142,7 +124,7 @@ function working() {
 
 function binding_events() {
   $('#adjust').click(function(e) {
-    if ($(this).text() == 'Adjust') {
+    if ($(this).text() == 'Adjust location') {
       $(this).text('Done');
       $('#input-items').attr('disabled', true);
       $('#struct-items').attr('disabled', true);
@@ -151,7 +133,7 @@ function binding_events() {
         placeholder: "ui-state-highlight"
       });
     } else {
-      $(this).text('Adjust');
+      $(this).text('Adjust location');
       $('#input-items').removeAttr('disabled');
       $('#struct-items').removeAttr('disabled');
       $('#save').removeAttr('disabled');
@@ -205,6 +187,9 @@ function binding_events() {
         break;
       case 'number':
         number_edit($cgr);
+        break;
+      case 'file':
+        file_edit($cgr);
         break;
       default:
         alert('not implemented.');
@@ -373,6 +358,41 @@ function number_edit($cgr) {
   $('input', $help).val(help);
 
   binding($edit, $number, model, $done);
+}
+
+function file_edit($cgr) {
+  $('#output .well.spec').remove();
+  var label = 'label';
+  var help = '';
+  if ($cgr) {
+    label = $('.control-label span', $cgr).text();
+    help = $('.controls span.help-block', $cgr).text();
+  }
+
+  var $upload = $(input.upload());
+  var $label = $(spec.label());
+  var $help = $(spec.help());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append($label, $help, $done);
+
+  if ($cgr) {
+    var $new_cgr = $('<div class="control-group-wrap" data-type="file"></div>').append($upload);
+    $cgr.replaceWith($new_cgr);
+    $new_cgr.after($edit);
+  } else {
+  $('#output').append($('<div class="control-group-wrap" data-type="file"></div>').append($upload));
+  $('#output').append($edit);
+  }
+
+  var model = {
+    label: 'label',
+    help: ''
+  };
+
+  $('input', $label).val(label);
+  $('input', $help).val(help);
+
+  binding($edit, $upload, model, $done);
 }
 
 
