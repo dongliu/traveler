@@ -43,27 +43,7 @@ function working() {
 
   $('#add-text').click(function(e) {
     e.preventDefault();
-    $('#output .well.spec').remove();
-    var $text = $(input.text());
-    $('#output').append($('<div class="control-group-wrap" data-type="text"></div>').append($text));
-    var $label = $(spec.label());
-    var $placeholder = $(spec.placeholder());
-    var $help = $(spec.help());
-    var $done = $(spec.done());
-    var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $done);
-    $('#output').append($edit);
-    var model = {
-      label: 'label',
-      placeholder: '',
-      help: ''
-    };
-    $('input', $edit).keyup(function(e) {
-      model[$(this).attr('name')] = $(this).val();
-    });
-    var view = rivets.bind($text, {
-      model: model
-    });
-    $done.click(done_button(view));
+    text_edit();
   });
 
   $('#add-par').click(function(e) {
@@ -259,6 +239,10 @@ function binding_events() {
       case 'checkbox':
         checkbox_edit($cgr);
         break;
+      case 'text':
+        text_edit($cgr);
+        break;
+
       default:
         alert('not implemented.');
     }
@@ -306,6 +290,49 @@ function checkbox_edit($cgr) {
     model[$(this).attr('name')] = $(this).val();
   });
   var view = rivets.bind($checkbox, {
+    model: model
+  });
+  $done.click(done_button(view));
+}
+
+function text_edit($cgr) {
+  $('#output .well.spec').remove();
+  var label = 'label';
+  var placeholder = '';
+  var help = '';
+  if ($cgr) {
+    label = $('.control-label span', $cgr).text();
+    placeholder = $('.controls input', $cgr).attr('placeholder');
+    help = $('.controls span.help-block', $cgr).text();
+  }
+  var $text = $(input.text());
+  var $label = $(spec.label());
+  var $placeholder = $(spec.placeholder());
+  var $help = $(spec.help());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $done);
+  if ($cgr) {
+    var $new_cgr = $('<div class="control-group-wrap" data-type="text"></div>').append($text);
+    $cgr.replaceWith($new_cgr);
+    $new_cgr.after($edit);
+  } else {
+      $('#output').append($('<div class="control-group-wrap" data-type="text"></div>').append($text));
+  $('#output').append($edit);
+  }
+
+  var model = {
+    label: label,
+    placeholder: placeholder,
+    help: help
+  };
+  $('input', $label).val(label);
+  $('input', $placeholder).val(placeholder);
+  $('input', $help).val(help);
+
+  $('input', $edit).keyup(function(e) {
+    model[$(this).attr('name')] = $(this).val();
+  });
+  var view = rivets.bind($text, {
     model: model
   });
   $done.click(done_button(view));
