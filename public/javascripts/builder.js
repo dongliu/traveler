@@ -48,29 +48,7 @@ function working() {
 
   $('#add-par').click(function(e) {
     e.preventDefault();
-    $('#output .well.spec').remove();
-    var $textarea = $(input.textarea());
-    $('#output').append($('<div class="control-group-wrap" data-type="textarea"></div>').append($textarea));
-    var $label = $(spec.label());
-    var $placeholder = $(spec.placeholder());
-    var $rows = $(spec.rows());
-    var $help = $(spec.help());
-    var $done = $(spec.done());
-    var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $rows, $help, $done);
-    $('#output').append($edit);
-    var model = {
-      label: 'label',
-      placeholder: '',
-      rows: 3,
-      help: ''
-    };
-    $('input', $edit).keyup(function(e) {
-      model[$(this).attr('name')] = $(this).val();
-    });
-    var view = rivets.bind($textarea, {
-      model: model
-    });
-    $done.click(done_button(view));
+    textarea_edit();
   });
 
   $('#add-number').click(function(e) {
@@ -242,6 +220,9 @@ function binding_events() {
       case 'text':
         text_edit($cgr);
         break;
+      case 'textarea':
+        textarea_edit($cgr);
+        break;
 
       default:
         alert('not implemented.');
@@ -286,13 +267,7 @@ function checkbox_edit($cgr) {
   $('input', $label).val(label);
   $('input', $checkbox_text).val(checkbox_text);
 
-  $('input', $edit).keyup(function(e) {
-    model[$(this).attr('name')] = $(this).val();
-  });
-  var view = rivets.bind($checkbox, {
-    model: model
-  });
-  $done.click(done_button(view));
+  binding($edit, $checkbox, model, $done);
 }
 
 function text_edit($cgr) {
@@ -316,8 +291,8 @@ function text_edit($cgr) {
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
-      $('#output').append($('<div class="control-group-wrap" data-type="text"></div>').append($text));
-  $('#output').append($edit);
+    $('#output').append($('<div class="control-group-wrap" data-type="text"></div>').append($text));
+    $('#output').append($edit);
   }
 
   var model = {
@@ -329,10 +304,59 @@ function text_edit($cgr) {
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
 
+  binding($edit, $text, model, $done);
+}
+
+
+function textarea_edit($cgr) {
+  $('#output .well.spec').remove();
+  var label = 'label';
+  var placeholder = '';
+  var rows = 3;
+  var help = '';
+
+  if ($cgr) {
+    label = $('.control-label span', $cgr).text();
+    placeholder = $('.controls textarea', $cgr).attr('placeholder');
+    help = $('.controls span.help-block', $cgr).text();
+    rows = $('.controls textarea', $cgr).attr('rows');
+  }
+
+  var $textarea = $(input.textarea());
+  var $label = $(spec.label());
+  var $placeholder = $(spec.placeholder());
+  var $rows = $(spec.rows());
+  var $help = $(spec.help());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $rows, $help, $done);
+  if ($cgr) {
+    var $new_cgr = $('<div class="control-group-wrap" data-type="textarea"></div>').append($textarea);
+    $cgr.replaceWith($new_cgr);
+    $new_cgr.after($edit);
+  } else {
+    $('#output').append($('<div class="control-group-wrap" data-type="textarea"></div>').append($textarea));
+    $('#output').append($edit);
+  }
+  var model = {
+    label: label,
+    placeholder: placeholder,
+    rows: rows,
+    help: help
+  };
+
+  $('input', $label).val(label);
+  $('input', $placeholder).val(placeholder);
+  $('input', $help).val(help);
+  $('input', $rows).val(rows);
+
+  binding($edit, $textarea, model, $done);
+}
+
+function binding($edit, $out, model, $done) {
   $('input', $edit).keyup(function(e) {
     model[$(this).attr('name')] = $(this).val();
   });
-  var view = rivets.bind($text, {
+  var view = rivets.bind($out, {
     model: model
   });
   $done.click(done_button(view));
