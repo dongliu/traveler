@@ -53,27 +53,7 @@ function working() {
 
   $('#add-number').click(function(e) {
     e.preventDefault();
-    $('#output .well.spec').remove();
-    var $number = $(input.number());
-    $('#output').append($('<div class="control-group-wrap" data-type="number"></div>').append($number));
-    var $label = $(spec.label());
-    var $placeholder = $(spec.placeholder());
-    var $help = $(spec.help());
-    var $done = $(spec.done());
-    var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $done);
-    $('#output').append($edit);
-    var model = {
-      label: 'label',
-      placeholder: '',
-      help: ''
-    };
-    $('input', $edit).keyup(function(e) {
-      model[$(this).attr('name')] = $(this).val();
-    });
-    var view = rivets.bind($textarea, {
-      model: model
-    });
-    $done.click(done_button(view));
+    number_edit();
   });
 
   $('#add-file').click(function(e) {
@@ -223,7 +203,9 @@ function binding_events() {
       case 'textarea':
         textarea_edit($cgr);
         break;
-
+      case 'number':
+        number_edit($cgr);
+        break;
       default:
         alert('not implemented.');
     }
@@ -351,6 +333,48 @@ function textarea_edit($cgr) {
 
   binding($edit, $textarea, model, $done);
 }
+
+
+function number_edit($cgr) {
+  $('#output .well.spec').remove();
+  var label = 'label';
+  var placeholder = '';
+  var help = '';
+  if ($cgr) {
+    label = $('.control-label span', $cgr).text();
+    placeholder = $('.controls input', $cgr).attr('placeholder');
+    help = $('.controls span.help-block', $cgr).text();
+  }
+
+  var $number = $(input.number());
+  var $label = $(spec.label());
+  var $placeholder = $(spec.placeholder());
+  var $help = $(spec.help());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $done);
+
+  if ($cgr) {
+    var $new_cgr = $('<div class="control-group-wrap" data-type="number"></div>').append($number);
+    $cgr.replaceWith($new_cgr);
+    $new_cgr.after($edit);
+  } else {
+    $('#output').append($('<div class="control-group-wrap" data-type="number"></div>').append($number));
+    $('#output').append($edit);
+  }
+
+  var model = {
+    label: label,
+    placeholder: placeholder,
+    help: help
+  };
+
+  $('input', $label).val(label);
+  $('input', $placeholder).val(placeholder);
+  $('input', $help).val(help);
+
+  binding($edit, $number, model, $done);
+}
+
 
 function binding($edit, $out, model, $done) {
   $('input', $edit).keyup(function(e) {
