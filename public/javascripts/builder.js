@@ -96,23 +96,7 @@ function working() {
 
   $('#add-section').click(function(e) {
     e.preventDefault();
-    $('#output .well.spec').remove();
-    var $section = $(input.section());
-    $('#output').append($('<div class="control-group-wrap"></div>').append($section));
-    var $legend = $(spec.legend());
-    var $done = $(spec.done());
-    var $edit = $('<div class="well spec"></div>').append($legend, $done);
-    $('#output').append($edit);
-    var model = {
-      legend: 'Section name',
-    };
-    $('input', $edit).keyup(function(e) {
-      model[$(this).attr('name')] = $(this).val();
-    });
-    var view = rivets.bind($section, {
-      model: model
-    });
-    $done.click(done_button(view));
+    section_edit();
   });
 
 
@@ -190,6 +174,9 @@ function binding_events() {
         break;
       case 'file':
         file_edit($cgr);
+        break;
+      case 'section':
+        section_edit($cgr);
         break;
       default:
         alert('not implemented.');
@@ -380,8 +367,8 @@ function file_edit($cgr) {
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
-  $('#output').append($('<div class="control-group-wrap" data-type="file"></div>').append($upload));
-  $('#output').append($edit);
+    $('#output').append($('<div class="control-group-wrap" data-type="file"></div>').append($upload));
+    $('#output').append($edit);
   }
 
   var model = {
@@ -393,6 +380,33 @@ function file_edit($cgr) {
   $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
+}
+
+function section_edit($cgr) {
+  $('#output .well.spec').remove();
+  var legend = 'Section name';
+  if ($cgr) {
+    legend = $('legend', $cgr).text();
+  }
+  var $section = $(input.section());
+  var $legend = $(spec.legend());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append($legend, $done);
+  if ($cgr) {
+    var $new_cgr = $('<div class="control-group-wrap" data-type="section"></div>').append($section);
+    $cgr.replaceWith($new_cgr);
+    $new_cgr.after($edit);
+  } else {
+    $('#output').append($('<div class="control-group-wrap" data-type="section"></div>').append($section));
+    $('#output').append($edit);
+  }
+  var model = {
+    legend: legend
+  };
+
+  $('input', $legend).val(legend);
+
+  binding($edit, $section, model, $done);
 }
 
 
