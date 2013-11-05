@@ -9,14 +9,27 @@ var express = require('express'),
   builder = require('./routes/builder'),
   test = require('./routes/test'),
   http = require('http'),
-  // Client = require('cas.js'),
   fs = require('fs'),
   path = require('path');
 
 
 var mongoose = require('mongoose');
+mongoose.connection.close();
 var User = require('./model/user.js').User;
 mongoose.connect('mongodb://localhost/traveler');
+
+mongoose.connection.on('connected', function () {
+  console.log('Mongoose default connection opened.');
+});
+
+mongoose.connection.on('error',function (err) {
+  console.log('Mongoose default connection error: ' + err);
+});
+
+mongoose.connection.on('disconnected', function () {
+  console.log('Mongoose default connection disconnected');
+});
+
 
 var auth = require('./lib/auth');
 
@@ -62,25 +75,24 @@ app.get('/builder', builder.index);
 app.get('/test', test.index);
 
 http.createServer(app).listen(app.get('port'), function(){
-  // logger.info("Express server listening on port " + app.get('port'));
   console.log("Express server listening on port " + app.get('port'));
 });
 
+function cleanup () {
+  server._connections = 0;
+  server.close( function () {
+    console.log( "Closed out remaining connections.");
+    // Close db connections, other chores, etc.
+    mongoose.connection.close();
+    process.exit();
+  });
 
-// function ensureAuthenticated(req, res, next) {
-//   if (req.session.username) {
-//     console.log(req.session);
-//     next();
-//   } else if (req.param('ticket')) {
-//     cas.validate(req.param('ticket'), function(err, status, username) {
-//       if (err) {
-//         res.send(401, err.message);
-//       } else {
-//         req.session.username = username;
-//         next();
-//       }
-//     });
-//   } else {
-//     res.redirect('https://' + cas.hostname + cas.base_path + '/login?service=' + encodeURIComponent(cas.service));
-//   }
-// }
+  setTimeout( function () {
+   console.error("Could not close connections in time, forcing shut down");
+   process.exit(1);
+  }, 30*1000);
+
+}
+
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
