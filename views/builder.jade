@@ -2,16 +2,19 @@ extends layout
 
 block content
   .container
+    #message
     .well-none
       form.form-horizontal#output
         //- .pagination.pagination-left
         //-   ul
         //-     li.active
         //-       a(href='#1') 1
-
-        #form-title
-          h3.tinymce Form Title
-          .tinymce Detailed information
+        if (typeof id == 'undefined')
+          #form-title
+            h3.tinymce Form Title
+            p.tinymce Detailed information
+        else
+          != html
 
     .btn-group.dropdown
       a.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
@@ -52,15 +55,6 @@ block content
       button.btn.btn-primary#preview(data-toggle='tooltip', title='the form will be saved first') Preview
     .btn-group
       button.btn.btn-primary#publish Publish
-
-    //- .builder.control
-    //-   .control-group.admin
-    //-     .controls
-    //-       label.checkbox
-    //-         input(type='checkbox')
-    //-         | I am ready to publish this form for data collection
-    //-       .btn-group
-    //-         button.btn#pub Publish
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
