@@ -6,8 +6,6 @@
 var express = require('express'),
   routes = require('./routes'),
   about = require('./routes/about'),
-  builder = require('./routes/builder'),
-  test = require('./routes/test'),
   http = require('http'),
   fs = require('fs'),
   path = require('path');
@@ -15,7 +13,10 @@ var express = require('express'),
 
 var mongoose = require('mongoose');
 mongoose.connection.close();
+
 var User = require('./model/user.js').User;
+var Form = require('./model/form.js').Form;
+
 mongoose.connect('mongodb://localhost/traveler');
 
 mongoose.connection.on('connected', function () {
@@ -37,12 +38,6 @@ var app = express();
 
 var access_logfile = fs.createWriteStream('./logs/access.log', {flags: 'a'});
 
-// var cas = new Client({
-//   base_url: 'https://liud-dev.nscl.msu.edu/cas',
-//   service: 'http://localhost:3001',
-//   version: 1.0
-// });
-
 app.configure(function(){
   app.set('port', process.env.PORT || 3001);
   app.set('views', __dirname + '/views');
@@ -63,6 +58,7 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+require('./routes/form')(app);
 
 require('./routes/user')(app);
 
@@ -71,10 +67,8 @@ require('./routes/profile')(app);
 app.get('/about', about.index);
 app.get('/', auth.ensureAuthenticated, routes.main);
 app.get('/logout', routes.logout);
-app.get('/builder', builder.index);
-app.get('/test', test.index);
 
-http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
 
