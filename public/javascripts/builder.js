@@ -29,9 +29,9 @@ $(function() {
 });
 
 function init() {
-  $('#add-item-form').hide();
   $('#form-title h3.tinymce').tinymce(mce_head);
-  $('#form-title div.tinymce').tinymce(mce_content);
+  $('#form-title p.tinymce').tinymce(mce_content);
+  $('.control-group.output-control-group[data-type="rich"]').tinymce(mce_content);
 }
 
 function working() {
@@ -183,6 +183,52 @@ function binding_events() {
     }
   });
 
+  $('#save').click(function(e){
+    $('#output .well.spec').remove();
+    tinymce.remove();
+    var html = $('#output').html();
+    sendRequest({html: html});
+  });
+
+}
+
+function sendRequest(data) {
+  var path = window.location.pathname;
+  var url, type;
+  if (/^\/forms\/new/.test(path)) {
+    url = '/forms';
+    type = 'POST';
+  } else {
+    url = path;
+    type = 'PUT';
+  }
+  $('form#output').fadeTo('slow', 0.2);
+  var formRequest = $.ajax({
+    url: url,
+    type: type,
+    async: true,
+    data: JSON.stringify(data),
+    contentType: 'application/json',
+    processData: false,
+    dataType: 'json'
+  }).done(function(json) {
+    if (/^\/forms\/new/.test(path)) {
+      var location = formRequest.getResponseHeader('Location');
+      document.location.href = location;
+      // document.location.href = json.location;
+    } else {
+      var timestamp = formRequest.getResponseHeader('Date');
+      var dateObj = moment(timestamp);
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved at ' + dateObj.format('HH:mm:ss') + '.</div>');
+    }
+  }).fail(function(jqXHR, status, error) {
+    // TODO change to modal
+    alert('The save request failed. You might need to try again or contact the admin.');
+  }).always(function() {
+    $('form#output').fadeTo('slow', 1);
+    // recover mce editors
+    init();
+  });
 }
 
 function done_button(view) {
