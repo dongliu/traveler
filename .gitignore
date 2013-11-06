@@ -10,20 +10,8 @@ node_modules/
 *.sublime-project
 *.sublime-workspace
 
-
-lib-cov
-*.seed
-*.log
-*.csv
-*.dat
-*.out
-*.pid
-*.gz
-
-pids
-logs
-results
-doc
-config
-
-npm-debug.log
+# special folders #
+logs/
+doc/
+test/
+config/ad.json
