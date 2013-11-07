@@ -350,3 +350,7 @@ ul.dropdown-menu input[type="checkbox"] {
 .control-focus {
   background-color: #f5f5f5;
 }
+
+.fe-type {
+  display: none
+}
