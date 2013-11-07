@@ -21,6 +21,7 @@ module.exports = function(app) {
         if (form.write.indexOf(req.session.userid) !== -1) {
           return res.render('builder', {
             id: req.params.id,
+            title: form.title,
             html: form.html
           });
         }

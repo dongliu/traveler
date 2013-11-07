@@ -29,8 +29,8 @@ $(function() {
 });
 
 function init() {
-  $('#form-title h3.tinymce').tinymce(mce_head);
-  $('#form-title p.tinymce').tinymce(mce_content);
+  // $('#form-title h3.tinymce').tinymce(mce_head);
+  // $('#form-title p.tinymce').tinymce(mce_content);
   $('.control-group.output-control-group[data-type="rich"]').tinymce(mce_content);
 }
 
@@ -187,7 +187,14 @@ function binding_events() {
     $('#output .well.spec').remove();
     tinymce.remove();
     var html = $('#output').html();
-    sendRequest({html: html});
+    $('#modalLabel').html('Save the form');
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
+    $('#modal .modal-footer').html('<button id="action" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
+    $('#modal').modal('show');
+    $('#action').click(function(e) {
+      sendRequest({title: $('#title').val(), html: html});
+    });
   });
 
 }
