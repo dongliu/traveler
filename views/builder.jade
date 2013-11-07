@@ -3,16 +3,25 @@ extends layout
 block content
   .container
     #message
-    .well-none
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body
+      .modal-footer
+    if (typeof id == 'undefined')
+      h4 New form
+    else
+      h4 #{title}
+    .well-large
       form.form-horizontal#output
         //- .pagination.pagination-left
         //-   ul
         //-     li.active
         //-       a(href='#1') 1
         if (typeof id == 'undefined')
-          #form-title
-            h3.tinymce Form Title
-            p.tinymce Detailed information
+          //- #form-title
+          //-   h3.tinymce Form Title
+          //-   p.tinymce Detailed information
         else
           != html
 
