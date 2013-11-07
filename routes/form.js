@@ -1,6 +1,7 @@
 var auth = require('../lib/auth');
 var mongoose = require('mongoose');
 var Form = mongoose.model('Form');
+var sanitizer = require('sanitizer');
 
 
 module.exports = function(app) {
@@ -43,7 +44,9 @@ module.exports = function(app) {
     if (!req.body.html) {
       return res.send(400, 'need html of the form');
     }
-    var form = req.body;
+    var form = {};
+    form.html = sanitizer.sanitize(req.body.html);
+    form.title = req.body.title;
     form.createdBy = req.session.userid;
     form.createdOn = Date.now();
     form.write = [];
