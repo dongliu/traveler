@@ -260,11 +260,11 @@ function checkbox_edit($cgr) {
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $checkbox_text, $done);
   if ($cgr) {
-    var $new_cgr = $('<div class="control-group-wrap" data-type="checkbox"></div>').append($checkbox);
+    var $new_cgr = $('<div class="control-group-wrap" data-type="checkbox"><span class="fe-type">checkbox</span></div>').append($checkbox);
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
-    $('#output').append($('<div class="control-group-wrap" data-type="checkbox"></div>').append($checkbox));
+    $('#output').append($('<div class="control-group-wrap" data-type="checkbox"><span class="fe-type">checkbox</span></div>').append($checkbox));
     $('#output').append($edit);
   }
   var model = {
