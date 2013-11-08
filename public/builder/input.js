@@ -44,7 +44,7 @@ exports.numberunit = function anonymous(locals) {
 // rich.jade compiled template
 exports.rich = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><div class="tinymce"><p>Instruction details here</p></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="tinymce"></div></div>');
     return buf.join("");
 };
 

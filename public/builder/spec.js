@@ -62,6 +62,13 @@ exports.placeholder = function anonymous(locals) {
     return buf.join("");
 };
 
+// rich_textarea.jade compiled template
+exports.rich_textarea = function anonymous(locals) {
+    var buf = [];
+    buf.push('<div class="control-group"><div class="control-label">Rich editor</div><div class="controls"><textarea rows="10" class="tinymce"></textarea></div></div>');
+    return buf.join("");
+};
+
 // rows.jade compiled template
 exports.rows = function anonymous(locals) {
     var buf = [];
