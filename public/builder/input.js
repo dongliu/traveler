@@ -16,7 +16,7 @@ exports.button = function anonymous(locals) {
 // checkbox.jade compiled template
 exports.checkbox = function anonymous(locals) {
     var buf = [];
-    buf.push('<div datatype="checkbox" class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled"/><span>{ model.checkbox_text }</span></label></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled"/><span>{ model.checkbox_text }</span></label></div></div>');
     return buf.join("");
 };
 
@@ -30,7 +30,7 @@ exports.hold = function anonymous(locals) {
 // number.jade compiled template
 exports.number = function anonymous(locals) {
     var buf = [];
-    buf.push('<div data-type="number" class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
@@ -44,35 +44,35 @@ exports.numberunit = function anonymous(locals) {
 // rich.jade compiled template
 exports.rich = function anonymous(locals) {
     var buf = [];
-    buf.push('<div data-type="rich" class="control-group output-control-group"><div class="instruction-content">Instruction details here</div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="instruction-content">Instruction details here</div></div>');
     return buf.join("");
 };
 
 // section.jade compiled template
 exports.section = function anonymous(locals) {
     var buf = [];
-    buf.push('<div data-type="section" class="control-group output-control-group"><legend>{ model.legend }</legend></div>');
+    buf.push('<div class="control-group output-control-group"><legend>{ model.legend }</legend></div>');
     return buf.join("");
 };
 
 // text.jade compiled template
 exports.text = function anonymous(locals) {
     var buf = [];
-    buf.push('<div data-type="text" class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
 // textarea.jade compiled template
 exports.textarea = function anonymous(locals) {
     var buf = [];
-    buf.push('<div data-type="textarea" class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows"></textarea><span class="help-block">{ model.help }</span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows"></textarea><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
 // upload.jade compiled template
 exports.upload = function anonymous(locals) {
     var buf = [];
-    buf.push('<div data-type="upload" class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><button type="file" class="btn">Upload</button><span class="help-block">{ model.help }</span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><button type="file" class="btn">Upload</button><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
