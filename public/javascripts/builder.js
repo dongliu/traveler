@@ -65,7 +65,7 @@ function working() {
     e.preventDefault();
     $('#output .well.spec').remove();
     var $rich = $(input.rich());
-    $('#output').append($('<div class="control-group-wrap" data-type="rich"></div>').append($rich));
+    $('#output').append($('<div class="control-group-wrap"><span class="fe-type">rich</span></div>').append($rich));
     $rich.tinymce(mce_content);
   });
 
@@ -141,12 +141,20 @@ function binding_events() {
   });
   $('#output').on('click', '.control-focus a.btn.btn-warning[title="remove"]', function(e) {
     e.preventDefault();
-    $(this).closest('.control-group-wrap').remove();
+    var $cgr = $(this).closest('.control-group-wrap');
+    if ($cgr.attr('data-status') == 'editting') {
+      return alert('please finish editting first');
+    }
+    $cgr.closest('.control-group-wrap').remove();
   });
   $('#output').on('click', '.control-focus a.btn[title="duplicate"]', function(e) {
     e.preventDefault();
     var that = this;
-    var cloned = $(that).closest('.control-group-wrap').clone();
+    var $cgr = $(this).closest('.control-group-wrap');
+    if ($cgr.attr('data-status') == 'editting') {
+      return alert('please finish editting first');
+    }
+    var cloned = $cgr.clone();
     $('.control-group-buttons', $(cloned)).remove();
     $(cloned).removeClass('control-focus');
     $(that).closest('.control-group-wrap').after(cloned);
@@ -155,35 +163,37 @@ function binding_events() {
   $('#output').on('click', '.control-focus a.btn[title="edit"]', function(e) {
     e.preventDefault();
     var $cgr = $(this).closest('.control-group-wrap');
-    var type = $cgr.attr('data-type');
-    switch (type) {
-      case 'rich':
-        alert('Please edit it inline.');
-        break;
-      case 'checkbox':
-        checkbox_edit($cgr);
-        break;
-      case 'text':
-        text_edit($cgr);
-        break;
-      case 'textarea':
-        textarea_edit($cgr);
-        break;
-      case 'number':
-        number_edit($cgr);
-        break;
-      case 'file':
-        file_edit($cgr);
-        break;
-      case 'section':
-        section_edit($cgr);
-        break;
-      default:
-        alert('not implemented.');
+    if ($cgr.attr('data-status') !== 'editting') {
+      var type = $('span.fe-type', $cgr).text();
+      switch (type) {
+        case 'rich':
+          alert('Please edit it inline.');
+          break;
+        case 'checkbox':
+          checkbox_edit($cgr);
+          break;
+        case 'text':
+          text_edit($cgr);
+          break;
+        case 'textarea':
+          textarea_edit($cgr);
+          break;
+        case 'number':
+          number_edit($cgr);
+          break;
+        case 'file':
+          file_edit($cgr);
+          break;
+        case 'section':
+          section_edit($cgr);
+          break;
+        default:
+          alert('not implemented.');
+      }
     }
   });
 
-  $('#save').click(function(e){
+  $('#save').click(function(e) {
     $('#output .well.spec').remove();
     tinymce.remove();
     var html = $('#output').html();
@@ -193,7 +203,10 @@ function binding_events() {
     $('#modal .modal-footer').html('<button id="action" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
     $('#action').click(function(e) {
-      sendRequest({title: $('#title').val(), html: html});
+      sendRequest({
+        title: $('#title').val(),
+        html: html
+      });
     });
   });
 
@@ -238,10 +251,11 @@ function sendRequest(data) {
   });
 }
 
-function done_button(view) {
+function done_button(view, $out) {
   return function(e) {
     view.unbind();
     $(this).closest('.spec').remove();
+    $out.closest('.control-group-wrap').removeAttr('data-status');
     e.preventDefault();
   };
 }
@@ -259,12 +273,12 @@ function checkbox_edit($cgr) {
   var $checkbox_text = $(spec.checkbox_text());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $checkbox_text, $done);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">checkbox</span></div>').append($checkbox);
   if ($cgr) {
-    var $new_cgr = $('<div class="control-group-wrap" data-type="checkbox"><span class="fe-type">checkbox</span></div>').append($checkbox);
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
-    $('#output').append($('<div class="control-group-wrap" data-type="checkbox"><span class="fe-type">checkbox</span></div>').append($checkbox));
+    $('#output').append($new_cgr);
     $('#output').append($edit);
   }
   var model = {
@@ -293,12 +307,12 @@ function text_edit($cgr) {
   var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $done);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">text</span></div>').append($text);
   if ($cgr) {
-    var $new_cgr = $('<div class="control-group-wrap" data-type="text"></div>').append($text);
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
-    $('#output').append($('<div class="control-group-wrap" data-type="text"></div>').append($text));
+    $('#output').append($new_cgr);
     $('#output').append($edit);
   }
 
@@ -336,12 +350,12 @@ function textarea_edit($cgr) {
   var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $rows, $help, $done);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">textarea</span></div>').append($textarea);
   if ($cgr) {
-    var $new_cgr = $('<div class="control-group-wrap" data-type="textarea"></div>').append($textarea);
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
-    $('#output').append($('<div class="control-group-wrap" data-type="textarea"></div>').append($textarea));
+    $('#output').append($new_cgr);
     $('#output').append($edit);
   }
   var model = {
@@ -377,13 +391,12 @@ function number_edit($cgr) {
   var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $done);
-
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">number</span></div>').append($number);
   if ($cgr) {
-    var $new_cgr = $('<div class="control-group-wrap" data-type="number"></div>').append($number);
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
-    $('#output').append($('<div class="control-group-wrap" data-type="number"></div>').append($number));
+    $('#output').append($new_cgr);
     $('#output').append($edit);
   }
 
@@ -414,13 +427,12 @@ function file_edit($cgr) {
   var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $help, $done);
-
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">file</span></div>').append($upload);
   if ($cgr) {
-    var $new_cgr = $('<div class="control-group-wrap" data-type="file"></div>').append($upload);
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
-    $('#output').append($('<div class="control-group-wrap" data-type="file"></div>').append($upload));
+    $('#output').append($new_cgr);
     $('#output').append($edit);
   }
 
@@ -445,12 +457,12 @@ function section_edit($cgr) {
   var $legend = $(spec.legend());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($legend, $done);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">section</span></div>').append($section);
   if ($cgr) {
-    var $new_cgr = $('<div class="control-group-wrap" data-type="section"></div>').append($section);
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
-    $('#output').append($('<div class="control-group-wrap" data-type="section"></div>').append($section));
+    $('#output').append($new_cgr);
     $('#output').append($edit);
   }
   var model = {
@@ -470,5 +482,5 @@ function binding($edit, $out, model, $done) {
   var view = rivets.bind($out, {
     model: model
   });
-  $done.click(done_button(view));
+  $done.click(done_button(view, $out));
 }
