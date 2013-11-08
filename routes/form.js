@@ -1,7 +1,10 @@
 var auth = require('../lib/auth');
 var mongoose = require('mongoose');
 var Form = mongoose.model('Form');
-var sanitizer = require('sanitizer');
+// var sanitizer = require('sanitizer');
+// var resanitize = require('resanitize');
+// var san = require("html-sanitiser");
+var sanitize = require('sanitize-caja');
 
 
 module.exports = function(app) {
@@ -45,7 +48,10 @@ module.exports = function(app) {
       return res.send(400, 'need html of the form');
     }
     var form = {};
-    form.html = sanitizer.sanitize(req.body.html);
+    // form.html = sanitizer.sanitize(req.body.html);
+    form.html = sanitize(req.body.html);
+    // form.html = san.sanitiseHTML(req.body.html);
+    // form.html = req.body.html;
     form.title = req.body.title;
     form.createdBy = req.session.userid;
     form.createdOn = Date.now();
