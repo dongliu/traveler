@@ -1,22 +1,36 @@
-var mce_head = {
-  inline: true,
-  browser_spellcheck: true,
-  plugins: "charmap",
-  toolbar: "undo redo | subscript superscript charmap",
-  menubar: false,
-  statusbar: false
-};
+// var mce_head = {
+//   inline: true,
+//   browser_spellcheck: true,
+//   plugins: "charmap",
+//   toolbar: "undo redo | subscript superscript charmap",
+//   menubar: false,
+//   statusbar: false
+// };
+
+// var mce_content = {
+//   inline: true,
+//   browser_spellcheck: true,
+//   plugins: [
+//     ["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
+//     ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
+//     ["save table contextmenu directionality emoticons template paste"]
+//   ],
+//   toolbar1: "subscript superscript charmap | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
+//   toolbar2: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough",
+//   contextmenu: "charmap link image",
+//   menubar: false,
+//   statusbar: false
+// };
 
 var mce_content = {
   inline: true,
   browser_spellcheck: true,
   plugins: [
-    ["advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker"],
-    ["searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking"],
-    ["save table contextmenu directionality emoticons template paste"]
+    ["advlist autolink link image charmap hr anchor spellchecker"],
+    ["wordcount visualblocks visualchars code media nonbreaking"],
+    ["contextmenu directionality paste"]
   ],
-  toolbar1: "subscript superscript charmap | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
-  toolbar2: "undo redo | removeformat | fontselect fontsizeselect | bold italic underline strikethrough",
+  toolbar1: "charmap | link image | undo redo | removeformat | bullist numlist outdent indent | formatselect bold italic underline strikethrough",
   contextmenu: "charmap link image",
   menubar: false,
   statusbar: false
@@ -29,9 +43,7 @@ $(function() {
 });
 
 function init() {
-  // $('#form-title h3.tinymce').tinymce(mce_head);
-  // $('#form-title p.tinymce').tinymce(mce_content);
-  $('.control-group.output-control-group[data-type="rich"]').tinymce(mce_content);
+  // $('.instruction-content').parent().tinymce(mce_content);
 }
 
 function working() {
@@ -65,8 +77,9 @@ function working() {
     e.preventDefault();
     $('#output .well.spec').remove();
     var $rich = $(input.rich());
-    $('#output').append($('<div class="control-group-wrap"><span class="fe-type">rich</span></div>').append($rich));
-    $rich.tinymce(mce_content);
+    var $cgr = $('<div class="control-group-wrap"><span class="fe-type">rich</span></div>').append($rich);
+    $('#output').append($cgr);
+    $('.tinymce', $cgr).tinymce(mce_content);
   });
 
   //   $('#add-hold').click(function(e){
@@ -142,7 +155,7 @@ function binding_events() {
   $('#output').on('click', '.control-focus a.btn.btn-warning[title="remove"]', function(e) {
     e.preventDefault();
     var $cgr = $(this).closest('.control-group-wrap');
-    if ($cgr.attr('data-status') == 'editting') {
+    if (type !== 'rich' && $cgr.attr('data-status') == 'editting') {
       return alert('please finish editting first');
     }
     $cgr.closest('.control-group-wrap').remove();
@@ -151,7 +164,8 @@ function binding_events() {
     e.preventDefault();
     var that = this;
     var $cgr = $(this).closest('.control-group-wrap');
-    if ($cgr.attr('data-status') == 'editting') {
+    var type = $('span.fe-type', $cgr).text();
+    if (type !== 'rich' && $cgr.attr('data-status') == 'editting') {
       return alert('please finish editting first');
     }
     var cloned = $cgr.clone();

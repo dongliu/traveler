@@ -12,6 +12,6 @@
     "mongoose": "*",
     "ldapjs": "*",
     "templatizer": "*",
-    "sanitizer": "*"
+    "sanitize-caja": "*"
   }
 }
