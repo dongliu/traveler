@@ -23,7 +23,9 @@
 // };
 
 var mce_content = {
-  inline: true,
+  // inline: true,
+  selector: 'textarea.tinymce',
+  content_css: '/bootstrap/css/bootstrap.css',
   browser_spellcheck: true,
   plugins: [
     ["advlist autolink link image charmap hr anchor spellchecker"],
@@ -75,11 +77,12 @@ function working() {
 
   $('#add-rich').click(function(e) {
     e.preventDefault();
-    $('#output .well.spec').remove();
-    var $rich = $(input.rich());
-    var $cgr = $('<div class="control-group-wrap"><span class="fe-type">rich</span></div>').append($rich);
-    $('#output').append($cgr);
-    $('.tinymce', $cgr).tinymce(mce_content);
+    // $('#output .well.spec').remove();
+    // var $rich = $(input.rich());
+    // var $cgr = $('<div class="control-group-wrap"><span class="fe-type">rich</span></div>').append($rich);
+    // $('#output').append($cgr);
+    // $('.tinymce', $cgr).tinymce(mce_content);
+    rich_edit();
   });
 
   //   $('#add-hold').click(function(e){
@@ -155,7 +158,8 @@ function binding_events() {
   $('#output').on('click', '.control-focus a.btn.btn-warning[title="remove"]', function(e) {
     e.preventDefault();
     var $cgr = $(this).closest('.control-group-wrap');
-    if (type !== 'rich' && $cgr.attr('data-status') == 'editting') {
+    // var type = $('span.fe-type', $cgr).text();
+    if ($cgr.attr('data-status') == 'editting') {
       return alert('please finish editting first');
     }
     $cgr.closest('.control-group-wrap').remove();
@@ -164,8 +168,8 @@ function binding_events() {
     e.preventDefault();
     var that = this;
     var $cgr = $(this).closest('.control-group-wrap');
-    var type = $('span.fe-type', $cgr).text();
-    if (type !== 'rich' && $cgr.attr('data-status') == 'editting') {
+    // var type = $('span.fe-type', $cgr).text();
+    if ($cgr.attr('data-status') == 'editting') {
       return alert('please finish editting first');
     }
     var cloned = $cgr.clone();
@@ -181,7 +185,8 @@ function binding_events() {
       var type = $('span.fe-type', $cgr).text();
       switch (type) {
         case 'rich':
-          alert('Please edit it inline.');
+          // alert('Please edit it inline.');
+          rich_edit($cgr);
           break;
         case 'checkbox':
           checkbox_edit($cgr);
@@ -486,6 +491,38 @@ function section_edit($cgr) {
   $('input', $legend).val(legend);
 
   binding($edit, $section, model, $done);
+}
+
+function rich_edit($cgr) {
+  $('#output .well.spec').remove();
+  var html = '';
+  if ($cgr) {
+    html = $('.tinymce', $cgr).html();
+    console.log(html);
+  }
+  var $rich = $(input.rich());
+  var $rich_textarea = $(spec.rich_textarea());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append($rich_textarea, $done);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">rich</span></div>').append($rich);
+  if ($cgr) {
+    $('.tinymce', $rich).html(html);
+    $cgr.replaceWith($new_cgr);
+    $new_cgr.after($edit);
+  } else {
+    $('#output').append($new_cgr);
+    $('#output').append($edit);
+  }
+  $('textarea', $rich_textarea).html(html);
+  tinymce.init(mce_content);
+  // tinymce.activeEditor.setContent(html);
+  $done.click(function(e){
+    e.preventDefault();
+    $('.tinymce', $rich).html(tinymce.activeEditor.getContent());
+    tinymce.remove();
+    $(this).closest('.spec').remove();
+    $rich.closest('.control-group-wrap').removeAttr('data-status');
+  });
 }
 
 
