@@ -207,7 +207,10 @@ function binding_events() {
   });
 
   $('#save').click(function(e) {
-    $('#output .well.spec').remove();
+    e.preventDefault();
+    if ($('#output .well.spec').length) {
+      return alert('please save the active edit before saving');
+    }
     tinymce.remove();
     var html = $('#output').html();
     var path = window.location.pathname;
