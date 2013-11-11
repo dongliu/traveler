@@ -45,4 +45,9 @@ UID._ha = function(num, length) {  // _hexAligner
   return str;
 };
 
-// vim: et ts=2 sw=2
+/*a short uid*/
+
+UID.generateShort = function() {
+  var rand = UID._gri, hex = UID._ha;
+  return  hex(rand(32), 8);
+};
