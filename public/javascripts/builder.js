@@ -45,7 +45,6 @@ $(function() {
 });
 
 function init() {
-  // $('.instruction-content').parent().tinymce(mce_content);
 }
 
 function working() {
@@ -77,11 +76,6 @@ function working() {
 
   $('#add-rich').click(function(e) {
     e.preventDefault();
-    // $('#output .well.spec').remove();
-    // var $rich = $(input.rich());
-    // var $cgr = $('<div class="control-group-wrap"><span class="fe-type">rich</span></div>').append($rich);
-    // $('#output').append($cgr);
-    // $('.tinymce', $cgr).tinymce(mce_content);
     rich_edit();
   });
 
@@ -216,17 +210,24 @@ function binding_events() {
     $('#output .well.spec').remove();
     tinymce.remove();
     var html = $('#output').html();
-    $('#modalLabel').html('Save the form');
-    $('#modal .modal-body').empty();
-    $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
-    $('#modal .modal-footer').html('<button id="action" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
-    $('#modal').modal('show');
-    $('#action').click(function(e) {
-      sendRequest({
-        title: $('#title').val(),
-        html: html
+    var path = window.location.pathname;
+    if (/^\/forms\/new/.test(path)) {
+      $('#modalLabel').html('Save the form');
+      $('#modal .modal-body').empty();
+      $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
+      $('#modal .modal-footer').html('<button id="action" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
+      $('#modal').modal('show');
+      $('#action').click(function(e) {
+        sendRequest({
+          title: $('#title').val(),
+          html: html
+        });
       });
-    });
+    } else {
+      sendRequest({
+        title: $('#title').val()
+      });
+    }
   });
 
 }
@@ -498,7 +499,6 @@ function rich_edit($cgr) {
   var html = '';
   if ($cgr) {
     html = $('.tinymce', $cgr).html();
-    console.log(html);
   }
   var $rich = $(input.rich());
   var $rich_textarea = $(spec.rich_textarea());
@@ -516,7 +516,7 @@ function rich_edit($cgr) {
   $('textarea', $rich_textarea).html(html);
   tinymce.init(mce_content);
   // tinymce.activeEditor.setContent(html);
-  $done.click(function(e){
+  $done.click(function(e) {
     e.preventDefault();
     $('.tinymce', $rich).html(tinymce.activeEditor.getContent());
     tinymce.remove();

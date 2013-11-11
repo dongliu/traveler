@@ -1,11 +1,10 @@
 var auth = require('../lib/auth');
 var mongoose = require('mongoose');
-var Form = mongoose.model('Form');
-// var sanitizer = require('sanitizer');
-// var resanitize = require('resanitize');
-// var san = require("html-sanitiser");
 var sanitize = require('sanitize-caja');
+var util = require('util');
 
+
+var Form = mongoose.model('Form');
 
 module.exports = function(app) {
   app.get('/forms/new', auth.ensureAuthenticated, function(req, res) {
@@ -65,6 +64,46 @@ module.exports = function(app) {
       var url = req.protocol + '://' + req.get('host') + '/forms/' + newform.id;
       res.set('Location', url);
       return res.json(201, {location: '/forms/'+newform.id});
+    });
+  });
+
+  app.put('/forms/:id', auth.ensureAuthenticated, function(req, res) {
+    if (!req.is('json')) {
+      return res.send(415, 'json request expected');
+    }
+    // if (!req.body.html) {
+    //   return res.send(400, 'need html of the form');
+    // }
+    var form = {};
+    if (req.body.html) {
+      form.html = sanitize(req.body.html);
+    }
+    if (req.body.title) {
+      form.title = req.body.title;
+    }
+    if (req.body.read && util.isArray(req.body.read)) {
+      form.read = req.body.read;
+    }
+    if (req.body.write && util.isArray(req.body.write)) {
+      form.write = req.body.write;
+    }
+
+    if (form.html || form.title || form.read || form.write) {
+      return res.send('400', 'no update details found');
+    }
+
+    form.updatedBy = req.session.userid;
+    form.updatedOn = Date.now();
+    Form.findByIdAndUpdate(req.params.id, form, function(err, old) {
+      if (err) {
+        console.dir(err);
+        return res.send(500, err.msg || err.errmsg);
+      }
+      if (old) {
+        return res.send(204);
+      } else {
+        return res.send(410, 'cannot find form ' + req.params.id);
+      }
     });
   });
 
