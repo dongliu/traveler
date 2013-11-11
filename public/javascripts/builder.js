@@ -13,12 +13,6 @@
 //   statusbar: false
 // };
 
-$(document).ajaxError(function(event, jqxhr) {
-  if (jqxhr.status == 401) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href='/'>, and save the changes on this page after logging in.</a>.</div>');
-    // document.location.href = window.location.pathname;
-  }
-});
 
 var mce_content = {
   selector: 'textarea.tinymce',
@@ -263,12 +257,13 @@ function sendRequest(data) {
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved at ' + dateObj.format('HH:mm:ss') + '.</div>');
     }
   }).fail(function(jqXHR, status, error) {
-    // TODO change to modal
     $('form#output').fadeTo('slow', 1);
-    alert('The save request failed. You might need to try again or contact the admin.');
+    if (jqXHR.status == 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
+    } else {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The save request failed. You might need to try again or contact the admin.</div>');
+    }
   }).always(function() {
-    // recover mce editors
-    init();
   });
 }
 
