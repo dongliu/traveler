@@ -9,7 +9,7 @@ var jade = exports.jade=function(exports){Array.isArray||(Array.isArray=function
 // button.jade compiled template
 exports.button = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="pull-right control-group-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="icon-edit icon-large"></i></a><a data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="icon-copy icon-large"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="icon-trash icon-large"></i></a></div></div>');
+    buf.push('<div class="pull-right control-group-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="fa fa-edit fa-lg"></i></a><a data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="fa fa-copy fa-lg"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="fa fa-trash-o fa-lg"></i></a></div></div>');
     return buf.join("");
 };
 
@@ -72,7 +72,7 @@ exports.textarea = function anonymous(locals) {
 // upload.jade compiled template
 exports.upload = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><button type="file" class="btn">Upload</button><span class="help-block">{ model.help }</span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="file" disabled="disabled"/><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
