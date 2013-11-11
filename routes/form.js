@@ -89,11 +89,12 @@ module.exports = function(app) {
     }
 
     if (form.html || form.title || form.read || form.write) {
+      form.updatedBy = req.session.userid;
+      form.updatedOn = Date.now();
+    } else {
       return res.send('400', 'no update details found');
     }
 
-    form.updatedBy = req.session.userid;
-    form.updatedOn = Date.now();
     Form.findByIdAndUpdate(req.params.id, form, function(err, old) {
       if (err) {
         console.dir(err);
