@@ -1,12 +1,3 @@
-// var mce_head = {
-//   inline: true,
-//   browser_spellcheck: true,
-//   plugins: "charmap",
-//   toolbar: "undo redo | subscript superscript charmap",
-//   menubar: false,
-//   statusbar: false
-// };
-
 // var mce_content = {
 //   inline: true,
 //   browser_spellcheck: true,
@@ -22,8 +13,14 @@
 //   statusbar: false
 // };
 
+$(document).ajaxError(function(event, jqxhr) {
+  if (jqxhr.status == 401) {
+    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href='/'>, and save the changes on this page after logging in.</a>.</div>');
+    // document.location.href = window.location.pathname;
+  }
+});
+
 var mce_content = {
-  // inline: true,
   selector: 'textarea.tinymce',
   content_css: '/bootstrap/css/bootstrap.css',
   browser_spellcheck: true,
@@ -169,6 +166,7 @@ function binding_events() {
     var cloned = $cgr.clone();
     $('.control-group-buttons', $(cloned)).remove();
     $(cloned).removeClass('control-focus');
+    $('input, textarea', $(cloned)).attr('name', _.uniqueId('form_'));
     $(that).closest('.control-group-wrap').after(cloned);
   });
 
@@ -228,7 +226,7 @@ function binding_events() {
       });
     } else {
       sendRequest({
-        title: $('#title').val()
+        html: html
       });
     }
   });
@@ -239,13 +237,13 @@ function sendRequest(data) {
   var path = window.location.pathname;
   var url, type;
   if (/^\/forms\/new/.test(path)) {
+    $('form#output').fadeTo('slow', 0.2);
     url = '/forms';
     type = 'POST';
   } else {
     url = path;
     type = 'PUT';
   }
-  $('form#output').fadeTo('slow', 0.2);
   var formRequest = $.ajax({
     url: url,
     type: type,
@@ -266,9 +264,9 @@ function sendRequest(data) {
     }
   }).fail(function(jqXHR, status, error) {
     // TODO change to modal
+    $('form#output').fadeTo('slow', 1);
     alert('The save request failed. You might need to try again or contact the admin.');
   }).always(function() {
-    $('form#output').fadeTo('slow', 1);
     // recover mce editors
     init();
   });
@@ -278,6 +276,7 @@ function done_button(view, $out) {
   return function(e) {
     view.unbind();
     $(this).closest('.spec').remove();
+    $('input, textarea', $out).attr('name', _.uniqueId('form_'));
     $out.closest('.control-group-wrap').removeAttr('data-status');
     e.preventDefault();
   };
