@@ -160,7 +160,7 @@ function binding_events() {
     var cloned = $cgr.clone();
     $('.control-group-buttons', $(cloned)).remove();
     $(cloned).removeClass('control-focus');
-    $('input, textarea', $(cloned)).attr('name', UID.generate());
+    $('input, textarea', $(cloned)).attr('name', UID.generateShort());
     $(that).closest('.control-group-wrap').after(cloned);
   });
 
@@ -271,7 +271,7 @@ function done_button(view, $out) {
   return function(e) {
     view.unbind();
     $(this).closest('.spec').remove();
-    $('input, textarea', $out).attr('name', UID.generate());
+    $('input, textarea', $out).attr('name', UID.generateShort());
     $out.closest('.control-group-wrap').removeAttr('data-status');
     e.preventDefault();
   };
