@@ -1,22 +1,42 @@
 extends layout
 
 block content
-  .container
+  .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary(href='./forms/new') New Form
+        a.btn.btn-primary#new(href='/forms/new', target='_blank')
+          i.fa.fa-file-o.fa-lg
+          | &nbsp;New Form
       .btn-group
-        a.btn.btn-info(href='./about') About
+        button.btn.btn-primary#reload
+          i.fa.fa-refresh.fa-lg
+          | &nbsp;Reload
+      .btn-group.dropdown
+        a#meta.btn.dropdown-toggle(data-toggle='dropdown')
+          i.fa.fa-gears.fa-lg
+          | &nbsp;Meta
+          span.caret
+        ul.dropdown-menu
+          li#devices
+            a(href='/devices', target='_blank') Devices
+      .btn-group
+        a.btn(href='/profile', target='_blank')
+          i.fa.fa-user.fa-lg
+          | &nbsp;Profile
+      .btn-group
+        a.btn.btn-info(href='/about', target='_blank')
+          i.fa.fa-info.fa-lg
+          |&nbsp;About
     .tabbable.tabs-left
       ul.nav.nav-tabs
         li.active
-          a(href='#form', data-toggle='tab') Forms
+          a(href='#form', data-toggle='tab') My forms
         li
-          a(href='#working', data-toggle='tab') Working travelers
+          a(href='#shared', data-toggle='tab') Shared forms
         li
-          a(href='#completed', data-toggle='tab') Completed travelers
-        //- li
-        //-   a(href='#device', data-toggle='tab') Device
+          a(href='#working', data-toggle='tab') Working
+        li
+          a(href='#completed', data-toggle='tab') Completed
       .tab-content
         #form.tab-pane.active
           p the list of forms
