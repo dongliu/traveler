@@ -14,7 +14,7 @@ block content
     if (typeof id == 'undefined')
       h3 New form
     else
-      h3 #{title}
+      h3#title #{title}
     .well-large
       form.form-horizontal#output
         if (typeof id !== 'undefined')
@@ -64,9 +64,11 @@ block content
           span.caret
         ul.dropdown-menu
           li
-            a#share(data-toggle='tooltip', title='the form will be saved first', href=''+id+'/share') Share
+            a#saveas Save as
           li
             a#rename Rename
+          li
+            a#share(data-toggle='tooltip', title='the form will be saved first', href=''+id+'/share') Share
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
