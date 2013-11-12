@@ -1,5 +1,17 @@
 extends layout
 
+block head
+  meta(charset='urf-8')
+  if (typeof id == 'undefined')
+    title FRIB Traveler :: new form
+  else
+    title FRIB Traveler :: forms :: #{id}
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
+  //- link(rel='stylesheet', href='/ui-lightness/jquery-ui-1.10.2.custom.css')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
 block content
   if (typeof id !== 'undefined')
     script.
@@ -71,7 +83,7 @@ block content
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='/jquery/jquery-ui-1.10.2.custom.js')
+  //- script(type='text/javascript', src='/jquery/jquery-ui-1.10.2.custom.js')
   script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='/rivets/rivets.min.js')
   script(type='text/javascript', src='/tinymce/tinymce.min.js')
