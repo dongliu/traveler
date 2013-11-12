@@ -219,15 +219,34 @@ function binding_events() {
         });
       });
     } else {
-      sendRequest({
-        html: html
+      if (html == initHtml) {
+        // do not bother to inform the user
+      } else {
+        sendRequest({
+          html: html
+        }, function(){
+          initHtml = html;
+        });
+      }
+    }
+  });
+
+  $('#preview').click(function(e) {
+    // e.preventDefault();
+    if (html !== initHtml) {
+      // open a new view
+    //   var w = window.open(path+'/preview', '_blank');
+    //     w.focus();
+    // } else {
+      sendRequest({html: html}, function(){
+        initHtml = html;
       });
     }
   });
 
 }
 
-function sendRequest(data) {
+function sendRequest(data, cb) {
   var path = window.location.pathname;
   var url, type;
   if (/^\/forms\/new/.test(path)) {
@@ -255,6 +274,9 @@ function sendRequest(data) {
       var timestamp = formRequest.getResponseHeader('Date');
       var dateObj = moment(timestamp);
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved at ' + dateObj.format('HH:mm:ss') + '.</div>');
+    }
+    if (cb) {
+      cb();
     }
   }).fail(function(jqXHR, status, error) {
     $('form#output').fadeTo('slow', 1);
