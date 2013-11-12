@@ -1,6 +1,9 @@
 extends layout
 
 block content
+  if (typeof id !== 'undefined')
+    script.
+      var initHtml = !{JSON.stringify(html)};
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -14,15 +17,7 @@ block content
       h3 #{title}
     .well-large
       form.form-horizontal#output
-        //- .pagination.pagination-left
-        //-   ul
-        //-     li.active
-        //-       a(href='#1') 1
-        if (typeof id == 'undefined')
-          //- #form-title
-          //-   h3.tinymce Form Title
-          //-   p.tinymce Detailed information
-        else
+        if (typeof id !== 'undefined')
           != html
 
     .btn-group.dropdown
@@ -60,10 +55,18 @@ block content
       button.btn#adjust Adjust location
     .btn-group
       button.btn.btn-primary#save Save
-    .btn-group
-      button.btn#preview(data-toggle='tooltip', title='the form will be saved first') Preview
-    .btn-group
-      button.btn.btn-primary#share Share
+    if (typeof id !== 'undefined')
+      .btn-group
+        a.btn#preview(data-toggle='tooltip', title='the form will be saved first', href=''+id+'/preview') Preview
+      .btn-group
+        a.btn.dropdown-toggle(data-toggle='dropdown')
+          | More
+          span.caret
+        ul.dropdown-menu
+          li
+            a#share(data-toggle='tooltip', title='the form will be saved first', href=''+id+'/share') Share
+          li
+            a#rename Rename
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
