@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  .container
+    h3 #{title}
+    .well-large
+      form.form-horizontal#output
+        != html
+
+block js
+  script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
+  //- script(type='text/javascript', src='/jquery/jquery-ui-1.10.2.custom.js')
+  //- script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+  //- script(type='text/javascript', src='/rivets/rivets.min.js')
+  //- script(type='text/javascript', src='/tinymce/tinymce.min.js')
+  //- script(type='text/javascript', src='/tinymce/jquery.tinymce.min.js')
+  //- script(type='text/javascript', src='/dependency/moment.js')
+  //- script(type='text/javascript', src='/dependency/lodash.js')
+  //- script(type='text/javascript', src='/builder/input.js')
+  //- script(type='text/javascript', src='/builder/spec.js')
+  //- script(type='text/javascript', src='/javascripts/uid.js')
+  script(type='text/javascript', src='/javascripts/viewer.js')

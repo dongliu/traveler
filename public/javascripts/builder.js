@@ -232,12 +232,9 @@ function binding_events() {
   });
 
   $('#preview').click(function(e) {
-    // e.preventDefault();
+    tinymce.remove();
+    var html = $('#output').html();
     if (html !== initHtml) {
-      // open a new view
-    //   var w = window.open(path+'/preview', '_blank');
-    //     w.focus();
-    // } else {
       sendRequest({html: html}, function(){
         initHtml = html;
       });

@@ -24,7 +24,6 @@ module.exports = function(app) {
         if (form.write.indexOf(req.session.userid) !== -1) {
           return res.render('builder', {
             id: req.params.id,
-            preview: req.path+'/preview',
             title: form.title,
             html: form.html
           });
@@ -34,6 +33,27 @@ module.exports = function(app) {
             html: form.html
           });
         }
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
+  app.get('/forms/:id/preview', auth.ensureAuthenticated, function(req, res) {
+    Form.findById(req.params.id).lean().exec(function(err, form){
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (form) {
+        if (form.read.indexOf(req.session.userid) == -1 && form.write.indexOf(req.session.userid) == -1) {
+          return res.send(403, 'you are not authorized to access this resource');
+        }
+        return res.render('viewer', {
+          id: req.params.id,
+          title: form.title,
+          html: form.html
+        });
       } else {
         return res.send(410, 'gone');
       }
