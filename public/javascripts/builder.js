@@ -35,8 +35,7 @@ $(function() {
   binding_events();
 });
 
-function init() {
-}
+function init() {}
 
 function working() {
   $('#add-checkbox').click(function(e) {
@@ -224,7 +223,7 @@ function binding_events() {
       } else {
         sendRequest({
           html: html
-        }, function(){
+        }, function() {
           initHtml = html;
         });
       }
@@ -235,10 +234,28 @@ function binding_events() {
     tinymce.remove();
     var html = $('#output').html();
     if (html !== initHtml) {
-      sendRequest({html: html}, function(){
+      sendRequest({
+        html: html
+      }, function() {
         initHtml = html;
       });
     }
+  });
+
+  $('#rename').click(function(e) {
+    $('#modalLabel').html('Rename the form');
+      $('#modal .modal-body').empty();
+      $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">New form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
+      $('#modal .modal-footer').html('<button id="action" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
+      $('#modal').modal('show');
+      $('#action').click(function(e) {
+        var newTitle = $('#title').val();
+        sendRequest({
+          title: newTitle
+        }, function(){
+          $('#formtitle').text(newTitle);
+        });
+      });
   });
 
 }
@@ -282,8 +299,7 @@ function sendRequest(data, cb) {
     } else {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The save request failed. You might need to try again or contact the admin.</div>');
     }
-  }).always(function() {
-  });
+  }).always(function() {});
 }
 
 function done_button(view, $out) {
