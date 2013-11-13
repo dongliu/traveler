@@ -5,6 +5,7 @@ block head
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='/datatables/css/dataTables.bootstrap.css')
   link(rel='stylesheet', href='/font-awesome-4.0.1/css/font-awesome.css')
   link(rel='stylesheet', href='/stylesheets/style.css')
 
@@ -55,9 +56,9 @@ block content
         #form.tab-pane.active
           .btn-toolbar
             .btn-group
-              button.btn.btn-primary#form-clone
-                i.fa.fa-copy.fa-lg
-                | &nbsp;Clone
+              button.btn.btn-primary#form-travel
+                i.fa.fa-plane.fa-lg
+                | &nbsp;Travel
             .btn-group
               button.btn.btn-warning#form-delete
                 i.fa.fa-trash-o.fa-lg
@@ -80,6 +81,13 @@ block content
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='/datatables/js/jquery.dataTables.js')
   script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='/datatables/js/TableTools.js')
+  script(type='text/javascript', src='/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='/dependency/moment.js')
+  script(type='text/javascript', src='/javascripts/table.js')
+  script(type='text/javascript', src='/javascripts/main.js')
 
 
