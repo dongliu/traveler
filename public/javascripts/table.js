@@ -55,6 +55,32 @@ var formTitleColumn = {
   bFilter: true
 };
 
+var writeColumn = {
+  sTitle: 'Write',
+  // sDefaultContent: '',
+  mData: function(source, type, val) {
+    if (source.write) {
+      return source.write.join();
+    } else {
+      return '';
+    }
+  },
+  bFilter: true
+};
+
+var readColumn = {
+  sTitle: 'Read',
+  // sDefaultContent: '',
+  mData: function(source, type, val) {
+    if (source.read) {
+      return source.read.join();
+    } else {
+      return '';
+    }
+  },
+  bFilter: true
+};
+
 var oTableTools = {
   "sSwfPath": "/datatables/swf/copy_csv_xls_pdf.swf",
   "aButtons": [
@@ -183,7 +209,7 @@ function fnAddFilterFoot(sTable, aoColumns) {
   var tr = $('<tr role="row">');
   aoColumns.forEach(function(c) {
     if (c.bFilter) {
-      tr.append('<th><input type="text" placeholder="' + c.sTitle + '" class="input-mini" autocomplete="off"></th>');
+      tr.append('<th><input type="text" placeholder="' + c.sTitle + '" class="input-medium" autocomplete="off"></th>');
     } else {
       tr.append('<th></th>');
     }
