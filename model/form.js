@@ -2,7 +2,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var form = new Schema({
-  derivedFrom: String,
   title: String,
   createdBy: String,
   createdOn: Date,

@@ -7,6 +7,18 @@ var util = require('util');
 var Form = mongoose.model('Form');
 
 module.exports = function(app) {
+
+  app.get('/forms/json', auth.ensureAuthenticated, function(req, res) {
+    Form.find({createdBy: req.session.userid}, 'title createdBy createdOn updatedBy updatedOn read write').lean().exec(function(err, forms){
+      if (err) {
+        console.error(err.msg);
+        res.send(500, err.msg);
+      }
+      res.json(200, forms);
+    });
+  });
+
+
   app.get('/forms/new', auth.ensureAuthenticated, function(req, res) {
     return res.render('builder');
   });
@@ -70,9 +82,7 @@ module.exports = function(app) {
       return res.send(400, 'need html of the form');
     }
     var form = {};
-    // form.html = sanitizer.sanitize(req.body.html);
     form.html = sanitize(req.body.html);
-    // form.html = san.sanitiseHTML(req.body.html);
     // form.html = req.body.html;
     form.title = req.body.title;
     form.createdBy = req.session.userid;
@@ -94,9 +104,6 @@ module.exports = function(app) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
-    // if (!req.body.html) {
-    //   return res.send(400, 'need html of the form');
-    // }
     var form = {};
     if (req.body.html) {
       form.html = sanitize(req.body.html);
