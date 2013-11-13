@@ -200,7 +200,7 @@ function binding_events() {
   $('#save').click(function(e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
-      return alert('please save the active edit before saving');
+      return alert('please finish the active edit before saving');
     }
     tinymce.remove();
     var html = $('#output').html();
@@ -209,7 +209,7 @@ function binding_events() {
       $('#modalLabel').html('Save the form');
       $('#modal .modal-body').empty();
       $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
-      $('#modal .modal-footer').html('<button id="action" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
+      $('#modal .modal-footer').html('<button id="action" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
       $('#modal').modal('show');
       $('#action').click(function(e) {
         sendRequest({
@@ -243,33 +243,57 @@ function binding_events() {
   });
 
   $('#rename').click(function(e) {
+    e.preventDefault();
     $('#modalLabel').html('Rename the form');
-      $('#modal .modal-body').empty();
-      $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">New form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
-      $('#modal .modal-footer').html('<button id="action" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
-      $('#modal').modal('show');
-      $('#action').click(function(e) {
-        var newTitle = $('#title').val();
-        sendRequest({
-          title: newTitle
-        }, function(){
-          $('#formtitle').text(newTitle);
-        });
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">New form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
+    $('#modal .modal-footer').html('<button id="action" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
+    $('#modal').modal('show');
+    $('#action').click(function(e) {
+      var newTitle = $('#title').val();
+      sendRequest({
+        title: newTitle
+      }, function() {
+        $('#formtitle').text(newTitle);
       });
+    });
+  });
+
+  $('#saveas').click(function(e) {
+    e.preventDefault();
+    tinymce.remove();
+    var html = $('#output').html();
+    $('#modalLabel').html('Save the form as (a new one)');
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
+    $('#modal .modal-footer').html('<button id="action" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
+    $('#modal').modal('show');
+    $('#action').click(function(e) {
+      var title = $('#title').val();
+      sendRequest({
+        html: html,
+        title: title
+      }, null, true);
+    });
   });
 
 }
 
-function sendRequest(data, cb) {
+function sendRequest(data, cb, saveas) {
   var path = window.location.pathname;
   var url, type;
-  if (/^\/forms\/new/.test(path)) {
-    $('form#output').fadeTo('slow', 0.2);
+  if (saveas) {
     url = '/forms';
     type = 'POST';
   } else {
-    url = path;
-    type = 'PUT';
+    if (/^\/forms\/new/.test(path)) {
+      $('form#output').fadeTo('slow', 0.2);
+      url = '/forms';
+      type = 'POST';
+    } else {
+      url = path;
+      type = 'PUT';
+    }
   }
   var formRequest = $.ajax({
     url: url,
@@ -280,14 +304,22 @@ function sendRequest(data, cb) {
     processData: false,
     dataType: 'json'
   }).done(function(json) {
+    var location;
     if (/^\/forms\/new/.test(path)) {
-      var location = formRequest.getResponseHeader('Location');
+      location = formRequest.getResponseHeader('Location');
       document.location.href = location;
       // document.location.href = json.location;
     } else {
       var timestamp = formRequest.getResponseHeader('Date');
       var dateObj = moment(timestamp);
-      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved at ' + dateObj.format('HH:mm:ss') + '.</div>');
+      if (saveas) {
+        location = formRequest.getResponseHeader('Location');
+        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The new form is created at <a href="' + location + '">' + json.location + '</a></div>');
+        var win = window.open(location, '_blank');
+        win.focus();
+      } else {
+        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved at ' + dateObj.format('HH:mm:ss') + '.</div>');
+      }
     }
     if (cb) {
       cb();
