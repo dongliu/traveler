@@ -30,6 +30,8 @@ module.exports = function(app) {
         }
         if (form.read.indexOf(req.session.userid) !== -1) {
           return res.render('viewer', {
+            id: req.params.id,
+            title: form.title,
             html: form.html
           });
         }
