@@ -14,9 +14,13 @@ block content
   .container(style="margin-top: 10px")
     #message
     form.form-inline(method='post')
-      input#user-name.input-medium(type='text', placeholder='Last, First', name='name')
+      input#username.input-medium(type='text', placeholder='Last, First', name='name')
       = ' '
-      button.btn.btn-primary(type='submit') Add
+      label.checkbox
+        input#access(type='checkbox', name='access', value='write')
+        | Write
+      = ' '
+      button.btn.btn-primary#add(type='submit') Add to share
     .btn-toolbar
       .btn-group
         button.btn.btn-warning#share-delete
