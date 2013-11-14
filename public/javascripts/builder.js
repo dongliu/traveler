@@ -19,7 +19,7 @@ var mce_content = {
   content_css: '/bootstrap/css/bootstrap.css',
   browser_spellcheck: true,
   plugins: [
-    ["advlist autolink link image charmap hr anchor spellchecker"],
+    ["advlist autolink link image lists charmap hr anchor spellchecker"],
     ["wordcount visualblocks visualchars code media nonbreaking"],
     ["contextmenu directionality paste"]
   ],
