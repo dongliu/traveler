@@ -19,6 +19,10 @@ $(function() {
   selectEvent();
   filterEvent();
 
+  $('#add').click(function(e){
+    e.preventDefault();
+  });
+
   var path = window.location.pathname;
   $.ajax({
     url: path+'/json',

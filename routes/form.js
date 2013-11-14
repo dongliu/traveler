@@ -38,13 +38,13 @@ module.exports = function(app) {
           });
         }
 
-        var access = getAccess(form.sharedWith, req.session.userid);
+        var share = getSharedWith(form.sharedWith, req.session.userid);
 
-        if (access === -1) {
+        if (share == null) {
           return res.send(403, 'you are not authorized to access this resource');
         }
 
-        if (access === 0) {
+        if (share.access === 0) {
           return res.render('viewer', {
             id: req.params.id,
             title: form.title,
@@ -52,7 +52,7 @@ module.exports = function(app) {
           });
         }
 
-        if (access === 1) {
+        if (share.access === 1) {
           return res.render('builder', {
             id: req.params.id,
             title: form.title,
@@ -116,6 +116,41 @@ module.exports = function(app) {
           return res.send(403, 'you are not authorized to access this resource');
         }
         return res.json(200, form.sharedWith || []);
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
+  app.post('/forms/:id/share', auth.ensureAuthenticated, function(req, res) {
+    Form.findById(req.params.id, function(err, form){
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (form) {
+        if (form.createdBy !== req.session.userid) {
+          return res.send(403, 'you are not authorized to access this resource');
+        }
+        var share = getSharedWith(form.sharedWith, req.body.name);
+        if (share == null) {
+          // new user
+          addUser(req, res);
+        } else {
+          if (req.body.access && req.body.access == 'write') {
+            share.access = 1;
+          } else {
+            share.access = 0;
+          }
+          form.save(function(err) {
+            if (err) {
+              console.error(err.msg);
+              return res.send(500, err.msg);
+            } else {
+              return res.send(204);
+            }
+          });
+        }
       } else {
         return res.send(410, 'gone');
       }
@@ -194,14 +229,14 @@ module.exports = function(app) {
 };
 
 
-function getAccess(sharedWith, userid) {
+function getSharedWith(sharedWith, userid) {
   if (sharedWith.length == 0) {
-    return -1;
+    return null;
   }
   for (var i = 0; i < sharedWith.length; i += 1 ) {
-    if (sharedWith[i].userid == userid) {
-      return sharedWith[i].write;
+    if (sharedWith[i].userid == userid || sharedWith[i].username == userid) {
+      return sharedWith[i];
     }
   }
-  return -1;
+  return null;
 }
