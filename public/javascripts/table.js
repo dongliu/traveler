@@ -55,12 +55,44 @@ var formTitleColumn = {
   bFilter: true
 };
 
-var writeColumn = {
-  sTitle: 'Write',
-  // sDefaultContent: '',
+// var writeColumn = {
+//   sTitle: 'Write',
+//   // sDefaultContent: '',
+//   mData: function(source, type, val) {
+//     if (source.write) {
+//       return source.write.join();
+//     } else {
+//       return '';
+//     }
+//   },
+//   bFilter: true
+// };
+
+// var readColumn = {
+//   sTitle: 'Read',
+//   // sDefaultContent: '',
+//   mData: function(source, type, val) {
+//     if (source.read) {
+//       return source.read.join();
+//     } else {
+//       return '';
+//     }
+//   },
+//   bFilter: true
+// };
+
+var sharedWithColumn = {
+  sTitle: 'Shared with',
   mData: function(source, type, val) {
-    if (source.write) {
-      return source.write.join();
+    if (source.sharedWith) {
+      if (source.sharedWith.length === 0) {
+        return '';
+      } else {
+        var names = source.sharedWith.map(function(u) {
+          return u.username;
+        });
+        return names.join();
+      }
     } else {
       return '';
     }
@@ -68,18 +100,29 @@ var writeColumn = {
   bFilter: true
 };
 
-var readColumn = {
-  sTitle: 'Read',
-  // sDefaultContent: '',
-  mData: function(source, type, val) {
-    if (source.read) {
-      return source.read.join();
-    } else {
-      return '';
+var useridColumn = personColumn('User id', 'userid');
+
+var userNameColumn = {
+  sTitle: 'Full name',
+  mData: 'username',
+  sDefaultContent: '',
+  bFilter: true
+};
+
+var accessColumn = {
+  sTitle : 'Priviledge',
+  mData : 'access',
+  sDefaultContent: '',
+  mRender: function(data, type, full) {
+    if (data == 0) {
+      return 'read';
+    }
+    if (data == 1) {
+      return 'write';
     }
   },
   bFilter: true
-};
+}
 
 var oTableTools = {
   "sSwfPath": "/datatables/swf/copy_csv_xls_pdf.swf",

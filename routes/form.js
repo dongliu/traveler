@@ -30,18 +30,30 @@ module.exports = function(app) {
         return res.send(500, err.msg);
       }
       if (form) {
-        if (form.read.indexOf(req.session.userid) == -1 && form.write.indexOf(req.session.userid) == -1) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        if (form.write.indexOf(req.session.userid) !== -1) {
+        if (form.createdBy == req.session.userid) {
           return res.render('builder', {
             id: req.params.id,
             title: form.title,
             html: form.html
           });
         }
-        if (form.read.indexOf(req.session.userid) !== -1) {
+
+        var access = getAccess(form.sharedWith, req.session.userid);
+
+        if (access === -1) {
+          return res.send(403, 'you are not authorized to access this resource');
+        }
+
+        if (access === 0) {
           return res.render('viewer', {
+            id: req.params.id,
+            title: form.title,
+            html: form.html
+          });
+        }
+
+        if (access === 1) {
+          return res.render('builder', {
             id: req.params.id,
             title: form.title,
             html: form.html
@@ -74,6 +86,42 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/forms/:id/share', auth.ensureAuthenticated, function(req, res) {
+    Form.findById(req.params.id).lean().exec(function(err, form){
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (form) {
+        if (form.createdBy !== req.session.userid) {
+          return res.send(403, 'you are not authorized to access this resource');
+        }
+        return res.render('share', {
+          id: req.params.id
+        });
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
+  app.get('/forms/:id/share/json', auth.ensureAuthenticated, function(req, res) {
+    Form.findById(req.params.id).lean().exec(function(err, form){
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (form) {
+        if (form.createdBy !== req.session.userid) {
+          return res.send(403, 'you are not authorized to access this resource');
+        }
+        return res.json(200, form.sharedWith || []);
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
   app.post('/forms', auth.ensureAuthenticated, function(req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
@@ -87,8 +135,7 @@ module.exports = function(app) {
     form.title = req.body.title;
     form.createdBy = req.session.userid;
     form.createdOn = Date.now();
-    form.write = [];
-    form.write.push(req.session.userid);
+    form.sharedWith = [];
     (new Form(form)).save(function(err, newform) {
       if (err) {
         console.error(err.msg);
@@ -145,3 +192,16 @@ module.exports = function(app) {
     });
   });
 };
+
+
+function getAccess(sharedWith, userid) {
+  if (sharedWith.length == 0) {
+    return -1;
+  }
+  for (var i = 0; i < sharedWith.length; i += 1 ) {
+    if (sharedWith[i].userid == userid) {
+      return sharedWith[i].write;
+    }
+  }
+  return -1;
+}
