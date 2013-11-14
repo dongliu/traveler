@@ -10,6 +10,8 @@ var user = new Schema({
   mobile: String,
   roles: [String],
   lastVisitedOn: Date,
+  forms: [String],
+  travelers: [String],
   subscribe: {type: Boolean, default: false}
 });
 
