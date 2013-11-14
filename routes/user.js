@@ -39,9 +39,6 @@ module.exports = function(app) {
 
   });
 
-  // app.get('/users/new', auth.ensureAuthenticated, function(req, res) {
-  //   res.render('user');
-  // });
 
   app.post('/users', auth.ensureAuthenticated, function(req, res) {
     // if (!req.is('json')) {
@@ -55,8 +52,6 @@ module.exports = function(app) {
     if (!req.body.name) {
       return res.send(400, 'need to know name');
     }
-
-    // return res.send(200, req.body.name);
 
     // check if already in db
 
