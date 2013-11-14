@@ -1,5 +1,5 @@
 $(function() {
-  var formAoColumns = [selectColumn, formLinkColumn, formTitleColumn, createdOnColumn, updatedOnColumn, writeColumn, readColumn];
+  var formAoColumns = [selectColumn, formLinkColumn, formTitleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
   fnAddFilterFoot('#form-table', formAoColumns);
   var formTable = $('#form-table').dataTable({
     aaData: [],
