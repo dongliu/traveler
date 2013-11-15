@@ -8,18 +8,41 @@ var util = require('util');
 
 
 var Form = mongoose.model('Form');
+var User = mongoose.model('User');
 
 module.exports = function(app) {
 
   app.get('/forms/json', auth.ensureAuthenticated, function(req, res) {
     Form.find({
       createdBy: req.session.userid
-    }, 'title createdBy createdOn updatedBy updatedOn read write').lean().exec(function(err, forms) {
+    }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function(err, forms) {
       if (err) {
         console.error(err.msg);
-        res.send(500, err.msg);
+        return res.send(500, err.msg);
       }
       res.json(200, forms);
+    });
+  });
+
+  app.get('/sharedforms/json', auth.ensureAuthenticated, function(req, res) {
+    User.findOne({
+      id: req.session.userid
+    }, 'forms').lean().exec(function(err, me) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (me) {
+        Form.find({_id: {$in : me.forms}}, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function(err, forms) {
+          if (err) {
+            console.error(err.msg);
+            return res.send(500, err.msg);
+          }
+          res.json(200, forms);
+        });
+      } else {
+        return res.send(400, 'cannot identify the current user');
+      }
     });
   });
 
@@ -77,7 +100,7 @@ module.exports = function(app) {
       }
       if (form) {
         var share = getSharedWith(form.sharedWith, req.session.userid);
-        if (form.createdBy == req.session.userid || share !== -1 ) {
+        if (form.createdBy == req.session.userid || share !== -1) {
           return res.render('viewer', {
             id: req.params.id,
             title: form.title,
