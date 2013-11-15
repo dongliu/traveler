@@ -218,27 +218,25 @@ module.exports = function(app) {
     var nameFilter, opts;
     if (query && query.length > 0) {
       nameFilter = ad.nameFilter.replace('_name', query + '*');
-      opts = {
-        filter: nameFilter,
-        attributes: ['displayName'],
-        scope: 'sub'
-      };
-      ldapClient.search(ad.searchBase, opts, false, function(err, result) {
-        if (err) {
-          return res.json(500, JSON.stringify(err));
-        }
-        if (result.length === 0) {
-          return res.json(500, {
-            error: 'Names starting with ' + query + ' are not found!'
-          });
-        }
-        return res.json(result);
-      });
     } else {
-      return res.json(500, {
-        error: 'query term is required.'
-      });
+      nameFilter = ad.nameFilter.replace('_name', '*');
     }
+    opts = {
+      filter: nameFilter,
+      attributes: ['displayName'],
+      scope: 'sub'
+    };
+    ldapClient.search(ad.searchBase, opts, false, function(err, result) {
+      if (err) {
+        return res.json(500, JSON.stringify(err));
+      }
+      if (result.length === 0) {
+        return res.json(500, {
+          error: 'Names starting with ' + query + ' are not found!'
+        });
+      }
+      return res.json(result);
+    });
   });
 };
 
