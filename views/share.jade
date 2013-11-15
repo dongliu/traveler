@@ -12,14 +12,19 @@ block head
 
 block content
   .container(style="margin-top: 10px")
-    form.form-inline(method='post')
-      input#username.input-medium(type='text', placeholder='Last, First', name='name')
-      = ' '
-      label.checkbox
-        input#access(type='checkbox', name='access', value='write')
-        | Write
-      = ' '
-      button.btn.btn-primary#add(type='submit') Add to share
+    form.form-horizontal.well
+      .control-group
+        lable.control-label User name
+        .controls
+          input#username.input(type='text', placeholder='Last, First', name='name')
+      .control-group
+        .controls
+          label.checkbox
+            input#access(type='checkbox', name='access', value='write')
+            | Write
+      .control-group
+        .controls
+          button.btn.btn-primary#add(type='submit') Add to share
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
