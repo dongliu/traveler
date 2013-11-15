@@ -69,7 +69,7 @@ block content
       button.btn.btn-primary#save Save
     if (typeof id !== 'undefined')
       .btn-group
-        a.btn#preview(data-toggle='tooltip', title='the form will be saved first', href=''+id+'/preview', target='_blank') Preview
+        a.btn#preview(data-toggle='tooltip', title='the form will be saved first', href='preview', target='_blank') Preview
       .btn-group
         a.btn.dropdown-toggle(data-toggle='dropdown')
           | More
@@ -80,7 +80,7 @@ block content
           li
             a#rename Rename
           li
-            a#share(data-toggle='tooltip', title='the form will be saved first', href=''+id+'/share') Share
+            a#share(data-toggle='tooltip', title='the form will be saved first', href='share/') Share
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
