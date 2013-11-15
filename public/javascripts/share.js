@@ -2,7 +2,11 @@ var path = window.location.pathname;
 $(function() {
   var nameCache = {};
 
-  $('#username').autocomplete(nameAuto('#username', nameCache));
+  $('#username').typeahead({
+    name: 'usernames',
+    valueKey: 'displayName',
+    prefetch: '/adusernames'
+  });
 
   var shareAoColumns = [selectColumn, useridColumn, userNameColumn, accessColumn];
   var shareTable = $('#share-table').dataTable({
