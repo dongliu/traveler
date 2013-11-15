@@ -108,7 +108,7 @@ module.exports = function(app) {
           myRoles: req.session.roles
         });
       } else {
-        return res.send(404, req.params.id + ' not found');
+        return res.send(404, req.params.id + ' has never logged into the application.');
       }
     });
   });
