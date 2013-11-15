@@ -17,7 +17,7 @@ var formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data, type, full) {
-    return '<a href="/forms/' + data + '" target="_blank"><i class="fa fa-edit fa-lg"></i></a>';
+    return '<a href="/forms/' + data + '/" target="_blank"><i class="fa fa-edit fa-lg"></i></a>';
   },
   bSortable: false
 };
