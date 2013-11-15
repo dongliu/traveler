@@ -91,7 +91,7 @@ var sharedWithColumn = {
         var names = source.sharedWith.map(function(u) {
           return u.username;
         });
-        return names.join();
+        return names.join(';');
       }
     } else {
       return '';
@@ -102,7 +102,24 @@ var sharedWithColumn = {
 
 var useridColumn = personColumn('User id', 'userid');
 
+var useridNoLinkColumn = {
+  sTitle: 'User id',
+  mData: 'userid',
+  sDefaultContent: '',
+  bFilter: true
+};
+
 var userNameColumn = {
+  sTitle: 'Full name',
+  mData: 'username',
+  sDefaultContent: '',
+  mRender: function(data, type, full) {
+    return '<a href = "/users?name=' + data + '" target="_blank">' + data + '</a>';
+  },
+  bFilter: true
+};
+
+var userNameNoLinkColumn = {
   sTitle: 'Full name',
   mData: 'username',
   sDefaultContent: '',
@@ -110,8 +127,8 @@ var userNameColumn = {
 };
 
 var accessColumn = {
-  sTitle : 'Priviledge',
-  mData : 'access',
+  sTitle: 'Priviledge',
+  mData: 'access',
   sDefaultContent: '',
   mRender: function(data, type, full) {
     if (data == 0) {

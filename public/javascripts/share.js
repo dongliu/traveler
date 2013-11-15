@@ -8,7 +8,7 @@ $(function() {
     prefetch: '/adusernames'
   });
 
-  var shareAoColumns = [selectColumn, useridColumn, userNameColumn, accessColumn];
+  var shareAoColumns = [selectColumn, useridColumn, userNameNoLinkColumn, accessColumn];
   var shareTable = $('#share-table').dataTable({
     aaData: [],
     // 'bAutoWidth': false,
