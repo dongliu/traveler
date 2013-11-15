@@ -45,11 +45,7 @@ module.exports = function(app) {
 
         var share = getSharedWith(form.sharedWith, req.session.userid);
 
-        if (share == null) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-
-        if (share.access === 0) {
+        if (form.sharedWith[share].access === 0) {
           return res.render('viewer', {
             id: req.params.id,
             title: form.title,
@@ -57,13 +53,16 @@ module.exports = function(app) {
           });
         }
 
-        if (share.access === 1) {
+        if (form.sharedWith[share].access === 1) {
           return res.render('builder', {
             id: req.params.id,
             title: form.title,
             html: form.html
           });
         }
+
+        return res.send(403, 'you are not authorized to access this resource');
+
       } else {
         return res.send(410, 'gone');
       }
@@ -78,14 +77,14 @@ module.exports = function(app) {
       }
       if (form) {
         var share = getSharedWith(form.sharedWith, req.session.userid);
-        if (form.createdBy !== req.session.userid && share.access < 0) {
-          return res.send(403, 'you are not authorized to access this resource');
+        if (form.createdBy == req.session.userid || share !== -1 ) {
+          return res.render('viewer', {
+            id: req.params.id,
+            title: form.title,
+            html: form.html
+          });
         }
-        return res.render('viewer', {
-          id: req.params.id,
-          title: form.title,
-          html: form.html
-        });
+        return res.send(403, 'you are not authorized to access this resource');
       } else {
         return res.send(410, 'gone');
       }
@@ -129,43 +128,7 @@ module.exports = function(app) {
     });
   });
 
-  // app.post('/forms/:id/share/', auth.ensureAuthenticated, function(req, res) {
-  //   Form.findById(req.params.id, function(err, form){
-  //     if (err) {
-  //       console.error(err.msg);
-  //       return res.send(500, err.msg);
-  //     }
-  //     if (form) {
-  //       if (form.createdBy !== req.session.userid) {
-  //         return res.send(403, 'you are not authorized to access this resource');
-  //       }
-  //       var share = getSharedWith(form.sharedWith, req.body.name);
-  //       if (share == null) {
-  //         // new user
-  //         addUser(req, res);
-  //       } else {
-  //         if (req.body.access && req.body.access == 'write') {
-  //           share.access = 1;
-  //         } else {
-  //           share.access = 0;
-  //         }
-  //         form.save(function(err) {
-  //           if (err) {
-  //             console.error(err.msg);
-  //             return res.send(500, err.msg);
-  //           } else {
-  //             return res.send(204);
-  //           }
-  //         });
-  //       }
-  //     } else {
-  //       return res.send(410, 'gone');
-  //     }
-  //   });
-  // });
-
-
-  app.put('/forms/:id/share/:name', auth.ensureAuthenticated, function(req, res) {
+  app.post('/forms/:id/share/', auth.ensureAuthenticated, function(req, res) {
     Form.findById(req.params.id, function(err, form) {
       if (err) {
         console.error(err.msg);
@@ -175,17 +138,73 @@ module.exports = function(app) {
         if (form.createdBy !== req.session.userid) {
           return res.send(403, 'you are not authorized to access this resource');
         }
-        var share = getSharedWith(form.sharedWith, req.params.name);
-        if (share == null) {
+        var share = getSharedWith(form.sharedWith, req.param['name']);
+        if (share === -1) {
           // new user
           addUser(req, res, form);
         } else {
+          // the user cannot be changed in this way
+          return res.send(400, 'The user named ' + req.param['name'] + ' is already in the list.');
+        }
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
+
+  app.put('/forms/:id/share/:userid', auth.ensureAuthenticated, function(req, res) {
+    Form.findById(req.params.id, function(err, form) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (form) {
+        if (form.createdBy !== req.session.userid) {
+          return res.send(403, 'you are not authorized to access this resource');
+        }
+        var share = getSharedWith(form.sharedWith, req.params.userid);
+        if (share === -1) {
+          // new user
+          // addUser(req, res, form);
+          return res.send(400, 'cannot find the user ' + req.params.userid);
+        } else {
           // the user want to change it
           if (req.body.access && req.body.access == 'write') {
-            share.access = 1;
+            form.sharedWith[share].access = 1;
           } else {
-            share.access = 0;
+            form.sharedWith[share].access = 0;
           }
+          form.save(function(err) {
+            if (err) {
+              console.error(err.msg);
+              return res.send(500, err.msg);
+            } else {
+              return res.send(204);
+            }
+          });
+        }
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
+  app.delete('/forms/:id/share/:userid', auth.ensureAuthenticated, function(req, res) {
+    Form.findById(req.params.id, function(err, form) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (form) {
+        if (form.createdBy !== req.session.userid) {
+          return res.send(403, 'you are not authorized to access this resource');
+        }
+        var share = getSharedWith(form.sharedWith, req.params.userid);
+        if (share === -1) {
+          return res.send(400, 'no share info found for ' + req.params.userid);
+        } else {
+          form.sharedWith.splice(share, 1);
           form.save(function(err) {
             if (err) {
               console.error(err.msg);
@@ -266,25 +285,19 @@ module.exports = function(app) {
     });
   });
 
-
-  app.get('/forms/:id', auth.ensureAuthenticated, function(req, res) {
-    return res.render('builder', {
-      id: req.params.id
-    });
-  });
 };
 
 
 function getSharedWith(sharedWith, userid) {
   if (sharedWith.length == 0) {
-    return null;
+    return -1;
   }
   for (var i = 0; i < sharedWith.length; i += 1) {
     if (sharedWith[i].userid == userid || sharedWith[i].username == userid) {
-      return sharedWith[i];
+      return i;
     }
   }
-  return null;
+  return -1;
 }
 
 function addUser(req, res, form) {
