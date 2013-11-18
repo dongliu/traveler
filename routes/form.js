@@ -307,10 +307,10 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      var url = req.protocol + '://' + req.get('host') + '/forms/' + newform.id;
+      var url = req.protocol + '://' + req.get('host') + '/forms/' + newform.id + '/';
       res.set('Location', url);
       return res.json(201, {
-        location: '/forms/' + newform.id
+        location: '/forms/' + newform.id + '/'
       });
     });
   });
