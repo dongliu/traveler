@@ -45,15 +45,15 @@ block content
     .tabbable.tabs-left
       ul.nav.nav-tabs
         li.active
-          a(href='#form', data-toggle='tab') My forms
+          a(href='#forms', data-toggle='tab') My forms
         li
-          a(href='#shared', data-toggle='tab') Shared forms
+          a(href='#sharedfroms', data-toggle='tab') Shared forms
         li
-          a(href='#working', data-toggle='tab') Working
+          a(href='#travelers', data-toggle='tab') My travelers
         li
-          a(href='#completed', data-toggle='tab') Completed
+          a(href='#sharedtravelers', data-toggle='tab') Shared travelers
       .tab-content
-        #form.tab-pane.active
+        #forms.tab-pane.active
           .btn-toolbar
             .btn-group
               button.btn.btn-primary#form-travel
@@ -72,11 +72,11 @@ block content
                 i.fa.fa-square-o.fa-lg
                 | &nbsp;Clear selection
           table#form-table.table.table-bordered.table-hover
-        #shared.tab-pane
+        #sharedfroms.tab-pane
           table#shared-form-table.table.table-bordered.table-hover
-        #working.tab-pane
+        #travelers.tab-pane
           p the list of travelers
-        #completed.tab-pane
+        #sharedtravelers.tab-pane
           p the list of completed travelers
 
 block js
