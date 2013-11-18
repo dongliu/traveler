@@ -8,6 +8,7 @@ var express = require('express'),
   about = require('./routes/about'),
   http = require('http'),
   fs = require('fs'),
+  slash = require('express-slash'),
   path = require('path');
 
 
@@ -36,6 +37,8 @@ var auth = require('./lib/auth');
 
 var app = express();
 
+app.enable('strict routing');
+
 var access_logfile = fs.createWriteStream('./logs/access.log', {flags: 'a'});
 
 app.configure(function(){
@@ -51,6 +54,7 @@ app.configure(function(){
   app.use(express.session({secret: 'traveler_secret',cookie: { maxAge: 14400000 }}));
   app.use(express.session());
   app.use(app.router);
+  app.use(slash());
   app.use(express.static(path.join(__dirname, 'public')));
 });
 

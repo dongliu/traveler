@@ -12,6 +12,7 @@
     "mongoose": "*",
     "ldapjs": "*",
     "templatizer": "*",
-    "sanitize-caja": "*"
+    "sanitize-caja": "*",
+    "express-slash": "*"
   }
 }
