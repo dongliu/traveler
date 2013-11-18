@@ -33,7 +33,11 @@ module.exports = function(app) {
         return res.send(500, err.msg);
       }
       if (me) {
-        Form.find({_id: {$in : me.forms}}, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function(err, forms) {
+        Form.find({
+          _id: {
+            $in: me.forms
+          }
+        }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function(err, forms) {
           if (err) {
             console.error(err.msg);
             return res.send(500, err.msg);
@@ -188,11 +192,10 @@ module.exports = function(app) {
         }
         var share = getSharedWith(form.sharedWith, req.params.userid);
         if (share === -1) {
-          // new user
-          // addUser(req, res, form);
+          // the user should in the list
           return res.send(400, 'cannot find the user ' + req.params.userid);
         } else {
-          // the user want to change it
+          // change the access
           if (req.body.access && req.body.access == 'write') {
             form.sharedWith[share].access = 1;
           } else {
@@ -203,6 +206,27 @@ module.exports = function(app) {
               console.error(err.msg);
               return res.send(500, err.msg);
             } else {
+              // check consistency of user's form list
+              User.findOne({
+                id: req.params.userid
+              }, function(err, user) {
+                if (err) {
+                  console.error(err.msg);
+                }
+                if (user) {
+                  user.update({
+                    $addToSet: {
+                      forms: form._id
+                    }
+                  }, function(err) {
+                    if (err) {
+                      console.error(err.msg);
+                    }
+                  });
+                } else {
+                  console.error('The user ' + req.params.userid + ' does not in the db');
+                }
+              });
               return res.send(204);
             }
           });
@@ -233,6 +257,27 @@ module.exports = function(app) {
               console.error(err.msg);
               return res.send(500, err.msg);
             } else {
+              // keep the consistency of user's form list
+              User.findOne({
+                id: req.params.userid
+              }, function(err, user) {
+                if (err) {
+                  console.error(err.msg);
+                }
+                if (user) {
+                  user.update({
+                    $pull: {
+                      forms: form._id
+                    }
+                  }, function(err) {
+                    if (err) {
+                      console.error(err.msg);
+                    }
+                  });
+                } else {
+                  console.error('The user ' + req.params.userid + ' does not in the db');
+                }
+              });
               return res.send(204);
             }
           });
@@ -325,6 +370,46 @@ function getSharedWith(sharedWith, userid) {
 
 function addUser(req, res, form) {
   var name = req.param('name');
+  // check local db first then try ad
+
+  User.findOne({
+    name: name
+  }, function(err, user) {
+    if (err) {
+      console.error(err.msg);
+      return res.send(500, err.msg);
+    }
+    if (user) {
+      form.sharedWith.push({
+        userid: user.id,
+        username: name,
+        access: access
+      });
+      form.save(function(err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        } else {
+          return res.send(201, 'The user named ' + name + ' was added to the share list.');
+        }
+      });
+      user.update({
+        $addToSet: {
+          forms: form._id
+        }
+      }, function(err) {
+        if (err) {
+          console.error(err.msg);
+        }
+      });
+    } else {
+      addUserFromAD(req, res, form);
+    }
+  });
+}
+
+function addUserFromAD(req, res, form) {
+  var name = req.param('name');
   var nameFilter = ad.nameFilter.replace('_name', name);
   var opts = {
     filter: nameFilter,
@@ -361,6 +446,20 @@ function addUser(req, res, form) {
         console.error(err.msg);
         return res.send(500, err.msg);
       } else {
+        var user = new User({
+          id: result[0].sAMAccountName,
+          name: result[0].displayName,
+          email: result[0].mail,
+          office: result[0].physicalDeliveryOfficeName,
+          phone: result[0].telephoneNumber,
+          mobile: result[0].mobile,
+          forms: [form._id]
+        });
+        user.save(function(err) {
+          if (err) {
+            console.error(err.msg);
+          }
+        });
         return res.send(201, 'The user named ' + name + ' was added to the share list.');
       }
     });
