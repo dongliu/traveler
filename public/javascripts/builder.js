@@ -283,12 +283,12 @@ function sendRequest(data, cb, saveas) {
   var path = window.location.pathname;
   var url, type;
   if (saveas) {
-    url = '/forms';
+    url = '/forms/';
     type = 'POST';
   } else {
     if (/^\/forms\/new/.test(path)) {
       $('form#output').fadeTo('slow', 0.2);
-      url = '/forms';
+      url = '/forms/';
       type = 'POST';
     } else {
       url = path;
