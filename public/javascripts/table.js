@@ -100,6 +100,7 @@ var sharedWithColumn = {
   bFilter: true
 };
 
+/*shared user columns*/
 var useridColumn = personColumn('User id', 'userid');
 
 var useridNoLinkColumn = {
@@ -139,7 +140,47 @@ var accessColumn = {
     }
   },
   bFilter: true
-}
+};
+
+/*device columns*/
+
+var serialColumn = {
+  sTitle: 'Serial',
+  mData: 'serialNumber',
+  sDefaultContent: '',
+  bFilter: true
+};
+
+var typeColumn = {
+  sTitle: 'Type',
+  mData: 'componentType',
+  sDefaultContent: '',
+  bFilter: true
+};
+
+var descriptionColumn = {
+  sTitle: 'Description',
+  mData: 'description',
+  sDefaultContent: '',
+  bFilter: true
+};
+
+var modifiedOnColumn = dateColumn('Modified', 'dateModified');
+
+// {
+//   sTitle: 'Modified',
+//   mData: 'dateModified',
+//   sDefaultContent: '',
+//   bFilter: true
+// };
+
+var modifiedByColumn = {
+  sTitle: 'Modified by',
+  mData: 'modifiedBy',
+  sDefaultContent: '',
+  bFilter: true
+};
+
 
 var oTableTools = {
   "sSwfPath": "/datatables/swf/copy_csv_xls_pdf.swf",
