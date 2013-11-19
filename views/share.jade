@@ -27,18 +27,11 @@ block content
     //-       button.btn.btn-primary#add(type='submit') Add to share
     .well
       form.form-inline
-        //- .control-group
-        //-   lable.control-label User name
-        //-   .controls
         input#username.input(type='text', placeholder='Last, First', name='name')
-        //- .control-group
-        //-   .controls
         != ' '
         label.checkbox
           input#access(type='checkbox', name='access', value='write')
           | Write
-        //- .control-group
-        //-   .controls
         != ' '
         button.btn.btn-primary#add(type='submit') Add to share
     #message
