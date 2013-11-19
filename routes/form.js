@@ -315,7 +315,7 @@ module.exports = function(app) {
     });
   });
 
-  app.put('/forms/:id', auth.ensureAuthenticated, function(req, res) {
+  app.put('/forms/:id/', auth.ensureAuthenticated, function(req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
