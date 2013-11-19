@@ -1,5 +1,6 @@
 $(function(){
   var aoColumns = [serialColumn, typeColumn, descriptionColumn, modifiedByColumn, modifiedOnColumn];
+  fnAddFilterFoot('#device-table', aoColumns);
   var deviceTable = $('#device-table').dataTable({
     aaData: [],
     // 'bAutoWidth': false,
@@ -10,6 +11,8 @@ $(function(){
     sDom: sDom,
     oTableTools: oTableTools
   });
+
+  filterEvent();
 
   $.ajax({
     url: '/devices/json',
