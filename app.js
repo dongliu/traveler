@@ -51,7 +51,7 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(express.cookieParser());
-  app.use(express.session({secret: 'traveler_secret',cookie: { maxAge: 14400000 }}));
+  app.use(express.session({secret: 'traveler_secret',cookie: { maxAge: 28800000 }}));
   app.use(express.session());
   app.use(app.router);
   app.use(slash());
