@@ -3,7 +3,7 @@ var auth = require('../lib/auth');
 var request = require('request');
 
 module.exports = function(app) {
-  app.get('/devices', function(req, res) {
+  app.get('/devices/', function(req, res) {
     res.render('devices');
   });
 
