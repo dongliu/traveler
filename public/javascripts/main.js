@@ -18,7 +18,6 @@ $(function() {
     fnSelectAll(formTable, 'row-selected', 'select-row', true);
   });
 
-
   $('#form-select-none').click(function(e) {
     fnDeselect(formTable, 'row-selected', 'select-row');
   });
@@ -41,23 +40,6 @@ $(function() {
   selectEvent();
   filterEvent();
 });
-
-
-// function initFormTable(formTable) {
-//   $.ajax({
-//     url: '/forms/json',
-//     type: 'GET',
-//     // contentType: 'application/json',
-//     dataType: 'json'
-//   }).done(function(json) {
-//     formTable.fnClearTable();
-//     formTable.fnAddData(json);
-//     formTable.fnDraw();
-//   }).fail(function(jqXHR, status, error) {
-//     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms.</div>');
-//     $(window).scrollTop($('#message div:last-child').offset().top - 40);
-//   }).always();
-// }
 
 function initTable(oTable, url) {
   $.ajax({
