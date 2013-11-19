@@ -24,6 +24,7 @@ $(function() {
   });
 
   var sharedFormAoColumns = [formLinkColumn, formTitleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
+  fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
   var sharedFormTable = $('#shared-form-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
