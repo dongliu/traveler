@@ -68,6 +68,8 @@ require('./routes/user')(app);
 
 require('./routes/profile')(app);
 
+require('./routes/device')(app);
+
 app.get('/about', about.index);
 app.get('/', auth.ensureAuthenticated, routes.main);
 app.get('/logout', routes.logout);

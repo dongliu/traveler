@@ -1,7 +1,5 @@
 var path = window.location.pathname;
 $(function() {
-  var nameCache = {};
-
   $('#username').typeahead({
     name: 'usernames',
     valueKey: 'displayName',

@@ -13,6 +13,7 @@
     "ldapjs": "*",
     "templatizer": "*",
     "sanitize-caja": "*",
-    "express-slash": "*"
+    "express-slash": "*",
+    "request": "*"
   }
 }
