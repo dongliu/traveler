@@ -316,7 +316,9 @@ function sendRequest(data, cb, saveas) {
         location = formRequest.getResponseHeader('Location');
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The new form is created at <a href="' + location + '">' + json.location + '</a></div>');
         var win = window.open(location, '_blank');
-        win.focus();
+        if (win) {
+          win.focus();
+        }
       } else {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved at ' + dateObj.format('HH:mm:ss') + '.</div>');
       }

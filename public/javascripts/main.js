@@ -36,6 +36,29 @@ $(function() {
     oTableTools: oTableTools
   });
   initTable(sharedFormTable, '/sharedforms/json');
+
+
+  $('#form-travel').click(function(e) {
+    var selected = fnGetSelected(formTable, 'row-selected');
+    if (selected.length == 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No form has been selected!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else if (selected.length > 1) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('Only one selected form is allowed for this action!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      var win = window.open('/travelers/new?form='+formTable.fnGetData(selected[0])._id, '_blank');
+      if (win) {
+        win.focus();
+      }
+    }
+  });
+
+
   // binding events
   selectEvent();
   filterEvent();
