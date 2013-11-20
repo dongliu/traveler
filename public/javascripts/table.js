@@ -91,7 +91,7 @@ var sharedWithColumn = {
         var names = source.sharedWith.map(function(u) {
           return u.username;
         });
-        return names.join(';');
+        return names.join('; ');
       }
     } else {
       return '';
