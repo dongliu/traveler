@@ -6,7 +6,7 @@ $(function(){
     // 'bAutoWidth': false,
     aoColumns: aoColumns,
     aaSorting: [
-      [1, 'desc']
+      [4, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools

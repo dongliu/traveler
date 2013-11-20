@@ -226,8 +226,7 @@ function dateColumn(title, key) {
       }
       return formatDate(source[key]);
     },
-    sDefaultContent: '',
-    sType: 'date'
+    sDefaultContent: ''
   };
 }
 
