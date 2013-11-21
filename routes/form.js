@@ -70,7 +70,6 @@ module.exports = function(app) {
           });
         }
 
-        // var share = getSharedWith(form.sharedWith, req.session.userid);
         var share = form.sharedWith.id(req.session.userid);
 
         if (share.access === 0) {
@@ -104,7 +103,6 @@ module.exports = function(app) {
         return res.send(500, err.msg);
       }
       if (form) {
-        // var share = getSharedWith(form.sharedWith, req.session.userid);
         var share = form.sharedWith.id(req.session.userid);
         if (form.createdBy == req.session.userid || share) {
           return res.render('viewer', {
@@ -192,15 +190,12 @@ module.exports = function(app) {
         if (form.createdBy !== req.session.userid) {
           return res.send(403, 'you are not authorized to access this resource');
         }
-        // var share = getSharedWith(form.sharedWith, req.params.userid);
         var share = form.sharedWith.id(req.params.userid);
         if (share) {
           // change the access
           if (req.body.access && req.body.access == 'write') {
-            // form.sharedWith[share].access = 1;
             share.access = 1;
           } else {
-            // form.sharedWith[share].access = 0;
             share.access = 0;
           }
           form.save(function(err) {
@@ -377,8 +372,8 @@ function getSharedWith(sharedWith, userid) {
 
 function addUser(req, res, form) {
   var name = req.param('name');
-  // check local db first then try ad
 
+  // check local db first then try ad
   User.findOne({
     name: name
   }, function(err, user) {
@@ -387,13 +382,12 @@ function addUser(req, res, form) {
       return res.send(500, err.msg);
     }
     if (user) {
-      // form.sharedWith.push({
-      //   userid: user.id,
-      //   username: name,
-      //   access: access
-      // });
+      var access = 0;
+      if (req.param('access') && req.param('access') == 'write') {
+        access = 1;
+      }
       form.sharedWith.addToSet({
-        _id: user.id,
+        _id: user._id,
         username: name,
         access: access
       });
@@ -448,11 +442,6 @@ function addUserFromAD(req, res, form) {
     if (req.param('access') && req.param('access') == 'write') {
       access = 1;
     }
-    // form.sharedWith.push({
-    //   userid: id,
-    //   username: name,
-    //   access: access
-    // });
     form.sharedWith.addToSet({
       _id: user.id,
       username: name,
