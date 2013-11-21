@@ -51,6 +51,7 @@ $(function() {
       $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
     } else {
+      // may need to deselect in the table here
       var win = window.open('/travelers/new?form='+formTable.fnGetData(selected[0])._id, '_blank');
       if (win) {
         win.focus();
