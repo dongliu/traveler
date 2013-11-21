@@ -62,7 +62,7 @@ module.exports = function(app) {
         return res.send(500, err.msg);
       }
       if (user) {
-        var url = req.protocol + '://' + req.get('host') + '/users/' + user.id;
+        var url = req.protocol + '://' + req.get('host') + '/users/' + user._id;
         res.set('Location', url);
         return res.send(303, 'The user is at ' + url);
       } else {
@@ -95,7 +95,7 @@ module.exports = function(app) {
     //   return res.send(403, "You are not authorized to access this resource. ");
     // }
     User.findOne({
-      id: req.params.id
+      _id: req.params.id
     }).lean().exec(function(err, user) {
       if (err) {
         console.error(err.msg);
@@ -123,7 +123,7 @@ module.exports = function(app) {
       });
     }
     User.findOneAndUpdate({
-      id: req.params.id
+      _id: req.params.id
     }, req.body).lean().exec(function(err, user) {
       if (err) {
         console.error(err.msg);
@@ -139,7 +139,7 @@ module.exports = function(app) {
   app.get('/users/:id/json', auth.ensureAuthenticated, function(req, res) {
 
     User.findOne({
-      id: req.params.id
+      _id: req.params.id
     }).lean().exec(function(err, user) {
       if (err) {
         console.error(err.msg);
@@ -263,7 +263,7 @@ function addUser(req, res) {
     }
 
     var user = new User({
-      id: result[0].sAMAccountName,
+      _id: result[0].sAMAccountName,
       name: result[0].displayName,
       email: result[0].mail,
       office: result[0].physicalDeliveryOfficeName,
@@ -277,7 +277,7 @@ function addUser(req, res) {
         return res.send(500, err.msg);
       }
 
-      var url = req.protocol + '://' + req.get('host') + '/users/' + newUser.id;
+      var url = req.protocol + '://' + req.get('host') + '/users/' + newUser._id;
       res.set('Location', url);
       res.send(303, 'The new user is at ' + url);
     });
