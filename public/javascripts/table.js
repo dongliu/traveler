@@ -101,11 +101,11 @@ var sharedWithColumn = {
 };
 
 /*shared user columns*/
-var useridColumn = personColumn('User id', 'userid');
+var useridColumn = personColumn('User id', '_id');
 
 var useridNoLinkColumn = {
   sTitle: 'User id',
-  mData: 'userid',
+  mData: '_id',
   sDefaultContent: '',
   bFilter: true
 };
