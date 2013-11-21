@@ -1,5 +1,6 @@
 var mongoose = require('mongoose'),
-  Schema = mongoose.Schema;
+  Schema = mongoose.Schema,
+  ObjectId = Schema.Types.ObjectId;
 
 var user = new Schema({
   _id: String,
@@ -10,8 +11,8 @@ var user = new Schema({
   mobile: String,
   roles: [String],
   lastVisitedOn: Date,
-  forms: [String],
-  travelers: [String],
+  forms: [ObjectId],
+  travelers: [ObjectId],
   subscribe: {
     type: Boolean,
     default: false
