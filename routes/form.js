@@ -26,7 +26,7 @@ module.exports = function(app) {
 
   app.get('/sharedforms/json', auth.ensureAuthenticated, function(req, res) {
     User.findOne({
-      id: req.session.userid
+      _id: req.session.userid
     }, 'forms').lean().exec(function(err, me) {
       if (err) {
         console.error(err.msg);
@@ -210,7 +210,7 @@ module.exports = function(app) {
             } else {
               // check consistency of user's form list
               User.findOne({
-                id: req.params.userid
+                _id: req.params.userid
               }, function(err, user) {
                 if (err) {
                   console.error(err.msg);
