@@ -1,5 +1,22 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var ObjectId = Schema.Types.ObjectId;
+
+
+/******
+access := 0 // for read or
+        | 1 // for write
+******/
+var sharedWithUser = new Schema({
+  _id: String,
+  username: String,
+  access: Number
+});
+
+var form = new Schema({
+  html: String
+});
+
 
 /*******
 status := 0 // working
@@ -16,18 +33,16 @@ var traveler = new Schema({
   createdOn: Date,
   updatedBy: String,
   updatedOn: Date,
-  sharedWith: [{
-    userid: String,
-    username: String,
-    access: Number
-  }],
-  forms: [{version: Number, description: String, html: String}],
-  data: [String],
-  comments: [String]
+  sharedWith: [sharedWithUser],
+  referenceForm: ObjectId,
+  forms: [form],
+  data: [ObjectId],
+  comments: [ObjectId]
 });
 
 
 var travelerData = new Schema({
+  traveler: ObjectId,
   name: String,
   value: Schema.Types.Mixed,
   inputBy: String,
@@ -35,6 +50,7 @@ var travelerData = new Schema({
 });
 
 var travelerComment = new Schema({
+  traveler: ObjectId,
   name: String,
   value: String,
   inputBy: String,

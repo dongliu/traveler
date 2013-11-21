@@ -37,6 +37,8 @@ $(function() {
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
+  var travelerAoColumns = [];
+
 
   $('#form-travel').click(function(e) {
     var selected = fnGetSelected(formTable, 'row-selected');
@@ -52,10 +54,26 @@ $(function() {
       $('#modal').modal('show');
     } else {
       // may need to deselect in the table here
-      var win = window.open('/travelers/new?form='+formTable.fnGetData(selected[0])._id, '_blank');
-      if (win) {
-        win.focus();
-      }
+      // var win = window.open('/travelers/new?form='+formTable.fnGetData(selected[0])._id, '_blank');
+      // if (win) {
+      //   win.focus();
+      // }
+      $.ajax({
+        url: '/travelers/',
+        method: 'POST',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({
+          form: formTable.fnGetData(selected[0])._id
+        })
+      }).done(function(json) {
+        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>A new traveler is created at <a href="' + json.location + '">' + json.location + '</a></div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        // initTable();
+      }).fail(function(jqXHR, status, error) {
+        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot create new traveler</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }).always();
     }
   });
 
@@ -79,3 +97,5 @@ function initTable(oTable, url) {
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   }).always();
 }
+
+// function travel
