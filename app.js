@@ -17,6 +17,9 @@ mongoose.connection.close();
 
 var User = require('./model/user.js').User;
 var Form = require('./model/form.js').Form;
+var Traveler = require('./model/traveler.js').Traveler;
+var TravelerData = require('./model/traveler.js').TravelerData;
+var TravelerComment = require('./model/traveler.js').TravelerComment;
 
 mongoose.connect('mongodb://localhost/traveler');
 
