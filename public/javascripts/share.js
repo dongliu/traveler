@@ -55,7 +55,7 @@ $(function() {
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         var data = shareTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data.userid + '"">' + data.username + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.username + '</div>');
       });
       $('#modal .modal-footer').html('<button id="remove" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#remove').click(function(e){
@@ -81,7 +81,7 @@ $(function() {
       $('#modal .modal-body').append('<form class="form-inline"><lable class="checkbox"><input id="modal-access" type="checkbox" name="access" value="write">write</lable></form>');
       selected.forEach(function(row) {
         var data = shareTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data.userid + '"">' + data.username + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.username + '</div>');
       });
       $('#modal .modal-footer').html('<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modify').click(function(e) {
