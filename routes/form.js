@@ -259,7 +259,7 @@ module.exports = function(app) {
             } else {
               // keep the consistency of user's form list
               User.findOne({
-                id: req.params.userid
+                _id: req.params.userid
               }, function(err, user) {
                 if (err) {
                   console.error(err.msg);
