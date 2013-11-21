@@ -2,7 +2,10 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB Traveler :: traveler :: #{id}
+  if (id)
+    title FRIB Traveler :: traveler :: #{id}
+  else
+    title FRIB Traveler :: traveler :: new traveler
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
@@ -10,7 +13,17 @@ block head
 
 block content
   .container
-    h3 #{title}
+    if (id && title)
+      h3 #{title}
+      if (description)
+        h4 #{description}
+      p Created by #{createdBy} on #{createdOn}
+      if (updatedBy)
+        p Updated by #{updatedBy} on #{updatedOn}
+      h4 Devices #{devices}
+    else
+      h3 New traveler
+
     .well-large
       form.form-horizontal#output
         != html

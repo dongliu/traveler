@@ -67,6 +67,8 @@ app.configure('development', function(){
 
 require('./routes/form')(app);
 
+require('./routes/traveler')(app);
+
 require('./routes/user')(app);
 
 require('./routes/profile')(app);
