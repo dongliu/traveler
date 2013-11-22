@@ -64,6 +64,15 @@ var travelerLinkColumn = {
   bSortable: false
 };
 
+var travalerConfigLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function(data, type, full) {
+    return '<a href="/travelers/' + data + '/config" target="_blank"><i class="fa fa-gear fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
 var deviceColumn = {
   sTitle: 'Devices',
   mData: function(source, type, val) {
