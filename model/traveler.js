@@ -19,9 +19,10 @@ var form = new Schema({
 
 
 /*******
-status := 0 // working
-        | 1 // completed
-        | 2 // frozen
+status := 0 // new
+        | 1 // active
+        | 2 // completed
+        | 3 // frozen
 *******/
 
 var traveler = new Schema({
