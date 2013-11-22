@@ -1,5 +1,5 @@
 $(function() {
-  var formAoColumns = [selectColumn, formLinkColumn, formTitleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
+  var formAoColumns = [selectColumn, formLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
   fnAddFilterFoot('#form-table', formAoColumns);
   var formTable = $('#form-table').dataTable({
     aaData: [],
@@ -22,7 +22,7 @@ $(function() {
     fnDeselect(formTable, 'row-selected', 'select-row');
   });
 
-  var sharedFormAoColumns = [formLinkColumn, formTitleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
+  var sharedFormAoColumns = [formLinkColumn, titleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
   fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
   var sharedFormTable = $('#shared-form-table').dataTable({
     aaData: [],
@@ -37,7 +37,20 @@ $(function() {
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
-  var travelerAoColumns = [];
+  var travelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
+  fnAddFilterFoot('#traveler-table', travelerAoColumns);
+  var travelerTable = $('#traveler-table').dataTable({
+    aaData: [],
+    // bAutoWidth: false,
+    aoColumns: travelerAoColumns,
+    aaSorting: [
+      [7, 'desc'],
+      [5, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+  initTable(travelerTable, '/travelers/json');
 
 
   $('#form-travel').click(function(e) {

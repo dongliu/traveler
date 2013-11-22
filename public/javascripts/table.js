@@ -49,37 +49,32 @@ var commentsColumn = {
   bFilter: true
 };
 
-var formTitleColumn = {
+var titleColumn = {
   sTitle: 'Title',
   mData: 'title',
   bFilter: true
 };
 
-// var writeColumn = {
-//   sTitle: 'Write',
-//   // sDefaultContent: '',
-//   mData: function(source, type, val) {
-//     if (source.write) {
-//       return source.write.join();
-//     } else {
-//       return '';
-//     }
-//   },
-//   bFilter: true
-// };
+var travelerLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function(data, type, full) {
+    return '<a href="/travelers/' + data + '/" target="_blank"><i class="fa fa-edit fa-lg"></i></a>';
+  },
+  bSortable: false
+};
 
-// var readColumn = {
-//   sTitle: 'Read',
-//   // sDefaultContent: '',
-//   mData: function(source, type, val) {
-//     if (source.read) {
-//       return source.read.join();
-//     } else {
-//       return '';
-//     }
-//   },
-//   bFilter: true
-// };
+var deviceColumn = {
+  sTitle: 'Devices',
+  mData: function(source, type, val) {
+    if (source.devices) {
+      return source.devices.join('; ');
+    } else {
+      return '';
+    }
+  },
+  bFilter: true
+};
 
 var sharedWithColumn = {
   sTitle: 'Shared with',
@@ -99,6 +94,28 @@ var sharedWithColumn = {
   },
   bFilter: true
 };
+
+var statusColumn = {
+  sTitle: 'Status',
+  mData: 'status',
+  mRender: function(data, type, full){
+    return formatTravelerStatus(data);
+  },
+  bFilter: true
+};
+
+function formatTravelerStatus(s) {
+  var status = {
+    '1': 'active',
+    '2': 'completed',
+    '3': 'frozen',
+    '0': 'new'
+  };
+  if (status['' + s]) {
+    return status['' + s];
+  }
+  return 'unknown';
+}
 
 /*shared user columns*/
 var useridColumn = personColumn('User id', '_id');

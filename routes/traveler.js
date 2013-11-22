@@ -15,6 +15,20 @@ var TravelerComment = mongoose.model('TravelerComment');
 
 
 module.exports = function(app) {
+
+  app.get('/travelers/json', auth.ensureAuthenticated, function(req, res) {
+    Traveler.find({
+      createdBy: req.session.userid
+    }, 'title description status devices sharedWith createdOn updatedOn updatedBy').lean().exec(function(err, docs) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      res.json(200, docs);
+    });
+  });
+
+
   app.post('/travelers/', auth.ensureAuthenticated, function(req, res) {
     if (!req.body.form) {
       return res.send(400, 'need the form in request');
@@ -36,8 +50,8 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/travelers/:id/json', auth.ensureAuthenticated, function(req, res){
-    Traveler.findById(req.params.id).lean().exec(function(err, doc){
+  app.get('/travelers/:id/json', auth.ensureAuthenticated, function(req, res) {
+    Traveler.findById(req.params.id).lean().exec(function(err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
