@@ -64,6 +64,21 @@ module.exports = function(app) {
 
     });
   });
+
+  app.get('/travelers/:id/config', auth.ensureAuthenticated, function(req, res) {
+    Traveler.findById(req.params.id, 'title description status devices sharedWith createdOn updatedOn updatedBy').lean().exec(function(err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (doc) {
+        return res.render('config', doc);
+      } else {
+        return res.send(410, 'gone');
+      }
+
+    });
+  });
 };
 
 function createTraveler(form, req, res) {

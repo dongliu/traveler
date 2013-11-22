@@ -37,15 +37,15 @@ $(function() {
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
-  var travelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
+  var travelerAoColumns = [travalerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: travelerAoColumns,
     aaSorting: [
-      [7, 'desc'],
-      [5, 'desc']
+      [8, 'desc'],
+      [6, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -66,11 +66,6 @@ $(function() {
       $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
     } else {
-      // may need to deselect in the table here
-      // var win = window.open('/travelers/new?form='+formTable.fnGetData(selected[0])._id, '_blank');
-      // if (win) {
-      //   win.focus();
-      // }
       $.ajax({
         url: '/travelers/',
         method: 'POST',
