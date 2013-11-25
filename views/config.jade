@@ -11,14 +11,19 @@ block head
 
 block content
   .container
-    if (title)
-      h3 Configure traveler
-        = ' '
-        span#title #{title}
-    if (description)
-      h4#desc #{description}
-    else
-      h4#desc No description
+    #message
+    h3 Title:
+      = ' '
+      if (typeof(title) == 'undefined')
+        span#title.editable No title
+      else
+        span#title.editable #{title}
+    h4 Description:
+      = ' '
+      if (typeof(description) == 'undefined')
+        span#description.editable No description
+      else
+        span#description.editable #{description}
     p Created on #{createdOn}
     h4 Devices
     ul
@@ -36,5 +41,6 @@ block content
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='/jquery/jquery.jeditable.js')
   script(type='text/javascript', src='/javascripts/config.js')
