@@ -66,19 +66,54 @@ module.exports = function(app) {
   });
 
   app.get('/travelers/:id/config', auth.ensureAuthenticated, function(req, res) {
-    Traveler.findById(req.params.id, 'title description status devices sharedWith createdOn updatedOn updatedBy').lean().exec(function(err, doc) {
+    Traveler.findById(req.params.id, 'title description status devices sharedWith createdBy createdOn updatedOn updatedBy').lean().exec(function(err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
       if (doc) {
-        return res.render('config', doc);
+        if (doc.createdBy == req.session.userid) {
+          return res.render('config', doc);
+        } else {
+          return res.res(403, 'You are not authorized to access this resource');
+        }
       } else {
         return res.send(410, 'gone');
       }
 
     });
   });
+
+  app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description']), function(req, res) {
+    Traveler.findById(req.params.id, function(err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (doc) {
+        for (var k in req.body) {
+          if (req.body.hasOwnProperty(k) && req.body[k] != null) {
+            doc[k] = req.body[k];
+          }
+        }
+        doc.save(function(err) {
+          if (err) {
+            console.error(err.msg);
+            return res.send(500, err.msg);
+          } else {
+            return res.send(204);
+          }
+        });
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
+  app.post('/travelers/:id/devices', auth.ensureAuthenticated, function(req, res) {
+
+  });
+
 };
 
 function createTraveler(form, req, res) {
@@ -109,4 +144,23 @@ function createTraveler(form, req, res) {
       location: '/travelers/' + doc.id + '/'
     });
   });
+}
+
+
+function filterBody(strings) {
+  return function(req, res, next) {
+    var found = false;
+    for (var k in req.body) {
+      if (strings.indexOf(k) !== -1) {
+        found = true;
+      } else {
+        req.body[k] = null;
+      }
+    }
+    if (found) {
+      next();
+    } else {
+      return res.send(400, 'cannot find required information in body');
+    }
+  };
 }
