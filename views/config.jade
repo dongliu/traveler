@@ -26,21 +26,24 @@ block content
         span#description.editable #{description}
     p Created on #{createdOn}
     h4 Devices
-    ul
-    each device in devices
-      li
-        span #{device}
-        a.btn.btn-small.btn-warning
-          i.fa.fa-trash-o.fa-lg
+    ul#devices
+      each device in devices
+        li
+          | #{device}
+          button.btn.btn-small.btn-warning.removeDevice
+            i.fa.fa-trash-o.fa-lg
     br
     .btn-group
-      button.btn.btn-primary Add device
+      button.btn.btn-primary#add Add device
     if (status == 0)
       .btn-group
         button.btn.btn-primary Start to work
+    .btn-group
+        a.btn.btn-info(href='/devices', target='_blank') Browse devices
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='/dependency/typeahead.js')
   script(type='text/javascript', src='/jquery/jquery.jeditable.js')
   script(type='text/javascript', src='/javascripts/config.js')

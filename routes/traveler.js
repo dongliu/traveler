@@ -110,10 +110,33 @@ module.exports = function(app) {
     });
   });
 
-  app.post('/travelers/:id/devices', auth.ensureAuthenticated, function(req, res) {
-
+  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, filterBody(['newdevice']), function(req, res) {
+    Traveler.findByIdAndUpdate(req.params.id, {$addToSet: {devices: req.body.newdevice} }, function(err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (doc) {
+        res.send(201, 'The device ' + req.body.newdevice + ' was added to the list.');
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
   });
 
+  app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, function(req, res) {
+    Traveler.findByIdAndUpdate(req.params.id, {$pull: {devices: req.params.number} }, function(err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (doc) {
+        res.send(204);
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
 };
 
 function createTraveler(form, req, res) {
