@@ -25,6 +25,8 @@ block content
       else
         span#description.editable #{description}
     p Created on #{createdOn}
+    if (typeof(updatedBy) != 'undefined')
+      p Updated by #{updatedBy} on #{updatedOn}
     h4 Devices
     ul#devices
       each device in devices
