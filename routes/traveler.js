@@ -449,7 +449,7 @@ function addUserFromAD(req, res, doc) {
 
   ldapClient.search(ad.searchBase, opts, false, function(err, result) {
     if (err) {
-      console.err(err.name + ' : ' + err.message);
+      console.error(err.name + ' : ' + err.message);
       return res.json(500, err);
     }
 
