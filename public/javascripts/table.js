@@ -73,6 +73,15 @@ var travalerConfigLinkColumn = {
   bSortable: false
 };
 
+var travalerShareLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function(data, type, full) {
+    return '<a href="/travelers/' + data + '/share" target="_blank"><i class="fa fa-users fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
 var deviceColumn = {
   sTitle: 'Devices',
   mData: function(source, type, val) {
@@ -118,7 +127,7 @@ function formatTravelerStatus(s) {
     '1': 'active',
     '2': 'completed',
     '3': 'frozen',
-    '0': 'new'
+    '0': 'initialized'
   };
   if (status['' + s]) {
     return status['' + s];

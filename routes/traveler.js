@@ -113,7 +113,15 @@ module.exports = function(app) {
   });
 
   app.post('/travelers/:id/devices/', auth.ensureAuthenticated, filterBody(['newdevice']), function(req, res) {
-    Traveler.findByIdAndUpdate(req.params.id, {$addToSet: {devices: req.body.newdevice}, $set: {updatedBy: req.session.userid, updatedOn: Date.now()}}, function(err, doc) {
+    Traveler.findByIdAndUpdate(req.params.id, {
+      $addToSet: {
+        devices: req.body.newdevice
+      },
+      $set: {
+        updatedBy: req.session.userid,
+        updatedOn: Date.now()
+      }
+    }, function(err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -127,7 +135,15 @@ module.exports = function(app) {
   });
 
   app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, function(req, res) {
-    Traveler.findByIdAndUpdate(req.params.id, {$pull: {devices: req.params.number, $set: {updatedBy: req.session.userid, updatedOn: Date.now()}} }, function(err, doc) {
+    Traveler.findByIdAndUpdate(req.params.id, {
+      $pull: {
+        devices: req.params.number,
+        $set: {
+          updatedBy: req.session.userid,
+          updatedOn: Date.now()
+        }
+      }
+    }, function(err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
