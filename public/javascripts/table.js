@@ -64,7 +64,7 @@ var travelerLinkColumn = {
   bSortable: false
 };
 
-var travalerConfigLinkColumn = {
+var travelerConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data, type, full) {
@@ -73,11 +73,11 @@ var travalerConfigLinkColumn = {
   bSortable: false
 };
 
-var travalerShareLinkColumn = {
+var travelerShareLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data, type, full) {
-    return '<a href="/travelers/' + data + '/share" target="_blank"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="/travelers/' + data + '/share/" target="_blank"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };

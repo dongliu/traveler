@@ -37,7 +37,7 @@ $(function() {
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
-  var travelerAoColumns = [travalerConfigLinkColumn, travalerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
+  var travelerAoColumns = [travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
     aaData: [],

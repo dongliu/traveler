@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB traveler :: forms :: #{id} :: share
+  title FRIB traveler :: #{type} :: #{id} :: share
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
@@ -12,19 +12,6 @@ block head
 
 block content
   .container(style="margin-top: 10px")
-    //- form.form-horizontal.well
-    //-   .control-group
-    //-     lable.control-label User name
-    //-     .controls
-    //-       input#username.input(type='text', placeholder='Last, First', name='name')
-    //-   .control-group
-    //-     .controls
-    //-       label.checkbox
-    //-         input#access(type='checkbox', name='access', value='write')
-    //-         | Write
-    //-   .control-group
-    //-     .controls
-    //-       button.btn.btn-primary#add(type='submit') Add to share
     .well
       form.form-inline
         input#username.input(type='text', placeholder='Last, First', name='name')
@@ -40,7 +27,9 @@ block content
         h3#modalLabel
       .modal-body
       .modal-footer
-    h3 Shared user list for #{title}
+    h3 Shared user list for #{type}
+      = ' '
+      span.text-info #{title}
     .btn-toolbar
       .btn-group
         button.btn.btn-info#share-modify

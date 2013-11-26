@@ -129,6 +129,7 @@ module.exports = function(app) {
           return res.send(403, 'you are not authorized to access this resource');
         }
         return res.render('share', {
+          tyoe: 'Form',
           id: req.params.id,
           title: form.title
         });
@@ -443,7 +444,7 @@ function addUserFromAD(req, res, form) {
       access = 1;
     }
     form.sharedWith.addToSet({
-      _id: user.id,
+      _id: id,
       username: name,
       access: access
     });
@@ -453,7 +454,7 @@ function addUserFromAD(req, res, form) {
         return res.send(500, err.msg);
       } else {
         var user = new User({
-          id: result[0].sAMAccountName,
+          _id: result[0].sAMAccountName,
           name: result[0].displayName,
           email: result[0].mail,
           office: result[0].physicalDeliveryOfficeName,
