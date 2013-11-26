@@ -27,6 +27,17 @@ block content
     p Created on #{createdOn}
     if (typeof(updatedBy) != 'undefined')
       p Updated by #{updatedBy} on #{updatedOn}
+    h4 Status:
+      = ' '
+      case status
+        when 0
+          | initialized
+        when 1
+          | active
+        when 2
+          | completed
+        when 3
+          | frozon
     h4 Devices
     ul#devices
       each device in devices
@@ -35,11 +46,18 @@ block content
           button.btn.btn-small.btn-warning.removeDevice
             i.fa.fa-trash-o.fa-lg
     br
-    .btn-group
-      button.btn.btn-primary#add Add device
-    if (status == 0)
+    if (status != 2)
       .btn-group
-        button.btn.btn-primary Start to work
+        button.btn.btn-primary#add Add device
+      if (status == 0)
+        .btn-group
+          button.btn.btn-primary#work Start to work
+      if (status == 1)
+        .btn-group
+          button.btn.btn-warning#freeze Freeze
+      if (status == 3)
+        .btn-group
+          button.btn.btn-primary#resume Resume
     .btn-group
         a.btn.btn-info(href='/devices', target='_blank') Browse devices
 
