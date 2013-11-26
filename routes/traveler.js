@@ -28,7 +28,6 @@ module.exports = function(app) {
     });
   });
 
-
   app.post('/travelers/', auth.ensureAuthenticated, function(req, res) {
     if (!req.body.form) {
       return res.send(400, 'need the form in request');
@@ -50,6 +49,20 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/travelers/:id/', auth.ensureAuthenticated, function(req, res){
+    Traveler.findById(req.params.id).lean().exec(function(err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (doc) {
+        return res.render('traveler', doc);
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
   app.get('/travelers/:id/json', auth.ensureAuthenticated, function(req, res) {
     Traveler.findById(req.params.id).lean().exec(function(err, doc) {
       if (err) {
@@ -61,7 +74,6 @@ module.exports = function(app) {
       } else {
         return res.send(410, 'gone');
       }
-
     });
   });
 
