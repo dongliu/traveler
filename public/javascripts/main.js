@@ -37,15 +37,15 @@ $(function() {
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
-  var travelerAoColumns = [travalerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
+  var travelerAoColumns = [travalerConfigLinkColumn, travalerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: travelerAoColumns,
     aaSorting: [
-      [8, 'desc'],
-      [6, 'desc']
+      [9, 'desc'],
+      [7, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
