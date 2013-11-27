@@ -11,17 +11,20 @@ block head
 block content
   .container
     h3 Traveler title:  #{title}
-    if (typeof(description) !== undefined)
-      h4 Description: #{description}
-    p Created by #{createdBy} on #{createdOn}
-    if (typeof(updatedBy) !== undefined)
-      p Updated by #{updatedBy} on #{updatedOn}
-    if (typeof(devices) !== undefined && devices.length > 0)
-      h4 Devices: #{devices}
-    .well
-      form.form-horizontal#form
-        != forms[0].html
+    button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
+    #details.collapse.out
+      if (typeof(description) !== undefined)
+        h4 Description: #{description}
+      p Created by #{createdBy} on #{createdOn}
+      if (typeof(updatedBy) !== undefined)
+        p Updated by #{updatedBy} on #{updatedOn}
+      if (typeof(devices) !== undefined && devices.length > 0)
+        h4 Devices: #{devices}
+    br
+    form.form-horizontal#form
+      != forms[0].html
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='/javascripts/traveler.js')
