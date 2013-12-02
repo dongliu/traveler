@@ -18,6 +18,7 @@ $(function() {
           }
         });
         binder.deserializeFieldFromValue(element, found[0].value);
+        binder.accessor.set(element.name, found[0].value);
         $(element).closest('.controls').append('<div class="history">' + history(found) + '</div>');
       }
     });
@@ -89,6 +90,9 @@ $(function() {
 
   $('#form').on('click', 'button[value="reset"]', function(e) {
     e.preventDefault();
+    var $this = $(this);
+    var input = $this.closest('.control-group-wrap').find('input,textarea')[0];
+    binder.deserializeField(input);
     $('#form input,textarea').removeAttr('disabled');
     $(this).closest('.control-group-buttons').remove();
   });
