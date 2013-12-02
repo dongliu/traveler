@@ -9,6 +9,8 @@ block head
   link(rel='stylesheet', href='/stylesheets/style.css')
 
 block content
+  script.
+    var travelerStatus = !{JSON.stringify(status)};
   .container
     #message
     h3 Traveler title:  #{title}

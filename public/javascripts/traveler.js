@@ -18,11 +18,13 @@ $(function() {
           }
         });
         binder.deserializeFieldFromValue(element, found[0].value);
-        $(element).parent().append('<div class="history">' + history(found) + '</div>');
+        $(element).closest('.controls').append('<div class="history">' + history(found) + '</div>');
       }
     });
     // check if active here
-    $('#form input,textarea').removeAttr('disabled');
+    if (travelerStatus == 1) {
+      $('#form input,textarea').removeAttr('disabled');
+    }
   }).fail(function(jqXHR, status, error) {
     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
