@@ -49,7 +49,7 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/travelers/:id/', auth.ensureAuthenticated, function(req, res){
+  app.get('/travelers/:id/', auth.ensureAuthenticated, function(req, res) {
     Traveler.findById(req.params.id).lean().exec(function(err, doc) {
       if (err) {
         console.error(err.msg);
@@ -124,6 +124,51 @@ module.exports = function(app) {
     });
   });
 
+  app.put('/travelers/:id/status', auth.ensureAuthenticated, function(req, res) {
+    Traveler.findById(req.params.id, function(err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (doc) {
+        if (req.body.status == 1) {
+          if ([0, 3].indexOf(doc.status) !== -1) {
+            doc.status = 1;
+          } else {
+            return res.send(400, 'cannot start to work from the current status');
+          }
+        }
+
+        if (req.body.status == 2) {
+          if ([1].indexOf(doc.status) !== -1) {
+            doc.status = 2;
+          } else {
+            return res.send(400, 'cannot complete from the current status');
+          }
+        }
+
+        if (req.body.status == 3) {
+          if ([1].indexOf(doc.status) !== -1) {
+            doc.status = 3;
+          } else {
+            return res.send(400, 'cannot freeze from the current status');
+          }
+        }
+        doc.save(function(err) {
+          if (err) {
+            console.error(err.msg);
+            return res.send(500, err.msg);
+          } else {
+            return res.send(204);
+          }
+        });
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
+
   app.post('/travelers/:id/devices/', auth.ensureAuthenticated, filterBody(['newdevice']), function(req, res) {
     Traveler.findByIdAndUpdate(req.params.id, {
       $addToSet: {
@@ -162,6 +207,46 @@ module.exports = function(app) {
       }
       if (doc) {
         res.send(204);
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
+  app.post('/travelers/:id/data/', auth.ensureAuthenticated, function(req, res) {
+    Traveler.findById(req.params.id, function(err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (doc) {
+        if (doc.status != 1) {
+          return res.send(400, 'The traveler ' + req.params.id + ' is not active');
+        } else {
+          var data = new TravelerData({
+            traveler: doc._id,
+            name: req.body.name,
+            value: req.body.value,
+            inputBy: req.session.userid,
+            inputOn: Date.now()
+          });
+          data.save(function(err) {
+            if (err) {
+              console.error(err.msg);
+              return res.send(500, err.msg);
+            } else {
+              doc.data.push(data._id);
+              doc.save(function(err) {
+                if (err) {
+                  console.error(err.msg);
+                  return res.send(500, err.msg);
+                } else {
+                  return res.send(204);
+                }
+              });
+            }
+          });
+        }
       } else {
         return res.send(410, 'gone');
       }
