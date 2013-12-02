@@ -213,6 +213,30 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/travelers/:id/data/', auth.ensureAuthenticated, function(req, res) {
+    Traveler.findById(req.params.id, function(err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (doc) {
+        TravelerData.find({
+          _id: {
+            $in: doc.data
+          }
+        }).lean().exec(function(err, docs) {
+          if (err) {
+            console.error(err.msg);
+            return res.send(500, err.msg);
+          }
+          return res.json(200, docs);
+        });
+      } else {
+        return res.send(410, 'gone');
+      }
+    });
+  });
+
   app.post('/travelers/:id/data/', auth.ensureAuthenticated, function(req, res) {
     Traveler.findById(req.params.id, function(err, doc) {
       if (err) {

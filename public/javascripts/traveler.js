@@ -1,7 +1,33 @@
 $(function() {
-  $('#form input,textarea').removeAttr('disabled');
-
   var binder = new Binder.FormBinder(document.forms[0]);
+  $.ajax({
+    url: './data/',
+    type: 'GET',
+    dataType: 'json'
+  }).done(function(data, status, jqXHR) {
+    $('#form input,textarea').each(function(index, element) {
+      var found = data.filter(function(e) {
+        return e.name == element.name;
+      });
+      if (found.length) {
+        found.sort(function(a, b){
+          if (a.inputOn > b.inputOn) {
+            return -1;
+          } else {
+            return 1;
+          }
+        });
+        binder.deserializeFieldFromValue(element, found[0].value);
+      }
+    });
+    // check if active here
+    $('#form input,textarea').removeAttr('disabled');
+  }).fail(function(jqXHR, status, error) {
+    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
+    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+  }).always();
+
+
 
   // deserialize the values here
 
@@ -36,7 +62,7 @@ $(function() {
     var $this = $(this);
     var input = $this.closest('.control-group-wrap').find('input,textarea')[0];
     binder.serializeField(input);
-    console.log(getUpdate(binder, input));
+    // console.log(getUpdate(binder, input));
     $.ajax({
       url: './data/',
       type: 'POST',
@@ -48,13 +74,13 @@ $(function() {
     }).done(function(data, status, jqXHR) {
       // document.location.href = window.location.pathname;
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved</div>');
+      $('#form input,textarea').removeAttr('disabled');
+      $this.closest('.control-group-buttons').remove();
     }).fail(function(jqXHR, status, error) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }).always();
 
-    $('#form input,textarea').removeAttr('disabled');
-    $this.closest('.control-group-buttons').remove();
   });
 
 
