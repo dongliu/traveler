@@ -30,7 +30,7 @@ exports.hold = function anonymous(locals) {
 // number.jade compiled template
 exports.number = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>');
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>');
     return buf.join("");
 };
 
