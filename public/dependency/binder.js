@@ -302,6 +302,23 @@ Binder.FormBinder.prototype = {
         element.value = value;
       }
     }
+  },
+  deserializeFieldFromValue: function(element, value) {
+    // var accessor = this._getAccessor(obj);
+    // var value = accessor.get(element.name);
+    // do not deserialize undefined
+    if (typeof value != 'undefined') {
+      value = this._format(element.name, value, element);
+      if (element.type == "radio" || element.type == "checkbox") {
+        element.checked = this._isSelected(element.value, value);
+      } else if (element.type == "select-one" || element.type == "select-multiple") {
+        for (var j = 0; j < element.options.length; j++) {
+          element.options[j].selected = this._isSelected(element.options[j].value, value);
+        }
+      } else {
+        element.value = value;
+      }
+    }
   }
 };
 Binder.FormBinder.bind = function(form, obj) {
