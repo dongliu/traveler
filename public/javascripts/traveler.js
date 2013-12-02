@@ -10,7 +10,7 @@ $(function() {
         return e.name == element.name;
       });
       if (found.length) {
-        found.sort(function(a, b){
+        found.sort(function(a, b) {
           if (a.inputOn > b.inputOn) {
             return -1;
           } else {
@@ -18,6 +18,7 @@ $(function() {
           }
         });
         binder.deserializeFieldFromValue(element, found[0].value);
+        $(element).parent().append('<div class="history">' + history(found) + '</div>');
       }
     });
     // check if active here
@@ -96,4 +97,14 @@ function getUpdate(binder, element) {
   var update = {};
   update[element.name] = binder.accessor.target[element.name];
   return update;
+}
+
+function history(found) {
+  var output = 'changed by ' + found[0].inputBy + ' ' + moment(found[0].inputOn).fromNow();
+  if (found.length > 1) {
+    for (var i = 1; i < found.length; i += 1) {
+      output = output + '; changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow();
+    }
+  }
+  return output;
 }

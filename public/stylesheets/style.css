@@ -405,3 +405,11 @@ ul.dropdown-menu input[type="checkbox"] {
 .fe-type {
   display: none
 }
+
+.history {
+  margin-top: 10px;
+  margin-bottom: 0;
+  display: block;
+  color: #595959;
+  font-style: italic;
+}
