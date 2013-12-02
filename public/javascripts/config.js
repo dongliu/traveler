@@ -43,6 +43,7 @@ $(function() {
   });
 
   $('#add').click(function(e) {
+    e.preventDefault();
     // add an input and a button add
     $('#add').attr('disabled', true);
     $('#devices').append('<li><form class="form-inline"><input id="newDevice" type="text"> <button id="confirm" class="btn btn-primary">Confirm</button> <button id="cancel" class="btn">Cancel</button></form></li>');
@@ -79,9 +80,10 @@ $(function() {
   });
 
   $('.removeDevice').click(function(e) {
+    e.preventDefault();
     var $that = $(this);
     $.ajax({
-      url: './devices/'+ $that.closest('li').text(),
+      url: './devices/' + $that.closest('li').text(),
       type: 'DELETE'
     }).done(function(data, status, jqXHR) {
       $that.closest('li').remove();
@@ -90,9 +92,41 @@ $(function() {
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }).always();
   });
+
+  $('#work').click(function(e) {
+    e.preventDefault();
+    setStatus(1);
+  });
+
+  $('#freeze').click(function(e) {
+    e.preventDefault();
+    setStatus(3);
+  });
+
+  $('#resume').click(function(e) {
+    e.preventDefault();
+    setStatus(1);
+  });
+
 });
 
 function cleanDeviceForm() {
   $('#newDevice').closest('li').remove();
   $('#add').removeAttr('disabled');
+}
+
+function setStatus(s) {
+  $.ajax({
+    url: './status',
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      status: s
+    })
+  }).done(function(data, status, jqXHR) {
+    document.location.href = window.location.pathname;
+  }).fail(function(jqXHR, status, error) {
+    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
+    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+  }).always();
 }
