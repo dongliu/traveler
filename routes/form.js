@@ -32,21 +32,20 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (me) {
-        Form.find({
-          _id: {
-            $in: me.forms
-          }
-        }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function(err, forms) {
-          if (err) {
-            console.error(err.msg);
-            return res.send(500, err.msg);
-          }
-          res.json(200, forms);
-        });
-      } else {
+      if (!me) {
         return res.send(400, 'cannot identify the current user');
       }
+      Form.find({
+        _id: {
+          $in: me.forms
+        }
+      }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function(err, forms) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        res.json(200, forms);
+      });
     });
   });
 
@@ -61,38 +60,29 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (form) {
-        if (form.createdBy == req.session.userid) {
-          return res.render('builder', {
-            id: req.params.id,
-            title: form.title,
-            html: form.html
-          });
-        }
-
-        var share = form.sharedWith.id(req.session.userid);
-
-        if (share.access === 0) {
-          return res.render('viewer', {
-            id: req.params.id,
-            title: form.title,
-            html: form.html
-          });
-        }
-
-        if (share.access === 1) {
-          return res.render('builder', {
-            id: req.params.id,
-            title: form.title,
-            html: form.html
-          });
-        }
-
-        return res.send(403, 'you are not authorized to access this resource');
-
-      } else {
+      if (!form) {
         return res.send(410, 'gone');
       }
+
+      var access = getAccess(req, form);
+
+      if (access == -1) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+
+      if (access == 1) {
+        return res.render('builder', {
+          id: req.params.id,
+          title: form.title,
+          html: form.html
+        });
+      }
+
+      return res.render('viewer', {
+        id: req.params.id,
+        title: form.title,
+        html: form.html
+      });
     });
   });
 
@@ -102,19 +92,21 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (form) {
-        var share = form.sharedWith.id(req.session.userid);
-        if (form.createdBy == req.session.userid || share) {
-          return res.render('viewer', {
-            id: req.params.id,
-            title: form.title,
-            html: form.html
-          });
-        }
-        return res.send(403, 'you are not authorized to access this resource');
-      } else {
+      if (!form) {
         return res.send(410, 'gone');
       }
+
+      var access = getAccess(req, form);
+
+      if (access == -1) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+
+      return res.render('viewer', {
+        id: req.params.id,
+        title: form.title,
+        html: form.html
+      });
     });
   });
 
@@ -124,18 +116,17 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (form) {
-        if (form.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        return res.render('share', {
-          tyoe: 'Form',
-          id: req.params.id,
-          title: form.title
-        });
-      } else {
+      if (!form) {
         return res.send(410, 'gone');
       }
+      if (form.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      return res.render('share', {
+        type: 'Form',
+        id: req.params.id,
+        title: form.title
+      });
     });
   });
 
@@ -145,14 +136,13 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (form) {
-        if (form.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        return res.json(200, form.sharedWith || []);
-      } else {
+      if (!form) {
         return res.send(410, 'gone');
       }
+      if (form.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      return res.json(200, form.sharedWith || []);
     });
   });
 
@@ -162,20 +152,19 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (form) {
-        if (form.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        var share = getSharedWith(form.sharedWith, req.param['name']);
-        if (share === -1) {
-          // new user
-          addUser(req, res, form);
-        } else {
-          // the user cannot be changed in this way
-          return res.send(400, 'The user named ' + req.param['name'] + ' is already in the list.');
-        }
-      } else {
+      if (!form) {
         return res.send(410, 'gone');
+      }
+      if (form.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      var share = getSharedWith(form.sharedWith, req.param['name']);
+      if (share === -1) {
+        // new user
+        addUser(req, res, form);
+      } else {
+        // the user cannot be changed in this way
+        return res.send(400, 'The user named ' + req.param['name'] + ' is already in the list.');
       }
     });
   });
@@ -187,53 +176,44 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (form) {
-        if (form.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        var share = form.sharedWith.id(req.params.userid);
-        if (share) {
-          // change the access
-          if (req.body.access && req.body.access == 'write') {
-            share.access = 1;
-          } else {
-            share.access = 0;
-          }
-          form.save(function(err) {
-            if (err) {
-              console.error(err.msg);
-              return res.send(500, err.msg);
-            } else {
-              // check consistency of user's form list
-              User.findOne({
-                _id: req.params.userid
-              }, function(err, user) {
-                if (err) {
-                  console.error(err.msg);
-                }
-                if (user) {
-                  user.update({
-                    $addToSet: {
-                      forms: form._id
-                    }
-                  }, function(err) {
-                    if (err) {
-                      console.error(err.msg);
-                    }
-                  });
-                } else {
-                  console.error('The user ' + req.params.userid + ' does not in the db');
-                }
-              });
-              return res.send(204);
-            }
-          });
-        } else {
-          // the user should in the list
-          return res.send(400, 'cannot find the user ' + req.params.userid);
-        }
-      } else {
+      if (!form) {
         return res.send(410, 'gone');
+      }
+      if (form.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      var share = form.sharedWith.id(req.params.userid);
+      if (share) {
+        // change the access
+        if (req.body.access && req.body.access == 'write') {
+          share.access = 1;
+        } else {
+          share.access = 0;
+        }
+        form.save(function(err) {
+          if (err) {
+            console.error(err.msg);
+            return res.send(500, err.msg);
+          } else {
+            // check consistency of user's form list
+            User.findByIdAndUpdate(req.params.userid, {
+              $addToSet: {
+                forms: form._id
+              }
+            }, function(err, user) {
+              if (err) {
+                console.error(err.msg);
+              }
+              if (!user) {
+                console.error('The user ' + req.params.userid + ' does not in the db');
+              }
+            });
+            return res.send(204);
+          }
+        });
+      } else {
+        // the user should in the list
+        return res.send(400, 'cannot find the user ' + req.params.userid);
       }
     });
   });
@@ -244,49 +224,38 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (form) {
-        if (form.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        // var share = getSharedWith(form.sharedWith, req.params.userid);
-        var share = form.sharedWith.id(req.params.userid);
-        if (share) {
-          // form.sharedWith.splice(share, 1);
-          share.remove();
-          form.save(function(err) {
-            if (err) {
-              console.error(err.msg);
-              return res.send(500, err.msg);
-            } else {
-              // keep the consistency of user's form list
-              User.findOne({
-                _id: req.params.userid
-              }, function(err, user) {
-                if (err) {
-                  console.error(err.msg);
-                }
-                if (user) {
-                  user.update({
-                    $pull: {
-                      forms: form._id
-                    }
-                  }, function(err) {
-                    if (err) {
-                      console.error(err.msg);
-                    }
-                  });
-                } else {
-                  console.error('The user ' + req.params.userid + ' does not in the db');
-                }
-              });
-              return res.send(204);
-            }
-          });
-        } else {
-          return res.send(400, 'no share info found for ' + req.params.userid);
-        }
-      } else {
+      if (!form) {
         return res.send(410, 'gone');
+      }
+      if (form.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      var share = form.sharedWith.id(req.params.userid);
+      if (share) {
+        share.remove();
+        form.save(function(err) {
+          if (err) {
+            console.error(err.msg);
+            return res.send(500, err.msg);
+          } else {
+            // keep the consistency of user's form list
+            User.findByIdAndUpdate(req.params.userid, {
+              $pull: {
+                forms: form._id
+              }
+            }, function(err, user) {
+              if (err) {
+                console.error(err.msg);
+              }
+              if (!user) {
+                console.error('The user ' + req.params.userid + ' does not in the db');
+              }
+            });
+            return res.send(204);
+          }
+        });
+      } else {
+        return res.send(400, 'no share info found for ' + req.params.userid);
       }
     });
   });
@@ -329,14 +298,14 @@ module.exports = function(app) {
     if (req.body.title) {
       form.title = req.body.title;
     }
-    if (req.body.read && util.isArray(req.body.read)) {
-      form.read = req.body.read;
-    }
-    if (req.body.write && util.isArray(req.body.write)) {
-      form.write = req.body.write;
-    }
+    // if (req.body.read && util.isArray(req.body.read)) {
+    //   form.read = req.body.read;
+    // }
+    // if (req.body.write && util.isArray(req.body.write)) {
+    //   form.write = req.body.write;
+    // }
 
-    if (form.html || form.title || form.read || form.write) {
+    if (form.html || form.title) {
       form.updatedBy = req.session.userid;
       form.updatedOn = Date.now();
     } else {
@@ -355,16 +324,15 @@ module.exports = function(app) {
       }
     });
   });
-
 };
 
 
-function getSharedWith(sharedWith, userid) {
+function getSharedWith(sharedWith, name) {
   if (sharedWith.length == 0) {
     return -1;
   }
   for (var i = 0; i < sharedWith.length; i += 1) {
-    if (sharedWith[i].userid == userid || sharedWith[i].username == userid) {
+    if (sharedWith[i].username == name) {
       return i;
     }
   }
@@ -471,4 +439,40 @@ function addUserFromAD(req, res, form) {
       }
     });
   });
+}
+
+function canWrite(req, doc) {
+  if (doc.createdBy == req.session.userid) {
+    return true;
+  }
+  if (doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access == 1) {
+    return true;
+  }
+  return false;
+}
+
+function canRead(req, doc) {
+  if (doc.createdBy == req.session.userid) {
+    return true;
+  }
+  if (doc.sharedWith.id(req.session.userid)) {
+    return true;
+  }
+  return false;
+}
+
+/*****
+access := -1 // no access
+        | 0  // read
+        | 1  // write
+*****/
+
+function getAccess(req, doc) {
+  if (doc.createdBy == req.session.userid) {
+    return 1;
+  }
+  if (doc.sharedWith.id(req.session.userid)) {
+    return doc.sharedWith.id(req.session.userid).access;
+  }
+  return -1;
 }
