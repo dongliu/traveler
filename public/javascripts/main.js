@@ -53,6 +53,21 @@ $(function() {
   initTable(travelerTable, '/travelers/json');
 
 
+  var sharedTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
+  fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
+  var sharedTravelerTable = $('#shared-traveler-table').dataTable({
+    aaData: [],
+    // bAutoWidth: false,
+    aoColumns: sharedTravelerAoColumns,
+    aaSorting: [
+      [8, 'desc'],
+      [6, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+  initTable(sharedTravelerTable, '/sharedtravelers/json');
+
   $('#form-travel').click(function(e) {
     var selected = fnGetSelected(formTable, 'row-selected');
     if (selected.length == 0) {
@@ -86,8 +101,10 @@ $(function() {
   });
 
   $('#reload').click(function(e) {
+    initTable(formTable, '/forms/json');
     initTable(sharedFormTable, '/sharedforms/json');
     initTable(travelerTable, '/travelers/json');
+    initTable(sharedTravelerTable, '/sharedtravelers/json');
   });
 
   // binding events

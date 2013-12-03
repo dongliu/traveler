@@ -27,6 +27,31 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/sharedtravelers/json', auth.ensureAuthenticated, function(req, res) {
+    User.findOne({
+      _id: req.session.userid
+    }, 'travelers').lean().exec(function(err, me) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (!me) {
+        return res.send(400, 'cannot identify the current user');
+      }
+      Traveler.find({
+        _id: {
+          $in: me.travelers
+        }
+      }, 'title status devices createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function(err, travelers) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        res.json(200, travelers);
+      });
+    });
+  });
+
   app.post('/travelers/', auth.ensureAuthenticated, function(req, res) {
     if (!req.body.form) {
       return res.send(400, 'need the form in request');
