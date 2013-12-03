@@ -3,7 +3,6 @@ var ldapClient = require('../lib/ldap-client');
 
 var auth = require('../lib/auth');
 var mongoose = require('mongoose');
-// var sanitize = require('sanitize-caja');
 var util = require('util');
 
 
@@ -50,30 +49,37 @@ module.exports = function(app) {
   });
 
   app.get('/travelers/:id/', auth.ensureAuthenticated, function(req, res) {
-    Traveler.findById(req.params.id).lean().exec(function(err, doc) {
+    Traveler.findById(req.params.id, function(err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (doc) {
-        return res.render('traveler', doc);
-      } else {
+      if (!doc) {
         return res.send(410, 'gone');
       }
+      if (!canRead(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      if (canWrite(req, doc)) {
+        return res.render('traveler', doc);
+      }
+      return res.render('travelerviewer', doc);
     });
   });
 
   app.get('/travelers/:id/json', auth.ensureAuthenticated, function(req, res) {
-    Traveler.findById(req.params.id).lean().exec(function(err, doc) {
+    Traveler.findById(req.params.id, function(err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (doc) {
-        return res.json(200, doc);
-      } else {
+      if (!doc) {
         return res.send(410, 'gone');
       }
+      if (!canRead(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      return res.json(200, doc);
     });
   });
 
@@ -83,16 +89,14 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (doc) {
-        if (doc.createdBy == req.session.userid) {
-          return res.render('config', doc);
-        } else {
-          return res.res(403, 'You are not authorized to access this resource');
-        }
-      } else {
+      if (!doc) {
         return res.send(410, 'gone');
       }
-
+      if (doc.createdBy == req.session.userid) {
+        return res.render('config', doc);
+      } else {
+        return res.res(403, 'You are not authorized to access this resource');
+      }
     });
   });
 
@@ -102,25 +106,27 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (doc) {
-        for (var k in req.body) {
-          if (req.body.hasOwnProperty(k) && req.body[k] != null) {
-            doc[k] = req.body[k];
-          }
-        }
-        doc.updatedBy = req.session.userid;
-        doc.updatedOn = Date.now();
-        doc.save(function(err) {
-          if (err) {
-            console.error(err.msg);
-            return res.send(500, err.msg);
-          } else {
-            return res.send(204);
-          }
-        });
-      } else {
+      if (!doc) {
         return res.send(410, 'gone');
       }
+      if (doc.createdBy != req.session.userid) {
+        return res.res(403, 'You are not authorized to access this resource');
+      }
+      for (var k in req.body) {
+        if (req.body.hasOwnProperty(k) && req.body[k] != null) {
+          doc[k] = req.body[k];
+        }
+      }
+      doc.updatedBy = req.session.userid;
+      doc.updatedOn = Date.now();
+      doc.save(function(err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        } else {
+          return res.send(204);
+        }
+      });
     });
   });
 
@@ -130,86 +136,99 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (doc) {
-        if (req.body.status == 1) {
-          if ([0, 3].indexOf(doc.status) !== -1) {
-            doc.status = 1;
-          } else {
-            return res.send(400, 'cannot start to work from the current status');
-          }
-        }
-
-        if (req.body.status == 2) {
-          if ([1].indexOf(doc.status) !== -1) {
-            doc.status = 2;
-          } else {
-            return res.send(400, 'cannot complete from the current status');
-          }
-        }
-
-        if (req.body.status == 3) {
-          if ([1].indexOf(doc.status) !== -1) {
-            doc.status = 3;
-          } else {
-            return res.send(400, 'cannot freeze from the current status');
-          }
-        }
-        doc.save(function(err) {
-          if (err) {
-            console.error(err.msg);
-            return res.send(500, err.msg);
-          } else {
-            return res.send(204);
-          }
-        });
-      } else {
+      if (!doc) {
         return res.send(410, 'gone');
       }
+      if (doc.createdBy != req.session.userid) {
+        return res.res(403, 'You are not authorized to access this resource');
+      }
+      if (req.body.status == 1) {
+        if ([0, 3].indexOf(doc.status) !== -1) {
+          doc.status = 1;
+        } else {
+          return res.send(400, 'cannot start to work from the current status');
+        }
+      }
+
+      if (req.body.status == 2) {
+        if ([1].indexOf(doc.status) !== -1) {
+          doc.status = 2;
+        } else {
+          return res.send(400, 'cannot complete from the current status');
+        }
+      }
+
+      if (req.body.status == 3) {
+        if ([1].indexOf(doc.status) !== -1) {
+          doc.status = 3;
+        } else {
+          return res.send(400, 'cannot freeze from the current status');
+        }
+      }
+
+      doc.updatedBy = req.session.userid;
+      doc.updatedOn = Date.now();
+      doc.save(function(err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        } else {
+          return res.send(204);
+        }
+      });
     });
   });
 
 
   app.post('/travelers/:id/devices/', auth.ensureAuthenticated, filterBody(['newdevice']), function(req, res) {
-    Traveler.findByIdAndUpdate(req.params.id, {
-      $addToSet: {
-        devices: req.body.newdevice
-      },
-      $set: {
-        updatedBy: req.session.userid,
-        updatedOn: Date.now()
-      }
-    }, function(err, doc) {
+    Traveler.findById(req.params.id, function(err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (doc) {
-        res.send(201, 'The device ' + req.body.newdevice + ' was added to the list.');
-      } else {
+      if (!doc) {
         return res.send(410, 'gone');
       }
+      if (doc.createdBy != req.session.userid) {
+        return res.res(403, 'You are not authorized to access this resource');
+      }
+      doc.updatedBy = req.session.userid;
+      doc.updatedOn = Date.now();
+      doc.devices.addToSet(req.body.newdevice);
+      doc.save(function(err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        } else {
+          return res.send(204);
+        }
+      });
     });
   });
 
   app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, function(req, res) {
-    Traveler.findByIdAndUpdate(req.params.id, {
-      $pull: {
-        devices: req.params.number,
-        $set: {
-          updatedBy: req.session.userid,
-          updatedOn: Date.now()
-        }
-      }
-    }, function(err, doc) {
+    Traveler.findById(req.params.id, function(err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (doc) {
-        res.send(204);
-      } else {
+      if (!doc) {
         return res.send(410, 'gone');
       }
+      if (doc.createdBy != req.session.userid) {
+        return res.res(403, 'You are not authorized to access this resource');
+      }
+      doc.updatedBy = req.session.userid;
+      doc.updatedOn = Date.now();
+      doc.devices.pull(req.params.number);
+      doc.save(function(err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        } else {
+          return res.send(204);
+        }
+      });
     });
   });
 
@@ -219,21 +238,23 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (doc) {
-        TravelerData.find({
-          _id: {
-            $in: doc.data
-          }
-        }).lean().exec(function(err, docs) {
-          if (err) {
-            console.error(err.msg);
-            return res.send(500, err.msg);
-          }
-          return res.json(200, docs);
-        });
-      } else {
+      if (!doc) {
         return res.send(410, 'gone');
       }
+      if (!canRead(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      TravelerData.find({
+        _id: {
+          $in: doc.data
+        }
+      }).lean().exec(function(err, docs) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        return res.json(200, docs);
+      });
     });
   });
 
@@ -243,40 +264,43 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (doc) {
-        if (doc.status != 1) {
-          return res.send(400, 'The traveler ' + req.params.id + ' is not active');
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource.');
+      }
+
+      if (doc.status != 1) {
+        return res.send(400, 'The traveler ' + req.params.id + ' is not active');
+      }
+      var data = new TravelerData({
+        traveler: doc._id,
+        name: req.body.name,
+        value: req.body.value,
+        inputBy: req.session.userid,
+        inputOn: Date.now()
+      });
+      data.save(function(err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
         } else {
-          var data = new TravelerData({
-            traveler: doc._id,
-            name: req.body.name,
-            value: req.body.value,
-            inputBy: req.session.userid,
-            inputOn: Date.now()
-          });
-          data.save(function(err) {
+          doc.data.push(data._id);
+          doc.updatedBy = req.session.userid;
+          doc.updatedOn = Date.now();
+          doc.save(function(err) {
             if (err) {
               console.error(err.msg);
               return res.send(500, err.msg);
             } else {
-              doc.data.push(data._id);
-              doc.save(function(err) {
-                if (err) {
-                  console.error(err.msg);
-                  return res.send(500, err.msg);
-                } else {
-                  return res.send(204);
-                }
-              });
+              return res.send(204);
             }
           });
         }
-      } else {
-        return res.send(410, 'gone');
-      }
+      });
     });
   });
-
 
   app.get('/travelers/:id/share/', auth.ensureAuthenticated, function(req, res) {
     Traveler.findById(req.params.id).lean().exec(function(err, traveler) {
@@ -284,18 +308,17 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (traveler) {
-        if (traveler.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        return res.render('share', {
-          type: 'Traveler',
-          id: req.params.id,
-          title: traveler.title
-        });
-      } else {
+      if (!traveler) {
         return res.send(410, 'gone');
       }
+      if (traveler.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      return res.render('share', {
+        type: 'Traveler',
+        id: req.params.id,
+        title: traveler.title
+      });
     });
   });
 
@@ -305,14 +328,13 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (traveler) {
-        if (traveler.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        return res.json(200, traveler.sharedWith || []);
-      } else {
+      if (!traveler) {
         return res.send(410, 'gone');
       }
+      if (traveler.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      return res.json(200, traveler.sharedWith || []);
     });
   });
 
@@ -322,20 +344,19 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (traveler) {
-        if (traveler.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        var share = getSharedWith(traveler.sharedWith, req.param['name']);
-        if (share === -1) {
-          // new user
-          addUser(req, res, traveler);
-        } else {
-          // the user cannot be changed in this way
-          return res.send(400, 'The user named ' + req.param['name'] + ' is already in the list.');
-        }
-      } else {
+      if (!traveler) {
         return res.send(410, 'gone');
+      }
+      if (traveler.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      var share = getSharedWith(traveler.sharedWith, req.param['name']);
+      if (share === -1) {
+        // new user
+        addUser(req, res, traveler);
+      } else {
+        // the user cannot be changed in this way
+        return res.send(400, 'The user named ' + req.param['name'] + ' is already in the list.');
       }
     });
   });
@@ -347,54 +368,43 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (traveler) {
-        if (traveler.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        var share = traveler.sharedWith.id(req.params.userid);
-        if (share) {
-          // change the access
-          if (req.body.access && req.body.access == 'write') {
-            share.access = 1;
-          } else {
-            share.access = 0;
-          }
-          traveler.save(function(err) {
-            if (err) {
-              console.error(err.msg);
-              return res.send(500, err.msg);
-            } else {
-              // check consistency of user's traveler list
-              User.findOne({
-                _id: req.params.userid
-              }, function(err, user) {
-                if (err) {
-                  console.error(err.msg);
-                }
-                if (user) {
-                  user.update({
-                    $addToSet: {
-                      travelers: traveler._id
-                    }
-                  }, function(err) {
-                    if (err) {
-                      console.error(err.msg);
-                    }
-                  });
-                } else {
-                  console.error('The user ' + req.params.userid + ' does not in the db');
-                }
-              });
-              return res.send(204);
-            }
-          });
-        } else {
-          // the user should in the list
-          return res.send(400, 'cannot find the user ' + req.params.userid);
-        }
-      } else {
+      if (!traveler) {
         return res.send(410, 'gone');
       }
+      if (traveler.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      var share = traveler.sharedWith.id(req.params.userid);
+      if (!share) {
+        return res.send(400, 'cannot find the user ' + req.params.userid);
+      }
+      // change the access
+      if (req.body.access && req.body.access == 'write') {
+        share.access = 1;
+      } else {
+        share.access = 0;
+      }
+      traveler.save(function(err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        } else {
+          // check consistency of user's traveler list
+          User.findByIdAndUpdate(req.params.userid, {
+            $addToSet: {
+              travelers: traveler._id
+            }
+          }, function(err, user) {
+            if (err) {
+              console.error(err.msg);
+            }
+            if (!user) {
+              console.error('The user ' + req.params.userid + ' does not in the db');
+            }
+          });
+          return res.send(204);
+        }
+      });
     });
   });
 
@@ -404,49 +414,38 @@ module.exports = function(app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      if (traveler) {
-        if (traveler.createdBy !== req.session.userid) {
-          return res.send(403, 'you are not authorized to access this resource');
-        }
-        // var share = getSharedWith(traveler.sharedWith, req.params.userid);
-        var share = traveler.sharedWith.id(req.params.userid);
-        if (share) {
-          // traveler.sharedWith.splice(share, 1);
-          share.remove();
-          traveler.save(function(err) {
-            if (err) {
-              console.error(err.msg);
-              return res.send(500, err.msg);
-            } else {
-              // keep the consistency of user's traveler list
-              User.findOne({
-                _id: req.params.userid
-              }, function(err, user) {
-                if (err) {
-                  console.error(err.msg);
-                }
-                if (user) {
-                  user.update({
-                    $pull: {
-                      travelers: traveler._id
-                    }
-                  }, function(err) {
-                    if (err) {
-                      console.error(err.msg);
-                    }
-                  });
-                } else {
-                  console.error('The user ' + req.params.userid + ' does not in the db');
-                }
-              });
-              return res.send(204);
-            }
-          });
-        } else {
-          return res.send(400, 'no share info found for ' + req.params.userid);
-        }
-      } else {
+      if (!traveler) {
         return res.send(410, 'gone');
+      }
+      if (traveler.createdBy !== req.session.userid) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      var share = traveler.sharedWith.id(req.params.userid);
+      if (share) {
+        share.remove();
+        traveler.save(function(err) {
+          if (err) {
+            console.error(err.msg);
+            return res.send(500, err.msg);
+          } else {
+            // keep the consistency of user's traveler list
+            User.findByIdAndUpdate(req.params.userid, {
+              $pull: {
+                travelers: traveler._id
+              }
+            }, function(err, user) {
+              if (err) {
+                console.error(err.msg);
+              }
+              if (!user) {
+                console.error('The user ' + req.params.userid + ' does not in the db');
+              }
+            });
+            return res.send(204);
+          }
+        });
+      } else {
+        return res.send(400, 'no share info found for ' + req.params.userid);
       }
     });
   });
@@ -503,12 +502,12 @@ function filterBody(strings) {
 }
 
 
-function getSharedWith(sharedWith, userid) {
+function getSharedWith(sharedWith, name) {
   if (sharedWith.length == 0) {
     return -1;
   }
   for (var i = 0; i < sharedWith.length; i += 1) {
-    if (sharedWith[i].userid == userid || sharedWith[i].username == userid) {
+    if (sharedWith[i].username == name) {
       return i;
     }
   }
@@ -517,7 +516,6 @@ function getSharedWith(sharedWith, userid) {
 
 function addUser(req, res, doc) {
   var name = req.param('name');
-
   // check local db first then try ad
   User.findOne({
     name: name
@@ -539,9 +537,9 @@ function addUser(req, res, doc) {
       doc.save(function(err) {
         if (err) {
           console.error(err.msg);
-          return res.send(500, err.msg);
+          res.send(500, err.msg);
         } else {
-          return res.send(201, 'The user named ' + name + ' was added to the share list.');
+          res.send(201, 'The user named ' + name + ' was added to the share list.');
         }
       });
       user.update({
@@ -608,7 +606,7 @@ function addUserFromAD(req, res, doc) {
         });
         user.save(function(err) {
           if (err) {
-            console.dir(user);
+            // console.dir(user);
             console.dir(err);
             console.error(err.msg);
           }
@@ -617,4 +615,24 @@ function addUserFromAD(req, res, doc) {
       }
     });
   });
+}
+
+function canWrite(req, doc) {
+  if (doc.createdBy == req.session.userid) {
+    return true;
+  }
+  if (doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access == 1) {
+    return true;
+  }
+  return false;
+}
+
+function canRead(req, doc) {
+  if (doc.createdBy == req.session.userid) {
+    return true;
+  }
+  if (doc.sharedWith.id(req.session.userid)) {
+    return true;
+  }
+  return false;
 }
