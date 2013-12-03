@@ -1,0 +1,33 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title FRIB Traveler :: traveler :: #{_id}
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+block content
+  .container
+    #message
+    h3 Traveler title:  #{title}
+    button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
+    #details.collapse.out
+      if (typeof(description) !== undefined)
+        h4 Description: #{description}
+      p Created by #{createdBy} on #{createdOn}
+      if (typeof(updatedBy) !== undefined)
+        p Updated by #{updatedBy} on #{updatedOn}
+      if (typeof(devices) !== undefined && devices.length > 0)
+        h4 Devices: #{devices}
+    br
+    form.form-horizontal#form
+      != forms[0].html
+
+block js
+  script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='/dependency/binder.js')
+  script(type='text/javascript', src='/dependency/moment.js')
+  script(type='text/javascript', src='/javascripts/travelerviewer.js')
