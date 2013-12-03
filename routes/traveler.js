@@ -352,7 +352,6 @@ module.exports = function(app) {
       }
       var share = getSharedWith(traveler.sharedWith, req.param['name']);
       if (share === -1) {
-        // new user
         addUser(req, res, traveler);
       } else {
         // the user cannot be changed in this way
@@ -544,7 +543,7 @@ function addUser(req, res, doc) {
       });
       user.update({
         $addToSet: {
-          docs: doc._id
+          travelers: doc._id
         }
       }, function(err) {
         if (err) {
