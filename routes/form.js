@@ -56,7 +56,7 @@ module.exports = function(app) {
   });
 
   app.get('/forms/:id/', auth.ensureAuthenticated, function(req, res) {
-    Form.findById(req.params.id).lean().exec(function(err, form) {
+    Form.findById(req.params.id, function(err, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -97,7 +97,7 @@ module.exports = function(app) {
   });
 
   app.get('/forms/:id/preview', auth.ensureAuthenticated, function(req, res) {
-    Form.findById(req.params.id).lean().exec(function(err, form) {
+    Form.findById(req.params.id, function(err, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
