@@ -85,6 +85,10 @@ $(function() {
     }
   });
 
+  $('#reload').click(function(e) {
+    initTable(sharedFormTable, '/sharedforms/json');
+    initTable(travelerTable, '/travelers/json');
+  });
 
   // binding events
   selectEvent();
