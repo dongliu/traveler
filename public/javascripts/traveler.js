@@ -39,14 +39,12 @@ $(function() {
     e.preventDefault();
     if (!$(this).hasClass('control-focus')) {
       $(this).addClass('control-focus');
-      // $(this).prepend(input.button());
     }
   });
   $('#form .control-group-wrap').mouseleave(function(e) {
     e.preventDefault();
     if ($(this).hasClass('control-focus')) {
       $(this).removeClass('control-focus');
-      // $('.control-group-buttons', $(this)).remove();
     }
   });
 
@@ -66,7 +64,6 @@ $(function() {
     var $this = $(this);
     var input = $this.closest('.control-group-wrap').find('input,textarea')[0];
     binder.serializeField(input);
-    // console.log(getUpdate(binder, input));
     $.ajax({
       url: './data/',
       type: 'POST',
@@ -76,8 +73,10 @@ $(function() {
         value: binder.accessor.target[input.name]
       })
     }).done(function(data, status, jqXHR) {
-      // document.location.href = window.location.pathname;
-      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved</div>');
+      var timestamp = jqXHR.getResponseHeader('Date');
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved ' + moment(timestamp).fromNow() + '</div>');
+      var $history = $($this.closest('.control-group-wrap').find('.history')[0]);
+      $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
       $('#form input,textarea').removeAttr('disabled');
       $this.closest('.control-group-buttons').remove();
     }).fail(function(jqXHR, status, error) {
@@ -106,10 +105,10 @@ function getUpdate(binder, element) {
 }
 
 function history(found) {
-  var output = 'changed by ' + found[0].inputBy + ' ' + moment(found[0].inputOn).fromNow();
-  if (found.length > 1) {
-    for (var i = 1; i < found.length; i += 1) {
-      output = output + '; changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow();
+  var output = '';
+  if (found.length > 0) {
+    for (var i = 0; i < found.length; i += 1) {
+      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
     }
   }
   return output;
