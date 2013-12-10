@@ -37,15 +37,29 @@ var traveler = new Schema({
   sharedWith: [sharedWithUser],
   referenceForm: ObjectId,
   forms: [form],
+  activeForm: {
+    type: Number,
+    default: 0
+  },
   data: [ObjectId],
   comments: [ObjectId]
 });
 
+/*******
+type := 'image'
+      | 'pdf'
+      | 'doc'
+      | 'binary' // 4 file types
+      | 'text'
+      | 'textarea'
+      | 'number'
+*******/
 
 var travelerData = new Schema({
   traveler: ObjectId,
   name: String,
   value: Schema.Types.Mixed,
+  type: String,
   inputBy: String,
   inputOn: Date
 });
