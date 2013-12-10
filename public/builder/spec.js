@@ -37,7 +37,7 @@ exports.hold = function anonymous(locals) {
 // inputtype.jade compiled template
 exports.inputtype = function anonymous(locals) {
     var buf = [];
-    buf.push('<option value="checkbox">Checkbox</option><option value="text">Text</option><option value="textarea">Paragraph</option><option value="number">Number</option><option value="choice">Single choice</option><option value="multiple">Miltiple choice</option><option value="upload">Upload file</option><option value="rich">Rich instruction</option><option value="hold">Hold point</option>');
+    buf.push('<option value="text">Text</option><option value="number">Number</option><option value="date">Date</option><option value="datetime-local">Date Time</option><option value="email">Email</option><option value="tel">Phone number</option><option value="time">Time</option><option value="url">URL</option>');
     return buf.join("");
 };
 
@@ -79,7 +79,7 @@ exports.rows = function anonymous(locals) {
 // type.jade compiled template
 exports.type = function anonymous(locals) {
     var buf = [];
-    buf.push('<div class="control-group"><div class="control-label">Type</div><div class="controls"><select><option value="checkbox">Checkbox</option><option value="text">Text</option><option value="textarea">Paragraph</option><option value="number">Number</option><option value="choice">Single choice</option><option value="multiple">Miltiple choice</option><option value="upload">Upload file</option><option value="rich">Rich instruction</option><option value="hold">Hold point</option></select></div></div>');
+    buf.push('<div class="control-group"><div class="control-label">Type</div><div class="controls"><select name="type"><option value="text">Text</option><option value="number">Number</option><option value="date">Date</option><option value="datetime-local">Date Time</option><option value="email">Email</option><option value="tel">Phone number</option><option value="time">Time</option><option value="url">URL</option></select></div></div>');
     return buf.join("");
 };
 

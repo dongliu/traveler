@@ -70,6 +70,7 @@ $(function() {
       contentType: 'application/json',
       data: JSON.stringify({
         name: input.name,
+        type: input.type,
         value: binder.accessor.target[input.name]
       })
     }).done(function(data, status, jqXHR) {

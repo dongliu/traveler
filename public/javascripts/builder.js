@@ -100,10 +100,10 @@ function working() {
   });
 
 
-  //   $('#add-page').click(function(e){
-  //     e.preventDefault();
-  //   });
-
+  $('#add-other').click(function(e) {
+    e.preventDefault();
+    other_edit();
+  });
 }
 
 function binding_events() {
@@ -190,6 +190,9 @@ function binding_events() {
           break;
         case 'section':
           section_edit($cgr);
+          break;
+        case 'other':
+          other_edit($cgr);
           break;
         default:
           alert('not implemented.');
@@ -414,6 +417,48 @@ function text_edit($cgr) {
   binding($edit, $text, model, $done);
 }
 
+function other_edit($cgr) {
+  $('#output .well.spec').remove();
+  var label = 'label';
+  var placeholder = '';
+  var help = '';
+  var type = 'text';
+  if ($cgr) {
+    label = $('.control-label span', $cgr).text();
+    placeholder = $('.controls input', $cgr).attr('placeholder');
+    type = $('.controls input', $cgr).attr('type');
+    help = $('.controls span.help-block', $cgr).text();
+  }
+  var $other = $(input.other());
+  var $label = $(spec.label());
+  var $placeholder = $(spec.placeholder());
+  var $type = $(spec.type());
+  var $help = $(spec.help());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append($type, $label, $placeholder, $help, $done);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">other</span></div>').append($other);
+  if ($cgr) {
+    $cgr.replaceWith($new_cgr);
+    $new_cgr.after($edit);
+  } else {
+    $('#output').append($new_cgr);
+    $('#output').append($edit);
+  }
+
+  var model = {
+    label: label,
+    placeholder: placeholder,
+    type: type,
+    help: help
+  };
+  $('input', $label).val(label);
+  $('select', $type).val(type);
+  $('input', $placeholder).val(placeholder);
+  $('input', $help).val(help);
+
+  binding($edit, $other, model, $done);
+}
+
 
 function textarea_edit($cgr) {
   $('#output .well.spec').remove();
@@ -581,7 +626,6 @@ function rich_edit($cgr) {
   }
   $('textarea', $rich_textarea).html(html);
   tinymce.init(mce_content);
-  // tinymce.activeEditor.setContent(html);
   $done.click(function(e) {
     e.preventDefault();
     $('.tinymce', $rich).html(tinymce.activeEditor.getContent());
@@ -594,6 +638,9 @@ function rich_edit($cgr) {
 
 function binding($edit, $out, model, $done) {
   $('input', $edit).keyup(function(e) {
+    model[$(this).attr('name')] = $(this).val();
+  });
+  $('select', $edit).change(function(e){
     model[$(this).attr('name')] = $(this).val();
   });
   var view = rivets.bind($out, {
