@@ -41,6 +41,13 @@ exports.numberunit = function anonymous(locals) {
     return buf.join("");
 };
 
+// other.jade compiled template
+exports.other = function anonymous(locals) {
+    var buf = [];
+    buf.push('<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input rv-type="model.type" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>');
+    return buf.join("");
+};
+
 // rich.jade compiled template
 exports.rich = function anonymous(locals) {
     var buf = [];

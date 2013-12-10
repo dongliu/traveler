@@ -9,7 +9,7 @@ block head
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='/ui-lightness/jquery-ui-1.10.2.custom.css')
+  link(rel='stylesheet', href='/jquery/ui-lightness/jquery-ui-1.10.2.custom.css')
   link(rel='stylesheet', href='/font-awesome-4.0.3/css/font-awesome.css')
   link(rel='stylesheet', href='/stylesheets/style.css')
 
@@ -47,10 +47,8 @@ block content
           a Number
         li#add-file
           a Upload file
-        li#add-rich
-          a Rich instruction
-        //- li#add-hold
-        //-   a Hold point
+        li#add-other
+          a other types
     .btn-group.dropdown
       a.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Advanced control
         span.caret
@@ -61,6 +59,8 @@ block content
         //-   a Grid
         li#add-section
           a Section
+        li#add-rich
+          a Rich instruction
         //- li#add-page
         //-   a Page break
     .btn-group
@@ -81,6 +81,16 @@ block content
             a#rename Rename
           li
             a#share(data-toggle='tooltip', title='the form will be saved first', href='share/') Share
+  br
+  br
+  br
+  br
+  br
+  br
+  br
+  br
+  br
+  br
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
