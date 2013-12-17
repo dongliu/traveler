@@ -303,6 +303,7 @@ module.exports = function(app) {
         traveler: doc._id,
         name: req.body.name,
         value: req.body.value,
+        type: req.body.type,
         inputBy: req.session.userid,
         inputOn: Date.now()
       });
