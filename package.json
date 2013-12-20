@@ -14,6 +14,7 @@
     "templatizer": "*",
     "sanitize-caja": "*",
     "express-slash": "*",
-    "request": "*"
+    "request": "*",
+    "busboy": "*"
   }
 }
