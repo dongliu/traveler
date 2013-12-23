@@ -353,6 +353,8 @@ module.exports = function (app) {
 
       var random = generateShort();
 
+      var params = {};
+
       var busboy = new Busboy({
         headers: req.headers,
         limits: {
@@ -372,6 +374,14 @@ module.exports = function (app) {
           console.log('File [' + fieldname + '] Finished');
         });
         file.pipe(fstream);
+      });
+
+      busboy.on('field', function (fieldname, val, valTruncated, keyTruncated) {
+        params[fieldname] = val;
+      });
+
+      busboy.on('end', function(){
+
       });
 
       var data = new TravelerData({
