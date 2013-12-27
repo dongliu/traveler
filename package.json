@@ -15,6 +15,7 @@
     "sanitize-caja": "*",
     "express-slash": "*",
     "request": "*",
-    "busboy": "*"
+    "busboy": "*",
+    "pause": "*"
   }
 }
