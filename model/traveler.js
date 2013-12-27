@@ -59,7 +59,12 @@ var travelerData = new Schema({
   traveler: ObjectId,
   name: String,
   value: Schema.Types.Mixed,
-  type: String,
+  file: {
+    path: String,
+    encoding: String,
+    mimetype: String
+  },
+  inputType: String,
   inputBy: String,
   inputOn: Date
 });

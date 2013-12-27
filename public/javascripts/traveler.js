@@ -22,9 +22,13 @@ $(function () {
           }
           return 1;
         });
-        binder.deserializeFieldFromValue(element, found[0].value);
-        binder.accessor.set(element.name, found[0].value);
-        $(element).closest('.controls').append('<div class="history">' + history(found) + '</div>');
+        if (this.type == 'file') {
+          $(element).closest('.controls').append('<div class="history">' + fileHistory(found) + '</div>');
+        } else {
+          binder.deserializeFieldFromValue(element, found[0].value);
+          binder.accessor.set(element.name, found[0].value);
+          $(element).closest('.controls').append('<div class="history">' + history(found) + '</div>');
+        }
       }
     });
     // check if active here
@@ -186,6 +190,16 @@ function history(found) {
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+    }
+  }
+  return output;
+}
+
+function fileHistory(found) {
+  var i, output = '';
+  if (found.length > 0) {
+    for (i = 0; i < found.length; i += 1) {
+      output = output + '<strong>' + found[i].value + '</strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
     }
   }
   return output;

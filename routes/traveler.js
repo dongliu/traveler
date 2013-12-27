@@ -277,7 +277,7 @@ module.exports = function (app) {
         _id: {
           $in: doc.data
         }
-      }).lean().exec(function (err, docs) {
+      }, 'name value inputType inputBy inputOn').lean().exec(function (err, docs) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
@@ -307,7 +307,7 @@ module.exports = function (app) {
         traveler: doc._id,
         name: req.body.name,
         value: req.body.value,
-        type: req.body.type,
+        inputType: req.body.type,
         inputBy: req.session.userid,
         inputOn: Date.now()
       });
@@ -331,7 +331,6 @@ module.exports = function (app) {
   });
 
   app.post('/travelers/:id/uploads/', auth.ensureAuthenticated, function (req, res) {
-    // var halt = pause(req);
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err.msg);
@@ -353,16 +352,22 @@ module.exports = function (app) {
       if (req.files == {}) {
         return res.send(400, 'Expecte One uploaded file');
       }
-      // res.json(200, req.body);
 
       var data = new TravelerData({
         traveler: doc._id,
         name: req.body.name,
-        value: req.files[req.body.name],
-        type: req.body.type,
+        value: req.files[req.body.name].name,
+        file: {
+          path: req.files[req.body.name].path,
+          encoding: req.files[req.body.name].encoding,
+          mimetype: req.files[req.body.name].type
+        },
+        inputType: req.body.type,
         inputBy: req.session.userid,
         inputOn: Date.now()
       });
+
+      console.dir(data);
       data.save(function (err) {
         if (err) {
           console.error(err.msg);
@@ -381,6 +386,23 @@ module.exports = function (app) {
       });
     });
   });
+
+  app.get('/data/:id', auth.ensureAuthenticated, function (req, res) {
+    TravelerData.findById(req.params.id).lean().exec(function (err, data) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (!data) {
+        return res.send(410, 'gone');
+      }
+      if (data.inputType == 'file') {
+        res.sendfile(data.file.path);
+      } else {
+        res.json(200, data);
+      }
+    });
+  })
 
   app.get('/travelers/:id/share/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id).lean().exec(function (err, traveler) {
