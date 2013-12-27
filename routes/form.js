@@ -1,3 +1,4 @@
+// var express = require('express');
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
 
@@ -10,12 +11,12 @@ var util = require('util');
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
 
-module.exports = function(app) {
+module.exports = function (app) {
 
-  app.get('/forms/json', auth.ensureAuthenticated, function(req, res) {
+  app.get('/forms/json', auth.ensureAuthenticated, function (req, res) {
     Form.find({
       createdBy: req.session.userid
-    }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function(err, forms) {
+    }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function (err, forms) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -24,10 +25,10 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/sharedforms/json', auth.ensureAuthenticated, function(req, res) {
+  app.get('/sharedforms/json', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.session.userid
-    }, 'forms').lean().exec(function(err, me) {
+    }, 'forms').lean().exec(function (err, me) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -39,7 +40,7 @@ module.exports = function(app) {
         _id: {
           $in: me.forms
         }
-      }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function(err, forms) {
+      }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function (err, forms) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
@@ -50,12 +51,12 @@ module.exports = function(app) {
   });
 
 
-  app.get('/forms/new', auth.ensureAuthenticated, function(req, res) {
+  app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
     return res.render('builder');
   });
 
-  app.get('/forms/:id/', auth.ensureAuthenticated, function(req, res) {
-    Form.findById(req.params.id, function(err, form) {
+  app.get('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id, function (err, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -86,8 +87,8 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/forms/:id/preview', auth.ensureAuthenticated, function(req, res) {
-    Form.findById(req.params.id, function(err, form) {
+  app.get('/forms/:id/preview', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id, function (err, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -110,8 +111,8 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/forms/:id/share/', auth.ensureAuthenticated, function(req, res) {
-    Form.findById(req.params.id).lean().exec(function(err, form) {
+  app.get('/forms/:id/share/', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id).lean().exec(function (err, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -130,8 +131,8 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/forms/:id/share/json', auth.ensureAuthenticated, function(req, res) {
-    Form.findById(req.params.id).lean().exec(function(err, form) {
+  app.get('/forms/:id/share/json', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id).lean().exec(function (err, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -146,8 +147,8 @@ module.exports = function(app) {
     });
   });
 
-  app.post('/forms/:id/share/', auth.ensureAuthenticated, function(req, res) {
-    Form.findById(req.params.id, function(err, form) {
+  app.post('/forms/:id/share/', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id, function (err, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -170,8 +171,8 @@ module.exports = function(app) {
   });
 
 
-  app.put('/forms/:id/share/:userid', auth.ensureAuthenticated, function(req, res) {
-    Form.findById(req.params.id, function(err, form) {
+  app.put('/forms/:id/share/:userid', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id, function (err, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -190,7 +191,7 @@ module.exports = function(app) {
         } else {
           share.access = 0;
         }
-        form.save(function(err) {
+        form.save(function (err) {
           if (err) {
             console.error(err.msg);
             return res.send(500, err.msg);
@@ -200,7 +201,7 @@ module.exports = function(app) {
               $addToSet: {
                 forms: form._id
               }
-            }, function(err, user) {
+            }, function (err, user) {
               if (err) {
                 console.error(err.msg);
               }
@@ -218,8 +219,8 @@ module.exports = function(app) {
     });
   });
 
-  app.delete('/forms/:id/share/:userid', auth.ensureAuthenticated, function(req, res) {
-    Form.findById(req.params.id, function(err, form) {
+  app.delete('/forms/:id/share/:userid', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id, function (err, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -233,7 +234,7 @@ module.exports = function(app) {
       var share = form.sharedWith.id(req.params.userid);
       if (share) {
         share.remove();
-        form.save(function(err) {
+        form.save(function (err) {
           if (err) {
             console.error(err.msg);
             return res.send(500, err.msg);
@@ -243,7 +244,7 @@ module.exports = function(app) {
               $pull: {
                 forms: form._id
               }
-            }, function(err, user) {
+            }, function (err, user) {
               if (err) {
                 console.error(err.msg);
               }
@@ -260,7 +261,7 @@ module.exports = function(app) {
     });
   });
 
-  app.post('/forms/', auth.ensureAuthenticated, function(req, res) {
+  app.post('/forms/', auth.ensureAuthenticated, function (req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
@@ -274,7 +275,7 @@ module.exports = function(app) {
     form.createdBy = req.session.userid;
     form.createdOn = Date.now();
     form.sharedWith = [];
-    (new Form(form)).save(function(err, newform) {
+    (new Form(form)).save(function (err, newform) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -287,7 +288,7 @@ module.exports = function(app) {
     });
   });
 
-  app.put('/forms/:id/', auth.ensureAuthenticated, function(req, res) {
+  app.put('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
@@ -298,12 +299,6 @@ module.exports = function(app) {
     if (req.body.title) {
       form.title = req.body.title;
     }
-    // if (req.body.read && util.isArray(req.body.read)) {
-    //   form.read = req.body.read;
-    // }
-    // if (req.body.write && util.isArray(req.body.write)) {
-    //   form.write = req.body.write;
-    // }
 
     if (form.html || form.title) {
       form.updatedBy = req.session.userid;
@@ -312,8 +307,16 @@ module.exports = function(app) {
       return res.send('400', 'no update details found');
     }
 
-    Form.findByIdAndUpdate(req.params.id, form, function(err, old) {
+    Form.findById(req.params.id, function (err, doc) {
       if (err) {
+        console.dir(err);
+        return res.send(500, err.msg || err.errmsg);
+      }
+      if (getAccess(req, doc) !== 1) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      doc.update(form, function (err, old) {
+        if (err) {
         console.dir(err);
         return res.send(500, err.msg || err.errmsg);
       }
@@ -322,6 +325,7 @@ module.exports = function(app) {
       } else {
         return res.send(410, 'cannot find form ' + req.params.id);
       }
+      });
     });
   });
 };
@@ -345,7 +349,7 @@ function addUser(req, res, form) {
   // check local db first then try ad
   User.findOne({
     name: name
-  }, function(err, user) {
+  }, function (err, user) {
     if (err) {
       console.error(err.msg);
       return res.send(500, err.msg);
@@ -360,7 +364,7 @@ function addUser(req, res, form) {
         username: name,
         access: access
       });
-      form.save(function(err) {
+      form.save(function (err) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
@@ -372,7 +376,7 @@ function addUser(req, res, form) {
         $addToSet: {
           forms: form._id
         }
-      }, function(err) {
+      }, function (err) {
         if (err) {
           console.error(err.msg);
         }
@@ -392,7 +396,7 @@ function addUserFromAD(req, res, form) {
     scope: 'sub'
   };
 
-  ldapClient.search(ad.searchBase, opts, false, function(err, result) {
+  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
     if (err) {
       console.error(err.name + ' : ' + err.message);
       return res.json(500, err);
@@ -416,7 +420,7 @@ function addUserFromAD(req, res, form) {
       username: name,
       access: access
     });
-    form.save(function(err) {
+    form.save(function (err) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -430,7 +434,7 @@ function addUserFromAD(req, res, form) {
           mobile: result[0].mobile,
           forms: [form._id]
         });
-        user.save(function(err) {
+        user.save(function (err) {
           if (err) {
             console.error(err.msg);
           }
