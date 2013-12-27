@@ -151,7 +151,7 @@ $(function () {
     var data = new FormData();
     data.append('name', input.name);
     data.append('type', input.type);
-    data.append('file', input.files[0]);
+    data.append(input.name, input.files[0]);
     $.ajax({
       url: './uploads/',
       type: 'POST',
@@ -175,8 +175,7 @@ $(function () {
     }).always(function () {
       $this.removeAttr('disabled');
       $('#form input,textarea').removeAttr('disabled');
-    }
-    );
+    });
 
   });
 
