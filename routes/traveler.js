@@ -5,9 +5,11 @@ var auth = require('../lib/auth');
 var mongoose = require('mongoose');
 var util = require('util');
 var fs = require('fs');
+var path = require('path');
 var Busboy = require('busboy');
+var pause = require('pause');
 
-var uploadsDir = '../uploads/'
+var uploadsDir = '../uploads/';
 
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
@@ -329,6 +331,7 @@ module.exports = function (app) {
   });
 
   app.post('/travelers/:id/uploads/', auth.ensureAuthenticated, function (req, res) {
+    // var halt = pause(req);
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err.msg);
@@ -345,49 +348,17 @@ module.exports = function (app) {
         return res.send(400, 'The traveler ' + req.params.id + ' is not active');
       }
 
-      // if (!req.body.file) {
-      //   return res.send(400, 'No file found in the request');
-      // }
+      console.info(req.files);
 
-      // do some validation again
-
-      var random = generateShort();
-
-      var params = {};
-
-      var busboy = new Busboy({
-        headers: req.headers,
-        limits: {
-          fileSize: 5 * 1024 * 1024
-          files: 1
-        }
-      });
-
-      busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
-        console.log('File [' + fieldname + ']: filename: ' + filename);
-        var filePath = path.join(__dirname, uploadsDir, random + path.extname(filename));
-        var fstream = fs.createWriteStream(filePath);
-        file.on('limit', function (data) {
-          console.log('file too big');
-        });
-        file.on('end', function () {
-          console.log('File [' + fieldname + '] Finished');
-        });
-        file.pipe(fstream);
-      });
-
-      busboy.on('field', function (fieldname, val, valTruncated, keyTruncated) {
-        params[fieldname] = val;
-      });
-
-      busboy.on('end', function(){
-
-      });
+      if (req.files == {}) {
+        return res.send(400, 'Expecte One uploaded file');
+      }
+      // res.json(200, req.body);
 
       var data = new TravelerData({
         traveler: doc._id,
         name: req.body.name,
-        value: filePath,
+        value: req.files[req.body.name],
         type: req.body.type,
         inputBy: req.session.userid,
         inputOn: Date.now()
@@ -751,9 +722,15 @@ function canRead(req, doc) {
  * @returns {int} An unsigned x-bit random integer (0 <= f(x) < 2^x).
  */
 gri = function (x) { // _getRandomInt
-  if (x < 0) return NaN;
-  if (x <= 30) return (0 | Math.random() * (1 << x));
-  if (x <= 53) return (0 | Math.random() * (1 << 30)) + (0 | Math.random() * (1 << x - 30)) * (1 << 30);
+  if (x < 0) {
+    return NaN;
+  }
+  if (x <= 30) {
+    return (0 | Math.random() * (1 << x));
+  }
+  if (x <= 53) {
+    return (0 | Math.random() * (1 << 30)) + (0 | Math.random() * (1 << x - 30)) * (1 << 30);
+  }
   return NaN;
 };
 
