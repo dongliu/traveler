@@ -8,6 +8,7 @@ var express = require('express'),
   http = require('http'),
   fs = require('fs'),
   slash = require('express-slash'),
+  busboy = require('./lib/express-busboy.js'),
   path = require('path');
 
 
@@ -39,6 +40,8 @@ var auth = require('./lib/auth');
 
 var app = express();
 
+var uploadDir = './uploads/';
+
 app.enable('strict routing');
 
 var access_logfile = fs.createWriteStream('./logs/access.log', {
@@ -49,11 +52,11 @@ app.configure(function () {
   app.set('port', process.env.PORT || 3001);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
-  app.use(express.favicon(__dirname + '/public/favicon.ico'));
   // app.use(express.logger({stream: access_logfile}));
+  app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.favicon(__dirname + '/public/favicon.ico'));
   app.use(express.logger('dev'));
-  app.use(express.json());
-  app.use(express.urlencoded());
+  // app.use(express.urlencoded());
   app.use(express.methodOverride());
   app.use(express.cookieParser());
   app.use(express.session({
@@ -63,9 +66,14 @@ app.configure(function () {
     }
   }));
   app.use(express.session());
+  app.use(busboy({
+    limit: 5,
+    files: 1,
+    uploadDir: uploadDir
+  }));
+  app.use(express.json());
   app.use(app.router);
   app.use(slash());
-  app.use(express.static(path.join(__dirname, 'public')));
 });
 
 app.configure('development', function () {
