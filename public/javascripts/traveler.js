@@ -13,11 +13,12 @@ function history(found) {
 }
 
 function fileHistory(found) {
-  var i, output = '', link;
+  var i, output = '',
+    link;
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      link = '/data/'+ found[i]._id;
-      output = output + '<strong><a href='+link+' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+      link = '/data/' + found[i]._id;
+      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
     }
   }
   return output;
@@ -183,17 +184,18 @@ $(function () {
       type: 'POST',
       processData: false,
       contentType: false, // important for jqXHR
-      data: data
+      data: data,
+      dataType: 'json'
     }).done(function (data, status, jqXHR) {
       var timestamp = jqXHR.getResponseHeader('Date');
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' + moment(timestamp).fromNow() + '</div>');
-      // var $history = $this.closest('.control-group-wrap').find('.history');
-      // if ($history.length) {
-      //   $history = $($history[0]);
-      // } else {
-      //   $history = $('<div class="history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
-      // }
-      // $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
+      var $history = $this.closest('.control-group-wrap').find('.history');
+      if ($history.length) {
+        $history = $($history[0]);
+      } else {
+        $history = $('<div class="history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
+      }
+      $history.html('<strong><a href=' + data.location + ' target="_blank">'  + input.files[0].name + '</a></strong> uploaded by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR, status, error) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
@@ -206,5 +208,3 @@ $(function () {
   });
 
 });
-
-
