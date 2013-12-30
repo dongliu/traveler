@@ -21,6 +21,7 @@ var form = new Schema({
 /*******
 status := 0 // new
         | 1 // active
+        | 1.5 // complete request
         | 2 // completed
         | 3 // frozen
 *******/
@@ -46,10 +47,7 @@ var traveler = new Schema({
 });
 
 /*******
-type := 'image'
-      | 'pdf'
-      | 'doc'
-      | 'binary' // 4 file types
+type := 'file'
       | 'text'
       | 'textarea'
       | 'number'
