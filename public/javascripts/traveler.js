@@ -1,6 +1,28 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, Binder: false*/
 /*global travelerStatus: false*/
+
+function history(found) {
+  var i, output = '';
+  if (found.length > 0) {
+    for (i = 0; i < found.length; i += 1) {
+      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+    }
+  }
+  return output;
+}
+
+function fileHistory(found) {
+  var i, output = '', link;
+  if (found.length > 0) {
+    for (i = 0; i < found.length; i += 1) {
+      link = '/data/'+ found[i]._id;
+      output = output + '<strong><a href='+link+' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+    }
+  }
+  return output;
+}
+
 $(function () {
   $(document).bind('drop dragover', function (e) {
     e.preventDefault();
@@ -185,22 +207,4 @@ $(function () {
 
 });
 
-function history(found) {
-  var i, output = '';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
-    }
-  }
-  return output;
-}
 
-function fileHistory(found) {
-  var i, output = '';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output = output + '<strong>' + found[i].value + '</strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
-    }
-  }
-  return output;
-}
