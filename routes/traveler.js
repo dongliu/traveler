@@ -275,9 +275,9 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canRead(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
+      // if (!canRead(req, doc)) {
+      //   return res.send(403, 'You are not authorized to access this resource');
+      // }
       if (canWrite(req, doc)) {
         return res.render('traveler', doc);
       }
@@ -294,9 +294,9 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canRead(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
+      // if (!canRead(req, doc)) {
+      //   return res.send(403, 'You are not authorized to access this resource');
+      // }
       return res.json(200, doc);
     });
   });
@@ -532,7 +532,7 @@ module.exports = function (app) {
         return res.send(400, 'The traveler ' + req.params.id + ' is not active');
       }
 
-      console.info(req.files);
+      // console.info(req.files);
 
       if (req.files == {}) {
         return res.send(400, 'Expecte One uploaded file');
@@ -552,7 +552,7 @@ module.exports = function (app) {
         inputOn: Date.now()
       });
 
-      console.dir(data);
+      // console.dir(data);
       data.save(function (err) {
         if (err) {
           console.error(err.msg);
@@ -566,7 +566,11 @@ module.exports = function (app) {
             console.error(err.msg);
             return res.send(500, err.msg);
           }
-          return res.send(204);
+          var url = req.protocol + '://' + req.get('host') + '/data/' + data._id;
+          res.set('Location', url);
+          return res.json(201, {
+            location: '/data/' + data._id
+          });
         });
       });
     });
