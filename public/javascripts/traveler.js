@@ -24,6 +24,22 @@ function fileHistory(found) {
   return output;
 }
 
+function setStatus(s) {
+  $.ajax({
+    url: './status',
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      status: s
+    })
+  }).done(function(data, status, jqXHR) {
+    document.location.href = window.location.pathname;
+  }).fail(function(jqXHR, status, error) {
+    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
+    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+  }).always();
+}
+
 $(function () {
   $(document).bind('drop dragover', function (e) {
     e.preventDefault();
@@ -63,7 +79,11 @@ $(function () {
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   }).always();
 
-
+  $('#complete').click(function (e) {
+    e.preventDefault();
+    $('#form input,textarea').attr('disabled', true);
+    setStatus(1.5);
+  });
 
   // deserialize the values here
 
@@ -84,6 +104,7 @@ $(function () {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
     $('#form input,textarea').not($this).attr('disabled', true);
+    $('#completed').attr('disabled', true);
     if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
     }
@@ -115,12 +136,14 @@ $(function () {
         $history = $('<div class="history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
       $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
-      $('#form input,textarea').removeAttr('disabled');
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR, status, error) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the value: ' + jqXHR.responseText + '</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }).always();
+    }).always(function () {
+      $('#form input,textarea').removeAttr('disabled');
+      $('#complete').removeAttr('disabled');
+    });
 
   });
 
@@ -135,6 +158,7 @@ $(function () {
       binder.deserializeField(input);
     }
     $('#form input,textarea').removeAttr('disabled');
+    $('#complete').removeAttr('disabled');
     $(this).closest('.control-group-buttons').remove();
   });
 
@@ -143,6 +167,7 @@ $(function () {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
     $('#form input,textarea').not($this).attr('disabled', true);
+    $('#completed').attr('disabled', true);
     var file = this.files[0];
     // var name = file.name;
     var size = file.size;
@@ -165,7 +190,7 @@ $(function () {
     $validation.empty();
 
     if ($cgw.children('.control-group-buttons').length === 0) {
-      $cgw.prepend('<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button></div>');
+      $cgw.prepend('<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>');
     }
   });
 
@@ -195,16 +220,24 @@ $(function () {
       } else {
         $history = $('<div class="history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
-      $history.html('<strong><a href=' + data.location + ' target="_blank">'  + input.files[0].name + '</a></strong> uploaded by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
+      $history.html('<strong><a href=' + data.location + ' target="_blank">' + input.files[0].name + '</a></strong> uploaded by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR, status, error) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }).always(function () {
-      $this.removeAttr('disabled');
       $('#form input,textarea').removeAttr('disabled');
+      $('#complete').removeAttr('disabled');
     });
 
+  });
+
+  $('#form').on('click', 'button[value="cancel"]', function (e) {
+    e.preventDefault();
+    // cannot reset the file input value
+    $('#form input,textarea').removeAttr('disabled');
+    $('#complete').removeAttr('disabled');
+    $(this).closest('.control-group-buttons').remove();
   });
 
 });
