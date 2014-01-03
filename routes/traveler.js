@@ -370,15 +370,23 @@ module.exports = function (app) {
         return res.res(403, 'You are not authorized to access this resource');
       }
       if (req.body.status === 1) {
-        if ([0, 3].indexOf(doc.status) !== -1) {
+        if ([0, 1.5, 3].indexOf(doc.status) !== -1) {
           doc.status = 1;
         } else {
           return res.send(400, 'cannot start to work from the current status');
         }
       }
 
-      if (req.body.status === 2) {
+      if (req.body.status === 1.5) {
         if ([1].indexOf(doc.status) !== -1) {
+          doc.status = 1.5;
+        } else {
+          return res.send(400, 'cannot complete from the current status');
+        }
+      }
+
+      if (req.body.status === 2) {
+        if ([1, 1.5].indexOf(doc.status) !== -1) {
           doc.status = 2;
         } else {
           return res.send(400, 'cannot complete from the current status');
