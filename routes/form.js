@@ -79,11 +79,12 @@ module.exports = function (app) {
         });
       }
 
-      return res.render('viewer', {
-        id: req.params.id,
-        title: form.title,
-        html: form.html
-      });
+      // return res.render('viewer', {
+      //   id: req.params.id,
+      //   title: form.title,
+      //   html: form.html
+      // });
+      return res.redirect('forms/' + req.params.id + '/preview');
     });
   });
 
@@ -317,14 +318,14 @@ module.exports = function (app) {
       }
       doc.update(form, function (err, old) {
         if (err) {
-        console.dir(err);
-        return res.send(500, err.msg || err.errmsg);
-      }
-      if (old) {
-        return res.send(204);
-      } else {
-        return res.send(410, 'cannot find form ' + req.params.id);
-      }
+          console.dir(err);
+          return res.send(500, err.msg || err.errmsg);
+        }
+        if (old) {
+          return res.send(204);
+        } else {
+          return res.send(410, 'cannot find form ' + req.params.id);
+        }
       });
     });
   });

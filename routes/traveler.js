@@ -275,11 +275,21 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      // if (!canRead(req, doc)) {
-      //   return res.send(403, 'You are not authorized to access this resource');
-      // }
       if (canWrite(req, doc)) {
         return res.render('traveler', doc);
+      }
+      return res.redirect('/travelers/' + req.params.id + '/view');
+    });
+  });
+
+  app.get('/travelers/:id/view', auth.ensureAuthenticated, function (req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
       }
       return res.render('travelerviewer', doc);
     });
