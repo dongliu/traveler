@@ -14,12 +14,12 @@ block content
     h3 Traveler title:  #{title}
     button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
     #details.collapse.out
-      if (typeof(description) !== undefined)
+      if (locals.description !== undefined)
         h4 Description: #{description}
       p Created by #{createdBy} on #{createdOn}
-      if (typeof(updatedBy) !== undefined)
+      if (locals.updatedBy !== undefined)
         p Updated by #{updatedBy} on #{updatedOn}
-      if (typeof(devices) !== undefined && devices.length > 0)
+      if (locals.devices !== undefined && devices.length > 0)
         h4 Devices: #{devices}
     br
     form.form-horizontal#form
