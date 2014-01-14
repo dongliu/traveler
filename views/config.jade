@@ -48,16 +48,24 @@ block content
           button.btn.btn-small.btn-warning.removeDevice
             i.fa.fa-trash-o.fa-lg
     br
-    if (status != 2)
-      .btn-group
-        button.btn.btn-primary#add Add device
-      if (status == 0)
+    case status
+      when 0
+        .btn-group
+          button.btn.btn-primary#add Add devices
         .btn-group
           button.btn.btn-primary#work Start to work
-      if (status == 1)
+      when 1
         .btn-group
           button.btn.btn-warning#freeze Freeze
-      if (status == 3)
+      when 1.5
+        .btn-group
+          button.btn.btn-primary#approve Approve completion
+        .btn-group
+          button.btn.btn-warning#more More work
+      when 2
+        //- .btn-group
+        //-   button.btn.btn-primary#resume Resume
+      when 3
         .btn-group
           button.btn.btn-primary#resume Resume
     .btn-group
