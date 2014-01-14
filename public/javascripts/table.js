@@ -125,6 +125,7 @@ var statusColumn = {
 function formatTravelerStatus(s) {
   var status = {
     '1': 'active',
+    '1.5': 'submitted for completion',
     '2': 'completed',
     '3': 'frozen',
     '0': 'initialized'
