@@ -1,16 +1,16 @@
-
-
-exports.main = function(req, res) {
-  res.render('main', { username: req.session.username});
+exports.main = function (req, res) {
+  res.render('main', {
+    roles: req.session.roles
+  });
 };
 
-exports.builder = function(req, res) {
+exports.builder = function (req, res) {
   res.render('builder');
 };
 
-exports.logout = function(req, res) {
+exports.logout = function (req, res) {
   if (req.session) {
-    req.session.destroy(function(err) {
+    req.session.destroy(function (err) {
       if (err) {
         console.error(err);
       }
