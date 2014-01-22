@@ -52,6 +52,10 @@ block content
           a(href='#travelers', data-toggle='tab') My travelers
         li
           a(href='#sharedtravelers', data-toggle='tab') Shared travelers
+        if (locals.roles && locals.roles.indexOf('manager') !== -1)
+          li
+            a(href='#alltravelers', data-toggle='tab') All travelers
+
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
@@ -78,6 +82,10 @@ block content
           table#traveler-table.table.table-bordered.table-hover
         #sharedtravelers.tab-pane
           table#shared-traveler-table.table.table-bordered.table-hover
+        if (locals.roles && locals.roles.indexOf('manager') !== -1)
+          #alltravelers.tab-pane
+            table#all-traveler-table.table.table-bordered.table-hover
+
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
