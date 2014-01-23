@@ -8,6 +8,7 @@ var fs = require('fs');
 var path = require('path');
 var Busboy = require('busboy');
 var pause = require('pause');
+var u = require('underscore');
 
 var uploadsDir = '../uploads/';
 
@@ -16,6 +17,7 @@ var User = mongoose.model('User');
 var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerComment = mongoose.model('TravelerComment');
+
 
 function createTraveler(form, req, res) {
   var traveler = new Traveler({
@@ -82,49 +84,6 @@ function getSharedWith(sharedWith, name) {
   return -1;
 }
 
-function addUser(req, res, doc) {
-  var name = req.param('name');
-  // check local db first then try ad
-  User.findOne({
-    name: name
-  }, function (err, user) {
-    if (err) {
-      console.error(err.msg);
-      return res.send(500, err.msg);
-    }
-    if (user) {
-      var access = 0;
-      if (req.param('access') && req.param('access') === 'write') {
-        access = 1;
-      }
-      doc.sharedWith.addToSet({
-        _id: user._id,
-        username: name,
-        access: access
-      });
-      doc.save(function (err) {
-        if (err) {
-          console.error(err.msg);
-          res.send(500, err.msg);
-        } else {
-          res.send(201, 'The user named ' + name + ' was added to the share list.');
-        }
-      });
-      user.update({
-        $addToSet: {
-          travelers: doc._id
-        }
-      }, function (err) {
-        if (err) {
-          console.error(err.msg);
-        }
-      });
-    } else {
-      addUserFromAD(req, res, doc);
-    }
-  });
-}
-
 function addUserFromAD(req, res, doc) {
   var name = req.param('name');
   var nameFilter = ad.nameFilter.replace('_name', name);
@@ -184,6 +143,49 @@ function addUserFromAD(req, res, doc) {
   });
 }
 
+function addUser(req, res, doc) {
+  var name = req.param('name');
+  // check local db first then try ad
+  User.findOne({
+    name: name
+  }, function (err, user) {
+    if (err) {
+      console.error(err.msg);
+      return res.send(500, err.msg);
+    }
+    if (user) {
+      var access = 0;
+      if (req.param('access') && req.param('access') === 'write') {
+        access = 1;
+      }
+      doc.sharedWith.addToSet({
+        _id: user._id,
+        username: name,
+        access: access
+      });
+      doc.save(function (err) {
+        if (err) {
+          console.error(err.msg);
+          res.send(500, err.msg);
+        } else {
+          res.send(201, 'The user named ' + name + ' was added to the share list.');
+        }
+      });
+      user.update({
+        $addToSet: {
+          travelers: doc._id
+        }
+      }, function (err) {
+        if (err) {
+          console.error(err.msg);
+        }
+      });
+    } else {
+      addUserFromAD(req, res, doc);
+    }
+  });
+}
+
 function canWrite(req, doc) {
   if (doc.createdBy === req.session.userid) {
     return true;
@@ -204,7 +206,50 @@ function canRead(req, doc) {
   return false;
 }
 
-var gri, ha, generateShort;
+// var gri, ha, generateShort;
+/**
+ * Returns an unsigned x-bit random integer.
+ * @param {int} x A positive integer ranging from 0 to 53, inclusive.
+ * @returns {int} An unsigned x-bit random integer (0 <= f(x) < 2^x).
+ */
+function gri(x) { // _getRandomInt
+  if (x < 0) {
+    return NaN;
+  }
+  if (x <= 30) {
+    return (0 | Math.random() * (1 << x));
+  }
+  if (x <= 53) {
+    return (0 | Math.random() * (1 << 30)) + (0 | Math.random() * (1 << x - 30)) * (1 << 30);
+  }
+  return NaN;
+}
+
+/**
+ * Converts an integer to a zero-filled hexadecimal string.
+ * @param {int} num
+ * @param {int} length
+ * @returns {string}
+ */
+function ha(num, length) { // _hexAligner
+  var str = num.toString(16),
+    i,
+    z = "0";
+  for (i = length - str.length; i > 0; i >>>= 1, z += z) {
+    if (i & 1) {
+      str = z + str;
+    }
+  }
+  return str;
+}
+
+/*a short uid*/
+
+function generateShort() {
+  var rand = gri,
+    hex = ha;
+  return hex(rand(32), 8);
+}
 
 module.exports = function (app) {
 
@@ -552,7 +597,7 @@ module.exports = function (app) {
 
       // console.info(req.files);
 
-      if (req.files == {}) {
+      if (u.isEmpty(req.files)) {
         return res.send(400, 'Expecte One uploaded file');
       }
 
@@ -603,13 +648,13 @@ module.exports = function (app) {
       if (!data) {
         return res.send(410, 'gone');
       }
-      if (data.inputType == 'file') {
+      if (data.inputType === 'file') {
         res.sendfile(data.file.path);
       } else {
         res.json(200, data);
       }
     });
-  })
+  });
 
   app.get('/travelers/:id/share/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id).lean().exec(function (err, traveler) {
@@ -756,48 +801,4 @@ module.exports = function (app) {
     });
   });
 
-};
-
-/**
- * Returns an unsigned x-bit random integer.
- * @param {int} x A positive integer ranging from 0 to 53, inclusive.
- * @returns {int} An unsigned x-bit random integer (0 <= f(x) < 2^x).
- */
-gri = function (x) { // _getRandomInt
-  if (x < 0) {
-    return NaN;
-  }
-  if (x <= 30) {
-    return (0 | Math.random() * (1 << x));
-  }
-  if (x <= 53) {
-    return (0 | Math.random() * (1 << 30)) + (0 | Math.random() * (1 << x - 30)) * (1 << 30);
-  }
-  return NaN;
-};
-
-/**
- * Converts an integer to a zero-filled hexadecimal string.
- * @param {int} num
- * @param {int} length
- * @returns {string}
- */
-ha = function (num, length) { // _hexAligner
-  var str = num.toString(16),
-    i = length - str.length,
-    z = "0";
-  for (; i > 0; i >>>= 1, z += z) {
-    if (i & 1) {
-      str = z + str;
-    }
-  }
-  return str;
-};
-
-/*a short uid*/
-
-generateShort = function () {
-  var rand = gri,
-    hex = ha;
-  return hex(rand(32), 8);
 };
