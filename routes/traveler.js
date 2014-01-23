@@ -290,6 +290,20 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/alltravelers/json', auth.ensureAuthenticated, function (req, res) {
+    if (req.session.roles.indexOf('manager') === -1) {
+      return res.send(403, 'You are not authorized to access this resource');
+    }
+    Traveler.find({}, 'title status devices createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function (err, travelers) {
+      if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        return res.json(200, travelers);
+    });
+
+  });
+
   app.post('/travelers/', auth.ensureAuthenticated, function (req, res) {
     if (!req.body.form) {
       return res.send(400, 'need the form in request');
