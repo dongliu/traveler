@@ -1,4 +1,24 @@
-$(function() {
+/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
+/*global moment: false, Binder: false*/
+/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
+
+function initTable(oTable, url) {
+  $.ajax({
+    url: url,
+    type: 'GET',
+    dataType: 'json'
+  }).done(function (json) {
+    oTable.fnClearTable();
+    oTable.fnAddData(json);
+    oTable.fnDraw();
+  }).fail(function (jqXHR, status, error) {
+    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms.</div>');
+    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+  }).always();
+}
+
+
+$(function () {
   var formAoColumns = [selectColumn, formLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
   fnAddFilterFoot('#form-table', formAoColumns);
   var formTable = $('#form-table').dataTable({
@@ -14,11 +34,11 @@ $(function() {
   });
   initTable(formTable, '/forms/json');
 
-  $('#form-select-all').click(function(e) {
+  $('#form-select-all').click(function (e) {
     fnSelectAll(formTable, 'row-selected', 'select-row', true);
   });
 
-  $('#form-select-none').click(function(e) {
+  $('#form-select-none').click(function (e) {
     fnDeselect(formTable, 'row-selected', 'select-row');
   });
 
@@ -68,9 +88,26 @@ $(function() {
   });
   initTable(sharedTravelerTable, '/sharedtravelers/json');
 
-  $('#form-travel').click(function(e) {
+  if ($('#all-traveler-table').length) {
+    var allTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
+    fnAddFilterFoot('#all-traveler-table', allTravelerAoColumns);
+    var allTravelerTable = $('#all-traveler-table').dataTable({
+      aaData: [],
+      // bAutoWidth: false,
+      aoColumns: allTravelerAoColumns,
+      aaSorting: [
+        [8, 'desc'],
+        [6, 'desc']
+      ],
+      sDom: sDom,
+      oTableTools: oTableTools
+    });
+    initTable(allTravelerTable, '/alltravelers/json');
+  }
+
+  $('#form-travel').click(function (e) {
     var selected = fnGetSelected(formTable, 'row-selected');
-    if (selected.length == 0) {
+    if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No form has been selected!');
       $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
@@ -89,18 +126,18 @@ $(function() {
         data: JSON.stringify({
           form: formTable.fnGetData(selected[0])._id
         })
-      }).done(function(json) {
+      }).done(function (json) {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>A new traveler is created at <a href="' + json.location + '">' + json.location + '</a></div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
         // initTable();
-      }).fail(function(jqXHR, status, error) {
+      }).fail(function (jqXHR, status, error) {
         $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot create new traveler</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }).always();
     }
   });
 
-  $('#reload').click(function(e) {
+  $('#reload').click(function (e) {
     initTable(formTable, '/forms/json');
     initTable(sharedFormTable, '/sharedforms/json');
     initTable(travelerTable, '/travelers/json');
@@ -112,19 +149,4 @@ $(function() {
   filterEvent();
 });
 
-function initTable(oTable, url) {
-  $.ajax({
-    url: url,
-    type: 'GET',
-    dataType: 'json'
-  }).done(function(json) {
-    oTable.fnClearTable();
-    oTable.fnAddData(json);
-    oTable.fnDraw();
-  }).fail(function(jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms.</div>');
-    $(window).scrollTop($('#message div:last-child').offset().top - 40);
-  }).always();
-}
 
-// function travel
