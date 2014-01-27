@@ -28,6 +28,14 @@ block content
         span#description.editable #{description}
       = ' '
       button.btn-primary.editable Edit
+    h4 Deadline:
+      = ' '
+      span.form-inline
+        if (locals.deadline == undefined)
+          input#deadline(type='date')
+        else
+          input#deadline(type='date', value='#{deadline}')
+        = ' '
     p Created on #{createdOn}
     if (locals.updatedOn != undefined)
       p Updated by #{updatedBy} on #{updatedOn}

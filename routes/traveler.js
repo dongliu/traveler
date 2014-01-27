@@ -296,12 +296,11 @@ module.exports = function (app) {
     }
     Traveler.find({}, 'title status devices createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function (err, travelers) {
       if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
-        }
-        return res.json(200, travelers);
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      return res.json(200, travelers);
     });
-
   });
 
   app.post('/travelers/', auth.ensureAuthenticated, function (req, res) {
@@ -371,7 +370,7 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/config', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, 'title description status devices sharedWith createdBy createdOn updatedOn updatedBy').lean().exec(function (err, doc) {
+    Traveler.findById(req.params.id, 'title description deadline status devices sharedWith createdBy createdOn updatedOn updatedBy').lean().exec(function (err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -386,7 +385,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description']), function (req, res) {
+  app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description', 'deadline']), function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       var k;
       if (err) {
