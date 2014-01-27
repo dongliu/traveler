@@ -35,6 +35,7 @@ var traveler = new Schema({
   createdOn: Date,
   updatedBy: String,
   updatedOn: Date,
+  deadline: Date,
   sharedWith: [sharedWithUser],
   referenceForm: ObjectId,
   forms: [form],

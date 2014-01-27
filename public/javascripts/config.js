@@ -66,6 +66,46 @@ $(function () {
     $(this).siblings('span.editable').first().click();
   });
 
+  var deadline = $('#deadline').val();
+
+  $('#deadline').change(function (e) {
+    var $dl = $(this).parent();
+    if ($dl.children('.buttons').length === 0) {
+      $dl.append('<span class="buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></span>');
+    }
+  });
+
+  $('#deadline').parent().on('click', 'button[value="save"]', function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var $input = $this.closest('.form-inline').children('input').first();
+    $.ajax({
+      url: './config',
+      type: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        deadline: $input.val(),
+      })
+    }).done(function (data, status, jqXHR) {
+      deadline = $input.val();
+      $this.parent().remove();
+    }).fail(function (jqXHR, status, error) {
+      $this.val(deadline);
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config :  ' + jqXHR.responseText + '</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    });
+  });
+
+
+  $('#deadline').parent().on('click', 'button[value="reset"]', function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    $this.closest('.form-inline').children('input').first().val(deadline);
+    $this.parent().remove();
+  });
+
+
+
   $('#add').click(function (e) {
     e.preventDefault();
     // add an input and a button add
