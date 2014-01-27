@@ -27,12 +27,8 @@ $(function () {
     title: $('#title').text(),
     description: $('#description').text()
   };
-  // var title = $('#title').text();
-  // var description = $('#description').text();
 
-  // var path = window.location.pathname;
-
-  $('.editable').editable(function (value, settings) {
+  $('span.editable').editable(function (value, settings) {
     var that = this;
     if (value === initValue[that.id]) {
       // console.log('not changed');
@@ -64,6 +60,10 @@ $(function () {
     submit: 'Update',
     indicator: 'Updating...',
     tooltip: 'Click to edit...'
+  });
+
+  $('button.editable').click(function (e) {
+    $(this).siblings('span.editable').first().click();
   });
 
   $('#add').click(function (e) {
@@ -143,4 +143,3 @@ $(function () {
   });
 
 });
-
