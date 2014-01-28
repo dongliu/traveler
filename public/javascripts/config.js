@@ -29,6 +29,11 @@ $(function () {
   if ($('#deadline').attr('value')) {
     $('#deadline').val(moment($('#deadline').attr('value')).format('YYYY-MM-DD'));
   }
+  if (!Modernizr.inputtypes['date']) {
+    $('#deadline').datepicker({
+      format: 'yyyy-mm-dd'
+    });
+  }
   var initValue = {
     title: $('#title').text(),
     description: $('#description').text()
