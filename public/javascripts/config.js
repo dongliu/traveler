@@ -23,6 +23,12 @@ function setStatus(s) {
 }
 
 $(function () {
+  $('span.time').each(function () {
+    $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
+  });
+  if ($('#deadline').attr('value')) {
+    $('#deadline').val(moment($('#deadline').attr('value')).format('YYYY-MM-DD'));
+  }
   var initValue = {
     title: $('#title').text(),
     description: $('#description').text()

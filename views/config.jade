@@ -36,9 +36,13 @@ block content
         else
           input#deadline(type='date', value='#{deadline}')
         = ' '
-    p Created on #{createdOn}
+    p Created on
+      = ' '
+      span.time #{createdOn}
     if (locals.updatedOn != undefined)
-      p Updated by #{updatedBy} on #{updatedOn}
+      p Updated by #{updatedBy} on
+        = ' '
+        span.time #{updatedOn}
     h4 Status:
       = ' '
       case status
