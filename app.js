@@ -65,7 +65,6 @@ app.configure(function () {
       maxAge: 28800000
     }
   }));
-  app.use(express.session());
   app.use(busboy({
     limit: 5,
     files: 1,
