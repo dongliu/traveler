@@ -84,7 +84,7 @@ $(function () {
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
-        deadline: $input.val(),
+        deadline: moment($input.val()).utc(),
       })
     }).done(function (data, status, jqXHR) {
       deadline = $input.val();
