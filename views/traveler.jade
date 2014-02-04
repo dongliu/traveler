@@ -22,6 +22,10 @@ block content
     #details.collapse.out
       if (locals.description !== undefined)
         h4 Description: #{description}
+      if (locals.deadline !== undefined)
+        p Deadline:
+          = ' '
+          span.time #{deadline}
       p Created by #{createdBy} on
         = ' '
         span.time #{createdOn}
