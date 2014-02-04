@@ -44,6 +44,11 @@ $(function () {
   $(document).bind('drop dragover', function (e) {
     e.preventDefault();
   });
+
+  $('span.time').each(function () {
+    $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
+  });
+
   var binder = new Binder.FormBinder(document.forms[0]);
   $.ajax({
     url: './data/',

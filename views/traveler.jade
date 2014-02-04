@@ -22,9 +22,13 @@ block content
     #details.collapse.out
       if (locals.description !== undefined)
         h4 Description: #{description}
-      p Created by #{createdBy} on #{createdOn}
+      p Created by #{createdBy} on
+        = ' '
+        span.time #{createdOn}
       if (locals.updatedBy !== undefined)
-        p Updated by #{updatedBy} on #{updatedOn}
+        p Updated by #{updatedBy} on
+          = ' '
+          span.time #{updatedOn}
       if (locals.devices !== undefined && devices.length > 0)
         h4 Devices: #{devices}
     br
