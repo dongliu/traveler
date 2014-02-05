@@ -12,7 +12,7 @@ function initTable(oTable, url) {
     oTable.fnAddData(json);
     oTable.fnDraw();
   }).fail(function (jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms.</div>');
+    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   }).always();
 }
@@ -57,7 +57,7 @@ $(function () {
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
-  var travelerAoColumns = [travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
+  var travelerAoColumns = [travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, deadlineColumn, updatedByColumn, updatedOnColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
     aaData: [],
@@ -73,7 +73,7 @@ $(function () {
   initTable(travelerTable, '/travelers/json');
 
 
-  var sharedTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
+  var sharedTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, deadlineColumn, updatedByColumn, updatedOnColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   var sharedTravelerTable = $('#shared-traveler-table').dataTable({
     aaData: [],
@@ -89,7 +89,7 @@ $(function () {
   initTable(sharedTravelerTable, '/sharedtravelers/json');
 
   if ($('#all-traveler-table').length) {
-    var allTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, updatedByColumn, updatedOnColumn];
+    var allTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, deadlineColumn, updatedByColumn, updatedOnColumn];
     fnAddFilterFoot('#all-traveler-table', allTravelerAoColumns);
     var allTravelerTable = $('#all-traveler-table').dataTable({
       aaData: [],
