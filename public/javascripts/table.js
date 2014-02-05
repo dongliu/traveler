@@ -28,6 +28,8 @@ var createdByColumn = personColumn('Created by', 'createdBy');
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
 
+var deadlineColumn = dateColumn('Deadline', 'deadline');
+
 var tagsColumn = {
   sTitle: 'Tags',
   sDefaultContent: '',
