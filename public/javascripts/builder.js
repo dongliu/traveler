@@ -69,31 +69,6 @@ function working() {
     rich_edit();
   });
 
-  //   $('#add-hold').click(function(e){
-  //     clean_ko();
-  //     $('#add-item-form').empty();
-  //     $('#add-item-form').show();
-  //     var legend = $('#legend legend').clone().text('Add hold point').show();
-  //     var hold = $('#hold .control-group').clone().show();
-  //     var button = $('#button .form-actions').clone().show();
-  //     $('#add-item-form').append(legend);
-  //     $('#add-item-form').append(hold);
-  //     $('#add-item-form').append(button);
-
-  //     // the output part
-  //     var element = $('#hold-element .control-group').clone().show();
-  //     element.prepend($('#control-group-buttons .btn-group').clone());
-  //     $('#output').append(element);
-  //     $('input', hold).attr("data-bind", "value: label, valueUpdate: 'afterkeydown'");
-  //     $('.holder span', element).attr("data-bind", "text: label");
-  //     var formModel = function (init) {
-  //       this.label = ko.observable(init);
-  //     };
-  //     ko.applyBindings(new formModel("Name"));
-  //     binding_button();
-  //     e.preventDefault();
-  //   });
-
   $('#add-section').click(function(e) {
     e.preventDefault();
     section_edit();
