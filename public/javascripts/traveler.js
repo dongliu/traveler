@@ -32,15 +32,46 @@ function setStatus(s) {
     data: JSON.stringify({
       status: s
     })
-  }).done(function(data, status, jqXHR) {
+  }).done(function (data, status, jqXHR) {
     document.location.href = window.location.pathname;
-  }).fail(function(jqXHR, status, error) {
+  }).fail(function (jqXHR, status, error) {
     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   }).always();
 }
 
+function createSideNav() {
+  var $legend = $('legend');
+  var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
+  var i;
+  if ($legend.length > 1) {
+    // $legend.attr('data-spy', 'affix');
+    for (i = 0; i < $legend.length; i += 1) {
+      $affix.append('<li><a href="#' + $legend[i].id + '">' + $legend[i].textContent + '</a></li>');
+    }
+    $('body').append($('<div id="affixlist" class="bs-docs-sidebar"></div>').append($affix));
+    $('body').attr('data-spy', 'scroll');
+    $('body').attr('data-target', '#affixlist');
+  }
+}
+
+function updateFinished(num) {
+  $.ajax({
+    url: './finishedinput',
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      finishedInput: num
+    })
+  }).done(function (data, status, jqXHR) {}).fail(function (jqXHR, status, error) {
+    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update finished input number</div>');
+    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+  }).always();
+}
+
 $(function () {
+  createSideNav();
+
   $(document).bind('drop dragover', function (e) {
     e.preventDefault();
   });
@@ -55,6 +86,7 @@ $(function () {
     type: 'GET',
     dataType: 'json'
   }).done(function (data, status, jqXHR) {
+    var finishedInput = 0;
     $('#form input,textarea').each(function (index, element) {
       var found = data.filter(function (e) {
         return e.name === element.name;
@@ -73,11 +105,15 @@ $(function () {
           binder.accessor.set(element.name, found[0].value);
           $(element).closest('.controls').append('<div class="history">' + history(found) + '</div>');
         }
+        finishedInput += 1;
       }
     });
+
     // check if active here
     if (travelerStatus === 1) {
       $('#form input,textarea').removeAttr('disabled');
+      // update the finished input count
+      updateFinished(finishedInput);
     }
   }).fail(function (jqXHR, status, error) {
     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');

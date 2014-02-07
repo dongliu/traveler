@@ -44,7 +44,9 @@ var traveler = new Schema({
     default: 0
   },
   data: [ObjectId],
-  comments: [ObjectId]
+  comments: [ObjectId],
+  totalInput: Number,
+  finishedInput: Number
 });
 
 /*******
