@@ -9,6 +9,8 @@ var path = require('path');
 var Busboy = require('busboy');
 var pause = require('pause');
 var u = require('underscore');
+var cheer = require('cheerio');
+// var sanitize = require('sanitize-caja'); // may need this later for new version of forms
 
 var uploadsDir = '../uploads/';
 
@@ -20,6 +22,10 @@ var TravelerComment = mongoose.model('TravelerComment');
 
 
 function createTraveler(form, req, res) {
+  // update the total input number and finished input number
+  var $ = cheer.load(form.html);
+  var num = $('input, textarea').length;
+  console.log('total input number is ' + num);
   var traveler = new Traveler({
     title: 'update me',
     description: '',
@@ -33,7 +39,9 @@ function createTraveler(form, req, res) {
       html: form.html
     }],
     data: [],
-    comments: []
+    comments: [],
+    totalInput: num,
+    finishedInput: 0
   });
   traveler.save(function (err, doc) {
     if (err) {
@@ -587,6 +595,37 @@ module.exports = function (app) {
           }
           return res.send(204);
         });
+      });
+    });
+  });
+
+  app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, function (req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource.');
+      }
+
+      if (doc.status !== 1) {
+        return res.send(400, 'The traveler ' + req.params.id + ' is not active');
+      }
+
+      if (!req.body.hasOwnProperty('finishedInput')) {
+        return res.send(400, 'need finished input number');
+      }
+
+      doc.update({finishedInput: req.body.finishedInput}, function (err){
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        return res.send(204);
       });
     });
   });

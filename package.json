@@ -17,6 +17,7 @@
     "request": "*",
     "busboy": "*",
     "pause": "*",
-    "underscore": "*"
+    "underscore": "*",
+    "cheerio": "*"
   }
 }
