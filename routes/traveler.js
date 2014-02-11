@@ -25,7 +25,7 @@ function createTraveler(form, req, res) {
   // update the total input number and finished input number
   var $ = cheer.load(form.html);
   var num = $('input, textarea').length;
-  console.log('total input number is ' + num);
+  // console.log('total input number is ' + num);
   var traveler = new Traveler({
     title: 'update me',
     description: '',
@@ -264,7 +264,7 @@ module.exports = function (app) {
   app.get('/travelers/json', auth.ensureAuthenticated, function (req, res) {
     Traveler.find({
       createdBy: req.session.userid
-    }, 'title description status devices sharedWith createdOn deadline updatedOn updatedBy').lean().exec(function (err, docs) {
+    }, 'title description status devices sharedWith createdOn deadline updatedOn updatedBy finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
