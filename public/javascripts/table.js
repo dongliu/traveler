@@ -84,6 +84,37 @@ var travelerShareLinkColumn = {
   bSortable: false
 };
 
+var progressColumn = {
+  sTitle: 'Estimated progress',
+  bSortable: true,
+  sType: 'numeric',
+  mData: function(source, type, val){
+    if (!source.hasOwnProperty('totalInput')) {
+      if (type === 'sort') {
+        return 0;
+      }
+      return '';
+    }
+    if (source.totalInput === 0) {
+      if (type === 'sort') {
+        return 0;
+      }
+      return '';
+    }
+    if (!source.hasOwnProperty('finishedInput')) {
+      if (type === 'sort') {
+        return 0;
+      }
+      return 'unknown';
+    }
+    var percentage = Math.floor((source.finishedInput/source.totalInput)*100);
+    if (type === 'sort') {
+      return percentage;
+    }
+    return '<div class="progress" style="width: 100px; background: #FFFF00; position: relative;"><div class="bar" style="width:' + percentage +'%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">' + source.finishedInput + '/' + source.totalInput + '</span></div>'
+  }
+};
+
 var deviceColumn = {
   sTitle: 'Devices',
   mData: function(source, type, val) {
