@@ -111,7 +111,7 @@ var progressColumn = {
     if (type === 'sort') {
       return percentage;
     }
-    return '<div class="progress" style="width: 100px; background: #FFFF00; position: relative;"><div class="bar" style="width:' + percentage +'%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">' + source.finishedInput + '/' + source.totalInput + '</span></div>'
+    return '<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar" style="width:' + percentage +'%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">' + source.finishedInput + '/' + source.totalInput + '</span></div>'
   }
 };
 
