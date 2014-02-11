@@ -288,7 +288,7 @@ module.exports = function (app) {
         _id: {
           $in: me.travelers
         }
-      }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith').lean().exec(function (err, travelers) {
+      }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
@@ -302,7 +302,7 @@ module.exports = function (app) {
     if (req.session.roles.indexOf('manager') === -1) {
       return res.send(403, 'You are not authorized to access this resource');
     }
-    Traveler.find({}, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith').lean().exec(function (err, travelers) {
+    Traveler.find({}, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
