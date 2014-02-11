@@ -57,7 +57,7 @@ $(function () {
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
-  var travelerAoColumns = [travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, deadlineColumn, updatedByColumn, updatedOnColumn];
+  var travelerAoColumns = [travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
     aaData: [],
@@ -65,6 +65,7 @@ $(function () {
     aoColumns: travelerAoColumns,
     aaSorting: [
       [9, 'desc'],
+      [8, 'desc'],
       [7, 'desc']
     ],
     sDom: sDom,
@@ -73,7 +74,7 @@ $(function () {
   initTable(travelerTable, '/travelers/json');
 
 
-  var sharedTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, deadlineColumn, updatedByColumn, updatedOnColumn];
+  var sharedTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   var sharedTravelerTable = $('#shared-traveler-table').dataTable({
     aaData: [],
@@ -81,6 +82,7 @@ $(function () {
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
       [8, 'desc'],
+      [7, 'desc'],
       [6, 'desc']
     ],
     sDom: sDom,
@@ -89,7 +91,7 @@ $(function () {
   initTable(sharedTravelerTable, '/sharedtravelers/json');
 
   if ($('#all-traveler-table').length) {
-    var allTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, deadlineColumn, updatedByColumn, updatedOnColumn];
+    var allTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn];
     fnAddFilterFoot('#all-traveler-table', allTravelerAoColumns);
     var allTravelerTable = $('#all-traveler-table').dataTable({
       aaData: [],
@@ -97,6 +99,7 @@ $(function () {
       aoColumns: allTravelerAoColumns,
       aaSorting: [
         [8, 'desc'],
+        [7, 'desc'],
         [6, 'desc']
       ],
       sDom: sDom,
