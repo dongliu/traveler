@@ -1,0 +1,10 @@
+{
+  "url": "ldap://your/service",
+  "adminDn": "cn=svc_cf-user,ou=Service Accounts,dc=...",
+  "adminPassword": "password",
+  "searchBase": "ou=...,dc=...",
+  "searchFilter": "(&(objectClass=user)(sAMAccountName=_id))",
+  "nameFilter": "(&(objectClass=user)(displayName=_name))",
+  "objAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName"],
+  "rawAttributes": ["thumbnailPhoto"]
+}
