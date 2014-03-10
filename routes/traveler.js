@@ -539,9 +539,9 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canRead(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
+      // if (!canRead(req, doc)) {
+      //   return res.send(403, 'You are not authorized to access this resource');
+      // }
       TravelerData.find({
         _id: {
           $in: doc.data
