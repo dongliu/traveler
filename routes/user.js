@@ -263,7 +263,7 @@ function addUser(req, res) {
     }
 
     var user = new User({
-      _id: result[0].sAMAccountName,
+      _id: result[0].sAMAccountName.toLowerCase(),
       name: result[0].displayName,
       email: result[0].mail,
       office: result[0].physicalDeliveryOfficeName,
