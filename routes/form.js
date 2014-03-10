@@ -411,7 +411,7 @@ function addUserFromAD(req, res, form) {
       return res.send(400, name + ' is not unique!');
     }
 
-    var id = result[0].sAMAccountName;
+    var id = result[0].sAMAccountName.toLowerCase();
     var access = 0;
     if (req.param('access') && req.param('access') == 'write') {
       access = 1;
@@ -427,7 +427,7 @@ function addUserFromAD(req, res, form) {
         return res.send(500, err.msg);
       } else {
         var user = new User({
-          _id: result[0].sAMAccountName,
+          _id: result[0].sAMAccountName.toLowerCase(),
           name: result[0].displayName,
           email: result[0].mail,
           office: result[0].physicalDeliveryOfficeName,
