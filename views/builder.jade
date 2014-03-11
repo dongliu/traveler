@@ -65,9 +65,9 @@ block content
       button.btn.btn-primary#save Save
     if (typeof id !== 'undefined')
       .btn-group
-        a.btn#preview(data-toggle='tooltip', title='the form will be saved first', href='preview', target='_blank') Preview
+        a.btn#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='_blank') Preview
       .btn-group
-        a.btn.dropdown-toggle(data-toggle='dropdown')
+        a.btn.dropdown-toggle(data-toggle='dropdown')#more
           | More
           span.caret
         ul.dropdown-menu
@@ -76,7 +76,7 @@ block content
           li
             a#rename Rename
           li
-            a#share(data-toggle='tooltip', title='the form will be saved first', href='share/') Share
+            a#share(data-toggle='tooltip', title='the form needs be saved first', href='share', target='_blank') Share
   br
   br
   br

@@ -81,6 +81,16 @@ function working() {
   });
 }
 
+function modalAlert(label, body){
+  // $('#modalLabel').html('Finish editting first');
+  $('#modalLabel').html(label);
+  $('#modal .modal-body').empty();
+  // $('#modal .modal-body').append('Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
+  $('#modal .modal-body').append(body);
+  $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">OK</button>');
+  $('#modal').modal('show');
+}
+
 function binding_events() {
   $('#adjust').click(function(e) {
     if ($(this).text() == 'Adjust location') {
@@ -88,6 +98,8 @@ function binding_events() {
       $('#input-items').attr('disabled', true);
       $('#struct-items').attr('disabled', true);
       $('#save').attr('disabled', true);
+      $('#preview').attr('disabled', true);
+      $('#more').attr('disabled', true);
       $('#output').sortable({
         placeholder: "ui-state-highlight"
       });
@@ -96,15 +108,20 @@ function binding_events() {
       $('#input-items').removeAttr('disabled');
       $('#struct-items').removeAttr('disabled');
       $('#save').removeAttr('disabled');
+      $('#preview').removeAttr('disabled');
+      $('#more').removeAttr('disabled');
       $('#output').sortable('destroy');
     }
     e.preventDefault();
   });
   $('#output').on('mouseenter', '.control-group-wrap', function(e) {
     e.preventDefault();
-    if (!$(this).hasClass('control-focus')) {
-      $(this).addClass('control-focus');
-      $(this).prepend(input.button());
+    // check if it is normal edit mode
+    if ($('#adjust').text() == 'Adjust location') {
+      if (!$(this).hasClass('control-focus')) {
+        $(this).addClass('control-focus');
+        $(this).prepend(input.button());
+      }
     }
   });
   $('#output').on('mouseleave', '.control-group-wrap', function(e) {
@@ -119,7 +136,8 @@ function binding_events() {
     var $cgr = $(this).closest('.control-group-wrap');
     // var type = $('span.fe-type', $cgr).text();
     if ($cgr.attr('data-status') == 'editting') {
-      return alert('please finish editting first');
+      modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
+      return;
     }
     $cgr.closest('.control-group-wrap').remove();
   });
@@ -129,7 +147,9 @@ function binding_events() {
     var $cgr = $(this).closest('.control-group-wrap');
     // var type = $('span.fe-type', $cgr).text();
     if ($cgr.attr('data-status') == 'editting') {
-      return alert('please finish editting first');
+      modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
+      return;
+      // return alert('please finish editting first');
     }
     var cloned = $cgr.clone();
     $('.control-group-buttons', $(cloned)).remove();
@@ -179,7 +199,9 @@ function binding_events() {
   $('#save').click(function(e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
-      return alert('please finish the active edit before saving');
+      modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
+      return;
+      // return alert('please finish the active edit before saving');
     }
     tinymce.remove();
     var html = $('#output').html();
@@ -210,19 +232,44 @@ function binding_events() {
   });
 
   $('#preview').click(function(e) {
+    if ($('#output .well.spec').length) {
+      e.preventDefault();
+      modalAlert('Save changes first', 'The form has been changed. Please save it before this action.');
+      return;
+    }
     tinymce.remove();
     var html = $('#output').html();
     if (html !== initHtml) {
-      sendRequest({
-        html: html
-      }, function() {
-        initHtml = html;
-      });
+      e.preventDefault();
+      modalAlert('Save changes first', 'The form has been changed. Please save it before this action.');
+      return;
     }
+    // if (html !== initHtml) {
+    //   sendRequest({
+    //     html: html
+    //   }, function() {
+    //     initHtml = html;
+    //     var win = window.open('preview', '_blank');
+    //     if (win) {
+    //       win.focus();
+    //     }
+    //   });
+    // }
   });
 
   $('#rename').click(function(e) {
     e.preventDefault();
+    if ($('#output .well.spec').length) {
+      modalAlert();
+      return;
+    }
+    tinymce.remove();
+    var html = $('#output').html();
+    if (html !== initHtml) {
+      e.preventDefault();
+      modalAlert('Save changes first', 'The form has been changed. Please save it before this action.');
+      return;
+    }
     $('#modalLabel').html('Rename the form');
     $('#modal .modal-body').empty();
     $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">New form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
@@ -240,6 +287,10 @@ function binding_events() {
 
   $('#saveas').click(function(e) {
     e.preventDefault();
+    if ($('#output .well.spec').length) {
+      modalAlert();
+      return;
+    }
     tinymce.remove();
     var html = $('#output').html();
     $('#modalLabel').html('Save the form as (a new one)');
