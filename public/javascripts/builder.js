@@ -29,7 +29,7 @@ var mce_content = {
   statusbar: false
 };
 
-$(function() {
+$(function () {
   init();
   working();
   binding_events();
@@ -38,61 +38,67 @@ $(function() {
 function init() {}
 
 function working() {
-  $('#add-checkbox').click(function(e) {
+  $('#add-checkbox').click(function (e) {
     e.preventDefault();
     checkbox_edit();
   });
 
 
-  $('#add-text').click(function(e) {
+  $('#add-text').click(function (e) {
     e.preventDefault();
     text_edit();
   });
 
-  $('#add-par').click(function(e) {
+  $('#add-par').click(function (e) {
     e.preventDefault();
     textarea_edit();
   });
 
-  $('#add-number').click(function(e) {
+  $('#add-number').click(function (e) {
     e.preventDefault();
     number_edit();
   });
 
-  $('#add-file').click(function(e) {
+  $('#add-file').click(function (e) {
     e.preventDefault();
     file_edit();
   });
 
-  $('#add-rich').click(function(e) {
+  $('#add-rich').click(function (e) {
     e.preventDefault();
     rich_edit();
   });
 
-  $('#add-section').click(function(e) {
+  $('#add-section').click(function (e) {
     e.preventDefault();
     section_edit();
   });
 
 
-  $('#add-other').click(function(e) {
+  $('#add-other').click(function (e) {
     e.preventDefault();
     other_edit();
   });
 }
 
-function modalAlert(label, body){
-  // $('#modalLabel').html('Finish editting first');
+function modalAlert(label, body) {
   $('#modalLabel').html(label);
   $('#modal .modal-body').empty();
-  // $('#modal .modal-body').append('Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
   $('#modal .modal-body').append(body);
   $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">OK</button>');
   $('#modal').modal('show');
 }
 
+function cleanBeforeSave() {
+  // clean control-focus class and .control-group-buttons element
+  $('.control-focus').removeClass('control-focus');
+  $('.control-group-buttons').remove();
+  // remove tinymce
+  tinymce.remove();
+}
+
 function binding_events() {
-  $('#adjust').click(function(e) {
+  $('#adjust').click(function (e) {
     if ($(this).text() == 'Adjust location') {
       $(this).text('Done');
       $('#input-items').attr('disabled', true);
@@ -114,7 +120,7 @@ function binding_events() {
     }
     e.preventDefault();
   });
-  $('#output').on('mouseenter', '.control-group-wrap', function(e) {
+  $('#output').on('mouseenter', '.control-group-wrap', function (e) {
     e.preventDefault();
     // check if it is normal edit mode
     if ($('#adjust').text() == 'Adjust location') {
@@ -124,14 +130,14 @@ function binding_events() {
       }
     }
   });
-  $('#output').on('mouseleave', '.control-group-wrap', function(e) {
+  $('#output').on('mouseleave', '.control-group-wrap', function (e) {
     e.preventDefault();
     if ($(this).hasClass('control-focus')) {
       $(this).removeClass('control-focus');
       $('.control-group-buttons', $(this)).remove();
     }
   });
-  $('#output').on('click', '.control-focus a.btn.btn-warning[title="remove"]', function(e) {
+  $('#output').on('click', '.control-focus a.btn.btn-warning[title="remove"]', function (e) {
     e.preventDefault();
     var $cgr = $(this).closest('.control-group-wrap');
     // var type = $('span.fe-type', $cgr).text();
@@ -141,7 +147,7 @@ function binding_events() {
     }
     $cgr.closest('.control-group-wrap').remove();
   });
-  $('#output').on('click', '.control-focus a.btn[title="duplicate"]', function(e) {
+  $('#output').on('click', '.control-focus a.btn[title="duplicate"]', function (e) {
     e.preventDefault();
     var that = this;
     var $cgr = $(this).closest('.control-group-wrap');
@@ -149,7 +155,6 @@ function binding_events() {
     if ($cgr.attr('data-status') == 'editting') {
       modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
-      // return alert('please finish editting first');
     }
     var cloned = $cgr.clone();
     $('.control-group-buttons', $(cloned)).remove();
@@ -159,51 +164,51 @@ function binding_events() {
     $(that).closest('.control-group-wrap').after(cloned);
   });
 
-  $('#output').on('click', '.control-focus a.btn[title="edit"]', function(e) {
+  $('#output').on('click', '.control-focus a.btn[title="edit"]', function (e) {
     e.preventDefault();
     var $cgr = $(this).closest('.control-group-wrap');
     if ($cgr.attr('data-status') !== 'editting') {
       var type = $('span.fe-type', $cgr).text();
       switch (type) {
-        case 'rich':
-          // alert('Please edit it inline.');
-          rich_edit($cgr);
-          break;
-        case 'checkbox':
-          checkbox_edit($cgr);
-          break;
-        case 'text':
-          text_edit($cgr);
-          break;
-        case 'textarea':
-          textarea_edit($cgr);
-          break;
-        case 'number':
-          number_edit($cgr);
-          break;
-        case 'file':
-          file_edit($cgr);
-          break;
-        case 'section':
-          section_edit($cgr);
-          break;
-        case 'other':
-          other_edit($cgr);
-          break;
-        default:
-          alert('not implemented.');
+      case 'rich':
+        // alert('Please edit it inline.');
+        rich_edit($cgr);
+        break;
+      case 'checkbox':
+        checkbox_edit($cgr);
+        break;
+      case 'text':
+        text_edit($cgr);
+        break;
+      case 'textarea':
+        textarea_edit($cgr);
+        break;
+      case 'number':
+        number_edit($cgr);
+        break;
+      case 'file':
+        file_edit($cgr);
+        break;
+      case 'section':
+        section_edit($cgr);
+        break;
+      case 'other':
+        other_edit($cgr);
+        break;
+      default:
+        alert('not implemented.');
       }
     }
   });
 
-  $('#save').click(function(e) {
+  $('#save').click(function (e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
       modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
-      // return alert('please finish the active edit before saving');
     }
-    tinymce.remove();
+    // tinymce.remove();
+    cleanBeforeSave();
     var html = $('#output').html();
     var path = window.location.pathname;
     if (/^\/forms\/new/.test(path)) {
@@ -212,7 +217,7 @@ function binding_events() {
       $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
       $('#modal .modal-footer').html('<button id="action" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
       $('#modal').modal('show');
-      $('#action').click(function(e) {
+      $('#action').click(function (e) {
         sendRequest({
           title: $('#title').val(),
           html: html
@@ -224,46 +229,35 @@ function binding_events() {
       } else {
         sendRequest({
           html: html
-        }, function() {
+        }, function () {
           initHtml = html;
         });
       }
     }
   });
 
-  $('#preview').click(function(e) {
+  $('#preview').click(function (e) {
     if ($('#output .well.spec').length) {
       e.preventDefault();
       modalAlert('Save changes first', 'The form has been changed. Please save it before this action.');
       return;
     }
-    tinymce.remove();
+    cleanBeforeSave();
     var html = $('#output').html();
     if (html !== initHtml) {
       e.preventDefault();
       modalAlert('Save changes first', 'The form has been changed. Please save it before this action.');
       return;
     }
-    // if (html !== initHtml) {
-    //   sendRequest({
-    //     html: html
-    //   }, function() {
-    //     initHtml = html;
-    //     var win = window.open('preview', '_blank');
-    //     if (win) {
-    //       win.focus();
-    //     }
-    //   });
-    // }
   });
 
-  $('#rename').click(function(e) {
+  $('#rename').click(function (e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
       modalAlert();
       return;
     }
-    tinymce.remove();
+    cleanBeforeSave();
     var html = $('#output').html();
     if (html !== initHtml) {
       e.preventDefault();
@@ -275,30 +269,30 @@ function binding_events() {
     $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">New form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
     $('#modal .modal-footer').html('<button id="action" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
-    $('#action').click(function(e) {
+    $('#action').click(function (e) {
       var newTitle = $('#title').val();
       sendRequest({
         title: newTitle
-      }, function() {
+      }, function () {
         $('#formtitle').text(newTitle);
       });
     });
   });
 
-  $('#saveas').click(function(e) {
+  $('#saveas').click(function (e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
       modalAlert();
       return;
     }
-    tinymce.remove();
+    cleanBeforeSave();
     var html = $('#output').html();
     $('#modalLabel').html('Save the form as (a new one)');
     $('#modal .modal-body').empty();
     $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
     $('#modal .modal-footer').html('<button id="action" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
-    $('#action').click(function(e) {
+    $('#action').click(function (e) {
       var title = $('#title').val();
       sendRequest({
         html: html,
@@ -333,7 +327,7 @@ function sendRequest(data, cb, saveas) {
     contentType: 'application/json',
     processData: false,
     dataType: 'json'
-  }).done(function(json) {
+  }).done(function (json) {
     var location;
     if (/^\/forms\/new/.test(path)) {
       location = formRequest.getResponseHeader('Location');
@@ -356,18 +350,18 @@ function sendRequest(data, cb, saveas) {
     if (cb) {
       cb();
     }
-  }).fail(function(jqXHR, status, error) {
+  }).fail(function (jqXHR, status, error) {
     $('form#output').fadeTo('slow', 1);
     if (jqXHR.status == 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
     } else {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The save request failed. You might need to try again or contact the admin.</div>');
     }
-  }).always(function() {});
+  }).always(function () {});
 }
 
 function done_button(view, $out) {
-  return function(e) {
+  return function (e) {
     view.unbind();
     $(this).closest('.spec').remove();
     $('input, textarea', $out).attr('name', UID.generateShort());
@@ -654,7 +648,7 @@ function rich_edit($cgr) {
   }
   $('textarea', $rich_textarea).html(html);
   tinymce.init(mce_content);
-  $done.click(function(e) {
+  $done.click(function (e) {
     e.preventDefault();
     $('.tinymce', $rich).html(tinymce.activeEditor.getContent());
     tinymce.remove();
@@ -665,10 +659,10 @@ function rich_edit($cgr) {
 
 
 function binding($edit, $out, model, $done) {
-  $('input', $edit).keyup(function(e) {
+  $('input', $edit).keyup(function (e) {
     model[$(this).attr('name')] = $(this).val();
   });
-  $('select', $edit).change(function(e){
+  $('select', $edit).change(function (e) {
     model[$(this).attr('name')] = $(this).val();
   });
   var view = rivets.bind($out, {
