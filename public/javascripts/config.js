@@ -130,6 +130,7 @@ $(function () {
     });
     $('#newDevice').typeahead({
       name: 'devices',
+      limit: 20,
       valueKey: 'serialNumber',
       prefetch: '/devices/json'
     });

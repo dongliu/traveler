@@ -2,6 +2,7 @@ var path = window.location.pathname;
 $(function() {
   $('#username').typeahead({
     name: 'usernames',
+    limit: 20,
     valueKey: 'displayName',
     prefetch: '/adusernames'
   });
