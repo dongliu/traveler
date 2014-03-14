@@ -1,3 +1,8 @@
+// temparary solution for the dirty forms
+function cleanForm() {
+  $('.control-group-buttons').remove();
+}
+
 function history(found) {
   var i, output = '';
   if (found.length > 0) {
@@ -37,6 +42,7 @@ function createSideNav() {
 
 $(function () {
   createSideNav();
+  cleanForm();
   var binder = new Binder.FormBinder(document.forms[0]);
   $.ajax({
     url: './data/',
