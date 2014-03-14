@@ -24,6 +24,11 @@ function fileHistory(found) {
   return output;
 }
 
+// temparary solution for the dirty forms
+function cleanForm() {
+  $('.control-group-buttons').remove();
+}
+
 function setStatus(s) {
   $.ajax({
     url: './status',
@@ -71,6 +76,8 @@ function updateFinished(num) {
 
 $(function () {
   createSideNav();
+
+  cleanForm();
 
   $(document).bind('drop dragover', function (e) {
     e.preventDefault();
