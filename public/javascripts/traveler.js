@@ -93,7 +93,7 @@ $(function () {
     type: 'GET',
     dataType: 'json'
   }).done(function (data, status, jqXHR) {
-    var finishedInput = 0;
+    // var finishedInput = 0;
     $('#form input,textarea').each(function (index, element) {
       var found = data.filter(function (e) {
         return e.name === element.name;
@@ -112,7 +112,7 @@ $(function () {
           binder.accessor.set(element.name, found[0].value);
           $(element).closest('.controls').append('<div class="history">' + history(found) + '</div>');
         }
-        finishedInput += 1;
+        // finishedInput += 1;
       }
     });
 
@@ -120,7 +120,7 @@ $(function () {
     if (travelerStatus === 1) {
       $('#form input,textarea').removeAttr('disabled');
       // update the finished input count
-      updateFinished(finishedInput);
+      // updateFinished(finishedInput);
     }
   }).fail(function (jqXHR, status, error) {
     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
@@ -181,6 +181,9 @@ $(function () {
       if ($history.length) {
         $history = $($history[0]);
       } else {
+        // a new finished input
+        finishedInput += 1;
+        updateFinished(finishedInput);
         $history = $('<div class="history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
       $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
