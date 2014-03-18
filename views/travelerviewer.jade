@@ -12,6 +12,26 @@ block content
   .container
     #message
     h3 Traveler title:  #{title}
+    if (locals.status !== undefined)
+      h4 Status:
+        case locals.status
+          when 1
+            = ' '
+            span active
+          when 1.5
+            = ' '
+            span submitted
+          when 2
+            = ' '
+            span completed
+          when 3
+            = ' '
+            span frozen
+          when 0
+            = ' '
+            span initialized
+          default
+            = ' '
     button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
     #details.collapse.out
       if (locals.description !== undefined)
