@@ -32,6 +32,11 @@ block content
         a.btn(href='/profile', target='_blank')
           i.fa.fa-user.fa-lg
           | &nbsp;Profile
+      if (locals.roles !== undefined && locals.roles.indexOf('admin') !== -1)
+        .btn-group
+          a.btn(href='/users', target='_blank')
+            i.fa.fa-users.fa-lg
+            | &nbsp;Users
       .btn-group
         a.btn(href='/about', target='_blank')
           i.fa.fa-info.fa-lg
@@ -52,7 +57,7 @@ block content
           a(href='#travelers', data-toggle='tab') My travelers
         li
           a(href='#sharedtravelers', data-toggle='tab') Shared travelers
-        if (locals.roles && locals.roles.indexOf('manager') !== -1)
+        if (locals.roles !== undefined && locals.roles.indexOf('manager') !== -1)
           li
             a(href='#alltravelers', data-toggle='tab') All travelers
 
@@ -82,7 +87,7 @@ block content
           table#traveler-table.table.table-bordered.table-hover
         #sharedtravelers.tab-pane
           table#shared-traveler-table.table.table-bordered.table-hover
-        if (locals.roles && locals.roles.indexOf('manager') !== -1)
+        if (locals.roles !== undefined && locals.roles.indexOf('manager') !== -1)
           #alltravelers.tab-pane
             table#all-traveler-table.table.table-bordered.table-hover
 
