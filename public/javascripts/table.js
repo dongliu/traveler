@@ -211,6 +211,19 @@ var accessColumn = {
   bFilter: true
 };
 
+/*user columns*/
+var rolesColumn = {
+  sTitle: 'Roles',
+  mData: 'roles',
+  sDefaultContent: '',
+  mRender: function(data, type, full) {
+    return data.join();
+  },
+  bFilter: true
+};
+
+var lastVisitedOnColumn = dateColumn('Last visited', 'lastVisitedOn');
+
 /*device columns*/
 
 var serialColumn = {
@@ -235,13 +248,6 @@ var descriptionColumn = {
 };
 
 var modifiedOnColumn = dateColumn('Modified', 'dateModified');
-
-// {
-//   sTitle: 'Modified',
-//   mData: 'dateModified',
-//   sDefaultContent: '',
-//   bFilter: true
-// };
 
 var modifiedByColumn = {
   sTitle: 'Modified by',

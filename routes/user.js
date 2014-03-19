@@ -7,45 +7,45 @@ var User = mongoose.model('User');
 
 var auth = require('../lib/auth');
 
-var Roles = ['manage', 'admin'];
+var Roles = ['manager', 'admin'];
 
 module.exports = function(app) {
 
-  app.get('/users', auth.ensureAuthenticated, function(req, res) {
-    if (req.query.name) {
-      User.findOne({
-        name: req.query.name
-      }).lean().exec(function(err, user) {
-        if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
-        }
-        if (user) {
-          return res.render('user', {
-            user: user,
-            myRoles: req.session.roles
-          });
-        } else {
-          return res.send(404, req.query.name + ' not found');
-        }
-      });
-    } else {
-      if (req.session.roles.length !== 0) {
-        return res.render('users');
-      } else {
+  app.get('/users/', auth.ensureAuthenticated, function(req, res) {
+    // if (req.query.name) {
+    //   User.findOne({
+    //     name: req.query.name
+    //   }).lean().exec(function(err, user) {
+    //     if (err) {
+    //       console.error(err.msg);
+    //       return res.send(500, err.msg);
+    //     }
+    //     if (user) {
+    //       return res.render('user', {
+    //         user: user,
+    //         myRoles: req.session.roles
+    //       });
+    //     } else {
+    //       return res.send(404, req.query.name + ' not found');
+    //     }
+    //   });
+    // } else {
+      if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
         return res.send(403, 'only admin allowed');
+      } else {
+        return res.render('users');
       }
-    }
+    // }
 
   });
 
 
-  app.post('/users', auth.ensureAuthenticated, function(req, res) {
+  app.post('/users/', auth.ensureAuthenticated, function(req, res) {
     // if (!req.is('json')) {
     //   return res.send(415, 'json request expected.');
     // }
 
-    if (req.session.roles.indexOf('admin') == -1) {
+    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
       return res.send(403, 'only admin allowed');
     }
 
@@ -54,7 +54,6 @@ module.exports = function(app) {
     }
 
     // check if already in db
-
     User.findOne({
       name: req.body.name
     }).lean().exec(function(err, user) {
@@ -63,8 +62,8 @@ module.exports = function(app) {
       }
       if (user) {
         var url = req.protocol + '://' + req.get('host') + '/users/' + user._id;
-        res.set('Location', url);
-        return res.send(303, 'The user is at ' + url);
+        // res.set('Location', url);
+        return res.send(200, 'The user is at ' + url);
       } else {
         addUser(req, res);
       }
@@ -75,7 +74,7 @@ module.exports = function(app) {
 
 
   app.get('/users/json', auth.ensureAuthenticated, function(req, res) {
-    if (req.session.roles.length === 0) {
+    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
       return res.send(403, "You are not authorized to access this resource. ");
     }
     User.find().lean().exec(function(err, users) {
@@ -102,7 +101,6 @@ module.exports = function(app) {
         return res.send(500, err.msg);
       }
       if (user) {
-
         return res.render('user', {
           user: user,
           myRoles: req.session.roles
@@ -114,7 +112,7 @@ module.exports = function(app) {
   });
 
   app.put('/users/:id', auth.ensureAuthenticated, function(req, res) {
-    if (req.session.roles.indexOf('admin') === -1) {
+    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
       return res.send(403, "You are not authorized to access this resource. ");
     }
     if (!req.is('json')) {
@@ -137,7 +135,6 @@ module.exports = function(app) {
 
   // get from the db not ad
   app.get('/users/:id/json', auth.ensureAuthenticated, function(req, res) {
-
     User.findOne({
       _id: req.params.id
     }).lean().exec(function(err, user) {
@@ -261,14 +258,21 @@ function addUser(req, res) {
     if (result.length > 1) {
       return res.send(400, req.body.name + ' is not unique!');
     }
-
+    var roles = [];
+    if (req.body.manager) {
+      roles.push('manager');
+    }
+    if (req.body.admin) {
+      roles.push('admin');
+    }
     var user = new User({
       _id: result[0].sAMAccountName.toLowerCase(),
       name: result[0].displayName,
       email: result[0].mail,
       office: result[0].physicalDeliveryOfficeName,
       phone: result[0].telephoneNumber,
-      mobile: result[0].mobile
+      mobile: result[0].mobile,
+      roles: roles
     });
 
     user.save(function(err, newUser) {
@@ -279,7 +283,7 @@ function addUser(req, res) {
 
       var url = req.protocol + '://' + req.get('host') + '/users/' + newUser._id;
       res.set('Location', url);
-      res.send(303, 'The new user is at ' + url);
+      res.send(201, 'The new user is at ' + url);
     });
 
   });
