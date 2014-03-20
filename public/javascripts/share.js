@@ -61,6 +61,7 @@ $(function() {
       $('#modal .modal-footer').html('<button id="remove" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#remove').click(function(e){
         e.preventDefault();
+        $('#remove').prop('disabled', true);
         removeFromModal(function(){
           initTable(shareTable);
         });
@@ -87,6 +88,7 @@ $(function() {
       $('#modal .modal-footer').html('<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modify').click(function(e) {
         e.preventDefault();
+        $('#modify').prop('disabled', true);
         modifyFromModal(function() {
           initTable(shareTable);
         });

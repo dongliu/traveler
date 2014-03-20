@@ -144,6 +144,7 @@ $(function () {
       $('#modal .modal-footer').html('<button id="update" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#update').click(function (e) {
         e.preventDefault();
+        $('#update').prop('disabled', true);
         updateFromModal(function () {
           initTable(userTable);
         });
@@ -170,6 +171,7 @@ $(function () {
       $('#modal .modal-footer').html('<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modify').click(function (e) {
         e.preventDefault();
+        $('#modify').prop('disabled', true);
         modifyFromModal(function () {
           initTable(userTable);
         });
