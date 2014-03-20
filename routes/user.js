@@ -9,9 +9,9 @@ var auth = require('../lib/auth');
 
 var Roles = ['manager', 'admin'];
 
-module.exports = function(app) {
+module.exports = function (app) {
 
-  app.get('/users/', auth.ensureAuthenticated, function(req, res) {
+  app.get('/users/', auth.ensureAuthenticated, function (req, res) {
     // if (req.query.name) {
     //   User.findOne({
     //     name: req.query.name
@@ -30,17 +30,17 @@ module.exports = function(app) {
     //     }
     //   });
     // } else {
-      if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
-        return res.send(403, 'only admin allowed');
-      } else {
-        return res.render('users');
-      }
+    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
+      return res.send(403, 'only admin allowed');
+    } else {
+      return res.render('users');
+    }
     // }
 
   });
 
 
-  app.post('/users/', auth.ensureAuthenticated, function(req, res) {
+  app.post('/users/', auth.ensureAuthenticated, function (req, res) {
     // if (!req.is('json')) {
     //   return res.send(415, 'json request expected.');
     // }
@@ -56,7 +56,7 @@ module.exports = function(app) {
     // check if already in db
     User.findOne({
       name: req.body.name
-    }).lean().exec(function(err, user) {
+    }).lean().exec(function (err, user) {
       if (err) {
         return res.send(500, err.msg);
       }
@@ -73,11 +73,11 @@ module.exports = function(app) {
 
 
 
-  app.get('/users/json', auth.ensureAuthenticated, function(req, res) {
+  app.get('/users/json', auth.ensureAuthenticated, function (req, res) {
     if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
       return res.send(403, "You are not authorized to access this resource. ");
     }
-    User.find().lean().exec(function(err, users) {
+    User.find().lean().exec(function (err, users) {
       if (err) {
         console.error(err.msg);
         return res.json(500, {
@@ -89,13 +89,13 @@ module.exports = function(app) {
   });
 
 
-  app.get('/users/:id', auth.ensureAuthenticated, function(req, res) {
+  app.get('/users/:id', auth.ensureAuthenticated, function (req, res) {
     // if (req.session.roles.indexOf('admin') === -1) {
     //   return res.send(403, "You are not authorized to access this resource. ");
     // }
     User.findOne({
       _id: req.params.id
-    }).lean().exec(function(err, user) {
+    }).lean().exec(function (err, user) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -111,7 +111,7 @@ module.exports = function(app) {
     });
   });
 
-  app.put('/users/:id', auth.ensureAuthenticated, function(req, res) {
+  app.put('/users/:id', auth.ensureAuthenticated, function (req, res) {
     if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
       return res.send(403, "You are not authorized to access this resource. ");
     }
@@ -122,7 +122,7 @@ module.exports = function(app) {
     }
     User.findOneAndUpdate({
       _id: req.params.id
-    }, req.body).lean().exec(function(err, user) {
+    }, req.body).lean().exec(function (err, user) {
       if (err) {
         console.error(err.msg);
         return res.json(500, {
@@ -134,10 +134,10 @@ module.exports = function(app) {
   });
 
   // get from the db not ad
-  app.get('/users/:id/json', auth.ensureAuthenticated, function(req, res) {
+  app.get('/users/:id/json', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.params.id
-    }).lean().exec(function(err, user) {
+    }).lean().exec(function (err, user) {
       if (err) {
         console.error(err.msg);
         return res.json(500, {
@@ -148,11 +148,29 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/users/:id/refresh', auth.ensureAuthenticated, function (req, res) {
+    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
+      return res.send(403, "You are not authorized to access this resource. ");
+    }
+    User.findOne({
+      _id: req.params.id
+    }).exec(function (err, user) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (user) {
+        updateUserProfile(user, res);
+      } else {
+        return res.send(404, req.params.id + ' is not in the application.');
+      }
+    });
+  });
 
 
   // resource /adusers
 
-  app.get('/adusers/:id', auth.ensureAuthenticated, function(req, res) {
+  app.get('/adusers/:id', auth.ensureAuthenticated, function (req, res) {
 
     var searchFilter = ad.searchFilter.replace('_id', req.params.id);
     var opts = {
@@ -160,7 +178,7 @@ module.exports = function(app) {
       attributes: ad.objAttributes,
       scope: 'sub'
     };
-    ldapClient.search(ad.searchBase, opts, false, function(err, result) {
+    ldapClient.search(ad.searchBase, opts, false, function (err, result) {
       if (err) {
         return res.json(500, err);
       }
@@ -181,7 +199,7 @@ module.exports = function(app) {
   });
 
 
-  app.get('/adusers/:id/photo', auth.ensureAuthenticated, function(req, res) {
+  app.get('/adusers/:id/photo', auth.ensureAuthenticated, function (req, res) {
 
     var searchFilter = ad.searchFilter.replace('_id', req.params.id);
     var opts = {
@@ -189,7 +207,7 @@ module.exports = function(app) {
       attributes: ad.rawAttributes,
       scope: 'sub'
     };
-    ldapClient.search(ad.searchBase, opts, true, function(err, result) {
+    ldapClient.search(ad.searchBase, opts, true, function (err, result) {
       if (err) {
         return res.json(500, err);
       }
@@ -209,7 +227,7 @@ module.exports = function(app) {
 
   });
 
-  app.get('/adusernames', auth.ensureAuthenticated, function(req, res) {
+  app.get('/adusernames', auth.ensureAuthenticated, function (req, res) {
     // var query = req.param('term');
     var query = req.query.term;
     var nameFilter, opts;
@@ -223,7 +241,7 @@ module.exports = function(app) {
       attributes: ['displayName'],
       scope: 'sub'
     };
-    ldapClient.search(ad.searchBase, opts, false, function(err, result) {
+    ldapClient.search(ad.searchBase, opts, false, function (err, result) {
       if (err) {
         return res.json(500, JSON.stringify(err));
       }
@@ -237,6 +255,43 @@ module.exports = function(app) {
   });
 };
 
+function updateUserProfile(user, res) {
+  var searchFilter = ad.searchFilter.replace('_id', user._id);
+  var opts = {
+    filter: searchFilter,
+    attributes: ad.objAttributes,
+    scope: 'sub'
+  };
+  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
+    if (err) {
+      return res.json(500, err);
+    }
+    if (result.length === 0) {
+      return res.json(500, {
+        error: req.params.id + ' is not found!'
+      });
+    }
+    if (result.length > 1) {
+      return res.json(500, {
+        error: req.params.id + ' is not unique!'
+      });
+    }
+    user.update({
+      name: result[0].displayName,
+      email: result[0].mail,
+      office: result[0].physicalDeliveryOfficeName,
+      phone: result[0].telephoneNumber,
+      mobile: result[0].mobile
+    }, function(err) {
+      if (err) {
+        return res.json(500, err);
+      }
+      res.send(204);
+    })
+  });
+}
+
+
 function addUser(req, res) {
   var nameFilter = ad.nameFilter.replace('_name', req.body.name);
   var opts = {
@@ -245,7 +300,7 @@ function addUser(req, res) {
     scope: 'sub'
   };
 
-  ldapClient.search(ad.searchBase, opts, false, function(err, result) {
+  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
     if (err) {
       console.error(err.name + ' : ' + err.message);
       return res.json(500, err);
@@ -275,7 +330,7 @@ function addUser(req, res) {
       roles: roles
     });
 
-    user.save(function(err, newUser) {
+    user.save(function (err, newUser) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
