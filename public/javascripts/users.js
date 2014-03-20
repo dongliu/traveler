@@ -51,14 +51,18 @@ function updateFromModal(cb) {
 function modifyFromModal(cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
+  var roles = [];
+  $('#modal-roles input:checked').each(function() {
+      roles.push($(this).val());
+    });
   $('#modal .modal-body div').each(function (index) {
     var that = this;
     $.ajax({
-      url: path + that.id,
+      url: '/users/' + that.id,
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
-        access: $('#modal-access').prop('checked') ? 'write' : 'read'
+        roles:roles
       }),
     }).done(function () {
       $(that).prepend('<i class="icon-check"></i>');
@@ -135,7 +139,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = userTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.name + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.name + '</div>');
       });
       $('#modal .modal-footer').html('<button id="update" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#update').click(function (e) {
@@ -153,21 +157,21 @@ $(function () {
     }
   });
 
-  $('#share-modify').click(function (e) {
-    var selected = fnGetSelected(shareTable, 'row-selected');
+  $('#user-modify').click(function (e) {
+    var selected = fnGetSelected(userTable, 'row-selected');
     if (selected.length) {
-      $('#modalLabel').html('Modify the following ' + selected.length + ' users\' priviledge? ');
+      $('#modalLabel').html('Modify the following ' + selected.length + ' users\' role? ');
       $('#modal .modal-body').empty();
-      $('#modal .modal-body').append('<form class="form-inline"><lable class="checkbox"><input id="modal-access" type="checkbox" name="access" value="write">write</lable></form>');
+      $('#modal .modal-body').append('<form id="modal-roles" class="form-inline"><label class="checkbox"><input id="modal-manager" type="checkbox" value="manager">manager</label> <label class="checkbox"><input id="modal-admin" type="checkbox" value="admin">admin</label> </form>');
       selected.forEach(function (row) {
-        var data = shareTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.username + '</div>');
+        var data = userTable.fnGetData(row);
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.name + '</div>');
       });
       $('#modal .modal-footer').html('<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modify').click(function (e) {
         e.preventDefault();
         modifyFromModal(function () {
-          initTable(shareTable);
+          initTable(userTable);
         });
       });
       $('#modal').modal('show');

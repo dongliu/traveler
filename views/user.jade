@@ -32,29 +32,14 @@ block content
         dd #{user.lastVisitedOn}
         dt Notice subscribed
         dd #{user.subscribe}
-        dt Priviledges
+        dt Roles
         dd#roles
-          //- //- form.form-inline
-          //- label.checkbox.inline
-          //-   input(type='checkbox', value='adjust')
-          //-   | adjust
-          //- //- = ' '
-          //- label.checkbox.inline
-          //-   input(type='checkbox', value='approve')
-          //-   | approve
-          //- //- = ' '
-          //- label.checkbox.inline
-          //-   input(type='checkbox', value='install')
-          //-   | install
-          //- = ' '
           label.checkbox.inline
-            input(type='checkbox', value='manage')
-            | manage
-          //- = ' '
+            input(type='checkbox', value='manager')
+            | manager
           label.checkbox.inline
             input(type='checkbox', value='admin')
             | admin
-          //- = ' '
       if (myRoles.indexOf('admin') !== -1)
         button#modify.btn.btn-primary(type='submit') Modify
         = ' '
