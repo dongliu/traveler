@@ -145,6 +145,9 @@ $(function () {
     initTable(sharedFormTable, '/sharedforms/json');
     initTable(travelerTable, '/travelers/json');
     initTable(sharedTravelerTable, '/sharedtravelers/json');
+    if ($('#all-traveler-table').length) {
+      initTable(allTravelerTable, '/alltravelers/json');
+    }
   });
 
   // binding events
