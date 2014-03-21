@@ -196,6 +196,13 @@ var userNameNoLinkColumn = {
   bFilter: true
 };
 
+var fullNameNoLinkColumn = {
+  sTitle: 'Full name',
+  mData: 'name',
+  sDefaultContent: '',
+  bFilter: true
+};
+
 var accessColumn = {
   sTitle: 'Priviledge',
   mData: 'access',
