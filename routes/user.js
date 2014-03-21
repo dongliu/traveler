@@ -12,31 +12,30 @@ var Roles = ['manager', 'admin'];
 module.exports = function (app) {
 
   app.get('/users/', auth.ensureAuthenticated, function (req, res) {
-    // if (req.query.name) {
-    //   User.findOne({
-    //     name: req.query.name
-    //   }).lean().exec(function(err, user) {
-    //     if (err) {
-    //       console.error(err.msg);
-    //       return res.send(500, err.msg);
-    //     }
-    //     if (user) {
-    //       return res.render('user', {
-    //         user: user,
-    //         myRoles: req.session.roles
-    //       });
-    //     } else {
-    //       return res.send(404, req.query.name + ' not found');
-    //     }
-    //   });
-    // } else {
     if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
       return res.send(403, 'only admin allowed');
     } else {
       return res.render('users');
     }
-    // }
+  });
 
+  app.get('/usernames/:name', auth.ensureAuthenticated, function (req, res) {
+    User.findOne({
+      name: req.params.name
+    }).lean().exec(function (err, user) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (user) {
+        return res.render('user', {
+          user: user,
+          myRoles: req.session.roles
+        });
+      } else {
+        return res.send(404, req.params.name + ' not found');
+      }
+    });
   });
 
 
@@ -282,7 +281,7 @@ function updateUserProfile(user, res) {
       office: result[0].physicalDeliveryOfficeName,
       phone: result[0].telephoneNumber,
       mobile: result[0].mobile
-    }, function(err) {
+    }, function (err) {
       if (err) {
         return res.json(500, err);
       }
