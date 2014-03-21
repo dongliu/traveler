@@ -94,7 +94,7 @@ $(function () {
   var userTable = $('#users').dataTable({
     aaData: [],
     // bAutoWidth: false,
-    aoColumns: [selectColumn, useridColumn, userNameNoLinkColumn, rolesColumn, lastVisitedOnColumn],
+    aoColumns: [selectColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn],
     aaSorting: [
       [1, 'desc']
     ],
