@@ -90,7 +90,7 @@ $(function () {
   });
   initTable(sharedTravelerTable, '/sharedtravelers/json');
 
-  if ($('#all-traveler-table').length) {
+  // if ($('#all-traveler-table').length) {
     var allTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
     fnAddFilterFoot('#all-traveler-table', allTravelerAoColumns);
     var allTravelerTable = $('#all-traveler-table').dataTable({
@@ -106,7 +106,7 @@ $(function () {
       oTableTools: oTableTools
     });
     initTable(allTravelerTable, '/alltravelers/json');
-  }
+  // }
 
   $('#form-travel').click(function (e) {
     var selected = fnGetSelected(formTable, 'row-selected');
@@ -145,9 +145,9 @@ $(function () {
     initTable(sharedFormTable, '/sharedforms/json');
     initTable(travelerTable, '/travelers/json');
     initTable(sharedTravelerTable, '/sharedtravelers/json');
-    if ($('#all-traveler-table').length) {
+    // if ($('#all-traveler-table').length) {
       initTable(allTravelerTable, '/alltravelers/json');
-    }
+    // }
   });
 
   // binding events
