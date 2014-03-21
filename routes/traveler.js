@@ -299,9 +299,9 @@ module.exports = function (app) {
   });
 
   app.get('/alltravelers/json', auth.ensureAuthenticated, function (req, res) {
-    if (req.session.roles.indexOf('manager') === -1) {
-      return res.send(403, 'You are not authorized to access this resource');
-    }
+    // if (req.session.roles.indexOf('manager') === -1) {
+    //   return res.send(403, 'You are not authorized to access this resource');
+    // }
     Traveler.find({}, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err.msg);
