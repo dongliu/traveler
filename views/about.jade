@@ -1,16 +1,55 @@
-extends layout
+doctype html
+html
+  head
+    meta(http-equiv='X-UA-Compatible', content='IE=Edge')
+    title FRIB Traveler :: about
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
+    link(rel='stylesheet', href='/datatables/css/dataTables.bootstrap.css')
+    link(rel='stylesheet', href='/font-awesome-4.0.3/css/font-awesome.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body(data-spy='scroll', data-target='.bs-docs-sidenav')
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.brand(href='http://www.frib.msu.edu/', target='_blank') FRIB
+          .nav-collapse.collapse
+            ul.nav
+              li
+                a(href='http://cable-dev:3000', target='_blank') Cable
+              li.active
+                a(href='/') Traveler
+              li
+                a(href='other') Other
+              li
+                a(href='other') Another
+              li
+                a(href='/logout') Logout
+    header
+      .hero-unit
+        h1 FRIB Traveler
+        h2 A Web application to create, manage, and share forms and travelers.
+        h4 A typical traveler contains a sequence of actions. Some actions require a person to verify the action is performed and collect data as defined in the form. The traveler application records who collects what data at what time before the traveler is completed.
 
-block head
-  title FRIB Traveler :: about
-  meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='/datatables/css/dataTables.bootstrap.css')
-  link(rel='stylesheet', href='/font-awesome-4.0.3/css/font-awesome.css')
-  link(rel='stylesheet', href='/stylesheets/style.css')
+    .container-fluid
+      .span3.bs-docs-sidebar
+        ul.nav.nav-list.bs-docs-sidenav.affix-top
+          li
+            a(href='#log') Login and logout
+            a(href='#layout') Forms and travelers
+            a(href='#table') Using the data table
+            a(href='#compose') Compose a form
+            a(href='#share-form') Share a form
+            a(href='#create') Create a traveler
+            a(href='#configure') Configure a traveler
+            a(href='#share-traveler') Share a traveler
+            a(href='#work') Work on a traveler
+            a(href='#bug') Bugs and suggestions
 
-block content
-  .hero-unit
-    h1 FRIB Traveler
-    h3 A Web application to create, manage, and share forms and travelers.
-
+    script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
+    script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
