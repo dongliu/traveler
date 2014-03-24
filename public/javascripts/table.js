@@ -22,6 +22,15 @@ var formLinkColumn = {
   bSortable: false
 };
 
+var formShareLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function(data, type, full) {
+    return '<a href="/forms/' + data + '/share/" target="_blank"><i class="fa fa-users fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
 var createdOnColumn = dateColumn('Created', 'createdOn');
 var createdByColumn = personColumn('Created by', 'createdBy');
 
