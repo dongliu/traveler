@@ -19,15 +19,15 @@ function initTable(oTable, url) {
 
 
 $(function () {
-  var formAoColumns = [selectColumn, formLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
+  var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
   fnAddFilterFoot('#form-table', formAoColumns);
   var formTable = $('#form-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: formAoColumns,
     aaSorting: [
-      [3, 'desc'],
-      [4, 'desc']
+      [4, 'desc'],
+      [5, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
