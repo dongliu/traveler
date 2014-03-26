@@ -9,7 +9,7 @@ $(function(){
       $affix.append('<li><a href="#' + $legend[i].id + '">' + $legend[i].textContent + '</a></li>');
     }
     $('body').append($('<div id="affixlist" class="bs-docs-sidebar"></div>').append($affix));
-    $('body').prop('data-spy', 'scroll');
-    $('body').prop('data-target', '#affixlist');
+    $('body').attr('data-spy', 'scroll');
+    $('body').attr('data-target', '#affixlist');
   }
 });
