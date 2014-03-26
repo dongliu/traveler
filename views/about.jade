@@ -113,7 +113,17 @@ html
               h2 Share a traveler
             p To share a traveler is similar to share a form. A user with write permission can update the data in the traveler, while a user with read permission can only view the traveler with collected data. Any user can view the traveler with a link or in the "All travelers" tab.
             embed(src="/images/sharetraveler.swf",width=1024,height=788,quality='low',play=false,loop=false,wmode='transparent',type="application/x-shockwave-flash",pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash")
-
+          section#work
+            .page-header
+              h2 Work on a traveler
+            p The traveler owner and other users with write permission can update the data in a traveler. All data input history are kept and shown on the traveler page. The progress can be seen in the traveler data table. A user can request to complete a traveler. The traveler owner can approve the completion, or asks for more work.
+            embed(src="/images/work.swf",width=1024,height=788,quality='low',play=false,loop=false,wmode='transparent',type="application/x-shockwave-flash",pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash")
+          section#bug
+            .page-header
+              h2 Bugs and suggestions
+            h4 If you find something not working well or you want a new feature, please contact
+              = ' '
+              a(href='mailto:liud@frib.msu.edu?Subject=traveler%20issues',target='_top') Dong Liu
 
 
     script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
