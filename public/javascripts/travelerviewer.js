@@ -61,11 +61,11 @@ $(function () {
           return 1;
         });
         if (this.type == 'file') {
-          $(element).closest('.controls').append('<div class="history">' + fileHistory(found) + '</div>');
+          $(element).closest('.controls').append('<div class="input-history">' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.controls').append('<div class="history">' + history(found) + '</div>');
+          $(element).closest('.controls').append('<div class="input-history">' + history(found) + '</div>');
         }
       }
     });
