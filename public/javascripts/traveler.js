@@ -104,11 +104,11 @@ $(function () {
           return 1;
         });
         if (this.type == 'file') {
-          $(element).closest('.controls').append('<div class="history">' + fileHistory(found) + '</div>');
+          $(element).closest('.controls').append('<div class="input-history">' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.controls').append('<div class="history">' + history(found) + '</div>');
+          $(element).closest('.controls').append('<div class="input-history">' + history(found) + '</div>');
         }
       }
     });
@@ -172,14 +172,14 @@ $(function () {
     }).done(function (data, status, jqXHR) {
       var timestamp = jqXHR.getResponseHeader('Date');
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved ' + moment(timestamp).fromNow() + '</div>');
-      var $history = $this.closest('.control-group-wrap').find('.history');
+      var $history = $this.closest('.control-group-wrap').find('.input-history');
       if ($history.length) {
         $history = $($history[0]);
       } else {
         // a new finished input
         finishedInput += 1;
         updateFinished(finishedInput);
-        $history = $('<div class="history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
+        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
       $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
       $this.closest('.control-group-buttons').remove();
@@ -260,11 +260,11 @@ $(function () {
     }).done(function (data, status, jqXHR) {
       var timestamp = jqXHR.getResponseHeader('Date');
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' + moment(timestamp).fromNow() + '</div>');
-      var $history = $this.closest('.control-group-wrap').find('.history');
+      var $history = $this.closest('.control-group-wrap').find('.input-history');
       if ($history.length) {
         $history = $($history[0]);
       } else {
-        $history = $('<div class="history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
+        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
       $history.html('<strong><a href=' + data.location + ' target="_blank">' + input.files[0].name + '</a></strong> uploaded by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
       $this.closest('.control-group-buttons').remove();
