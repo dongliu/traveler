@@ -73,9 +73,9 @@ $(function () {
     // bAutoWidth: false,
     aoColumns: travelerAoColumns,
     aaSorting: [
+      [7, 'desc'],
       [9, 'desc'],
-      [8, 'desc'],
-      [7, 'desc']
+      [8, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -90,9 +90,9 @@ $(function () {
     // bAutoWidth: false,
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
+      [6, 'desc'],
       [8, 'desc'],
-      [7, 'desc'],
-      [6, 'desc']
+      [7, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -107,9 +107,9 @@ $(function () {
     // bAutoWidth: false,
     aoColumns: allTravelerAoColumns,
     aaSorting: [
+      [6, 'desc'],
       [8, 'desc'],
-      [7, 'desc'],
-      [6, 'desc']
+      [7, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
