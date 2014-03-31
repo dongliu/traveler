@@ -27,7 +27,7 @@ function createTraveler(form, req, res) {
   var num = $('input, textarea').length;
   // console.log('total input number is ' + num);
   var traveler = new Traveler({
-    title: 'update me',
+    title: form.title,
     description: '',
     devices: [],
     status: 0,
