@@ -30,6 +30,12 @@ var mce_content = {
 };
 
 $(function () {
+  $(document).ajaxError(function (event, jqXHR, settings, exception) {
+    if (jqXHR.status == 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
+  });
   init();
   working();
   binding_events();
@@ -352,9 +358,7 @@ function sendRequest(data, cb, saveas) {
     }
   }).fail(function (jqXHR, status, error) {
     $('form#output').fadeTo('slow', 1);
-    if (jqXHR.status == 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
-    } else {
+    if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The save request failed. You might need to try again or contact the admin.</div>');
     }
   }).always(function () {});

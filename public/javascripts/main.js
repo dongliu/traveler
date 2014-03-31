@@ -12,13 +12,22 @@ function initTable(oTable, url) {
     oTable.fnAddData(json);
     oTable.fnDraw();
   }).fail(function (jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
-    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
   }).always();
 }
 
 
 $(function () {
+  $(document).ajaxError(function (event, jqXHR, settings, exception) {
+    if (jqXHR.status == 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
+  });
+
   var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
   fnAddFilterFoot('#form-table', formAoColumns);
   var formTable = $('#form-table').dataTable({
@@ -91,21 +100,21 @@ $(function () {
   initTable(sharedTravelerTable, '/sharedtravelers/json');
 
   // if ($('#all-traveler-table').length) {
-    var allTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
-    fnAddFilterFoot('#all-traveler-table', allTravelerAoColumns);
-    var allTravelerTable = $('#all-traveler-table').dataTable({
-      aaData: [],
-      // bAutoWidth: false,
-      aoColumns: allTravelerAoColumns,
-      aaSorting: [
-        [8, 'desc'],
-        [7, 'desc'],
-        [6, 'desc']
-      ],
-      sDom: sDom,
-      oTableTools: oTableTools
-    });
-    initTable(allTravelerTable, '/alltravelers/json');
+  var allTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  fnAddFilterFoot('#all-traveler-table', allTravelerAoColumns);
+  var allTravelerTable = $('#all-traveler-table').dataTable({
+    aaData: [],
+    // bAutoWidth: false,
+    aoColumns: allTravelerAoColumns,
+    aaSorting: [
+      [8, 'desc'],
+      [7, 'desc'],
+      [6, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+  initTable(allTravelerTable, '/alltravelers/json');
   // }
 
   $('#form-travel').click(function (e) {
@@ -134,8 +143,10 @@ $(function () {
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
         // initTable();
       }).fail(function (jqXHR, status, error) {
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot create new traveler</div>');
-        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        if (jqXHR.status !== 401) {
+          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot create new traveler</div>');
+          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        }
       }).always();
     }
   });
@@ -146,7 +157,7 @@ $(function () {
     initTable(travelerTable, '/travelers/json');
     initTable(sharedTravelerTable, '/sharedtravelers/json');
     // if ($('#all-traveler-table').length) {
-      initTable(allTravelerTable, '/alltravelers/json');
+    initTable(allTravelerTable, '/alltravelers/json');
     // }
   });
 
@@ -154,5 +165,3 @@ $(function () {
   selectEvent();
   filterEvent();
 });
-
-

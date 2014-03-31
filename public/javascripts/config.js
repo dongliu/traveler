@@ -17,12 +17,20 @@ function setStatus(s) {
   }).done(function (data, status, jqXHR) {
     document.location.href = window.location.pathname;
   }).fail(function (jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
-    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
   }).always();
 }
 
 $(function () {
+  $(document).ajaxError(function (event, jqXHR, settings, exception) {
+    if (jqXHR.status == 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
+  });
   $('span.time').each(function () {
     $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
   });
@@ -102,8 +110,10 @@ $(function () {
       $this.parent().remove();
     }).fail(function (jqXHR, status, error) {
       $this.val(deadline);
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config :  ' + jqXHR.responseText + '</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config :  ' + jqXHR.responseText + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
     });
   });
 
@@ -147,8 +157,10 @@ $(function () {
         }).done(function (data, status, jqXHR) {
           document.location.href = window.location.pathname;
         }).fail(function (jqXHR, status, error) {
-          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot add the device</div>');
-          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          if (jqXHR.status !== 401) {
+            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot add the device</div>');
+            $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          }
         }).always();
       }
       cleanDeviceForm();
@@ -164,8 +176,10 @@ $(function () {
     }).done(function (data, status, jqXHR) {
       $that.closest('li').remove();
     }).fail(function (jqXHR, status, error) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
     }).always();
   });
 
