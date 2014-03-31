@@ -40,8 +40,10 @@ function setStatus(s) {
   }).done(function (data, status, jqXHR) {
     document.location.href = window.location.pathname;
   }).fail(function (jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
-    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
   }).always();
 }
 
@@ -68,12 +70,21 @@ function updateFinished(num) {
       finishedInput: num
     })
   }).done(function (data, status, jqXHR) {}).fail(function (jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update finished input number</div>');
-    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update finished input number</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
   }).always();
 }
 
 $(function () {
+
+  $(document).ajaxError(function (event, jqXHR, settings, exception) {
+    if (jqXHR.status == 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
+  })
   createSideNav();
 
   cleanForm();
@@ -118,8 +129,10 @@ $(function () {
       $('#form input,textarea').removeAttr('disabled');
     }
   }).fail(function (jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
-    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
   }).always();
 
   $('#complete').click(function (e) {
@@ -184,8 +197,10 @@ $(function () {
       $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR, status, error) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the value: ' + jqXHR.responseText + '</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the value: ' + jqXHR.responseText + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
     }).always(function () {
       $('#form input,textarea').removeAttr('disabled');
       $('#complete').removeAttr('disabled');
@@ -269,8 +284,10 @@ $(function () {
       $history.html('<strong><a href=' + data.location + ' target="_blank">' + input.files[0].name + '</a></strong> uploaded by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR, status, error) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
     }).always(function () {
       $('#form input,textarea').removeAttr('disabled');
       $('#complete').removeAttr('disabled');
