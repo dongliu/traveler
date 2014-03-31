@@ -1,5 +1,11 @@
 var path = window.location.pathname;
-$(function() {
+$(function () {
+  $(document).ajaxError(function (event, jqXHR, settings, exception) {
+    if (jqXHR.status == 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
+  });
   $('#username').typeahead({
     name: 'usernames',
     limit: 20,
@@ -22,7 +28,7 @@ $(function() {
   selectEvent();
   filterEvent();
 
-  $('#add').click(function(e) {
+  $('#add').click(function (e) {
     e.preventDefault();
     var name = $('#username').val();
     if (inArray(name, shareTable.fnGetData())) {
@@ -37,32 +43,34 @@ $(function() {
           name: name,
           access: $('#access').prop('checked') ? 'write' : 'read'
         }),
-        success: function(data, status, jqXHR) {
+        success: function (data, status, jqXHR) {
           $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
           initTable(shareTable);
         },
-        error: function(jqXHR, status, error) {
-          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
+        error: function (jqXHR, status, error) {
+          if (jqXHR.status !== 401) {
+            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
+          }
         }
       });
     }
     document.forms[0].reset();
   });
 
-  $('#share-remove').click(function(e) {
+  $('#share-remove').click(function (e) {
     var selected = fnGetSelected(shareTable, 'row-selected');
     if (selected.length) {
       $('#modalLabel').html('Remove the following ' + selected.length + ' users from the share list? ');
       $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
+      selected.forEach(function (row) {
         var data = shareTable.fnGetData(row);
         $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.username + '</div>');
       });
       $('#modal .modal-footer').html('<button id="remove" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#remove').click(function(e){
+      $('#remove').click(function (e) {
         e.preventDefault();
         $('#remove').prop('disabled', true);
-        removeFromModal(function(){
+        removeFromModal(function () {
           initTable(shareTable);
         });
       });
@@ -75,21 +83,21 @@ $(function() {
     }
   });
 
-  $('#share-modify').click(function(e) {
+  $('#share-modify').click(function (e) {
     var selected = fnGetSelected(shareTable, 'row-selected');
     if (selected.length) {
       $('#modalLabel').html('Modify the following ' + selected.length + ' users\' priviledge? ');
       $('#modal .modal-body').empty();
       $('#modal .modal-body').append('<form class="form-inline"><lable class="checkbox"><input id="modal-access" type="checkbox" name="access" value="write">write</lable></form>');
-      selected.forEach(function(row) {
+      selected.forEach(function (row) {
         var data = shareTable.fnGetData(row);
         $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.username + '</div>');
       });
       $('#modal .modal-footer').html('<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modify').click(function(e) {
+      $('#modify').click(function (e) {
         e.preventDefault();
         $('#modify').prop('disabled', true);
-        modifyFromModal(function() {
+        modifyFromModal(function () {
           initTable(shareTable);
         });
       });
@@ -109,20 +117,20 @@ $(function() {
 function removeFromModal(cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function(index) {
+  $('#modal .modal-body div').each(function (index) {
     var that = this;
     $.ajax({
       url: path + that.id,
       type: 'DELETE'
-    }).done(function() {
+    }).done(function () {
       $(that).wrap('<del></del>');
       $(that).addClass('text-success');
     })
-      .fail(function(jqXHR, status, error) {
+      .fail(function (jqXHR, status, error) {
         $(that).append(' : ' + jqXHR.responseText);
         $(that).addClass('text-error');
       })
-      .always(function() {
+      .always(function () {
         number = number - 1;
         if (number === 0) {
           if (cb) {
@@ -136,7 +144,7 @@ function removeFromModal(cb) {
 function modifyFromModal(cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function(index) {
+  $('#modal .modal-body div').each(function (index) {
     var that = this;
     $.ajax({
       url: path + that.id,
@@ -145,15 +153,15 @@ function modifyFromModal(cb) {
       data: JSON.stringify({
         access: $('#modal-access').prop('checked') ? 'write' : 'read'
       }),
-    }).done(function() {
+    }).done(function () {
       $(that).prepend('<i class="icon-check"></i>');
       $(that).addClass('text-success');
     })
-      .fail(function(jqXHR, status, error) {
+      .fail(function (jqXHR, status, error) {
         $(that).append(' : ' + jqXHR.responseText);
         $(that).addClass('text-error');
       })
-      .always(function() {
+      .always(function () {
         number = number - 1;
         if (number === 0) {
           if (cb) {
@@ -179,11 +187,13 @@ function initTable(oTable) {
     url: path + 'json',
     type: 'GET',
     dataType: 'json'
-  }).done(function(json) {
+  }).done(function (json) {
     oTable.fnClearTable();
     oTable.fnAddData(json);
     oTable.fnDraw();
-  }).fail(function(jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for sharing information.</div>');
+  }).fail(function (jqXHR, status, error) {
+    if (jqXHR.status == 401) {
+      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for sharing information.</div>');
+    }
   }).always();
 }
