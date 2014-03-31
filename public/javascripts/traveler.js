@@ -50,6 +50,7 @@ function setStatus(s) {
 function createSideNav() {
   var $legend = $('legend');
   var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
+  var $toggle = $('<div class="sidenavtoggle"><a id="toggle" class="btn btn-primary" data-toggle="tooltip" title="show/hide side nav"><i class="fa fa-anchor fa-lg"></i></a></div>');
   var i;
   if ($legend.length > 1) {
     for (i = 0; i < $legend.length; i += 1) {
@@ -58,6 +59,12 @@ function createSideNav() {
     $('body').append($('<div id="affixlist" class="bs-docs-sidebar"></div>').append($affix));
     $('body').attr('data-spy', 'scroll');
     $('body').attr('data-target', '#affixlist');
+    $('#affixlist').hide();
+    $('body').append($toggle);
+    $('#toggle').click(function (e) {
+      e.preventDefault();
+      $('#affixlist').toggle();
+    });
   }
 }
 

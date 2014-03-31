@@ -171,6 +171,15 @@ ul.dropdown-menu input[type="checkbox"] {
   color: #595959;
   font-style: italic;
 }
+
+.sidenavtoggle {
+  position: fixed;
+  /*right: 4em;*/
+  top: 40px;
+  /*margin-top: -2.5em;*/
+}
+
+
 /*jumbotron*/
 .jumbotron {
   position: relative;
@@ -238,7 +247,7 @@ ul.dropdown-menu input[type="checkbox"] {
 /* Sidenav for sections
 -------------------------------------------------- */
  .bs-docs-sidenav {
-  width: 228px;
+  width: auto;
   margin: 30px 0 0;
   padding: 0;
   background-color: #fff;
@@ -302,7 +311,7 @@ ul.dropdown-menu input[type="checkbox"] {
   bottom: 270px;
 }
 /* legend */
- .output-control-group legend {
+.output-control-group legend {
   padding-top: 40px;
   /* margin-top: -40px;
    */
