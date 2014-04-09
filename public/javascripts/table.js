@@ -17,7 +17,7 @@ var formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data, type, full) {
-    return '<a href="/forms/' + data + '/" target="_blank"><i class="fa fa-edit fa-lg"></i></a>';
+    return '<a href="/forms/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -26,7 +26,7 @@ var formShareLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data, type, full) {
-    return '<a href="/forms/' + data + '/share/" target="_blank"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="/forms/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -70,7 +70,7 @@ var travelerLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data, type, full) {
-    return '<a href="/travelers/' + data + '/" target="_blank"><i class="fa fa-edit fa-lg"></i></a>';
+    return '<a href="/travelers/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -79,7 +79,7 @@ var travelerConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data, type, full) {
-    return '<a href="/travelers/' + data + '/config" target="_blank"><i class="fa fa-gear fa-lg"></i></a>';
+    return '<a href="/travelers/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the traveler"><i class="fa fa-gear fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -88,7 +88,7 @@ var travelerShareLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data, type, full) {
-    return '<a href="/travelers/' + data + '/share/" target="_blank"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="/travelers/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
