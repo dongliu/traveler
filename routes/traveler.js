@@ -263,7 +263,10 @@ module.exports = function (app) {
 
   app.get('/travelers/json', auth.ensureAuthenticated, function (req, res) {
     Traveler.find({
-      createdBy: req.session.userid
+      createdBy: req.session.userid,
+      archived: {
+        $ne: true
+      }
     }, 'title description status devices sharedWith createdOn deadline updatedOn updatedBy finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
         console.error(err.msg);
@@ -287,6 +290,9 @@ module.exports = function (app) {
       Traveler.find({
         _id: {
           $in: me.travelers
+        },
+        archived: {
+          $ne: true
         }
       }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
@@ -298,11 +304,27 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/alltravelers/json', auth.ensureAuthenticated, function (req, res) {
+  app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
     // if (req.session.roles.indexOf('manager') === -1) {
     //   return res.send(403, 'You are not authorized to access this resource');
     // }
-    Traveler.find({}, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+    Traveler.find({
+      archived: {
+        $ne: true
+      }
+    }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      return res.json(200, travelers);
+    });
+  });
+
+  app.get('/archivedtravelers/json', auth.ensureAuthenticated, function (req, res) {
+    Traveler.find({
+      archived: true
+    }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -620,7 +642,9 @@ module.exports = function (app) {
         return res.send(400, 'need finished input number');
       }
 
-      doc.update({finishedInput: req.body.finishedInput}, function (err){
+      doc.update({
+        finishedInput: req.body.finishedInput
+      }, function (err) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);

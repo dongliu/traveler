@@ -59,7 +59,13 @@ block content
           a(href='#sharedtravelers', data-toggle='tab') Shared travelers
         //- if (locals.roles !== undefined && locals.roles.indexOf('manager') !== -1)
         li
-          a(href='#alltravelers', data-toggle='tab') All travelers
+          a(href='#activetravelers', data-toggle='tab') Active travelers
+        li
+          a(href='#completetravelers', data-toggle='tab') Complete travelers
+        li
+          a(href='#frozentravelers', data-toggle='tab') Frozen travelers
+        li
+          a(href='#archivedtravelers', data-toggle='tab') Archived travelers
 
       .tab-content
         #forms.tab-pane.active
@@ -88,8 +94,14 @@ block content
         #sharedtravelers.tab-pane
           table#shared-traveler-table.table.table-bordered.table-hover
         //- if (locals.roles !== undefined && locals.roles.indexOf('manager') !== -1)
-        #alltravelers.tab-pane
-          table#all-traveler-table.table.table-bordered.table-hover
+        #activetravelers.tab-pane
+          table#active-traveler-table.table.table-bordered.table-hover
+        #completetravelers.tab-pane
+          table#complete-traveler-table.table.table-bordered.table-hover
+        #frozentravelers.tab-pane
+          table#frozen-traveler-table.table.table-bordered.table-hover
+        #archivedtravelers.tab-pane
+          table#archived-traveler-table.table.table-bordered.table-hover
 
 
 block js

@@ -19,6 +19,41 @@ function initTable(oTable, url) {
   }).always();
 }
 
+function initTableFromArray(oTable, json) {
+  oTable.fnClearTable();
+  oTable.fnAddData(json);
+  oTable.fnDraw();
+}
+
+function initCurrentTables(activeTravelerTable, completeTravelerTable, frozenTravelerTable, url) {
+  $.ajax({
+    url: url,
+    type: 'GET',
+    dataType: 'json'
+  }).done(function (json) {
+    var active = json.filter(function (element) {
+      return (element.status == 1);
+    });
+    initTableFromArray(activeTravelerTable, active);
+
+    var complete = json.filter(function (element) {
+      return (element.status == 1.5 || element.status == 2);
+    });
+    initTableFromArray(completeTravelerTable, complete);
+
+    var frozen = json.filter(function (element) {
+      return (element.status == 3);
+    });
+    initTableFromArray(frozenTravelerTable, frozen);
+
+  }).fail(function (jqXHR, status, error) {
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
+  }).always();
+}
+
 
 $(function () {
   $(document).ajaxError(function (event, jqXHR, settings, exception) {
@@ -99,13 +134,12 @@ $(function () {
   });
   initTable(sharedTravelerTable, '/sharedtravelers/json');
 
-  // if ($('#all-traveler-table').length) {
-  var allTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
-  fnAddFilterFoot('#all-traveler-table', allTravelerAoColumns);
-  var allTravelerTable = $('#all-traveler-table').dataTable({
+  var activeTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  fnAddFilterFoot('#active-traveler-table', activeTravelerAoColumns);
+  var activeTravelerTable = $('#active-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
-    aoColumns: allTravelerAoColumns,
+    aoColumns: activeTravelerAoColumns,
     aaSorting: [
       [6, 'desc'],
       [8, 'desc'],
@@ -114,8 +148,53 @@ $(function () {
     sDom: sDom,
     oTableTools: oTableTools
   });
-  initTable(allTravelerTable, '/alltravelers/json');
-  // }
+
+  var completeTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  fnAddFilterFoot('#complete-traveler-table', completeTravelerAoColumns);
+  var completeTravelerTable = $('#complete-traveler-table').dataTable({
+    aaData: [],
+    // bAutoWidth: false,
+    aoColumns: completeTravelerAoColumns,
+    aaSorting: [
+      [6, 'desc'],
+      [8, 'desc'],
+      [7, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+
+  var frozenTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  fnAddFilterFoot('#frozen-traveler-table', frozenTravelerAoColumns);
+  var frozenTravelerTable = $('#frozen-traveler-table').dataTable({
+    aaData: [],
+    // bAutoWidth: false,
+    aoColumns: frozenTravelerAoColumns,
+    aaSorting: [
+      [6, 'desc'],
+      [8, 'desc'],
+      [7, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+  initCurrentTables(activeTravelerTable, completeTravelerTable, frozenTravelerTable, '/currenttravelers/json');
+
+  var archivedTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);
+  var archivedTravelerTable = $('#archived-traveler-table').dataTable({
+    aaData: [],
+    // bAutoWidth: false,
+    aoColumns: archivedTravelerAoColumns,
+    aaSorting: [
+      [6, 'desc'],
+      [8, 'desc'],
+      [7, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+  initTable(archivedTravelerTable, '/archivedtravelers/json');
 
   $('#form-travel').click(function (e) {
     var selected = fnGetSelected(formTable, 'row-selected');
@@ -141,7 +220,7 @@ $(function () {
       }).done(function (json) {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>A new traveler is created at <a href="' + json.location + '">' + json.location + '</a></div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
-        // initTable();
+        initTable(travelerTable, '/travelers/json');
       }).fail(function (jqXHR, status, error) {
         if (jqXHR.status !== 401) {
           $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot create new traveler</div>');
@@ -156,9 +235,8 @@ $(function () {
     initTable(sharedFormTable, '/sharedforms/json');
     initTable(travelerTable, '/travelers/json');
     initTable(sharedTravelerTable, '/sharedtravelers/json');
-    // if ($('#all-traveler-table').length) {
-    initTable(allTravelerTable, '/alltravelers/json');
-    // }
+    initCurrentTables(activeTravelerTable, completeTravelerTable, frozenTravelerTable, '/currenttravelers/json');
+    initTable(archivedTravelerTable, '/archivedtravelers/json');
   });
 
   // binding events

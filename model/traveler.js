@@ -24,7 +24,6 @@ status := 0 // new
         | 1.5 // complete request
         | 2 // completed
         | 3 // frozen
-        | 4 // archived
 *******/
 
 var traveler = new Schema({
@@ -47,7 +46,11 @@ var traveler = new Schema({
   data: [ObjectId],
   comments: [ObjectId],
   totalInput: Number,
-  finishedInput: Number
+  finishedInput: Number,
+  archived: {
+    type: Boolean,
+    default: false
+  }
 });
 
 /*******
