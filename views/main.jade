@@ -90,10 +90,14 @@ block content
         #sharedfroms.tab-pane
           table#shared-form-table.table.table-bordered.table-hover
         #travelers.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-primary#archive(data-toggle='tooltip', title='archive selected travelers')
+                i.fa.fa-archive.fa-lg
+                | &nbsp;Archive
           table#traveler-table.table.table-bordered.table-hover
         #sharedtravelers.tab-pane
           table#shared-traveler-table.table.table-bordered.table-hover
-        //- if (locals.roles !== undefined && locals.roles.indexOf('manager') !== -1)
         #activetravelers.tab-pane
           table#active-traveler-table.table.table-bordered.table-hover
         #completetravelers.tab-pane

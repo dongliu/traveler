@@ -54,6 +54,55 @@ function initCurrentTables(activeTravelerTable, completeTravelerTable, frozenTra
   }).always();
 }
 
+function formatTravelerStatus(s) {
+  var status = {
+    '1': 'active',
+    '1.5': 'submitted for completion',
+    '2': 'completed',
+    '3': 'frozen',
+    '0': 'initialized'
+  };
+  if (status['' + s]) {
+    return status['' + s];
+  }
+  return 'unknown';
+}
+
+function archiveFromModal(travelerTable, sharedTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, archivedTravelerTable) {
+  $('#submit').prop('disabled', true);
+  var number = $('#modal .modal-body div').length;
+  $('#modal .modal-body div').each(function(index) {
+    var that = this;
+    var success = false;
+    $.ajax({
+      url: '/travelers/' + that.id + '/archived',
+      type: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        archived: true
+      })
+    }).done(function() {
+      $(that).prepend('<i class="icon-check"></i>');
+      $(that).addClass('text-success');
+      success = true;
+    })
+      .fail(function(jqXHR, status, error) {
+        $(that).prepend('<i class="icon-question"></i>');
+        $(that).append(' : ' + jqXHR.responseText);
+        $(that).addClass('text-error');
+      })
+      .always(function() {
+        number = number - 1;
+        if (number === 0 && success) {
+          initTable(travelerTable, '/travelers/json');
+          initTable(sharedTravelerTable, '/sharedtravelers/json');
+          initCurrentTables(activeTravelerTable, completeTravelerTable, frozenTravelerTable, '/currenttravelers/json');
+          initTable(archivedTravelerTable, '/archivedtravelers/json');
+        }
+      });
+  });
+}
+
 
 $(function () {
   $(document).ajaxError(function (event, jqXHR, settings, exception) {
@@ -101,16 +150,16 @@ $(function () {
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
-  var travelerAoColumns = [travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: travelerAoColumns,
     aaSorting: [
-      [7, 'desc'],
-      [9, 'desc'],
-      [8, 'desc']
+      [8, 'desc'],
+      [10, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -227,6 +276,28 @@ $(function () {
           $(window).scrollTop($('#message div:last-child').offset().top - 40);
         }
       }).always();
+    }
+  });
+
+  $('#archive').click(function (e) {
+    var selected = fnGetSelected(travelerTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No traveler has been selected!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html('Archive the following ' + selected.length + ' travelers? ');
+      $('#modal .modal-body').empty();
+      selected.forEach(function (row) {
+        var data = travelerTable.fnGetData(row);
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
+      });
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+      $('#submit').click(function (e) {
+        archiveFromModal(travelerTable, sharedTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, archivedTravelerTable);
+      });
     }
   });
 
