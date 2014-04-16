@@ -25,12 +25,17 @@ function initTableFromArray(oTable, json) {
   oTable.fnDraw();
 }
 
-function initCurrentTables(activeTravelerTable, completeTravelerTable, frozenTravelerTable, url) {
+function initCurrentTables(initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, url) {
   $.ajax({
     url: url,
     type: 'GET',
     dataType: 'json'
   }).done(function (json) {
+    var init = json.filter(function (element) {
+      return (element.status == 0);
+    });
+    initTableFromArray(initTravelerTable, init);
+
     var active = json.filter(function (element) {
       return (element.status == 1);
     });
@@ -183,6 +188,21 @@ $(function () {
   });
   initTable(sharedTravelerTable, '/sharedtravelers/json');
 
+  var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  fnAddFilterFoot('#init-traveler-table', initTravelerAoColumns);
+  var initTravelerTable = $('#init-traveler-table').dataTable({
+    aaData: [],
+    // bAutoWidth: false,
+    aoColumns: initTravelerAoColumns,
+    aaSorting: [
+      [6, 'desc'],
+      [8, 'desc'],
+      [7, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+
   var activeTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#active-traveler-table', activeTravelerAoColumns);
   var activeTravelerTable = $('#active-traveler-table').dataTable({
@@ -227,7 +247,7 @@ $(function () {
     sDom: sDom,
     oTableTools: oTableTools
   });
-  initCurrentTables(activeTravelerTable, completeTravelerTable, frozenTravelerTable, '/currenttravelers/json');
+  initCurrentTables(initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, '/currenttravelers/json');
 
   var archivedTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);

@@ -57,7 +57,8 @@ block content
           a(href='#travelers', data-toggle='tab') My travelers
         li
           a(href='#sharedtravelers', data-toggle='tab') Shared travelers
-        //- if (locals.roles !== undefined && locals.roles.indexOf('manager') !== -1)
+        li
+          a(href='#inittravelers', data-toggle='tab') Initial travelers
         li
           a(href='#activetravelers', data-toggle='tab') Active travelers
         li
@@ -98,6 +99,8 @@ block content
           table#traveler-table.table.table-bordered.table-hover
         #sharedtravelers.tab-pane
           table#shared-traveler-table.table.table-bordered.table-hover
+        #inittravelers.tab-pane
+          table#init-traveler-table.table.table-bordered.table-hover
         #activetravelers.tab-pane
           table#active-traveler-table.table.table-bordered.table-hover
         #completetravelers.tab-pane
