@@ -326,7 +326,7 @@ $(function () {
     initTable(sharedFormTable, '/sharedforms/json');
     initTable(travelerTable, '/travelers/json');
     initTable(sharedTravelerTable, '/sharedtravelers/json');
-    initCurrentTables(activeTravelerTable, completeTravelerTable, frozenTravelerTable, '/currenttravelers/json');
+    initCurrentTables(initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, '/currenttravelers/json');
     initTable(archivedTravelerTable, '/archivedtravelers/json');
   });
 
