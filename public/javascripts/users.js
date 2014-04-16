@@ -96,7 +96,8 @@ $(function () {
     // bAutoWidth: false,
     aoColumns: [selectColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn],
     aaSorting: [
-      [1, 'desc']
+      [4, 'desc'],
+      [1, 'asc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
