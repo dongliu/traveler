@@ -108,6 +108,11 @@ block content
         #frozentravelers.tab-pane
           table#frozen-traveler-table.table.table-bordered.table-hover
         #archivedtravelers.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
+                i.fa.fa-inbox.fa-lg
+                | &nbsp;De-archive
           table#archived-traveler-table.table.table-bordered.table-hover
 
 
