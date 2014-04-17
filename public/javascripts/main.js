@@ -174,16 +174,16 @@ $(function () {
   initTable(travelerTable, '/travelers/json');
 
 
-  var sharedTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var sharedTravelerAoColumns = [travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   sharedTravelerTable = $('#shared-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
-      [6, 'desc'],
-      [8, 'desc'],
-      [7, 'desc']
+      [7, 'desc'],
+      [9, 'desc'],
+      [8, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools

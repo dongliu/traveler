@@ -429,7 +429,7 @@ module.exports = function (app) {
   })
 
   app.get('/travelers/:id/config', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, 'title description deadline status devices sharedWith createdBy createdOn updatedOn updatedBy').lean().exec(function (err, doc) {
+    Traveler.findById(req.params.id, 'title description deadline status devices sharedWith createdBy createdOn updatedOn updatedBy').exec(function (err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -437,7 +437,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (doc.createdBy === req.session.userid) {
+      if (canWrite(req, doc)) {
         return res.render('config', doc);
       }
       return res.send(403, 'You are not authorized to access this resource');
@@ -454,7 +454,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (doc.createdBy !== req.session.userid) {
+      if (!canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       for (k in req.body) {
@@ -540,7 +540,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (doc.createdBy !== req.session.userid) {
+      if (!canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       doc.updatedBy = req.session.userid;
@@ -565,7 +565,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (doc.createdBy !== req.session.userid) {
+      if (!canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       doc.updatedBy = req.session.userid;
