@@ -483,9 +483,17 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (doc.createdBy !== req.session.userid) {
-        return res.send(403, 'You are not authorized to access this resource');
+
+      if (req.body.status === 1.5) {
+        if (!canWrite(req, doc)) {
+          return res.send(403, 'You are not authorized to access this resource');
+        }
+      } else {
+        if (doc.createdBy !== req.session.userid) {
+          return res.send(403, 'You are not authorized to access this resource');
+        }
       }
+
       if (req.body.status === 1) {
         if ([0, 1.5, 3].indexOf(doc.status) !== -1) {
           doc.status = 1;
