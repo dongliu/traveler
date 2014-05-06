@@ -312,7 +312,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }, 'title description status devices sharedWith createdOn deadline updatedOn updatedBy finishedInput totalInput').lean().exec(function (err, docs) {
+    }, 'title description status devices sharedWith clonedBy createdOn deadline updatedOn updatedBy finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -339,7 +339,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
@@ -354,7 +354,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+    }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
