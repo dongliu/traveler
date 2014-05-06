@@ -144,6 +144,40 @@ function archiveFromModal(archive) {
   });
 }
 
+function cloneFromModal() {
+  $('#submit').prop('disabled', true);
+  var number = $('#modal .modal-body div').length;
+  $('#modal .modal-body div').each(function (index) {
+    var that = this;
+    var success = false;
+    $.ajax({
+      url: '/travelers/',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        source: this.id
+      })
+    }).done(function () {
+      $(that).prepend('<i class="icon-check"></i>');
+      $(that).addClass('text-success');
+      success = true;
+    })
+      .fail(function (jqXHR, status, error) {
+        $(that).prepend('<i class="icon-question"></i>');
+        $(that).append(' : ' + jqXHR.responseText);
+        $(that).addClass('text-error');
+      })
+      .always(function () {
+        number = number - 1;
+        if (number === 0 && success) {
+          initTable(travelerTable, '/travelers/json');
+          initTable(sharedTravelerTable, '/sharedtravelers/json');
+          initCurrentTables('/currenttravelers/json');
+        }
+      });
+  });
+}
+
 
 $(function () {
   $(document).ajaxError(function (event, jqXHR, settings, exception) {
@@ -341,6 +375,28 @@ $(function () {
       $('#modal').modal('show');
       $('#submit').click(function (e) {
         archiveFromModal(true);
+      });
+    }
+  });
+
+  $('#clone').click(function (e) {
+    var selected = fnGetSelected(travelerTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No traveler has been selected!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html('Clone the following ' + selected.length + ' travelers? ');
+      $('#modal .modal-body').empty();
+      selected.forEach(function (row) {
+        var data = travelerTable.fnGetData(row);
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
+      });
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+      $('#submit').click(function (e) {
+        cloneFromModal();
       });
     }
   });
