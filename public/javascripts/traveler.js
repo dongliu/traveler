@@ -29,6 +29,15 @@ function cleanForm() {
   $('.control-group-buttons').remove();
 }
 
+// handle browsers not supporting date type input
+function dateSupport() {
+  if (!Modernizr.inputtypes['date']) {
+    $('input[type="date"]').datepicker({
+      format: 'yyyy-mm-dd'
+    });
+  }
+}
+
 function setStatus(s) {
   $.ajax({
     url: './status',
@@ -103,6 +112,8 @@ $(function () {
   $('span.time').each(function () {
     $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
   });
+
+  dateSupport();
 
   var binder = new Binder.FormBinder(document.forms[0]);
   $.ajax({
