@@ -57,20 +57,22 @@ function createTraveler(form, req, res) {
   });
 }
 
-function cloneTraveler(traveler, req, res) {
+function cloneTraveler(source, req, res) {
   var traveler = new Traveler({
-    title: traveler.title,
-    description: traveler.description,
+    title: source.title,
+    description: source.description,
     devices: [],
     status: 1,
-    createdBy: traveler.createdBy,
+    createdBy: source.createdBy,
     createdOn: Date.now(),
-    sharedWith: traveler.sharedWith,
-    referenceForm: traveler.referenceForm,
-    forms: traveler.forms,
+    clonedBy: req.session.userid,
+    clonedFrom: source._id,
+    sharedWith: source.sharedWith,
+    referenceForm: source.referenceForm,
+    forms: source.forms,
     data: [],
     comments: [],
-    totalInput: traveler.totalInput,
+    totalInput: source.totalInput,
     finishedInput: 0
   });
   traveler.save(function (err, doc) {
