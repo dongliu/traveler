@@ -33,6 +33,8 @@ var traveler = new Schema({
   status: Number,
   createdBy: String,
   createdOn: Date,
+  clonedBy: String,
+  clonedFrom: ObjectId,
   updatedBy: String,
   updatedOn: Date,
   deadline: Date,
