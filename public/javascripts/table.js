@@ -34,6 +34,8 @@ var formShareLinkColumn = {
 var createdOnColumn = dateColumn('Created', 'createdOn');
 var createdByColumn = personColumn('Created by', 'createdBy');
 
+var clonedByColumn = personColumn('Cloned by', 'clonedBy');
+
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
 

@@ -218,23 +218,22 @@ $(function () {
     aoColumns: sharedFormAoColumns,
     aaSorting: [
       [3, 'desc'],
-      [5, 'desc']
+      [4, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
-  var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   travelerTable = $('#traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: travelerAoColumns,
     aaSorting: [
-      [8, 'desc'],
-      [10, 'desc'],
-      [9, 'desc']
+      [9, 'desc'],
+      [12, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -242,16 +241,15 @@ $(function () {
   initTable(travelerTable, '/travelers/json');
 
 
-  var sharedTravelerAoColumns = [travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var sharedTravelerAoColumns = [travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   sharedTravelerTable = $('#shared-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
-      [7, 'desc'],
-      [9, 'desc'],
-      [8, 'desc']
+      [8, 'desc'],
+      [11, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -266,8 +264,7 @@ $(function () {
     aoColumns: initTravelerAoColumns,
     aaSorting: [
       [6, 'desc'],
-      [8, 'desc'],
-      [7, 'desc']
+      [8, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -281,8 +278,7 @@ $(function () {
     aoColumns: activeTravelerAoColumns,
     aaSorting: [
       [6, 'desc'],
-      [8, 'desc'],
-      [7, 'desc']
+      [8, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -296,8 +292,7 @@ $(function () {
     aoColumns: completeTravelerAoColumns,
     aaSorting: [
       [6, 'desc'],
-      [8, 'desc'],
-      [7, 'desc']
+      [8, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -311,8 +306,7 @@ $(function () {
     aoColumns: frozenTravelerAoColumns,
     aaSorting: [
       [6, 'desc'],
-      [8, 'desc'],
-      [7, 'desc']
+      [8, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -327,8 +321,7 @@ $(function () {
     aoColumns: archivedTravelerAoColumns,
     aaSorting: [
       [7, 'desc'],
-      [9, 'desc'],
-      [8, 'desc']
+      [10, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
