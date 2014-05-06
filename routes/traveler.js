@@ -57,6 +57,49 @@ function createTraveler(form, req, res) {
   });
 }
 
+function cloneTraveler(traveler, req, res) {
+  var traveler = new Traveler({
+    title: traveler.title,
+    description: traveler.description,
+    devices: [],
+    status: 1,
+    createdBy: traveler.createdBy,
+    createdOn: Date.now(),
+    sharedWith: traveler.sharedWith,
+    referenceForm: traveler.referenceForm,
+    forms: traveler.forms,
+    data: [],
+    comments: [],
+    totalInput: traveler.totalInput,
+    finishedInput: 0
+  });
+  traveler.save(function (err, doc) {
+    if (err) {
+      console.error(err.msg);
+      return res.send(500, err.msg);
+    }
+    console.log('new traveler ' + doc.id + ' created');
+    doc.sharedWith.forEach(function (e, i, a) {
+      User.findByIdAndUpdate(e._id, {
+        $addToSet: {
+          travelers: doc._id
+        }
+      }, function (err, user) {
+        if (err) {
+          console.error(err.msg);
+        }
+        if (!user) {
+          console.error('The user ' + e._id + ' does not in the db');
+        }
+      });
+    });
+    var url = req.protocol + '://' + req.get('host') + '/travelers/' + doc.id + '/';
+    res.set('Location', url);
+    return res.json(201, {
+      location: '/travelers/' + doc.id + '/'
+    });
+  });
+}
 
 function filterBody(strings) {
   return function (req, res, next) {
@@ -331,25 +374,44 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/travelers/', auth.ensureAuthenticated, function (req, res) {
-    if (!req.body.form) {
-      return res.send(400, 'need the form in request');
-    }
-    Form.findById(req.body.form, function (err, form) {
-      if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
-      }
-      if (form) {
-        if (form.createdBy === req.session.userid) {
-          createTraveler(form, req, res);
-        } else {
-          return res.send(400, 'You cannot create a traveler based on a form that you do not own');
+  app.post('/travelers/', auth.ensureAuthenticated, filterBody(['form', 'source']), function (req, res) {
+    if (req.body.form) {
+      Form.findById(req.body.form, function (err, form) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
         }
-      } else {
-        return res.send(400, 'cannot find the form ' + req.body.form);
-      }
-    });
+        if (form) {
+          if (form.createdBy === req.session.userid) {
+            createTraveler(form, req, res);
+          } else {
+            return res.send(400, 'You cannot create a traveler based on a form that you do not own.');
+          }
+        } else {
+          return res.send(400, 'cannot find the form ' + req.body.form);
+        }
+      });
+    }
+    if (req.body.source) {
+      Traveler.findById(req.body.source, function (err, traveler) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        if (traveler) {
+          if (traveler.status == 0) {
+            return res.send(400, 'You cannot clone an initialized traveler.');
+          }
+          if (canWrite(req, traveler)) {
+            cloneTraveler(traveler, req, res);
+          } else {
+            return res.send(400, 'You cannot clone a traveler that you cannot write.');
+          }
+        } else {
+          return res.send(400, 'cannot find the traveler ' + req.body.source);
+        }
+      });
+    }
   });
 
   app.get('/travelers/:id/', auth.ensureAuthenticated, function (req, res) {
