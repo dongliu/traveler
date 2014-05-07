@@ -241,15 +241,15 @@ $(function () {
   initTable(travelerTable, '/travelers/json');
 
 
-  var sharedTravelerAoColumns = [travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   sharedTravelerTable = $('#shared-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
-      [8, 'desc'],
-      [11, 'desc']
+      [9, 'desc'],
+      [12, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
@@ -384,6 +384,28 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = travelerTable.fnGetData(row);
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
+      });
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+      $('#submit').click(function (e) {
+        cloneFromModal();
+      });
+    }
+  });
+
+  $('#share-clone').click(function (e) {
+    var selected = fnGetSelected(sharedTravelerTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No traveler has been selected!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html('Clone the following ' + selected.length + ' travelers? ');
+      $('#modal .modal-body').empty();
+      selected.forEach(function (row) {
+        var data = sharedTravelerTable.fnGetData(row);
         $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
