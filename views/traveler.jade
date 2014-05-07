@@ -36,6 +36,8 @@ block content
             span initialized
           default
             = ' '
+    if (locals.devices !== undefined && devices.length > 0)
+      h4 Devices: #{devices}
     if (locals.status !== undefined && locals.status == 1)
       .btn-group
         button.btn.btn-primary#complete Submit for completion
@@ -48,15 +50,18 @@ block content
         p Deadline:
           = ' '
           span.time #{deadline}
-      p Created by #{createdBy} on
+      p Created by #{createdBy}
+        = ' '
+        if (locals.clonedBy !== undefined)
+          | cloned by #{clonedBy} on
+        else
+          | on
         = ' '
         span.time #{createdOn}
       if (locals.updatedBy !== undefined)
         p Updated by #{updatedBy} on
           = ' '
           span.time #{updatedOn}
-      if (locals.devices !== undefined && devices.length > 0)
-        h4 Devices: #{devices}
     br
     form.form-horizontal#form
       != forms[0].html
