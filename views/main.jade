@@ -103,6 +103,11 @@ block content
 
           table#traveler-table.table.table-bordered.table-hover
         #sharedtravelers.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-primary#share-clone(data-toggle='tooltip', title='clone selected travelers')
+                i.fa.fa-copy.fa-lg
+                | &nbsp;Clone
           table#shared-traveler-table.table.table-bordered.table-hover
         #inittravelers.tab-pane
           table#init-traveler-table.table.table-bordered.table-hover
