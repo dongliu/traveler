@@ -328,6 +328,32 @@ $(function () {
   });
   initTable(archivedTravelerTable, '/archivedtravelers/json');
 
+  // var state = History.getState();
+  // Javascript to enable link to tab
+  // History.log(state.data, state.title, state.url);
+  // var url = document.location.toString();
+  // if (url.match('#')) {
+  //   $('.nav-tabs a[href=#' + url.split('#')[1] + ']').tab('show');
+  // }
+  if (History.getHash()) {
+    $('.nav-tabs a[href=#' + History.getHash() + ']').tab('show');
+  }
+
+  // add state for tab changes
+  $('.nav-tabs a').on('click', function (e) {
+    History.pushState({
+      tab: this.href
+    }, 'FRIB traveler :: ' + this.text, this.href);
+    console.log(History.getHash());
+  })
+
+  window.onhashchange = function (newURL, oldURL) {
+    console.log(History.getHash())
+    if (History.getHash()) {
+      $('.nav-tabs a[href=#' + History.getHash() + ']').tab('show');
+    }
+  }
+
   $('#form-travel').click(function (e) {
     var selected = fnGetSelected(formTable, 'row-selected');
     if (selected.length === 0) {
