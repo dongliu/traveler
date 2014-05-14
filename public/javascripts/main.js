@@ -328,13 +328,7 @@ $(function () {
   });
   initTable(archivedTravelerTable, '/archivedtravelers/json');
 
-  // var state = History.getState();
-  // Javascript to enable link to tab
-  // History.log(state.data, state.title, state.url);
-  // var url = document.location.toString();
-  // if (url.match('#')) {
-  //   $('.nav-tabs a[href=#' + url.split('#')[1] + ']').tab('show');
-  // }
+  // show the tab in hash
   if (History.getHash()) {
     $('.nav-tabs a[href=#' + History.getHash() + ']').tab('show');
   }
@@ -347,6 +341,7 @@ $(function () {
     console.log(History.getHash());
   })
 
+  // show the tab when back and forward
   window.onhashchange = function (newURL, oldURL) {
     console.log(History.getHash())
     if (History.getHash()) {
