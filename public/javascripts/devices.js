@@ -1,12 +1,12 @@
 $(function(){
-  var aoColumns = [serialColumn, typeColumn, descriptionColumn, modifiedByColumn, modifiedOnColumn];
+  var aoColumns = [deviceTravelerLinkColumn, serialColumn, typeColumn, descriptionColumn, modifiedByColumn, modifiedOnColumn];
   fnAddFilterFoot('#device-table', aoColumns);
   var deviceTable = $('#device-table').dataTable({
     aaData: [],
     // 'bAutoWidth': false,
     aoColumns: aoColumns,
     aaSorting: [
-      [4, 'desc']
+      [5, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
