@@ -350,17 +350,26 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
-    Traveler.find({
+    var device = req.query.device;
+    var search = {
       archived: {
         $ne: true
       }
-    }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+    };
+    if (device) {
+      search.devices = {$in: [device]};
+    }
+    Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
       return res.json(200, travelers);
     });
+  });
+
+  app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
+    return res.render('currenttravelers', {device: req.query.device});
   });
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function (req, res) {

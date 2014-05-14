@@ -95,6 +95,15 @@ var travelerShareLinkColumn = {
   bSortable: false
 };
 
+var deviceTravelerLinkColumn = {
+  sTitle: '',
+  mData: 'serialNumber',
+  mRender: function(data, type, full) {
+    return '<a href="/currenttravelers/?device=' + data + '" target="_blank" data-toggle="tooltip" title="travelers for this device"><i class="fa fa-search fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
 var progressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
