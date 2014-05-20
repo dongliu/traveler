@@ -9,7 +9,7 @@ module.exports = function(app) {
 
   app.get('/devices/json', function(req, res) {
     request({
-      url: 'http://ctlapp-wheezy-temp:8080/conf/rs/v0/component/physical',
+      url: 'http://localhost/conf96/rs/v0/component/physical',
       headers: {
         Accept: 'application/json'
       }
