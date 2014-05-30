@@ -369,7 +369,7 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
-    return res.render('currenttravelers', {device: req.query.device});
+    return res.render('currenttravelers', {device: req.query.device || null});
   });
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function (req, res) {
