@@ -56,8 +56,11 @@ $(function () {
     oTableTools: oTableTools
   });
 
-
-  initTable(currentTravelerTable, '/currenttravelers/json?device='+device);
+  if (device) {
+    initTable(currentTravelerTable, '/currenttravelers/json?device=' + device);
+  } else {
+    initTable(currentTravelerTable, '/currenttravelers/json');
+  }
 
   // binding events
   filterEvent();
