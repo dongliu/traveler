@@ -20,6 +20,8 @@ var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerComment = mongoose.model('TravelerComment');
 
+var travelerV1API = 'https://liud-dev:8181/traveler/api.php';
+var request = require('request');
 
 function createTraveler(form, req, res) {
   // update the total input number and finished input number
@@ -350,14 +352,14 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
-    var device = req.query.device;
+    // var device = req.query.device;
     var search = {
       archived: {
         $ne: true
       }
     };
-    if (device) {
-      search.devices = {$in: [device]};
+    if (req.query.hasOwnProperty('device')) {
+      search.devices = {$in: [req.query.device]};
     }
     Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
@@ -366,6 +368,17 @@ module.exports = function (app) {
       }
       return res.json(200, travelers);
     });
+  });
+
+  app.get('/currenttravelersinv1/json', auth.ensureAuthenticated, function (req, res) {
+    var fullurl = travelerV1API+'?resource=travelers';
+    if (req.query.hasOwnProperty('device')) {
+      fullurl = fullurl + '&device='+req.query.device;
+    }
+    request({
+      strictSSL: false,
+      url: fullurl
+    }).pipe(res);
   });
 
   app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {

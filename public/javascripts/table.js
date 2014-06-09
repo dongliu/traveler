@@ -70,10 +70,19 @@ var titleColumn = {
 
 var travelerLinkColumn = {
   sTitle: '',
-  mData: '_id',
-  mRender: function(data, type, full) {
-    return '<a href="/travelers/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>';
+  mData: function(source, type, val){
+    if (source.hasOwnProperty('url')) {
+      return '<a href="' + source.url + '" target="_blank" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>';
+    }
+    if (source.hasOwnProperty('_id')){
+      return '<a href="/travelers/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>';
+    }
+    return 'unknown';
   },
+  // mData: '_id',
+  // mRender: function(data, type, full) {
+  //   return '<a href="/travelers/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>';
+  // },
   bSortable: false
 };
 
