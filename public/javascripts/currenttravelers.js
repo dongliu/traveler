@@ -127,10 +127,12 @@ $(function () {
   currentTravelerTable.fnClearTable();
   if (device) {
     addData(currentTravelerTable, '/currenttravelers/json?device=' + device);
-    addExternalData(currentTravelerTable, '/currenttravelersinv1/json?device=' + device);
+    // addExternalData(currentTravelerTable, '/currenttravelersinv1/json?device=' + device);
+    addExternalData(currentTravelerTable, 'https://liud-dev:8181/traveler/api.php?resource=travelers&device=' + device);
   } else {
     addData(currentTravelerTable, '/currenttravelers/json');
-    addExternalData(currentTravelerTable, '/currenttravelersinv1/json');
+    // addExternalData(currentTravelerTable, '/currenttravelersinv1/json');
+    addExternalData(currentTravelerTable, 'https://liud-dev:8181/traveler/api.php?resource=travelers');
   }
   // binding events
   filterEvent();
