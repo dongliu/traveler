@@ -10,6 +10,9 @@ node_modules/
 *.sublime-project
 *.sublime-workspace
 
+# system related #
+.DS_Store
+
 # special folders #
 logs/
 doc/
