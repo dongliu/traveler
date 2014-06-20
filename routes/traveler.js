@@ -6,7 +6,6 @@ var mongoose = require('mongoose');
 var util = require('util');
 var fs = require('fs');
 var path = require('path');
-var Busboy = require('busboy');
 var pause = require('pause');
 var u = require('underscore');
 var cheer = require('cheerio');
@@ -803,11 +802,11 @@ module.exports = function (app) {
       var data = new TravelerData({
         traveler: doc._id,
         name: req.body.name,
-        value: req.files[req.body.name].name,
+        value: req.files[req.body.name].originalname,
         file: {
           path: req.files[req.body.name].path,
           encoding: req.files[req.body.name].encoding,
-          mimetype: req.files[req.body.name].type
+          mimetype: req.files[req.body.name].mimetype
         },
         inputType: req.body.type,
         inputBy: req.session.userid,
