@@ -15,7 +15,7 @@
     "sanitize-caja": "0.0.0",
     "express-slash": "1.0.0",
     "request": "2.34.0",
-    "busboy": "0.0.14",
+    "multer": "0.1.0",
     "pause": "0.0.1",
     "underscore": "1.6.0",
     "cheerio": "0.13.1"
