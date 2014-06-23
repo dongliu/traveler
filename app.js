@@ -8,7 +8,7 @@ var express = require('express'),
   http = require('http'),
   fs = require('fs'),
   slash = require('express-slash'),
-  busboy = require('./lib/express-busboy.js'),
+  multer = require('multer'),
   path = require('path');
 
 
@@ -66,10 +66,12 @@ app.configure(function () {
       maxAge: 28800000
     }
   }));
-  app.use(busboy({
-    limit: 5,
-    files: 1,
-    uploadDir: uploadDir
+  app.use(multer({
+    dest: uploadDir,
+    limits: {
+      files: 1,
+      fileSize: 5 * 1024 * 1024
+    }
   }));
   app.use(express.json());
   app.use(app.router);
