@@ -7,17 +7,17 @@
   },
   "dependencies": {
     "express": "3.1.0",
-    "jade": "*",
-    "cas.js": "*",
-    "mongoose": "*",
-    "ldapjs": "*",
-    "templatizer": "*",
-    "sanitize-caja": "*",
-    "express-slash": "*",
-    "request": "*",
-    "busboy": "*",
-    "pause": "*",
-    "underscore": "*",
-    "cheerio": "*"
+    "jade": "1.2.0",
+    "cas.js": "0.0.1",
+    "mongoose": "3.8.8",
+    "ldapjs": "0.7.0",
+    "templatizer": "0.2.10",
+    "sanitize-caja": "0.0.0",
+    "express-slash": "1.0.0",
+    "request": "2.34.0",
+    "multer": "0.1.0",
+    "pause": "0.0.1",
+    "underscore": "1.6.0",
+    "cheerio": "0.13.1"
   }
 }
