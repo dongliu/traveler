@@ -411,17 +411,20 @@ function text_edit($cgr) {
   var label = 'label';
   var placeholder = '';
   var help = '';
+  var required = false;
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
+    required = $('.controls input', $cgr).prop('required');
   }
   var $text = $(input.text());
   var $label = $(spec.label());
   var $placeholder = $(spec.placeholder());
   var $help = $(spec.help());
+  var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">text</span></div>').append($text);
   if ($cgr) {
     $cgr.replaceWith($new_cgr);
@@ -439,7 +442,9 @@ function text_edit($cgr) {
   $('input', $label).val(label);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
-
+  if (required) {
+    $('input', $required).prop('checked', true);
+  }
   binding($edit, $text, model, $done);
 }
 
@@ -663,11 +668,19 @@ function rich_edit($cgr) {
 
 
 function binding($edit, $out, model, $done) {
-  $('input', $edit).keyup(function (e) {
-    model[$(this).attr('name')] = $(this).val();
+  $('input:text', $edit).keyup(function (e) {
+    if ($(this).val() == 'required') {
+      // $('input', $out).prop('required', $(this).prop('checked'));
+      // do nothing
+      // } else {
+      model[$(this).attr('name')] = $(this).val();
+    }
   });
   $('select', $edit).change(function (e) {
     model[$(this).attr('name')] = $(this).val();
+  });
+  $('input:checkbox', $edit).change(function (e) {
+    $('input', $out).attr('required', $(this).prop('checked'));
   });
   var view = rivets.bind($out, {
     model: model
