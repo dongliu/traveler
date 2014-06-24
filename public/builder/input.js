@@ -49,7 +49,7 @@ exports["section"] = function tmpl_section() {
 
 // text.jade compiled template
 exports["text"] = function tmpl_text() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required"/><span class="help-block">{ model.help }</span></div></div>';
 };
 
 // textarea.jade compiled template
