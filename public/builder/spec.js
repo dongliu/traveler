@@ -49,7 +49,7 @@ exports["placeholder"] = function tmpl_placeholder() {
 
 // required.jade compiled template
 exports["required"] = function tmpl_required() {
-    return '<div class="control-group"><div class="control-label">Required</div><div class="controls"><label class="checkbox"><input type="checkbox" value="required"/><span>required</span></label></div></div>';
+    return '<div class="control-group"><div class="control-label">Required</div><div class="controls"><label class="checkbox"><input type="checkbox" name="required"/><span>required</span></label></div></div>';
 };
 
 // rich_textarea.jade compiled template

@@ -99,6 +99,8 @@ function cleanBeforeSave() {
   // clean control-focus class and .control-group-buttons element
   $('.control-focus').removeClass('control-focus');
   $('.control-group-buttons').remove();
+  // clean status
+  $('.control-group-wrap').removeAttr('data-status');
   // remove tinymce
   tinymce.remove();
 }
@@ -129,36 +131,35 @@ function binding_events() {
   $('#output').on('mouseenter', '.control-group-wrap', function (e) {
     e.preventDefault();
     // check if it is normal edit mode
+    $('.control-group-wrap', '#output').removeClass('control-focus');
+    $('.control-group-buttons', '#output').hide();
     if ($('#adjust').text() == 'Adjust location') {
       if (!$(this).hasClass('control-focus')) {
         $(this).addClass('control-focus');
-        $(this).prepend(input.button());
+        if ($('.control-group-buttons', $(this)).length) {
+          $('.control-group-buttons', $(this)).show();
+        } else {
+          $(this).prepend(input.button());
+        }
       }
     }
   });
-  $('#output').on('mouseleave', '.control-group-wrap', function (e) {
-    e.preventDefault();
-    if ($(this).hasClass('control-focus')) {
-      $(this).removeClass('control-focus');
-      $('.control-group-buttons', $(this)).remove();
-    }
-  });
+
   $('#output').on('click', '.control-focus a.btn.btn-warning[title="remove"]', function (e) {
     e.preventDefault();
     var $cgr = $(this).closest('.control-group-wrap');
-    // var type = $('span.fe-type', $cgr).text();
-    if ($cgr.attr('data-status') == 'editting') {
+    if ($('.control-group-wrap[data-status="editting"]').length) {
       modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
     }
     $cgr.closest('.control-group-wrap').remove();
   });
+
   $('#output').on('click', '.control-focus a.btn[title="duplicate"]', function (e) {
     e.preventDefault();
     var that = this;
     var $cgr = $(this).closest('.control-group-wrap');
-    // var type = $('span.fe-type', $cgr).text();
-    if ($cgr.attr('data-status') == 'editting') {
+    if ($('.control-group-wrap[data-status="editting"]').length) {
       modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
     }
@@ -173,37 +174,42 @@ function binding_events() {
   $('#output').on('click', '.control-focus a.btn[title="edit"]', function (e) {
     e.preventDefault();
     var $cgr = $(this).closest('.control-group-wrap');
-    if ($cgr.attr('data-status') !== 'editting') {
-      var type = $('span.fe-type', $cgr).text();
-      switch (type) {
-      case 'rich':
-        // alert('Please edit it inline.');
-        rich_edit($cgr);
-        break;
-      case 'checkbox':
-        checkbox_edit($cgr);
-        break;
-      case 'text':
-        text_edit($cgr);
-        break;
-      case 'textarea':
-        textarea_edit($cgr);
-        break;
-      case 'number':
-        number_edit($cgr);
-        break;
-      case 'file':
-        file_edit($cgr);
-        break;
-      case 'section':
-        section_edit($cgr);
-        break;
-      case 'other':
-        other_edit($cgr);
-        break;
-      default:
-        alert('not implemented.');
-      }
+    if ($('.control-group-wrap[data-status="editting"]').length && $cgr.attr('data-status') !== 'editting') {
+      modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
+      return;
+    }
+    if ($cgr.attr('data-status') == 'editting') {
+      // modalAlert('You are still editting it', '');
+      return;
+    }
+    var type = $('span.fe-type', $cgr).text();
+    switch (type) {
+    case 'rich':
+      rich_edit($cgr);
+      break;
+    case 'checkbox':
+      checkbox_edit($cgr);
+      break;
+    case 'text':
+      text_edit($cgr);
+      break;
+    case 'textarea':
+      textarea_edit($cgr);
+      break;
+    case 'number':
+      number_edit($cgr);
+      break;
+    case 'file':
+      file_edit($cgr);
+      break;
+    case 'section':
+      section_edit($cgr);
+      break;
+    case 'other':
+      other_edit($cgr);
+      break;
+    default:
+      alert('not implemented.');
     }
   });
 
@@ -213,7 +219,6 @@ function binding_events() {
       modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
     }
-    // tinymce.remove();
     cleanBeforeSave();
     var html = $('#output').html();
     var path = window.location.pathname;
@@ -368,8 +373,18 @@ function done_button(view, $out) {
   return function (e) {
     view.unbind();
     $(this).closest('.spec').remove();
-    $('input, textarea', $out).attr('name', UID.generateShort());
-    $('legend', $out).attr('id', UID.generateShort());
+    $('input, textarea', $out).each(function () {
+      if (!$(this).attr('name')) {
+        $(this).attr('name', UID.generateShort());
+      }
+    });
+    // $('input, textarea', $out).attr('name', UID.generateShort());
+    $('legend', $out).each(function () {
+      if (!$(this).attr('id')) {
+        $(this).attr('id', UID.generateShort());
+      }
+    });
+    // $('legend', $out).attr('id', UID.generateShort());
     $out.closest('.control-group-wrap').removeAttr('data-status');
     e.preventDefault();
   };
@@ -419,6 +434,7 @@ function text_edit($cgr) {
     required = $('.controls input', $cgr).prop('required');
   }
   var $text = $(input.text());
+  var $buttons = $(input.button());
   var $label = $(spec.label());
   var $placeholder = $(spec.placeholder());
   var $help = $(spec.help());
@@ -426,25 +442,26 @@ function text_edit($cgr) {
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">text</span></div>').append($text);
+  $new_cgr.prepend($buttons.hide());
   if ($cgr) {
+    // reserve important attributes that are not covered but rivet model binding like unique name
+    $('input', $new_cgr).attr('name', $('input', $cgr).attr('name'));
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
     $('#output').append($new_cgr);
     $('#output').append($edit);
   }
-
   var model = {
     label: label,
     placeholder: placeholder,
-    help: help
+    help: help,
+    required: required
   };
   $('input', $label).val(label);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
-  if (required) {
-    $('input', $required).prop('checked', true);
-  }
+  $('input', $required).prop('checked', required);
   binding($edit, $text, model, $done);
 }
 
@@ -669,18 +686,13 @@ function rich_edit($cgr) {
 
 function binding($edit, $out, model, $done) {
   $('input:text', $edit).keyup(function (e) {
-    if ($(this).val() == 'required') {
-      // $('input', $out).prop('required', $(this).prop('checked'));
-      // do nothing
-      // } else {
-      model[$(this).attr('name')] = $(this).val();
-    }
+    model[$(this).attr('name')] = $(this).val();
   });
   $('select', $edit).change(function (e) {
     model[$(this).attr('name')] = $(this).val();
   });
   $('input:checkbox', $edit).change(function (e) {
-    $('input', $out).attr('required', $(this).prop('checked'));
+    model[$(this).attr('name')] = $(this).prop('checked');
   });
   var view = rivets.bind($out, {
     model: model
