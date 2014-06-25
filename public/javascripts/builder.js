@@ -97,10 +97,10 @@ function modalAlert(label, body) {
 
 function cleanBeforeSave() {
   // clean control-focus class and .control-group-buttons element
-  $('.control-focus').removeClass('control-focus');
-  $('.control-group-buttons').remove();
+  $('#output .control-focus').removeClass('control-focus');
+  $('#output .control-group-buttons').remove();
   // clean status
-  $('.control-group-wrap').removeAttr('data-status');
+  $('#output .control-group-wrap').removeAttr('data-status');
   // remove tinymce
   tinymce.remove();
 }
@@ -390,33 +390,47 @@ function done_button(view, $out) {
   };
 }
 
-function checkbox_edit($cgr) {
-  $('#output .well.spec').remove();
-  var label = 'label';
-  var checkbox_text = 'checkbox text';
+function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
+  // var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">text</span></div>').append($comp);
+  $new_cgr.prepend($buttons.hide());
   if ($cgr) {
-    label = $('.control-label span', $cgr).text();
-    checkbox_text = $('.controls label span', $cgr).text();
-  }
-  var $checkbox = $(input.checkbox());
-  var $label = $(spec.label());
-  var $checkbox_text = $(spec.checkbox_text());
-  var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $checkbox_text, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">checkbox</span></div>').append($checkbox);
-  if ($cgr) {
+    // reserve important attributes that are not covered but rivet model binding like unique name
+    $('input', $new_cgr).attr('name', $('input', $cgr).attr('name'));
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
     $('#output').append($new_cgr);
     $('#output').append($edit);
   }
+}
+
+function checkbox_edit($cgr) {
+  $('#output .well.spec').remove();
+  var label = 'label';
+  var checkbox_text = 'checkbox text';
+  var required = false;
+  if ($cgr) {
+    label = $('.control-label span', $cgr).text();
+    checkbox_text = $('.controls label span', $cgr).text();
+    required = $('input', $cgr).prop('required');
+  }
+  var $checkbox = $(input.checkbox());
+  var $buttons = $(input.button());
+  var $label = $(spec.label());
+  var $checkbox_text = $(spec.checkbox_text());
+  var $required = $(spec.required());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append($label, $checkbox_text, $required, $done);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">checkbox</span></div>').append($checkbox);
+  add_new_cgr($cgr, $new_cgr, $buttons, $edit);
   var model = {
     label: label,
-    checkbox_text: checkbox_text
+    checkbox_text: checkbox_text,
+    required: required
   };
   $('input', $label).val(label);
   $('input', $checkbox_text).val(checkbox_text);
+  $('input', $required).prop('checked', required);
 
   binding($edit, $checkbox, model, $done);
 }
@@ -442,16 +456,7 @@ function text_edit($cgr) {
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">text</span></div>').append($text);
-  $new_cgr.prepend($buttons.hide());
-  if ($cgr) {
-    // reserve important attributes that are not covered but rivet model binding like unique name
-    $('input', $new_cgr).attr('name', $('input', $cgr).attr('name'));
-    $cgr.replaceWith($new_cgr);
-    $new_cgr.after($edit);
-  } else {
-    $('#output').append($new_cgr);
-    $('#output').append($edit);
-  }
+  add_new_cgr($cgr, $new_cgr, $buttons, $edit);
   var model = {
     label: label,
     placeholder: placeholder,
