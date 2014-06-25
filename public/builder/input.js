@@ -14,7 +14,7 @@ exports["button"] = function tmpl_button() {
 
 // checkbox.jade compiled template
 exports["checkbox"] = function tmpl_checkbox() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled"/><span>{ model.checkbox_text }</span></label></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-required="model.required"/><span>{ model.checkbox_text }</span></label></div></div>';
 };
 
 // hold.jade compiled template
@@ -24,7 +24,7 @@ exports["hold"] = function tmpl_hold() {
 
 // number.jade compiled template
 exports["number"] = function tmpl_number() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required"/><span class="help-block">{ model.help }</span></div></div>';
 };
 
 // numberunit.jade compiled template
@@ -34,7 +34,7 @@ exports["numberunit"] = function tmpl_numberunit() {
 
 // other.jade compiled template
 exports["other"] = function tmpl_other() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input rv-type="model.type" disabled="disabled" rv-placeholder="model.placeholder"/><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input rv-type="model.type" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required"/><span class="help-block">{ model.help }</span></div></div>';
 };
 
 // rich.jade compiled template
@@ -54,7 +54,7 @@ exports["text"] = function tmpl_text() {
 
 // textarea.jade compiled template
 exports["textarea"] = function tmpl_textarea() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows"></textarea><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows" rv-required="model.required"></textarea><span class="help-block">{ model.help }</span></div></div>';
 };
 
 // upload.jade compiled template
