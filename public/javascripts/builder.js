@@ -476,38 +476,38 @@ function other_edit($cgr) {
   var placeholder = '';
   var help = '';
   var type = 'text';
+  var required = false;
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
     placeholder = $('.controls input', $cgr).attr('placeholder');
     type = $('.controls input', $cgr).attr('type');
     help = $('.controls span.help-block', $cgr).text();
+    required = $('input', $cgr).prop('required');
   }
   var $other = $(input.other());
+  var $buttons = $(input.button());
   var $label = $(spec.label());
   var $placeholder = $(spec.placeholder());
   var $type = $(spec.type());
   var $help = $(spec.help());
+  var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($type, $label, $placeholder, $help, $done);
+  var $edit = $('<div class="well spec"></div>').append($type, $label, $placeholder, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">other</span></div>').append($other);
-  if ($cgr) {
-    $cgr.replaceWith($new_cgr);
-    $new_cgr.after($edit);
-  } else {
-    $('#output').append($new_cgr);
-    $('#output').append($edit);
-  }
+  add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
     label: label,
     placeholder: placeholder,
     type: type,
-    help: help
+    help: help,
+    required: required
   };
   $('input', $label).val(label);
   $('select', $type).val(type);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
+  $('input', $required).prop('checked', required);
 
   binding($edit, $other, model, $done);
 }
