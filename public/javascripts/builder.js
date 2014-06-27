@@ -564,36 +564,36 @@ function number_edit($cgr) {
   var label = 'label';
   var placeholder = '';
   var help = '';
+  var required = false;
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
+    required = $('input', $cgr).prop('required');
   }
 
   var $number = $(input.number());
+  var $buttons = $(input.button());
   var $label = $(spec.label());
   var $placeholder = $(spec.placeholder());
   var $help = $(spec.help());
+  var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">number</span></div>').append($number);
-  if ($cgr) {
-    $cgr.replaceWith($new_cgr);
-    $new_cgr.after($edit);
-  } else {
-    $('#output').append($new_cgr);
-    $('#output').append($edit);
-  }
+  add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
     label: label,
     placeholder: placeholder,
-    help: help
+    help: help,
+    required: required
   };
 
   $('input', $label).val(label);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
+  $('input', $required).prop('checked', required);
 
   binding($edit, $number, model, $done);
 }
