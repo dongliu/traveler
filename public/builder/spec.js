@@ -42,6 +42,16 @@ exports["legend"] = function tmpl_legend() {
     return '<div class="control-group"><div class="control-label">Section legend</div><div class="controls"><input type="text" name="legend"/></div></div>';
 };
 
+// max.jade compiled template
+exports["max"] = function tmpl_max() {
+    return '<div class="control-group"><div class="control-label">Max</div><div class="controls"><input type="number" name="max"/></div></div>';
+};
+
+// min.jade compiled template
+exports["min"] = function tmpl_min() {
+    return '<div class="control-group"><div class="control-label">Min</div><div class="controls"><input type="number" name="min"/></div></div>';
+};
+
 // placeholder.jade compiled template
 exports["placeholder"] = function tmpl_placeholder() {
     return '<div class="control-group"><div class="control-label">Placeholder</div><div class="controls"><input type="text" name="placeholder"/></div></div>';
@@ -59,7 +69,7 @@ exports["rich_textarea"] = function tmpl_rich_textarea() {
 
 // rows.jade compiled template
 exports["rows"] = function tmpl_rows() {
-    return '<div class="control-group"><div class="control-label">Row</div><div class="controls"><input type="text" placeholder="Number of rows" name="rows"/></div></div>';
+    return '<div class="control-group"><div class="control-label">Row</div><div class="controls"><input type="number" placeholder="Number of rows" name="rows"/></div></div>';
 };
 
 // type.jade compiled template

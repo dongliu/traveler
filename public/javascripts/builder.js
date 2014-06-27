@@ -565,11 +565,15 @@ function number_edit($cgr) {
   var placeholder = '';
   var help = '';
   var required = false;
+  var min = '';
+  var max = '';
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     required = $('input', $cgr).prop('required');
+    min = $('input', $cgr).prop('min');
+    max = $('input', $cgr).prop('max');
   }
 
   var $number = $(input.number());
@@ -577,9 +581,11 @@ function number_edit($cgr) {
   var $label = $(spec.label());
   var $placeholder = $(spec.placeholder());
   var $help = $(spec.help());
+  var $min = $(spec.min());
+  var $max = $(spec.max());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $min, $max, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">number</span></div>').append($number);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
@@ -587,13 +593,17 @@ function number_edit($cgr) {
     label: label,
     placeholder: placeholder,
     help: help,
-    required: required
+    required: required,
+    min: min,
+    max: max
   };
 
   $('input', $label).val(label);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
   $('input', $required).prop('checked', required);
+  $('input', $min).val(min);
+  $('input', $max).val(max);
 
   binding($edit, $number, model, $done);
 }
@@ -694,14 +704,22 @@ function binding($edit, $out, model, $done) {
   $('input:text', $edit).keyup(function (e) {
     model[$(this).attr('name')] = $(this).val();
   });
+
+  $('input[type="number"]', $edit).on('input' ,function (e) {
+    model[$(this).attr('name')] = $(this).val();
+  });
+
   $('select', $edit).change(function (e) {
     model[$(this).attr('name')] = $(this).val();
   });
+
   $('input:checkbox', $edit).change(function (e) {
     model[$(this).attr('name')] = $(this).prop('checked');
   });
+
   var view = rivets.bind($out, {
     model: model
   });
+
   $done.click(done_button(view, $out));
 }
