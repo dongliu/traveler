@@ -44,12 +44,12 @@ exports["legend"] = function tmpl_legend() {
 
 // max.jade compiled template
 exports["max"] = function tmpl_max() {
-    return '<div class="control-group"><div class="control-label">Max</div><div class="controls"><input type="number" name="max"/></div></div>';
+    return '<div class="control-group"><div class="control-label">Max</div><div class="controls"><input type="number" name="max" step="any"/></div></div>';
 };
 
 // min.jade compiled template
 exports["min"] = function tmpl_min() {
-    return '<div class="control-group"><div class="control-label">Min</div><div class="controls"><input type="number" name="min"/></div></div>';
+    return '<div class="control-group"><div class="control-label">Min</div><div class="controls"><input type="number" name="min" step="any"/></div></div>';
 };
 
 // placeholder.jade compiled template
