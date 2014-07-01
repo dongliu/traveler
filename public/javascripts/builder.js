@@ -705,7 +705,7 @@ function binding($edit, $out, model, $done) {
     model[$(this).attr('name')] = $(this).val();
   });
 
-  $('input[type="number"]', $edit).on('input' ,function (e) {
+  $('input[type="number"]', $edit).on('input', function (e) {
     model[$(this).attr('name')] = $(this).val();
   });
 
