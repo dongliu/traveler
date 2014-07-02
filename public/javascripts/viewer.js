@@ -1,4 +1,36 @@
-$(function(){
+function validation_message(form) {
+  var i = 0,
+    output = $('<div>'),
+    p, value, input, label;
+  for (i = 0; i < form.elements.length; i += 1) {
+    input = form.elements[i];
+    p = $('<p>');
+    if (input.checkValidity()) {
+      p.css('color', '#468847');
+    } else {
+      p.css('color', '#b94a48');
+    }
+    if (input.type == 'checkbox') {
+      value = input.checked ? 'checked' : 'not checked';
+    } else {
+      if (input.value == '') {
+        value = 'no input from user'
+      } else {
+        value = input.value;
+      }
+    }
+    label = $(input).closest('.control-group').children('.control-label').text()
+    if (input.checkValidity()) {
+      p.html(label + ': ' + value );
+    } else {
+      p.html(label + ': ' + value + ' | Message: ' + input.validationMessage);
+    }
+    output.append(p);
+  }
+  return output;
+}
+
+$(function () {
   $('input, textarea').removeAttr('disabled');
   var $legend = $('legend');
   var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="10"></ul>');
@@ -18,4 +50,9 @@ $(function(){
       $('#affixlist').toggle();
     });
   }
+
+  $('#validate').click(function () {
+    $('#validation').html(validation_message(document.getElementById('output')));
+    $('#validation').show();
+  })
 });
