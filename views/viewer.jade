@@ -16,8 +16,9 @@ block content
       form.form-horizontal#output
         != html
     #validation.well.hide
-    .btn-group
-      button.btn.btn-info#validate Test validation
+    .btn-group(data-toggle='buttons-radio')
+      button.btn.btn-info#show-validation Show validation
+      button.btn.btn-info#hide-validation.active Hide validation
 
 block js
   script(type='text/javascript', src='/jquery/jquery-1.9.1.js')

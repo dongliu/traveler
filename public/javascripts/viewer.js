@@ -51,8 +51,12 @@ $(function () {
     });
   }
 
-  $('#validate').click(function () {
+  $('#show-validation').click(function () {
     $('#validation').html(validation_message(document.getElementById('output')));
     $('#validation').show();
-  })
+  });
+
+  $('#hide-validation').click(function () {
+    $('#validation').hide();
+  });
 });
