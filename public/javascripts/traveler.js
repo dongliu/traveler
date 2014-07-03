@@ -359,6 +359,13 @@ $(function () {
   });
 
   $('#show-validation').click(function (e) {
+    if ($('input:disabled').length) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('Please finish the input before validating the form.');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+      return;
+    }
     $('.validation').remove();
     $('#validation').html('<h3>Summary</h3>' + validation_message(document.getElementById('form')).html());
     $('#validation').show();
