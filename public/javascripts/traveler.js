@@ -119,7 +119,7 @@ function validation_message(form) {
     }
     label = $(input).closest('.control-group').children('.control-label').text()
     if (input.checkValidity()) {
-      p.html('<b>' + label + '</b>: ' + value );
+      p.html('<b>' + label + '</b>: ' + value);
       span.text('validation passed');
     } else {
       p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
@@ -198,7 +198,6 @@ $(function () {
   });
 
   // deserialize the values here
-
   $('#form .control-group-wrap').mouseenter(function (e) {
     e.preventDefault();
     if (!$(this).hasClass('control-focus')) {
@@ -212,7 +211,7 @@ $(function () {
     }
   });
 
-  $('#form input:not([type="file"]),textarea').change(function (e) {
+  $('#form input:not([type="file"]),textarea').on('input', function (e) {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
     $('#form input,textarea').not($this).attr('disabled', true);
@@ -359,13 +358,13 @@ $(function () {
     $(this).closest('.control-group-buttons').remove();
   });
 
-  $('#show-validation').click(function(e){
+  $('#show-validation').click(function (e) {
     $('.validation').remove();
     $('#validation').html('<h3>Summary</h3>' + validation_message(document.getElementById('form')).html());
     $('#validation').show();
   });
 
-  $('#hide-validation').click(function(e){
+  $('#hide-validation').click(function (e) {
     $('#validation').hide();
     $('.validation').hide();
   });
