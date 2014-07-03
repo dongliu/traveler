@@ -46,6 +46,44 @@ function createSideNav() {
   }
 }
 
+function validation_message(form) {
+  var i = 0,
+    output = $('<div>'),
+    p, value, input, label, span;
+  for (i = 0; i < form.elements.length; i += 1) {
+    input = form.elements[i];
+    p = $('<p>');
+    span = $('<span class="validation">');
+    if (input.checkValidity()) {
+      p.css('color', '#468847');
+      span.css('color', '#468847');
+    } else {
+      p.css('color', '#b94a48');
+      span.css('color', '#b94a48');
+    }
+    if (input.type == 'checkbox') {
+      value = input.checked ? 'checked' : 'not checked';
+    } else {
+      if (input.value == '') {
+        value = 'no input from user'
+      } else {
+        value = input.value;
+      }
+    }
+    label = $(input).closest('.control-group').children('.control-label').text()
+    if (input.checkValidity()) {
+      p.html('<b>' + label + '</b>: ' + value);
+      span.text('validation passed');
+    } else {
+      p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
+      span.text(input.validationMessage);
+    }
+    $(input).closest('.controls').append(span);
+    output.append(p);
+  }
+  return output;
+}
+
 $(function () {
   createSideNav();
   cleanForm();
@@ -79,5 +117,16 @@ $(function () {
     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   }).always();
+
+  $('#show-validation').click(function (e) {
+    $('.validation').remove();
+    $('#validation').html('<h3>Summary</h3>' + validation_message(document.getElementById('form')).html());
+    $('#validation').show();
+  });
+
+  $('#hide-validation').click(function (e) {
+    $('#validation').hide();
+    $('.validation').hide();
+  });
 
 });

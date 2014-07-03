@@ -41,8 +41,12 @@ block content
     if (locals.status !== undefined && locals.status == 1)
       .btn-group
         button.btn.btn-primary#complete Submit for completion
+    .btn-group(data-toggle='buttons-radio')
+      button.btn.btn-info#show-validation Show validation
+      button.btn.btn-info#hide-validation.active Hide validation
     .btn-group
       button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
+    #validation.well.hide
     #details.collapse.out
       if (locals.description !== undefined)
         h4 Description: #{description}

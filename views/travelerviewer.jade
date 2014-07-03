@@ -35,6 +35,9 @@ block content
             = ' '
     if (locals.devices !== undefined && devices.length > 0)
         h4 Devices: #{devices}
+    .btn-group(data-toggle='buttons-radio')
+      button.btn.btn-info#show-validation Show validation
+      button.btn.btn-info#hide-validation.active Hide validation
     button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
     #details.collapse.out
       if (locals.description !== undefined)
