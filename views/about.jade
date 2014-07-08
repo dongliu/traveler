@@ -49,6 +49,8 @@ html
             li
               a(href='#compose') Compose a form
             li
+              a(href='#validation') Validation rules
+            li
               a(href='#share-form') Share a form
             li
               a(href='#create') Create a traveler
@@ -95,6 +97,11 @@ html
             br
             br
             embed(src="/images/rename.swf",width=1024,height=788,quality='low',play=false,loop=false,wmode='transparent',type="application/x-shockwave-flash",pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash")
+          section#validation
+            .page-header
+              h2 Validation rules
+            p The What-You-See-Is-What-You-Get form builder also supports basic validation rules like required and min/max for a number input. This is a new feature released in v2.2.0. Basically, to make an input required, check the "required" checkbox in the input's specification. The min/max rule works in the same way. A user can test the validation rules of a form in its preview before creating a traveler based on it. The validation messages can be shown or refreshed by clicking on the "Show validation" button. The validation works similarly in a traveler page.
+            embed(src="/images/validation.swf",width=1024,height=788,quality='low',play=false,loop=false,wmode='transparent',type="application/x-shockwave-flash",pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash")
           section#share-form
             .page-header
               h2 Share a form
