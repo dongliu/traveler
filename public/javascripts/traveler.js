@@ -211,7 +211,17 @@ $(function () {
     }
   });
 
-  $('#form input:not([type="file"]),textarea').on('input', function (e) {
+  $('#form input:not([type="file"], [type="checkbox"]),textarea').on('input', function (e) {
+    var $this = $(this);
+    var $cgw = $this.closest('.control-group-wrap');
+    $('#form input,textarea').not($this).attr('disabled', true);
+    $('#completed').attr('disabled', true);
+    if ($cgw.children('.control-group-buttons').length === 0) {
+      $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
+    }
+  });
+
+  $('#form :checkbox').change(function (e) {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
     $('#form input,textarea').not($this).attr('disabled', true);
