@@ -1,3 +1,8 @@
+release v2.2.0
+date: July 8, 2014
+- form validation rules
+- use multer for file uploading
+
 release v2.1.0
 date: May 30, 2014
 - sidenav for long forms/travelers
