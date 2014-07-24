@@ -1,3 +1,7 @@
+release v2.2.1
+date: July 24, 2014
+- allow image, text and MS Excel files (.xsl and .xslx) in upload file input
+
 release v2.2.0
 date: July 8, 2014
 - form validation rules
