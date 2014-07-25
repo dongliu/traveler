@@ -1,5 +1,8 @@
+/*global ObjectId:false*/
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var ObjectId = Schema.Types.ObjectId;
 
 /******
 access := 0 // for read or
@@ -21,9 +24,23 @@ var form = new Schema({
   html: String
 });
 
+var formFile = new Schema({
+  form: ObjectId,
+  file: {
+    path: String,
+    encoding: String,
+    mimetype: String
+  },
+  uploadedBy: String,
+  uploadedOn: Date
+});
+
+
 
 var Form = mongoose.model('Form', form);
+var FormFile = mongoose.model('FormFile', formFile);
 
 module.exports = {
-  Form: Form
+  Form: Form,
+  FormFile: FormFile
 };

@@ -174,6 +174,121 @@ function text_edit($cgr) {
   binding($edit, $text, model, $done);
 }
 
+function figure_edit($cgr) {
+  $('#output .well.spec').remove();
+  var src = '';
+  var alt = '';
+  var figcaption = '';
+  var height = '';
+  var width = '';
+  if ($cgr) {
+    scr = $(img, $cgr).attr('scr');
+    alt = $(img, $cgr).attr('alt');
+    figcaption = $(figcaption, $cgr).text();
+    height = $(img, $cgr).attr('height');
+    width = $(img, $cgr).attr('width');
+  }
+  var $figure = $(input.figure());
+  var $buttons = $(input.button());
+  var $file = $(spec.imagefile());
+  var $alt = $(spec.alt());
+  var $figcaption = $(spec.figcaption());
+  var $height = $(spec.height());
+  var $width = $(spec.width());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append($file, $alt, $figcaption, $height, $width, $done);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">figure</span></div>').append($figure);
+  add_new_cgr($cgr, $new_cgr, $buttons, $edit);
+
+  // handle image upload here
+  $('input:file', $figure).change(function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    // var $cg = $this.closest('.control-group');
+    // $('#form input,textarea').not($this).attr('disabled', true);
+    // $('#completed').attr('disabled', true);
+    var file = this.files[0];
+    // var name = file.name;
+    var size = file.size;
+    var type = file.type;
+    var $validation = $figure.find('.validation');
+    if ($validation.length) {
+      $validation = $($validation[0]);
+    } else {
+      $validation = $('<div class="validation"></div>').appendTo($figure.find('.controls'));
+    }
+    if (!(/(\.|\/)(gif|jpe?g|png)$/i).test(type)) {
+      $validation.html('<p class="text-error">' + type + ' is not allowed to upload</p>');
+      return;
+    }
+    if (size > 5000000) {
+      $validation.html('<p class="text-error">' + size + ' is too large to upload</p>');
+      return;
+    }
+    // clear validation message if any
+    $validation.empty();
+
+    if ($figure.children('.control-group-buttons').length === 0) {
+      $figure.prepend('<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>');
+    }
+  });
+
+  $fugure.on('click', 'button[value="upload"]', function (e) {
+    e.preventDefault();
+    // ajax to save the current value
+    var $this = $(this);
+    $this.attr('disabled', true);
+    // var input = $this.closest('.control-group-wrap').find('input')[0];
+    var input = $figure.find('input')[0];
+    var data = new FormData();
+    // data.append('name', input.name);
+    data.append('type', input.type);
+    data.append(input.name, input.files[0]);
+    $.ajax({
+      url: './uploads/',
+      type: 'POST',
+      processData: false,
+      contentType: false, // important for jqXHR
+      data: data,
+      dataType: 'json'
+    }).done(function (data, status, jqXHR) {
+      var timestamp = jqXHR.getResponseHeader('Date');
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' + moment(timestamp).fromNow() + '</div>');
+      // set the figure attributes
+      $('img', $figure).attr('scr', data.location);
+      $this.closest('.control-group-buttons').remove();
+    }).fail(function (jqXHR, status, error) {
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    }).always(function () {});
+
+  });
+
+  $figure.on('click', 'button[value="cancel"]', function (e) {
+    e.preventDefault();
+    $(this).closest('.control-group-buttons').remove();
+  });
+
+
+
+  // construct model and bind it when the file is uploaded
+  // var model = {
+  //   label: label,
+  //   placeholder: placeholder,
+  //   help: help,
+  //   required: required
+  // };
+  // $('input', $label).val(label);
+  // $('input', $placeholder).val(placeholder);
+  // $('input', $help).val(help);
+  // $('input', $required).prop('checked', required);
+  // binding($edit, $text, model, $done);
+}
+
+
+
 function other_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
@@ -426,7 +541,22 @@ function binding($edit, $out, model, $done) {
 }
 
 
-function init() {}
+function init() {
+  // var html = '';
+  var path = window.location.pathname;
+  if (/^\/forms\/new/.test(path)) {
+    $('#modalLabel').html('Create a new form');
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
+    $('#modal .modal-footer').html('<button id="action" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn" onclick="window.open(\'\', \'_self\', \'\');window.close(); return false;">Cancel</button>');
+    $('#modal').modal('show');
+    $('#action').click(function (e) {
+      sendRequest({
+        title: $('#title').val()
+      });
+    });
+  }
+}
 
 function working() {
   $('#add-checkbox').click(function (e) {

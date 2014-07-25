@@ -17,6 +17,11 @@ exports["checkbox"] = function tmpl_checkbox() {
     return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-required="model.required"/><span>{ model.checkbox_text }</span></label></div></div>';
 };
 
+// figure.jade compiled template
+exports["figure"] = function tmpl_figure() {
+    return '<div class="control-group output-control-group"><div class="controls"><img rv-scr="model.scr" rv-alt="model.alt" rv-height="model.height" rv-width="model.width"/><figcaption>{ model.figcaption }</figcaption></div></div>';
+};
+
 // hold.jade compiled template
 exports["hold"] = function tmpl_hold() {
     return '<div class="control-group output-control-group"><h4 class="holder">The flow is currently hold by&nbsp;<span>{ model.holder }</span></h4><div class="form-actions"><button type="submit" class="btn btn-primary">Continue</button></div></div>';
