@@ -11,6 +11,158 @@ var util = require('util');
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
 
+function addUserFromAD(req, res, form) {
+  var name = req.param('name');
+  var nameFilter = ad.nameFilter.replace('_name', name);
+  var opts = {
+    filter: nameFilter,
+    attributes: ad.objAttributes,
+    scope: 'sub'
+  };
+
+  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
+    if (err) {
+      console.error(err.name + ' : ' + err.message);
+      return res.json(500, err);
+    }
+
+    if (result.length === 0) {
+      return res.send(404, name + ' is not found in AD!');
+    }
+
+    if (result.length > 1) {
+      return res.send(400, name + ' is not unique!');
+    }
+
+    var id = result[0].sAMAccountName.toLowerCase();
+    var access = 0;
+    if (req.param('access') && req.param('access') == 'write') {
+      access = 1;
+    }
+    form.sharedWith.addToSet({
+      _id: id,
+      username: name,
+      access: access
+    });
+    form.save(function (err) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      } else {
+        var user = new User({
+          _id: result[0].sAMAccountName.toLowerCase(),
+          name: result[0].displayName,
+          email: result[0].mail,
+          office: result[0].physicalDeliveryOfficeName,
+          phone: result[0].telephoneNumber,
+          mobile: result[0].mobile,
+          forms: [form._id]
+        });
+        user.save(function (err) {
+          if (err) {
+            console.error(err.msg);
+          }
+        });
+        return res.send(201, 'The user named ' + name + ' was added to the share list.');
+      }
+    });
+  });
+}
+
+function canWrite(req, doc) {
+  if (doc.createdBy == req.session.userid) {
+    return true;
+  }
+  if (doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access == 1) {
+    return true;
+  }
+  return false;
+}
+
+function canRead(req, doc) {
+  if (doc.createdBy == req.session.userid) {
+    return true;
+  }
+  if (doc.sharedWith.id(req.session.userid)) {
+    return true;
+  }
+  return false;
+}
+
+/*****
+access := -1 // no access
+        | 0  // read
+        | 1  // write
+*****/
+
+function getAccess(req, doc) {
+  if (doc.createdBy == req.session.userid) {
+    return 1;
+  }
+  if (doc.sharedWith.id(req.session.userid)) {
+    return doc.sharedWith.id(req.session.userid).access;
+  }
+  return -1;
+}
+
+function getSharedWith(sharedWith, name) {
+  if (sharedWith.length == 0) {
+    return -1;
+  }
+  for (var i = 0; i < sharedWith.length; i += 1) {
+    if (sharedWith[i].username == name) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function addUser(req, res, form) {
+  var name = req.param('name');
+
+  // check local db first then try ad
+  User.findOne({
+    name: name
+  }, function (err, user) {
+    if (err) {
+      console.error(err.msg);
+      return res.send(500, err.msg);
+    }
+    if (user) {
+      var access = 0;
+      if (req.param('access') && req.param('access') == 'write') {
+        access = 1;
+      }
+      form.sharedWith.addToSet({
+        _id: user._id,
+        username: name,
+        access: access
+      });
+      form.save(function (err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        } else {
+          return res.send(201, 'The user named ' + name + ' was added to the share list.');
+        }
+      });
+      user.update({
+        $addToSet: {
+          forms: form._id
+        }
+      }, function (err) {
+        if (err) {
+          console.error(err.msg);
+        }
+      });
+    } else {
+      addUserFromAD(req, res, form);
+    }
+  });
+
+}
+
+
 module.exports = function (app) {
 
   app.get('/forms/json', auth.ensureAuthenticated, function (req, res) {
@@ -85,6 +237,49 @@ module.exports = function (app) {
       //   html: form.html
       // });
       return res.redirect('forms/' + req.params.id + '/preview');
+    });
+  });
+
+  app.post('/forms/:id/uploads/', auth.ensureAuthenticated, function (req, res) {
+
+    if (_.isEmpty(req.files)) {
+      return res.send(400, 'Expecte One uploaded file');
+    }
+
+    var data = new TravelerData({
+      traveler: doc._id,
+      name: req.body.name,
+      value: req.files[req.body.name].originalname,
+      file: {
+        path: req.files[req.body.name].path,
+        encoding: req.files[req.body.name].encoding,
+        mimetype: req.files[req.body.name].mimetype
+      },
+      inputType: req.body.type,
+      inputBy: req.session.userid,
+      inputOn: Date.now()
+    });
+
+    // console.dir(data);
+    data.save(function (err) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      doc.data.push(data._id);
+      doc.updatedBy = req.session.userid;
+      doc.updatedOn = Date.now();
+      doc.save(function (err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        var url = req.protocol + '://' + req.get('host') + '/data/' + data._id;
+        res.set('Location', url);
+        return res.json(201, {
+          location: '/data/' + data._id
+        });
+      });
     });
   });
 
@@ -266,12 +461,15 @@ module.exports = function (app) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
-    if (!req.body.html) {
-      return res.send(400, 'need html of the form');
-    }
+    // if (!req.body.html) {
+    //   return res.send(400, 'need html of the form');
+    // }
     var form = {};
-    form.html = sanitize(req.body.html);
-    // form.html = req.body.html;
+    if (!!req.body.html) {
+      form.html = sanitize(req.body.html);
+    } else {
+      form.html = '';
+    }
     form.title = req.body.title;
     form.createdBy = req.session.userid;
     form.createdOn = Date.now();
@@ -330,154 +528,3 @@ module.exports = function (app) {
     });
   });
 };
-
-
-function getSharedWith(sharedWith, name) {
-  if (sharedWith.length == 0) {
-    return -1;
-  }
-  for (var i = 0; i < sharedWith.length; i += 1) {
-    if (sharedWith[i].username == name) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-function addUser(req, res, form) {
-  var name = req.param('name');
-
-  // check local db first then try ad
-  User.findOne({
-    name: name
-  }, function (err, user) {
-    if (err) {
-      console.error(err.msg);
-      return res.send(500, err.msg);
-    }
-    if (user) {
-      var access = 0;
-      if (req.param('access') && req.param('access') == 'write') {
-        access = 1;
-      }
-      form.sharedWith.addToSet({
-        _id: user._id,
-        username: name,
-        access: access
-      });
-      form.save(function (err) {
-        if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
-        } else {
-          return res.send(201, 'The user named ' + name + ' was added to the share list.');
-        }
-      });
-      user.update({
-        $addToSet: {
-          forms: form._id
-        }
-      }, function (err) {
-        if (err) {
-          console.error(err.msg);
-        }
-      });
-    } else {
-      addUserFromAD(req, res, form);
-    }
-  });
-}
-
-function addUserFromAD(req, res, form) {
-  var name = req.param('name');
-  var nameFilter = ad.nameFilter.replace('_name', name);
-  var opts = {
-    filter: nameFilter,
-    attributes: ad.objAttributes,
-    scope: 'sub'
-  };
-
-  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
-    if (err) {
-      console.error(err.name + ' : ' + err.message);
-      return res.json(500, err);
-    }
-
-    if (result.length === 0) {
-      return res.send(404, name + ' is not found in AD!');
-    }
-
-    if (result.length > 1) {
-      return res.send(400, name + ' is not unique!');
-    }
-
-    var id = result[0].sAMAccountName.toLowerCase();
-    var access = 0;
-    if (req.param('access') && req.param('access') == 'write') {
-      access = 1;
-    }
-    form.sharedWith.addToSet({
-      _id: id,
-      username: name,
-      access: access
-    });
-    form.save(function (err) {
-      if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
-      } else {
-        var user = new User({
-          _id: result[0].sAMAccountName.toLowerCase(),
-          name: result[0].displayName,
-          email: result[0].mail,
-          office: result[0].physicalDeliveryOfficeName,
-          phone: result[0].telephoneNumber,
-          mobile: result[0].mobile,
-          forms: [form._id]
-        });
-        user.save(function (err) {
-          if (err) {
-            console.error(err.msg);
-          }
-        });
-        return res.send(201, 'The user named ' + name + ' was added to the share list.');
-      }
-    });
-  });
-}
-
-function canWrite(req, doc) {
-  if (doc.createdBy == req.session.userid) {
-    return true;
-  }
-  if (doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access == 1) {
-    return true;
-  }
-  return false;
-}
-
-function canRead(req, doc) {
-  if (doc.createdBy == req.session.userid) {
-    return true;
-  }
-  if (doc.sharedWith.id(req.session.userid)) {
-    return true;
-  }
-  return false;
-}
-
-/*****
-access := -1 // no access
-        | 0  // read
-        | 1  // write
-*****/
-
-function getAccess(req, doc) {
-  if (doc.createdBy == req.session.userid) {
-    return 1;
-  }
-  if (doc.sharedWith.id(req.session.userid)) {
-    return doc.sharedWith.id(req.session.userid).access;
-  }
-  return -1;
-}

@@ -7,6 +7,11 @@ var jade = exports.jade=function(exports){Array.isArray||(Array.isArray=function
 
 // create our folder objects
 
+// alt.jade compiled template
+exports["alt"] = function tmpl_alt() {
+    return '<div class="control-group"><div class="control-label">Image alternate text</div><div class="controls"><input type="text" disabled="disabled" name="alt"/></div></div>';
+};
+
 // checkbox_text.jade compiled template
 exports["checkbox_text"] = function tmpl_checkbox_text() {
     return '<div class="control-group"><div class="control-label">Text</div><div class="controls"><input type="text" name="checkbox_text"/></div></div>';
@@ -17,6 +22,16 @@ exports["done"] = function tmpl_done() {
     return '<div class="control-group"><div class="controls"><button type="submit" class="btn btn-primary">Done</button></div></div>';
 };
 
+// figcaption.jade compiled template
+exports["figcaption"] = function tmpl_figcaption() {
+    return '<div class="control-group"><div class="control-label">Figure caption</div><div class="controls"><input type="text" disabled="disabled" name="figcaption"/></div></div>';
+};
+
+// height.jade compiled template
+exports["height"] = function tmpl_height() {
+    return '<div class="control-group"><div class="control-label">Height</div><div class="controls"><input type="number" disabled="disabled" name="height" step="any"/></div></div>';
+};
+
 // help.jade compiled template
 exports["help"] = function tmpl_help() {
     return '<div class="control-group"><div class="control-label">Help</div><div class="controls"><input type="text" name="help"/></div></div>';
@@ -25,6 +40,11 @@ exports["help"] = function tmpl_help() {
 // hold.jade compiled template
 exports["hold"] = function tmpl_hold() {
     return '<div class="control-group"><div class="control-label">Holder</div><div class="controls"><input type="text" placeholder="Hold owner" name="holder"/></div></div>';
+};
+
+// imagefile.jade compiled template
+exports["imagefile"] = function tmpl_imagefile() {
+    return '<div class="control-group"><div class="control-label">Select an image</div><div class="controls"><input type="file"/></div></div>';
 };
 
 // inputtype.jade compiled template
@@ -80,6 +100,11 @@ exports["type"] = function tmpl_type() {
 // unit.jade compiled template
 exports["unit"] = function tmpl_unit() {
     return '<div class="control-group"><div class="control-label">Unit</div><div class="controls"><input type="text" name="unit"/></div></div>';
+};
+
+// width.jade compiled template
+exports["width"] = function tmpl_width() {
+    return '<div class="control-group"><div class="control-label">Width</div><div class="controls"><input type="number" disabled="disabled" name="width" step="any"/></div></div>';
 };
 
 

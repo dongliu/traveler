@@ -7,7 +7,7 @@ var util = require('util');
 var fs = require('fs');
 var path = require('path');
 var pause = require('pause');
-var u = require('underscore');
+var _ = require('underscore');
 var cheer = require('cheerio');
 // var sanitize = require('sanitize-caja'); // may need this later for new version of forms
 
@@ -795,7 +795,7 @@ module.exports = function (app) {
 
       // console.info(req.files);
 
-      if (u.isEmpty(req.files)) {
+      if (_.isEmpty(req.files)) {
         return res.send(400, 'Expecte One uploaded file');
       }
 
