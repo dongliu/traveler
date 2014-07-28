@@ -204,7 +204,7 @@ module.exports = function (app) {
 
 
   app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
-    return res.render('builder');
+    return res.render('newform');
   });
 
   app.get('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
@@ -458,18 +458,8 @@ module.exports = function (app) {
   });
 
   app.post('/forms/', auth.ensureAuthenticated, function (req, res) {
-    if (!req.is('json')) {
-      return res.send(415, 'json request expected');
-    }
-    // if (!req.body.html) {
-    //   return res.send(400, 'need html of the form');
-    // }
     var form = {};
-    if (!!req.body.html) {
-      form.html = sanitize(req.body.html);
-    } else {
-      form.html = '';
-    }
+    form.html = '';
     form.title = req.body.title;
     form.createdBy = req.session.userid;
     form.createdOn = Date.now();
@@ -481,9 +471,7 @@ module.exports = function (app) {
       }
       var url = req.protocol + '://' + req.get('host') + '/forms/' + newform.id + '/';
       res.set('Location', url);
-      return res.json(201, {
-        location: '/forms/' + newform.id + '/'
-      });
+      return res.send(303);
     });
   });
 
