@@ -1,7 +1,7 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false*/
+/*global moment: false, Binder: false, tinymce:false, rivets:false*/
 /*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
-/*global UID:false, initHtml:false*/
+/*global UID:false, initHtml:false, input:false, spec:false*/
 
 var mce_content = {
   selector: 'textarea.tinymce',
@@ -25,14 +25,8 @@ function sendRequest(data, cb, saveas) {
     url = '/forms/';
     type = 'POST';
   } else {
-    if (/^\/forms\/new/.test(path)) {
-      $('form#output').fadeTo('slow', 0.2);
-      url = '/forms/';
-      type = 'POST';
-    } else {
-      url = path;
-      type = 'PUT';
-    }
+    url = path;
+    type = 'PUT';
   }
   var formRequest = $.ajax({
     url: url,
@@ -40,27 +34,16 @@ function sendRequest(data, cb, saveas) {
     async: true,
     data: JSON.stringify(data),
     contentType: 'application/json',
-    processData: false,
-    dataType: 'json'
+    processData: false
   }).done(function (json) {
     var location;
-    if (/^\/forms\/new/.test(path)) {
+    var timestamp = formRequest.getResponseHeader('Date');
+    if (saveas) {
       location = formRequest.getResponseHeader('Location');
-      document.location.href = location;
-      // document.location.href = json.location;
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>A new form is created at <a href="' + location + '">' + location + '</a> at ' + moment(timestamp).fromNow() + '.</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
     } else {
-      var timestamp = formRequest.getResponseHeader('Date');
-      var dateObj = moment(timestamp);
-      if (saveas) {
-        location = formRequest.getResponseHeader('Location');
-        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The new form is created at <a href="' + location + '">' + json.location + '</a></div>');
-        var win = window.open(location, '_blank');
-        if (win) {
-          win.focus();
-        }
-      } else {
-        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved at ' + dateObj.format('HH:mm:ss') + '.</div>');
-      }
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved at ' + moment(timestamp).fromNow() + '.</div>');
     }
     if (cb) {
       cb();
@@ -82,20 +65,17 @@ function done_button(view, $out) {
         $(this).attr('name', UID.generateShort());
       }
     });
-    // $('input, textarea', $out).attr('name', UID.generateShort());
     $('legend', $out).each(function () {
       if (!$(this).attr('id')) {
         $(this).attr('id', UID.generateShort());
       }
     });
-    // $('legend', $out).attr('id', UID.generateShort());
     $out.closest('.control-group-wrap').removeAttr('data-status');
     e.preventDefault();
   };
 }
 
 function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
-  // var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">text</span></div>').append($comp);
   $new_cgr.prepend($buttons.hide());
   if ($cgr) {
     // reserve important attributes that are not covered but rivet model binding like unique name
@@ -107,6 +87,31 @@ function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
     $('#output').append($edit);
   }
 }
+
+function binding($edit, $out, model, $done) {
+  $('input:text', $edit).keyup(function (e) {
+    model[$(this).attr('name')] = $(this).val();
+  });
+
+  $('input[type="number"]', $edit).on('input', function (e) {
+    model[$(this).attr('name')] = $(this).val();
+  });
+
+  $('select', $edit).change(function (e) {
+    model[$(this).attr('name')] = $(this).val();
+  });
+
+  $('input:checkbox', $edit).change(function (e) {
+    model[$(this).attr('name')] = $(this).prop('checked');
+  });
+
+  var view = rivets.bind($out, {
+    model: model
+  });
+
+  $done.click(done_button(view, $out));
+}
+
 
 function checkbox_edit($cgr) {
   $('#output .well.spec').remove();
@@ -182,11 +187,11 @@ function figure_edit($cgr) {
   var height = '';
   var width = '';
   if ($cgr) {
-    scr = $(img, $cgr).attr('scr');
-    alt = $(img, $cgr).attr('alt');
-    figcaption = $(figcaption, $cgr).text();
-    height = $(img, $cgr).attr('height');
-    width = $(img, $cgr).attr('width');
+    src = $('img', $cgr).attr('scr');
+    alt = $('img', $cgr).attr('alt');
+    figcaption = $('figcaption', $cgr).text();
+    height = $('img', $cgr).attr('height');
+    width = $('img', $cgr).attr('width');
   }
   var $figure = $(input.figure());
   var $buttons = $(input.button());
@@ -233,7 +238,7 @@ function figure_edit($cgr) {
     }
   });
 
-  $fugure.on('click', 'button[value="upload"]', function (e) {
+  $figure.on('click', 'button[value="upload"]', function (e) {
     e.preventDefault();
     // ajax to save the current value
     var $this = $(this);
@@ -516,47 +521,7 @@ function rich_edit($cgr) {
   });
 }
 
-function binding($edit, $out, model, $done) {
-  $('input:text', $edit).keyup(function (e) {
-    model[$(this).attr('name')] = $(this).val();
-  });
-
-  $('input[type="number"]', $edit).on('input', function (e) {
-    model[$(this).attr('name')] = $(this).val();
-  });
-
-  $('select', $edit).change(function (e) {
-    model[$(this).attr('name')] = $(this).val();
-  });
-
-  $('input:checkbox', $edit).change(function (e) {
-    model[$(this).attr('name')] = $(this).prop('checked');
-  });
-
-  var view = rivets.bind($out, {
-    model: model
-  });
-
-  $done.click(done_button(view, $out));
-}
-
-
-function init() {
-  // var html = '';
-  var path = window.location.pathname;
-  if (/^\/forms\/new/.test(path)) {
-    $('#modalLabel').html('Create a new form');
-    $('#modal .modal-body').empty();
-    $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
-    $('#modal .modal-footer').html('<button id="action" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn" onclick="window.open(\'\', \'_self\', \'\');window.close(); return false;">Cancel</button>');
-    $('#modal').modal('show');
-    $('#action').click(function (e) {
-      sendRequest({
-        title: $('#title').val()
-      });
-    });
-  }
-}
+function init() {}
 
 function working() {
   $('#add-checkbox').click(function (e) {
@@ -627,7 +592,7 @@ function cleanBeforeSave() {
 
 function binding_events() {
   $('#adjust').click(function (e) {
-    if ($(this).text() == 'Adjust location') {
+    if ($(this).text() === 'Adjust location') {
       $(this).text('Done');
       $('#input-items').attr('disabled', true);
       $('#struct-items').attr('disabled', true);
@@ -653,7 +618,7 @@ function binding_events() {
     // check if it is normal edit mode
     $('.control-group-wrap', '#output').removeClass('control-focus');
     $('.control-group-buttons', '#output').hide();
-    if ($('#adjust').text() == 'Adjust location') {
+    if ($('#adjust').text() === 'Adjust location') {
       if (!$(this).hasClass('control-focus')) {
         $(this).addClass('control-focus');
         if ($('.control-group-buttons', $(this)).length) {
@@ -698,7 +663,7 @@ function binding_events() {
       modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
     }
-    if ($cgr.attr('data-status') == 'editting') {
+    if ($cgr.attr('data-status') === 'editting') {
       // modalAlert('You are still editting it', '');
       return;
     }
@@ -729,7 +694,7 @@ function binding_events() {
       other_edit($cgr);
       break;
     default:
-      alert('not implemented.');
+      console.log('type not implemented.');
     }
   });
 
@@ -742,28 +707,12 @@ function binding_events() {
     cleanBeforeSave();
     var html = $('#output').html();
     var path = window.location.pathname;
-    if (/^\/forms\/new/.test(path)) {
-      $('#modalLabel').html('Save the form');
-      $('#modal .modal-body').empty();
-      $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
-      $('#modal .modal-footer').html('<button id="action" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
-      $('#modal').modal('show');
-      $('#action').click(function (e) {
-        sendRequest({
-          title: $('#title').val(),
-          html: html
-        });
+    if (html !== initHtml) {
+      sendRequest({
+        html: html
+      }, function () {
+        initHtml = html;
       });
-    } else {
-      if (html == initHtml) {
-        // do not bother to inform the user
-      } else {
-        sendRequest({
-          html: html
-        }, function () {
-          initHtml = html;
-        });
-      }
     }
   });
 
@@ -836,7 +785,7 @@ function binding_events() {
 
 $(function () {
   $(document).ajaxError(function (event, jqXHR, settings, exception) {
-    if (jqXHR.status == 401) {
+    if (jqXHR.status === 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
