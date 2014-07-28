@@ -459,7 +459,11 @@ module.exports = function (app) {
 
   app.post('/forms/', auth.ensureAuthenticated, function (req, res) {
     var form = {};
-    form.html = '';
+    if (!!req.body.html) {
+      form.html = sanitize(req.body.html)
+    } else {
+      form.html = '';
+    }
     form.title = req.body.title;
     form.createdBy = req.session.userid;
     form.createdOn = Date.now();
@@ -471,7 +475,7 @@ module.exports = function (app) {
       }
       var url = req.protocol + '://' + req.get('host') + '/forms/' + newform.id + '/';
       res.set('Location', url);
-      return res.send(303);
+      return res.send(201, 'You can see the new form at <a href="' + url + '">' + url + '</a>');
     });
   });
 
