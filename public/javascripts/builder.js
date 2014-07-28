@@ -1,7 +1,7 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, Binder: false, tinymce:false, rivets:false*/
 /*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
-/*global UID:false, initHtml:false, input:false, spec:false*/
+/*global UID:false, input:false, spec:false*/
 
 var mce_content = {
   selector: 'textarea.tinymce',
@@ -17,6 +17,8 @@ var mce_content = {
   menubar: false,
   statusbar: false
 };
+
+var initHtml = '';
 
 function sendRequest(data, cb, saveas) {
   var path = window.location.pathname;
@@ -521,7 +523,9 @@ function rich_edit($cgr) {
   });
 }
 
-function init() {}
+function init() {
+  initHtml = $('#output').html();
+}
 
 function working() {
   $('#add-checkbox').click(function (e) {

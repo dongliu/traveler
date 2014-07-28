@@ -14,9 +14,6 @@ block head
   link(rel='stylesheet', href='/stylesheets/style.css')
 
 block content
-  if (typeof id !== 'undefined')
-    script.
-      var initHtml = !{JSON.stringify(html)};
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -24,14 +21,10 @@ block content
         h3#modalLabel
       .modal-body
       .modal-footer
-    if (typeof id == 'undefined')
-      h3 New form
-    else
-      h3#formtitle #{title}
+    h3#formtitle #{title}
     .well-large
       form.form-horizontal#output
-        if (typeof id !== 'undefined')
-          != html
+        != html
 
     .btn-group.dropdown
       a.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
@@ -65,20 +58,19 @@ block content
       button.btn#adjust Adjust location
     .btn-group
       button.btn.btn-primary#save Save
-    if (typeof id !== 'undefined')
-      .btn-group
-        a.btn#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='_blank') Preview
-      .btn-group
-        a.btn.dropdown-toggle(data-toggle='dropdown')#more
-          | More
-          span.caret
-        ul.dropdown-menu
-          li
-            a#saveas Save as
-          li
-            a#rename Rename
-          li
-            a#share(data-toggle='tooltip', title='the form needs be saved first', href='share', target='_blank') Share
+    .btn-group
+      a.btn#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='_blank') Preview
+    .btn-group
+      a.btn.dropdown-toggle(data-toggle='dropdown')#more
+        | More
+        span.caret
+      ul.dropdown-menu
+        li
+          a#saveas Save as
+        li
+          a#rename Rename
+        li
+          a#share(data-toggle='tooltip', title='the form needs be saved first', href='share', target='_blank') Share
   br
   br
   br
