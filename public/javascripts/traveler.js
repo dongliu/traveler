@@ -295,6 +295,11 @@ $(function () {
     $('#form input,textarea').not($this).attr('disabled', true);
     $('#completed').attr('disabled', true);
     var file = this.files[0];
+    if (file === undefined) {
+      $cgw.children('.control-group-buttons').remove();
+      return;
+    }
+
     var $validation = $cgw.find('.validation');
     if ($validation.length) {
       $validation = $($validation[0]);
@@ -303,16 +308,18 @@ $(function () {
     }
     if (!(/^(image|text)\//i.test(file.type) || file.type === 'application/vnd.ms-excel' || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
       $validation.html('<p class="text-error">' + file.type + ' is not allowed to upload</p>');
+      $cgw.children('.control-group-buttons').remove();
       return;
     }
-    if (!!file.size && file.size > 5000000) {
+    if (file.size > 5000000) {
       $validation.html('<p class="text-error">' + size + ' is too large to upload</p>');
+      $cgw.children('.control-group-buttons').remove();
       return;
     }
     // clear validation message if any
     $validation.empty();
 
-    if (!!file && $cgw.children('.control-group-buttons').length === 0) {
+    if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>');
     }
   });
