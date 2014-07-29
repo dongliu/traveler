@@ -241,45 +241,66 @@ module.exports = function (app) {
   });
 
   app.post('/forms/:id/uploads/', auth.ensureAuthenticated, function (req, res) {
-
-    if (_.isEmpty(req.files)) {
-      return res.send(400, 'Expecte One uploaded file');
-    }
-
-    var data = new TravelerData({
-      traveler: doc._id,
-      name: req.body.name,
-      value: req.files[req.body.name].originalname,
-      file: {
-        path: req.files[req.body.name].path,
-        encoding: req.files[req.body.name].encoding,
-        mimetype: req.files[req.body.name].mimetype
-      },
-      inputType: req.body.type,
-      inputBy: req.session.userid,
-      inputOn: Date.now()
-    });
-
-    // console.dir(data);
-    data.save(function (err) {
+    Form.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      doc.data.push(data._id);
-      doc.updatedBy = req.session.userid;
-      doc.updatedOn = Date.now();
-      doc.save(function (err) {
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource.');
+      }
+
+      if (_.isEmpty(req.files)) {
+        return res.send(400, 'Expecte One uploaded file');
+      }
+
+      if (!req.body.name) {
+        return res.send(400, 'Expecte input name');
+      }
+
+      var file = new FormFile({
+        form: doc._id,
+        value: req.files[req.body.name].originalname,
+        file: {
+          path: req.files[req.body.name].path,
+          encoding: req.files[req.body.name].encoding,
+          mimetype: req.files[req.body.name].mimetype
+        },
+        inputType: req.body.type,
+        uploadedBy: req.session.userid,
+        uploadedOn: Date.now()
+      });
+
+      // console.dir(data);
+      file.save(function (err, newfile) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
         }
-        var url = req.protocol + '://' + req.get('host') + '/data/' + data._id;
+        var url = req.protocol + '://' + req.get('host') + '/formfiles/' + newfile.id;
         res.set('Location', url);
-        return res.json(201, {
-          location: '/data/' + data._id
-        });
+        return res.send(201, 'The uploaded file is at <a href="' + url + '">' + url + '</a>');
       });
+    });
+  });
+
+  app.get('/formfiles/:id', auth.ensureAuthenticated, function (req, res) {
+    TravelerData.findById(req.params.id).lean().exec(function (err, data) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (!data) {
+        return res.send(410, 'gone');
+      }
+      if (data.inputType === 'file') {
+        res.sendfile(data.file.path);
+      } else {
+        res.send(500, 'it is not a file');
+      }
     });
   });
 
