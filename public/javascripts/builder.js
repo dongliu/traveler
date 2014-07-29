@@ -189,11 +189,11 @@ function figure_edit($cgr) {
   var height = '';
   var width = '';
   if ($cgr) {
-    src = $('img', $cgr).attr('scr');
+    src = $('img', $cgr).attr('src');
     alt = $('img', $cgr).attr('alt');
     figcaption = $('figcaption', $cgr).text();
-    height = $('img', $cgr).attr('height');
-    width = $('img', $cgr).attr('width');
+    height = $('img', $cgr).attr('height') || $('img', $cgr).prop('clientHeight');
+    width = $('img', $cgr).attr('width') || $('img', $cgr).prop('clientWidth');
   }
   var $figure = $(input.figure());
   var $buttons = $(input.button());
@@ -203,16 +203,38 @@ function figure_edit($cgr) {
   var $height = $(spec.height());
   var $width = $(spec.width());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($file, $alt, $figcaption, $height, $width, $done);
+  var $edit = $('<div class="well spec"></div>').append($file, $alt, $height, $width, $figcaption, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">figure</span></div>').append($figure);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
+  if ($cgr) {
+    $('img', $figure).prop('src', src);
+    // enable the spec inputs
+    $('input', $alt).removeAttr('disabled');
+    $('input', $figcaption).removeAttr('disabled');
+    $('input', $height).removeAttr('disabled');
+    $('input', $width).removeAttr('disabled');
+
+    $('input', $alt).val(alt);
+    $('input', $figcaption).val(figcaption);
+    $('input', $height).val(height);
+    $('input', $width).val(width);
+
+    var model = {
+      alt: alt,
+      figcaption: figcaption,
+      height: height,
+      width: width
+    };
+
+    binding($edit, $figure, model, $done);
+  }
 
   // handle image upload here
   $('input:file', $file).change(function (e) {
     e.preventDefault();
     var file = this.files[0];
     if (file === undefined) {
-      $file.children('.control-group-buttons').remove();
+      $file.children('.file-upload-buttons').remove();
       return;
     }
 
@@ -223,15 +245,15 @@ function figure_edit($cgr) {
       $validation = $('<div class="validation"></div>').appendTo($file.find('.controls'));
     }
 
-    if (!!file.type && !(/image\/(gif|jpe?g|png)$/i.test(file.type))) {
+    if (!(/image\/(gif|jpe?g|png)$/i.test(file.type))) {
       $validation.html('<p class="text-error">' + file.type + ' is not allowed to upload</p>');
-      $file.children('.control-group-buttons').remove();
+      $file.children('.file-upload-buttons').remove();
       return;
     }
 
-    if (!!file.size && file.size > 5000000) {
+    if (file.size > 5000000) {
       $validation.html('<p class="text-error">' + file.size + ' is too large to upload</p>');
-      $file.children('.control-group-buttons').remove();
+      $file.children('.file-upload-buttons').remove();
       return;
     }
 
@@ -239,7 +261,7 @@ function figure_edit($cgr) {
     $validation.empty();
 
     if ($file.children('.control-group-buttons').length === 0) {
-      $file.prepend('<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>');
+      $file.prepend('<div class="pull-right file-upload-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>');
     }
   });
 
@@ -248,7 +270,6 @@ function figure_edit($cgr) {
     // ajax to save the current value
     var $this = $(this);
     $this.attr('disabled', true);
-    // var input = $this.closest('.control-group-wrap').find('input')[0];
     var input = $file.find('input')[0];
     var data = new FormData();
     data.append('name', input.name);
@@ -259,14 +280,35 @@ function figure_edit($cgr) {
       type: 'POST',
       processData: false,
       contentType: false, // important for jqXHR
-      data: data,
-      dataType: 'json'
-    }).done(function (data, status, jqXHR) {
+      data: data
+    }).done(function (res, status, jqXHR) {
+      var location = jqXHR.getResponseHeader('Location');
       var timestamp = jqXHR.getResponseHeader('Date');
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' + moment(timestamp).fromNow() + '</div>');
       // set the figure attributes
-      $('img', $figure).attr('scr', data.location);
-      $this.closest('.control-group-buttons').remove();
+      $('img', $figure).attr('src', location);
+      $this.closest('.file-upload-buttons').remove();
+
+      // enable the spec inputs
+      $('input', $alt).removeAttr('disabled');
+      $('input', $figcaption).removeAttr('disabled');
+      $('input', $height).removeAttr('disabled');
+      $('input', $width).removeAttr('disabled');
+
+      $('input', $alt).val(alt);
+      $('input', $figcaption).val(figcaption);
+      $('input', $height).val(height || $('img', $figure).prop('clientHeight'));
+      $('input', $width).val(width || $('img', $figure).prop('clientWidth'));
+
+      var model = {
+        alt: alt,
+        figcaption: figcaption,
+        height: height,
+        width: width
+      };
+
+      binding($edit, $figure, model, $done);
+
     }).fail(function (jqXHR, status, error) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
@@ -278,23 +320,9 @@ function figure_edit($cgr) {
 
   $file.on('click', 'button[value="cancel"]', function (e) {
     e.preventDefault();
-    $(this).closest('.control-group-buttons').remove();
+    $(this).closest('.file-upload-buttons').remove();
   });
 
-
-
-  // construct model and bind it when the file is uploaded
-  // var model = {
-  //   label: label,
-  //   placeholder: placeholder,
-  //   help: help,
-  //   required: required
-  // };
-  // $('input', $label).val(label);
-  // $('input', $placeholder).val(placeholder);
-  // $('input', $help).val(help);
-  // $('input', $required).prop('checked', required);
-  // binding($edit, $text, model, $done);
 }
 
 
@@ -681,6 +709,9 @@ function binding_events() {
       break;
     case 'checkbox':
       checkbox_edit($cgr);
+      break;
+    case 'figure':
+      figure_edit($cgr);
       break;
     case 'text':
       text_edit($cgr);

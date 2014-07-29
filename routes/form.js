@@ -1,4 +1,5 @@
-// var express = require('express');
+/*global FormFile: false, TravelerData: false*/
+
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
 
@@ -6,9 +7,11 @@ var auth = require('../lib/auth');
 var mongoose = require('mongoose');
 var sanitize = require('sanitize-caja');
 var util = require('util');
+var underscore = require('underscore');
 
 
 var Form = mongoose.model('Form');
+var FormFile = mongoose.model('FormFile');
 var User = mongoose.model('User');
 
 function addUserFromAD(req, res, form) {
@@ -36,7 +39,7 @@ function addUserFromAD(req, res, form) {
 
     var id = result[0].sAMAccountName.toLowerCase();
     var access = 0;
-    if (req.param('access') && req.param('access') == 'write') {
+    if (req.param('access') && req.param('access') === 'write') {
       access = 1;
     }
     form.sharedWith.addToSet({
@@ -48,39 +51,38 @@ function addUserFromAD(req, res, form) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
-      } else {
-        var user = new User({
-          _id: result[0].sAMAccountName.toLowerCase(),
-          name: result[0].displayName,
-          email: result[0].mail,
-          office: result[0].physicalDeliveryOfficeName,
-          phone: result[0].telephoneNumber,
-          mobile: result[0].mobile,
-          forms: [form._id]
-        });
-        user.save(function (err) {
-          if (err) {
-            console.error(err.msg);
-          }
-        });
-        return res.send(201, 'The user named ' + name + ' was added to the share list.');
       }
+      var user = new User({
+        _id: result[0].sAMAccountName.toLowerCase(),
+        name: result[0].displayName,
+        email: result[0].mail,
+        office: result[0].physicalDeliveryOfficeName,
+        phone: result[0].telephoneNumber,
+        mobile: result[0].mobile,
+        forms: [form._id]
+      });
+      user.save(function (err) {
+        if (err) {
+          console.error(err.msg);
+        }
+      });
+      return res.send(201, 'The user named ' + name + ' was added to the share list.');
     });
   });
 }
 
 function canWrite(req, doc) {
-  if (doc.createdBy == req.session.userid) {
+  if (doc.createdBy === req.session.userid) {
     return true;
   }
-  if (doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access == 1) {
+  if (doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
     return true;
   }
   return false;
 }
 
 function canRead(req, doc) {
-  if (doc.createdBy == req.session.userid) {
+  if (doc.createdBy === req.session.userid) {
     return true;
   }
   if (doc.sharedWith.id(req.session.userid)) {
@@ -96,7 +98,7 @@ access := -1 // no access
 *****/
 
 function getAccess(req, doc) {
-  if (doc.createdBy == req.session.userid) {
+  if (doc.createdBy === req.session.userid) {
     return 1;
   }
   if (doc.sharedWith.id(req.session.userid)) {
@@ -106,11 +108,12 @@ function getAccess(req, doc) {
 }
 
 function getSharedWith(sharedWith, name) {
-  if (sharedWith.length == 0) {
+  var i;
+  if (sharedWith.length === 0) {
     return -1;
   }
-  for (var i = 0; i < sharedWith.length; i += 1) {
-    if (sharedWith[i].username == name) {
+  for (i = 0; i < sharedWith.length; i += 1) {
+    if (sharedWith[i].username === name) {
       return i;
     }
   }
@@ -130,7 +133,7 @@ function addUser(req, res, form) {
     }
     if (user) {
       var access = 0;
-      if (req.param('access') && req.param('access') == 'write') {
+      if (req.param('access') && req.param('access') === 'write') {
         access = 1;
       }
       form.sharedWith.addToSet({
@@ -142,9 +145,8 @@ function addUser(req, res, form) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
-        } else {
-          return res.send(201, 'The user named ' + name + ' was added to the share list.');
         }
+        return res.send(201, 'The user named ' + name + ' was added to the share list.');
       });
       user.update({
         $addToSet: {
@@ -219,11 +221,11 @@ module.exports = function (app) {
 
       var access = getAccess(req, form);
 
-      if (access == -1) {
+      if (access === -1) {
         return res.send(403, 'you are not authorized to access this resource');
       }
 
-      if (access == 1) {
+      if (access === 1) {
         return res.render('builder', {
           id: req.params.id,
           title: form.title,
@@ -253,7 +255,7 @@ module.exports = function (app) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
-      if (_.isEmpty(req.files)) {
+      if (underscore.isEmpty(req.files)) {
         return res.send(400, 'Expecte One uploaded file');
       }
 
@@ -288,7 +290,7 @@ module.exports = function (app) {
   });
 
   app.get('/formfiles/:id', auth.ensureAuthenticated, function (req, res) {
-    TravelerData.findById(req.params.id).lean().exec(function (err, data) {
+    FormFile.findById(req.params.id).lean().exec(function (err, data) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -316,7 +318,7 @@ module.exports = function (app) {
 
       var access = getAccess(req, form);
 
-      if (access == -1) {
+      if (access === -1) {
         return res.send(403, 'you are not authorized to access this resource');
       }
 
@@ -376,13 +378,13 @@ module.exports = function (app) {
       if (form.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      var share = getSharedWith(form.sharedWith, req.param['name']);
+      var share = getSharedWith(form.sharedWith, req.param.name);
       if (share === -1) {
         // new user
         addUser(req, res, form);
       } else {
         // the user cannot be changed in this way
-        return res.send(400, 'The user named ' + req.param['name'] + ' is already in the list.');
+        return res.send(400, 'The user named ' + req.param.name + ' is already in the list.');
       }
     });
   });
@@ -403,7 +405,7 @@ module.exports = function (app) {
       var share = form.sharedWith.id(req.params.userid);
       if (share) {
         // change the access
-        if (req.body.access && req.body.access == 'write') {
+        if (req.body.access && req.body.access === 'write') {
           share.access = 1;
         } else {
           share.access = 0;
@@ -412,22 +414,21 @@ module.exports = function (app) {
           if (err) {
             console.error(err.msg);
             return res.send(500, err.msg);
-          } else {
-            // check consistency of user's form list
-            User.findByIdAndUpdate(req.params.userid, {
-              $addToSet: {
-                forms: form._id
-              }
-            }, function (err, user) {
-              if (err) {
-                console.error(err.msg);
-              }
-              if (!user) {
-                console.error('The user ' + req.params.userid + ' does not in the db');
-              }
-            });
-            return res.send(204);
           }
+          // check consistency of user's form list
+          User.findByIdAndUpdate(req.params.userid, {
+            $addToSet: {
+              forms: form._id
+            }
+          }, function (err, user) {
+            if (err) {
+              console.error(err.msg);
+            }
+            if (!user) {
+              console.error('The user ' + req.params.userid + ' does not in the db');
+            }
+          });
+          return res.send(204);
         });
       } else {
         // the user should in the list
@@ -455,22 +456,21 @@ module.exports = function (app) {
           if (err) {
             console.error(err.msg);
             return res.send(500, err.msg);
-          } else {
-            // keep the consistency of user's form list
-            User.findByIdAndUpdate(req.params.userid, {
-              $pull: {
-                forms: form._id
-              }
-            }, function (err, user) {
-              if (err) {
-                console.error(err.msg);
-              }
-              if (!user) {
-                console.error('The user ' + req.params.userid + ' does not in the db');
-              }
-            });
-            return res.send(204);
           }
+          // keep the consistency of user's form list
+          User.findByIdAndUpdate(req.params.userid, {
+            $pull: {
+              forms: form._id
+            }
+          }, function (err, user) {
+            if (err) {
+              console.error(err.msg);
+            }
+            if (!user) {
+              console.error('The user ' + req.params.userid + ' does not in the db');
+            }
+          });
+          return res.send(204);
         });
       } else {
         return res.send(400, 'no share info found for ' + req.params.userid);
@@ -481,7 +481,7 @@ module.exports = function (app) {
   app.post('/forms/', auth.ensureAuthenticated, function (req, res) {
     var form = {};
     if (!!req.body.html) {
-      form.html = sanitize(req.body.html)
+      form.html = sanitize(req.body.html);
     } else {
       form.html = '';
     }
@@ -534,9 +534,8 @@ module.exports = function (app) {
         }
         if (old) {
           return res.send(204);
-        } else {
-          return res.send(410, 'cannot find form ' + req.params.id);
         }
+        return res.send(410, 'cannot find form ' + req.params.id);
       });
     });
   });
