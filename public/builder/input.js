@@ -19,7 +19,7 @@ exports["checkbox"] = function tmpl_checkbox() {
 
 // figure.jade compiled template
 exports["figure"] = function tmpl_figure() {
-    return '<div class="control-group output-control-group"><div class="controls"><img rv-scr="model.scr" rv-alt="model.alt" rv-height="model.height" rv-width="model.width"/><figcaption>{ model.figcaption }</figcaption></div></div>';
+    return '<div class="control-group output-control-group"><div class="controls"><img src="" rv-alt="model.alt" rv-height="model.height" rv-width="model.width"/><figcaption>{ model.figcaption }</figcaption></div></div>';
 };
 
 // hold.jade compiled template

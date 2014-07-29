@@ -44,7 +44,7 @@ exports["hold"] = function tmpl_hold() {
 
 // imagefile.jade compiled template
 exports["imagefile"] = function tmpl_imagefile() {
-    return '<div class="control-group"><div class="control-label">Select an image</div><div class="controls"><input type="file"/></div></div>';
+    return '<div class="control-group"><div class="control-label">Select an image</div><div class="controls"><input name="userimage" type="file"/></div></div>';
 };
 
 // inputtype.jade compiled template
