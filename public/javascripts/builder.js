@@ -208,47 +208,50 @@ function figure_edit($cgr) {
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   // handle image upload here
-  $('input:file', $figure).change(function (e) {
+  $('input:file', $file).change(function (e) {
     e.preventDefault();
-    var $this = $(this);
-    // var $cg = $this.closest('.control-group');
-    // $('#form input,textarea').not($this).attr('disabled', true);
-    // $('#completed').attr('disabled', true);
     var file = this.files[0];
-    // var name = file.name;
-    var size = file.size;
-    var type = file.type;
-    var $validation = $figure.find('.validation');
+    if (file === undefined) {
+      $file.children('.control-group-buttons').remove();
+      return;
+    }
+
+    var $validation = $file.find('.validation');
     if ($validation.length) {
       $validation = $($validation[0]);
     } else {
-      $validation = $('<div class="validation"></div>').appendTo($figure.find('.controls'));
+      $validation = $('<div class="validation"></div>').appendTo($file.find('.controls'));
     }
-    if (!(/(\.|\/)(gif|jpe?g|png)$/i).test(type)) {
-      $validation.html('<p class="text-error">' + type + ' is not allowed to upload</p>');
+
+    if (!!file.type && !(/image\/(gif|jpe?g|png)$/i.test(file.type))) {
+      $validation.html('<p class="text-error">' + file.type + ' is not allowed to upload</p>');
+      $file.children('.control-group-buttons').remove();
       return;
     }
-    if (size > 5000000) {
-      $validation.html('<p class="text-error">' + size + ' is too large to upload</p>');
+
+    if (!!file.size && file.size > 5000000) {
+      $validation.html('<p class="text-error">' + file.size + ' is too large to upload</p>');
+      $file.children('.control-group-buttons').remove();
       return;
     }
+
     // clear validation message if any
     $validation.empty();
 
-    if ($figure.children('.control-group-buttons').length === 0) {
-      $figure.prepend('<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>');
+    if ($file.children('.control-group-buttons').length === 0) {
+      $file.prepend('<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>');
     }
   });
 
-  $figure.on('click', 'button[value="upload"]', function (e) {
+  $file.on('click', 'button[value="upload"]', function (e) {
     e.preventDefault();
     // ajax to save the current value
     var $this = $(this);
     $this.attr('disabled', true);
     // var input = $this.closest('.control-group-wrap').find('input')[0];
-    var input = $figure.find('input')[0];
+    var input = $file.find('input')[0];
     var data = new FormData();
-    // data.append('name', input.name);
+    data.append('name', input.name);
     data.append('type', input.type);
     data.append(input.name, input.files[0]);
     $.ajax({
@@ -273,7 +276,7 @@ function figure_edit($cgr) {
 
   });
 
-  $figure.on('click', 'button[value="cancel"]', function (e) {
+  $file.on('click', 'button[value="cancel"]', function (e) {
     e.preventDefault();
     $(this).closest('.control-group-buttons').remove();
   });

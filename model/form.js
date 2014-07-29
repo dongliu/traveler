@@ -26,6 +26,7 @@ var form = new Schema({
 
 var formFile = new Schema({
   form: ObjectId,
+  value: String,
   file: {
     path: String,
     encoding: String,
