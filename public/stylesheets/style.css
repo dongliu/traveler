@@ -9,7 +9,7 @@ body {
 
 /* Tweak navbar brand link to be super sleek
 -------------------------------------------------- */
- body > .navbar {
+body > .navbar {
   font-size: 13px;
 }
 /* Change the docs' brand */
@@ -33,7 +33,7 @@ body > .navbar .brand:hover {
 -------------------------------------------------- */
 
 /* padding for in-page bookmarks and fixed navbar */
- section {
+section {
   padding-top: 30px;
 }
 section > .page-header, section > .lead {
@@ -47,7 +47,7 @@ section > ul li {
   margin: 40px 0 39px;
 }
 /* Faded out hr */
- hr.soften {
+hr.soften {
   height: 1px;
   margin: 70px 0;
   background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 0), rgba(0, 0, 0, .1), rgba(0, 0, 0, 0));
@@ -58,7 +58,7 @@ section > ul li {
 }
 
 /* twitter typeahead styles */
- .twitter-typeahead .tt-query, .twitter-typeahead .tt-hint {
+.twitter-typeahead .tt-query, .twitter-typeahead .tt-hint {
   margin-bottom: 0;
 }
 .tt-dropdown-menu {
@@ -110,7 +110,7 @@ section > ul li {
  */
 
 /* d3 stuff */
- .chart {
+.chart {
   display: block;
   margin: auto;
   margin-top: 60px;
@@ -133,6 +133,8 @@ text {
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+/* builder stuff */
 .row-selected td {
   background-color: #c09853 !important;
 }
@@ -162,6 +164,12 @@ ul.dropdown-menu input[type="checkbox"] {
 .control-focus {
   background-color: #f5f5f5;
 }
+
+figcaption {
+  font-weight: bold;
+  font-size: large
+}
+
 .fe-type {
   display: none
 }

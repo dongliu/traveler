@@ -186,13 +186,11 @@ function figure_edit($cgr) {
   var src = '';
   var alt = '';
   var figcaption = '';
-  var height = '';
   var width = '';
   if ($cgr) {
     src = $('img', $cgr).attr('src');
     alt = $('img', $cgr).attr('alt');
     figcaption = $('figcaption', $cgr).text();
-    height = $('img', $cgr).attr('height') || $('img', $cgr).prop('clientHeight');
     width = $('img', $cgr).attr('width') || $('img', $cgr).prop('clientWidth');
   }
   var $figure = $(input.figure());
@@ -200,10 +198,9 @@ function figure_edit($cgr) {
   var $file = $(spec.imagefile());
   var $alt = $(spec.alt());
   var $figcaption = $(spec.figcaption());
-  var $height = $(spec.height());
   var $width = $(spec.width());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($file, $alt, $height, $width, $figcaption, $done);
+  var $edit = $('<div class="well spec"></div>').append($file, $alt, $width, $figcaption, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">figure</span></div>').append($figure);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
   if ($cgr) {
@@ -211,18 +208,15 @@ function figure_edit($cgr) {
     // enable the spec inputs
     $('input', $alt).removeAttr('disabled');
     $('input', $figcaption).removeAttr('disabled');
-    $('input', $height).removeAttr('disabled');
     $('input', $width).removeAttr('disabled');
 
     $('input', $alt).val(alt);
     $('input', $figcaption).val(figcaption);
-    $('input', $height).val(height);
     $('input', $width).val(width);
 
     var model = {
       alt: alt,
       figcaption: figcaption,
-      height: height,
       width: width
     };
 
@@ -292,18 +286,17 @@ function figure_edit($cgr) {
       // enable the spec inputs
       $('input', $alt).removeAttr('disabled');
       $('input', $figcaption).removeAttr('disabled');
-      $('input', $height).removeAttr('disabled');
       $('input', $width).removeAttr('disabled');
+
+      alt = input.files[0].name;
+      figcaption = input.files[0].name;
 
       $('input', $alt).val(alt);
       $('input', $figcaption).val(figcaption);
-      $('input', $height).val(height || $('img', $figure).prop('clientHeight'));
-      $('input', $width).val(width || $('img', $figure).prop('clientWidth'));
 
       var model = {
         alt: alt,
         figcaption: figcaption,
-        height: height,
         width: width
       };
 
