@@ -505,14 +505,14 @@ module.exports = function (app) {
       return res.send(415, 'json request expected');
     }
     var form = {};
-    if (req.body.html) {
+    if (req.body.hasOwnProperty('html')) {
       form.html = sanitize(req.body.html);
     }
-    if (req.body.title) {
+    if (req.body.hasOwnProperty('title')) {
       form.title = req.body.title;
     }
 
-    if (form.html || form.title) {
+    if (form.hasOwnProperty('html') || form.hasOwnProperty('title')) {
       form.updatedBy = req.session.userid;
       form.updatedOn = Date.now();
     } else {
