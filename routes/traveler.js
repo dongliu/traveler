@@ -1,6 +1,7 @@
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
 
+var fs = require('fs');
 var auth = require('../lib/auth');
 var mongoose = require('mongoose');
 var util = require('util');
@@ -358,7 +359,9 @@ module.exports = function (app) {
       }
     };
     if (req.query.hasOwnProperty('device')) {
-      search.devices = {$in: [req.query.device]};
+      search.devices = {
+        $in: [req.query.device]
+      };
     }
     Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
@@ -370,9 +373,9 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelersinv1/json', auth.ensureAuthenticated, function (req, res) {
-    var fullurl = travelerV1API+'?resource=travelers';
+    var fullurl = travelerV1API + '?resource=travelers';
     if (req.query.hasOwnProperty('device')) {
-      fullurl = fullurl + '&device='+req.query.device;
+      fullurl = fullurl + '&device=' + req.query.device;
     }
     request({
       strictSSL: false,
@@ -381,7 +384,9 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
-    return res.render('currenttravelers', {device: req.query.device || null});
+    return res.render('currenttravelers', {
+      device: req.query.device || null
+    });
   });
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function (req, res) {
@@ -422,7 +427,7 @@ module.exports = function (app) {
           return res.send(500, err.msg);
         }
         if (traveler) {
-          if (traveler.status == 0) {
+          if (traveler.status === 0) {
             return res.send(400, 'You cannot clone an initialized traveler.');
           }
           if (canWrite(req, traveler)) {
@@ -508,10 +513,10 @@ module.exports = function (app) {
           return res.send(500, err.msg);
         }
         return res.send(204);
-      })
+      });
 
     });
-  })
+  });
 
   app.get('/travelers/:id/config', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, 'title description deadline status devices sharedWith createdBy createdOn updatedOn updatedBy').exec(function (err, doc) {
@@ -847,7 +852,12 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (data.inputType === 'file') {
-        res.sendfile(data.file.path);
+        fs.exists(data.file.path, function (exists) {
+          if (exists) {
+            return res.sendfile(data.file.path);
+          }
+          return res.send(410, 'gone');
+        });
       } else {
         res.json(200, data);
       }
