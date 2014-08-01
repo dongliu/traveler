@@ -1,3 +1,7 @@
+release v2.2.2
+date: Aug. 1, 2014
+- add figure/image into form from local disk
+
 release v2.2.1
 date: July 24, 2014
 - allow image, text and MS Excel files (.xsl and .xslx) in upload file input
