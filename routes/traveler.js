@@ -18,7 +18,7 @@ var Form = mongoose.model('Form');
 var User = mongoose.model('User');
 var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
-var TravelerComment = mongoose.model('TravelerComment');
+var TravelerNote = mongoose.model('TravelerNote');
 
 var travelerV1API = 'https://liud-dev:8181/traveler/api.php';
 var request = require('request');
@@ -744,6 +744,32 @@ module.exports = function (app) {
           }
           return res.send(204);
         });
+      });
+    });
+  });
+
+  app.get('/travelers/:id/notes/', auth.ensureAuthenticated, function (req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      // if (!canRead(req, doc)) {
+      //   return res.send(403, 'You are not authorized to access this resource');
+      // }
+      TravelerNote.find({
+        _id: {
+          $in: doc.notes
+        }
+      }, 'name value inputBy inputOn').lean().exec(function (err, docs) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        return res.json(200, docs);
       });
     });
   });

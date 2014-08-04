@@ -24,6 +24,18 @@ function fileHistory(found) {
   return output;
 }
 
+function notes(found) {
+  var i, output = '';
+  if (found.length > 0) {
+    for (i = 0; i < found.length; i += 1) {
+      output = output + found[i].inputBy + ' noted ' + moment(found[i].inputOn).fromNow() + ': <\br>';
+      output = output + found[i].value + '</br>';
+    }
+  }
+  return output;
+}
+
+
 // temparary solution for the dirty forms
 function cleanForm() {
   $('.control-group-buttons').remove();
@@ -154,6 +166,38 @@ $(function () {
   dateSupport();
 
   var binder = new Binder.FormBinder(document.forms[0]);
+
+  function renderNotes() {
+    $.ajax({
+      url: './notes/',
+      type: 'GET',
+      dataType: 'json'
+    }).done(function (data, status, jqXHR) {
+      $('#form input,textarea').each(function (index, element) {
+        var found = data.filter(function (e) {
+          return e.name === element.name;
+        });
+        $(element).closest('.controls').append('<div class="note-buttons"><a href="#"><span class="badge badge-info">' + found.length + '</span></a> <a href="#"><i class="fa fa-file-o fa-lg"></i></a>');
+        if (found.length) {
+          found.sort(function (a, b) {
+            if (a.inputOn > b.inputOn) {
+              return -1;
+            }
+            return 1;
+          });
+          $(element).closest('.controls').append('<div class="input-notes">' + notes(found) + '</div>');
+        }
+      });
+
+    }).fail(function (jqXHR, status, error) {
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    }).always();
+  }
+
+
   $.ajax({
     url: './data/',
     type: 'GET',
@@ -184,6 +228,9 @@ $(function () {
     if (travelerStatus === 1) {
       $('#form input,textarea').removeAttr('disabled');
     }
+
+    // TODO: load the notes here
+    renderNotes();
   }).fail(function (jqXHR, status, error) {
     if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');

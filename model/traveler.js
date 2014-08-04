@@ -46,7 +46,7 @@ var traveler = new Schema({
     default: 0
   },
   data: [ObjectId],
-  comments: [ObjectId],
+  notes: [ObjectId],
   totalInput: Number,
   finishedInput: Number,
   archived: {
