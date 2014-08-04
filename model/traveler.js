@@ -76,7 +76,7 @@ var travelerData = new Schema({
   inputOn: Date
 });
 
-var travelerComment = new Schema({
+var travelerNote = new Schema({
   traveler: ObjectId,
   name: String,
   value: String,
@@ -87,10 +87,10 @@ var travelerComment = new Schema({
 
 var Traveler = mongoose.model('Traveler', traveler);
 var TravelerData = mongoose.model('TravelerData', travelerData);
-var TravelerComment = mongoose.model('TravelerComment', travelerComment);
+var TravelerNote = mongoose.model('TravelerNote', travelerNote);
 
 module.exports = {
   Traveler: Traveler,
   TravelerData: TravelerData,
-  TravelerComment: TravelerComment
+  TravelerNote: TravelerNote
 };
