@@ -175,10 +175,18 @@ figcaption {
 }
 .input-history {
   margin-top: 10px;
-  margin-bottom: 0;
+  margin-bottom: 10px;
   display: block;
   color: #595959;
   font-style: italic;
+}
+
+.input-notes {
+  margin-top: 10px;
+  margin-bottom: 0;
+  display: block;
+  color: #595959;
+  background-color: #F5F6CE;
 }
 
 .sidenavtoggle {
