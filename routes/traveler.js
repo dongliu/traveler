@@ -774,6 +774,49 @@ module.exports = function (app) {
     });
   });
 
+  app.post('/travelers/:id/notes/', auth.ensureAuthenticated, function (req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource.');
+      }
+
+      // allow add note for all conditions
+      // if (doc.status !== 1) {
+      //   return res.send(400, 'The traveler ' + req.params.id + ' is not active');
+      // }
+      var note = new TravelerNote({
+        traveler: doc._id,
+        name: req.body.name,
+        value: req.body.value,
+        inputBy: req.session.userid,
+        inputOn: Date.now()
+      });
+      note.save(function (err) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        doc.notes.push(note._id);
+        doc.updatedBy = req.session.userid;
+        doc.updatedOn = Date.now();
+        doc.save(function (err) {
+          if (err) {
+            console.error(err.msg);
+            return res.send(500, err.msg);
+          }
+          return res.send(204);
+        });
+      });
+    });
+  });
+
   app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
