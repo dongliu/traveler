@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false*/
-/*global travelerStatus: false*/
+/*global moment: false, Binder: false, Modernizr: false*/
+/*global travelerStatus: false, finishedInput: false*/
 
 function history(found) {
   var i, output = '';
@@ -13,7 +13,8 @@ function history(found) {
 }
 
 function fileHistory(found) {
-  var i, output = '',
+  var i,
+    output = '',
     link;
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
@@ -25,14 +26,14 @@ function fileHistory(found) {
 }
 
 function notes(found) {
-  var i, output = '';
+  var i, output = '<dl>';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + found[i].inputBy + ' noted ' + moment(found[i].inputOn).fromNow() + ': <\br>';
-      output = output + found[i].value + '</br>';
+      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + moment(found[i].inputOn).fromNow() + '</b>: </dt>';
+      output = output + '<dd>' + found[i].value + '</dd>';
     }
   }
-  return output;
+  return output + '</dl>';
 }
 
 
@@ -43,7 +44,7 @@ function cleanForm() {
 
 // handle browsers not supporting date type input
 function dateSupport() {
-  if (!Modernizr.inputtypes['date']) {
+  if (!Modernizr.inputtypes.date) {
     $('input[type="date"]').datepicker({
       format: 'yyyy-mm-dd'
     });
@@ -108,7 +109,11 @@ function updateFinished(num) {
 function validation_message(form) {
   var i = 0,
     output = $('<div>'),
-    p, value, input, label, span;
+    p,
+    value,
+    input,
+    label,
+    span;
   for (i = 0; i < form.elements.length; i += 1) {
     input = form.elements[i];
     p = $('<p>');
@@ -120,16 +125,16 @@ function validation_message(form) {
       p.css('color', '#b94a48');
       span.css('color', '#b94a48');
     }
-    if (input.type == 'checkbox') {
+    if (input.type === 'checkbox') {
       value = input.checked ? 'checked' : 'not checked';
     } else {
-      if (input.value == '') {
-        value = 'no input from user'
+      if (input.value === '') {
+        value = 'no input from user';
       } else {
         value = input.value;
       }
     }
-    label = $(input).closest('.control-group').children('.control-label').text()
+    label = $(input).closest('.control-group').children('.control-label').text();
     if (input.checkValidity()) {
       p.html('<b>' + label + '</b>: ' + value);
       span.text('validation passed');
@@ -146,7 +151,7 @@ function validation_message(form) {
 $(function () {
 
   $(document).ajaxError(function (event, jqXHR, settings, exception) {
-    if (jqXHR.status == 401) {
+    if (jqXHR.status === 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
@@ -177,7 +182,7 @@ $(function () {
         var found = data.filter(function (e) {
           return e.name === element.name;
         });
-        $(element).closest('.controls').append('<div class="note-buttons"><a href="#"><span class="badge badge-info">' + found.length + '</span></a> <a href="#"><i class="fa fa-file-o fa-lg"></i></a>');
+        $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#"><i class="fa fa-file-o fa-lg"></i></a></div>');
         if (found.length) {
           found.sort(function (a, b) {
             if (a.inputOn > b.inputOn) {
@@ -185,7 +190,7 @@ $(function () {
             }
             return 1;
           });
-          $(element).closest('.controls').append('<div class="input-notes">' + notes(found) + '</div>');
+          $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
         }
       });
 
@@ -197,6 +202,46 @@ $(function () {
     }).always();
   }
 
+  $('#form').on('click', 'a.new-note', function (e) {
+    e.preventDefault();
+    var $that = $(this);
+    $('#modalLabel').html('Add new note');
+    $('#modal .modal-body').html('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Note: </label><div class="controls"><textarea name="note-content" rows=5></textarea><input type="hidden" name="inputname" value="' + $(this).closest('.controls').find('input').prop('name') + '"></div></div></form>');
+    $('#modal .modal-footer').html('<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
+    $('#modal').modal('show');
+    $('#modal button[value="submit"]').click(function (e) {
+      e.preventDefault();
+      $.ajax({
+        url: './notes/',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          name: $('#modal input[name="inputname"]').val(),
+          value: $('#modal textarea[name="note-content"]').val()
+        })
+      }).done(function (data, status, jqXHR) {
+        var timestamp = jqXHR.getResponseHeader('Date');
+        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' + moment(timestamp).fromNow() + '</div>');
+        var $notes_number = $that.closest('.controls').find('a.notes-number span.badge');
+        $notes_number.text($notes_number.text() + 1);
+      }).fail(function (jqXHR, status, error) {
+        if (jqXHR.status !== 401) {
+          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
+          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        }
+      }).always(function () {});
+    });
+  });
+
+  $('#form').on('click', 'a.notes-number', function (e) {
+    e.preventDefault();
+    var $input_notes = $(this).closest('.controls').find('.input-notes');
+    if ($input_notes.is(':visible')) {
+      $input_notes.hide();
+    } else {
+      $input_notes.show();
+    }
+  });
 
   $.ajax({
     url: './data/',
@@ -214,12 +259,12 @@ $(function () {
           }
           return 1;
         });
-        if (this.type == 'file') {
-          $(element).closest('.controls').append('<div class="input-history">' + fileHistory(found) + '</div>');
+        if (this.type === 'file') {
+          $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.controls').append('<div class="input-history">' + history(found) + '</div>');
+          $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + history(found) + '</div>');
         }
       }
     });
@@ -229,7 +274,7 @@ $(function () {
       $('#form input,textarea').removeAttr('disabled');
     }
 
-    // TODO: load the notes here
+    // load the notes here
     renderNotes();
   }).fail(function (jqXHR, status, error) {
     if (jqXHR.status !== 401) {
@@ -359,7 +404,7 @@ $(function () {
       return;
     }
     if (file.size > 5000000) {
-      $validation.html('<p class="text-error">' + size + ' is too large to upload</p>');
+      $validation.html('<p class="text-error">' + file.size + ' is too large to upload</p>');
       $cgw.children('.control-group-buttons').remove();
       return;
     }
