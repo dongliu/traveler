@@ -223,7 +223,7 @@ $(function () {
         var timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' + moment(timestamp).fromNow() + '</div>');
         var $notes_number = $that.closest('.controls').find('a.notes-number span.badge');
-        $notes_number.text($notes_number.text() + 1);
+        $notes_number.text(parseInt($notes_number.text(), 10) + 1);
       }).fail(function (jqXHR, status, error) {
         if (jqXHR.status !== 401) {
           $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
