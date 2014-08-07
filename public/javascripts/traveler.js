@@ -210,20 +210,27 @@ $(function () {
     $('#modal .modal-footer').html('<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
     $('#modal button[value="submit"]').click(function (e) {
+      var name = $('#modal input[name="inputname"]').val();
+      var value = $('#modal textarea[name="note-content"]').val();
       e.preventDefault();
       $.ajax({
         url: './notes/',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({
-          name: $('#modal input[name="inputname"]').val(),
-          value: $('#modal textarea[name="note-content"]').val()
+          name: name,
+          value: value
         })
       }).done(function (data, status, jqXHR) {
         var timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' + moment(timestamp).fromNow() + '</div>');
         var $notes_number = $that.closest('.controls').find('a.notes-number span.badge');
         $notes_number.text(parseInt($notes_number.text(), 10) + 1);
+
+        // add new note to the note list
+
+        $that.closest('.controls').find('.input-notes dl').prepend('<dt><b>I noted ' + moment(timestamp).fromNow() + '</b>: </dt><dd>' + value + '</dd>');
+
       }).fail(function (jqXHR, status, error) {
         if (jqXHR.status !== 401) {
           $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
@@ -276,6 +283,7 @@ $(function () {
 
     // load the notes here
     renderNotes();
+
   }).fail(function (jqXHR, status, error) {
     if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
