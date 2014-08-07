@@ -472,6 +472,14 @@ $(function () {
     $(this).closest('.control-group-buttons').remove();
   });
 
+  $('#show-notes').click(function (e) {
+    $('.input-notes').show();
+  });
+
+  $('#hide-notes').click(function (e) {
+    $('.input-notes').hide();
+  });
+
   $('#show-validation').click(function (e) {
     if ($('input:disabled').length) {
       $('#modalLabel').html('Alert');
