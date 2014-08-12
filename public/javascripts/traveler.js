@@ -167,7 +167,7 @@ $(function () {
   cleanForm();
 
   // update every 30 seconds
-  $.livestamp.interval(30*1000);
+  $.livestamp.interval(30 * 1000);
 
   $(document).bind('drop dragover', function (e) {
     e.preventDefault();
@@ -236,8 +236,13 @@ $(function () {
         var $notes_number = $that.closest('.controls').find('a.notes-number span.badge');
         $notes_number.text(parseInt($notes_number.text(), 10) + 1);
 
-        // add new note to the note list
-        $that.closest('.controls').find('.input-notes dl').prepend('<dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd>');
+        // add new note
+        if ($that.closest('.controls').find('.input-notes').length) {
+          $that.closest('.controls').find('.input-notes dl').prepend('<dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd>');
+        } else {
+          $that.closest('.controls').append('<div class="input-notes"><dl><dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd></dl></div>');
+        }
+
         $.livestamp.resume();
 
       }).fail(function (jqXHR, status, error) {
@@ -363,7 +368,7 @@ $(function () {
       if ($history.length) {
         $history = $($history[0]);
       } else {
-        // a new finished input
+        // add an input-history div
         finishedInput += 1;
         updateFinished(finishedInput);
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
