@@ -3,6 +3,10 @@
 /*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
 /*global UID:false, input:false, spec:false*/
 
+function livespan(stamp) {
+  return '<span data-livestamp="' + stamp + '"></span>';
+}
+
 var mce_content = {
   selector: 'textarea.tinymce',
   content_css: '/bootstrap/css/bootstrap.css',
@@ -42,11 +46,12 @@ function sendRequest(data, cb, saveas) {
     var timestamp = formRequest.getResponseHeader('Date');
     if (saveas) {
       location = formRequest.getResponseHeader('Location');
-      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>A new form is created at <a href="' + location + '">' + location + '</a> at ' + moment(timestamp).fromNow() + '.</div>');
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>A new form is created at <a href="' + location + '">' + location + '</a> ' + livespan(timestamp) + '.</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     } else {
-      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved at ' + moment(timestamp).fromNow() + '.</div>');
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved ' + livespan(timestamp) + '.</div>');
     }
+    $.livestamp.resume();
     if (cb) {
       cb();
     }
@@ -278,7 +283,9 @@ function figure_edit($cgr) {
     }).done(function (res, status, jqXHR) {
       var location = jqXHR.getResponseHeader('Location');
       var timestamp = jqXHR.getResponseHeader('Date');
-      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' + moment(timestamp).fromNow() + '</div>');
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' + livespan(timestamp) + '</div>');
+      $.livestamp.resume();
+
       // set the figure attributes
       $('img', $figure).attr('src', location);
       $this.closest('.file-upload-buttons').remove();
@@ -549,6 +556,8 @@ function rich_edit($cgr) {
 
 function init() {
   initHtml = $('#output').html();
+  // update every 30 seconds
+  $.livestamp.interval(30 * 1000);
 }
 
 function working() {
