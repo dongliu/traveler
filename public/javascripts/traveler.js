@@ -2,6 +2,11 @@
 /*global moment: false, Binder: false, Modernizr: false*/
 /*global travelerStatus: false, finishedInput: false*/
 
+function livespan(stamp) {
+  return '<span data-livestamp="' + stamp + '"></span>';
+}
+
+
 function history(found) {
   var i, output = '';
   if (found.length > 0) {
@@ -156,9 +161,13 @@ $(function () {
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   });
+
   createSideNav();
 
   cleanForm();
+
+  // update every 30 seconds
+  $.livestamp.interval(30*1000);
 
   $(document).bind('drop dragover', function (e) {
     e.preventDefault();
@@ -223,13 +232,13 @@ $(function () {
         })
       }).done(function (data, status, jqXHR) {
         var timestamp = jqXHR.getResponseHeader('Date');
-        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' + moment(timestamp).fromNow() + '</div>');
+        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' + livespan(timestamp) + '</div>');
         var $notes_number = $that.closest('.controls').find('a.notes-number span.badge');
         $notes_number.text(parseInt($notes_number.text(), 10) + 1);
 
         // add new note to the note list
-
-        $that.closest('.controls').find('.input-notes dl').prepend('<dt><b>I noted ' + moment(timestamp).fromNow() + '</b>: </dt><dd>' + value + '</dd>');
+        $that.closest('.controls').find('.input-notes dl').prepend('<dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd>');
+        $.livestamp.resume();
 
       }).fail(function (jqXHR, status, error) {
         if (jqXHR.status !== 401) {
@@ -349,7 +358,7 @@ $(function () {
       })
     }).done(function (data, status, jqXHR) {
       var timestamp = jqXHR.getResponseHeader('Date');
-      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved ' + moment(timestamp).fromNow() + '</div>');
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved ' + livespan(timestamp) + '</div>');
       var $history = $this.closest('.control-group-wrap').find('.input-history');
       if ($history.length) {
         $history = $($history[0]);
@@ -359,7 +368,8 @@ $(function () {
         updateFinished(finishedInput);
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
-      $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
+      $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by you ' + livespan(timestamp) + '; ' + $history.html());
+      $.livestamp.resume();
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR, status, error) {
       if (jqXHR.status !== 401) {
@@ -443,14 +453,15 @@ $(function () {
       dataType: 'json'
     }).done(function (data, status, jqXHR) {
       var timestamp = jqXHR.getResponseHeader('Date');
-      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' + moment(timestamp).fromNow() + '</div>');
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' + livespan(timestamp) + '</div>');
       var $history = $this.closest('.control-group-wrap').find('.input-history');
       if ($history.length) {
         $history = $($history[0]);
       } else {
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
-      $history.html('<strong><a href=' + data.location + ' target="_blank">' + input.files[0].name + '</a></strong> uploaded by me ' + moment(timestamp).fromNow() + '; ' + $history.html());
+      $history.html('<strong><a href=' + data.location + ' target="_blank">' + input.files[0].name + '</a></strong> uploaded by you ' + livespan(timestamp) + '; ' + $history.html());
+      $.livestamp.resume();
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR, status, error) {
       if (jqXHR.status !== 401) {
