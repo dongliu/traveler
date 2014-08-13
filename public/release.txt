@@ -1,3 +1,11 @@
+release v2.2.4
+date: Aug. 12, 2014
+- automatically update the time stamps with local timer
+
+release v2.2.3
+date: Aug. 12, 2014
+- add notes to any inputs in a traveler
+
 release v2.2.2
 date: Aug. 1, 2014
 - add figure/image into form from local disk
