@@ -191,7 +191,7 @@ $(function () {
         var found = data.filter(function (e) {
           return e.name === element.name;
         });
-        $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#"><i class="fa fa-file-o fa-lg"></i></a></div>');
+        $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
         if (found.length) {
           found.sort(function (a, b) {
             if (a.inputOn > b.inputOn) {
