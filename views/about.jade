@@ -51,6 +51,8 @@ html
             li
               a(href='#validation') Validation rules
             li
+              a(href='#figure') Figure from local file
+            li
               a(href='#share-form') Share a form
             li
               a(href='#create') Create a traveler
@@ -60,6 +62,8 @@ html
               a(href='#share-traveler') Share a traveler
             li
               a(href='#work') Work on a traveler
+            li
+              a(href='#notes') Notes in a traveler
             li
               a(href='#clone-traveler') Clone a traveler
             li
@@ -102,6 +106,11 @@ html
               h2 Validation rules
             p The What-You-See-Is-What-You-Get form builder also supports basic validation rules like required and min/max for a number input. This is a new feature released in v2.2.0. Basically, to make an input required, check the "required" checkbox in the input's specification. The min/max rule works in the same way. A user can test the validation rules of a form in its preview before creating a traveler based on it. The validation messages can be shown or refreshed by clicking on the "Show validation" button. The validation works similarly in a traveler page.
             embed(src="/images/validation.swf",width=1024,height=788,quality='low',play=false,loop=false,wmode='transparent',type="application/x-shockwave-flash",pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash")
+          section#figure
+            .page-header
+              h2 Figure from local image
+            p The figure input type allows a user to insert an image (jpg, jpeg, peg, or gif) in a form from local file system. The image's display size, alternate text, and caption can be specified. If the width is empty, the image will be displayed as its original size.
+            embed(src="/images/figure.swf",width=1024,height=788,quality='low',play=false,loop=false,wmode='transparent',type="application/x-shockwave-flash",pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash")
           section#share-form
             .page-header
               h2 Share a form
@@ -127,6 +136,11 @@ html
               h2 Work on a traveler
             p The traveler owner and other users with write permission can update the data in a traveler. All data input history are kept and shown on the traveler page. The progress can be seen in the traveler data table. A user can request to complete a traveler. The traveler owner can approve the completion, or asks for more work.
             embed(src="/images/work.swf",width=1024,height=788,quality='low',play=false,loop=false,wmode='transparent',type="application/x-shockwave-flash",pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash")
+          section#notes
+            .page-header
+              h2 Notes in a traveler
+            p A use can add notes to any input (number, text, checkbox, file) in a traveler. The notes can be hidden or shown on the traveler page. Notes can be a tool to log or a means to communication between different parties.
+            embed(src="/images/notes.swf",width=1024,height=788,quality='low',play=false,loop=false,wmode='transparent',type="application/x-shockwave-flash",pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash")
           section#clone-traveler
             .page-header
               h2 Clone a traveler
