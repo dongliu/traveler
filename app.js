@@ -6,10 +6,18 @@ var express = require('express'),
   routes = require('./routes'),
   about = require('./routes/about'),
   http = require('http'),
+  https = require('https'),
   fs = require('fs'),
   slash = require('express-slash'),
   multer = require('multer'),
   path = require('path');
+
+var key = fs.readFileSync('./config/node.key'),
+  cert = fs.readFileSync('./config/node.pem'),
+  credentials = {
+    key: key,
+    cert: cert
+  };
 
 
 var mongoose = require('mongoose');
@@ -39,6 +47,8 @@ mongoose.connection.on('disconnected', function () {
 var auth = require('./lib/auth');
 
 var app = express();
+
+var api = express();
 
 var uploadDir = './uploads/';
 
@@ -96,24 +106,68 @@ app.get('/about', about.index);
 app.get('/', auth.ensureAuthenticated, routes.main);
 app.get('/logout', routes.logout);
 
+app.get('/apis', function (req, res) {
+  res.redirect('https://' + req.host + ':' + api.get('port') + req.originalUrl);
+});
+
+
+// var
+
+
+api.configure(function () {
+  api.set('port', process.env.PORT || 3443);
+  // app.set('views', __dirname + '/views');
+  // app.set('view engine', 'jade');
+  // app.use(express.logger({stream: access_logfile}));
+  api.use(express.compress());
+  api.use(express.static(path.join(__dirname, 'public')));
+  api.use(express.favicon(__dirname + '/public/favicon.ico'));
+  api.use(express.logger('dev'));
+  api.use(express.methodOverride());
+  // app.use(express.cookieParser());
+  // app.use(express.session({
+  //   secret: 'traveler_secret',
+  //   cookie: {
+  //     maxAge: 28800000
+  //   }
+  // }));
+  // app.use(multer({
+  //   dest: uploadDir,
+  //   limits: {
+  //     files: 1,
+  //     fileSize: 5 * 1024 * 1024
+  //   }
+  // }));
+  api.use(express.json());
+  api.use(express.urlencoded());
+  // app.use(app.router);
+  api.use(slash());
+});
+
 var server = http.createServer(app).listen(app.get('port'), function () {
-  console.log("Express server listening on port " + app.get('port'));
+  console.log('Express server listening on port  ' + app.get('port'));
+});
+
+var apiserver = https.createServer(credentials, api).listen(api.get('port'), function () {
+  console.log('API server listening on port ' + api.get('port'));
 });
 
 function cleanup() {
   server._connections = 0;
+  apiserver._connections = 0;
   server.close(function () {
-    console.log("Closed out remaining connections.");
-    // Close db connections, other chores, etc.
-    mongoose.connection.close();
-    process.exit();
+    apiserver.close(function () {
+      console.log("Closed out remaining connections.");
+      // Close db connections, other chores, etc.
+      mongoose.connection.close();
+      process.exit();
+    });
   });
 
   setTimeout(function () {
     console.error("Could not close connections in time, forcing shut down");
     process.exit(1);
   }, 30 * 1000);
-
 }
 
 process.on('SIGINT', cleanup);
