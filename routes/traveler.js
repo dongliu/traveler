@@ -5,7 +5,6 @@ var fs = require('fs');
 var auth = require('../lib/auth');
 var mongoose = require('mongoose');
 var util = require('util');
-var fs = require('fs');
 var path = require('path');
 var pause = require('pause');
 var underscore = require('underscore');
