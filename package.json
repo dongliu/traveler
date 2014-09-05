@@ -18,6 +18,7 @@
     "multer": "0.1.0",
     "pause": "0.0.1",
     "underscore": "1.6.0",
-    "cheerio": "0.13.1"
+    "cheerio": "0.13.1",
+    "basic-auth": "1.0.0"
   }
 }

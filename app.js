@@ -111,18 +111,19 @@ app.get('/apis', function (req, res) {
 });
 
 
-// var
+
 
 
 api.configure(function () {
   api.set('port', process.env.PORT || 3443);
+  api.use(express.logger('dev'));
   // app.set('views', __dirname + '/views');
   // app.set('view engine', 'jade');
   // app.use(express.logger({stream: access_logfile}));
+  api.use(auth.basicAuth);
   api.use(express.compress());
   api.use(express.static(path.join(__dirname, 'public')));
   api.use(express.favicon(__dirname + '/public/favicon.ico'));
-  api.use(express.logger('dev'));
   api.use(express.methodOverride());
   // app.use(express.cookieParser());
   // app.use(express.session({
@@ -138,9 +139,9 @@ api.configure(function () {
   //     fileSize: 5 * 1024 * 1024
   //   }
   // }));
-  api.use(express.json());
-  api.use(express.urlencoded());
-  // app.use(app.router);
+  // api.use(express.json());
+  // api.use(express.urlencoded());
+  app.use(app.router);
   api.use(slash());
 });
 
