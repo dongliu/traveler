@@ -110,40 +110,21 @@ app.get('/apis', function (req, res) {
   res.redirect('https://' + req.host + ':' + api.get('port') + req.originalUrl);
 });
 
-
-
-
-
+api.enable('strict routing');
 api.configure(function () {
   api.set('port', process.env.PORT || 3443);
   api.use(express.logger('dev'));
-  // app.set('views', __dirname + '/views');
-  // app.set('view engine', 'jade');
-  // app.use(express.logger({stream: access_logfile}));
+  // api.use(express.logger({stream: access_logfile}));
   api.use(auth.basicAuth);
   api.use(express.compress());
-  api.use(express.static(path.join(__dirname, 'public')));
-  api.use(express.favicon(__dirname + '/public/favicon.ico'));
-  api.use(express.methodOverride());
-  // app.use(express.cookieParser());
-  // app.use(express.session({
-  //   secret: 'traveler_secret',
-  //   cookie: {
-  //     maxAge: 28800000
-  //   }
-  // }));
-  // app.use(multer({
-  //   dest: uploadDir,
-  //   limits: {
-  //     files: 1,
-  //     fileSize: 5 * 1024 * 1024
-  //   }
-  // }));
+  // api.use(express.static(path.join(__dirname, 'public')));
   // api.use(express.json());
   // api.use(express.urlencoded());
-  app.use(app.router);
+  api.use(api.router);
   api.use(slash());
 });
+
+require('./routes/api')(api);
 
 var server = http.createServer(app).listen(app.get('port'), function () {
   console.log('Express server listening on port  ' + app.get('port'));
