@@ -103,6 +103,9 @@ require('./routes/profile')(app);
 require('./routes/device')(app);
 
 app.get('/about', about.index);
+app.get('/api', function (req, res) {
+  res.render('api');
+});
 app.get('/', auth.ensureAuthenticated, routes.main);
 app.get('/logout', routes.logout);
 

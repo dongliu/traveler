@@ -1,0 +1,222 @@
+doctype html
+html
+  head
+    meta(http-equiv='X-UA-Compatible', content='IE=Edge')
+    title FRIB Traveler :: about
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
+    link(rel='stylesheet', href='/datatables/css/dataTables.bootstrap.css')
+    link(rel='stylesheet', href='/font-awesome-4.0.3/css/font-awesome.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body(data-spy='scroll', data-target='.bs-docs-sidebar')
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.brand(href='http://www.frib.msu.edu/', target='_blank') FRIB
+          .nav-collapse.collapse
+            ul.nav
+              li
+                a(href='http://cable/', target='_blank') Cable
+              li.active
+                a(href='/') Traveler
+              li
+                a(href='https://controls.frib.msu.edu/controlshelp/', target='_blank') Trouble report
+              li
+                a(href='/logout') Logout
+    header.jumbotron.subhead
+      .container
+        //- .hero-unit
+        h1 FRIB Traveler API
+        h2 The application programming interface to access traveler information
+
+    //- .container-fluid
+    .container
+      .row
+        .span3.bs-docs-sidebar
+          ul.nav.nav-list.bs-docs-sidenav.affix(data-offset-top='282', data-spy='affix', style="top: 40px;")
+            li
+              a(href='#auth') Authentication
+            li
+              a(href='#travelers') Trevelers
+            li
+              a(href='#traveler') Individual traveler
+            li
+              a(href='#data') Traveler data
+            li
+              a(href='#file') Uploaded files
+            li
+              a(href='#notes') Traveler notes
+            li
+              a(href='#bug') Bugs and suggestions
+        .span9
+          section#auth
+            .page-header
+              h2 API client authentication
+            p The API's are protected by basic authentication. Contact the application operator for available credentials. If a client gets 401 response with "api" realm challenge, then the client either did not present the credential in the request or the presented creadential was not right.
+          section#travelers
+            .page-header
+               h2 The list of travelers
+            p Method: GET
+            p URL: https://hostname:port/apis/travelers/
+            p Sample response:
+            pre
+              | [
+              |   {
+              |     "_id": "52f3f98a87d4808008000002",
+              |     "createdBy": "liud",
+              |     "createdOn": "2014-02-06T21:07:22.730Z",
+              |     "devices": [],
+              |     "sharedWith": [],
+              |     "status": 0,
+              |     "title": "update me"
+              |   },
+              |   {
+              |     "_id": "52f8ed88f029d24d2b000002",
+              |     "createdBy": "liud",
+              |     "createdOn": "2014-02-10T15:17:28.849Z",
+              |     "deadline": "2014-02-28T05:00:00.000Z",
+              |     "devices": [],
+              |     "finishedInput": 4,
+              |     "sharedWith": [],
+              |     "status": 1.5,
+              |     "title": "a long traveler",
+              |     "totalInput": 36,
+              |     "updatedBy": "liud",
+              |     "updatedOn": "2014-03-18T19:12:25.739Z"
+              |   },
+              |   {
+              |     "title": "test77 update",
+              |     "status": 0,
+              |     "createdBy": "liud",
+              |     "createdOn": "2014-03-31T15:34:27.947Z",
+              |     "totalInput": 34,
+              |     "finishedInput": 0,
+              |     "_id": "53398b03951887482f000002",
+              |     "sharedWith": [],
+              |     "devices": []
+              |   },
+              |   ...
+              | ]
+            p The response will be a JSON array containing the list of travelers. Each traveler in the list is represented by a JSON object with traveler id, title, status, devices, createdBy, clonedBy, createdOn, deadline, updatedBy, updatedOn, sharedWith, finishedInput, and totalInput information. The traveler id can be used to retrieve more details of a traveler, https://hostname:port/apis/travelers/:id/ for the JSON representation and http://hostname:port/travelers/:id/ for the HTML representation.
+          section#traveler
+            .page-header
+              h2 The details of a traveler
+            p method: GET
+            p URL: https://hostname:port/apis/travelers/:id/
+            p where :id is the id of the traveler to be retrieved
+            P Sample response:
+            pre
+              | {
+              |   "__v": 26,
+              |   "_id": "53bbf46e2ace2f7f111d76c8",
+              |   "createdBy": "liud",
+              |   "createdOn": "2014-07-08T13:38:54.529Z",
+              |   "description": "",
+              |   "finishedInput": 2,
+              |   "referenceForm": "5283aa947185189f61000001",
+              |   "status": 1,
+              |   "title": "test validation",
+              |   "totalInput": 7,
+              |   "updatedBy": "liud",
+              |   "updatedOn": "2014-08-12T13:56:02.090Z",
+              |   "archived": false,
+              |   "notes": [
+              |     "53e2380cd48af61751d91394",
+              |     "53e38b47d48af61751d91395",
+              |     "53e39121d48af61751d91396",
+              |     ...
+              |   ],
+              |   "data": [
+              |     "53bbf6b52ace2f7f111d76ca",
+              |     "53bbf6cd2ace2f7f111d76cb",
+              |     ...
+              |   ],
+              |   "activeForm": 0,
+              |   "forms": [
+              |     {
+              |       "html": "<div class=\"control-group-wrap\">...</div>",
+              |       "_id": "53bbf46e2ace2f7f111d76c9"
+              |     }
+              |   ],
+              |   "sharedWith": [],
+              |   "devices": []
+              | }
+
+            p The traveler details JSON object contains more information than the object in a traveler list. The "forms" property contrains a list of the forms that were used in this traveler. Currently, only one form is allowed for a traveler. The "data" property contrains the data id's that were collected in the traveler. The "notes" property holds the note id's that were inputed in the traveler.
+          section#data
+            .page-header
+              h2 Data collected in a traveler
+            p method: GET
+            p URL: https://hostname:port/apis/travelers/:id/data/
+            p where :id is the id of the traveler whose data is retrieved
+            P Sample response:
+            pre
+              | [
+              |   {
+              |     "name": "2f067ecd",
+              |     "value": true,
+              |     "inputType": "checkbox",
+              |     "inputBy": "liud",
+              |     "inputOn": "2014-07-08T13:48:37.972Z",
+              |     "_id": "53bbf6b52ace2f7f111d76ca"
+              |   },
+              |   {
+              |     "name": "d134f3cd",
+              |     "value": "something",
+              |     "inputType": "textarea",
+              |     "inputBy": "liud",
+              |     "inputOn": "2014-07-08T13:49:01.784Z",
+              |     "_id": "53bbf6cd2ace2f7f111d76cb"
+              |   },
+              |   ...
+              | ]
+
+            p Each data item in the list contains the input name in the form, the input type and the value. Besides, it also records who input the value at what time, by which the input history can be generated. For file input, the value is the file's original name when it was uploaded. In order to retrieve the content of the file, the following file API can be used.
+          section#file
+            .page-header
+              h2 File uploaded in a traveler
+            p method: GET
+            p URL: https://hostname:port/apis/data/:id/
+            p where :id is the id of the data whose type is file.
+          section#notes
+            .page-header
+              h2 Notes in a traveler
+            p method: GET
+            p URL: https://hostname:port/apis/travelers/:id/notes/
+            p where :id is the id of the traveler whose notes are retrieved
+            P Sample response:
+            pre
+              | [
+              |   {
+              |     "name": "2f067ecd",
+              |     "value": "first notes",
+              |     "inputBy": "liud",
+              |     "inputOn": "2014-08-06T14:13:32.233Z",
+              |     "_id": "53e2380cd48af61751d91394"
+              |   },
+              |   {
+              |     "name": "2f067ecd",
+              |     "value": "live stamp",
+              |     "inputBy": "liud",
+              |     "inputOn": "2014-08-07T14:20:55.944Z",
+              |     "_id": "53e38b47d48af61751d91395"
+              |   },
+              |   ...
+              | ]
+            p Similar to the data API, each note item in the list contains the input name in the form and the note text. Besides, it also records who input the note at what time, by which the note history can be generated.
+          section#bug
+            .page-header
+              h2 Bugs and suggestions
+            h4 If you find something not working well or you want a new feature, please contact
+              = ' '
+              a(href='mailto:liud@frib.msu.edu?Subject=traveler%20issues',target='_top') Dong Liu
+              | . Thank you.
+
+
+    script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
+    script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
