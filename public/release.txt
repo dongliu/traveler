@@ -1,3 +1,8 @@
+release v2.3.0
+date: Sept. 8, 2014
+- traveler API's available
+- API document added
+
 release v2.2.4
 date: Aug. 12, 2014
 - automatically update the time stamps with local timer
