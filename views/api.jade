@@ -57,7 +57,7 @@ html
           section#auth
             .page-header
               h2 API client authentication
-            p The API's are protected by basic authentication. Contact the application operator for available credentials. If a client gets 401 response with "api" realm challenge, then the client either did not present the credential in the request or the presented creadential was not right.
+            p The API's are protected by basic authentication. If a client gets 401 response with "api" realm challenge, then the client either did not present the credential in the request or the presented creadential was not right. Please contact the application operator for available credentials.
           section#travelers
             .page-header
                h2 The list of travelers
@@ -103,10 +103,13 @@ html
               |   ...
               | ]
             p The response will be a JSON array containing the list of travelers. Each traveler in the list is represented by a JSON object with traveler id, title, status, devices, createdBy, clonedBy, createdOn, deadline, updatedBy, updatedOn, sharedWith, finishedInput, and totalInput information. The traveler id can be used to retrieve more details of a traveler, https://hostname:port/apis/travelers/:id/ for the JSON representation and http://hostname:port/travelers/:id/ for the HTML representation.
+            p The travler list can also be retrieved by a device name.
+            p URL: https://hostname:port/apis/travelers/?device=:devicename
+            p where :devicename is the name of device that was assigned to the travelers.
           section#traveler
             .page-header
               h2 The details of a traveler
-            p method: GET
+            p Method: GET
             p URL: https://hostname:port/apis/travelers/:id/
             p where :id is the id of the traveler to be retrieved
             P Sample response:
@@ -139,7 +142,7 @@ html
               |   "activeForm": 0,
               |   "forms": [
               |     {
-              |       "html": "<div class=\"control-group-wrap\">...</div>",
+              |       "html": "...",
               |       "_id": "53bbf46e2ace2f7f111d76c9"
               |     }
               |   ],
@@ -151,7 +154,7 @@ html
           section#data
             .page-header
               h2 Data collected in a traveler
-            p method: GET
+            p Method: GET
             p URL: https://hostname:port/apis/travelers/:id/data/
             p where :id is the id of the traveler whose data is retrieved
             P Sample response:
@@ -180,13 +183,13 @@ html
           section#file
             .page-header
               h2 File uploaded in a traveler
-            p method: GET
+            p Method: GET
             p URL: https://hostname:port/apis/data/:id/
             p where :id is the id of the data whose type is file.
           section#notes
             .page-header
               h2 Notes in a traveler
-            p method: GET
+            p Method: GET
             p URL: https://hostname:port/apis/travelers/:id/notes/
             p where :id is the id of the traveler whose notes are retrieved
             P Sample response:
