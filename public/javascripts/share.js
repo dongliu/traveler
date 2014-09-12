@@ -86,7 +86,7 @@ $(function () {
   $('#share-modify').click(function (e) {
     var selected = fnGetSelected(shareTable, 'row-selected');
     if (selected.length) {
-      $('#modalLabel').html('Modify the following ' + selected.length + ' users\' priviledge? ');
+      $('#modalLabel').html('Modify the following ' + selected.length + ' users\' privilege? ');
       $('#modal .modal-body').empty();
       $('#modal .modal-body').append('<form class="form-inline"><lable class="checkbox"><input id="modal-access" type="checkbox" name="access" value="write">write</lable></form>');
       selected.forEach(function (row) {
