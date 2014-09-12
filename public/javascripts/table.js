@@ -233,7 +233,7 @@ var fullNameNoLinkColumn = {
 };
 
 var accessColumn = {
-  sTitle: 'Priviledge',
+  sTitle: 'Privilege',
   mData: 'access',
   sDefaultContent: '',
   mRender: function(data, type, full) {
