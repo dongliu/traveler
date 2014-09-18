@@ -421,7 +421,7 @@ $(function () {
     } else {
       $validation = $('<div class="validation"></div>').appendTo($cgw.find('.controls'));
     }
-    if (!(/^(image|text)\//i.test(file.type) || file.type === 'application/vnd.ms-excel' || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+    if (!(/^(image|text)\//i.test(file.type) || file.type === 'application/pdf' || file.type === 'application/vnd.ms-excel' || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
       $validation.html('<p class="text-error">' + file.type + ' is not allowed to upload</p>');
       $cgw.children('.control-group-buttons').remove();
       return;
