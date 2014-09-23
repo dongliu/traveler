@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, Binder: false, Modernizr: false*/
-/*global travelerStatus: false, finishedInput: false*/
+/*global travelerStatus: true, finishedInput: true*/
 
 function livespan(stamp) {
   return '<span data-livestamp="' + stamp + '"></span>';
@@ -335,7 +335,7 @@ $(function () {
     }
   });
 
-  $('#form :checkbox').change(function (e) {
+  $('#form input:not([type="file"])').change(function (e) {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
     $('#form input,textarea').not($this).attr('disabled', true);
@@ -394,7 +394,11 @@ $(function () {
     var $this = $(this);
     var input = $this.closest('.control-group-wrap').find('input,textarea')[0];
     if (binder.accessor.target[input.name] === undefined) {
-      $(input).val('');
+      if ($(input).is(':checkbox')) {
+        $(input).prop('checked', false);
+      } else {
+        $(input).val('');
+      }
     } else {
       binder.deserializeField(input);
     }
