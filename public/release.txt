@@ -1,3 +1,9 @@
+
+
+release v2.3.1
+date: Sept. 18, 2014
+- allow pdf files to be uploaded in traveler
+
 release v2.3.0
 date: Sept. 8, 2014
 - traveler API's available
