@@ -1,0 +1,5 @@
+{
+  "device" : {
+    "url" : "http://controlsapp1:8080/conf/rs/v0/component/physical"
+  }
+}
