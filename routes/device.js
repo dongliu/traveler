@@ -1,5 +1,5 @@
 var auth = require('../lib/auth');
-
+var service = require('../config/service.json');
 var request = require('request');
 
 module.exports = function (app) {
@@ -9,7 +9,7 @@ module.exports = function (app) {
 
   app.get('/devices/json', function (req, res) {
     request({
-      url: 'http://ctlapp-wheezy-temp:8080/conf/rs/v0/component/physical',
+      url: service.device.url,
       timeout: 30 * 1000,
       headers: {
         Accept: 'application/json'
@@ -21,7 +21,8 @@ module.exports = function (app) {
           error: 'cannot retrieve device list from ctlapp-wheezy-temp'
         });
       }
-      return res.json(response.statusCode, resBody);
+      res.status(response.statusCode).type('application/json');
+      return res.send(resBody);
     });
   });
 };
