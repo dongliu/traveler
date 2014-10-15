@@ -1,3 +1,9 @@
+release v2.3.3
+date: Oct. 15, 2014
+- fix auth bugs
+- revise device proxy to fix xhr session issue when device service gives no response and close the connection (net::ERR_EMPTY_RESPONSE)
+- move device service config to /config/service.json
+
 release v2.3.2
 date: Sept. 18, 2014
 - fix date input change in firefox
