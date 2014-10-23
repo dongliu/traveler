@@ -1,3 +1,8 @@
+release v2.3.4
+date: Oct. 23, 2014
+- add validation block to traveler viewer
+- add notes and buttons to traveler viewer
+
 release v2.3.3
 date: Oct. 15, 2014
 - fix auth bugs
