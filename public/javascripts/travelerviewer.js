@@ -84,6 +84,47 @@ function validation_message(form) {
   return output;
 }
 
+function notes(found) {
+  var i, output = '<dl>';
+  if (found.length > 0) {
+    for (i = 0; i < found.length; i += 1) {
+      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + moment(found[i].inputOn).fromNow() + '</b>: </dt>';
+      output = output + '<dd>' + found[i].value + '</dd>';
+    }
+  }
+  return output + '</dl>';
+}
+
+function renderNotes() {
+  $.ajax({
+    url: './notes/',
+    type: 'GET',
+    dataType: 'json'
+  }).done(function (data, status, jqXHR) {
+    $('#form input,textarea').each(function (index, element) {
+      var found = data.filter(function (e) {
+        return e.name === element.name;
+      });
+      $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a></div>');
+      if (found.length) {
+        found.sort(function (a, b) {
+          if (a.inputOn > b.inputOn) {
+            return -1;
+          }
+          return 1;
+        });
+        $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
+      }
+    });
+
+  }).fail(function (jqXHR, status, error) {
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
+  }).always();
+}
+
 $(function () {
   createSideNav();
   cleanForm();
@@ -113,10 +154,23 @@ $(function () {
         }
       }
     });
+
+    // load the notes here
+    renderNotes();
   }).fail(function (jqXHR, status, error) {
     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   }).always();
+
+  $('#form').on('click', 'a.notes-number', function (e) {
+    e.preventDefault();
+    var $input_notes = $(this).closest('.controls').find('.input-notes');
+    if ($input_notes.is(':visible')) {
+      $input_notes.hide();
+    } else {
+      $input_notes.show();
+    }
+  });
 
   $('#show-validation').click(function (e) {
     $('.validation').remove();
@@ -127,6 +181,14 @@ $(function () {
   $('#hide-validation').click(function (e) {
     $('#validation').hide();
     $('.validation').hide();
+  });
+
+  $('#show-notes').click(function (e) {
+    $('.input-notes').show();
+  });
+
+  $('#hide-notes').click(function (e) {
+    $('.input-notes').hide();
   });
 
 });
