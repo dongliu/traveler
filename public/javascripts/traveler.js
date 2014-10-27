@@ -501,7 +501,7 @@ $(function () {
   });
 
   $('#show-validation').click(function (e) {
-    if ($('input:disabled').length) {
+    if ($('.control-group-buttons').length) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('Please finish the input before validating the form.');
       $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
