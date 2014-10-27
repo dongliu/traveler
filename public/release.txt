@@ -1,3 +1,7 @@
+release v2.3.5
+date: Oct. 27, 2014
+- fix a bug that prevents to display validation messages when a traveler is submitted or completed
+
 release v2.3.4
 date: Oct. 23, 2014
 - add validation block to traveler viewer
