@@ -1,3 +1,6 @@
+/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
+/*global moment: false, Binder: false, Modernizr: false*/
+
 // temparary solution for the dirty forms
 function cleanForm() {
   $('.control-group-buttons').remove();
@@ -48,8 +51,8 @@ function createSideNav() {
 
 function validation_message(form) {
   var i = 0,
-    output = $('<div>'),
-    p, value, input, label, span;
+    output = $('<div>');
+  var p, value, input, label, span;
   for (i = 0; i < form.elements.length; i += 1) {
     input = form.elements[i];
     p = $('<p>');
@@ -61,16 +64,19 @@ function validation_message(form) {
       p.css('color', '#b94a48');
       span.css('color', '#b94a48');
     }
-    if (input.type == 'checkbox') {
+    if (input.type === 'checkbox') {
       value = input.checked ? 'checked' : 'not checked';
     } else {
-      if (input.value == '') {
-        value = 'no input from user'
+      if (input.value === '') {
+        value = 'no input from user';
       } else {
         value = input.value;
       }
     }
-    label = $(input).closest('.control-group').children('.control-label').text()
+    label = $(input).closest('.control-group').children('.control-label').text();
+    if (label === '' && input.type === 'checkbox') {
+      label = $(input).next().text();
+    }
     if (input.checkValidity()) {
       p.html('<b>' + label + '</b>: ' + value);
       span.text('validation passed');
@@ -145,7 +151,7 @@ $(function () {
           }
           return 1;
         });
-        if (this.type == 'file') {
+        if (this.type === 'file') {
           $(element).closest('.controls').append('<div class="input-history">' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
