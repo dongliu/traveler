@@ -140,6 +140,9 @@ function validation_message(form) {
       }
     }
     label = $(input).closest('.control-group').children('.control-label').text();
+    if (label === '' && input.type === 'checkbox') {
+      label = $(input).next().text();
+    }
     if (input.checkValidity()) {
       p.html('<b>' + label + '</b>: ' + value);
       span.text('validation passed');
