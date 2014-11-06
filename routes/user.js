@@ -9,14 +9,102 @@ var auth = require('../lib/auth');
 
 var Roles = ['manager', 'admin'];
 
+function updateUserProfile(user, res) {
+  var searchFilter = ad.searchFilter.replace('_id', user._id);
+  var opts = {
+    filter: searchFilter,
+    attributes: ad.objAttributes,
+    scope: 'sub'
+  };
+  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
+    if (err) {
+      return res.json(500, err);
+    }
+    if (result.length === 0) {
+      return res.json(500, {
+        error: user._id + ' is not found!'
+      });
+    }
+    if (result.length > 1) {
+      return res.json(500, {
+        error: user._id + ' is not unique!'
+      });
+    }
+    user.update({
+      name: result[0].displayName,
+      email: result[0].mail,
+      office: result[0].physicalDeliveryOfficeName,
+      phone: result[0].telephoneNumber,
+      mobile: result[0].mobile
+    }, function (err) {
+      if (err) {
+        return res.json(500, err);
+      }
+      res.send(204);
+    });
+  });
+}
+
+
+function addUser(req, res) {
+  var nameFilter = ad.nameFilter.replace('_name', req.body.name);
+  var opts = {
+    filter: nameFilter,
+    attributes: ad.objAttributes,
+    scope: 'sub'
+  };
+
+  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
+    if (err) {
+      console.error(err.name + ' : ' + err.message);
+      return res.json(500, err);
+    }
+
+    if (result.length === 0) {
+      return res.send(404, req.body.name + ' is not found in AD!');
+    }
+
+    if (result.length > 1) {
+      return res.send(400, req.body.name + ' is not unique!');
+    }
+    var roles = [];
+    if (req.body.manager) {
+      roles.push('manager');
+    }
+    if (req.body.admin) {
+      roles.push('admin');
+    }
+    var user = new User({
+      _id: result[0].sAMAccountName.toLowerCase(),
+      name: result[0].displayName,
+      email: result[0].mail,
+      office: result[0].physicalDeliveryOfficeName,
+      phone: result[0].telephoneNumber,
+      mobile: result[0].mobile,
+      roles: roles
+    });
+
+    user.save(function (err, newUser) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+
+      var url = req.protocol + '://' + req.get('host') + '/users/' + newUser._id;
+      res.set('Location', url);
+      res.send(201, 'The new user is at ' + url);
+    });
+
+  });
+}
+
 module.exports = function (app) {
 
   app.get('/users/', auth.ensureAuthenticated, function (req, res) {
-    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
+    if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
       return res.send(403, 'only admin allowed');
-    } else {
-      return res.render('users');
     }
+    return res.render('users');
   });
 
   app.get('/usernames/:name', auth.ensureAuthenticated, function (req, res) {
@@ -32,9 +120,8 @@ module.exports = function (app) {
           user: user,
           myRoles: req.session.roles
         });
-      } else {
-        return res.send(404, req.params.name + ' not found');
       }
+      return res.send(404, req.params.name + ' not found');
     });
   });
 
@@ -44,7 +131,7 @@ module.exports = function (app) {
     //   return res.send(415, 'json request expected.');
     // }
 
-    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
+    if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
       return res.send(403, 'only admin allowed');
     }
 
@@ -63,9 +150,8 @@ module.exports = function (app) {
         var url = req.protocol + '://' + req.get('host') + '/users/' + user._id;
         // res.set('Location', url);
         return res.send(200, 'The user is at ' + url);
-      } else {
-        addUser(req, res);
       }
+      addUser(req, res);
     });
 
   });
@@ -73,7 +159,7 @@ module.exports = function (app) {
 
 
   app.get('/users/json', auth.ensureAuthenticated, function (req, res) {
-    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
+    if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
       return res.send(403, "You are not authorized to access this resource. ");
     }
     User.find().lean().exec(function (err, users) {
@@ -104,14 +190,13 @@ module.exports = function (app) {
           user: user,
           myRoles: req.session.roles
         });
-      } else {
-        return res.send(404, req.params.id + ' has never logged into the application.');
       }
+      return res.send(404, req.params.id + ' has never logged into the application.');
     });
   });
 
   app.put('/users/:id', auth.ensureAuthenticated, function (req, res) {
-    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
+    if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
       return res.send(403, "You are not authorized to access this resource. ");
     }
     if (!req.is('json')) {
@@ -148,7 +233,7 @@ module.exports = function (app) {
   });
 
   app.get('/users/:id/refresh', auth.ensureAuthenticated, function (req, res) {
-    if (req.session.roles == undefined || req.session.roles.indexOf('admin') == -1) {
+    if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
       return res.send(403, "You are not authorized to access this resource. ");
     }
     User.findOne({
@@ -253,92 +338,3 @@ module.exports = function (app) {
     });
   });
 };
-
-function updateUserProfile(user, res) {
-  var searchFilter = ad.searchFilter.replace('_id', user._id);
-  var opts = {
-    filter: searchFilter,
-    attributes: ad.objAttributes,
-    scope: 'sub'
-  };
-  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
-    if (err) {
-      return res.json(500, err);
-    }
-    if (result.length === 0) {
-      return res.json(500, {
-        error: req.params.id + ' is not found!'
-      });
-    }
-    if (result.length > 1) {
-      return res.json(500, {
-        error: req.params.id + ' is not unique!'
-      });
-    }
-    user.update({
-      name: result[0].displayName,
-      email: result[0].mail,
-      office: result[0].physicalDeliveryOfficeName,
-      phone: result[0].telephoneNumber,
-      mobile: result[0].mobile
-    }, function (err) {
-      if (err) {
-        return res.json(500, err);
-      }
-      res.send(204);
-    })
-  });
-}
-
-
-function addUser(req, res) {
-  var nameFilter = ad.nameFilter.replace('_name', req.body.name);
-  var opts = {
-    filter: nameFilter,
-    attributes: ad.objAttributes,
-    scope: 'sub'
-  };
-
-  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
-    if (err) {
-      console.error(err.name + ' : ' + err.message);
-      return res.json(500, err);
-    }
-
-    if (result.length === 0) {
-      return res.send(404, req.body.name + ' is not found in AD!');
-    }
-
-    if (result.length > 1) {
-      return res.send(400, req.body.name + ' is not unique!');
-    }
-    var roles = [];
-    if (req.body.manager) {
-      roles.push('manager');
-    }
-    if (req.body.admin) {
-      roles.push('admin');
-    }
-    var user = new User({
-      _id: result[0].sAMAccountName.toLowerCase(),
-      name: result[0].displayName,
-      email: result[0].mail,
-      office: result[0].physicalDeliveryOfficeName,
-      phone: result[0].telephoneNumber,
-      mobile: result[0].mobile,
-      roles: roles
-    });
-
-    user.save(function (err, newUser) {
-      if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
-      }
-
-      var url = req.protocol + '://' + req.get('host') + '/users/' + newUser._id;
-      res.set('Location', url);
-      res.send(201, 'The new user is at ' + url);
-    });
-
-  });
-}
