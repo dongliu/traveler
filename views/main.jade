@@ -3,21 +3,21 @@ extends layout
 block head
   title FRIB Traveler
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='/datatables/css/dataTables.bootstrap.css')
-  link(rel='stylesheet', href='/font-awesome-4.0.3/css/font-awesome.css')
-  link(rel='stylesheet', href='/stylesheets/style.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='/forms/new', target='_blank')
+        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='_blank')
           i.fa.fa-file-o.fa-lg
           | &nbsp;New Form
       .btn-group
-        a.btn.btn-primary#new(href='/currenttravelers/', target='_blank')
+        a.btn.btn-primary#new(href='#{prefix}/currenttravelers/', target='_blank')
           i.fa.fa-list.fa-lg
           | &nbsp;All travelers
       .btn-group
@@ -31,18 +31,18 @@ block content
           span.caret
         ul.dropdown-menu
           li#devices
-            a(href='/devices/', target='_blank') Devices
+            a(href='#{prefix}/devices/', target='_blank') Devices
       .btn-group
-        a.btn(href='/profile', target='_blank')
+        a.btn(href='#{prefix}/profile', target='_blank')
           i.fa.fa-user.fa-lg
           | &nbsp;Profile
       if (locals.roles !== undefined && locals.roles.indexOf('admin') !== -1)
         .btn-group
-          a.btn(href='/users/', target='_blank')
+          a.btn(href='#{prefix}/users/', target='_blank')
             i.fa.fa-users.fa-lg
             | &nbsp;Users
       .btn-group
-        a.btn(href='/about', target='_blank')
+        a.btn(href='#{prefix}/about', target='_blank')
           i.fa.fa-info.fa-lg
           |&nbsp;About
     #message
@@ -131,15 +131,15 @@ block content
 
 
 block js
-  script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='/datatables/js/ZeroClipboard.js')
-  script(type='text/javascript', src='/datatables/js/TableTools.js')
-  script(type='text/javascript', src='/datatables/js/dataTables.bootstrap.js')
-  script(type='text/javascript', src='/jquery/jquery.history.js')
-  script(type='text/javascript', src='/dependencies/moment.js')
-  script(type='text/javascript', src='/javascripts/table.js')
-  script(type='text/javascript', src='/javascripts/main.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery.history.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/main.js')
 
 
