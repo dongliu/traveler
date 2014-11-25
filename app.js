@@ -1,6 +1,4 @@
-/**
- * Module dependencies.
- */
+/*jslint es5: true*/
 
 var express = require('express'),
   routes = require('./routes'),
@@ -84,7 +82,7 @@ app.configure(function () {
   }));
   app.use(express.json());
   app.use(express.urlencoded());
-  app.use(auth.proxied());
+  app.use(auth.proxied);
   app.use(app.router);
   app.use(slash());
 });
