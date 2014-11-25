@@ -1,4 +1,5 @@
 /*global FormFile: false, TravelerData: false*/
+/*jslint es5: true*/
 
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
@@ -233,11 +234,6 @@ module.exports = function (app) {
         });
       }
 
-      // return res.render('viewer', {
-      //   id: req.params.id,
-      //   title: form.title,
-      //   html: form.html
-      // });
       return res.redirect('forms/' + req.params.id + '/preview');
     });
   });

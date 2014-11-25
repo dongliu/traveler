@@ -84,6 +84,7 @@ app.configure(function () {
   }));
   app.use(express.json());
   app.use(express.urlencoded());
+  app.use(auth.proxied());
   app.use(app.router);
   app.use(slash());
 });
