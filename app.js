@@ -6,7 +6,6 @@ var express = require('express'),
   http = require('http'),
   https = require('https'),
   fs = require('fs'),
-  // slash = require('./lib/slash-forward'),
   multer = require('multer'),
   path = require('path');
 
@@ -84,7 +83,6 @@ app.configure(function () {
   app.use(express.urlencoded());
   app.use(auth.proxied);
   app.use(app.router);
-  // app.use(slash());
 });
 
 app.configure('development', function () {
@@ -119,11 +117,7 @@ api.configure(function () {
   // api.use(express.logger({stream: access_logfile}));
   api.use(auth.basicAuth);
   api.use(express.compress());
-  // api.use(express.static(path.join(__dirname, 'public')));
-  // api.use(express.json());
-  // api.use(express.urlencoded());
   api.use(api.router);
-  // api.use(slash());
 });
 
 require('./routes/api')(api);
