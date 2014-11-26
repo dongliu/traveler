@@ -82,7 +82,7 @@ function travelFromModal() {
     var that = this;
     var success = false;
     $.ajax({
-      url: prefix + '/travelers/',
+      url: '/travelers/',
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -101,8 +101,8 @@ function travelFromModal() {
       .always(function () {
         number = number - 1;
         if (number === 0 && success) {
-          initTable(travelerTable, prefix + '/travelers/json');
-          initCurrentTables(prefix + '/currenttravelers/json');
+          initTable(travelerTable, '/travelers/json');
+          initCurrentTables('/currenttravelers/json');
         }
       });
   });
@@ -116,7 +116,7 @@ function archiveFromModal(archive) {
     var that = this;
     var success = false;
     $.ajax({
-      url: prefix + '/travelers/' + that.id + '/archived',
+      url: '/travelers/' + that.id + '/archived',
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -135,10 +135,10 @@ function archiveFromModal(archive) {
       .always(function () {
         number = number - 1;
         if (number === 0 && success) {
-          initTable(travelerTable, prefix + '/travelers/json');
-          initTable(sharedTravelerTable, prefix + '/sharedtravelers/json');
-          initCurrentTables(prefix + '/currenttravelers/json');
-          initTable(archivedTravelerTable, prefix + '/archivedtravelers/json');
+          initTable(travelerTable, '/travelers/json');
+          initTable(sharedTravelerTable, '/sharedtravelers/json');
+          initCurrentTables('/currenttravelers/json');
+          initTable(archivedTravelerTable, '/archivedtravelers/json');
         }
       });
   });
@@ -151,7 +151,7 @@ function cloneFromModal() {
     var that = this;
     var success = false;
     $.ajax({
-      url: prefix + '/travelers/',
+      url: '/travelers/',
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -170,9 +170,9 @@ function cloneFromModal() {
       .always(function () {
         number = number - 1;
         if (number === 0 && success) {
-          initTable(travelerTable, prefix + '/travelers/json');
-          initTable(sharedTravelerTable, prefix + '/sharedtravelers/json');
-          initCurrentTables(prefix + '/currenttravelers/json');
+          initTable(travelerTable, '/travelers/json');
+          initTable(sharedTravelerTable, '/sharedtravelers/json');
+          initCurrentTables('/currenttravelers/json');
         }
       });
   });
@@ -187,6 +187,8 @@ $(function () {
     }
   });
 
+  updateAjaxURL(prefix);
+
   var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
   fnAddFilterFoot('#form-table', formAoColumns);
   formTable = $('#form-table').dataTable({
@@ -200,7 +202,7 @@ $(function () {
     sDom: sDom,
     oTableTools: oTableTools
   });
-  initTable(formTable, prefix + '/forms/json');
+  initTable(formTable, '/forms/json');
 
   $('#form-select-all').click(function (e) {
     fnSelectAll(formTable, 'row-selected', 'select-row', true);
@@ -223,7 +225,7 @@ $(function () {
     sDom: sDom,
     oTableTools: oTableTools
   });
-  initTable(sharedFormTable, prefix + '/sharedforms/json');
+  initTable(sharedFormTable, '/sharedforms/json');
 
   var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
@@ -238,7 +240,7 @@ $(function () {
     sDom: sDom,
     oTableTools: oTableTools
   });
-  initTable(travelerTable, prefix + '/travelers/json');
+  initTable(travelerTable, '/travelers/json');
 
 
   var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
@@ -254,7 +256,7 @@ $(function () {
     sDom: sDom,
     oTableTools: oTableTools
   });
-  initTable(sharedTravelerTable, prefix + '/sharedtravelers/json');
+  initTable(sharedTravelerTable, '/sharedtravelers/json');
 
   var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#init-traveler-table', initTravelerAoColumns);
@@ -311,7 +313,7 @@ $(function () {
     sDom: sDom,
     oTableTools: oTableTools
   });
-  initCurrentTables(prefix + '/currenttravelers/json');
+  initCurrentTables('/currenttravelers/json');
 
   var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);
@@ -326,7 +328,7 @@ $(function () {
     sDom: sDom,
     oTableTools: oTableTools
   });
-  initTable(archivedTravelerTable, prefix + '/archivedtravelers/json');
+  initTable(archivedTravelerTable, '/archivedtravelers/json');
 
   // show the tab in hash
   if (History.getHash()) {
@@ -461,12 +463,12 @@ $(function () {
 
 
   $('#reload').click(function (e) {
-    initTable(formTable, prefix + '/forms/json');
-    initTable(sharedFormTable, prefix + '/sharedforms/json');
-    initTable(travelerTable, prefix + '/travelers/json');
-    initTable(sharedTravelerTable, prefix + '/sharedtravelers/json');
-    initCurrentTables(prefix + '/currenttravelers/json');
-    initTable(archivedTravelerTable, prefix + '/archivedtravelers/json');
+    initTable(formTable, '/forms/json');
+    initTable(sharedFormTable, '/sharedforms/json');
+    initTable(travelerTable, '/travelers/json');
+    initTable(sharedTravelerTable, '/sharedtravelers/json');
+    initCurrentTables('/currenttravelers/json');
+    initTable(archivedTravelerTable, '/archivedtravelers/json');
   });
 
   // binding events
