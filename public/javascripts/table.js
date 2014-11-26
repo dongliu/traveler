@@ -1,4 +1,5 @@
 /*global moment: false*/
+/*global prefix: false*/
 
 function formatDate(date) {
   return date ? moment(date).fromNow() : '';
@@ -478,13 +479,13 @@ var modifiedByColumn = {
 
 
 var oTableTools = {
-  "sSwfPath": "/datatables/swf/copy_csv_xls_pdf.swf",
-  "aButtons": [
-    "copy",
-    "print", {
-      "sExtends": "collection",
-      "sButtonText": 'Save <span class="caret" />',
-      "aButtons": ["csv", "xls", "pdf"]
+  sSwfPath: prefix ? prefix + '/datatables/swf/copy_csv_xls_pdf.swf' : '/datatables/swf/copy_csv_xls_pdf.swf',
+  aButtons: [
+    'copy',
+    'print', {
+      'sExtends': 'collection',
+      'sButtonText': 'Save <span class="caret" />',
+      'aButtons': ['csv', 'xls', 'pdf']
     }
   ]
 };
