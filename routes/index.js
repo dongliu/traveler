@@ -1,10 +1,3 @@
-// function proxied_address(req) {
-//   if (req.proxied) {
-//     return '/3001';
-//   }
-//   return '';
-// }
-
 exports.main = function (req, res) {
   res.render('main', {
     roles: req.session.roles,
