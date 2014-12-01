@@ -48,7 +48,7 @@ function personColumn(title, key) {
     mData: key,
     sDefaultContent: '',
     mRender: function (data, type, full) {
-      return '<a href = "/users/' + data + '" target="_blank">' + data + '</a>';
+      return '<a href = "' + prefix + '/users/' + data + '" target="_blank">' + data + '</a>';
     },
     bFilter: true
   };
@@ -220,7 +220,7 @@ var formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function (data, type, full) {
-    return '<a href="/forms/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
+    return '<a href="' + prefix + '/forms/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -229,7 +229,7 @@ var formShareLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function (data, type, full) {
-    return '<a href="/forms/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/forms/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -277,14 +277,10 @@ var travelerLinkColumn = {
       return '<a href="' + source.url + '" target="_blank" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>';
     }
     if (source.hasOwnProperty('_id')) {
-      return '<a href="/travelers/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>';
+      return '<a href="' + prefix + '/travelers/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>';
     }
     return 'unknown';
   },
-  // mData: '_id',
-  // mRender: function(data, type, full) {
-  //   return '<a href="/travelers/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>';
-  // },
   bSortable: false
 };
 
@@ -292,7 +288,7 @@ var travelerConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function (data, type, full) {
-    return '<a href="/travelers/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the traveler"><i class="fa fa-gear fa-lg"></i></a>';
+    return '<a href="' + prefix + '/travelers/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the traveler"><i class="fa fa-gear fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -301,7 +297,7 @@ var travelerShareLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function (data, type, full) {
-    return '<a href="/travelers/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/travelers/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -310,7 +306,7 @@ var deviceTravelerLinkColumn = {
   sTitle: '',
   mData: 'serialNumber',
   mRender: function (data, type, full) {
-    return '<a href="/currenttravelers/?device=' + data + '" target="_blank" data-toggle="tooltip" title="travelers for this device"><i class="fa fa-search fa-lg"></i></a>';
+    return '<a href="' + prefix + '/currenttravelers/?device=' + data + '" target="_blank" data-toggle="tooltip" title="travelers for this device"><i class="fa fa-search fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -398,7 +394,7 @@ var userNameColumn = {
   mData: 'username',
   sDefaultContent: '',
   mRender: function (data, type, full) {
-    return '<a href = "/users?name=' + data + '" target="_blank">' + data + '</a>';
+    return '<a href = "' + prefix + '/users?name=' + data + '" target="_blank">' + data + '</a>';
   },
   bFilter: true
 };
