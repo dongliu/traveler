@@ -94,7 +94,7 @@ function addUser(req, res) {
       // var url = req.protocol + '://' + req.get('host') + '/users/' + newUser._id;
       var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/users/' + newUser._id;
       res.set('Location', url);
-      res.send(201, 'The new user is at ' + url);
+      res.send(201, 'The new user is at <a target="_blank" href="' + url + '">' + url + '</a>');
     });
 
   });
@@ -151,7 +151,7 @@ module.exports = function (app) {
       if (user) {
         // var url = req.protocol + '://' + req.get('host') + '/users/' + user._id;
         var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/users/' + user._id;
-        return res.send(200, 'The user is at ' + url);
+        return res.send(200, 'The user is at <a target="_blank" href="' + url + '">' + url + '</a>');
       }
       addUser(req, res);
     });
