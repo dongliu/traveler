@@ -4,10 +4,10 @@ block head
   meta(charset='urf-8')
   title FRIB Cable :: user profile
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='/jquery/ui-lightness/jquery-ui-1.10.2.custom.css')
-  link(rel='stylesheet', href='/stylesheets/style.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/jquery/ui-lightness/jquery-ui-1.10.2.custom.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
   script.
@@ -46,7 +46,8 @@ block content
       button#cacel.btn(onclick="window.open('', '_self', '');window.close(); return false;") Close window
 
 block js
-  script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='/dependencies/moment.js')
-  script(type='text/javascript', src='/javascripts/user.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/user.js')
