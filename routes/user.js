@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var User = mongoose.model('User');
 
 var auth = require('../lib/auth');
+var authConfig = require('../config/auth.json');
 
 var Roles = ['manager', 'admin'];
 
@@ -90,7 +91,8 @@ function addUser(req, res) {
         return res.send(500, err.msg);
       }
 
-      var url = req.protocol + '://' + req.get('host') + '/users/' + newUser._id;
+      // var url = req.protocol + '://' + req.get('host') + '/users/' + newUser._id;
+      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/users/' + newUser._id;
       res.set('Location', url);
       res.send(201, 'The new user is at ' + url);
     });
@@ -147,7 +149,8 @@ module.exports = function (app) {
         return res.send(500, err.msg);
       }
       if (user) {
-        var url = req.protocol + '://' + req.get('host') + '/users/' + user._id;
+        // var url = req.protocol + '://' + req.get('host') + '/users/' + user._id;
+        var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/users/' + user._id;
         return res.send(200, 'The user is at ' + url);
       }
       addUser(req, res);
