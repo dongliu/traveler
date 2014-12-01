@@ -1,6 +1,10 @@
+/*global selectColumn: false, useridColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDom: false, oTableTools: false*/
+/*global updateAjaxURL: false, prefix: false*/
+
 function inArray(name, ao) {
-  for (var i = 0; i < ao.length; i += 1) {
-    if (ao[i]['name'] == name) {
+  var i;
+  for (i = 0; i < ao.length; i += 1) {
+    if (ao[i].name === name) {
       return true;
     }
   }
@@ -32,19 +36,17 @@ function updateFromModal(cb) {
     }).done(function () {
       $(that).prepend('<i class="icon-check"></i>');
       $(that).addClass('text-success');
-    })
-      .fail(function (jqXHR, status, error) {
-        $(that).append(' : ' + jqXHR.responseText);
-        $(that).addClass('text-error');
-      })
-      .always(function () {
-        number = number - 1;
-        if (number === 0) {
-          if (cb) {
-            cb();
-          }
+    }).fail(function (jqXHR, status, error) {
+      $(that).append(' : ' + jqXHR.responseText);
+      $(that).addClass('text-error');
+    }).always(function () {
+      number = number - 1;
+      if (number === 0) {
+        if (cb) {
+          cb();
         }
-      });
+      }
+    });
   });
 }
 
@@ -52,9 +54,9 @@ function modifyFromModal(cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   var roles = [];
-  $('#modal-roles input:checked').each(function() {
-      roles.push($(this).val());
-    });
+  $('#modal-roles input:checked').each(function () {
+    roles.push($(this).val());
+  });
   $('#modal .modal-body div').each(function (index) {
     var that = this;
     $.ajax({
@@ -62,28 +64,28 @@ function modifyFromModal(cb) {
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
-        roles:roles
-      }),
+        roles: roles
+      })
     }).done(function () {
       $(that).prepend('<i class="icon-check"></i>');
       $(that).addClass('text-success');
-    })
-      .fail(function (jqXHR, status, error) {
-        $(that).append(' : ' + jqXHR.responseText);
-        $(that).addClass('text-error');
-      })
-      .always(function () {
-        number = number - 1;
-        if (number === 0) {
-          if (cb) {
-            cb();
-          }
+    }).fail(function (jqXHR, status, error) {
+      $(that).append(' : ' + jqXHR.responseText);
+      $(that).addClass('text-error');
+    }).always(function () {
+      number = number - 1;
+      if (number === 0) {
+        if (cb) {
+          cb();
         }
-      });
+      }
+    });
   });
 }
 
 $(function () {
+  updateAjaxURL(prefix);
+
   $('#username').typeahead({
     name: 'usernames',
     limit: 20,
