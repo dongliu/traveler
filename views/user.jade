@@ -12,11 +12,12 @@ block head
 block content
   script.
     var roles = !{JSON.stringify(user.roles)};
+    var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
     //- a.btn.btn-primary(href="/users") users
     #message
     #profile.well
-      img(src="/adusers/#{user._id}/photo")
+      img(src='#{prefix}/adusers/#{user._id}/photo')
       dl
         dt Name
         dd #{user.name}
