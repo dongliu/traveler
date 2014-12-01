@@ -5,6 +5,8 @@ var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
 
 var auth = require('../lib/auth');
+var authConfig = require('../config/auth.json');
+
 var mongoose = require('mongoose');
 var sanitize = require('sanitize-caja');
 var util = require('util');
@@ -207,7 +209,9 @@ module.exports = function (app) {
 
 
   app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
-    return res.render('newform');
+    return res.render('newform', {
+      prefix: req.proxied ? req.proxied_prefix : ''
+    });
   });
 
   app.get('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
@@ -230,11 +234,12 @@ module.exports = function (app) {
         return res.render('builder', {
           id: req.params.id,
           title: form.title,
-          html: form.html
+          html: form.html,
+          prefix: req.proxied ? req.proxied_prefix : ''
         });
       }
 
-      return res.redirect('forms/' + req.params.id + '/preview');
+      return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + 'forms/' + req.params.id + '/preview');
     });
   });
 
@@ -278,9 +283,10 @@ module.exports = function (app) {
           console.error(err.msg);
           return res.send(500, err.msg);
         }
-        var url = req.protocol + '://' + req.get('host') + '/formfiles/' + newfile.id;
+        var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/formfiles/' + newfile.id;
+        // var url = req.protocol + '://' + req.get('host') + '/formfiles/' + newfile.id;
         res.set('Location', url);
-        return res.send(201, 'The uploaded file is at <a href="' + url + '">' + url + '</a>');
+        return res.send(201, 'The uploaded file is at <a target="_blank" href="' + url + '">' + url + '</a>');
       });
     });
   });
@@ -321,7 +327,8 @@ module.exports = function (app) {
       return res.render('viewer', {
         id: req.params.id,
         title: form.title,
-        html: form.html
+        html: form.html,
+        prefix: req.proxied ? req.proxied_prefix : ''
       });
     });
   });
@@ -341,7 +348,8 @@ module.exports = function (app) {
       return res.render('share', {
         type: 'Form',
         id: req.params.id,
-        title: form.title
+        title: form.title,
+        prefix: req.proxied ? req.proxied_prefix : ''
       });
     });
   });
@@ -490,7 +498,9 @@ module.exports = function (app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      var url = req.protocol + '://' + req.get('host') + '/forms/' + newform.id + '/';
+      // var url = req.protocol + '://' + req.get('host') + '/forms/' + newform.id + '/';
+      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + newform.id + '/';
+
       res.set('Location', url);
       return res.send(201, 'You can see the new form at <a href="' + url + '">' + url + '</a>');
     });
