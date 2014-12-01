@@ -104,7 +104,9 @@ module.exports = function (app) {
     if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
       return res.send(403, 'only admin allowed');
     }
-    return res.render('users');
+    return res.render('users', {
+      prefix: req.proxied ? req.proxied_prefix : ''
+    });
   });
 
   app.get('/usernames/:name', auth.ensureAuthenticated, function (req, res) {
@@ -118,7 +120,8 @@ module.exports = function (app) {
       if (user) {
         return res.render('user', {
           user: user,
-          myRoles: req.session.roles
+          myRoles: req.session.roles,
+          prefix: req.proxied ? req.proxied_prefix : ''
         });
       }
       return res.send(404, req.params.name + ' not found');
@@ -127,9 +130,6 @@ module.exports = function (app) {
 
 
   app.post('/users/', auth.ensureAuthenticated, function (req, res) {
-    // if (!req.is('json')) {
-    //   return res.send(415, 'json request expected.');
-    // }
 
     if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
       return res.send(403, 'only admin allowed');
@@ -148,7 +148,6 @@ module.exports = function (app) {
       }
       if (user) {
         var url = req.protocol + '://' + req.get('host') + '/users/' + user._id;
-        // res.set('Location', url);
         return res.send(200, 'The user is at ' + url);
       }
       addUser(req, res);
@@ -175,9 +174,6 @@ module.exports = function (app) {
 
 
   app.get('/users/:id', auth.ensureAuthenticated, function (req, res) {
-    // if (req.session.roles.indexOf('admin') === -1) {
-    //   return res.send(403, "You are not authorized to access this resource. ");
-    // }
     User.findOne({
       _id: req.params.id
     }).lean().exec(function (err, user) {
@@ -188,7 +184,8 @@ module.exports = function (app) {
       if (user) {
         return res.render('user', {
           user: user,
-          myRoles: req.session.roles
+          myRoles: req.session.roles,
+          prefix: req.proxied ? req.proxied_prefix : ''
         });
       }
       return res.send(404, req.params.id + ' has never logged into the application.');
