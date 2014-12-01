@@ -17,14 +17,14 @@ html
               li
                 a(href='https://controls.frib.msu.edu/', target='_blank') controls
               li.active
-                a(href='/') Traveler
+                a(href='#{prefix}/') Traveler
               li
                 a(href='https://controls.frib.msu.edu/controlshelp/', target='_blank') Trouble report
               li
-                a(href='/logout') Logout
+                a(href='#{prefix}/logout') Logout
     block content
     .container-fluid
       h6.text-right
-        a(href='/release.txt', target='_blank') Release 2.3.5
+        a(href='#{prefix}/release.txt', target='_blank') Release 2.3.5
     block js
 
