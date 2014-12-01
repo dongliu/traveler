@@ -1,14 +1,14 @@
-function proxied_address(req) {
-  if (req.proxied) {
-    return '/3001';
-  }
-  return '';
-}
+// function proxied_address(req) {
+//   if (req.proxied) {
+//     return '/3001';
+//   }
+//   return '';
+// }
 
 exports.main = function (req, res) {
   res.render('main', {
     roles: req.session.roles,
-    prefix: proxied_address(req)
+    prefix: req.proxied ? req.proxied_prefix : ''
   });
 };
 
