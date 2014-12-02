@@ -28,7 +28,7 @@ function sendRequest(data, cb, saveas) {
   var path = window.location.pathname;
   var url, type;
   if (saveas) {
-    url = '/forms/';
+    url = prefix + '/forms/';
     type = 'POST';
   } else {
     url = path;
@@ -831,7 +831,7 @@ $(function () {
     }
   });
 
-  updateAjaxURL(prefix);
+  // updateAjaxURL(prefix);
 
   init();
   working();
