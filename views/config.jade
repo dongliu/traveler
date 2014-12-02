@@ -2,48 +2,50 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB Traveler :: traveler :: #{_id} :: config
+  title FRIB Traveler :: traveler :: #{traveler._id} :: config
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='/font-awesome-4.0.3/css/font-awesome.css')
-  link(rel='stylesheet', href='/bootstrap-datepicker/css/datepicker.css')
-  link(rel='stylesheet', href='/stylesheets/style.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap-datepicker/css/datepicker.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
+  script.
+    var prefix = '!{prefix}';
   .container
     #message
     h3 Title:
       = ' '
-      if (locals.title == undefined)
+      if (locals.traveler.title == undefined)
         span#title.editable No title
       else
-        span#title.editable #{title}
+        span#title.editable #{traveler.title}
       = ' '
       button.btn-primary.editable Edit
     h4 Description:
       = ' '
-      if (locals.description == undefined)
+      if (locals.traveler.description == undefined)
         span#description.editable No description
       else
-        span#description.editable #{description}
+        span#description.editable #{traveler.description}
       = ' '
       button.btn-primary.editable Edit
     h4 Deadline:
       = ' '
       span.form-inline
-        if (locals.deadline == undefined)
+        if (locals.traveler.deadline == undefined)
           input#deadline(type='date')
         else
-          input#deadline(type='date', value='#{deadline}')
+          input#deadline(type='date', value='#{traveler.deadline}')
         = ' '
     p Created on
       = ' '
-      span.time #{createdOn}
-    if (locals.updatedOn != undefined)
-      p Updated by #{updatedBy} on
+      span.time #{traveler.createdOn}
+    if (locals.traveler.updatedOn != undefined)
+      p Updated by #{traveler.updatedBy} on
         = ' '
-        span.time #{updatedOn}
+        span.time #{traveler.updatedOn}
     h4 Status:
       = ' '
       case status
@@ -59,7 +61,7 @@ block content
           | frozen
     h4 Devices
     ul#devices
-      each device in devices
+      each device in traveler.devices
         li
           | #{device}
           button.btn.btn-small.btn-warning.removeDevice
@@ -67,7 +69,7 @@ block content
     br
     .btn-group
       button.btn.btn-primary#add Add devices
-    case status
+    case traveler.status
       when 0
         .btn-group
           button.btn.btn-primary#work Start to work
@@ -86,14 +88,15 @@ block content
         .btn-group
           button.btn.btn-primary#resume Resume
     .btn-group
-        a.btn.btn-info(href='/devices', target='_blank') Browse devices
+        a.btn.btn-info(href='#{prefix}/devices/', target='_blank') Browse devices
 
 block js
-  script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='/dependencies/typeahead.js')
-  script(type='text/javascript', src='/dependencies/modernizr.js')
-  script(type='text/javascript', src='/jquery/jquery.jeditable.js')
-  script(type='text/javascript', src='/dependencies/moment.js')
-  script(type='text/javascript', src='/bootstrap-datepicker/js/bootstrap-datepicker.js')
-  script(type='text/javascript', src='/javascripts/config.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery.jeditable.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/config.js')

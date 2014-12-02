@@ -1,5 +1,5 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false*/
+/*global moment: false, Binder: false, ajax401: false, Modernizr: false, prefix: false*/
 
 function cleanDeviceForm() {
   $('#newDevice').closest('li').remove();
@@ -25,19 +25,14 @@ function setStatus(s) {
 }
 
 $(function () {
-  $(document).ajaxError(function (event, jqXHR, settings, exception) {
-    if (jqXHR.status == 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }
-  });
+  ajax401(prefix);
   $('span.time').each(function () {
     $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
   });
   if ($('#deadline').attr('value')) {
     $('#deadline').val(moment($('#deadline').attr('value')).format('YYYY-MM-DD'));
   }
-  if (!Modernizr.inputtypes['date']) {
+  if (!Modernizr.inputtypes.date) {
     $('#deadline').datepicker({
       format: 'yyyy-mm-dd'
     });
@@ -103,7 +98,7 @@ $(function () {
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
-        deadline: moment($input.val()).utc(),
+        deadline: moment($input.val()).utc()
       })
     }).done(function (data, status, jqXHR) {
       deadline = $input.val();
