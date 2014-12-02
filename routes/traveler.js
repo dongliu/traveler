@@ -1,3 +1,5 @@
+/*jslint es5: true*/
+
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
 
@@ -53,7 +55,7 @@ function createTraveler(form, req, res) {
     var url = req.protocol + '://' + req.get('host') + '/travelers/' + doc.id + '/';
     res.set('Location', url);
     return res.json(201, {
-      location: '/travelers/' + doc.id + '/'
+      location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
     });
   });
 }
@@ -99,7 +101,7 @@ function cloneTraveler(source, req, res) {
     var url = req.protocol + '://' + req.get('host') + '/travelers/' + doc.id + '/';
     res.set('Location', url);
     return res.json(201, {
-      location: '/travelers/' + doc.id + '/'
+      location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
     });
   });
 }
@@ -384,7 +386,8 @@ module.exports = function (app) {
 
   app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
     return res.render('currenttravelers', {
-      device: req.query.device || null
+      device: req.query.device || null,
+      prefix: req.proxied ? req.proxied_prefix : ''
     });
   });
 
@@ -451,7 +454,10 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (canWrite(req, doc)) {
-        return res.render('traveler', doc);
+        return res.render('traveler', {
+          traveler: doc,
+          prefix: req.proxied ? req.proxied_prefix : ''
+        });
       }
       return res.redirect('/travelers/' + req.params.id + '/view');
     });
@@ -466,7 +472,10 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      return res.render('travelerviewer', doc);
+      return res.render('travelerviewer', {
+        traveler: doc,
+        prefix: req.proxied ? req.proxied_prefix : ''
+      });
     });
   });
 
@@ -527,7 +536,10 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (canWrite(req, doc)) {
-        return res.render('config', doc);
+        return res.render('config', {
+          traveler: doc,
+          prefix: req.proxied ? req.proxied_prefix : ''
+        });
       }
       return res.send(403, 'You are not authorized to access this resource');
     });
@@ -903,7 +915,7 @@ module.exports = function (app) {
           var url = req.protocol + '://' + req.get('host') + '/data/' + data._id;
           res.set('Location', url);
           return res.json(201, {
-            location: '/data/' + data._id
+            location: (req.proxied ? req.proxied_prefix : '') + '/data/' + data._id
           });
         });
       });
@@ -947,7 +959,8 @@ module.exports = function (app) {
       return res.render('share', {
         type: 'Traveler',
         id: req.params.id,
-        title: traveler.title
+        title: traveler.title,
+        prefix: req.proxied ? req.proxied_prefix : ''
       });
     });
   });

@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, Binder: false, Modernizr: false*/
-/*global travelerStatus: true, finishedInput: true*/
+/*global travelerStatus: true, finishedInput: true, ajax401: false*/
 
 function livespan(stamp) {
   return '<span data-livestamp="' + stamp + '"></span>';
@@ -23,7 +23,7 @@ function fileHistory(found) {
     link;
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      link = '/data/' + found[i]._id;
+      link = prefix + '/data/' + found[i]._id;
       output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
     }
   }
@@ -158,12 +158,14 @@ function validation_message(form) {
 
 $(function () {
 
-  $(document).ajaxError(function (event, jqXHR, settings, exception) {
+/*  $(document).ajaxError(function (event, jqXHR, settings, exception) {
     if (jqXHR.status === 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
-  });
+  });*/
+
+  ajax401(prefix);
 
   createSideNav();
 
