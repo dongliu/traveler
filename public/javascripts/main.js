@@ -180,12 +180,8 @@ function cloneFromModal() {
 
 
 $(function () {
-  $(document).ajaxError(function (event, jqXHR, settings, exception) {
-    if (jqXHR.status == 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }
-  });
+
+  ajax401(prefix);
 
   updateAjaxURL(prefix);
 
@@ -341,15 +337,15 @@ $(function () {
       tab: this.href
     }, 'FRIB traveler :: ' + this.text, this.href);
     console.log(History.getHash());
-  })
+  });
 
   // show the tab when back and forward
   window.onhashchange = function (newURL, oldURL) {
-    console.log(History.getHash())
+    // console.log(History.getHash());
     if (History.getHash()) {
       $('.nav-tabs a[href=#' + History.getHash() + ']').tab('show');
     }
-  }
+  };
 
   $('#form-travel').click(function (e) {
     var selected = fnGetSelected(formTable, 'row-selected');
