@@ -10,7 +10,7 @@ $(function () {
     name: 'usernames',
     limit: 20,
     valueKey: 'displayName',
-    prefetch: '/adusernames'
+    prefetch: prefix + '/adusernames'
   });
 
   var shareAoColumns = [selectColumn, useridColumn, userNameNoLinkColumn, accessColumn];
