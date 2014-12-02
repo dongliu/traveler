@@ -137,7 +137,7 @@ $(function () {
       name: 'devices',
       limit: 20,
       valueKey: 'serialNumber',
-      prefetch: '/devices/json'
+      prefetch: prefix + '/devices/json'
     });
     $('#confirm').click(function (e) {
       e.preventDefault();
