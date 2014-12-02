@@ -284,7 +284,6 @@ module.exports = function (app) {
           return res.send(500, err.msg);
         }
         var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/formfiles/' + newfile.id;
-        // var url = req.protocol + '://' + req.get('host') + '/formfiles/' + newfile.id;
         res.set('Location', url);
         return res.send(201, 'The uploaded file is at <a target="_blank" href="' + url + '">' + url + '</a>');
       });
@@ -498,7 +497,6 @@ module.exports = function (app) {
         console.error(err.msg);
         return res.send(500, err.msg);
       }
-      // var url = req.protocol + '://' + req.get('host') + '/forms/' + newform.id + '/';
       var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + newform.id + '/';
 
       res.set('Location', url);

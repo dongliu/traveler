@@ -5,6 +5,7 @@ var ldapClient = require('../lib/ldap-client');
 
 var fs = require('fs');
 var auth = require('../lib/auth');
+var authConfig = require('../config/auth.json');
 var mongoose = require('mongoose');
 var util = require('util');
 var path = require('path');
@@ -52,7 +53,7 @@ function createTraveler(form, req, res) {
       return res.send(500, err.msg);
     }
     console.log('new traveler ' + doc.id + ' created');
-    var url = req.protocol + '://' + req.get('host') + '/travelers/' + doc.id + '/';
+    var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
     res.set('Location', url);
     return res.json(201, {
       location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
@@ -98,10 +99,10 @@ function cloneTraveler(source, req, res) {
         }
       });
     });
-    var url = req.protocol + '://' + req.get('host') + '/travelers/' + doc.id + '/';
+    var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
     res.set('Location', url);
     return res.json(201, {
-      location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
+      location: url
     });
   });
 }
@@ -912,10 +913,10 @@ module.exports = function (app) {
             console.error(err.msg);
             return res.send(500, err.msg);
           }
-          var url = req.protocol + '://' + req.get('host') + '/data/' + data._id;
+          var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/data/' + data._id;
           res.set('Location', url);
           return res.json(201, {
-            location: (req.proxied ? req.proxied_prefix : '') + '/data/' + data._id
+            location: url
           });
         });
       });
