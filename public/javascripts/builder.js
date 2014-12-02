@@ -831,8 +831,6 @@ $(function () {
     }
   });
 
-  // updateAjaxURL(prefix);
-
   init();
   working();
   binding_events();
