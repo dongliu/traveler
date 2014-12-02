@@ -4,31 +4,28 @@ block head
   meta(charset='urf-8')
   title FRIB traveler :: devices
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='/datatables/css/dataTables.bootstrap.css')
-  link(rel='stylesheet', href='/font-awesome-4.0.3/css/font-awesome.css')
-  link(rel='stylesheet', href='/stylesheets/style.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
+  script.
+    var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
     #message
-    //- #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
-    //-   .modal-header
-    //-     h3#modalLabel
-    //-   .modal-body
-    //-   .modal-footer
     h3 FRIB physical devices
     table#device-table.table.table-bordered.table-hover
 
 block js
-  script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='/datatables/js/ZeroClipboard.js')
-  script(type='text/javascript', src='/datatables/js/TableTools.js')
-  script(type='text/javascript', src='/datatables/js/dataTables.bootstrap.js')
-  script(type='text/javascript', src='/dependencies/moment.js')
-  script(type='text/javascript', src='/javascripts/table.js')
-  script(type='text/javascript', src='/javascripts/util.js')
-  script(type='text/javascript', src='/javascripts/devices.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/devices.js')

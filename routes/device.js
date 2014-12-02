@@ -4,7 +4,9 @@ var request = require('request');
 
 module.exports = function (app) {
   app.get('/devices/', function (req, res) {
-    res.render('devices');
+    res.render('devices', {
+      prefix: req.proxied ? req.proxied_prefix : ''
+    });
   });
 
   app.get('/devices/json', function (req, res) {
