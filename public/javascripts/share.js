@@ -1,7 +1,99 @@
+/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
+/*global moment: false, Binder: false, prefix: false*/
+/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, accessColumn: false, sDom: false, oTableTools: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
+
+
 var path = window.location.pathname;
+
+function removeFromModal(cb) {
+  $('#remove').prop('disabled', true);
+  var number = $('#modal .modal-body div').length;
+  $('#modal .modal-body div').each(function (index) {
+    var that = this;
+    $.ajax({
+      url: path + that.id,
+      type: 'DELETE'
+    }).done(function () {
+      $(that).wrap('<del></del>');
+      $(that).addClass('text-success');
+    })
+      .fail(function (jqXHR, status, error) {
+        $(that).append(' : ' + jqXHR.responseText);
+        $(that).addClass('text-error');
+      })
+      .always(function () {
+        number = number - 1;
+        if (number === 0) {
+          if (cb) {
+            cb();
+          }
+        }
+      });
+  });
+}
+
+function modifyFromModal(cb) {
+  $('#remove').prop('disabled', true);
+  var number = $('#modal .modal-body div').length;
+  $('#modal .modal-body div').each(function (index) {
+    var that = this;
+    $.ajax({
+      url: path + that.id,
+      type: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        access: $('#modal-access').prop('checked') ? 'write' : 'read'
+      })
+    }).done(function () {
+      $(that).prepend('<i class="icon-check"></i>');
+      $(that).addClass('text-success');
+    })
+      .fail(function (jqXHR, status, error) {
+        $(that).append(' : ' + jqXHR.responseText);
+        $(that).addClass('text-error');
+      })
+      .always(function () {
+        number = number - 1;
+        if (number === 0) {
+          if (cb) {
+            cb();
+          }
+        }
+      });
+  });
+}
+
+
+function inArray(name, ao) {
+  var i;
+  for (i = 0; i < ao.length; i += 1) {
+    if (ao[i].username === name) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function initTable(oTable) {
+  $.ajax({
+    url: path + 'json',
+    type: 'GET',
+    dataType: 'json'
+  }).done(function (json) {
+    oTable.fnClearTable();
+    oTable.fnAddData(json);
+    oTable.fnDraw();
+  }).fail(function (jqXHR, status, error) {
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for sharing information.</div>');
+    }
+  });
+}
+
+
 $(function () {
   $(document).ajaxError(function (event, jqXHR, settings, exception) {
-    if (jqXHR.status == 401) {
+    if (jqXHR.status === 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
@@ -113,87 +205,3 @@ $(function () {
   initTable(shareTable);
 
 });
-
-function removeFromModal(cb) {
-  $('#remove').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
-    var that = this;
-    $.ajax({
-      url: path + that.id,
-      type: 'DELETE'
-    }).done(function () {
-      $(that).wrap('<del></del>');
-      $(that).addClass('text-success');
-    })
-      .fail(function (jqXHR, status, error) {
-        $(that).append(' : ' + jqXHR.responseText);
-        $(that).addClass('text-error');
-      })
-      .always(function () {
-        number = number - 1;
-        if (number === 0) {
-          if (cb) {
-            cb();
-          }
-        }
-      });
-  });
-}
-
-function modifyFromModal(cb) {
-  $('#remove').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
-    var that = this;
-    $.ajax({
-      url: path + that.id,
-      type: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        access: $('#modal-access').prop('checked') ? 'write' : 'read'
-      }),
-    }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
-      $(that).addClass('text-success');
-    })
-      .fail(function (jqXHR, status, error) {
-        $(that).append(' : ' + jqXHR.responseText);
-        $(that).addClass('text-error');
-      })
-      .always(function () {
-        number = number - 1;
-        if (number === 0) {
-          if (cb) {
-            cb();
-          }
-        }
-      });
-  });
-}
-
-
-function inArray(name, ao) {
-  for (var i = 0; i < ao.length; i += 1) {
-    if (ao[i]['username'] == name) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function initTable(oTable) {
-  $.ajax({
-    url: path + 'json',
-    type: 'GET',
-    dataType: 'json'
-  }).done(function (json) {
-    oTable.fnClearTable();
-    oTable.fnAddData(json);
-    oTable.fnDraw();
-  }).fail(function (jqXHR, status, error) {
-    if (jqXHR.status == 401) {
-      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for sharing information.</div>');
-    }
-  }).always();
-}
