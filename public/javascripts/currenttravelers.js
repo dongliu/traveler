@@ -18,7 +18,7 @@ function addData(oTable, url) {
   }).always();
 }
 
-var externalUrl = "https://liud-dev:8181/traveler/showForm.php?assigned=";
+var externalUrl = "https://controls.frib.msu.edu/traveler/showForm.php?assigned=";
 
 var template = {
   title: {
