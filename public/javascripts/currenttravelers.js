@@ -41,7 +41,8 @@ var template = {
     path: "$.Completed",
     transform: function (data) {
       return data ? 2 : 1;
-    }
+    },
+    defaultValue: -1
   },
   url: {
     path: "$.ID",
@@ -84,7 +85,7 @@ function addExternalData(oTable, url) {
     var transformed = [];
     var i, size = json.length;
     for (i = 0; i < size; i += 1) {
-      transformed[i] = transform(json[i]);
+      transformed[i] = transform(json[i], template);
     }
     oTable.fnAddData(transformed);
     oTable.fnDraw();
@@ -96,19 +97,6 @@ function addExternalData(oTable, url) {
   }).always();
 }
 
-function formatTravelerStatus(s) {
-  var status = {
-    '1': 'active',
-    '1.5': 'submitted for completion',
-    '2': 'completed',
-    '3': 'frozen',
-    '0': 'initialized'
-  };
-  if (status[s.toString()]) {
-    return status[s.toString()];
-  }
-  return 'unknown';
-}
 $(function () {
   ajax401();
   var currentTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
@@ -127,10 +115,10 @@ $(function () {
   currentTravelerTable.fnClearTable();
   if (device) {
     addData(currentTravelerTable, prefix + '/currenttravelers/json?device=' + device);
-    addExternalData(currentTravelerTable, 'https://liud-dev:8181/traveler/api.php?resource=travelers&device=' + device);
+    addExternalData(currentTravelerTable, 'https://controls.frib.msu.edu/traveler/api.php?resource=travelers&device=' + device);
   } else {
     addData(currentTravelerTable, prefix + '/currenttravelers/json');
-    addExternalData(currentTravelerTable, 'https://liud-dev:8181/traveler/api.php?resource=travelers');
+    addExternalData(currentTravelerTable, 'https://controls.frib.msu.edu/traveler/api.php?resource=travelers');
   }
   // binding events
   filterEvent();
