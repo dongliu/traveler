@@ -4,18 +4,25 @@ block head
   meta(charset='urf-8')
   title FRIB Traveler :: traveler :: #{_id}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
-  link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='/font-awesome-4.0.3/css/font-awesome.css')
-  link(rel='stylesheet', href='/stylesheets/style.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
+  script.
+    var prefix = '!{prefix}';
   .container
     #message
-    h3 Traveler title:  #{title}
-    if (locals.status !== undefined)
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body
+      .modal-footer
+    h3 Traveler title:  #{traveler.title}
+    if (locals.traveler.status !== undefined)
       h4 Status:
-        case locals.status
+        case locals.traveler.status
           when 1
             = ' '
             span active
@@ -33,9 +40,9 @@ block content
             span initialized
           default
             = ' '
-    if (locals.devices !== undefined && devices.length > 0)
-        h4 Devices: #{devices}
-    if (locals.status !== undefined && locals.status > 0)
+    if (locals.traveler.devices !== undefined && traveler.devices.length > 0)
+      h4 Devices: #{devices}
+    if (locals.traveler.status !== undefined && locals.traveler.status > 0)
       .btn-group(data-toggle='buttons-radio')
         button.btn.btn-info#show-validation Show validation
         button.btn.btn-info#hide-validation.active Hide validation
@@ -46,26 +53,31 @@ block content
       button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
     #validation.well.hide
     #details.collapse.out
-      if (locals.description !== undefined)
-        h4 Description: #{description}
-      p Created by #{createdBy}
+      if (locals.traveler.description !== undefined)
+        h4 Description: #{traveler.description}
+      if (locals.traveler.deadline !== undefined)
+        p Deadline:
+          = ' '
+          span.time #{traveler.deadline}
+      p Created by #{traveler.createdBy}
         = ' '
-        if (locals.clonedBy !== undefined)
-          | cloned by #{clonedBy} on
+        if (locals.traveler.clonedBy !== undefined)
+          | cloned by #{traveler.clonedBy} on
         else
           | on
         = ' '
-        span.time #{createdOn}
-      if (locals.updatedBy !== undefined)
-        p Updated by #{updatedBy} on #{updatedOn}
-
+        span.time #{traveler.createdOn}
+      if (locals.traveler.updatedBy !== undefined)
+        p Updated by #{traveler.updatedBy} on
+          = ' '
+          span.time #{traveler.updatedOn}
     br
     form.form-horizontal#form
-      != forms[0].html
+      != traveler.forms[0].html
 
 block js
-  script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='/dependencies/binder.js')
-  script(type='text/javascript', src='/dependencies/moment.js')
-  script(type='text/javascript', src='/javascripts/travelerviewer.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/travelerviewer.js')
