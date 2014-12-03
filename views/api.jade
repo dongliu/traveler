@@ -4,11 +4,11 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     title FRIB Traveler :: api
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='/bootstrap/css/bootstrap.css')
-    link(rel='stylesheet', href='/bootstrap/css/bootstrap-responsive.css')
-    link(rel='stylesheet', href='/datatables/css/dataTables.bootstrap.css')
-    link(rel='stylesheet', href='/font-awesome-4.0.3/css/font-awesome.css')
-    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+    link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+    link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+    link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
+    link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
   body(data-spy='scroll', data-target='.bs-docs-sidebar')
     .navbar.navbar-inverse.navbar-fixed-top
       .navbar-inner
@@ -21,13 +21,13 @@ html
           .nav-collapse.collapse
             ul.nav
               li
-                a(href='http://cable/', target='_blank') Cable
+                a(href='https://controls.frib.msu.edu/', target='_blank') controls
               li.active
-                a(href='/') Traveler
+                a(href='#{prefix}/') Traveler
               li
                 a(href='https://controls.frib.msu.edu/controlshelp/', target='_blank') Trouble report
               li
-                a(href='/logout') Logout
+                a(href='#{prefix}/logout') Logout
     header.jumbotron.subhead
       .container
         //- .hero-unit
@@ -221,5 +221,5 @@ html
               | . Thank you.
 
 
-    script(type='text/javascript', src='/jquery/jquery-1.9.1.js')
-    script(type='text/javascript', src='/bootstrap/js/bootstrap.js')
+    script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+    script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')

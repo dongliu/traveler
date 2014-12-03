@@ -101,7 +101,9 @@ require('./routes/device')(app);
 
 app.get('/about', about.index);
 app.get('/api', function (req, res) {
-  res.render('api');
+  res.render('api', {
+    prefix: req.proxied ? req.proxied_prefix : ''
+  });
 });
 app.get('/', auth.ensureAuthenticated, routes.main);
 app.get('/logout', routes.logout);
