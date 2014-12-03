@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false*/
-/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
+/*global moment: false, Binder: false, jsonPath: false, device: false, prefix: false, ajax401: false*/
+/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, deadlineColumn: false, progressColumn: false*/
 
 function addData(oTable, url) {
   $.ajax({
@@ -23,7 +23,7 @@ var externalUrl = "https://liud-dev:8181/traveler/showForm.php?assigned=";
 var template = {
   title: {
     path: "$.TravelerNumber",
-    default: "unknown"
+    defaultValue: "unknown"
   },
   devices: {
     path: "$.Device",
@@ -49,22 +49,26 @@ var template = {
       return externalUrl + data;
     }
   }
-}
+};
 
-
-function transform(json) {
-  var prop, output = {}, valueFromPath;
+function transform(json, template) {
+  var prop, output = {},
+    valueFromPath;
   for (prop in template) {
     if (template.hasOwnProperty(prop)) {
       valueFromPath = jsonPath.eval(json, template[prop].path);
-      if (valueFromPath.length == 1) {
-        if (typeof template[prop].transform == 'function') {
+      if (valueFromPath.length === 1) {
+        if (typeof template[prop].transform === 'function') {
           output[prop] = template[prop].transform(valueFromPath[0]);
         } else {
           output[prop] = valueFromPath[0];
         }
       } else {
-        output[prop] = null;
+        if (template[prop].hasOwnProperty('defaultValue')) {
+          output[prop] = template[prop].defaultValue;
+        } else {
+          output[prop] = null;
+        }
       }
     }
   }
@@ -77,7 +81,8 @@ function addExternalData(oTable, url) {
     type: 'GET',
     dataType: 'json'
   }).done(function (json) {
-    var transformed = [], i, size = json.length;
+    var transformed = [];
+    var i, size = json.length;
     for (i = 0; i < size; i += 1) {
       transformed[i] = transform(json[i]);
     }
@@ -99,18 +104,13 @@ function formatTravelerStatus(s) {
     '3': 'frozen',
     '0': 'initialized'
   };
-  if (status['' + s]) {
-    return status['' + s];
+  if (status[s.toString()]) {
+    return status[s.toString()];
   }
   return 'unknown';
 }
 $(function () {
-  $(document).ajaxError(function (event, jqXHR, settings, exception) {
-    if (jqXHR.status == 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }
-  });
+  ajax401();
   var currentTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#current-traveler-table', currentTravelerAoColumns);
   var currentTravelerTable = $('#current-traveler-table').dataTable({
@@ -126,12 +126,10 @@ $(function () {
   });
   currentTravelerTable.fnClearTable();
   if (device) {
-    addData(currentTravelerTable, '/currenttravelers/json?device=' + device);
-    // addExternalData(currentTravelerTable, '/currenttravelersinv1/json?device=' + device);
+    addData(currentTravelerTable, prefix + '/currenttravelers/json?device=' + device);
     addExternalData(currentTravelerTable, 'https://liud-dev:8181/traveler/api.php?resource=travelers&device=' + device);
   } else {
-    addData(currentTravelerTable, '/currenttravelers/json');
-    // addExternalData(currentTravelerTable, '/currenttravelersinv1/json');
+    addData(currentTravelerTable, prefix + '/currenttravelers/json');
     addExternalData(currentTravelerTable, 'https://liud-dev:8181/traveler/api.php?resource=travelers');
   }
   // binding events
