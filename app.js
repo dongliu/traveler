@@ -9,6 +9,8 @@ var express = require('express'),
   multer = require('multer'),
   path = require('path');
 
+var rotator = require('file-stream-rotator');
+
 var key = fs.readFileSync('./config/node.key'),
   cert = fs.readFileSync('./config/node.pem'),
   credentials = {
@@ -51,19 +53,28 @@ var uploadDir = './uploads/';
 
 app.enable('strict routing');
 
-var access_logfile = fs.createWriteStream('./logs/access.log', {
-  flags: 'a'
-});
+if (app.get('env') === 'production') {
+  var access_logfile = rotator.getStream({
+    filename: __dirname + '/logs/access.log',
+    frequency: 'daily'
+  });
+}
 
 app.configure(function () {
   app.set('port', process.env.PORT || 3001);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
-  // app.use(express.logger({stream: access_logfile}));
+  if (app.get('env') === 'production') {
+    app.use(express.logger({
+      stream: access_logfile
+    }));
+  }
   app.use(express.compress());
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(express.favicon(__dirname + '/public/favicon.ico'));
-  app.use(express.logger('dev'));
+  if (app.get('env') === 'development') {
+    app.use(express.logger('dev'));
+  }
   app.use(express.methodOverride());
   app.use(express.cookieParser());
   app.use(express.session({
@@ -114,7 +125,7 @@ app.get('/apis', function (req, res) {
 
 api.enable('strict routing');
 api.configure(function () {
-  api.set('port', process.env.PORT || 3443);
+  api.set('port', process.env.APIPORT || 3443);
   api.use(express.logger('dev'));
   // api.use(express.logger({stream: access_logfile}));
   api.use(auth.basicAuth);
@@ -125,7 +136,7 @@ api.configure(function () {
 require('./routes/api')(api);
 
 var server = http.createServer(app).listen(app.get('port'), function () {
-  console.log('Express server listening on port  ' + app.get('port'));
+  console.log('Express server listening on port ' + app.get('port'));
 });
 
 var apiserver = https.createServer(credentials, api).listen(api.get('port'), function () {
