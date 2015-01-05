@@ -1,3 +1,8 @@
+release v2.3.6
+date: Jan. 5, 2015
+- display text for checkboxes without a label in a traveler's summary
+- update resource views to enable access through a gateway/firewall
+
 release v2.3.5
 date: Oct. 27, 2014
 - fix a bug that validation messages cannot be shown when a traveler is submitted or completed
