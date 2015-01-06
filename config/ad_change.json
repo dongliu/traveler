@@ -5,6 +5,9 @@
   "searchBase": "ou=...,dc=...",
   "searchFilter": "(&(objectClass=user)(sAMAccountName=_id))",
   "nameFilter": "(&(objectClass=user)(displayName=_name))",
+  "groupSearchBase": "ou=...,dc=...",
+  "groupSearchFilter": "(&(objectClass=group)(sAMAccountName=_id))",
   "objAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName"],
+  "groupAttributes": ["sAMAccountName","displayName","mail"],
   "rawAttributes": ["thumbnailPhoto"]
 }
