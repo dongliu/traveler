@@ -1,3 +1,5 @@
+var auth = require('../config/auth.json');
+
 exports.main = function (req, res) {
   res.render('main', {
     roles: req.session.roles,
@@ -17,5 +19,9 @@ exports.logout = function (req, res) {
       }
     });
   }
-  res.redirect('https://liud-dev.nscl.msu.edu/cas/logout');
+  if (res.proxied) {
+    res.redirect(auth.proxied_cas + '/logout');
+  } else {
+    res.redirect(auth.cas + '/logout');
+  }
 };
