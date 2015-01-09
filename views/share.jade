@@ -14,15 +14,6 @@ block content
   script.
     var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
-    .well
-      form.form-inline
-        input#username.input(type='text', placeholder='Last, First', name='name')
-        != ' '
-        label.checkbox
-          input#access(type='checkbox', name='access', value='write')
-          | Write
-        != ' '
-        button.btn.btn-primary#add(type='submit') Add to share
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -32,6 +23,15 @@ block content
     h3 Shared user list for #{type}
       = ' '
       span.text-info #{title}
+    .well
+      form.form-inline
+        input#username.input(type='text', placeholder='Last, First', name='name')
+        != ' '
+        label.checkbox
+          input#access(type='checkbox', name='access', value='write')
+          | Write
+        != ' '
+        button.btn.btn-primary#add(type='submit') Add to share
     .btn-toolbar
       .btn-group
         button.btn.btn-info#share-modify
@@ -41,8 +41,30 @@ block content
         button.btn.btn-warning#share-remove
           i.fa.fa-trash-o.fa-lg
           | &nbsp;Remove
-
     table#share-table.table.table-bordered.table-hover
+    h3 Shared group list for #{type}
+      = ' '
+      span.text-info #{title}
+    .well
+      form.form-inline
+        input#groupname.input(type='text', placeholder='GROUP.SUB', name='group')
+        != ' '
+        label.checkbox
+          input#groupaccess(type='checkbox', name='access', value='write')
+          | Write
+        != ' '
+        button.btn.btn-primary#addgroup(type='submit') Add to share
+    .btn-toolbar
+      .btn-group
+        button.btn.btn-info#groupshare-modify
+          i.fa.fa-wrench.fa-lg
+          | &nbsp;Modify
+      .btn-group
+        button.btn.btn-warning#groupshare-remove
+          i.fa.fa-trash-o.fa-lg
+          | &nbsp;Remove
+
+    table#groupshare-table.table.table-bordered.table-hover
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

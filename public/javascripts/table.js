@@ -413,6 +413,13 @@ var fullNameNoLinkColumn = {
   bFilter: true
 };
 
+var groupNameColumn = {
+  sTitle: 'Group name',
+  mData: 'groupname',
+  sDefaultContent: '',
+  bFilter: true
+}
+
 var accessColumn = {
   sTitle: 'Privilege',
   mData: 'access',
