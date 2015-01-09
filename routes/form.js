@@ -167,6 +167,56 @@ function addUser(req, res, form) {
 
 }
 
+function addShare(req, res, form) {
+  var name = req.param('name');
+
+  if (req.params.list === 'users') {
+    // check local db first then try ad
+    User.findOne({
+      name: name
+    }, function (err, user) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      if (user) {
+        var access = 0;
+        if (req.param('access') && req.param('access') === 'write') {
+          access = 1;
+        }
+        form.sharedWith.addToSet({
+          _id: user._id,
+          username: name,
+          access: access
+        });
+        form.save(function (err) {
+          if (err) {
+            console.error(err.msg);
+            return res.send(500, err.msg);
+          }
+          return res.send(201, 'The user named ' + name + ' was added to the share list.');
+        });
+        user.update({
+          $addToSet: {
+            forms: form._id
+          }
+        }, function (err) {
+          if (err) {
+            console.error(err.msg);
+          }
+        });
+      } else {
+        addUserFromAD(req, res, form);
+      }
+    });
+  }
+
+  if (req.params.list === 'groups') {
+
+  }
+
+}
+
 
 module.exports = function (app) {
 
@@ -353,7 +403,7 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/forms/:id/share/json', auth.ensureAuthenticated, function (req, res) {
+  app.get('/forms/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id).lean().exec(function (err, form) {
       if (err) {
         console.error(err.msg);
@@ -365,11 +415,33 @@ module.exports = function (app) {
       if (form.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      return res.json(200, form.sharedWith || []);
+      if (req.params.list === 'users') {
+        return res.json(200, form.sharedWith || []);
+      }
+      if (req.params.list === 'groups') {
+        return res.json(200, form.sharedGroup || []);
+      }
+      return res.send(400, 'unknown share list.');
     });
   });
 
-  app.post('/forms/:id/share/', auth.ensureAuthenticated, function (req, res) {
+  // app.get('/forms/:id/share/json', auth.ensureAuthenticated, function (req, res) {
+  //   Form.findById(req.params.id).lean().exec(function (err, form) {
+  //     if (err) {
+  //       console.error(err.msg);
+  //       return res.send(500, err.msg);
+  //     }
+  //     if (!form) {
+  //       return res.send(410, 'gone');
+  //     }
+  //     if (form.createdBy !== req.session.userid) {
+  //       return res.send(403, 'you are not authorized to access this resource');
+  //     }
+  //     return res.json(200, form.sharedWith || []);
+  //   });
+  // });
+
+  app.post('/forms/:id/share/:list/', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id, function (err, form) {
       if (err) {
         console.error(err.msg);
@@ -381,13 +453,25 @@ module.exports = function (app) {
       if (form.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      var share = getSharedWith(form.sharedWith, req.param.name);
+      var share = -2;
+      if (req.params.list === 'users') {
+        share = getSharedWith(form.sharedWith, req.param.name);
+      }
+      if (req.params.list === 'groups') {
+        share = getSharedWith(form.sharedGroup, req.param.name);
+      }
+
+      if (share === -2) {
+        return res.send(400, 'unknown share list.');
+      }
+
+      if (share <= 0) {
+        return res.send(400, req.param.name + ' is already in the ' + req.params.list + ' list.');
+      }
+
       if (share === -1) {
         // new user
         addUser(req, res, form);
-      } else {
-        // the user cannot be changed in this way
-        return res.send(400, 'The user named ' + req.param.name + ' is already in the list.');
       }
     });
   });
