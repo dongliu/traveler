@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, Binder: false, prefix: false*/
-/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, accessColumn: false, sDom: false, oTableTools: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
+/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupNameColumn: false, accessColumn: false, sDom: false, oTableTools: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
 
 
 var path = window.location.pathname;
@@ -16,19 +16,17 @@ function removeFromModal(cb) {
     }).done(function () {
       $(that).wrap('<del></del>');
       $(that).addClass('text-success');
-    })
-      .fail(function (jqXHR, status, error) {
-        $(that).append(' : ' + jqXHR.responseText);
-        $(that).addClass('text-error');
-      })
-      .always(function () {
-        number = number - 1;
-        if (number === 0) {
-          if (cb) {
-            cb();
-          }
+    }).fail(function (jqXHR, status, error) {
+      $(that).append(' : ' + jqXHR.responseText);
+      $(that).addClass('text-error');
+    }).always(function () {
+      number = number - 1;
+      if (number === 0) {
+        if (cb) {
+          cb();
         }
-      });
+      }
+    });
   });
 }
 
@@ -47,19 +45,17 @@ function modifyFromModal(cb) {
     }).done(function () {
       $(that).prepend('<i class="icon-check"></i>');
       $(that).addClass('text-success');
-    })
-      .fail(function (jqXHR, status, error) {
-        $(that).append(' : ' + jqXHR.responseText);
-        $(that).addClass('text-error');
-      })
-      .always(function () {
-        number = number - 1;
-        if (number === 0) {
-          if (cb) {
-            cb();
-          }
+    }).fail(function (jqXHR, status, error) {
+      $(that).append(' : ' + jqXHR.responseText);
+      $(that).addClass('text-error');
+    }).always(function () {
+      number = number - 1;
+      if (number === 0) {
+        if (cb) {
+          cb();
         }
-      });
+      }
+    });
   });
 }
 
@@ -67,7 +63,7 @@ function modifyFromModal(cb) {
 function inArray(name, ao) {
   var i;
   for (i = 0; i < ao.length; i += 1) {
-    if (ao[i].username === name) {
+    if ((ao[i].username || ao[i].groupname) === name) {
       return true;
     }
   }
@@ -88,6 +84,33 @@ function initTable(oTable) {
       $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for sharing information.</div>');
     }
   });
+}
+
+function addto(name, access, table, type) {
+  if (inArray(name, table.fnGetData())) {
+    //show message
+    $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The ' + type + ' named <strong>' + name + '</strong> is already in the ' + type + ' share list. </div>');
+  } else {
+    $.ajax({
+      url: path,
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        name: name,
+        access: $('#access').prop('checked') ? 'write' : 'read',
+        type: type
+      }),
+      success: function (data, status, jqXHR) {
+        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
+        initTable(table);
+      },
+      error: function (jqXHR, status, error) {
+        if (jqXHR.status !== 401) {
+          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ' + type + 'share list : ' + jqXHR.responseText + '</div>');
+        }
+      }
+    });
+  }
 }
 
 
@@ -117,12 +140,32 @@ $(function () {
     oTableTools: oTableTools
   });
 
+  var groupShareAoColumns = [selectColumn, groupNameColumn, accessColumn];
+  var groupShareTable = $('#groupshare-table').dataTable({
+    aaData: [],
+    // 'bAutoWidth': false,
+    aoColumns: groupShareAoColumns,
+    aaSorting: [
+      [1, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+
   selectEvent();
   filterEvent();
 
   $('#add').click(function (e) {
     e.preventDefault();
     var name = $('#username').val();
+    var access = $('#access').prop('checked') ? 'write' : 'read';
+    addto(name, access, shareTable, 'user');
+    document.forms[0].reset();
+  });
+
+  $('#addgroup').click(function (e) {
+    e.preventDefault();
+    var name = $('#groupname').val();
     if (inArray(name, shareTable.fnGetData())) {
       //show message
       $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The user named <strong>' + name + '</strong> is already in the share list. </div>');
@@ -146,7 +189,7 @@ $(function () {
         }
       });
     }
-    document.forms[0].reset();
+    document.forms[1].reset();
   });
 
   $('#share-remove').click(function (e) {
