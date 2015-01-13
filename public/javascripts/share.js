@@ -63,16 +63,16 @@ function modifyFromModal(cb) {
 function inArray(name, ao) {
   var i;
   for (i = 0; i < ao.length; i += 1) {
-    if ((ao[i].username || ao[i].groupname) === name) {
+    if ((ao[i].username || ao[i]._id) === name) {
       return true;
     }
   }
   return false;
 }
 
-function initTable(oTable) {
+function initTable(list, oTable) {
   $.ajax({
-    url: path + 'users/json',
+    url: path + list + '/json',
     type: 'GET',
     dataType: 'json'
   }).done(function (json) {
@@ -86,27 +86,24 @@ function initTable(oTable) {
   });
 }
 
-function addto(name, access, table, type) {
-  if (inArray(name, table.fnGetData())) {
+function addto(data, table, list) {
+  if (inArray(data.name || data.id, table.fnGetData())) {
     //show message
-    $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The ' + type + ' named <strong>' + name + '</strong> is already in the ' + type + ' share list. </div>');
+    $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button><strong>' + name + '</strong> is already in the ' + list + ' share list. </div>');
   } else {
     $.ajax({
-      url: path + 'users/',
+      url: path + list + '/',
       type: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify({
-        name: name,
-        access: $('#access').prop('checked') ? 'write' : 'read',
-        type: type
-      }),
-      success: function (data, status, jqXHR) {
+      data: JSON.stringify(data),
+      processData: false,
+      success: function (res, status, jqXHR) {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
-        initTable(table);
+        initTable(list, table);
       },
       error: function (jqXHR, status, error) {
         if (jqXHR.status !== 401) {
-          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ' + type + 'share list : ' + jqXHR.responseText + '</div>');
+          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ' + list + ' share list : ' + jqXHR.responseText + '</div>');
         }
       }
     });
@@ -164,38 +161,19 @@ $(function () {
 
   $('#add').click(function (e) {
     e.preventDefault();
-    var name = $('#username').val();
-    var access = $('#access').prop('checked') ? 'write' : 'read';
-    addto(name, access, shareTable, 'user');
+    var data = {};
+    data.name = $('#username').val();
+    data.access = $('#access').prop('checked') ? 'write' : 'read';
+    addto(data, shareTable, 'users');
     document.forms[0].reset();
   });
 
   $('#addgroup').click(function (e) {
     e.preventDefault();
-    var name = $('#groupname').val();
-    if (inArray(name, shareTable.fnGetData())) {
-      //show message
-      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The user named <strong>' + name + '</strong> is already in the share list. </div>');
-    } else {
-      $.ajax({
-        url: path,
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-          name: name,
-          access: $('#access').prop('checked') ? 'write' : 'read'
-        }),
-        success: function (data, status, jqXHR) {
-          $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
-          initTable(shareTable);
-        },
-        error: function (jqXHR, status, error) {
-          if (jqXHR.status !== 401) {
-            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
-          }
-        }
-      });
-    }
+    var data = {};
+    data.id = $('#groupid').val().toLowerCase();
+    data.access = $('#groupaccess').prop('checked') ? 'write' : 'read';
+    addto(data, groupShareTable, 'groups');
     document.forms[1].reset();
   });
 
@@ -252,6 +230,7 @@ $(function () {
     }
   });
 
-  initTable(shareTable);
+  initTable('users', shareTable);
+  initTable('groups', groupShareTable);
 
 });
