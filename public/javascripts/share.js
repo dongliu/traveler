@@ -30,15 +30,16 @@ function removeFromModal(cb) {
   });
 }
 
-function modifyFromModal(cb) {
+function modifyFromModal(list, cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
     var that = this;
     $.ajax({
-      url: path + that.id,
+      url: path + list + '/' + that.id,
       type: 'PUT',
       contentType: 'application/json',
+      processData: false,
       data: JSON.stringify({
         access: $('#modal-access').prop('checked') ? 'write' : 'read'
       })
@@ -217,8 +218,8 @@ $(function () {
       $('#modify').click(function (e) {
         e.preventDefault();
         $('#modify').prop('disabled', true);
-        modifyFromModal(function () {
-          initTable(shareTable);
+        modifyFromModal('users', function () {
+          initTable('users', shareTable);
         });
       });
       $('#modal').modal('show');
