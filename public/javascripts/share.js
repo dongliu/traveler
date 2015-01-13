@@ -23,13 +23,13 @@ function initTable(list, oTable) {
 }
 
 
-function removeFromModal(cb) {
+function removeFromModal(list, cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
     var that = this;
     $.ajax({
-      url: path + that.id,
+      url: path + list + '/' + that.id,
       type: 'DELETE'
     }).done(function () {
       $(that).wrap('<del></del>');
@@ -46,6 +46,37 @@ function removeFromModal(cb) {
       }
     });
   });
+}
+
+function remove(list, oTable) {
+  var selected = fnGetSelected(oTable, 'row-selected');
+  if (selected.length) {
+    $('#modalLabel').html('Remove the following ' + selected.length + ' ' + list + '? ');
+    $('#modal .modal-body').empty();
+    selected.forEach(function (row) {
+      var data = oTable.fnGetData(row);
+      if (list === 'users') {
+        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.username + '</div>');
+      }
+      if (list === 'groups') {
+        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.groupname + '</div>');
+      }
+    });
+    $('#modal .modal-footer').html('<button id="remove" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+    $('#remove').click(function (e) {
+      e.preventDefault();
+      $('#remove').prop('disabled', true);
+      removeFromModal(list, function () {
+        initTable(list, oTable);
+      });
+    });
+    $('#modal').modal('show');
+  } else {
+    $('#modalLabel').html('Alert');
+    $('#modal .modal-body').html('No item has been selected!');
+    $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+    $('#modal').modal('show');
+  }
 }
 
 function modifyFromModal(list, cb) {
@@ -223,29 +254,11 @@ $(function () {
   });
 
   $('#share-remove').click(function (e) {
-    var selected = fnGetSelected(shareTable, 'row-selected');
-    if (selected.length) {
-      $('#modalLabel').html('Remove the following ' + selected.length + ' users from the share list? ');
-      $('#modal .modal-body').empty();
-      selected.forEach(function (row) {
-        var data = shareTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.username + '</div>');
-      });
-      $('#modal .modal-footer').html('<button id="remove" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#remove').click(function (e) {
-        e.preventDefault();
-        $('#remove').prop('disabled', true);
-        removeFromModal(function () {
-          initTable(shareTable);
-        });
-      });
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No users has been selected!');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-    }
+    remove('users', shareTable);
+  });
+
+  $('#groupshare-remove').click(function (e) {
+    remove('groups', groupShareTable);
   });
 
   $('#share-modify').click(function (e) {
