@@ -27,6 +27,8 @@ var group = new Schema({
 });
 
 var User = mongoose.model('User', user);
+var Group = mongoose.model('Group', group);
 module.exports = {
-  User: User
+  User: User,
+  Group: Group
 };
