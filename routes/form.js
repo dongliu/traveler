@@ -584,7 +584,7 @@ module.exports = function (app) {
               console.error(err);
             }
             if (!target) {
-              console.error('The user/group ' + req.params.userid + ' does not in the db');
+              console.error('The user/group ' + req.params.userid + ' is not in the db');
             }
           });
           return res.send(204);
@@ -596,10 +596,10 @@ module.exports = function (app) {
     });
   });
 
-  app.delete('/forms/:id/share/:userid', auth.ensureAuthenticated, function (req, res) {
+  app.delete('/forms/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id, function (err, form) {
       if (err) {
-        console.error(err.msg);
+        console.error(err);
         return res.send(500, err.msg);
       }
       if (!form) {
@@ -608,31 +608,44 @@ module.exports = function (app) {
       if (form.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      var share = form.sharedWith.id(req.params.userid);
+      var share;
+      if (req.params.list === 'users') {
+        share = form.sharedWith.id(req.params.shareid);
+      }
+      if (req.params.list === 'groups') {
+        share = form.sharedGroup.id(req.params.shareid);
+      }
       if (share) {
         share.remove();
         form.save(function (err) {
           if (err) {
-            console.error(err.msg);
+            console.error(err);
             return res.send(500, err.msg);
           }
           // keep the consistency of user's form list
-          User.findByIdAndUpdate(req.params.userid, {
+          var Target;
+          if (req.params.list === 'users') {
+            Target = User;
+          }
+          if (req.params.list === 'groups') {
+            Target = Group;
+          }
+          Target.findByIdAndUpdate(req.params.shareid, {
             $pull: {
               forms: form._id
             }
-          }, function (err, user) {
+          }, function (err, target) {
             if (err) {
-              console.error(err.msg);
+              console.error(err);
             }
-            if (!user) {
-              console.error('The user ' + req.params.userid + ' does not in the db');
+            if (!target) {
+              console.error('The user/group ' + req.params.shareid + ' is not in the db');
             }
           });
           return res.send(204);
         });
       } else {
-        return res.send(400, 'no share info found for ' + req.params.userid);
+        return res.send(400, 'cannot find ' + req.params.shareid + ' in list.');
       }
     });
   });
