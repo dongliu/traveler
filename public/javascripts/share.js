@@ -5,6 +5,24 @@
 
 var path = window.location.pathname;
 
+
+function initTable(list, oTable) {
+  $.ajax({
+    url: path + list + '/json',
+    type: 'GET',
+    dataType: 'json'
+  }).done(function (json) {
+    oTable.fnClearTable();
+    oTable.fnAddData(json);
+    oTable.fnDraw();
+  }).fail(function (jqXHR, status, error) {
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for sharing information.</div>');
+    }
+  });
+}
+
+
 function removeFromModal(cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
@@ -60,6 +78,47 @@ function modifyFromModal(list, cb) {
   });
 }
 
+function modify(list, oTable) {
+  var selected = fnGetSelected(oTable, 'row-selected');
+  if (selected.length) {
+    $('#modalLabel').html('Modify the following ' + selected.length + ' ' + list + '\' privilege? ');
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append('<form class="form-inline"><lable class="checkbox"><input id="modal-access" type="checkbox" name="access" value="write">write</lable></form>');
+    selected.forEach(function (row) {
+      var data = oTable.fnGetData(row);
+      if (list === 'users') {
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.username + '</div>');
+      }
+
+      if (list === 'groups') {
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.groupname + '</div>');
+      }
+    });
+    $('#modal .modal-footer').html('<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+    $('#modify').click(function (e) {
+      e.preventDefault();
+      $('#modify').prop('disabled', true);
+      if (list === 'users') {
+        modifyFromModal('users', function () {
+          initTable('users', oTable);
+        });
+      }
+
+      if (list === 'groups') {
+        modifyFromModal('groups', function () {
+          initTable('groups', oTable);
+        });
+      }
+    });
+    $('#modal').modal('show');
+  } else {
+    $('#modalLabel').html('Alert');
+    $('#modal .modal-body').html('No item has been selected!');
+    $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+    $('#modal').modal('show');
+  }
+}
+
 
 function inArray(name, ao) {
   var i;
@@ -71,21 +130,6 @@ function inArray(name, ao) {
   return false;
 }
 
-function initTable(list, oTable) {
-  $.ajax({
-    url: path + list + '/json',
-    type: 'GET',
-    dataType: 'json'
-  }).done(function (json) {
-    oTable.fnClearTable();
-    oTable.fnAddData(json);
-    oTable.fnDraw();
-  }).fail(function (jqXHR, status, error) {
-    if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for sharing information.</div>');
-    }
-  });
-}
 
 function addto(data, table, list) {
   if (inArray(data.name || data.id, table.fnGetData())) {
@@ -205,30 +249,11 @@ $(function () {
   });
 
   $('#share-modify').click(function (e) {
-    var selected = fnGetSelected(shareTable, 'row-selected');
-    if (selected.length) {
-      $('#modalLabel').html('Modify the following ' + selected.length + ' users\' privilege? ');
-      $('#modal .modal-body').empty();
-      $('#modal .modal-body').append('<form class="form-inline"><lable class="checkbox"><input id="modal-access" type="checkbox" name="access" value="write">write</lable></form>');
-      selected.forEach(function (row) {
-        var data = shareTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.username + '</div>');
-      });
-      $('#modal .modal-footer').html('<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modify').click(function (e) {
-        e.preventDefault();
-        $('#modify').prop('disabled', true);
-        modifyFromModal('users', function () {
-          initTable('users', shareTable);
-        });
-      });
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No users has been selected!');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-    }
+    modify('users', shareTable);
+  });
+
+  $('#groupshare-modify').click(function (e) {
+    modify('groups', groupShareTable);
   });
 
   initTable('users', shareTable);

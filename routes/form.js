@@ -536,54 +536,6 @@ module.exports = function (app) {
     });
   });
 
-
-  // app.put('/forms/:id/share/:userid', auth.ensureAuthenticated, function (req, res) {
-  //   Form.findById(req.params.id, function (err, form) {
-  //     if (err) {
-  //       console.error(err.msg);
-  //       return res.send(500, err.msg);
-  //     }
-  //     if (!form) {
-  //       return res.send(410, 'gone');
-  //     }
-  //     if (form.createdBy !== req.session.userid) {
-  //       return res.send(403, 'you are not authorized to access this resource');
-  //     }
-  //     var share = form.sharedWith.id(req.params.userid);
-  //     if (share) {
-  //       // change the access
-  //       if (req.body.access && req.body.access === 'write') {
-  //         share.access = 1;
-  //       } else {
-  //         share.access = 0;
-  //       }
-  //       form.save(function (err) {
-  //         if (err) {
-  //           console.error(err.msg);
-  //           return res.send(500, err.msg);
-  //         }
-  //         // check consistency of user's form list
-  //         User.findByIdAndUpdate(req.params.userid, {
-  //           $addToSet: {
-  //             forms: form._id
-  //           }
-  //         }, function (err, user) {
-  //           if (err) {
-  //             console.error(err.msg);
-  //           }
-  //           if (!user) {
-  //             console.error('The user ' + req.params.userid + ' does not in the db');
-  //           }
-  //         });
-  //         return res.send(204);
-  //       });
-  //     } else {
-  //       // the user should in the list
-  //       return res.send(400, 'cannot find the user ' + req.params.userid);
-  //     }
-  //   });
-  // });
-
   app.put('/forms/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id, function (err, form) {
       if (err) {
