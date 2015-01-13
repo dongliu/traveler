@@ -312,7 +312,6 @@ module.exports = function (app) {
   });
 
   app.get('/adusernames', auth.ensureAuthenticated, function (req, res) {
-    // var query = req.param('term');
     var query = req.query.term;
     var nameFilter, opts;
     if (query && query.length > 0) {
@@ -330,9 +329,32 @@ module.exports = function (app) {
         return res.json(500, JSON.stringify(err));
       }
       if (result.length === 0) {
-        return res.json(500, {
-          error: 'Names starting with ' + query + ' are not found!'
-        });
+        return res.json([]);
+      }
+      return res.json(result);
+    });
+  });
+
+  app.get('/adgroups', auth.ensureAuthenticated, function (req, res) {
+    var query = req.query.term;
+    var filter, opts;
+    if (query && query.length > 0) {
+      filter = ad.groupSearchFilter.replace('_id', query + '*');
+    } else {
+      filter = ad.groupSearchFilter.replace('_id', '*');
+    }
+    opts = {
+      filter: filter,
+      attributes: ad.groupAttributes,
+      scope: 'sub'
+    };
+    ldapClient.search(ad.groupSearchBase, opts, false, function (err, result) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (result.length === 0) {
+        return res.json([]);
       }
       return res.json(result);
     });

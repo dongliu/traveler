@@ -72,7 +72,7 @@ function inArray(name, ao) {
 
 function initTable(oTable) {
   $.ajax({
-    url: path + 'json',
+    url: path + 'users/json',
     type: 'GET',
     dataType: 'json'
   }).done(function (json) {
@@ -92,7 +92,7 @@ function addto(name, access, table, type) {
     $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The ' + type + ' named <strong>' + name + '</strong> is already in the ' + type + ' share list. </div>');
   } else {
     $.ajax({
-      url: path,
+      url: path + 'users/',
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -126,6 +126,13 @@ $(function () {
     limit: 20,
     valueKey: 'displayName',
     prefetch: prefix + '/adusernames'
+  });
+
+  $('#groupid').typeahead({
+    name: 'groups',
+    limit: 20,
+    valueKey: 'sAMAccountName',
+    prefetch: prefix + '/adgroups?term=lab.frib.*'
   });
 
   var shareAoColumns = [selectColumn, useridColumn, userNameNoLinkColumn, accessColumn];
