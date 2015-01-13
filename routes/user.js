@@ -339,7 +339,11 @@ module.exports = function (app) {
     var query = req.query.term;
     var filter, opts;
     if (query && query.length > 0) {
-      filter = ad.groupSearchFilter.replace('_id', query + '*');
+      if (query.endsWith('*')) {
+        filter = ad.groupSearchFilter.replace('_id', query);
+      } else {
+        filter = ad.groupSearchFilter.replace('_id', query + '*');
+      }
     } else {
       filter = ad.groupSearchFilter.replace('_id', '*');
     }

@@ -205,7 +205,7 @@ $(function () {
     name: 'groups',
     limit: 20,
     valueKey: 'sAMAccountName',
-    prefetch: prefix + '/adgroups?term=lab.frib.*'
+    prefetch: prefix + '/adgroups?term=lab.frib.'
   });
 
   var shareAoColumns = [selectColumn, useridColumn, userNameNoLinkColumn, accessColumn];
