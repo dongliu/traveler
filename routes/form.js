@@ -455,10 +455,10 @@ module.exports = function (app) {
       }
       var share = -2;
       if (req.params.list === 'users') {
-        share = getSharedWith(form.sharedWith, req.param.name);
+        share = getSharedWith(form.sharedWith, req.params.name);
       }
       if (req.params.list === 'groups') {
-        share = getSharedWith(form.sharedGroup, req.param.name);
+        share = getSharedWith(form.sharedGroup, req.params.name);
       }
 
       if (share === -2) {
@@ -466,7 +466,7 @@ module.exports = function (app) {
       }
 
       if (share <= 0) {
-        return res.send(400, req.param.name + ' is already in the ' + req.params.list + ' list.');
+        return res.send(400, req.params.name + ' is already in the ' + req.params.list + ' list.');
       }
 
       if (share === -1) {
