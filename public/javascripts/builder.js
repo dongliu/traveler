@@ -287,6 +287,7 @@ function figure_edit($cgr) {
       $.livestamp.resume();
 
       // set the figure attributes
+      $('img', $figure).attr('id', location.substr(location.lastIndexOf('/') + 1));
       $('img', $figure).attr('src', location);
       $this.closest('.file-upload-buttons').remove();
 
@@ -555,7 +556,27 @@ function rich_edit($cgr) {
 }
 
 function init() {
+
+  $('#output img').each(function (index) {
+    var $this = $(this);
+    if ($this.attr('id')) {
+      if ($this.attr('src') === undefined) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('id')));
+        return;
+      }
+      if ($this.attr('src').indexOf('http') === 0) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('id')));
+        return;
+      }
+      if (prefix && $this.attr('src').indexOf(prefix) !== 0) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('id')));
+        return;
+      }
+    }
+  });
+
   initHtml = $('#output').html();
+
   // update every 30 seconds
   $.livestamp.interval(30 * 1000);
 }
