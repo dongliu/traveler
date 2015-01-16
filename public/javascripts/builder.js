@@ -65,6 +65,7 @@ function sendRequest(data, cb, saveas) {
 
 function done_button(view, $out) {
   return function (e) {
+    e.preventDefault();
     view.unbind();
     $(this).closest('.spec').remove();
     $('input, textarea', $out).each(function () {
@@ -78,7 +79,6 @@ function done_button(view, $out) {
       }
     });
     $out.closest('.control-group-wrap').removeAttr('data-status');
-    e.preventDefault();
   };
 }
 
@@ -86,7 +86,10 @@ function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
   $new_cgr.prepend($buttons.hide());
   if ($cgr) {
     // reserve important attributes that are not covered but rivet model binding like unique name
-    $('input', $new_cgr).attr('name', $('input', $cgr).attr('name'));
+    $('input, textarea, img', $new_cgr).attr('name', $('input, textarea, img', $cgr).attr('name'));
+    // reserve legend id
+    $('legend', $new_cgr).attr('id', $('legend', $cgr).attr('id'));
+
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
   } else {
@@ -116,6 +119,8 @@ function binding($edit, $out, model, $done) {
     model: model
   });
 
+  // remove click handler first
+  $done.unbind('click');
   $done.click(done_button(view, $out));
 }
 
@@ -208,6 +213,14 @@ function figure_edit($cgr) {
   var $edit = $('<div class="well spec"></div>').append($file, $alt, $width, $figcaption, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">figure</span></div>').append($figure);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
+
+  // need a handler here for the $done button if no image exist or updated
+  $done.click(function (e) {
+    e.preventDefault();
+    $edit.remove();
+    $new_cgr.remove();
+  });
+
   if ($cgr) {
     $('img', $figure).prop('src', src);
     // enable the spec inputs
@@ -287,6 +300,7 @@ function figure_edit($cgr) {
       $.livestamp.resume();
 
       // set the figure attributes
+      $('img', $figure).attr('name', location.substr(location.lastIndexOf('/') + 1));
       $('img', $figure).attr('src', location);
       $this.closest('.file-upload-buttons').remove();
 
@@ -547,15 +561,42 @@ function rich_edit($cgr) {
   tinymce.init(mce_content);
   $done.click(function (e) {
     e.preventDefault();
-    $('.tinymce', $rich).html(tinymce.activeEditor.getContent());
-    tinymce.remove();
-    $(this).closest('.spec').remove();
-    $rich.closest('.control-group-wrap').removeAttr('data-status');
+    var content = tinymce.activeEditor.getContent();
+    if (content === '') {
+      // nothing was done
+      tinymce.remove();
+      $edit.remove();
+      $new_cgr.remove();
+    } else {
+      $('.tinymce', $rich).html(tinymce.activeEditor.getContent());
+      tinymce.remove();
+      $(this).closest('.spec').remove();
+      $rich.closest('.control-group-wrap').removeAttr('data-status');
+    }
   });
 }
 
 function init() {
+  $('#output').find('img').each(function (index) {
+    var $this = $(this);
+    if ($this.attr('name')) {
+      if ($this.attr('src') === undefined) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
+        return;
+      }
+      if ($this.attr('src').indexOf('http') === 0) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
+        return;
+      }
+      if (prefix && $this.attr('src').indexOf(prefix) !== 0) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
+        return;
+      }
+    }
+  });
+
   initHtml = $('#output').html();
+
   // update every 30 seconds
   $.livestamp.interval(30 * 1000);
 }
@@ -625,10 +666,14 @@ function cleanBeforeSave() {
   $('#output .control-group-wrap').removeAttr('data-status');
   // remove tinymce
   tinymce.remove();
+
+  // remove img src with id
+
 }
 
 function binding_events() {
   $('#adjust').click(function (e) {
+    e.preventDefault();
     if ($(this).text() === 'Adjust location') {
       $(this).text('Done');
       $('#input-items').attr('disabled', true);
@@ -648,7 +693,6 @@ function binding_events() {
       $('#more').removeAttr('disabled');
       $('#output').sortable('destroy');
     }
-    e.preventDefault();
   });
   $('#output').on('mouseenter', '.control-group-wrap', function (e) {
     e.preventDefault();

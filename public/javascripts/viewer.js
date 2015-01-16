@@ -1,7 +1,9 @@
+/*global prefix:false*/
+
 function validation_message(form) {
-  var i = 0,
-    output = $('<div>'),
-    p, value, input, label, span;
+  var i = 0;
+  var output = $('<div>');
+  var p, value, input, label, span;
   for (i = 0; i < form.elements.length; i += 1) {
     input = form.elements[i];
     p = $('<p>');
@@ -13,18 +15,18 @@ function validation_message(form) {
       p.css('color', '#b94a48');
       span.css('color', '#b94a48');
     }
-    if (input.type == 'checkbox') {
+    if (input.type === 'checkbox') {
       value = input.checked ? 'checked' : 'not checked';
     } else {
-      if (input.value == '') {
-        value = 'no input from user'
+      if (input.value === '') {
+        value = 'no input from user';
       } else {
         value = input.value;
       }
     }
-    label = $(input).closest('.control-group').children('.control-label').text()
+    label = $(input).closest('.control-group').children('.control-label').text();
     if (input.checkValidity()) {
-      p.html('<b>' + label + '</b>: ' + value );
+      p.html('<b>' + label + '</b>: ' + value);
       span.text('validation passed');
     } else {
       p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
@@ -37,6 +39,24 @@ function validation_message(form) {
 }
 
 $(function () {
+  $('#output').find('img').each(function (index) {
+    var $this = $(this);
+    if ($this.attr('id')) {
+      if ($this.attr('src') === undefined) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('id')));
+        return;
+      }
+      if ($this.attr('src').indexOf('http') === 0) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('id')));
+        return;
+      }
+      if (prefix && $this.attr('src').indexOf(prefix) !== 0) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('id')));
+        return;
+      }
+    }
+  });
+
   $('input, textarea').removeAttr('disabled');
   var $legend = $('legend');
   var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="10"></ul>');
