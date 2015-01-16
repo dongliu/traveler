@@ -39,8 +39,7 @@ function validation_message(form) {
 }
 
 $(function () {
-
-  $('#output img').each(function (index) {
+  $('#output').find('img').each(function (index) {
     var $this = $(this);
     if ($this.attr('id')) {
       if ($this.attr('src') === undefined) {
