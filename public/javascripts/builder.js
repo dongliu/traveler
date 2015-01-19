@@ -666,9 +666,6 @@ function cleanBeforeSave() {
   $('#output .control-group-wrap').removeAttr('data-status');
   // remove tinymce
   tinymce.remove();
-
-  // remove img src with id
-
 }
 
 function binding_events() {
