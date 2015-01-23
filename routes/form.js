@@ -76,7 +76,7 @@ function addUserFromAD(req, res, form) {
 }
 
 function addGroupFromAD(req, res, form) {
-  var id = req.body.id;
+  var id = req.body.id.toLowerCase();
   var filter = ad.groupSearchFilter.replace('_id', id);
   var opts = {
     filter: filter,
@@ -136,6 +136,12 @@ function canWrite(req, doc) {
   }
   if (doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
     return true;
+  }
+  var i;
+  for (i = 0; i < req.session.memberOf.length; i += 1) {
+    if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
+      return true;
+    }
   }
   return false;
 }
@@ -238,7 +244,7 @@ function addUser(req, res, form) {
 }
 
 function addGroup(req, res, form) {
-  var id = req.body.id;
+  var id = req.body.id.toLowerCase();
   // check local db first then try ad
   Group.findOne({
     _id: id
@@ -321,6 +327,40 @@ module.exports = function (app) {
       Form.find({
         _id: {
           $in: me.forms
+        }
+      }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function (err, forms) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        res.json(200, forms);
+      });
+    });
+  });
+
+  app.get('/groupsharedforms/json', auth.ensureAuthenticated, function (req, res) {
+    Group.find({
+      _id: {
+        $in: req.session.memberOf
+      }
+    }, 'forms').lean().exec(function (err, groups) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      var formids = [];
+      var i, j;
+      // merge the forms arrays
+      for (i = 0; i < groups.length; i += 1) {
+        for (j = 0; j < groups[i].forms.length; j += 1) {
+          if (formids.indexOf(groups[i].forms[j]) === -1) {
+            formids.push(groups[i].forms[j]);
+          }
+        }
+      }
+      Form.find({
+        _id: {
+          $in: formids
         }
       }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function (err, forms) {
         if (err) {
