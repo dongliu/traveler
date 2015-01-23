@@ -304,7 +304,7 @@ module.exports = function (app) {
   app.get('/forms/json', auth.ensureAuthenticated, function (req, res) {
     Form.find({
       createdBy: req.session.userid
-    }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function (err, forms) {
+    }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -328,7 +328,7 @@ module.exports = function (app) {
         _id: {
           $in: me.forms
         }
-      }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function (err, forms) {
+      }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
@@ -362,7 +362,7 @@ module.exports = function (app) {
         _id: {
           $in: formids
         }
-      }, 'title createdBy createdOn updatedBy updatedOn sharedWith').lean().exec(function (err, forms) {
+      }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
