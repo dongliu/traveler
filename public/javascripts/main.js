@@ -1,8 +1,8 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, Binder: false, ajax401: false, prefix: false, updateAjaxURL: false*/
-/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false*/
+/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false*/
 
-var formTable, sharedFormTable, travelerTable, sharedTravelerTable, initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, archivedTravelerTable;
+var formTable, sharedFormTable, groupSharedFormTable, travelerTable, sharedTravelerTable, initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, archivedTravelerTable;
 
 function initTable(oTable, url) {
   $.ajax({
@@ -185,7 +185,7 @@ $(function () {
 
   updateAjaxURL(prefix);
 
-  var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
+  var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   fnAddFilterFoot('#form-table', formAoColumns);
   formTable = $('#form-table').dataTable({
     aaData: [],
@@ -208,7 +208,7 @@ $(function () {
     fnDeselect(formTable, 'row-selected', 'select-row');
   });
 
-  var sharedFormAoColumns = [formLinkColumn, titleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn];
+  var sharedFormAoColumns = [formLinkColumn, titleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
   sharedFormTable = $('#shared-form-table').dataTable({
     aaData: [],
@@ -222,6 +222,21 @@ $(function () {
     oTableTools: oTableTools
   });
   initTable(sharedFormTable, '/sharedforms/json');
+
+  var groupSharedFormAoColumns = sharedFormAoColumns;
+  fnAddFilterFoot('#group-shared-form-table', groupSharedFormAoColumns);
+  groupSharedFormTable = $('#group-shared-form-table').dataTable({
+    aaData: [],
+    // bAutoWidth: false,
+    aoColumns: groupSharedFormAoColumns,
+    aaSorting: [
+      [3, 'desc'],
+      [4, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+  initTable(groupSharedFormTable, '/groupsharedforms/json');
 
   var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
@@ -336,7 +351,7 @@ $(function () {
     History.pushState({
       tab: this.href
     }, 'FRIB traveler :: ' + this.text, this.href);
-    console.log(History.getHash());
+    // console.log(History.getHash());
   });
 
   // show the tab when back and forward

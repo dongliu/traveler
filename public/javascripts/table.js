@@ -370,6 +370,23 @@ var sharedWithColumn = {
   bFilter: true
 };
 
+var sharedGroupColumn = {
+  sTitle: 'Shared groups',
+  mData: function (source, type, val) {
+    if (source.sharedGroup) {
+      if (source.sharedGroup.length === 0) {
+        return '';
+      }
+      var names = source.sharedGroup.map(function (g) {
+        return g.groupname;
+      });
+      return names.join('; ');
+    }
+    return '';
+  },
+  bFilter: true
+};
+
 var statusColumn = {
   sTitle: 'Status',
   mData: 'status',
@@ -418,7 +435,7 @@ var groupNameColumn = {
   mData: 'groupname',
   sDefaultContent: '',
   bFilter: true
-}
+};
 
 var accessColumn = {
   sTitle: 'Privilege',
