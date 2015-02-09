@@ -21,6 +21,7 @@ config/ad.json
 config/node.pem
 config/node.key
 config/api.json
+config/service.json
 
 # npm stuff #
 npm-debug.log
