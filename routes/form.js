@@ -587,7 +587,6 @@ module.exports = function (app) {
 
       if (share === -1) {
         // new user
-        // addUser(req, res, form);
         addShare(req, res, form);
       }
     });

@@ -13,6 +13,12 @@ var sharedWithUser = new Schema({
   access: Number
 });
 
+var sharedWithGroup = new Schema({
+  _id: String,
+  groupname: String,
+  access: Number
+});
+
 var form = new Schema({
   html: String
 });
@@ -39,6 +45,7 @@ var traveler = new Schema({
   updatedOn: Date,
   deadline: Date,
   sharedWith: [sharedWithUser],
+  sharedGroup: [sharedWithGroup],
   referenceForm: ObjectId,
   forms: [form],
   activeForm: {
