@@ -153,6 +153,12 @@ function canRead(req, doc) {
   if (doc.sharedWith.id(req.session.userid)) {
     return true;
   }
+  var i;
+  for (i = 0; i < req.session.memberOf.length; i += 1) {
+    if (doc.sharedGroup.id(req.session.memberOf[i])) {
+      return true;
+    }
+  }
   return false;
 }
 
@@ -168,6 +174,17 @@ function getAccess(req, doc) {
   }
   if (doc.sharedWith.id(req.session.userid)) {
     return doc.sharedWith.id(req.session.userid).access;
+  }
+  var i;
+  for (i = 0; i < req.session.memberOf.length; i += 1) {
+    if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
+      return 1;
+    }
+  }
+  for (i = 0; i < req.session.memberOf.length; i += 1) {
+    if (doc.sharedGroup.id(req.session.memberOf[i])) {
+      return 0;
+    }
   }
   return -1;
 }
