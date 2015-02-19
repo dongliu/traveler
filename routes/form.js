@@ -421,7 +421,7 @@ module.exports = function (app) {
         });
       }
 
-      return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + 'forms/' + req.params.id + '/preview');
+      return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + req.params.id + '/preview');
     });
   });
 
