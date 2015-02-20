@@ -48,7 +48,7 @@ block content
         span.time #{traveler.updatedOn}
     h4 Status:
       = ' '
-      case status
+      case traveler.status
         when 0
           | initialized
         when 1
