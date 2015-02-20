@@ -275,6 +275,12 @@ function canWrite(req, doc) {
   if (doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
     return true;
   }
+  var i;
+  for (i = 0; i < req.session.memberOf.length; i += 1) {
+    if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
+      return true;
+    }
+  }
   return false;
 }
 
@@ -285,7 +291,40 @@ function canRead(req, doc) {
   if (doc.sharedWith.id(req.session.userid)) {
     return true;
   }
+  var i;
+  for (i = 0; i < req.session.memberOf.length; i += 1) {
+    if (doc.sharedGroup.id(req.session.memberOf[i])) {
+      return true;
+    }
+  }
   return false;
+}
+
+/*****
+access := -1 // no access
+        | 0  // read
+        | 1  // write
+*****/
+
+function getAccess(req, doc) {
+  if (doc.createdBy === req.session.userid) {
+    return 1;
+  }
+  if (doc.sharedWith.id(req.session.userid)) {
+    return doc.sharedWith.id(req.session.userid).access;
+  }
+  var i;
+  for (i = 0; i < req.session.memberOf.length; i += 1) {
+    if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
+      return 1;
+    }
+  }
+  for (i = 0; i < req.session.memberOf.length; i += 1) {
+    if (doc.sharedGroup.id(req.session.memberOf[i])) {
+      return 0;
+    }
+  }
+  return -1;
 }
 
 // var gri, ha, generateShort;
@@ -520,7 +559,7 @@ module.exports = function (app) {
         $in: [req.query.device]
       };
     }
-    Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+    Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -551,7 +590,7 @@ module.exports = function (app) {
     Traveler.find({
       createdBy: req.session.userid,
       archived: true
-    }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+    }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -615,7 +654,7 @@ module.exports = function (app) {
           prefix: req.proxied ? req.proxied_prefix : ''
         });
       }
-      return res.redirect('/travelers/' + req.params.id + '/view');
+      return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
     });
   });
 
@@ -683,7 +722,7 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/config', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, 'title description deadline status devices sharedWith createdBy createdOn updatedOn updatedBy').exec(function (err, doc) {
+    Traveler.findById(req.params.id, 'title description deadline status devices sharedWith sharedGroup createdBy createdOn updatedOn updatedBy').exec(function (err, doc) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -954,7 +993,7 @@ module.exports = function (app) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
-      // allow add note for all conditions
+      // allow add note for all status
       // if (doc.status !== 1) {
       //   return res.send(400, 'The traveler ' + req.params.id + ' is not active');
       // }
