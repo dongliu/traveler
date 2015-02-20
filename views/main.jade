@@ -66,6 +66,8 @@ block content
         li
           a(href='#sharedtravelers', data-toggle='tab') Shared travelers
         li
+          a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
+        li
           a(href='#inittravelers', data-toggle='tab') Initial travelers
         li
           a(href='#activetravelers', data-toggle='tab') Active travelers
@@ -119,6 +121,13 @@ block content
                 i.fa.fa-copy.fa-lg
                 | &nbsp;Clone
           table#shared-traveler-table.table.table-bordered.table-hover
+        #groupsharedtravelers.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-primary#group-share-clone(data-toggle='tooltip', title='clone selected travelers')
+                i.fa.fa-copy.fa-lg
+                | &nbsp;Clone
+          table#group-shared-traveler-table.table.table-bordered.table-hover
         #inittravelers.tab-pane
           table#init-traveler-table.table.table-bordered.table-hover
         #activetravelers.tab-pane
