@@ -272,13 +272,15 @@ function canWrite(req, doc) {
   if (doc.createdBy === req.session.userid) {
     return true;
   }
-  if (doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
+  if (doc.sharedWith && doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
     return true;
   }
   var i;
-  for (i = 0; i < req.session.memberOf.length; i += 1) {
-    if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
-      return true;
+  if (doc.sharedGroup) {
+    for (i = 0; i < req.session.memberOf.length; i += 1) {
+      if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
+        return true;
+      }
     }
   }
   return false;
@@ -288,13 +290,15 @@ function canRead(req, doc) {
   if (doc.createdBy === req.session.userid) {
     return true;
   }
-  if (doc.sharedWith.id(req.session.userid)) {
+  if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
     return true;
   }
   var i;
-  for (i = 0; i < req.session.memberOf.length; i += 1) {
-    if (doc.sharedGroup.id(req.session.memberOf[i])) {
-      return true;
+  if (doc.sharedGroup) {
+    for (i = 0; i < req.session.memberOf.length; i += 1) {
+      if (doc.sharedGroup.id(req.session.memberOf[i])) {
+        return true;
+      }
     }
   }
   return false;
@@ -310,18 +314,20 @@ function getAccess(req, doc) {
   if (doc.createdBy === req.session.userid) {
     return 1;
   }
-  if (doc.sharedWith.id(req.session.userid)) {
+  if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
     return doc.sharedWith.id(req.session.userid).access;
   }
   var i;
-  for (i = 0; i < req.session.memberOf.length; i += 1) {
-    if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
-      return 1;
+  if (doc.sharedGroup) {
+    for (i = 0; i < req.session.memberOf.length; i += 1) {
+      if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
+        return 1;
+      }
     }
-  }
-  for (i = 0; i < req.session.memberOf.length; i += 1) {
-    if (doc.sharedGroup.id(req.session.memberOf[i])) {
-      return 0;
+    for (i = 0; i < req.session.memberOf.length; i += 1) {
+      if (doc.sharedGroup.id(req.session.memberOf[i])) {
+        return 0;
+      }
     }
   }
   return -1;
