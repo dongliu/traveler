@@ -437,7 +437,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }, 'title description status devices sharedWith clonedBy createdOn deadline updatedOn updatedBy finishedInput totalInput').lean().exec(function (err, docs) {
+    }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
         console.error(err.msg);
         return res.send(500, err.msg);
@@ -1214,7 +1214,7 @@ module.exports = function (app) {
       if (!traveler) {
         return res.send(410, 'gone');
       }
-      if (traveler.createdBy !== req.session.shareid) {
+      if (traveler.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       var share;
