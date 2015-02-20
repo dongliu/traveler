@@ -389,7 +389,6 @@ module.exports = function (app) {
     });
   });
 
-
   app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
     return res.render('newform', {
       prefix: req.proxied ? req.proxied_prefix : ''

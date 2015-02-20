@@ -242,32 +242,46 @@ $(function () {
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   travelerTable = $('#traveler-table').dataTable({
     aaData: [],
-    // bAutoWidth: false,
+    bAutoWidth: false,
     aoColumns: travelerAoColumns,
     aaSorting: [
-      [9, 'desc'],
-      [12, 'desc']
+      [10, 'desc'],
+      [13, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
   });
   initTable(travelerTable, '/travelers/json');
 
-
-  var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   sharedTravelerTable = $('#shared-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
-      [9, 'desc'],
-      [12, 'desc']
+      [10, 'desc'],
+      [13, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
   });
   initTable(sharedTravelerTable, '/sharedtravelers/json');
+
+  var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  fnAddFilterFoot('#group-shared-traveler-table', sharedTravelerAoColumns);
+  sharedTravelerTable = $('#group-shared-traveler-table').dataTable({
+    aaData: [],
+    // bAutoWidth: false,
+    aoColumns: groupSharedTravelerAoColumns,
+    aaSorting: [
+      [10, 'desc'],
+      [13, 'desc']
+    ],
+    sDom: sDom,
+    oTableTools: oTableTools
+  });
+  initTable(sharedTravelerTable, '/groupsharedtravelers/json');
 
   var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#init-traveler-table', initTravelerAoColumns);

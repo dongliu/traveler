@@ -464,12 +464,46 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
           console.error(err.msg);
           return res.send(500, err.msg);
         }
         return res.json(200, travelers);
+      });
+    });
+  });
+
+  app.get('/groupsharedtravelers/json', auth.ensureAuthenticated, function (req, res) {
+    Group.find({
+      _id: {
+        $in: req.session.memberOf
+      }
+    }, 'travelers').lean().exec(function (err, groups) {
+      if (err) {
+        console.error(err.msg);
+        return res.send(500, err.msg);
+      }
+      var travelerIds = [];
+      var i, j;
+      // merge the travelers arrays
+      for (i = 0; i < groups.length; i += 1) {
+        for (j = 0; j < groups[i].travelers.length; j += 1) {
+          if (travelerIds.indexOf(groups[i].travelers[j]) === -1) {
+            travelerIds.push(groups[i].travelers[j]);
+          }
+        }
+      }
+      Traveler.find({
+        _id: {
+          $in: travelerIds
+        }
+      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
+        if (err) {
+          console.error(err.msg);
+          return res.send(500, err.msg);
+        }
+        res.json(200, travelers);
       });
     });
   });
