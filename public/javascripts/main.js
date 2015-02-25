@@ -490,8 +490,10 @@ $(function () {
   $('#reload').click(function (e) {
     initTable(formTable, '/forms/json');
     initTable(sharedFormTable, '/sharedforms/json');
+    initTable(groupSharedFormTable, '/groupsharedforms/json');
     initTable(travelerTable, '/travelers/json');
     initTable(sharedTravelerTable, '/sharedtravelers/json');
+    initTable(sharedTravelerTable, '/groupsharedtravelers/json');
     initCurrentTables('/currenttravelers/json');
     initTable(archivedTravelerTable, '/archivedtravelers/json');
   });
