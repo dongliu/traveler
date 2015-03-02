@@ -283,72 +283,72 @@ $(function () {
   });
   initTable(sharedTravelerTable, '/groupsharedtravelers/json');
 
-  var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#init-traveler-table', initTravelerAoColumns);
   initTravelerTable = $('#init-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: initTravelerAoColumns,
     aaSorting: [
-      [6, 'desc'],
-      [8, 'desc']
+      [7, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
   });
 
-  var activeTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var activeTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#active-traveler-table', activeTravelerAoColumns);
   activeTravelerTable = $('#active-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: activeTravelerAoColumns,
     aaSorting: [
-      [6, 'desc'],
-      [8, 'desc']
+      [7, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
   });
 
-  var completeTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var completeTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#complete-traveler-table', completeTravelerAoColumns);
   completeTravelerTable = $('#complete-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: completeTravelerAoColumns,
     aaSorting: [
-      [6, 'desc'],
-      [8, 'desc']
+      [7, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
   });
 
-  var frozenTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var frozenTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#frozen-traveler-table', frozenTravelerAoColumns);
   frozenTravelerTable = $('#frozen-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: frozenTravelerAoColumns,
     aaSorting: [
-      [6, 'desc'],
-      [8, 'desc']
+      [7, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
   });
   initCurrentTables('/currenttravelers/json');
 
-  var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);
   archivedTravelerTable = $('#archived-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: archivedTravelerAoColumns,
     aaSorting: [
-      [7, 'desc'],
-      [10, 'desc']
+      [8, 'desc'],
+      [11, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools
