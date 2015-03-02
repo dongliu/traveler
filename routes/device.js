@@ -13,6 +13,7 @@ module.exports = function (app) {
     request({
       url: service.device.url,
       timeout: 30 * 1000,
+      strictSSL: false,
       headers: {
         Accept: 'application/json'
       }

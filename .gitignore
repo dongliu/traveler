@@ -16,12 +16,13 @@ node_modules/
 # special folders #
 logs/
 doc/
-test/
 uploads/
 config/ad.json
 config/node.pem
 config/node.key
 config/api.json
+config/service.json
+config/auth.json
 
 # npm stuff #
 npm-debug.log
