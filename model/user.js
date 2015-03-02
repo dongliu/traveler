@@ -19,7 +19,16 @@ var user = new Schema({
   }
 });
 
+var group = new Schema({
+  _id: String,
+  name: String,
+  forms: [ObjectId],
+  travelers: [ObjectId]
+});
+
 var User = mongoose.model('User', user);
+var Group = mongoose.model('Group', group);
 module.exports = {
-  User: User
+  User: User,
+  Group: Group
 };

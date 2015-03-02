@@ -14,6 +14,12 @@ var sharedWithUser = new Schema({
   access: Number
 });
 
+var sharedWithGroup = new Schema({
+  _id: String,
+  groupname: String,
+  access: Number
+});
+
 var form = new Schema({
   title: String,
   createdBy: String,
@@ -21,6 +27,7 @@ var form = new Schema({
   updatedBy: String,
   updatedOn: Date,
   sharedWith: [sharedWithUser],
+  sharedGroup: [sharedWithGroup],
   html: String
 });
 

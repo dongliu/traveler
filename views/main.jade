@@ -56,13 +56,17 @@ block content
     .tabbable.tabs-left
       ul.nav.nav-tabs
         li.active
-          a(href='#forms', data-toggle='tab') My forms
+          a(href='#forms', data-toggle='tab') Your forms
         li
           a(href='#sharedfroms', data-toggle='tab') Shared forms
         li
-          a(href='#travelers', data-toggle='tab') My travelers
+          a(href='#groupsharedfroms', data-toggle='tab') Group shared forms
+        li
+          a(href='#travelers', data-toggle='tab') Your travelers
         li
           a(href='#sharedtravelers', data-toggle='tab') Shared travelers
+        li
+          a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
         li
           a(href='#inittravelers', data-toggle='tab') Initial travelers
         li
@@ -96,6 +100,8 @@ block content
           table#form-table.table.table-bordered.table-hover
         #sharedfroms.tab-pane
           table#shared-form-table.table.table-bordered.table-hover
+        #groupsharedfroms.tab-pane
+          table#group-shared-form-table.table.table-bordered.table-hover
         #travelers.tab-pane
           .btn-toolbar
             .btn-group
@@ -115,6 +121,13 @@ block content
                 i.fa.fa-copy.fa-lg
                 | &nbsp;Clone
           table#shared-traveler-table.table.table-bordered.table-hover
+        #groupsharedtravelers.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-primary#group-share-clone(data-toggle='tooltip', title='clone selected travelers')
+                i.fa.fa-copy.fa-lg
+                | &nbsp;Clone
+          table#group-shared-traveler-table.table.table-bordered.table-hover
         #inittravelers.tab-pane
           table#init-traveler-table.table.table-bordered.table-hover
         #activetravelers.tab-pane
