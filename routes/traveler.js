@@ -73,6 +73,7 @@ function cloneTraveler(source, req, res) {
     clonedBy: req.session.userid,
     clonedFrom: source._id,
     sharedWith: source.sharedWith,
+    sharedGroup: source.sharedGroup,
     referenceForm: source.referenceForm,
     forms: source.forms,
     data: [],
@@ -100,6 +101,22 @@ function cloneTraveler(source, req, res) {
         }
       });
     });
+
+    doc.sharedGroup.forEach(function (e, i, a) {
+      Group.findByIdAndUpdate(e._id, {
+        $addToSet: {
+          travelers: doc._id
+        }
+      }, function (err, user) {
+        if (err) {
+          console.error(err.msg);
+        }
+        if (!user) {
+          console.error('The group ' + e._id + ' does not in the db');
+        }
+      });
+    });
+
     var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
     res.set('Location', url);
     return res.json(201, {

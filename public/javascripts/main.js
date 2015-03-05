@@ -2,7 +2,7 @@
 /*global moment: false, Binder: false, ajax401: false, prefix: false, updateAjaxURL: false*/
 /*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false*/
 
-var formTable, sharedFormTable, groupSharedFormTable, travelerTable, sharedTravelerTable, initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, archivedTravelerTable;
+var formTable, sharedFormTable, groupSharedFormTable, travelerTable, sharedTravelerTable, groupSharedTravelerTable, initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, archivedTravelerTable;
 
 function initTable(oTable, url) {
   $.ajax({
@@ -172,6 +172,7 @@ function cloneFromModal() {
         if (number === 0 && success) {
           initTable(travelerTable, '/travelers/json');
           initTable(sharedTravelerTable, '/sharedtravelers/json');
+          initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
           initCurrentTables('/currenttravelers/json');
         }
       });
@@ -270,7 +271,7 @@ $(function () {
 
   var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#group-shared-traveler-table', sharedTravelerAoColumns);
-  sharedTravelerTable = $('#group-shared-traveler-table').dataTable({
+  groupSharedTravelerTable = $('#group-shared-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: groupSharedTravelerAoColumns,
@@ -281,7 +282,7 @@ $(function () {
     sDom: sDom,
     oTableTools: oTableTools
   });
-  initTable(sharedTravelerTable, '/groupsharedtravelers/json');
+  initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
 
   var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#init-traveler-table', initTravelerAoColumns);
@@ -464,6 +465,28 @@ $(function () {
     }
   });
 
+  $('#group-share-clone').click(function (e) {
+    var selected = fnGetSelected(groupSharedTravelerTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No traveler has been selected!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html('Clone the following ' + selected.length + ' travelers? ');
+      $('#modal .modal-body').empty();
+      selected.forEach(function (row) {
+        var data = groupSharedTravelerTable.fnGetData(row);
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
+      });
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+      $('#submit').click(function (e) {
+        cloneFromModal();
+      });
+    }
+  });
+
   $('#dearchive').click(function (e) {
     var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
     if (selected.length === 0) {
@@ -493,7 +516,7 @@ $(function () {
     initTable(groupSharedFormTable, '/groupsharedforms/json');
     initTable(travelerTable, '/travelers/json');
     initTable(sharedTravelerTable, '/sharedtravelers/json');
-    initTable(sharedTravelerTable, '/groupsharedtravelers/json');
+    initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
     initCurrentTables('/currenttravelers/json');
     initTable(archivedTravelerTable, '/archivedtravelers/json');
   });
