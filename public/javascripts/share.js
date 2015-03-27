@@ -1,5 +1,5 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false, prefix: false*/
+/*global moment: false, Binder: false, prefix: false, Bloodhound: false*/
 /*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupNameColumn: false, accessColumn: false, sDom: false, oTableTools: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
 
 
@@ -194,18 +194,47 @@ $(function () {
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   });
-  $('#username').typeahead({
-    name: 'usernames',
+
+  var usernames = new Bloodhound({
+    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('displayName'),
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
     limit: 20,
-    valueKey: 'displayName',
-    prefetch: prefix + '/adusernames'
+    prefetch: {
+      url: prefix + '/adusernames'
+    }
   });
 
-  $('#groupid').typeahead({
-    name: 'groups',
+  usernames.initialize();
+
+  $('#username').typeahead({
+    minLength: 1,
+    highlight: true,
+    hint: true
+  }, {
+    name: 'usernames',
+    displayKey: 'displayName',
+    source: usernames.ttAdapter()
+  });
+
+  var groupIds = new Bloodhound({
+    datumTokenizer: Bloodhound.tokenizers.obj.nonword('sAMAccountName'),
+    queryTokenizer: Bloodhound.tokenizers.nonword,
     limit: 20,
-    valueKey: 'sAMAccountName',
-    prefetch: prefix + '/adgroups?term=lab.frib.'
+    prefetch: {
+      url: prefix + '/adgroups?term=lab.frib.'
+    }
+  });
+
+  groupIds.initialize();
+
+  $('#groupid').typeahead({
+    minLength: 1,
+    highlight: true,
+    hint: true
+  }, {
+    name: 'groupIds',
+    displayKey: 'sAMAccountName',
+    source: groupIds.ttAdapter()
   });
 
   var shareAoColumns = [selectColumn, useridColumn, userNameNoLinkColumn, accessColumn];
