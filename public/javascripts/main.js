@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, Binder: false, ajax401: false, prefix: false, updateAjaxURL: false*/
-/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false*/
+/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, sDomNoTools: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false*/
 
 var formTable, sharedFormTable, groupSharedFormTable, travelerTable, sharedTravelerTable, groupSharedTravelerTable, initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, archivedTravelerTable;
 
@@ -196,8 +196,7 @@ $(function () {
       [4, 'desc'],
       [5, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
   initTable(formTable, '/forms/json');
 
@@ -219,8 +218,7 @@ $(function () {
       [3, 'desc'],
       [4, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
   initTable(sharedFormTable, '/sharedforms/json');
 
@@ -234,8 +232,7 @@ $(function () {
       [3, 'desc'],
       [4, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
   initTable(groupSharedFormTable, '/groupsharedforms/json');
 
@@ -249,8 +246,7 @@ $(function () {
       [10, 'desc'],
       [13, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
   initTable(travelerTable, '/travelers/json');
 
@@ -264,8 +260,7 @@ $(function () {
       [10, 'desc'],
       [13, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
   initTable(sharedTravelerTable, '/sharedtravelers/json');
 
@@ -279,8 +274,7 @@ $(function () {
       [10, 'desc'],
       [13, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
   initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
 
@@ -336,8 +330,7 @@ $(function () {
       [7, 'desc'],
       [9, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
   initCurrentTables('/currenttravelers/json');
 
@@ -351,8 +344,7 @@ $(function () {
       [8, 'desc'],
       [11, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
   initTable(archivedTravelerTable, '/archivedtravelers/json');
 
