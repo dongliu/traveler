@@ -35,6 +35,7 @@ var mongoOptions = {
   server: {
     poolSize: 5,
     socketOptions: {
+      connectTimeoutMS: 30000,
       keepAlive: 1
     }
   }
