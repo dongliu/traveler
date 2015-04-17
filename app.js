@@ -28,7 +28,19 @@ var Traveler = require('./model/traveler.js').Traveler;
 var TravelerData = require('./model/traveler.js').TravelerData;
 var TravelerComment = require('./model/traveler.js').TravelerComment;
 
-mongoose.connect('mongodb://localhost/traveler');
+var mongoOptions = {
+  db: {
+    native_parser: true
+  },
+  server: {
+    poolSize: 5,
+    socketOptions: {
+      keepAlive: 1
+    }
+  }
+};
+
+mongoose.connect('mongodb://localhost/traveler', mongoOptions);
 
 mongoose.connection.on('connected', function () {
   console.log('Mongoose default connection opened.');
