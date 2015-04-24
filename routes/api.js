@@ -22,8 +22,8 @@ module.exports = function (app) {
     }
     Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       return res.json(200, travelers);
     });
@@ -32,8 +32,8 @@ module.exports = function (app) {
   app.get('/apis/travelers/:id/', function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -45,8 +45,8 @@ module.exports = function (app) {
   app.get('/apis/travelers/:id/data/', function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -57,8 +57,8 @@ module.exports = function (app) {
         }
       }, 'name value inputType inputBy inputOn').lean().exec(function (err, docs) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.json(200, docs);
       });
@@ -68,8 +68,8 @@ module.exports = function (app) {
   app.get('/apis/travelers/:id/notes/', function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -80,8 +80,8 @@ module.exports = function (app) {
         }
       }, 'name value inputBy inputOn').lean().exec(function (err, docs) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.json(200, docs);
       });
@@ -91,8 +91,8 @@ module.exports = function (app) {
   app.get('/apis/data/:id/', function (req, res) {
     TravelerData.findById(req.params.id).lean().exec(function (err, data) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!data) {
         return res.send(410, 'gone');

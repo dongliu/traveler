@@ -87,8 +87,8 @@ function addUser(req, res) {
 
     user.save(function (err, newUser) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
 
       // var url = req.protocol + '://' + req.get('host') + '/users/' + newUser._id;
@@ -116,8 +116,8 @@ module.exports = function (app) {
       name: req.params.name
     }).lean().exec(function (err, user) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (user) {
         return res.render('user', {
@@ -146,7 +146,7 @@ module.exports = function (app) {
       name: req.body.name
     }).lean().exec(function (err, user) {
       if (err) {
-        return res.send(500, err.msg);
+        return res.send(500, err.message);
       }
       if (user) {
         // var url = req.protocol + '://' + req.get('host') + '/users/' + user._id;
@@ -166,9 +166,9 @@ module.exports = function (app) {
     }
     User.find().lean().exec(function (err, users) {
       if (err) {
-        console.error(err.msg);
+        console.error(err);
         return res.json(500, {
-          error: err.msg
+          error: err.message
         });
       }
       res.json(users);
@@ -181,8 +181,8 @@ module.exports = function (app) {
       _id: req.params.id
     }).lean().exec(function (err, user) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (user) {
         return res.render('user', {
@@ -208,9 +208,9 @@ module.exports = function (app) {
       _id: req.params.id
     }, req.body).lean().exec(function (err, user) {
       if (err) {
-        console.error(err.msg);
+        console.error(err);
         return res.json(500, {
-          error: err.msg
+          error: err.message
         });
       }
       res.send(204);
@@ -223,7 +223,7 @@ module.exports = function (app) {
       _id: req.params.id
     }).lean().exec(function (err, user) {
       if (err) {
-        console.error(err.msg);
+        console.error(err);
         return res.json(500, {
           error: err.mesage
         });
@@ -240,8 +240,8 @@ module.exports = function (app) {
       _id: req.params.id
     }).exec(function (err, user) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (user) {
         updateUserProfile(user, res);

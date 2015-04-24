@@ -53,8 +53,8 @@ function addUserFromAD(req, res, form) {
     });
     form.save(function (err) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       var user = new User({
         _id: result[0].sAMAccountName.toLowerCase(),
@@ -67,7 +67,7 @@ function addUserFromAD(req, res, form) {
       });
       user.save(function (err) {
         if (err) {
-          console.error(err.msg);
+          console.error(err);
         }
       });
       return res.send(201, 'The user named ' + name + ' was added to the share list.');
@@ -111,7 +111,7 @@ function addGroupFromAD(req, res, form) {
     form.save(function (err) {
       if (err) {
         console.error(err);
-        return res.send(500, err.msg);
+        return res.send(500, err.message);
       }
       var group = new Group({
         _id: result[0].sAMAccountName.toLowerCase(),
@@ -230,8 +230,8 @@ function addUser(req, res, form) {
     name: name
   }, function (err, user) {
     if (err) {
-      console.error(err.msg);
-      return res.send(500, err.msg);
+      console.error(err);
+      return res.send(500, err.message);
     }
     if (user) {
       var access = 0;
@@ -245,8 +245,8 @@ function addUser(req, res, form) {
       });
       form.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.send(201, 'The user named ' + name + ' was added to the share list.');
       });
@@ -256,7 +256,7 @@ function addUser(req, res, form) {
         }
       }, function (err) {
         if (err) {
-          console.error(err.msg);
+          console.error(err);
         }
       });
     } else {
@@ -274,7 +274,7 @@ function addGroup(req, res, form) {
   }, function (err, group) {
     if (err) {
       console.error(err);
-      return res.send(500, err.msg);
+      return res.send(500, err.message);
     }
     if (group) {
       var access = 0;
@@ -289,7 +289,7 @@ function addGroup(req, res, form) {
       form.save(function (err) {
         if (err) {
           console.error(err);
-          return res.send(500, err.msg);
+          return res.send(500, err.message);
         }
         return res.send(201, 'The group ' + id + ' was added to the share list.');
       });
@@ -329,8 +329,8 @@ module.exports = function (app) {
       createdBy: req.session.userid
     }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       res.json(200, forms);
     });
@@ -341,8 +341,8 @@ module.exports = function (app) {
       _id: req.session.userid
     }, 'forms').lean().exec(function (err, me) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!me) {
         return res.send(400, 'cannot identify the current user');
@@ -353,8 +353,8 @@ module.exports = function (app) {
         }
       }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         res.json(200, forms);
       });
@@ -368,8 +368,8 @@ module.exports = function (app) {
       }
     }, 'forms').lean().exec(function (err, groups) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       var formids = [];
       var i, j;
@@ -387,8 +387,8 @@ module.exports = function (app) {
         }
       }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         res.json(200, forms);
       });
@@ -404,8 +404,8 @@ module.exports = function (app) {
   app.get('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id, function (err, form) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!form) {
         return res.send(410, 'gone');
@@ -433,8 +433,8 @@ module.exports = function (app) {
   app.post('/forms/:id/uploads/', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -467,8 +467,8 @@ module.exports = function (app) {
       // console.dir(data);
       file.save(function (err, newfile) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/formfiles/' + newfile.id;
         res.set('Location', url);
@@ -480,8 +480,8 @@ module.exports = function (app) {
   app.get('/formfiles/:id', auth.ensureAuthenticated, function (req, res) {
     FormFile.findById(req.params.id).lean().exec(function (err, data) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!data) {
         return res.send(410, 'gone');
@@ -497,8 +497,8 @@ module.exports = function (app) {
   app.get('/forms/:id/preview', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id, function (err, form) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!form) {
         return res.send(410, 'gone');
@@ -522,8 +522,8 @@ module.exports = function (app) {
   app.get('/forms/:id/share/', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id).lean().exec(function (err, form) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!form) {
         return res.send(410, 'gone');
@@ -543,8 +543,8 @@ module.exports = function (app) {
   app.get('/forms/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id).lean().exec(function (err, form) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!form) {
         return res.send(410, 'gone');
@@ -565,8 +565,8 @@ module.exports = function (app) {
   app.post('/forms/:id/share/:list/', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id, function (err, form) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!form) {
         return res.send(410, 'gone');
@@ -601,7 +601,7 @@ module.exports = function (app) {
     Form.findById(req.params.id, function (err, form) {
       if (err) {
         console.error(err);
-        return res.send(500, err.msg);
+        return res.send(500, err.message);
       }
       if (!form) {
         return res.send(410, 'gone');
@@ -626,7 +626,7 @@ module.exports = function (app) {
         form.save(function (err) {
           if (err) {
             console.error(err);
-            return res.send(500, err.msg);
+            return res.send(500, err.message);
           }
           // check consistency of user's form list
           var Target;
@@ -661,7 +661,7 @@ module.exports = function (app) {
     Form.findById(req.params.id, function (err, form) {
       if (err) {
         console.error(err);
-        return res.send(500, err.msg);
+        return res.send(500, err.message);
       }
       if (!form) {
         return res.send(410, 'gone');
@@ -681,7 +681,7 @@ module.exports = function (app) {
         form.save(function (err) {
           if (err) {
             console.error(err);
-            return res.send(500, err.msg);
+            return res.send(500, err.message);
           }
           // keep the consistency of user's form list
           var Target;
@@ -724,8 +724,8 @@ module.exports = function (app) {
     form.sharedWith = [];
     (new Form(form)).save(function (err, newform) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + newform.id + '/';
 
@@ -756,7 +756,7 @@ module.exports = function (app) {
     Form.findById(req.params.id, function (err, doc) {
       if (err) {
         console.dir(err);
-        return res.send(500, err.msg || err.errmsg);
+        return res.send(500, err.message || err.errmsg);
       }
       if (getAccess(req, doc) !== 1) {
         return res.send(403, 'you are not authorized to access this resource');
@@ -764,7 +764,7 @@ module.exports = function (app) {
       doc.update(form, function (err, old) {
         if (err) {
           console.dir(err);
-          return res.send(500, err.msg || err.errmsg);
+          return res.send(500, err.message || err.errmsg);
         }
         if (old) {
           return res.send(204);
