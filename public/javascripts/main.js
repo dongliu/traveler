@@ -189,8 +189,13 @@ $(function () {
   var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   fnAddFilterFoot('#form-table', formAoColumns);
   formTable = $('#form-table').dataTable({
-    aaData: [],
-    // bAutoWidth: false,
+    sAjaxSource: '/forms/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
     aoColumns: formAoColumns,
     aaSorting: [
       [4, 'desc'],
@@ -198,7 +203,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  initTable(formTable, '/forms/json');
 
   $('#form-select-all').click(function (e) {
     fnSelectAll(formTable, 'row-selected', 'select-row', true);
@@ -211,8 +215,13 @@ $(function () {
   var sharedFormAoColumns = [formLinkColumn, titleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
   sharedFormTable = $('#shared-form-table').dataTable({
-    aaData: [],
-    // bAutoWidth: false,
+    sAjaxSource: '/sharedforms/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
     aoColumns: sharedFormAoColumns,
     aaSorting: [
       [3, 'desc'],
@@ -220,13 +229,18 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  initTable(sharedFormTable, '/sharedforms/json');
+  // initTable(sharedFormTable, '/sharedforms/json');
 
   var groupSharedFormAoColumns = sharedFormAoColumns;
   fnAddFilterFoot('#group-shared-form-table', groupSharedFormAoColumns);
   groupSharedFormTable = $('#group-shared-form-table').dataTable({
-    aaData: [],
-    // bAutoWidth: false,
+    sAjaxSource: '/groupsharedforms/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
     aoColumns: groupSharedFormAoColumns,
     aaSorting: [
       [3, 'desc'],
@@ -234,13 +248,18 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  initTable(groupSharedFormTable, '/groupsharedforms/json');
+  // initTable(groupSharedFormTable, '/groupsharedforms/json');
 
   var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   travelerTable = $('#traveler-table').dataTable({
-    aaData: [],
+    sAjaxSource: '/travelers/json',
+    sAjaxDataProp: '',
     bAutoWidth: false,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
     aoColumns: travelerAoColumns,
     aaSorting: [
       [10, 'desc'],
@@ -248,13 +267,18 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  initTable(travelerTable, '/travelers/json');
+  // initTable(travelerTable, '/travelers/json');
 
   var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   sharedTravelerTable = $('#shared-traveler-table').dataTable({
-    aaData: [],
-    // bAutoWidth: false,
+    sAjaxSource: '/sharedtravelers/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
       [10, 'desc'],
@@ -262,13 +286,18 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  initTable(sharedTravelerTable, '/sharedtravelers/json');
+  // initTable(sharedTravelerTable, '/sharedtravelers/json');
 
   var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#group-shared-traveler-table', sharedTravelerAoColumns);
   groupSharedTravelerTable = $('#group-shared-traveler-table').dataTable({
-    aaData: [],
-    // bAutoWidth: false,
+    sAjaxSource: '/groupsharedtravelers/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
     aoColumns: groupSharedTravelerAoColumns,
     aaSorting: [
       [10, 'desc'],
@@ -276,7 +305,7 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
+  // initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
 
   var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#init-traveler-table', initTravelerAoColumns);
@@ -336,8 +365,13 @@ $(function () {
   var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);
   archivedTravelerTable = $('#archived-traveler-table').dataTable({
-    aaData: [],
-    // bAutoWidth: false,
+    sAjaxSource: '/archivedtravelers/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
     aoColumns: archivedTravelerAoColumns,
     aaSorting: [
       [8, 'desc'],
@@ -345,7 +379,7 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  initTable(archivedTravelerTable, '/archivedtravelers/json');
+  // initTable(archivedTravelerTable, '/archivedtravelers/json');
 
   // show the tab in hash
   if (History.getHash()) {
@@ -502,14 +536,21 @@ $(function () {
 
 
   $('#reload').click(function (e) {
-    initTable(formTable, '/forms/json');
-    initTable(sharedFormTable, '/sharedforms/json');
-    initTable(groupSharedFormTable, '/groupsharedforms/json');
-    initTable(travelerTable, '/travelers/json');
-    initTable(sharedTravelerTable, '/sharedtravelers/json');
-    initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
+    formTable.fnReloadAjax();
+    sharedFormTable.fnReloadAjax();
+    groupSharedFormTable.fnReloadAjax();
+    travelerTable.fnReloadAjax();
+    sharedTravelerTable.fnReloadAjax();
+    groupSharedTravelerTable.fnReloadAjax();
+    archivedTravelerTable.fnReloadAjax();
+    // initTable(formTable, '/forms/json');
+    // initTable(sharedFormTable, '/sharedforms/json');
+    // initTable(groupSharedFormTable, '/groupsharedforms/json');
+    // initTable(travelerTable, '/travelers/json');
+    // initTable(sharedTravelerTable, '/sharedtravelers/json');
+    // initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
     initCurrentTables('/currenttravelers/json');
-    initTable(archivedTravelerTable, '/archivedtravelers/json');
+    // initTable(archivedTravelerTable, '/archivedtravelers/json');
   });
 
   // binding events
