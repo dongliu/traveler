@@ -15,17 +15,17 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='_blank')
-          i.fa.fa-file-o.fa-lg
-          | &nbsp;New Form
+        a.btn.btn-primary#new(href='#{prefix}/reports/', target='_blank')
+          i.fa.fa-briefcase.fa-lg
+          | &nbsp;Reports
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/currenttravelers/', target='_blank')
+        a.btn.btn-info#alltravelers(href='#{prefix}/currenttravelers/', target='_blank')
           i.fa.fa-list.fa-lg
           | &nbsp;All travelers
       .btn-group
         button.btn.btn-primary#reload
           i.fa.fa-refresh.fa-lg
-          | &nbsp;Reload
+          | &nbsp;Reload all tables
       .btn-group.dropdown
         a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
           i.fa.fa-gears.fa-lg
@@ -67,20 +67,24 @@ block content
           a(href='#sharedtravelers', data-toggle='tab') Shared travelers
         li
           a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
-        li
-          a(href='#inittravelers', data-toggle='tab') Initial travelers
-        li
-          a(href='#activetravelers', data-toggle='tab') Active travelers
-        li
-          a(href='#completetravelers', data-toggle='tab') Complete travelers
-        li
-          a(href='#frozentravelers', data-toggle='tab') Frozen travelers
+        //- li
+        //-   a(href='#inittravelers', data-toggle='tab') Initial travelers
+        //- li
+        //-   a(href='#activetravelers', data-toggle='tab') Active travelers
+        //- li
+        //-   a(href='#completetravelers', data-toggle='tab') Complete travelers
+        //- li
+        //-   a(href='#frozentravelers', data-toggle='tab') Frozen travelers
         li
           a(href='#archivedtravelers', data-toggle='tab') Archived travelers
 
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
+            .btn-group
+              a.btn.btn-primary#new(href='#{prefix}/forms/new', target='_blank')
+                i.fa.fa-file-o.fa-lg
+                | &nbsp;New Form
             .btn-group
               button.btn.btn-primary#form-travel(data-toggle='tooltip', title='select ONE form and create a traveler')
                 i.fa.fa-plane.fa-lg
@@ -128,14 +132,14 @@ block content
                 i.fa.fa-copy.fa-lg
                 | &nbsp;Clone
           table#group-shared-traveler-table.table.table-bordered.table-hover
-        #inittravelers.tab-pane
-          table#init-traveler-table.table.table-bordered.table-hover
-        #activetravelers.tab-pane
-          table#active-traveler-table.table.table-bordered.table-hover
-        #completetravelers.tab-pane
-          table#complete-traveler-table.table.table-bordered.table-hover
-        #frozentravelers.tab-pane
-          table#frozen-traveler-table.table.table-bordered.table-hover
+        //- #inittravelers.tab-pane
+        //-   table#init-traveler-table.table.table-bordered.table-hover
+        //- #activetravelers.tab-pane
+        //-   table#active-traveler-table.table.table-bordered.table-hover
+        //- #completetravelers.tab-pane
+        //-   table#complete-traveler-table.table.table-bordered.table-hover
+        //- #frozentravelers.tab-pane
+        //-   table#frozen-traveler-table.table.table-bordered.table-hover
         #archivedtravelers.tab-pane
           .btn-toolbar
             .btn-group
