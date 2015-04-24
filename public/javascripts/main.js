@@ -229,7 +229,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  // initTable(sharedFormTable, '/sharedforms/json');
 
   var groupSharedFormAoColumns = sharedFormAoColumns;
   fnAddFilterFoot('#group-shared-form-table', groupSharedFormAoColumns);
@@ -248,7 +247,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  // initTable(groupSharedFormTable, '/groupsharedforms/json');
 
   var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
@@ -267,7 +265,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  // initTable(travelerTable, '/travelers/json');
 
   var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
@@ -305,7 +302,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  // initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
 
   var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#init-traveler-table', initTravelerAoColumns);
@@ -379,7 +375,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  // initTable(archivedTravelerTable, '/archivedtravelers/json');
 
   // show the tab in hash
   if (History.getHash()) {
@@ -543,14 +538,7 @@ $(function () {
     sharedTravelerTable.fnReloadAjax();
     groupSharedTravelerTable.fnReloadAjax();
     archivedTravelerTable.fnReloadAjax();
-    // initTable(formTable, '/forms/json');
-    // initTable(sharedFormTable, '/sharedforms/json');
-    // initTable(groupSharedFormTable, '/groupsharedforms/json');
-    // initTable(travelerTable, '/travelers/json');
-    // initTable(sharedTravelerTable, '/sharedtravelers/json');
-    // initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
     initCurrentTables('/currenttravelers/json');
-    // initTable(archivedTravelerTable, '/archivedtravelers/json');
   });
 
   // binding events
