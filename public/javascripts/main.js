@@ -21,13 +21,13 @@ function initTable(oTable, url) {
   }).always();
 }
 
-function initTableFromArray(oTable, json) {
+/*function initTableFromArray(oTable, json) {
   oTable.fnClearTable();
   oTable.fnAddData(json);
   oTable.fnDraw();
-}
+}*/
 
-function initCurrentTables(url) {
+/*function initCurrentTables(url) {
   $.ajax({
     url: url,
     type: 'GET',
@@ -59,7 +59,7 @@ function initCurrentTables(url) {
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   }).always();
-}
+}*/
 
 function formatTravelerStatus(s) {
   var status = {
@@ -283,7 +283,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  // initTable(sharedTravelerTable, '/sharedtravelers/json');
 
   var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#group-shared-traveler-table', sharedTravelerAoColumns);
@@ -303,7 +302,7 @@ $(function () {
     sDom: sDomNoTools
   });
 
-  var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  /*var initTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#init-traveler-table', initTravelerAoColumns);
   initTravelerTable = $('#init-traveler-table').dataTable({
     aaData: [],
@@ -356,7 +355,7 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  initCurrentTables('/currenttravelers/json');
+  initCurrentTables('/currenttravelers/json');*/
 
   var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);
@@ -538,7 +537,7 @@ $(function () {
     sharedTravelerTable.fnReloadAjax();
     groupSharedTravelerTable.fnReloadAjax();
     archivedTravelerTable.fnReloadAjax();
-    initCurrentTables('/currenttravelers/json');
+    // initCurrentTables('/currenttravelers/json');
   });
 
   // binding events
