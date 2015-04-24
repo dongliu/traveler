@@ -50,8 +50,8 @@ function createTraveler(form, req, res) {
   });
   traveler.save(function (err, doc) {
     if (err) {
-      console.error(err.msg);
-      return res.send(500, err.msg);
+      console.error(err);
+      return res.send(500, err.message);
     }
     console.log('new traveler ' + doc.id + ' created');
     var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
@@ -83,8 +83,8 @@ function cloneTraveler(source, req, res) {
   });
   traveler.save(function (err, doc) {
     if (err) {
-      console.error(err.msg);
-      return res.send(500, err.msg);
+      console.error(err);
+      return res.send(500, err.message);
     }
     console.log('new traveler ' + doc.id + ' created');
     doc.sharedWith.forEach(function (e, i, a) {
@@ -94,7 +94,7 @@ function cloneTraveler(source, req, res) {
         }
       }, function (err, user) {
         if (err) {
-          console.error(err.msg);
+          console.error(err);
         }
         if (!user) {
           console.error('The user ' + e._id + ' does not in the db');
@@ -109,7 +109,7 @@ function cloneTraveler(source, req, res) {
         }
       }, function (err, user) {
         if (err) {
-          console.error(err.msg);
+          console.error(err);
         }
         if (!user) {
           console.error('The group ' + e._id + ' does not in the db');
@@ -207,8 +207,8 @@ function addUserFromAD(req, res, traveler) {
     });
     traveler.save(function (err) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       var user = new User({
         _id: result[0].sAMAccountName.toLowerCase(),
@@ -223,7 +223,7 @@ function addUserFromAD(req, res, traveler) {
         if (err) {
           // console.dir(user);
           console.dir(err);
-          console.error(err.msg);
+          console.error(err);
         }
       });
       return res.send(201, 'The user named ' + name + ' was added to the share list.');
@@ -267,7 +267,7 @@ function addGroupFromAD(req, res, traveler) {
     traveler.save(function (err) {
       if (err) {
         console.error(err);
-        return res.send(500, err.msg);
+        return res.send(500, err.message);
       }
       var group = new Group({
         _id: result[0].sAMAccountName.toLowerCase(),
@@ -402,8 +402,8 @@ function addUser(req, res, traveler) {
     name: name
   }, function (err, user) {
     if (err) {
-      console.error(err.msg);
-      return res.send(500, err.msg);
+      console.error(err);
+      return res.send(500, err.message);
     }
     if (user) {
       var access = 0;
@@ -417,8 +417,8 @@ function addUser(req, res, traveler) {
       });
       traveler.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.send(201, 'The user named ' + name + ' was added to the share list.');
       });
@@ -428,7 +428,7 @@ function addUser(req, res, traveler) {
         }
       }, function (err) {
         if (err) {
-          console.error(err.msg);
+          console.error(err);
         }
       });
     } else {
@@ -445,7 +445,7 @@ function addGroup(req, res, traveler) {
   }, function (err, group) {
     if (err) {
       console.error(err);
-      return res.send(500, err.msg);
+      return res.send(500, err.message);
     }
     if (group) {
       var access = 0;
@@ -460,7 +460,7 @@ function addGroup(req, res, traveler) {
       traveler.save(function (err) {
         if (err) {
           console.error(err);
-          return res.send(500, err.msg);
+          return res.send(500, err.message);
         }
         return res.send(201, 'The group ' + id + ' was added to the share list.');
       });
@@ -501,8 +501,8 @@ module.exports = function (app) {
       }
     }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       return res.json(200, docs);
     });
@@ -513,8 +513,8 @@ module.exports = function (app) {
       _id: req.session.userid
     }, 'travelers').lean().exec(function (err, me) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!me) {
         return res.send(400, 'cannot identify the current user');
@@ -528,8 +528,8 @@ module.exports = function (app) {
         }
       }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.json(200, travelers);
       });
@@ -543,8 +543,8 @@ module.exports = function (app) {
       }
     }, 'travelers').lean().exec(function (err, groups) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       var travelerIds = [];
       var i, j;
@@ -562,8 +562,8 @@ module.exports = function (app) {
         }
       }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         res.json(200, travelers);
       });
@@ -584,8 +584,8 @@ module.exports = function (app) {
     }
     Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       return res.json(200, travelers);
     });
@@ -615,8 +615,8 @@ module.exports = function (app) {
       archived: true
     }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       return res.json(200, travelers);
     });
@@ -626,8 +626,8 @@ module.exports = function (app) {
     if (req.body.form) {
       Form.findById(req.body.form, function (err, form) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         if (form) {
           if (form.createdBy === req.session.userid) {
@@ -643,8 +643,8 @@ module.exports = function (app) {
     if (req.body.source) {
       Traveler.findById(req.body.source, function (err, traveler) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         if (traveler) {
           if (traveler.status === 0) {
@@ -665,8 +665,8 @@ module.exports = function (app) {
   app.get('/travelers/:id/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -684,8 +684,8 @@ module.exports = function (app) {
   app.get('/travelers/:id/view', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -700,8 +700,8 @@ module.exports = function (app) {
   app.get('/travelers/:id/json', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -716,8 +716,8 @@ module.exports = function (app) {
   app.put('/travelers/:id/archived', auth.ensureAuthenticated, filterBody(['archived']), function (req, res) {
     Traveler.findById(req.params.id, 'createdBy archived').exec(function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -735,8 +735,8 @@ module.exports = function (app) {
 
       doc.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.send(204);
       });
@@ -747,8 +747,8 @@ module.exports = function (app) {
   app.get('/travelers/:id/config', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, 'title description deadline status devices sharedWith sharedGroup createdBy createdOn updatedOn updatedBy').exec(function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -767,8 +767,8 @@ module.exports = function (app) {
     Traveler.findById(req.params.id, function (err, doc) {
       var k;
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -785,8 +785,8 @@ module.exports = function (app) {
       doc.updatedOn = Date.now();
       doc.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.send(204);
       });
@@ -796,8 +796,8 @@ module.exports = function (app) {
   app.put('/travelers/:id/status', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -849,8 +849,8 @@ module.exports = function (app) {
       doc.updatedOn = Date.now();
       doc.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.send(204);
       });
@@ -861,8 +861,8 @@ module.exports = function (app) {
   app.post('/travelers/:id/devices/', auth.ensureAuthenticated, filterBody(['newdevice']), function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -875,8 +875,8 @@ module.exports = function (app) {
       doc.devices.addToSet(req.body.newdevice);
       doc.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.send(204);
       });
@@ -886,8 +886,8 @@ module.exports = function (app) {
   app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -900,8 +900,8 @@ module.exports = function (app) {
       doc.devices.pull(req.params.number);
       doc.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.send(204);
       });
@@ -911,8 +911,8 @@ module.exports = function (app) {
   app.get('/travelers/:id/data/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -926,8 +926,8 @@ module.exports = function (app) {
         }
       }, 'name value inputType inputBy inputOn').lean().exec(function (err, docs) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.json(200, docs);
       });
@@ -937,8 +937,8 @@ module.exports = function (app) {
   app.post('/travelers/:id/data/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -960,16 +960,16 @@ module.exports = function (app) {
       });
       data.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         doc.data.push(data._id);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
         doc.save(function (err) {
           if (err) {
-            console.error(err.msg);
-            return res.send(500, err.msg);
+            console.error(err);
+            return res.send(500, err.message);
           }
           return res.send(204);
         });
@@ -980,8 +980,8 @@ module.exports = function (app) {
   app.get('/travelers/:id/notes/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -995,8 +995,8 @@ module.exports = function (app) {
         }
       }, 'name value inputBy inputOn').lean().exec(function (err, docs) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.json(200, docs);
       });
@@ -1006,8 +1006,8 @@ module.exports = function (app) {
   app.post('/travelers/:id/notes/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -1029,16 +1029,16 @@ module.exports = function (app) {
       });
       note.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         doc.notes.push(note._id);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
         doc.save(function (err) {
           if (err) {
-            console.error(err.msg);
-            return res.send(500, err.msg);
+            console.error(err);
+            return res.send(500, err.message);
           }
           return res.send(204);
         });
@@ -1049,8 +1049,8 @@ module.exports = function (app) {
   app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -1071,8 +1071,8 @@ module.exports = function (app) {
         finishedInput: req.body.finishedInput
       }, function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         return res.send(204);
       });
@@ -1082,8 +1082,8 @@ module.exports = function (app) {
   app.post('/travelers/:id/uploads/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!doc) {
         return res.send(410, 'gone');
@@ -1119,16 +1119,16 @@ module.exports = function (app) {
       // console.dir(data);
       data.save(function (err) {
         if (err) {
-          console.error(err.msg);
-          return res.send(500, err.msg);
+          console.error(err);
+          return res.send(500, err.message);
         }
         doc.data.push(data._id);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
         doc.save(function (err) {
           if (err) {
-            console.error(err.msg);
-            return res.send(500, err.msg);
+            console.error(err);
+            return res.send(500, err.message);
           }
           var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/data/' + data._id;
           res.set('Location', url);
@@ -1143,8 +1143,8 @@ module.exports = function (app) {
   app.get('/data/:id', auth.ensureAuthenticated, function (req, res) {
     TravelerData.findById(req.params.id).lean().exec(function (err, data) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!data) {
         return res.send(410, 'gone');
@@ -1165,8 +1165,8 @@ module.exports = function (app) {
   app.get('/travelers/:id/share/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id).lean().exec(function (err, traveler) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!traveler) {
         return res.send(410, 'gone');
@@ -1186,8 +1186,8 @@ module.exports = function (app) {
   app.get('/travelers/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id).lean().exec(function (err, traveler) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!traveler) {
         return res.send(410, 'gone');
@@ -1208,8 +1208,8 @@ module.exports = function (app) {
   app.post('/travelers/:id/share/:list/', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, traveler) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!traveler) {
         return res.send(410, 'gone');
@@ -1244,8 +1244,8 @@ module.exports = function (app) {
   app.put('/travelers/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, traveler) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!traveler) {
         return res.send(410, 'gone');
@@ -1270,7 +1270,7 @@ module.exports = function (app) {
         traveler.save(function (err) {
           if (err) {
             console.error(err);
-            return res.send(500, err.msg);
+            return res.send(500, err.message);
           }
           // check consistency of user's traveler list
           var Target;
@@ -1304,8 +1304,8 @@ module.exports = function (app) {
   app.delete('/travelers/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, traveler) {
       if (err) {
-        console.error(err.msg);
-        return res.send(500, err.msg);
+        console.error(err);
+        return res.send(500, err.message);
       }
       if (!traveler) {
         return res.send(410, 'gone');
@@ -1325,7 +1325,7 @@ module.exports = function (app) {
         traveler.save(function (err) {
           if (err) {
             console.error(err);
-            return res.send(500, err.msg);
+            return res.send(500, err.message);
           }
           // keep the consistency of user's traveler list
           var Target;

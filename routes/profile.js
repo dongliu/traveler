@@ -9,7 +9,7 @@ module.exports = function (app) {
       _id: req.session.userid
     }).lean().exec(function (err, user) {
       if (err) {
-        console.error(err.msg);
+        console.error(err);
         return res.send(500, 'something is wrong with the DB.');
       }
       return res.render('profile', {
@@ -32,9 +32,9 @@ module.exports = function (app) {
       subscribe: req.body.subscribe
     }).lean().exec(function (err, user) {
       if (err) {
-        console.error(err.msg);
+        console.error(err);
         return res.json(500, {
-          error: err.msg
+          error: err.message
         });
       }
       res.send(204);
