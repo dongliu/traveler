@@ -288,8 +288,7 @@ $(function () {
       [7, 'desc'],
       [9, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
 
   var activeTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
