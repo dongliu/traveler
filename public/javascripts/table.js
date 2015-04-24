@@ -95,13 +95,17 @@ function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
 
 function fnSelectAll(oTableLocal, selectedClass, checkboxClass, filtered) {
   fnDeselect(oTableLocal, selectedClass, checkboxClass);
-  var settings = oTableLocal.fnSettings();
-  var indexes = (filtered === true) ? settings.aiDisplay : settings.aiDisplayMaster;
-  indexes.forEach(function (i) {
-    var r = oTableLocal.fnGetNodes(i);
-    $(r).addClass(selectedClass);
-    $(r).find('input.' + checkboxClass).prop('checked', true);
-  });
+  var rows, i;
+  if (filtered) {
+    rows = oTableLocal.$('tr', {"filter":"applied"});
+  } else {
+    rows = oTableLocal.$('tr');
+  }
+
+  for(i = 0; i < rows.length; i += 1) {
+    $(rows[i]).addClass(selectedClass);
+    $(rows[i]).find('input.' + checkboxClass).prop('checked', true);
+  }
 }
 
 function fnSetDeselect(nTr, selectedClass, checkboxClass) {
