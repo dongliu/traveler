@@ -13,6 +13,7 @@ var user = new Schema({
   lastVisitedOn: Date,
   forms: [ObjectId],
   travelers: [ObjectId],
+  reports: [ObjectId],
   subscribe: {
     type: Boolean,
     default: false
