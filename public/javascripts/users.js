@@ -88,11 +88,16 @@ $(function () {
   updateAjaxURL(prefix);
 
   var usernames = new Bloodhound({
-    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('displayName'),
+    datumTokenizer: function (user) {
+      return Bloodhound.tokenizers.whitespace(user.displayName);
+    },
     queryTokenizer: Bloodhound.tokenizers.whitespace,
-    limit: 20,
+    identify: function (user) {
+      return user.displayName;
+    },
     prefetch: {
-      url: '/adusernames'
+      url: '/adusernames',
+      cacheKey: 'adusernames'
     }
   });
 
@@ -104,8 +109,9 @@ $(function () {
     hint: true
   }, {
     name: 'usernames',
-    displayKey: 'displayName',
-    source: usernames.ttAdapter()
+    display: 'displayName',
+    limit: 20,
+    source: usernames
   });
 
   var userTable = $('#users').dataTable({
