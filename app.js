@@ -129,7 +129,11 @@ app.get('/api', function (req, res) {
     prefix: req.proxied ? req.proxied_prefix : ''
   });
 });
-app.get('/', auth.ensureAuthenticated, routes.main);
+app.get('/', auth.checkAuth, routes.main);
+app.get('/login', auth.ensureAuthenticated, function (req, res) {
+  // not redirected by auth, something is wrong here
+  return res.send(400, 'cannot login, please make sure cookie is enabled in your browser.');
+});
 app.get('/logout', routes.logout);
 
 app.get('/apis', function (req, res) {
