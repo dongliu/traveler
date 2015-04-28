@@ -103,11 +103,29 @@ hr.soften {
 }
 /* FRIB style */
 
-/* .navbar .navbar-inner {
+/*.navbar .navbar-inner {
   background-color: #46a546;
   background-image: none;
+}*/
+
+/*user photo*/
+
+.navbar .nav > li > a.user {
+  padding: 5px;
 }
- */
+
+.user {
+  max-width: 30px;
+  /*max-height: 20px;*/
+  height: auto;
+  overflow: hidden;
+}
+.user img {
+  width: 100%;
+  height: auto;
+  margin: 0px auto -20px;
+/*  margin-top: -7px;*/
+}
 
 /* d3 stuff */
 .chart {
