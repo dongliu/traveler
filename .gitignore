@@ -25,4 +25,4 @@ config/service.json
 config/auth.json
 
 # npm stuff #
-npm-debug.log
+npm-debug.log*
