@@ -55,6 +55,7 @@ mongoose.connection.on('disconnected', function () {
   console.log('Mongoose default connection disconnected');
 });
 
+var adClient = require('./lib/ldap-client').client;
 
 var auth = require('./lib/auth');
 
@@ -159,11 +160,14 @@ var apiserver = https.createServer(credentials, api).listen(api.get('port'), fun
 function cleanup() {
   server._connections = 0;
   apiserver._connections = 0;
+  mongoose.connection.close();
+  adClient.unbind(function () {
+    console.log('ldap client stops.');
+  });
   server.close(function () {
     apiserver.close(function () {
-      console.log("Closed out remaining connections.");
+      console.log('web and api servers close.');
       // Close db connections, other chores, etc.
-      mongoose.connection.close();
       process.exit();
     });
   });
