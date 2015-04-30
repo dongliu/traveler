@@ -3,7 +3,9 @@
 function updateAjaxURL(prefix) {
   if (prefix) {
     $.ajaxPrefilter(function (options) {
-      options.url = prefix + options.url;
+      if (options.url.indexOf(prefix) !== 0) {
+        options.url = prefix + options.url;
+      }
     });
   }
 }
