@@ -1,6 +1,6 @@
 /*global selectColumn: false, useridColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDom: false, oTableTools: false*/
 /*global updateAjaxURL: false, prefix: false*/
-/*global Bloodhound: false*/
+/*global Bloodhound: false, travelerGlobal: false*/
 
 function inArray(name, ao) {
   var i;
@@ -87,21 +87,21 @@ function modifyFromModal(cb) {
 $(function () {
   updateAjaxURL(prefix);
 
-  var usernames = new Bloodhound({
-    datumTokenizer: function (user) {
-      return Bloodhound.tokenizers.whitespace(user.displayName);
-    },
-    queryTokenizer: Bloodhound.tokenizers.whitespace,
-    identify: function (user) {
-      return user.displayName;
-    },
-    prefetch: {
-      url: '/adusernames',
-      cacheKey: 'adusernames'
-    }
-  });
+  // var usernames = new Bloodhound({
+  //   datumTokenizer: function (user) {
+  //     return Bloodhound.tokenizers.whitespace(user.displayName);
+  //   },
+  //   queryTokenizer: Bloodhound.tokenizers.whitespace,
+  //   identify: function (user) {
+  //     return user.displayName;
+  //   },
+  //   prefetch: {
+  //     url: '/adusernames',
+  //     cacheKey: 'adusernames'
+  //   }
+  // });
 
-  usernames.initialize();
+  travelerGlobal.usernames.initialize();
 
   $('#username').typeahead({
     minLength: 1,
@@ -111,7 +111,7 @@ $(function () {
     name: 'usernames',
     display: 'displayName',
     limit: 20,
-    source: usernames
+    source: travelerGlobal.usernames
   });
 
   var userTable = $('#users').dataTable({
