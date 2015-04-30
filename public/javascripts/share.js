@@ -188,23 +188,10 @@ function addto(data, table, list) {
 
 
 $(function () {
-  $(document).ajaxError(function (event, jqXHR, settings, exception) {
-    if (jqXHR.status === 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }
-  });
+  ajax401(prefix);
+  updateAjaxURL(prefix);
 
-  var usernames = new Bloodhound({
-    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('displayName'),
-    queryTokenizer: Bloodhound.tokenizers.whitespace,
-    limit: 20,
-    prefetch: {
-      url: prefix + '/adusernames'
-    }
-  });
-
-  usernames.initialize();
+  travelerGlobal.usernames.initialize();
 
   $('#username').typeahead({
     minLength: 1,
@@ -212,29 +199,22 @@ $(function () {
     hint: true
   }, {
     name: 'usernames',
-    displayKey: 'displayName',
-    source: usernames.ttAdapter()
-  });
-
-  var groupIds = new Bloodhound({
-    datumTokenizer: Bloodhound.tokenizers.obj.nonword('sAMAccountName'),
-    queryTokenizer: Bloodhound.tokenizers.nonword,
+    display: 'displayName',
     limit: 20,
-    prefetch: {
-      url: prefix + '/adgroups?term=lab.frib.'
-    }
+    source: travelerGlobal.usernames
   });
 
-  groupIds.initialize();
+  travelerGlobal.groupids.initialize();
 
   $('#groupid').typeahead({
     minLength: 1,
     highlight: true,
     hint: true
   }, {
-    name: 'groupIds',
+    name: 'groupids',
     displayKey: 'sAMAccountName',
-    source: groupIds.ttAdapter()
+    limit: 20,
+    source: travelerGlobal.groupids
   });
 
   var shareAoColumns = [selectColumn, useridColumn, userNameNoLinkColumn, accessColumn];
@@ -245,8 +225,7 @@ $(function () {
     aaSorting: [
       [1, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
 
   var groupShareAoColumns = [selectColumn, groupNameColumn, accessColumn];
@@ -257,8 +236,7 @@ $(function () {
     aaSorting: [
       [1, 'desc']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    sDom: sDomNoTools
   });
 
   selectEvent();
