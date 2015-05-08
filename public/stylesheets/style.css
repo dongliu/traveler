@@ -111,20 +111,18 @@ hr.soften {
 /*user photo*/
 
 .navbar .nav > li > a.user {
-  padding: 5px;
+  padding: 0px;
 }
 
 .user {
-  max-width: 30px;
-  /*max-height: 20px;*/
+  max-width: 27px;
   height: auto;
   overflow: hidden;
 }
 .user img {
   width: 100%;
   height: auto;
-  margin: 0px auto -20px;
-/*  margin-top: -7px;*/
+  margin: 0px auto;
 }
 
 /* d3 stuff */
