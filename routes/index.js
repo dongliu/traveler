@@ -2,10 +2,7 @@ var auth = require('../config/auth.json');
 
 exports.main = function (req, res) {
   console.log(req.session);
-  res.render('main', {
-    session: req.session,
-    prefix: req.proxied ? req.proxied_prefix : ''
-  });
+  res.render('main');
 };
 
 /*exports.builder = function (req, res) {

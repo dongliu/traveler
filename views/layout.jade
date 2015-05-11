@@ -30,11 +30,12 @@ html
                     img(src='#{prefix}/adusers/#{session.userid}/photo', title='#{session.username}')
                 li.dropdown
                   a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
+                    b.caret
                   ul.dropdown-menu
                     li
-                      a Profile
+                      a(href='#{prefix}/profile', target='_blank') Profile
                     li
-                      a Log out
+                      a(href='#{prefix}/logout') Log out
 
               else
                 li
