@@ -14,12 +14,12 @@ node_modules/
 .DS_Store
 
 # special folders #
-logs/
+logs/*
 !logs/readme
-doc/
-uploads/
+doc/*
+uploads/*
 !uploads/readme
-userphoto/
+userphoto/*
 !userphoto/readme
 config/ad.json
 config/node.pem
