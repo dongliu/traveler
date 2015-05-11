@@ -8,7 +8,58 @@ var User = mongoose.model('User');
 var auth = require('../lib/auth');
 var authConfig = require('../config/auth.json');
 
+var fs = require('fs');
+var pending_photo = {};
+var options = {
+  root: __dirname + '/../userphoto/',
+  maxAge: 30 * 24 * 3600 * 1000
+};
+
 var Roles = ['manager', 'admin'];
+
+function fetch_photo_from_ad(id) {
+  var searchFilter = ad.searchFilter.replace('_id', id);
+  var opts = {
+    filter: searchFilter,
+    attributes: ad.rawAttributes,
+    scope: 'sub'
+  };
+  ldapClient.search(ad.searchBase, opts, true, function (err, result) {
+    var res_list = pending_photo[id];
+    delete pending_photo[id];
+    if (err) {
+      console.error(err);
+      res_list.forEach(function (res) {
+        res.send(500, 'ldap error');
+      });
+    } else {
+      if (result.length === 0) {
+        res_list.forEach(function (res) {
+          res.status(500, id + ' is not found');
+        });
+      }
+      if (result.length > 1) {
+        res_list.forEach(function (res) {
+          res.status(500, id + ' is not unique!');
+        });
+      } else {
+        res_list.forEach(function (res) {
+          res.set('Content-Type', 'image/jpeg');
+          res.set('Cache-Control', 'public, max-age=' + options.maxAge);
+          res.send(result[0].thumbnailPhoto);
+        });
+        // there is a chance that the file was created but not seen by the current leading request
+        if (!fs.existsSync(options.root + id + '.jpg')) {
+          fs.writeFile(options.root + id + '.jpg', result[0].thumbnailPhoto, function (err) {
+            if (err) {
+              console.error(err);
+            }
+          });
+        }
+      }
+    }
+  });
+}
 
 function updateUserProfile(user, res) {
   var searchFilter = ad.searchFilter.replace('_id', user._id);
@@ -284,31 +335,16 @@ module.exports = function (app) {
 
 
   app.get('/adusers/:id/photo', auth.ensureAuthenticated, function (req, res) {
-
-    var searchFilter = ad.searchFilter.replace('_id', req.params.id);
-    var opts = {
-      filter: searchFilter,
-      attributes: ad.rawAttributes,
-      scope: 'sub'
-    };
-    ldapClient.search(ad.searchBase, opts, true, function (err, result) {
-      if (err) {
-        return res.json(500, err);
+    if (fs.existsSync(options.root + req.params.id + '.jpg')) {
+      res.sendFile(req.params.id + '.jpg', options);
+    } else {
+      if (pending_photo[req.params.id]) {
+        pending_photo[req.params.id].push(res);
+      } else {
+        pending_photo[req.params.id] = [res];
+        fetch_photo_from_ad(req.params.id);
       }
-      if (result.length === 0) {
-        return res.json(500, {
-          error: req.params.id + ' is not found!'
-        });
-      }
-      if (result.length > 1) {
-        return res.json(500, {
-          error: req.params.id + ' is not unique!'
-        });
-      }
-      res.set('Content-Type', 'image/jpeg');
-      return res.send(result[0].thumbnailPhoto);
-    });
-
+    }
   });
 
   app.get('/adusernames', auth.ensureAuthenticated, function (req, res) {
