@@ -15,8 +15,12 @@ node_modules/
 
 # special folders #
 logs/
+!logs/readme
 doc/
 uploads/
+!uploads/readme
+userphoto/
+!userphoto/readme
 config/ad.json
 config/node.pem
 config/node.key
