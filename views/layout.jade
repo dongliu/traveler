@@ -26,13 +26,21 @@ html
             ul.nav.pull-right
               if (locals.session && locals.session.userid)
                 li
-                  a.user(href='#')
+                  .user(href='#')
                     img(src='#{prefix}/adusers/#{session.userid}/photo', title='#{session.username}')
+                li.dropdown
+                  a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
+                  ul.dropdown-menu
+                    li
+                      a Profile
+                    li
+                      a Log out
+
               else
                 li
                   a(href='#{prefix}/login')
                     i.fa.fa-user.fa-lg
-                    | &nbsp;Login
+                    | &nbsp;Log in
     block content
     .container-fluid
       h6.text-right

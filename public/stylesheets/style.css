@@ -115,9 +115,9 @@ hr.soften {
 }
 
 .user {
-  max-width: 27px;
-  height: auto;
-  overflow: hidden;
+  width: 27px;
+  height: 40px;
+  /*overflow: hidden;*/
 }
 .user img {
   width: 100%;
