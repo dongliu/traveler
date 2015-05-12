@@ -35,12 +35,12 @@ function fetch_photo_from_ad(id) {
     } else {
       if (result.length === 0) {
         res_list.forEach(function (res) {
-          res.status(500, id + ' is not found');
+          res.status(400, id + ' is not found');
         });
       }
       if (result.length > 1) {
         res_list.forEach(function (res) {
-          res.status(500, id + ' is not unique!');
+          res.status(400, id + ' is not unique!');
         });
       } else {
         res_list.forEach(function (res) {
