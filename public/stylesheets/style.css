@@ -108,6 +108,43 @@ hr.soften {
   background-image: none;
 }*/
 
+/* section for the main page
+-------------------------------------------------- */
+
+.main {
+  text-align: center;
+  color: #5a5a5a;
+}
+.main h1 {
+  margin: 60px 0 10px;
+  font-size: 60px;
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.main h2 {
+  font-weight: 200;
+  margin-bottom: 5px;
+}
+.main p {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.main .main-byline {
+  margin-bottom: 40px;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1.25;
+  color: #999;
+}
+.main-img {
+  display: block;
+  margin: 0 auto 30px;
+  max-height: 145px;
+}
+
+
+
 /*user photo*/
 
 .navbar .nav > li > a.user {
@@ -433,7 +470,7 @@ figcaption {
   .masthead p, .masthead .btn {
     font-size: 24px;
   }
-  .marketing .span4 {
+  .main .span4 {
     margin-bottom: 40px;
   }
   .bs-docs-social {
@@ -490,11 +527,11 @@ figcaption {
   .subhead h1, .subhead p {
     text-align: center;
   }
-  /* Marketing on home */
-  .marketing h1 {
+  /* main on home */
+  .main h1 {
     font-size: 30px;
   }
-  .marketing-byline {
+  .main-byline {
     font-size: 18px;
   }
   /* center example sites */
