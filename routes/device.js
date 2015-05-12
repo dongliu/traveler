@@ -24,7 +24,10 @@ module.exports = function (app) {
           error: 'cannot retrieve device list from ctlapp-wheezy-temp'
         });
       }
-      res.status(response.statusCode).type('application/json');
+      res.status(response.statusCode);
+      if (response.statusCode === 200) {
+        res.type('application/json');
+      }
       return res.send(resBody);
     });
   });
