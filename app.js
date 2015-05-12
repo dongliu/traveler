@@ -106,13 +106,7 @@ app.configure(function () {
   app.use(express.json());
   app.use(express.urlencoded());
   app.use(auth.proxied);
-  app.use(function (req, res, next) {
-    res.locals({
-      session: req.session,
-      prefix: req.proxied ? req.proxied_prefix : ''
-    });
-    next();
-  });
+  app.use(auth.sessionLocals);
   app.use(app.router);
 });
 
