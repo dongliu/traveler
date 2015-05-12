@@ -107,6 +107,7 @@ app.configure(function () {
   app.use(express.json());
   app.use(express.urlencoded());
   app.use(auth.proxied);
+  app.use(auth.sessionLocals);
   app.use(app.router);
 });
 
