@@ -37,8 +37,7 @@ function fetch_photo_from_ad(id) {
         res_list.forEach(function (res) {
           res.status(400, id + ' is not found');
         });
-      }
-      if (result.length > 1) {
+      } else if (result.length > 1) {
         res_list.forEach(function (res) {
           res.status(400, id + ' is not unique!');
         });
