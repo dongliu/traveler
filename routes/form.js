@@ -129,7 +129,6 @@ function addGroupFromAD(req, res, form) {
   });
 }
 
-
 function canWrite(req, doc) {
   if (doc.createdBy === req.session.userid) {
     return true;
@@ -208,7 +207,6 @@ function getSharedWith(sharedWith, name) {
   return -1;
 }
 
-
 function getSharedGroup(sharedGroup, id) {
   var i;
   if (sharedGroup.length === 0) {
@@ -221,7 +219,6 @@ function getSharedGroup(sharedGroup, id) {
   }
   return -1;
 }
-
 
 function addUser(req, res, form) {
   var name = req.body.name;
@@ -263,7 +260,6 @@ function addUser(req, res, form) {
       addUserFromAD(req, res, form);
     }
   });
-
 }
 
 function addGroup(req, res, form) {
@@ -306,11 +302,9 @@ function addGroup(req, res, form) {
       addGroupFromAD(req, res, form);
     }
   });
-
 }
 
 function addShare(req, res, form) {
-
   if (req.params.list === 'users') {
     addUser(req, res, form);
   }
@@ -318,11 +312,13 @@ function addShare(req, res, form) {
   if (req.params.list === 'groups') {
     addGroup(req, res, form);
   }
-
 }
 
-
 module.exports = function (app) {
+
+  app.get('/forms/', auth.ensureAuthenticated, function (req, res) {
+    res.render('forms');
+  });
 
   app.get('/forms/json', auth.ensureAuthenticated, function (req, res) {
     Form.find({
