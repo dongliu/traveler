@@ -21,10 +21,19 @@ function selectEvent() {
 
 
 function filterEvent() {
-  $('tfoot').on('keyup', 'input', function (e) {
+  $('.filter').on('keyup', 'input', function (e) {
     var table = $(this).closest('table');
     var th = $(this).closest('th');
-    table.dataTable().fnFilter(this.value, $('tfoot th', table).index(th));
+    var filter = $(this).closest('.filter');
+    var index;
+    if (filter.is('thead')) {
+      index = $('thead.filter th', table).index(th);
+      $('tfoot.filter th:nth-child(' + (index + 1) + ') input', table).val(this.value);
+    } else {
+      index = $('tfoot.filter th', table).index(th);
+      $('thead.filter th:nth-child(' + (index + 1) + ') input', table).val(this.value);
+    }
+    table.dataTable().fnFilter(this.value, index);
   });
 }
 
@@ -54,6 +63,18 @@ function personColumn(title, key) {
   };
 }
 
+function personNameColumn(title, key) {
+  return {
+    sTitle: title,
+    mData: key,
+    sDefaultContent: '',
+    mRender: function (data, type, full) {
+      return '<a href = "/usernames/' + data + '" target="_blank">' + data + '</a>';
+    },
+    bFilter: true
+  };
+}
+
 function fnWrap(oTableLocal) {
   $(oTableLocal.fnSettings().aoData).each(function () {
     $(this.nTr).removeClass('nowrap');
@@ -71,9 +92,10 @@ function fnUnwrap(oTableLocal) {
 
 
 function fnGetSelected(oTableLocal, selectedClass) {
-  var aReturn = [];
+  var aReturn = [],
+    i;
   var aTrs = oTableLocal.fnGetNodes();
-  var i;
+
   for (i = 0; i < aTrs.length; i++) {
     if ($(aTrs[i]).hasClass(selectedClass)) {
       aReturn.push(aTrs[i]);
@@ -83,8 +105,9 @@ function fnGetSelected(oTableLocal, selectedClass) {
 }
 
 function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
-  var aTrs = oTableLocal.fnGetNodes();
-  var i;
+  var aTrs = oTableLocal.fnGetNodes(),
+    i;
+
   for (i = 0; i < aTrs.length; i++) {
     if ($(aTrs[i]).hasClass(selectedClass)) {
       $(aTrs[i]).removeClass(selectedClass);
@@ -132,7 +155,19 @@ function fnAddFilterFoot(sTable, aoColumns) {
       tr.append('<th></th>');
     }
   });
-  $(sTable).append($('<tfoot>').append(tr));
+  $(sTable).append($('<tfoot class="filter">').append(tr));
+}
+
+function fnAddFilterHead(sTable, aoColumns) {
+  var tr = $('<tr role="row">');
+  aoColumns.forEach(function (c) {
+    if (c.bFilter) {
+      tr.append('<th><input type="text" placeholder="' + c.sTitle + '" style="width:80%;" autocomplete="off"></th>');
+    } else {
+      tr.append('<th></th>');
+    }
+  });
+  $(sTable).append($('<thead class="filter">').append(tr));
 }
 
 function formatTravelerStatus(s) {
@@ -517,7 +552,10 @@ var oTableTools = {
 };
 
 var sDom = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
+var sDom2i = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
+var sDom2i1p = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span3'r><'span3'f>>t<'row-fluid'<'span6'i><'span6'p>>";
 var sDomNoTools = "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
+var sDomNoLength = "<'row-fluid'<'span6'<'control-group'T>><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
 
 
 /**
