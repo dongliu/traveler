@@ -1,4 +1,4 @@
-/*global ObjectId:false*/
+/*jslint es5: true*/
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
@@ -26,6 +26,10 @@ var form = new Schema({
   createdOn: Date,
   updatedBy: String,
   updatedOn: Date,
+  archived: {
+    type: Boolean,
+    default: false
+  },
   sharedWith: [sharedWithUser],
   sharedGroup: [sharedWithGroup],
   html: String
