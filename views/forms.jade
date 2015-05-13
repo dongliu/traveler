@@ -19,6 +19,10 @@ block content
           i.fa.fa-file-o.fa-lg
           | &nbsp;New Form
       .btn-group
+        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected forms')
+          i.fa.fa-copy.fa-lg
+          | &nbsp;Clone
+      .btn-group
         button.btn.btn-primary#form-travel(data-toggle='tooltip', title='select ONE form and create a traveler')
           i.fa.fa-plane.fa-lg
           | &nbsp;Travel
@@ -91,6 +95,6 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
-  // script(type='text/javascript', src='#{prefix}/javascripts/main.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/forms.js')
 
 
