@@ -90,6 +90,7 @@ function cloneFromModal() {
 $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
+  /*form table starts*/
   var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var formTable = $('#form-table').dataTable({
     sAjaxSource: '/forms/json',
@@ -118,7 +119,10 @@ $(function () {
   $('#form-select-none').click(function (e) {
     fnDeselect(formTable, 'row-selected', 'select-row');
   });
-  var sharedFormAoColumns = [formLinkColumn, titleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  /*form table ends*/
+
+  /*shared form table starts*/
+  var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var sharedFormTable = $('#shared-form-table').dataTable({
     sAjaxSource: '/sharedforms/json',
     sAjaxDataProp: '',
@@ -134,12 +138,15 @@ $(function () {
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
     aaSorting: [
-      [3, 'desc'],
-      [4, 'desc']
+      [4, 'desc'],
+      [5, 'desc']
     ],
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
+  /*shared form table ends*/
+
+  /*group shared form table starts*/
   var groupSharedFormAoColumns = sharedFormAoColumns;
   var groupSharedFormTable = $('#group-shared-form-table').dataTable({
     sAjaxSource: '/groupsharedforms/json',
@@ -162,13 +169,18 @@ $(function () {
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#group-shared-form-table', groupSharedFormAoColumns);
+  /*group shared form table ends*/
+
+  /*archieved form table starts*/
   var archivedFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
     oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...'
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+      sZeroRecords: 'No records to display.',
+      sInfoEmpty: 'No entries to display.'
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
@@ -179,6 +191,8 @@ $(function () {
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
+  /*archived form table ends*/
+
   // show the tab in hash
   if (History.getHash()) {
     $('.nav-tabs a[href=#' + History.getHash() + ']').tab('show');
