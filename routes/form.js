@@ -322,7 +322,10 @@ module.exports = function (app) {
 
   app.get('/forms/json', auth.ensureAuthenticated, function (req, res) {
     Form.find({
-      createdBy: req.session.userid
+      createdBy: req.session.userid,
+      archived: {
+        $ne: true
+      }
     }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
       if (err) {
         console.error(err);
@@ -346,6 +349,9 @@ module.exports = function (app) {
       Form.find({
         _id: {
           $in: me.forms
+        },
+        archived: {
+          $ne: true
         }
       }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
@@ -380,6 +386,9 @@ module.exports = function (app) {
       Form.find({
         _id: {
           $in: formids
+        },
+        archived: {
+          $ne: true
         }
       }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
@@ -388,6 +397,19 @@ module.exports = function (app) {
         }
         res.json(200, forms);
       });
+    });
+  });
+
+  app.get('/archivedforms/json', auth.ensureAuthenticated, function (req, res) {
+    Form.find({
+      createdBy: req.session.userid,
+      archived: true
+    }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, forms);
     });
   });
 

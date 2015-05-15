@@ -163,8 +163,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: groupSharedFormAoColumns,
     aaSorting: [
-      [3, 'desc'],
-      [4, 'desc']
+      [4, 'desc'],
+      [5, 'desc']
     ],
     sDom: sDomNoTools
   });
