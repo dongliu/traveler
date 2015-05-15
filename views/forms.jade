@@ -15,7 +15,7 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='_blank')
+        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='_blank', data-toggle='tooltip', title='create new empty forms')
           i.fa.fa-file-o.fa-lg
           | &nbsp;New Form
       .btn-group
@@ -23,7 +23,7 @@ block content
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
       .btn-group
-        button.btn.btn-primary#form-travel(data-toggle='tooltip', title='select ONE form and create a traveler')
+        button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected forms')
           i.fa.fa-plane.fa-lg
           | &nbsp;Travel
       .btn-group
@@ -59,7 +59,7 @@ block content
         #forms.tab-pane.active
           .btn-toolbar
             .btn-group
-              button.btn.btn-warning#form-archive
+              button.btn.btn-warning#form-archive(data-toggle='tooltip', title='archive selected forms, only you can see them after archived.')
                 i.fa.fa-trash-o.fa-lg
                 | &nbsp;Archive
             .btn-group
