@@ -3,7 +3,8 @@
 function updateAjaxURL(prefix) {
   if (prefix) {
     $.ajaxPrefilter(function (options) {
-      if (options.url.indexOf(prefix) !== 0) {
+      // when the prefix is /traveler, it confilict with resources like /travelers/...
+      if (options.url.indexOf(prefix + '/') !== 0) {
         options.url = prefix + options.url;
       }
     });
