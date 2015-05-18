@@ -131,8 +131,11 @@ app.get('/api', function (req, res) {
   });
 });
 app.get('/', auth.ensureAuthenticated, routes.main);
+app.get('/login', auth.ensureAuthenticated, function (req, res) {
+  // something wrong
+  res.send(400, 'please enable cookie in your browser');
+});
 app.get('/logout', routes.logout);
-
 app.get('/apis', function (req, res) {
   res.redirect('https://' + req.host + ':' + api.get('port') + req.originalUrl);
 });
