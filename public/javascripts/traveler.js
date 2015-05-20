@@ -220,7 +220,7 @@ $(function () {
     e.preventDefault();
     var $that = $(this);
     $('#modalLabel').html('Add new note');
-    $('#modal .modal-body').html('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Note: </label><div class="controls"><textarea name="note-content" rows=5></textarea><input type="hidden" name="inputname" value="' + $(this).closest('.controls').find('input').prop('name') + '"></div></div></form>');
+    $('#modal .modal-body').html('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Note: </label><div class="controls"><textarea name="note-content" rows=5></textarea><input type="hidden" name="inputname" value="' + $(this).closest('.controls').find('input, textarea').prop('name') + '"></div></div></form>');
     $('#modal .modal-footer').html('<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
     $('#modal button[value="submit"]').click(function (e) {
