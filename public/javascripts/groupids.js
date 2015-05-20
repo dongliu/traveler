@@ -7,7 +7,7 @@ travelerGlobal.groupids = new Bloodhound({
     return group.sAMAccountName;
   },
   prefetch: {
-    url: '/adgroups?term=lab.frib.',
+    url: prefix ? prefix + '/adgroups?term=lab.frib.' : '/adgroups?term=lab.frib.',
     cacheKey: 'adgroups'
   }
 });
