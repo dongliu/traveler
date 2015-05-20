@@ -174,6 +174,25 @@ $(function () {
   // update every 30 seconds
   $.livestamp.interval(30 * 1000);
 
+  // update img
+  $('#form').find('img').each(function (index) {
+    var $this = $(this);
+    if ($this.attr('name')) {
+      if ($this.attr('src') === undefined) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
+        return;
+      }
+      if ($this.attr('src').indexOf('http') === 0) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
+        return;
+      }
+      if (prefix && $this.attr('src').indexOf(prefix) !== 0) {
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
+        return;
+      }
+    }
+  });
+
   $(document).bind('drop dragover', function (e) {
     e.preventDefault();
   });

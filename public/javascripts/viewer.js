@@ -41,17 +41,17 @@ function validation_message(form) {
 $(function () {
   $('#output').find('img').each(function (index) {
     var $this = $(this);
-    if ($this.attr('id')) {
+    if ($this.attr('name')) {
       if ($this.attr('src') === undefined) {
-        $($this.attr('src', prefix + '/formfiles/' + $this.attr('id')));
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
         return;
       }
       if ($this.attr('src').indexOf('http') === 0) {
-        $($this.attr('src', prefix + '/formfiles/' + $this.attr('id')));
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
         return;
       }
       if (prefix && $this.attr('src').indexOf(prefix) !== 0) {
-        $($this.attr('src', prefix + '/formfiles/' + $this.attr('id')));
+        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
         return;
       }
     }
