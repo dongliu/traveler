@@ -32,7 +32,7 @@ function travelFromModal() {
   });
 }
 
-function archiveFromModal(archive) {
+function archiveFromModal(archive, formTable, archivedFormTable) {
   $('#submit').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
@@ -55,12 +55,15 @@ function archiveFromModal(archive) {
       $(that).addClass('text-error');
     }).always(function () {
       number = number - 1;
-      if (number === 0 && success) {}
+      if (number === 0 && success) {
+        formTable.fnReloadAjax();
+        archivedFormTable.fnReloadAjax();
+      }
     });
   });
 }
 
-function cloneFromModal() {
+function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
@@ -83,10 +86,14 @@ function cloneFromModal() {
       $(that).addClass('text-error');
     }).always(function () {
       number = number - 1;
-      if (number === 0 && success) {}
+      if (number === 0 && success) {
+        formTable.fnReloadAjax();
+      }
     });
   });
 }
+
+
 $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
@@ -232,36 +239,38 @@ $(function () {
       });
     }
   });
-  $('#archive').click(function (e) {
+
+  $('#form-archive').click(function (e) {
     var selected = fnGetSelected(formTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
+      $('#modal .modal-body').html('No form has been selected!');
       $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
     } else {
-      $('#modalLabel').html('Archive the following ' + selected.length + ' travelers? ');
+      $('#modalLabel').html('Archive the following ' + selected.length + ' forms? ');
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = formTable.fnGetData(row);
-        // $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
-        archiveFromModal(true);
+        archiveFromModal(true, formTable, archivedFormTable);
       });
     }
   });
+
   $('#clone').click(function (e) {
     var selected = fnGetSelected(formTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
+      $('#modal .modal-body').html('No form has been selected!');
       $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
     } else {
-      $('#modalLabel').html('Clone the following ' + selected.length + ' travelers? ');
+      $('#modalLabel').html('Clone the following ' + selected.length + ' forms? ');
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = formTable.fnGetData(row);
@@ -274,27 +283,29 @@ $(function () {
       });
     }
   });
-  /* $('#dearchive').click(function (e) {
-     var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
-     if (selected.length === 0) {
-       $('#modalLabel').html('Alert');
-       $('#modal .modal-body').html('No traveler has been selected!');
-       $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-       $('#modal').modal('show');
-     } else {
-       $('#modalLabel').html('De-archive the following ' + selected.length + ' travelers? ');
-       $('#modal .modal-body').empty();
-       selected.forEach(function (row) {
-         var data = archivedTravelerTable.fnGetData(row);
-         $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
-       });
-       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-       $('#modal').modal('show');
-       $('#submit').click(function (e) {
-         archiveFromModal(false);
-       });
-     }
-   });*/
+
+  $('#dearchive').click(function (e) {
+    var selected = fnGetSelected(archivedFormTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No form has been selected!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html('De-archive the following ' + selected.length + ' forms? ');
+      $('#modal .modal-body').empty();
+      selected.forEach(function (row) {
+        var data = archivedFormTable.fnGetData(row);
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
+      });
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+      $('#submit').click(function (e) {
+        archiveFromModal(false, formTable, archivedFormTable);
+      });
+    }
+  });
+
   $('#reload').click(function (e) {
     formTable.fnReloadAjax();
     sharedFormTable.fnReloadAjax();
