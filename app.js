@@ -131,7 +131,7 @@ app.get('/api', function (req, res) {
     prefix: req.proxied ? req.proxied_prefix : ''
   });
 });
-app.get('/', auth.ensureAuthenticated, routes.main);
+app.get('/', routes.main);
 app.get('/login', auth.ensureAuthenticated, function (req, res) {
   if (req.session.userid) {
     return res.redirect(req.proxied ? auth.proxied_service : '/');
