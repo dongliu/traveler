@@ -7,10 +7,6 @@ exports.main = function (req, res) {
   });
 };
 
-exports.builder = function (req, res) {
-  res.render('builder');
-};
-
 exports.logout = function (req, res) {
   if (req.session) {
     req.session.destroy(function (err) {
