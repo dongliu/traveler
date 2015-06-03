@@ -42,8 +42,8 @@ block content
             span initialized
           default
             = ' '
-    if (locals.traveler.devices !== undefined && traveler.devices.length > 0)
-      h4 Devices: #{devices}
+    if (locals.traveler.devices && traveler.devices.length > 0)
+      h4 Devices: #{traveler.devices}
     if (locals.traveler.status !== undefined && locals.traveler.status == 1)
       .btn-group
         button.btn.btn-primary#complete Submit for completion

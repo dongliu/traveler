@@ -18,7 +18,7 @@ function addData(oTable, url) {
   }).always();
 }
 
-var externalUrl = "https://controls.frib.msu.edu/traveler/showForm.php?assigned=";
+var externalUrl = "https://controls.frib.msu.edu/traveler1/showForm.php?assigned=";
 
 var template = {
   title: {
@@ -115,10 +115,10 @@ $(function () {
   currentTravelerTable.fnClearTable();
   if (device) {
     addData(currentTravelerTable, prefix + '/currenttravelers/json?device=' + device);
-    addExternalData(currentTravelerTable, 'https://controls.frib.msu.edu/traveler/api.php?resource=travelers&device=' + device);
+    addExternalData(currentTravelerTable, 'https://controls.frib.msu.edu/traveler1/api.php?resource=travelers&device=' + device);
   } else {
     addData(currentTravelerTable, prefix + '/currenttravelers/json');
-    addExternalData(currentTravelerTable, 'https://controls.frib.msu.edu/traveler/api.php?resource=travelers');
+    addExternalData(currentTravelerTable, 'https://controls.frib.msu.edu/traveler1/api.php?resource=travelers');
   }
   // binding events
   filterEvent();

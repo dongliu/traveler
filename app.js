@@ -55,6 +55,7 @@ mongoose.connection.on('disconnected', function () {
   console.log('Mongoose default connection disconnected');
 });
 
+var adClient = require('./lib/ldap-client').client;
 
 var auth = require('./lib/auth');
 
@@ -106,11 +107,8 @@ app.configure(function () {
   app.use(express.json());
   app.use(express.urlencoded());
   app.use(auth.proxied);
-  app.use(auth.sessionLocals);
   app.use(app.router);
 });
-
-
 
 app.configure('development', function () {
   app.use(express.errorHandler());
@@ -132,16 +130,15 @@ app.get('/api', function (req, res) {
     prefix: req.proxied ? req.proxied_prefix : ''
   });
 });
-app.get('/', auth.checkAuth, routes.main);
+app.get('/', auth.ensureAuthenticated, routes.main);
 app.get('/login', auth.ensureAuthenticated, function (req, res) {
   if (req.session.userid) {
     return res.redirect(req.proxied ? auth.proxied_service : '/');
   }
-  // no session after auth, something is wrong here
-  return res.send(400, 'cannot login, please make sure cookie is enabled in your browser.');
+  // something wrong
+  res.send(400, 'please enable cookie in your browser');
 });
 app.get('/logout', routes.logout);
-
 app.get('/apis', function (req, res) {
   res.redirect('https://' + req.host + ':' + api.get('port') + req.originalUrl);
 });
@@ -169,11 +166,14 @@ var apiserver = https.createServer(credentials, api).listen(api.get('port'), fun
 function cleanup() {
   server._connections = 0;
   apiserver._connections = 0;
+  mongoose.connection.close();
+  adClient.unbind(function () {
+    console.log('ldap client stops.');
+  });
   server.close(function () {
     apiserver.close(function () {
-      console.log("Closed out remaining connections.");
+      console.log('web and api servers close.');
       // Close db connections, other chores, etc.
-      mongoose.connection.close();
       process.exit();
     });
   });

@@ -133,12 +133,34 @@ $(function () {
       // $('#add').removeAttr('disabled');
       cleanDeviceForm();
     });
+
+    var devices = new Bloodhound({
+      datumTokenizer: function (device) {
+        return Bloodhound.tokenizers.whitespace(device.serialNumber);
+      },
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      identify: function (device) {
+        return device.serialNumber;
+      },
+      prefetch: {
+        url: prefix + '/devices/json',
+        cacheKey: 'devices'
+      }
+    });
+
+    devices.initialize();
+
     $('#newDevice').typeahead({
+      minLength: 1,
+      highlight: true,
+      hint: true
+    }, {
       name: 'devices',
       limit: 20,
-      valueKey: 'serialNumber',
-      prefetch: prefix + '/devices/json'
+      display: 'serialNumber',
+      source: devices
     });
+
     $('#confirm').click(function (e) {
       e.preventDefault();
       if ($('#newDevice').val()) {
@@ -166,7 +188,7 @@ $(function () {
     e.preventDefault();
     var $that = $(this);
     $.ajax({
-      url: './devices/' + $that.closest('li').text(),
+      url: './devices/' + encodeURIComponent($that.closest('li').text()),
       type: 'DELETE'
     }).done(function (data, status, jqXHR) {
       $that.closest('li').remove();

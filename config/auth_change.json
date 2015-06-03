@@ -2,6 +2,8 @@
   "proxy": "intra-gw.nscl.msu.edu",
   "cas": "https://liud-dev.nscl.msu.edu/cas",
   "proxied_cas": "https://intra-gw.nscl.msu.edu/cas",
-  "service": "http://localhost:3001",
-  "proxied_service": "https://intra-gw.nscl.msu.edu/3001"
+  "service": "http://localhost:3001/",
+  "login_service": "http://localhost:3001/login",
+  "proxied_service": "https://intra-gw.nscl.msu.edu/3001/",
+  "login_proxied_service": "https://intra-gw.nscl.msu.edu/3001/login"
 }
