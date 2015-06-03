@@ -18,6 +18,26 @@ var FormFile = mongoose.model('FormFile');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 
+function filterBody(strings) {
+  return function (req, res, next) {
+    var k, found = false;
+    for (k in req.body) {
+      if (req.body.hasOwnProperty(k)) {
+        if (strings.indexOf(k) !== -1) {
+          found = true;
+        } else {
+          req.body[k] = null;
+        }
+      }
+    }
+    if (found) {
+      next();
+    } else {
+      return res.send(400, 'cannot find required information in body');
+    }
+  };
+}
+
 function addUserFromAD(req, res, form) {
   var name = req.body.name;
   var nameFilter = ad.nameFilter.replace('_name', name);
@@ -749,6 +769,37 @@ module.exports = function (app) {
 
       res.set('Location', url);
       return res.send(201, 'You can see the new form at <a href="' + url + '">' + url + '</a>');
+    });
+  });
+
+  app.put('/forms/:id/archived', auth.ensureAuthenticated, filterBody(['archived']), function (req, res) {
+    Form.findById(req.params.id, 'createdBy archived').exec(function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+
+      if (doc.createdBy !== req.session.userid) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+
+      if (doc.archived === req.body.archived) {
+        return res.send(204);
+      }
+
+      doc.archived = req.body.archived;
+
+      doc.save(function (err) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+        return res.send(204);
+      });
+
     });
   });
 
