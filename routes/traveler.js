@@ -493,6 +493,10 @@ function addShare(req, res, traveler) {
 
 module.exports = function (app) {
 
+  app.get('/travelers/', auth.ensureAuthenticated, function (req, res) {
+    res.render('travelers');
+  });
+
   app.get('/travelers/json', auth.ensureAuthenticated, function (req, res) {
     Traveler.find({
       createdBy: req.session.userid,
