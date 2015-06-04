@@ -772,6 +772,35 @@ module.exports = function (app) {
     });
   });
 
+  app.post('/forms/:id/clone', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id).exec(function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+
+      var form = {};
+      form.html = doc.html;
+      form.title = doc.title + ' clone';
+      form.createdBy = req.session.userid;
+      form.createdOn = Date.now();
+      form.sharedWith = [];
+
+      (new Form(form)).save(function (err, newform) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+        var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + newform.id + '/';
+        res.set('Location', url);
+        return res.send(201, 'You can see the new form at <a href="' + url + '">' + url + '</a>');
+      });
+    });
+  });
+
   app.put('/forms/:id/archived', auth.ensureAuthenticated, filterBody(['archived']), function (req, res) {
     Form.findById(req.params.id, 'createdBy archived').exec(function (err, doc) {
       if (err) {

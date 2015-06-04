@@ -310,6 +310,7 @@ var commentsColumn = {
 
 var titleColumn = {
   sTitle: 'Title',
+  sDefaultContent: 'unknown',
   mData: 'title',
   bFilter: true
 };

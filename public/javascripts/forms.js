@@ -70,12 +70,8 @@ function cloneFromModal(formTable) {
     var that = this;
     var success = false;
     $.ajax({
-      url: '/forms/',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        source: this.id
-      })
+      url: '/forms/' + that.id + '/clone',
+      type: 'POST'
     }).done(function () {
       $(that).prepend('<i class="icon-check"></i>');
       $(that).addClass('text-success');
@@ -252,7 +248,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = formTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
@@ -263,7 +259,8 @@ $(function () {
   });
 
   $('#clone').click(function (e) {
-    var selected = fnGetSelected(formTable, 'row-selected');
+    var activeTable = $('.tab-pane.active table').dataTable();
+    var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No form has been selected!');
@@ -273,13 +270,13 @@ $(function () {
       $('#modalLabel').html('Clone the following ' + selected.length + ' forms? ');
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
-        var data = formTable.fnGetData(row);
-        // $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
+        var data = activeTable.fnGetData(row);
+        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
-        cloneFromModal();
+        cloneFromModal(formTable);
       });
     }
   });
