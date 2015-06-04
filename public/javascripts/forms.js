@@ -34,6 +34,7 @@ function travelFromModal() {
 
 function archiveFromModal(archive, formTable, archivedFormTable) {
   $('#submit').prop('disabled', true);
+  $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
     var that = this;
@@ -56,6 +57,7 @@ function archiveFromModal(archive, formTable, archivedFormTable) {
     }).always(function () {
       number = number - 1;
       if (number === 0 && success) {
+        $('#return').prop('disabled', false);
         formTable.fnReloadAjax();
         archivedFormTable.fnReloadAjax();
       }
@@ -65,6 +67,7 @@ function archiveFromModal(archive, formTable, archivedFormTable) {
 
 function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
+  $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
     var that = this;
@@ -83,6 +86,7 @@ function cloneFromModal(formTable) {
     }).always(function () {
       number = number - 1;
       if (number === 0 && success) {
+        $('#return').prop('disabled', false);
         formTable.fnReloadAjax();
       }
     });
@@ -215,7 +219,8 @@ $(function () {
     }
   };
   $('#form-travel').click(function (e) {
-    var selected = fnGetSelected(formTable, 'row-selected');
+    var activeTable = $('.tab-pane.active table').dataTable();
+    var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No form has been selected!');
@@ -225,8 +230,8 @@ $(function () {
       $('#modalLabel').html('Create travelers from the following ' + selected.length + ' forms? ');
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
-        var data = formTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + '</div>');
+        var data = activeTable.fnGetData(row);
+        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
