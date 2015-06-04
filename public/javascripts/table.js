@@ -283,6 +283,9 @@ var clonedByColumn = personColumn('Cloned by', 'clonedBy');
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
 
+var archivedOnColumn = dateColumn('Archived', 'archivedOn');
+
+
 var deadlineColumn = dateColumn('Deadline', 'deadline');
 
 var tagsColumn = {

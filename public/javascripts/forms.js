@@ -179,7 +179,7 @@ $(function () {
   /*group shared form table ends*/
 
   /*archieved form table starts*/
-  var archivedFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var archivedFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, archivedOnColumn, sharedWithColumn, sharedGroupColumn];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
     sAjaxDataProp: '',
@@ -296,7 +296,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = archivedFormTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' created ' + moment(data.createdOn).fromNow() + ' archived ' + moment(data.archivedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
