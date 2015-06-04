@@ -30,7 +30,6 @@ function createTraveler(form, req, res) {
   // update the total input number and finished input number
   var $ = cheer.load(form.html);
   var num = $('input, textarea').length;
-  // console.log('total input number is ' + num);
   var traveler = new Traveler({
     title: form.title,
     description: '',
@@ -634,11 +633,11 @@ module.exports = function (app) {
           return res.send(500, err.message);
         }
         if (form) {
-          if (form.createdBy === req.session.userid) {
-            createTraveler(form, req, res);
-          } else {
-            return res.send(400, 'You cannot create a traveler based on a form that you do not own.');
-          }
+          // if (form.createdBy === req.session.userid) {
+          createTraveler(form, req, res);
+          // } else {
+          //   return res.send(400, 'You cannot create a traveler based on a form that you do not own.');
+          // }
         } else {
           return res.send(400, 'cannot find the form ' + req.body.form);
         }
