@@ -424,7 +424,7 @@ module.exports = function (app) {
     Form.find({
       createdBy: req.session.userid,
       archived: true
-    }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+    }, 'title createdBy createdOn archivedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -791,6 +791,9 @@ module.exports = function (app) {
       }
 
       doc.archived = req.body.archived;
+      if (doc.archived) {
+        doc.archivedOn = Date.now();
+      }
 
       doc.save(function (err) {
         if (err) {
