@@ -80,6 +80,7 @@ function cloneTraveler(source, req, res) {
     totalInput: source.totalInput,
     finishedInput: 0
   });
+
   traveler.save(function (err, doc) {
     if (err) {
       console.error(err);

@@ -1,57 +1,7 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, Binder: false, ajax401: false, prefix: false, updateAjaxURL: false*/
 /*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, sDomNoTools: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false*/
-// var formTable, sharedFormTable, groupSharedFormTable, travelerTable, sharedTravelerTable, groupSharedTravelerTable, initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, archivedTravelerTable;
-// function initTable(oTable, url) {
-//   $.ajax({
-//     url: url,
-//     type: 'GET',
-//     dataType: 'json'
-//   }).done(function (json) {
-//     oTable.fnClearTable();
-//     oTable.fnAddData(json);
-//     oTable.fnDraw();
-//   }).fail(function (jqXHR, status, error) {
-//     if (jqXHR.status !== 401) {
-//       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
-//       $(window).scrollTop($('#message div:last-child').offset().top - 40);
-//     }
-//   }).always();
-// }
-// function initTableFromArray(oTable, json) {
-//   oTable.fnClearTable();
-//   oTable.fnAddData(json);
-//   oTable.fnDraw();
-// }
-// function initCurrentTables(url) {
-//   $.ajax({
-//     url: url,
-//     type: 'GET',
-//     dataType: 'json'
-//   }).done(function (json) {
-//     var init = json.filter(function (element) {
-//       return (element.status === 0);
-//     });
-//     initTableFromArray(initTravelerTable, init);
-//     var active = json.filter(function (element) {
-//       return (element.status === 1);
-//     });
-//     initTableFromArray(activeTravelerTable, active);
-//     var complete = json.filter(function (element) {
-//       return (element.status === 1.5 || element.status === 2);
-//     });
-//     initTableFromArray(completeTravelerTable, complete);
-//     var frozen = json.filter(function (element) {
-//       return (element.status === 3);
-//     });
-//     initTableFromArray(frozenTravelerTable, frozen);
-//   }).fail(function (jqXHR, status, error) {
-//     if (jqXHR.status !== 401) {
-//       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
-//       $(window).scrollTop($('#message div:last-child').offset().top - 40);
-//     }
-//   }).always();
-// }
+
 function formatTravelerStatus(s) {
   var status = {
     '1': 'active',
@@ -64,34 +14,6 @@ function formatTravelerStatus(s) {
     return status[s.toString()];
   }
   return 'unknown';
-}
-
-function travelFromModal() {
-  $('#submit').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
-    var that = this;
-    var success = false;
-    $.ajax({
-      url: '/travelers/',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        form: this.id
-      })
-    }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
-      $(that).addClass('text-success');
-      success = true;
-    }).fail(function (jqXHR, status, error) {
-      $(that).prepend('<i class="icon-question"></i>');
-      $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
-    }).always(function () {
-      number = number - 1;
-      if (number === 0 && success) {}
-    });
-  });
 }
 
 function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
@@ -129,8 +51,9 @@ function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
   });
 }
 
-function cloneFromModal() {
+function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable) {
   $('#submit').prop('disabled', true);
+  $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
     var that = this;
@@ -152,7 +75,14 @@ function cloneFromModal() {
       $(that).addClass('text-error');
     }).always(function () {
       number = number - 1;
-      if (number === 0 && success) {}
+      if (number === 0) {
+        $('#return').prop('disabled', false);
+        if (success) {
+          travelerTable.fnReloadAjax();
+          sharedTravelerTable.fnReloadAjax();
+          groupSharedTravelerTable.fnReloadAjax();
+        }
+      }
     });
   });
 }
@@ -291,8 +221,10 @@ $(function () {
       });
     }
   });
+
   $('#clone').click(function (e) {
-    var selected = fnGetSelected(travelerTable, 'row-selected');
+    var activeTable = $('.tab-pane.active table').dataTable();
+    var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No traveler has been selected!');
@@ -302,16 +234,17 @@ $(function () {
       $('#modalLabel').html('Clone the following ' + selected.length + ' travelers? ');
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
-        var data = travelerTable.fnGetData(row);
+        var data = activeTable.fnGetData(row);
         $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
-        cloneFromModal();
+        cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable);
       });
     }
   });
+
   $('#dearchive').click(function (e) {
     var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
     if (selected.length === 0) {
@@ -333,6 +266,7 @@ $(function () {
       });
     }
   });
+
   $('#reload').click(function (e) {
     travelerTable.fnReloadAjax();
     sharedTravelerTable.fnReloadAjax();
