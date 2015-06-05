@@ -455,6 +455,10 @@ module.exports = function (app) {
         return res.send(403, 'you are not authorized to access this resource');
       }
 
+      if (form.archived) {
+        return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + req.params.id + '/preview');
+      }
+
       if (access === 1) {
         return res.render('builder', {
           id: req.params.id,
