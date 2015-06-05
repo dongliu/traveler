@@ -1,9 +1,7 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, Binder: false, ajax401: false, prefix: false, updateAjaxURL: false*/
 /*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, sDomNoTools: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false*/
-
 // var formTable, sharedFormTable, groupSharedFormTable, travelerTable, sharedTravelerTable, groupSharedTravelerTable, initTravelerTable, activeTravelerTable, completeTravelerTable, frozenTravelerTable, archivedTravelerTable;
-
 // function initTable(oTable, url) {
 //   $.ajax({
 //     url: url,
@@ -20,13 +18,11 @@
 //     }
 //   }).always();
 // }
-
 // function initTableFromArray(oTable, json) {
 //   oTable.fnClearTable();
 //   oTable.fnAddData(json);
 //   oTable.fnDraw();
 // }
-
 // function initCurrentTables(url) {
 //   $.ajax({
 //     url: url,
@@ -37,22 +33,18 @@
 //       return (element.status === 0);
 //     });
 //     initTableFromArray(initTravelerTable, init);
-
 //     var active = json.filter(function (element) {
 //       return (element.status === 1);
 //     });
 //     initTableFromArray(activeTravelerTable, active);
-
 //     var complete = json.filter(function (element) {
 //       return (element.status === 1.5 || element.status === 2);
 //     });
 //     initTableFromArray(completeTravelerTable, complete);
-
 //     var frozen = json.filter(function (element) {
 //       return (element.status === 3);
 //     });
 //     initTableFromArray(frozenTravelerTable, frozen);
-
 //   }).fail(function (jqXHR, status, error) {
 //     if (jqXHR.status !== 401) {
 //       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
@@ -60,7 +52,6 @@
 //     }
 //   }).always();
 // }
-
 function formatTravelerStatus(s) {
   var status = {
     '1': 'active',
@@ -92,23 +83,20 @@ function travelFromModal() {
       $(that).prepend('<i class="icon-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    })
-      .fail(function (jqXHR, status, error) {
-        $(that).prepend('<i class="icon-question"></i>');
-        $(that).append(' : ' + jqXHR.responseText);
-        $(that).addClass('text-error');
-      })
-      .always(function () {
-        number = number - 1;
-        if (number === 0 && success) {
-        }
-      });
+    }).fail(function (jqXHR, status, error) {
+      $(that).prepend('<i class="icon-question"></i>');
+      $(that).append(' : ' + jqXHR.responseText);
+      $(that).addClass('text-error');
+    }).always(function () {
+      number = number - 1;
+      if (number === 0 && success) {}
+    });
   });
 }
 
-
-function archiveFromModal(archive) {
+function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
   $('#submit').prop('disabled', true);
+  $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
     var that = this;
@@ -124,17 +112,16 @@ function archiveFromModal(archive) {
       $(that).prepend('<i class="icon-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    })
-      .fail(function (jqXHR, status, error) {
-        $(that).prepend('<i class="icon-question"></i>');
-        $(that).append(' : ' + jqXHR.responseText);
-        $(that).addClass('text-error');
-      })
-      .always(function () {
-        number = number - 1;
-        if (number === 0 && success) {
-        }
-      });
+    }).fail(function (jqXHR, status, error) {
+      $(that).prepend('<i class="icon-question"></i>');
+      $(that).append(' : ' + jqXHR.responseText);
+      $(that).addClass('text-error');
+    }).always(function () {
+      number = number - 1;
+      if (number === 0) {
+        $('#return').prop('disabled', false);
+      }
+    });
   });
 }
 
@@ -155,27 +142,26 @@ function cloneFromModal() {
       $(that).prepend('<i class="icon-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    })
-      .fail(function (jqXHR, status, error) {
-        $(that).prepend('<i class="icon-question"></i>');
-        $(that).append(' : ' + jqXHR.responseText);
-        $(that).addClass('text-error');
-      })
-      .always(function () {
-        number = number - 1;
-        if (number === 0 && success) {
-        }
-      });
+    }).fail(function (jqXHR, status, error) {
+      $(that).prepend('<i class="icon-question"></i>');
+      $(that).append(' : ' + jqXHR.responseText);
+      $(that).addClass('text-error');
+    }).always(function () {
+      number = number - 1;
+      if (number === 0 && success) {}
+    });
   });
 }
 
+function showHash() {
+  if (window.location.hash) {
+    $('.nav-tabs a[href=' + window.location.hash + ']').tab('show');
+  }
+}
 
 $(function () {
-
   ajax401(prefix);
-
   updateAjaxURL(prefix);
-
   var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
@@ -198,7 +184,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-
   var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   var sharedTravelerTable = $('#shared-traveler-table').dataTable({
@@ -221,7 +206,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-
   var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#group-shared-traveler-table', sharedTravelerAoColumns);
   var groupSharedTravelerTable = $('#group-shared-traveler-table').dataTable({
@@ -244,7 +228,6 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-
   var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);
   var archivedTravelerTable = $('#archived-traveler-table').dataTable({
@@ -268,27 +251,20 @@ $(function () {
     sDom: sDomNoTools
   });
 
-  // show the tab in hash
-  if (History.getHash()) {
-    $('.nav-tabs a[href=#' + History.getHash() + ']').tab('show');
-  }
+  // show the tab in hash when loaded
+  showHash();
 
   // add state for tab changes
   $('.nav-tabs a').on('click', function (e) {
-    History.pushState({
-      tab: this.href
-    }, 'FRIB traveler :: ' + this.text, this.href);
-    // console.log(History.getHash());
+    if (!$(this).parent().hasClass('active')) {
+      window.history.pushState(null, 'FRIB traveler :: ' + this.text, this.href);
+    }
   });
 
   // show the tab when back and forward
-  window.onhashchange = function (newURL, oldURL) {
-    // console.log(History.getHash());
-    if (History.getHash()) {
-      $('.nav-tabs a[href=#' + History.getHash() + ']').tab('show');
-    }
+  window.onhashchange = function () {
+    showHash();
   };
-
 
   $('#archive').click(function (e) {
     var selected = fnGetSelected(travelerTable, 'row-selected');
@@ -302,16 +278,15 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = travelerTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, status: ' + formatTravelerStatus(data.status) + ', created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
-        archiveFromModal(true);
+        archiveFromModal(true, travelerTable, archivedTravelerTable);
       });
     }
   });
-
   $('#clone').click(function (e) {
     var selected = fnGetSelected(travelerTable, 'row-selected');
     if (selected.length === 0) {
@@ -333,7 +308,6 @@ $(function () {
       });
     }
   });
-
   $('#dearchive').click(function (e) {
     var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
     if (selected.length === 0) {
@@ -355,15 +329,12 @@ $(function () {
       });
     }
   });
-
-
   $('#reload').click(function (e) {
     travelerTable.fnReloadAjax();
     sharedTravelerTable.fnReloadAjax();
     groupSharedTravelerTable.fnReloadAjax();
     archivedTravelerTable.fnReloadAjax();
   });
-
   // binding events
   selectEvent();
   filterEvent();
