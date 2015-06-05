@@ -93,6 +93,11 @@ function cloneFromModal(formTable) {
   });
 }
 
+function showHash() {
+  if (window.location.hash) {
+    $('.nav-tabs a[href=' + window.location.hash + ']').tab('show');
+  }
+}
 
 $(function () {
   ajax401(prefix);
@@ -201,23 +206,18 @@ $(function () {
   /*archived form table ends*/
 
   // show the tab in hash
-  if (History.getHash()) {
-    $('.nav-tabs a[href=#' + History.getHash() + ']').tab('show');
-  }
+  showHash();
+
   // add state for tab changes
   $('.nav-tabs a').on('click', function (e) {
-    History.pushState({
-      tab: this.href
-    }, 'FRIB traveler :: ' + this.text, this.href);
-    // console.log(History.getHash());
+    window.history.pushState(null, 'FRIB forms :: ' + this.text, this.href);
   });
+
   // show the tab when back and forward
-  window.onhashchange = function (newURL, oldURL) {
-    // console.log(History.getHash());
-    if (History.getHash()) {
-      $('.nav-tabs a[href=#' + History.getHash() + ']').tab('show');
-    }
+  window.onhashchange = function () {
+    showHash();
   };
+
   $('#form-travel').click(function (e) {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
@@ -231,7 +231,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
@@ -253,7 +253,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = formTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
@@ -276,7 +276,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
