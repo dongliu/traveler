@@ -43,6 +43,7 @@ var traveler = new Schema({
   clonedFrom: ObjectId,
   updatedBy: String,
   updatedOn: Date,
+  archivedOn: Date,
   deadline: Date,
   sharedWith: [sharedWithUser],
   sharedGroup: [sharedWithGroup],
