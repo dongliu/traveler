@@ -616,7 +616,7 @@ module.exports = function (app) {
     Traveler.find({
       createdBy: req.session.userid,
       archived: true
-    }, 'title status devices createdBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
+    }, 'title status devices archivedOn updatedBy updatedOn deadline sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -674,6 +674,11 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
+
+      if (doc.archived) {
+        return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
+      }
+
       if (canWrite(req, doc)) {
         return res.render('traveler', {
           traveler: doc,
@@ -735,6 +740,10 @@ module.exports = function (app) {
       }
 
       doc.archived = req.body.archived;
+
+      if (doc.archived) {
+        doc.archivedOn = Date.now();
+      }
 
       doc.save(function (err) {
         if (err) {

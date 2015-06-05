@@ -120,6 +120,10 @@ function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
       number = number - 1;
       if (number === 0) {
         $('#return').prop('disabled', false);
+        if (success) {
+          travelerTable.fnReloadAjax();
+          archivedTravelerTable.fnReloadAjax();
+        }
       }
     });
   });
@@ -228,7 +232,7 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, archivedOnColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);
   var archivedTravelerTable = $('#archived-traveler-table').dataTable({
     sAjaxSource: '/archivedtravelers/json',
@@ -245,8 +249,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: archivedTravelerAoColumns,
     aaSorting: [
-      [8, 'desc'],
-      [11, 'desc']
+      [3, 'desc'],
+      [12, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -325,7 +329,7 @@ $(function () {
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
-        archiveFromModal(false);
+        archiveFromModal(false, travelerTable, archivedTravelerTable);
       });
     }
   });
