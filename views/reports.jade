@@ -1,12 +1,12 @@
 extends layout
 
 block head
-  title FRIB Traveler
+  title FRIB Reports
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
   link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
@@ -15,17 +15,21 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/reports/', target='_blank')
-          i.fa.fa-briefcase.fa-lg
-          | &nbsp;Reports
+        a.btn.btn-primary#new(href='#{prefix}/reports/new', target='_blank', data-toggle='tooltip', title='create new empty package')
+          i.fa.fa-paperclip.fa-lg
+          | &nbsp;New Package
       .btn-group
-        a.btn.btn-info#alltravelers(href='#{prefix}/currenttravelers/', target='_blank')
-          i.fa.fa-list.fa-lg
-          | &nbsp;All travelers
+        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected package')
+          i.fa.fa-copy.fa-lg
+          | &nbsp;Clone
       .btn-group
-        button.btn.btn-primary#reload
+        button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
+      .btn-group
+        button.btn.btn-info#alltravelers(href='#{prefix}/reports/new', target='_blank', data-toggle='tooltip', title='see all the travelers')
+          i.fa.fa-institution.fa-lg
+          | &nbsp;All travelers
       .btn-group.dropdown
         a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
           i.fa.fa-gears.fa-lg
@@ -34,19 +38,6 @@ block content
         ul.dropdown-menu
           li#devices
             a(href='#{prefix}/devices/', target='_blank') Devices
-      .btn-group
-        a.btn(href='#{prefix}/profile', target='_blank')
-          i.fa.fa-user.fa-lg
-          | &nbsp;Profile
-      if (locals.roles !== undefined && locals.roles.indexOf('admin') !== -1)
-        .btn-group
-          a.btn(href='#{prefix}/users/', target='_blank')
-            i.fa.fa-users.fa-lg
-            | &nbsp;Users
-      .btn-group
-        a.btn(href='#{prefix}/about', target='_blank')
-          i.fa.fa-info.fa-lg
-          |&nbsp;About
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -56,97 +47,32 @@ block content
     .tabbable.tabs-left
       ul.nav.nav-tabs
         li.active
-          a(href='#forms', data-toggle='tab') My forms
+          a(href='#mypackages', data-toggle='tab') My packages
         li
-          a(href='#sharedfroms', data-toggle='tab') Shared forms
+          a(href='#sharedpackages', data-toggle='tab') Shared packages
         li
-          a(href='#groupsharedfroms', data-toggle='tab') Group shared forms
+          a(href='#groupsharedpackages', data-toggle='tab') Group shared packages
         li
-          a(href='#travelers', data-toggle='tab') My travelers
-        li
-          a(href='#sharedtravelers', data-toggle='tab') Shared travelers
-        li
-          a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
-        //- li
-        //-   a(href='#inittravelers', data-toggle='tab') Initial travelers
-        //- li
-        //-   a(href='#activetravelers', data-toggle='tab') Active travelers
-        //- li
-        //-   a(href='#completetravelers', data-toggle='tab') Complete travelers
-        //- li
-        //-   a(href='#frozentravelers', data-toggle='tab') Frozen travelers
-        li
-          a(href='#archivedtravelers', data-toggle='tab') Archived travelers
-
+          a(href='#archivedpackages', data-toggle='tab') Archived packages
       .tab-content
-        #forms.tab-pane.active
+        #mypackages.tab-pane.active
           .btn-toolbar
             .btn-group
-              a.btn.btn-primary#new(href='#{prefix}/forms/new', target='_blank')
-                i.fa.fa-file-o.fa-lg
-                | &nbsp;New Form
-            .btn-group
-              button.btn.btn-primary#form-travel(data-toggle='tooltip', title='select ONE form and create a traveler')
-                i.fa.fa-plane.fa-lg
-                | &nbsp;Travel
-            //- .btn-group
-            //-   button.btn.btn-warning#form-delete
-            //-     i.fa.fa-trash-o.fa-lg
-            //-     | &nbsp;Delete
-            .btn-group
-              button.btn.btn-info#form-select-all
-                i.fa.fa-list.fa-lg
-                | &nbsp;Select all in the current view
-            .btn-group
-              button.btn.btn-info#form-select-none
-                i.fa.fa-square-o.fa-lg
-                | &nbsp;Clear selection
-          table#form-table.table.table-bordered.table-hover
-        #sharedfroms.tab-pane
-          table#shared-form-table.table.table-bordered.table-hover
-        #groupsharedfroms.tab-pane
-          table#group-shared-form-table.table.table-bordered.table-hover
-        #travelers.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-primary#archive(data-toggle='tooltip', title='archive selected travelers')
+              button.btn.btn-warning#archive(data-toggle='tooltip', title='archive selected packages, only you can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
-            .btn-group
-              button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected travelers')
-                i.fa.fa-copy.fa-lg
-                | &nbsp;Clone
-
-          table#traveler-table.table.table-bordered.table-hover
-        #sharedtravelers.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-primary#share-clone(data-toggle='tooltip', title='clone selected travelers')
-                i.fa.fa-copy.fa-lg
-                | &nbsp;Clone
-          table#shared-traveler-table.table.table-bordered.table-hover
-        #groupsharedtravelers.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-primary#group-share-clone(data-toggle='tooltip', title='clone selected travelers')
-                i.fa.fa-copy.fa-lg
-                | &nbsp;Clone
-          table#group-shared-traveler-table.table.table-bordered.table-hover
-        //- #inittravelers.tab-pane
-        //-   table#init-traveler-table.table.table-bordered.table-hover
-        //- #activetravelers.tab-pane
-        //-   table#active-traveler-table.table.table-bordered.table-hover
-        //- #completetravelers.tab-pane
-        //-   table#complete-traveler-table.table.table-bordered.table-hover
-        //- #frozentravelers.tab-pane
-        //-   table#frozen-traveler-table.table.table-bordered.table-hover
-        #archivedtravelers.tab-pane
+          table#package-table.table.table-bordered.table-hover
+        #sharedpackages.tab-pane
+          table#shared-package-table.table.table-bordered.table-hover
+        #groupsharedpackages.tab-pane
+          table#group-shared-package-table.table.table-bordered.table-hover
+        #archivedpackages.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
                 i.fa.fa-inbox.fa-lg
                 | &nbsp;De-archive
-          table#archived-traveler-table.table.table-bordered.table-hover
+          table#archived-package-table.table.table-bordered.table-hover
 
 
 block js
@@ -156,10 +82,9 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/jquery/jquery.history.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/main.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/reports.js')
 
 
