@@ -125,12 +125,6 @@ $(function () {
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#form-table', formAoColumns);
-  $('#form-select-all').click(function (e) {
-    fnSelectAll(formTable, 'row-selected', 'select-row', true);
-  });
-  $('#form-select-none').click(function (e) {
-    fnDeselect(formTable, 'row-selected', 'select-row');
-  });
   /*form table ends*/
 
   /*shared form table starts*/
