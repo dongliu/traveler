@@ -608,8 +608,8 @@ module.exports = function (app) {
 
   app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
     return res.render('currenttravelers', {
-      device: req.query.device || null,
-      prefix: req.proxied ? req.proxied_prefix : ''
+      device: req.query.device || null
+      // prefix: req.proxied ? req.proxied_prefix : ''
     });
   });
 

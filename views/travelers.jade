@@ -22,6 +22,10 @@ block content
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected travelers')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
+      .btn-group
+        a.btn.btn-info#alltravelers(href='#{prefix}/currenttravelers/', target='_blank', data-toggle='tooltip', title='see all the travelers')
+          i.fa.fa-institution.fa-lg
+          | &nbsp;All travelers
       .btn-group.dropdown
         a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
           i.fa.fa-gears.fa-lg
