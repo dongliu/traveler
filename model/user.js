@@ -13,7 +13,7 @@ var user = new Schema({
   lastVisitedOn: Date,
   forms: [ObjectId],
   travelers: [ObjectId],
-  reports: [ObjectId],
+  packages: [ObjectId],
   subscribe: {
     type: Boolean,
     default: false
@@ -24,7 +24,8 @@ var group = new Schema({
   _id: String,
   name: String,
   forms: [ObjectId],
-  travelers: [ObjectId]
+  travelers: [ObjectId],
+  packages: [ObjectId]
 });
 
 var User = mongoose.model('User', user);
