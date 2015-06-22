@@ -158,13 +158,6 @@ function validation_message(form) {
 
 $(function () {
 
-/*  $(document).ajaxError(function (event, jqXHR, settings, exception) {
-    if (jqXHR.status === 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }
-  });*/
-
   ajax401(prefix);
 
   createSideNav();
@@ -449,7 +442,7 @@ $(function () {
     } else {
       $validation = $('<div class="validation"></div>').appendTo($cgw.find('.controls'));
     }
-    if (!(/^(image|text)\//i.test(file.type) || file.type === 'application/pdf' || file.type === 'application/vnd.ms-excel' || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+    if (!(/^(image|text)\//i.test(file.type) || file.type === 'application/pdf' || file.type === 'application/vnd.ms-excel' || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-xpsdocument' || file.type === 'application/oxps')) {
       $validation.html('<p class="text-error">' + file.type + ' is not allowed to upload</p>');
       $cgw.children('.control-group-buttons').remove();
       return;
