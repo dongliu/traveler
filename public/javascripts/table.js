@@ -347,6 +347,38 @@ var travelerShareLinkColumn = {
   bSortable: false
 };
 
+var packageLinkColumn = {
+  sTitle: '',
+  mData: function (source, type, val) {
+    if (source.hasOwnProperty('url')) {
+      return '<a href="' + source.url + '" target="_blank" data-toggle="tooltip" title="go to the package"><i class="fa fa-edit fa-lg"></i></a>';
+    }
+    if (source.hasOwnProperty('_id')) {
+      return '<a href="' + prefix + '/works/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the package"><i class="fa fa-edit fa-lg"></i></a>';
+    }
+    return 'unknown';
+  },
+  bSortable: false
+};
+
+var packageConfigLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function (data, type, full) {
+    return '<a href="' + prefix + '/works/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the package"><i class="fa fa-gear fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
+var packageShareLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function (data, type, full) {
+    return '<a href="' + prefix + '/works/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the package"><i class="fa fa-users fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
 var deviceTravelerLinkColumn = {
   sTitle: '',
   mData: 'serialNumber',
