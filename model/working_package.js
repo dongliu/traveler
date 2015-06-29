@@ -1,3 +1,5 @@
+/*jslint es5: true*/
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
@@ -24,19 +26,19 @@ var work = new Schema({
   addedOn: Date,
   addedBy: String,
   priority: {
-    type: number,
+    type: Number,
     min: 1,
     max: 10,
     default: 5
   },
   sequence: {
-    type: number,
+    type: Number,
     min: 1
   },
   color: String
 });
 
-var package = new Schema({
+var workingPackage = new Schema({
   title: String,
   description: String,
   tags: [String],
@@ -57,8 +59,8 @@ var package = new Schema({
   }
 });
 
-var Package = mongoose.model('Package', package);
+var WorkingPackage = mongoose.model('WorkingPackage', workingPackage);
 
 module.exports = {
-  Package: Package
+  WorkingPackage: WorkingPackage
 };
