@@ -19,7 +19,7 @@ var sharedWithGroup = new Schema({
   access: Number
 });
 
-var task = new Schema({
+var work = new Schema({
   traveler: ObjectId,
   addedOn: Date,
   addedBy: String,
@@ -28,6 +28,10 @@ var task = new Schema({
     min: 1,
     max: 10,
     default: 5
+  },
+  sequence: {
+    type: number,
+    min: 1
   },
   color: String
 });
@@ -46,7 +50,7 @@ var package = new Schema({
   deadline: Date,
   sharedWith: [sharedWithUser],
   sharedGroup: [sharedWithGroup],
-  tasks: [task],
+  works: [work],
   archived: {
     type: Boolean,
     default: false
