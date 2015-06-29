@@ -53,6 +53,7 @@ var workingPackage = new Schema({
   sharedWith: [sharedWithUser],
   sharedGroup: [sharedWithGroup],
   works: [work],
+  finishedWorks: Number,
   archived: {
     type: Boolean,
     default: false
