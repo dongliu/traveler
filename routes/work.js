@@ -493,8 +493,8 @@ function addShare(req, res, traveler) {
 
 module.exports = function (app) {
 
-  app.get('/reports/', auth.ensureAuthenticated, function (req, res) {
-    res.render('reports');
+  app.get('/works/', auth.ensureAuthenticated, function (req, res) {
+    res.render('works');
   });
 
   /*app.get('/travelers/json', auth.ensureAuthenticated, function (req, res) {

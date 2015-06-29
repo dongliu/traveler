@@ -119,7 +119,7 @@ require('./routes/form')(app);
 
 require('./routes/traveler')(app);
 
-require('./routes/report')(app);
+require('./routes/work')(app);
 
 require('./routes/user')(app);
 
