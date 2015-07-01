@@ -52,7 +52,7 @@ var workingPackage = new Schema({
   deadline: Date,
   sharedWith: [sharedWithUser],
   sharedGroup: [sharedWithGroup],
-  works: [work],
+  works: [ObjectId],
   finishedWorks: Number,
   archived: {
     type: Boolean,
@@ -60,9 +60,10 @@ var workingPackage = new Schema({
   }
 });
 
-var WorkingPackage = mongoose.model('WorkingPackage', workingPackage);
+var Work = mongoose.model('Work', work);
 var WorkingPackage = mongoose.model('WorkingPackage', workingPackage);
 
 module.exports = {
+  Work: Work,
   WorkingPackage: WorkingPackage
 };
