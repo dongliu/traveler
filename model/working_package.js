@@ -61,6 +61,7 @@ var workingPackage = new Schema({
 });
 
 var WorkingPackage = mongoose.model('WorkingPackage', workingPackage);
+var WorkingPackage = mongoose.model('WorkingPackage', workingPackage);
 
 module.exports = {
   WorkingPackage: WorkingPackage
