@@ -503,7 +503,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy finishedInput totalInput').lean().exec(function (err, docs) {
+    }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -758,7 +758,7 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/config', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, 'title description deadline status devices sharedWith sharedGroup createdBy createdOn updatedOn updatedBy').exec(function (err, doc) {
+    Traveler.findById(req.params.id, 'title description deadline location status devices sharedWith sharedGroup createdBy createdOn updatedOn updatedBy').exec(function (err, doc) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -776,7 +776,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description', 'deadline']), function (req, res) {
+  app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description', 'deadline', 'location']), function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       var k;
       if (err) {
@@ -977,6 +977,7 @@ module.exports = function (app) {
           return res.send(500, err.message);
         }
         doc.data.push(data._id);
+        doc.manPower.addToSet(req.session.userid);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
         doc.save(function (err) {
@@ -1046,6 +1047,7 @@ module.exports = function (app) {
           return res.send(500, err.message);
         }
         doc.notes.push(note._id);
+        doc.manPower.addToSet(req.session.userid);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
         doc.save(function (err) {
