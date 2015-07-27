@@ -206,81 +206,81 @@ $(function () {
   window.onhashchange = function () {
     showHash();
   };
-/*
-  $('#archive').click(function (e) {
-    var selected = fnGetSelected(travelerTable, 'row-selected');
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html('Archive the following ' + selected.length + ' travelers? ');
-      $('#modal .modal-body').empty();
-      selected.forEach(function (row) {
-        var data = travelerTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, status: ' + formatTravelerStatus(data.status) + ', created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
-      });
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-      $('#submit').click(function (e) {
-        archiveFromModal(true, travelerTable, archivedTravelerTable);
-      });
-    }
-  });
 
-  $('#clone').click(function (e) {
-    var activeTable = $('.tab-pane.active table').dataTable();
-    var selected = fnGetSelected(activeTable, 'row-selected');
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html('Clone the following ' + selected.length + ' travelers? ');
-      $('#modal .modal-body').empty();
-      selected.forEach(function (row) {
-        var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
-      });
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-      $('#submit').click(function (e) {
-        cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable);
-      });
-    }
-  });
+  // $('#archive').click(function (e) {
+  //   var selected = fnGetSelected(travelerTable, 'row-selected');
+  //   if (selected.length === 0) {
+  //     $('#modalLabel').html('Alert');
+  //     $('#modal .modal-body').html('No traveler has been selected!');
+  //     $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  //     $('#modal').modal('show');
+  //   } else {
+  //     $('#modalLabel').html('Archive the following ' + selected.length + ' travelers? ');
+  //     $('#modal .modal-body').empty();
+  //     selected.forEach(function (row) {
+  //       var data = travelerTable.fnGetData(row);
+  //       $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, status: ' + formatTravelerStatus(data.status) + ', created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
+  //     });
+  //     $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  //     $('#modal').modal('show');
+  //     $('#submit').click(function (e) {
+  //       archiveFromModal(true, travelerTable, archivedTravelerTable);
+  //     });
+  //   }
+  // });
 
-  $('#dearchive').click(function (e) {
-    var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html('De-archive the following ' + selected.length + ' travelers? ');
-      $('#modal .modal-body').empty();
-      selected.forEach(function (row) {
-        var data = archivedTravelerTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
-      });
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-      $('#submit').click(function (e) {
-        archiveFromModal(false, travelerTable, archivedTravelerTable);
-      });
-    }
-  });
+  // $('#clone').click(function (e) {
+  //   var activeTable = $('.tab-pane.active table').dataTable();
+  //   var selected = fnGetSelected(activeTable, 'row-selected');
+  //   if (selected.length === 0) {
+  //     $('#modalLabel').html('Alert');
+  //     $('#modal .modal-body').html('No traveler has been selected!');
+  //     $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  //     $('#modal').modal('show');
+  //   } else {
+  //     $('#modalLabel').html('Clone the following ' + selected.length + ' travelers? ');
+  //     $('#modal .modal-body').empty();
+  //     selected.forEach(function (row) {
+  //       var data = activeTable.fnGetData(row);
+  //       $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
+  //     });
+  //     $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  //     $('#modal').modal('show');
+  //     $('#submit').click(function (e) {
+  //       cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable);
+  //     });
+  //   }
+  // });
+
+  // $('#dearchive').click(function (e) {
+  //   var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
+  //   if (selected.length === 0) {
+  //     $('#modalLabel').html('Alert');
+  //     $('#modal .modal-body').html('No traveler has been selected!');
+  //     $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  //     $('#modal').modal('show');
+  //   } else {
+  //     $('#modalLabel').html('De-archive the following ' + selected.length + ' travelers? ');
+  //     $('#modal .modal-body').empty();
+  //     selected.forEach(function (row) {
+  //       var data = archivedTravelerTable.fnGetData(row);
+  //       $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
+  //     });
+  //     $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  //     $('#modal').modal('show');
+  //     $('#submit').click(function (e) {
+  //       archiveFromModal(false, travelerTable, archivedTravelerTable);
+  //     });
+  //   }
+  // });
 
   $('#reload').click(function (e) {
-    travelerTable.fnReloadAjax();
-    sharedTravelerTable.fnReloadAjax();
-    groupSharedTravelerTable.fnReloadAjax();
-    archivedTravelerTable.fnReloadAjax();
+    packageTable.fnReloadAjax();
+    sharedPackageTable.fnReloadAjax();
+    groupSharedPackageTable.fnReloadAjax();
+    archivedPackageTable.fnReloadAjax();
   });
-  */
+
   // binding events
   selectEvent();
   filterEvent();
