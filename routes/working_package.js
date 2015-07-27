@@ -9,10 +9,6 @@ var authConfig = require('../config/auth.json');
 var mongoose = require('mongoose');
 var util = require('util');
 var path = require('path');
-// var pause = require('pause');
-// var underscore = require('underscore');
-// var cheer = require('cheerio');
-// var sanitize = require('sanitize-caja'); // may need this later for new version of forms
 require('../model/working_package.js');
 
 
@@ -498,10 +494,10 @@ function addShare(req, res, traveler) {
 module.exports = function (app) {
 
   app.get('/workingpackages/', auth.ensureAuthenticated, function (req, res) {
-    res.render('workpackages');
+    res.render('working_packages');
   });
 
-  app.get('/workpackages/json', auth.ensureAuthenticated, function (req, res) {
+  app.get('/workingpackages/json', auth.ensureAuthenticated, function (req, res) {
     WorkingPackage.find({
       createdBy: req.session.userid,
       archived: {
