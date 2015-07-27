@@ -39,6 +39,13 @@ block content
         else
           input#deadline(type='date', value='#{traveler.deadline}')
         = ' '
+    h4 Location:
+      = ' '
+      span.form-inline
+        if (locals.traveler.location == undefined)
+          span#location.editable No specific location
+        else
+          span#location.editable #{traveler.location}
     p Created on
       = ' '
       span.time #{traveler.createdOn}

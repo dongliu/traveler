@@ -36,6 +36,8 @@ var traveler = new Schema({
   title: String,
   description: String,
   devices: [String],
+  location: String,
+  manPower: [String],
   status: Number,
   createdBy: String,
   createdOn: Date,
