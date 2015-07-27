@@ -13,13 +13,16 @@ var path = require('path');
 // var underscore = require('underscore');
 // var cheer = require('cheerio');
 // var sanitize = require('sanitize-caja'); // may need this later for new version of forms
+require('../model/working_package.js');
+
 
 var uploadsDir = '../uploads/';
 
 // var Form = mongoose.model('Form');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
-var WorkingPackage = mongoose.model('');
+var Work = mongoose.model('Work');
+var WorkingPackage = mongoose.model('WorkingPackage');
 // var Traveler = mongoose.model('Traveler');
 // var TravelerData = mongoose.model('TravelerData');
 // var TravelerNote = mongoose.model('TravelerNote');
@@ -27,104 +30,104 @@ var WorkingPackage = mongoose.model('');
 var travelerV1API = 'https://liud-dev:8181/traveler/api.php';
 var request = require('request');
 
-function createTraveler(form, req, res) {
-  // update the total input number and finished input number
-  var $ = cheer.load(form.html);
-  var num = $('input, textarea').length;
-  var traveler = new Traveler({
-    title: form.title,
-    description: '',
-    devices: [],
-    status: 0,
-    createdBy: req.session.userid,
-    createdOn: Date.now(),
-    sharedWith: [],
-    referenceForm: form._id,
-    forms: [{
-      html: form.html
-    }],
-    data: [],
-    comments: [],
-    totalInput: num,
-    finishedInput: 0
-  });
-  traveler.save(function (err, doc) {
-    if (err) {
-      console.error(err);
-      return res.send(500, err.message);
-    }
-    console.log('new traveler ' + doc.id + ' created');
-    var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
-    res.set('Location', url);
-    return res.json(201, {
-      location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
-    });
-  });
-}
+// function createTraveler(form, req, res) {
+//   // update the total input number and finished input number
+//   var $ = cheer.load(form.html);
+//   var num = $('input, textarea').length;
+//   var traveler = new Traveler({
+//     title: form.title,
+//     description: '',
+//     devices: [],
+//     status: 0,
+//     createdBy: req.session.userid,
+//     createdOn: Date.now(),
+//     sharedWith: [],
+//     referenceForm: form._id,
+//     forms: [{
+//       html: form.html
+//     }],
+//     data: [],
+//     comments: [],
+//     totalInput: num,
+//     finishedInput: 0
+//   });
+//   traveler.save(function (err, doc) {
+//     if (err) {
+//       console.error(err);
+//       return res.send(500, err.message);
+//     }
+//     console.log('new traveler ' + doc.id + ' created');
+//     var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
+//     res.set('Location', url);
+//     return res.json(201, {
+//       location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
+//     });
+//   });
+// }
 
-function cloneTraveler(source, req, res) {
-  var traveler = new Traveler({
-    title: source.title,
-    description: source.description,
-    devices: [],
-    status: 1,
-    createdBy: source.createdBy,
-    createdOn: Date.now(),
-    clonedBy: req.session.userid,
-    clonedFrom: source._id,
-    sharedWith: source.sharedWith,
-    sharedGroup: source.sharedGroup,
-    referenceForm: source.referenceForm,
-    forms: source.forms,
-    data: [],
-    comments: [],
-    totalInput: source.totalInput,
-    finishedInput: 0
-  });
+// function cloneTraveler(source, req, res) {
+//   var traveler = new Traveler({
+//     title: source.title,
+//     description: source.description,
+//     devices: [],
+//     status: 1,
+//     createdBy: source.createdBy,
+//     createdOn: Date.now(),
+//     clonedBy: req.session.userid,
+//     clonedFrom: source._id,
+//     sharedWith: source.sharedWith,
+//     sharedGroup: source.sharedGroup,
+//     referenceForm: source.referenceForm,
+//     forms: source.forms,
+//     data: [],
+//     comments: [],
+//     totalInput: source.totalInput,
+//     finishedInput: 0
+//   });
 
-  traveler.save(function (err, doc) {
-    if (err) {
-      console.error(err);
-      return res.send(500, err.message);
-    }
-    console.log('new traveler ' + doc.id + ' created');
-    doc.sharedWith.forEach(function (e, i, a) {
-      User.findByIdAndUpdate(e._id, {
-        $addToSet: {
-          travelers: doc._id
-        }
-      }, function (err, user) {
-        if (err) {
-          console.error(err);
-        }
-        if (!user) {
-          console.error('The user ' + e._id + ' does not in the db');
-        }
-      });
-    });
+//   traveler.save(function (err, doc) {
+//     if (err) {
+//       console.error(err);
+//       return res.send(500, err.message);
+//     }
+//     console.log('new traveler ' + doc.id + ' created');
+//     doc.sharedWith.forEach(function (e, i, a) {
+//       User.findByIdAndUpdate(e._id, {
+//         $addToSet: {
+//           travelers: doc._id
+//         }
+//       }, function (err, user) {
+//         if (err) {
+//           console.error(err);
+//         }
+//         if (!user) {
+//           console.error('The user ' + e._id + ' does not in the db');
+//         }
+//       });
+//     });
 
-    doc.sharedGroup.forEach(function (e, i, a) {
-      Group.findByIdAndUpdate(e._id, {
-        $addToSet: {
-          travelers: doc._id
-        }
-      }, function (err, user) {
-        if (err) {
-          console.error(err);
-        }
-        if (!user) {
-          console.error('The group ' + e._id + ' does not in the db');
-        }
-      });
-    });
+//     doc.sharedGroup.forEach(function (e, i, a) {
+//       Group.findByIdAndUpdate(e._id, {
+//         $addToSet: {
+//           travelers: doc._id
+//         }
+//       }, function (err, user) {
+//         if (err) {
+//           console.error(err);
+//         }
+//         if (!user) {
+//           console.error('The group ' + e._id + ' does not in the db');
+//         }
+//       });
+//     });
 
-    var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
-    res.set('Location', url);
-    return res.json(201, {
-      location: url
-    });
-  });
-}
+//     var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
+//     res.set('Location', url);
+//     return res.json(201, {
+//       location: url
+//     });
+//   });
+// }
 
 function filterBody(strings) {
   return function (req, res, next) {
@@ -499,12 +502,12 @@ module.exports = function (app) {
   });
 
   app.get('/workpackages/json', auth.ensureAuthenticated, function (req, res) {
-    Traveler.find({
+    WorkingPackage.find({
       createdBy: req.session.userid,
       archived: {
         $ne: true
       }
-    }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy finishedInput totalInput').lean().exec(function (err, docs) {
+    }, 'title description tags sharedWith sharedGroup clonedBy createdOn updatedOn updatedBy works finishedWorks').lean().exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
