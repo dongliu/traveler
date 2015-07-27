@@ -1,0 +1,33 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title FRIB Traveler :: new working package
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  .container(style="margin-top: 10px")
+    form.form-horizontal(name='newpackage', action='./', method='POST')
+      .control-group
+        .control-label Package title
+        .controls
+          input(type='text', name='title', required)
+      .control-group
+        .control-label Description
+        .controls
+          input(type='text', name='description')
+      .control-group
+        .controls
+          .btn-group
+            button.btn.btn-primary(type='submit') Confirm
+          .btn-group
+            button.btn(onclick='window.open("", "_self", ""); window.close(); return false;') Cancel
+
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-ui-1.10.2.custom.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
