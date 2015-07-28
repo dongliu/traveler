@@ -351,10 +351,10 @@ var packageLinkColumn = {
   sTitle: '',
   mData: function (source, type, val) {
     if (source.hasOwnProperty('url')) {
-      return '<a href="' + source.url + '" target="_blank" data-toggle="tooltip" title="go to the package"><i class="fa fa-edit fa-lg"></i></a>';
+      return '<a href="' + source.url + '" target="_blank" data-toggle="tooltip" title="go to the package"><i class="fa fa-eye fa-lg"></i></a>';
     }
     if (source.hasOwnProperty('_id')) {
-      return '<a href="' + prefix + '/works/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the package"><i class="fa fa-edit fa-lg"></i></a>';
+      return '<a href="' + prefix + '/packages/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the package"><i class="fa fa-eye fa-lg"></i></a>';
     }
     return 'unknown';
   },
@@ -365,7 +365,7 @@ var packageConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function (data, type, full) {
-    return '<a href="' + prefix + '/works/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the package"><i class="fa fa-gear fa-lg"></i></a>';
+    return '<a href="' + prefix + '/packages/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the package"><i class="fa fa-gear fa-lg"></i></a>';
   },
   bSortable: false
 };
