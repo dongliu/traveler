@@ -21,33 +21,45 @@ block content
       .modal-body
       .modal-footer
     h3 Title:
+      = ' '
       span#title.editable #{package.title}
-    h5 Description:
+    h4 Description:
+      = ' '
       span#description.editable #{package.description}
     h4 Tags
     ul#tags
       each tag in package.tags
         li
           | #{tag}
-          button.btn.btn-small.btn-warning.removeTag
+          button.btn.btn-small.btn-warning.remove-tag
             i.fa.fa-trash-o.fa-lg
+    br
+    .btn-group
+      button.btn.btn-primary#add-tag
+        i.fa.fa-tag.fa-lg
+        | &nbsp;Add tag
     .btn-toolbar
       .btn-group
-        button.btn.btn-info#add
-          i.fa.fa-wrench.fa-lg
+        button.btn.btn-primary#add-work
+          i.fa.fa-link.fa-lg
           | &nbsp;Add work(traveler)
       .btn-group
-        button.btn.btn-warning#remove
-          i.fa.fa-refresh.fa-lg
+        button.btn.btn-warning#remove-work
+          i.fa.fa-unlink.fa-lg
           | &nbsp;Remove work
       .btn-group
-        button.btn.btn-warning#sequence
-          i.fa.fa-refresh.fa-lg
+        button.btn#sequence
+          i.fa.fa-arrows-v.fa-lg
           | &nbsp;Adjust sequence
-    table#package_table.table.table-bordered.table-hover
+      .btn-group
+        button.btn.btn-info#sequence
+          i.fa.fa-eye.fa-lg
+          | &nbsp;View
+    table#package-table.table.table-bordered.table-hover
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery.jeditable.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
@@ -57,3 +69,4 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/working_package_config.js')

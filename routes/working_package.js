@@ -543,6 +543,104 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/workingpackages/:id/config', auth.ensureAuthenticated, function (req, res) {
+    WorkingPackage.findById(req.params.id).exec(function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (canWrite(req, doc)) {
+        return res.render('working_package_config', {
+          package: doc
+        });
+      }
+      return res.send(403, 'You are not authorized to access this resource');
+    });
+  });
+
+  app.post('/workingpackages/:id/tags/', auth.ensureAuthenticated, filterBody(['newtag']), function (req, res) {
+    WorkingPackage.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      doc.updatedBy = req.session.userid;
+      doc.updatedOn = Date.now();
+      doc.tags.addToSet(req.body.newtag);
+      doc.save(function (err) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+        return res.send(204);
+      });
+    });
+  });
+
+  app.delete('/workingpackages/:id/tags/:number', auth.ensureAuthenticated, function (req, res) {
+    WorkingPackage.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      doc.updatedBy = req.session.userid;
+      doc.updatedOn = Date.now();
+      doc.tags.pull(req.params.number);
+      doc.save(function (err) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+        return res.send(204);
+      });
+    });
+  });
+
+  // app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description', 'deadline']), function (req, res) {
+  //   Traveler.findById(req.params.id, function (err, doc) {
+  //     var k;
+  //     if (err) {
+  //       console.error(err);
+  //       return res.send(500, err.message);
+  //     }
+  //     if (!doc) {
+  //       return res.send(410, 'gone');
+  //     }
+  //     if (!canWrite(req, doc)) {
+  //       return res.send(403, 'You are not authorized to access this resource');
+  //     }
+  //     for (k in req.body) {
+  //       if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
+  //         doc[k] = req.body[k];
+  //       }
+  //     }
+  //     doc.updatedBy = req.session.userid;
+  //     doc.updatedOn = Date.now();
+  //     doc.save(function (err) {
+  //       if (err) {
+  //         console.error(err);
+  //         return res.send(500, err.message);
+  //       }
+  //       return res.send(204);
+  //     });
+  //   });
+  // });
+
   // app.get('/sharedtravelers/json', auth.ensureAuthenticated, function (req, res) {
   //   User.findOne({
   //     _id: req.session.userid
@@ -788,54 +886,7 @@ module.exports = function (app) {
   //   });
   // });
 
-  // app.get('/travelers/:id/config', auth.ensureAuthenticated, function (req, res) {
-  //   Traveler.findById(req.params.id, 'title description deadline status devices sharedWith sharedGroup createdBy createdOn updatedOn updatedBy').exec(function (err, doc) {
-  //     if (err) {
-  //       console.error(err);
-  //       return res.send(500, err.message);
-  //     }
-  //     if (!doc) {
-  //       return res.send(410, 'gone');
-  //     }
-  //     if (canWrite(req, doc)) {
-  //       return res.render('config', {
-  //         traveler: doc,
-  //         prefix: req.proxied ? req.proxied_prefix : ''
-  //       });
-  //     }
-  //     return res.send(403, 'You are not authorized to access this resource');
-  //   });
-  // });
 
-  // app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description', 'deadline']), function (req, res) {
-  //   Traveler.findById(req.params.id, function (err, doc) {
-  //     var k;
-  //     if (err) {
-  //       console.error(err);
-  //       return res.send(500, err.message);
-  //     }
-  //     if (!doc) {
-  //       return res.send(410, 'gone');
-  //     }
-  //     if (!canWrite(req, doc)) {
-  //       return res.send(403, 'You are not authorized to access this resource');
-  //     }
-  //     for (k in req.body) {
-  //       if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
-  //         doc[k] = req.body[k];
-  //       }
-  //     }
-  //     doc.updatedBy = req.session.userid;
-  //     doc.updatedOn = Date.now();
-  //     doc.save(function (err) {
-  //       if (err) {
-  //         console.error(err);
-  //         return res.send(500, err.message);
-  //       }
-  //       return res.send(204);
-  //     });
-  //   });
-  // });
 
   // app.put('/travelers/:id/status', auth.ensureAuthenticated, function (req, res) {
   //   Traveler.findById(req.params.id, function (err, doc) {
@@ -902,55 +953,7 @@ module.exports = function (app) {
   // });
 
 
-  // app.post('/travelers/:id/devices/', auth.ensureAuthenticated, filterBody(['newdevice']), function (req, res) {
-  //   Traveler.findById(req.params.id, function (err, doc) {
-  //     if (err) {
-  //       console.error(err);
-  //       return res.send(500, err.message);
-  //     }
-  //     if (!doc) {
-  //       return res.send(410, 'gone');
-  //     }
-  //     if (!canWrite(req, doc)) {
-  //       return res.send(403, 'You are not authorized to access this resource');
-  //     }
-  //     doc.updatedBy = req.session.userid;
-  //     doc.updatedOn = Date.now();
-  //     doc.devices.addToSet(req.body.newdevice);
-  //     doc.save(function (err) {
-  //       if (err) {
-  //         console.error(err);
-  //         return res.send(500, err.message);
-  //       }
-  //       return res.send(204);
-  //     });
-  //   });
-  // });
 
-  // app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, function (req, res) {
-  //   Traveler.findById(req.params.id, function (err, doc) {
-  //     if (err) {
-  //       console.error(err);
-  //       return res.send(500, err.message);
-  //     }
-  //     if (!doc) {
-  //       return res.send(410, 'gone');
-  //     }
-  //     if (!canWrite(req, doc)) {
-  //       return res.send(403, 'You are not authorized to access this resource');
-  //     }
-  //     doc.updatedBy = req.session.userid;
-  //     doc.updatedOn = Date.now();
-  //     doc.devices.pull(req.params.number);
-  //     doc.save(function (err) {
-  //       if (err) {
-  //         console.error(err);
-  //         return res.send(500, err.message);
-  //       }
-  //       return res.send(204);
-  //     });
-  //   });
-  // });
 
   // app.get('/travelers/:id/data/', auth.ensureAuthenticated, function (req, res) {
   //   Traveler.findById(req.params.id, function (err, doc) {
