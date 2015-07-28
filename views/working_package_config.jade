@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB traveler - user management
+  title FRIB traveler - package - #{package._id}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -14,37 +14,37 @@ block content
   script.
     var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
-    .well
-      form.form-inline
-        input#username.input(type='text', placeholder='Last, First', name='name')
-        != ' '
-        label.checkbox.inline
-          input#manager(type='checkbox', value='manager')
-          | manager
-        != ' '
-        label.checkbox.inline
-          input#admin(type='checkbox', value='admin')
-          | admin
-        != ' '
-        button.btn.btn-primary#add(type='submit') Add
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
         h3#modalLabel
       .modal-body
       .modal-footer
-    h3 User list
+    h3 Title:
+      span#title.editable #{package.title}
+    h5 Description:
+      span#description.editable #{package.description}
+    h4 Tags
+    ul#tags
+      each tag in package.tags
+        li
+          | #{tag}
+          button.btn.btn-small.btn-warning.removeTag
+            i.fa.fa-trash-o.fa-lg
     .btn-toolbar
       .btn-group
-        button.btn.btn-info#user-modify
+        button.btn.btn-info#add
           i.fa.fa-wrench.fa-lg
-          | &nbsp;Modify role
+          | &nbsp;Add work(traveler)
       .btn-group
-        button.btn.btn-warning#user-update
+        button.btn.btn-warning#remove
           i.fa.fa-refresh.fa-lg
-          | &nbsp;Update profile
-
-    table#users.table.table-bordered.table-hover
+          | &nbsp;Remove work
+      .btn-group
+        button.btn.btn-warning#sequence
+          i.fa.fa-refresh.fa-lg
+          | &nbsp;Adjust sequence
+    table#package_table.table.table-bordered.table-hover
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
@@ -53,11 +53,7 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/users.js')
