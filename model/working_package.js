@@ -33,7 +33,8 @@ var work = new Schema({
   },
   sequence: {
     type: Number,
-    min: 1
+    min: 1,
+    defualt: 1
   },
   color: String
 });
