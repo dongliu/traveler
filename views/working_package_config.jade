@@ -30,7 +30,8 @@ block content
     ul#tags
       each tag in package.tags
         li
-          | #{tag}
+          span.tag #{tag}
+          = ' '
           button.btn.btn-small.btn-warning.remove-tag
             i.fa.fa-trash-o.fa-lg
     br

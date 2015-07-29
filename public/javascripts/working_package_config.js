@@ -160,7 +160,7 @@ $(function () {
     e.preventDefault();
     var $that = $(this);
     $.ajax({
-      url: './tags/' + encodeURIComponent($that.closest('li').text()),
+      url: './tags/' + encodeURIComponent($that.siblings('span.tag').text()),
       type: 'DELETE'
     }).done(function (data, status, jqXHR) {
       $that.closest('li').remove();
