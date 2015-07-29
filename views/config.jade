@@ -41,11 +41,12 @@ block content
         = ' '
     h4 Location:
       = ' '
-      span.form-inline
-        if (locals.traveler.location == undefined)
-          span#location.editable No specific location
-        else
-          span#location.editable #{traveler.location}
+      if (locals.traveler.location == undefined)
+        span#location.editable No specific location
+      else
+        span#location.editable #{traveler.location}
+      = ' '
+      button.btn-primary.editable Edit
     p Created on
       = ' '
       span.time #{traveler.createdOn}
