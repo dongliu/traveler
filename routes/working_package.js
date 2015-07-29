@@ -611,35 +611,35 @@ module.exports = function (app) {
     });
   });
 
-  // app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description', 'deadline']), function (req, res) {
-  //   Traveler.findById(req.params.id, function (err, doc) {
-  //     var k;
-  //     if (err) {
-  //       console.error(err);
-  //       return res.send(500, err.message);
-  //     }
-  //     if (!doc) {
-  //       return res.send(410, 'gone');
-  //     }
-  //     if (!canWrite(req, doc)) {
-  //       return res.send(403, 'You are not authorized to access this resource');
-  //     }
-  //     for (k in req.body) {
-  //       if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
-  //         doc[k] = req.body[k];
-  //       }
-  //     }
-  //     doc.updatedBy = req.session.userid;
-  //     doc.updatedOn = Date.now();
-  //     doc.save(function (err) {
-  //       if (err) {
-  //         console.error(err);
-  //         return res.send(500, err.message);
-  //       }
-  //       return res.send(204);
-  //     });
-  //   });
-  // });
+  app.put('/workingpackages/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description']), function (req, res) {
+    WorkingPackage.findById(req.params.id, function (err, doc) {
+      var k;
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      for (k in req.body) {
+        if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
+          doc[k] = req.body[k];
+        }
+      }
+      doc.updatedBy = req.session.userid;
+      doc.updatedOn = Date.now();
+      doc.save(function (err) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+        return res.send(204);
+      });
+    });
+  });
 
   // app.get('/sharedtravelers/json', auth.ensureAuthenticated, function (req, res) {
   //   User.findOne({
