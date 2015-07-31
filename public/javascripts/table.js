@@ -277,14 +277,16 @@ var formShareLinkColumn = {
 
 var createdOnColumn = dateColumn('Created', 'createdOn');
 var createdByColumn = personColumn('Created by', 'createdBy');
+var ownerColumn = personColumn('Owner', 'owner');
 
 var clonedByColumn = personColumn('Cloned by', 'clonedBy');
 
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
 
-var archivedOnColumn = dateColumn('Archived', 'archivedOn');
+var transferedOnColumn = dateColumn('Transfered', 'transferedOn');
 
+var archivedOnColumn = dateColumn('Archived', 'archivedOn');
 
 var deadlineColumn = dateColumn('Deadline', 'deadline');
 

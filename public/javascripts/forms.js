@@ -65,6 +65,39 @@ function archiveFromModal(archive, formTable, archivedFormTable) {
   });
 }
 
+// function transferFromModal(newOwner, formTable, archivedFormTable) {
+//   $('#submit').prop('disabled', true);
+//   $('#return').prop('disabled', true);
+//   var number = $('#modal .modal-body div').length;
+//   $('#modal .modal-body div').each(function (index) {
+//     var that = this;
+//     var success = false;
+//     $.ajax({
+//       url: '/forms/' + that.id + '/archived',
+//       type: 'PUT',
+//       contentType: 'application/json',
+//       data: JSON.stringify({
+//         archived: archive
+//       })
+//     }).done(function () {
+//       $(that).prepend('<i class="icon-check"></i>');
+//       $(that).addClass('text-success');
+//       success = true;
+//     }).fail(function (jqXHR, status, error) {
+//       $(that).prepend('<i class="icon-question"></i>');
+//       $(that).append(' : ' + jqXHR.responseText);
+//       $(that).addClass('text-error');
+//     }).always(function () {
+//       number = number - 1;
+//       if (number === 0 && success) {
+//         $('#return').prop('disabled', false);
+//         formTable.fnReloadAjax();
+//         archivedFormTable.fnReloadAjax();
+//       }
+//     });
+//   });
+// }
+
 function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
@@ -103,7 +136,7 @@ $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
   /*form table starts*/
-  var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn, ownerColumn];
   var formTable = $('#form-table').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
@@ -125,6 +158,31 @@ $(function () {
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#form-table', formAoColumns);
+  /*form table ends*/
+
+  /*transfered form table starts*/
+  var transferedFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var transferedFormTable = $('#transfered-form-table').dataTable({
+    sAjaxSource: '/transferedforms/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, "All"]
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: formAoColumns,
+    aaSorting: [
+      [4, 'desc'],
+      [5, 'desc']
+    ],
+    sDom: sDomNoTools
+  });
+  fnAddFilterFoot('#transfered-form-table', formAoColumns);
   /*form table ends*/
 
   /*shared form table starts*/
@@ -240,8 +298,9 @@ $(function () {
     }
   });
 
-  $('#form-archive').click(function (e) {
-    var selected = fnGetSelected(formTable, 'row-selected');
+  $('button.archive').click(function (e) {
+    var activeTable = $('.tab-pane.active table').dataTable();
+    var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No form has been selected!');
@@ -251,13 +310,13 @@ $(function () {
       $('#modalLabel').html('Archive the following ' + selected.length + ' forms? ');
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
-        var data = formTable.fnGetData(row);
+        var data = activeTable.fnGetData(row);
         $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
-        archiveFromModal(true, formTable, archivedFormTable);
+        archiveFromModal(true, activeTable, archivedFormTable);
       });
     }
   });
@@ -297,7 +356,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = archivedFormTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' created ' + moment(data.createdOn).fromNow() + ' archived ' + moment(data.archivedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' archived ' + moment(data.archivedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
