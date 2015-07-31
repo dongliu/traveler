@@ -16,7 +16,7 @@ function travelFromModal() {
         form: this.id
       })
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
     }).fail(function (jqXHR, status, error) {
@@ -47,7 +47,7 @@ function archiveFromModal(archive, formTable, archivedFormTable) {
         archived: archive
       })
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
     }).fail(function (jqXHR, status, error) {
@@ -69,7 +69,7 @@ function transferFromModal(newOwnerName, formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
+  $('#modal .modal-body div.transfer').each(function (index) {
     var that = this;
     var success = false;
     $.ajax({
@@ -80,11 +80,11 @@ function transferFromModal(newOwnerName, formTable) {
         name: newOwnerName
       })
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
     }).fail(function (jqXHR, status, error) {
-      $(that).prepend('<i class="icon-question"></i>');
+      $(that).prepend('<i class="fa fa-exclamation"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
     }).always(function () {
@@ -108,7 +108,7 @@ function cloneFromModal(formTable) {
       url: '/forms/' + that.id + '/clone',
       type: 'POST'
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
     }).fail(function (jqXHR, status, error) {
@@ -333,7 +333,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append('<div id="' + data._id + '" class="transfer"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
       });
       $('#modal .modal-body').append('<h5>to the following user</h5>');
       $('#modal .modal-body').append('<form class="form-inline"><input id="username" type="text" placeholder="Last, First" name="name" class="input" required></form>')
@@ -352,7 +352,7 @@ $(function () {
         source: travelerGlobal.usernames
       });
       $('#submit').click(function (e) {
-        TransferFromModal($('#username').val(), activeTable);
+        transferFromModal($('#username').val(), activeTable);
       });
     }
   });

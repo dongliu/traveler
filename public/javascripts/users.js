@@ -35,7 +35,7 @@ function updateFromModal(cb) {
       url: '/users/' + that.id + '/refresh',
       type: 'GET'
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
     }).fail(function (jqXHR, status, error) {
       $(that).append(' : ' + jqXHR.responseText);
@@ -68,7 +68,7 @@ function modifyFromModal(cb) {
         roles: roles
       })
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
     }).fail(function (jqXHR, status, error) {
       $(that).append(' : ' + jqXHR.responseText);
