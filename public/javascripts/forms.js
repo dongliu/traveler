@@ -65,38 +65,37 @@ function archiveFromModal(archive, formTable, archivedFormTable) {
   });
 }
 
-// function transferFromModal(newOwner, formTable, archivedFormTable) {
-//   $('#submit').prop('disabled', true);
-//   $('#return').prop('disabled', true);
-//   var number = $('#modal .modal-body div').length;
-//   $('#modal .modal-body div').each(function (index) {
-//     var that = this;
-//     var success = false;
-//     $.ajax({
-//       url: '/forms/' + that.id + '/archived',
-//       type: 'PUT',
-//       contentType: 'application/json',
-//       data: JSON.stringify({
-//         archived: archive
-//       })
-//     }).done(function () {
-//       $(that).prepend('<i class="icon-check"></i>');
-//       $(that).addClass('text-success');
-//       success = true;
-//     }).fail(function (jqXHR, status, error) {
-//       $(that).prepend('<i class="icon-question"></i>');
-//       $(that).append(' : ' + jqXHR.responseText);
-//       $(that).addClass('text-error');
-//     }).always(function () {
-//       number = number - 1;
-//       if (number === 0 && success) {
-//         $('#return').prop('disabled', false);
-//         formTable.fnReloadAjax();
-//         archivedFormTable.fnReloadAjax();
-//       }
-//     });
-//   });
-// }
+function transferFromModal(newOwnerName, formTable) {
+  $('#submit').prop('disabled', true);
+  $('#return').prop('disabled', true);
+  var number = $('#modal .modal-body div').length;
+  $('#modal .modal-body div').each(function (index) {
+    var that = this;
+    var success = false;
+    $.ajax({
+      url: '/forms/' + that.id + '/owner',
+      type: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        name: newOwnerName
+      })
+    }).done(function () {
+      $(that).prepend('<i class="icon-check"></i>');
+      $(that).addClass('text-success');
+      success = true;
+    }).fail(function (jqXHR, status, error) {
+      $(that).prepend('<i class="icon-question"></i>');
+      $(that).append(' : ' + jqXHR.responseText);
+      $(that).addClass('text-error');
+    }).always(function () {
+      number = number - 1;
+      if (number === 0 && success) {
+        $('#return').prop('disabled', false);
+        formTable.fnReloadAjax();
+      }
+    });
+  });
+}
 
 function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
@@ -317,6 +316,43 @@ $(function () {
       $('#modal').modal('show');
       $('#submit').click(function (e) {
         archiveFromModal(true, activeTable, archivedFormTable);
+      });
+    }
+  });
+
+  $('button.transfer').click(function (e) {
+    var activeTable = $('.tab-pane.active table').dataTable();
+    var selected = fnGetSelected(activeTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No form has been selected!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html('Transfer the following ' + selected.length + ' forms? ');
+      $('#modal .modal-body').empty();
+      selected.forEach(function (row) {
+        var data = activeTable.fnGetData(row);
+        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
+      });
+      $('#modal .modal-body').append('<h5>to the following user</h5>');
+      $('#modal .modal-body').append('<form class="form-inline"><input id="username" type="text" placeholder="Last, First" name="name" class="input" required></form>')
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+
+      travelerGlobal.usernames.initialize();
+      $('#username').typeahead({
+        minLength: 1,
+        highlight: true,
+        hint: true
+      }, {
+        name: 'usernames',
+        display: 'displayName',
+        limit: 20,
+        source: travelerGlobal.usernames
+      });
+      $('#submit').click(function (e) {
+        TransferFromModal($('#username').val(), activeTable);
       });
     }
   });
