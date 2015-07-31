@@ -32,7 +32,8 @@ function travelFromModal() {
   });
 }
 
-function archiveFromModal(archive, formTable, archivedFormTable) {
+
+function archiveFromModal(archive, activeTable, archivedFormTable, theOtherTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
@@ -58,7 +59,10 @@ function archiveFromModal(archive, formTable, archivedFormTable) {
       number = number - 1;
       if (number === 0 && success) {
         $('#return').prop('disabled', false);
-        formTable.fnReloadAjax();
+        activeTable.fnReloadAjax();
+        if (!!theOtherTable) {
+          theOtherTable.fnReloadAjax();
+        }
         archivedFormTable.fnReloadAjax();
       }
     });
@@ -129,6 +133,10 @@ function showHash() {
   if (window.location.hash) {
     $('.nav-tabs a[href=' + window.location.hash + ']').tab('show');
   }
+}
+
+function formatItemUpdate(data) {
+  return '<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ((!!data.updatedOn) ? (', updated ' + moment(data.updatedOn).fromNow()) : '') + '</div>';
 }
 
 $(function () {
@@ -287,7 +295,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append(formatItemUpdate(data));
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
@@ -310,7 +318,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append(formatItemUpdate(data));
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
@@ -333,10 +341,10 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '" class="transfer"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append(formatItemUpdate(data));
       });
       $('#modal .modal-body').append('<h5>to the following user</h5>');
-      $('#modal .modal-body').append('<form class="form-inline"><input id="username" type="text" placeholder="Last, First" name="name" class="input" required></form>')
+      $('#modal .modal-body').append('<form class="form-inline"><input id="username" type="text" placeholder="Last, First" name="name" class="input" required></form>');
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
 
@@ -370,7 +378,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append(formatItemUpdate(data));
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
@@ -397,13 +405,14 @@ $(function () {
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
-        archiveFromModal(false, formTable, archivedFormTable);
+        archiveFromModal(false, formTable, archivedFormTable, transferedFormTable);
       });
     }
   });
 
   $('#reload').click(function (e) {
     formTable.fnReloadAjax();
+    transferedFormTable.fnReloadAjax();
     sharedFormTable.fnReloadAjax();
     groupSharedFormTable.fnReloadAjax();
     archivedFormTable.fnReloadAjax();
