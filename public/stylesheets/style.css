@@ -80,6 +80,7 @@ hr.soften {
   -moz-background-clip: padding;
   background-clip: padding-box;
 }
+
 .tt-suggestion {
   display: block;
   padding: 3px 20px;
