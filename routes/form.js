@@ -865,6 +865,68 @@ module.exports = function (app) {
     });
   });
 
+  app.put('/forms/:id/owner', auth.ensureAuthenticated, filterBody(['name']), function (req, res) {
+    Form.findById(req.params.id, 'createdBy owner').exec(function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+
+      if (!!doc.owner && doc.owner !== req.session.userid) {
+        return res.send(403, 'Only the current owner can transfer the ownership.');
+      }
+
+      if (doc.createdBy !== req.session.userid) {
+        return res.send(403, 'Only the current owner can transfer the ownership.');
+      }
+
+      // get user id from name here
+      var name = req.body.name;
+      var nameFilter = ad.nameFilter.replace('_name', name);
+      var opts = {
+        filter: nameFilter,
+        attributes: ad.objAttributes,
+        scope: 'sub'
+      };
+
+      ldapClient.search(ad.searchBase, opts, false, function (err, result) {
+        if (err) {
+          console.error(err.name + ' : ' + err.message);
+          return res.send(500, err.message);
+        }
+
+        if (result.length === 0) {
+          return res.send(400, name + ' is not found in AD!');
+        }
+
+        if (result.length > 1) {
+          return res.send(400, name + ' is not unique!');
+        }
+
+        var id = result[0].sAMAccountName.toLowerCase();
+
+        if (doc.owner === id) {
+          return res.send(204);
+        }
+
+        doc.owner = id;
+        doc.transferedOn = Date.now();
+
+        doc.save(function (err) {
+          if (err) {
+            console.error(err);
+            return res.send(500, err.message);
+          }
+          return res.send(204);
+        });
+
+      });
+    });
+  });
+
   app.put('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
