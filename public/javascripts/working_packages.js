@@ -31,7 +31,7 @@ function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
         archived: archive
       })
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
     }).fail(function (jqXHR, status, error) {
@@ -66,7 +66,7 @@ function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerT
         source: this.id
       })
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
     }).fail(function (jqXHR, status, error) {

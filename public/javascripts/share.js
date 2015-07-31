@@ -93,7 +93,7 @@ function modifyFromModal(list, cb) {
         access: $('#modal-access').prop('checked') ? 'write' : 'read'
       })
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
     }).fail(function (jqXHR, status, error) {
       $(that).append(' : ' + jqXHR.responseText);
