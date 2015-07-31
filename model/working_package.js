@@ -23,6 +23,7 @@ var sharedWithGroup = new Schema({
 
 var work = new Schema({
   traveler: ObjectId,
+  workingPackage: ObjectId,
   addedOn: Date,
   addedBy: String,
   priority: {
