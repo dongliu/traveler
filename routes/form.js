@@ -153,6 +153,9 @@ function canWrite(req, doc) {
   if (doc.createdBy === req.session.userid) {
     return true;
   }
+  if (doc.owner === req.session.userid) {
+    return true;
+  }
   if (doc.sharedWith && doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
     return true;
   }
@@ -169,6 +172,9 @@ function canWrite(req, doc) {
 
 function canRead(req, doc) {
   if (doc.createdBy === req.session.userid) {
+    return true;
+  }
+  if (doc.owner === req.session.userid) {
     return true;
   }
   if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
@@ -345,8 +351,24 @@ module.exports = function (app) {
       createdBy: req.session.userid,
       archived: {
         $ne: true
+      },
+      owner: null
+    }).lean().exec(function (err, forms) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
       }
-    }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+      res.json(200, forms);
+    });
+  });
+
+  app.get('/transferedforms/json', auth.ensureAuthenticated, function (req, res) {
+    Form.find({
+      owner: req.session.userid,
+      archived: {
+        $ne: true
+      }
+    }).lean().exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -373,7 +395,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+      }).lean().exec(function (err, forms) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -410,7 +432,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+      }).lean().exec(function (err, forms) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -424,7 +446,7 @@ module.exports = function (app) {
     Form.find({
       createdBy: req.session.userid,
       archived: true
-    }, 'title createdBy createdOn archivedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+    }).lean().exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -806,7 +828,7 @@ module.exports = function (app) {
   });
 
   app.put('/forms/:id/archived', auth.ensureAuthenticated, filterBody(['archived']), function (req, res) {
-    Form.findById(req.params.id, 'createdBy archived').exec(function (err, doc) {
+    Form.findById(req.params.id, 'createdBy owner archived').exec(function (err, doc) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -815,8 +837,12 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
 
+      if (!!doc.owner && doc.owner !== req.session.userid) {
+        return res.send(403, 'Only the owner can archive the form.');
+      }
+
       if (doc.createdBy !== req.session.userid) {
-        return res.send(403, 'You are not authorized to access this resource');
+        return res.send(403, 'Only the owner can archive the form.');
       }
 
       if (doc.archived === req.body.archived) {
