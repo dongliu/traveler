@@ -150,7 +150,7 @@ function addGroupFromAD(req, res, form) {
 }
 
 function canWrite(req, doc) {
-  if (doc.createdBy === req.session.userid) {
+  if (doc.createdBy === req.session.userid && !doc.owner) {
     return true;
   }
   if (doc.owner === req.session.userid) {
@@ -171,7 +171,7 @@ function canWrite(req, doc) {
 }
 
 function canRead(req, doc) {
-  if (doc.createdBy === req.session.userid) {
+  if (doc.createdBy === req.session.userid && !doc.owner) {
     return true;
   }
   if (doc.owner === req.session.userid) {
@@ -198,7 +198,10 @@ access := -1 // no access
 *****/
 
 function getAccess(req, doc) {
-  if (doc.createdBy === req.session.userid) {
+  if (doc.createdBy === req.session.userid && !doc.owner) {
+    return 1;
+  }
+  if (doc.owner === req.session.userid) {
     return 1;
   }
   if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
