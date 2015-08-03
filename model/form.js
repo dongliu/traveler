@@ -27,7 +27,7 @@ var form = new Schema({
   updatedBy: String,
   updatedOn: Date,
   owner: String,
-  transferedOn: Date,
+  transferredOn: Date,
   archivedOn: Date,
   archived: {
     type: Boolean,

@@ -284,7 +284,7 @@ var clonedByColumn = personColumn('Cloned by', 'clonedBy');
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
 
-var transferedOnColumn = dateColumn('Transfered', 'transferedOn');
+var transferredOnColumn = dateColumn('transferred', 'transferredOn');
 
 var archivedOnColumn = dateColumn('Archived', 'archivedOn');
 
