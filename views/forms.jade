@@ -49,7 +49,7 @@ block content
         li.active
           a(href='#forms', data-toggle='tab') My forms
         li
-          a(href='#transferedforms', data-toggle='tab') Transfered forms
+          a(href='#transferredforms', data-toggle='tab') transferred forms
         li
           a(href='#sharedfroms', data-toggle='tab') Shared forms
         li
@@ -68,7 +68,7 @@ block content
                 i.fa.fa-user.fa-lg
                 | &nbsp;Transfer ownership
           table#form-table.table.table-bordered.table-hover
-        #transferedforms.tab-pane
+        #transferredforms.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected forms, only you can see them after archived.')
@@ -78,7 +78,7 @@ block content
               button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
                 i.fa.fa-user.fa-lg
                 | &nbsp;Transfer ownership
-          table#transfered-form-table.table.table-bordered.table-hover
+          table#transferred-form-table.table.table-bordered.table-hover
         #sharedfroms.tab-pane
           table#shared-form-table.table.table-bordered.table-hover
         #groupsharedfroms.tab-pane

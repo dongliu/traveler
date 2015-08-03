@@ -143,7 +143,7 @@ $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
   /*form table starts*/
-  var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn, ownerColumn];
+  var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var formTable = $('#form-table').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
@@ -159,18 +159,18 @@ $(function () {
     bDeferRender: true,
     aoColumns: formAoColumns,
     aaSorting: [
-      [4, 'desc'],
-      [5, 'desc']
+      [5, 'desc'],
+      [4, 'desc']
     ],
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#form-table', formAoColumns);
   /*form table ends*/
 
-  /*transfered form table starts*/
-  var transferedFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
-  var transferedFormTable = $('#transfered-form-table').dataTable({
-    sAjaxSource: '/transferedforms/json',
+  /*transferred form table starts*/
+  var transferredFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdByColumn, createdOnColumn, transferredOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var transferredFormTable = $('#transferred-form-table').dataTable({
+    sAjaxSource: '/transferredforms/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
     iDisplayLength: 10,
@@ -182,18 +182,18 @@ $(function () {
       sLoadingRecords: 'Please wait - loading data from the server ...'
     },
     bDeferRender: true,
-    aoColumns: formAoColumns,
+    aoColumns: transferredFormAoColumns,
     aaSorting: [
-      [4, 'desc'],
-      [5, 'desc']
+      [7, 'desc'],
+      [6, 'desc']
     ],
     sDom: sDomNoTools
   });
-  fnAddFilterFoot('#transfered-form-table', formAoColumns);
+  fnAddFilterFoot('#transferred-form-table', transferredFormAoColumns);
   /*form table ends*/
 
   /*shared form table starts*/
-  var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, createdByColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, ownerColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var sharedFormTable = $('#shared-form-table').dataTable({
     sAjaxSource: '/sharedforms/json',
     sAjaxDataProp: '',
@@ -209,8 +209,7 @@ $(function () {
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
     aaSorting: [
-      [4, 'desc'],
-      [5, 'desc']
+      [4, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -243,7 +242,7 @@ $(function () {
   /*group shared form table ends*/
 
   /*archieved form table starts*/
-  var archivedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, archivedOnColumn, createdOnColumn, sharedWithColumn, sharedGroupColumn];
+  var archivedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, archivedOnColumn, sharedWithColumn, sharedGroupColumn];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
     sAjaxDataProp: '',
@@ -261,8 +260,7 @@ $(function () {
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
     aaSorting: [
-      [3, 'desc'],
-      [4, 'desc']
+      [3, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -405,14 +403,14 @@ $(function () {
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
-        archiveFromModal(false, formTable, archivedFormTable, transferedFormTable);
+        archiveFromModal(false, formTable, archivedFormTable, transferredFormTable);
       });
     }
   });
 
   $('#reload').click(function (e) {
     formTable.fnReloadAjax();
-    transferedFormTable.fnReloadAjax();
+    transferredFormTable.fnReloadAjax();
     sharedFormTable.fnReloadAjax();
     groupSharedFormTable.fnReloadAjax();
     archivedFormTable.fnReloadAjax();

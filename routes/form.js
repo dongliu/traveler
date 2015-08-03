@@ -362,7 +362,7 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/transferedforms/json', auth.ensureAuthenticated, function (req, res) {
+  app.get('/transferredforms/json', auth.ensureAuthenticated, function (req, res) {
     Form.find({
       owner: req.session.userid,
       archived: {
@@ -913,7 +913,7 @@ module.exports = function (app) {
         }
 
         doc.owner = id;
-        doc.transferedOn = Date.now();
+        doc.transferredOn = Date.now();
 
         doc.save(function (err) {
           if (err) {
