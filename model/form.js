@@ -6,7 +6,8 @@ var ObjectId = Schema.Types.ObjectId;
 
 /******
 access := 0 // for read or
-        | 1 // for write
+        | 1 // for write or
+        | -1 // no access
 ******/
 var sharedWithUser = new Schema({
   _id: String,
@@ -32,6 +33,10 @@ var form = new Schema({
   archived: {
     type: Boolean,
     default: false
+  },
+  publicAccess: {
+    type: Number,
+    default: -1
   },
   sharedWith: [sharedWithUser],
   sharedGroup: [sharedWithGroup],
