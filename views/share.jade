@@ -20,18 +20,28 @@ block content
         h3#modalLabel
       .modal-body
       .modal-footer
+    h3 Public access for #{type}
+      = ' '
+      span.text-info #{title}
+    form.form-inline(name='public')
+      select(name='public')
+        option(value='-1') no access
+        option(value='0') read
+        option(value='1') write
+      = ' '
+      button.btn.btn-primary(type='submit', disabled)#update Update
     h3 Shared user list for #{type}
       = ' '
       span.text-info #{title}
     //- .well
-    form.form-inline
+    form.form-inline(name='user')
       input#username.input(type='text', placeholder='Last, First', name='name')
       != ' '
       label.checkbox
         input#access(type='checkbox', name='access', value='write')
         | Write
       != ' '
-      button.btn.btn-primary#add(type='submit') Add to share
+      button.btn.btn-primary#add(type='submit', disabled) Add to share
     .btn-toolbar
       .btn-group
         button.btn.btn-info#share-modify
@@ -46,14 +56,14 @@ block content
       = ' '
       span.text-info #{title}
     //- .well
-    form.form-inline
+    form.form-inline(name='group')
       input#groupid.input.input-xlarge(type='text', placeholder='LAB.FRIB.DIV.Department.Group', name='group')
       != ' '
       label.checkbox
         input#groupaccess(type='checkbox', name='access', value='write')
         | Write
       != ' '
-      button.btn.btn-primary#addgroup(type='submit') Add to share
+      button.btn.btn-primary#addgroup(type='submit', disabled) Add to share
     .btn-toolbar
       .btn-group
         button.btn.btn-info#groupshare-modify
