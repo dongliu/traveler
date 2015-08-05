@@ -163,26 +163,30 @@ function inArray(name, ao) {
 
 
 function addto(data, table, list) {
-  if (inArray(data.name || data.id, table.fnGetData())) {
-    //show message
-    $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button><strong>' + name + '</strong> is already in the ' + list + ' share list. </div>');
-  } else {
-    $.ajax({
-      url: path + list + '/',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify(data),
-      processData: false,
-      success: function (res, status, jqXHR) {
-        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
-        initTable(list, table);
-      },
-      error: function (jqXHR, status, error) {
-        if (jqXHR.status !== 401) {
-          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ' + list + ' share list : ' + jqXHR.responseText + '</div>');
+  if (!!data.name || !!data.id) {
+    if (inArray(data.name || data.id, table.fnGetData())) {
+      //show message
+      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button><strong>' + name + '</strong> is already in the ' + list + ' share list. </div>');
+    } else {
+      $.ajax({
+        url: path + list + '/',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        processData: false,
+        success: function (res, status, jqXHR) {
+          $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
+          initTable(list, table);
+        },
+        error: function (jqXHR, status, error) {
+          if (jqXHR.status !== 401) {
+            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ' + list + ' share list : ' + jqXHR.responseText + '</div>');
+          }
         }
-      }
-    });
+      });
+    }
+  } else {
+    $('#message').append('<div class="alert"><button class="close" data-dismiss="alert">x</button>' + list + ' name is empty. </div>');
   }
 }
 
@@ -191,8 +195,46 @@ $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
 
-  travelerGlobal.usernames.initialize();
 
+  var initAccess = $('select[name="public"]').val();
+
+  $('select[name="public"]').click(function (e) {
+    if ($('select[name="public"]').val() !== initAccess) {
+      $('#update').attr('disabled', false);
+    } else {
+      $('#update').attr('disabled', true);
+    }
+  });
+
+
+  $('#update').click(function (e) {
+    e.preventDefault();
+    var value = $('select[name="public"]').val();
+    if (initAccess === value) {
+      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The setting is not changed.</div>');
+    } else {
+      $.ajax({
+        url: path + 'public',
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          access: value
+        }),
+        processData: false,
+        success: function (res, status, jqXHR) {
+          $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
+        },
+        error: function (jqXHR, status, error) {
+          if (jqXHR.status !== 401) {
+            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the public access setting : ' + jqXHR.responseText + '</div>');
+          }
+        }
+      });
+    }
+  });
+
+
+  travelerGlobal.usernames.initialize();
   $('#username').typeahead({
     minLength: 1,
     highlight: true,
@@ -203,6 +245,11 @@ $(function () {
     limit: 20,
     source: travelerGlobal.usernames
   });
+
+  $('#username').on('typeahead:select', function (e) {
+    $('#add').attr('disabled', false);
+  });
+
 
   travelerGlobal.groupids.initialize();
 
@@ -215,6 +262,10 @@ $(function () {
     displayKey: 'sAMAccountName',
     limit: 20,
     source: travelerGlobal.groupids
+  });
+
+  $('#groupid').on('typeahead:select', function (e) {
+    $('#addgroup').attr('disabled', false);
   });
 
   var shareAoColumns = [selectColumn, useridColumn, userNameNoLinkColumn, accessColumn];
@@ -248,7 +299,8 @@ $(function () {
     data.name = $('#username').val();
     data.access = $('#access').prop('checked') ? 'write' : 'read';
     addto(data, shareTable, 'users');
-    document.forms[0].reset();
+    // document.forms[0].reset();
+    $('form[name="user"]')[0].reset();
   });
 
   $('#addgroup').click(function (e) {
@@ -257,7 +309,8 @@ $(function () {
     data.id = $('#groupid').val().toLowerCase();
     data.access = $('#groupaccess').prop('checked') ? 'write' : 'read';
     addto(data, groupShareTable, 'groups');
-    document.forms[1].reset();
+    // document.forms[1].reset();
+    $('form[name="group"]')[0].reset();
   });
 
   $('#share-remove').click(function (e) {
