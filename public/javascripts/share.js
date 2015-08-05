@@ -195,7 +195,9 @@ $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
 
-
+  if (typeof access !== 'undefined') {
+    $('select[name="public"]').val(access);
+  }
   var initAccess = $('select[name="public"]').val();
 
   $('select[name="public"]').click(function (e) {
