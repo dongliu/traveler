@@ -2,22 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
-
-/******
-access := 0 // for read or
-        | 1 // for write
-******/
-var sharedWithUser = new Schema({
-  _id: String,
-  username: String,
-  access: Number
-});
-
-var sharedWithGroup = new Schema({
-  _id: String,
-  groupname: String,
-  access: Number
-});
+var share = require('./share.js');
 
 var form = new Schema({
   html: String
@@ -47,8 +32,8 @@ var traveler = new Schema({
   updatedOn: Date,
   archivedOn: Date,
   deadline: Date,
-  sharedWith: [sharedWithUser],
-  sharedGroup: [sharedWithGroup],
+  sharedWith: [share.user],
+  sharedGroup: [share.group],
   referenceForm: ObjectId,
   forms: [form],
   activeForm: {

@@ -4,22 +4,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
-/******
-access := 0 // for read or
-        | 1 // for write or
-        | -1 // no access
-******/
-var sharedWithUser = new Schema({
-  _id: String,
-  username: String,
-  access: Number
-});
-
-var sharedWithGroup = new Schema({
-  _id: String,
-  groupname: String,
-  access: Number
-});
+var share = require('./share.js');
 
 var form = new Schema({
   title: String,
@@ -38,8 +23,8 @@ var form = new Schema({
     type: Number,
     default: -1
   },
-  sharedWith: [sharedWithUser],
-  sharedGroup: [sharedWithGroup],
+  sharedWith: [share.user],
+  sharedGroup: [share.group],
   html: String
 });
 
