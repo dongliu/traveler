@@ -12,31 +12,13 @@ var sanitize = require('sanitize-caja');
 var util = require('util');
 var underscore = require('underscore');
 
+var reqUtils = require('../lib/reqUtils');
+
 
 var Form = mongoose.model('Form');
 var FormFile = mongoose.model('FormFile');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
-
-function filterBody(strings) {
-  return function (req, res, next) {
-    var k, found = false;
-    for (k in req.body) {
-      if (req.body.hasOwnProperty(k)) {
-        if (strings.indexOf(k) !== -1) {
-          found = true;
-        } else {
-          req.body[k] = null;
-        }
-      }
-    }
-    if (found) {
-      next();
-    } else {
-      return res.send(400, 'cannot find required information in body');
-    }
-  };
-}
 
 function addUserFromAD(req, res, form) {
   var name = req.body.name;
@@ -147,116 +129,6 @@ function addGroupFromAD(req, res, form) {
       return res.send(201, 'The group ' + id + ' was added to the share list.');
     });
   });
-}
-
-function canWrite(req, doc) {
-  if (doc.createdBy === req.session.userid && !doc.owner) {
-    return true;
-  }
-  if (doc.owner === req.session.userid) {
-    return true;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
-    return true;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function canRead(req, doc) {
-  if (doc.createdBy === req.session.userid && !doc.owner) {
-    return true;
-  }
-  if (doc.owner === req.session.userid) {
-    return true;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
-    return true;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i])) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-/*****
-access := -1 // no access
-        | 0  // read
-        | 1  // write
-*****/
-
-function getAccess(req, doc) {
-  if (doc.createdBy === req.session.userid && !doc.owner) {
-    return 1;
-  }
-  if (doc.owner === req.session.userid) {
-    return 1;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
-    return doc.sharedWith.id(req.session.userid).access;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
-        return 1;
-      }
-    }
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i])) {
-        return 0;
-      }
-    }
-  }
-  return -1;
-}
-
-function isOwner(req, doc) {
-  if (doc.createdBy === req.session.userid && !doc.owner) {
-    return true;
-  }
-  if (doc.owner === req.session.userid) {
-    return true;
-  }
-  return false;
-}
-
-function getSharedWith(sharedWith, name) {
-  var i;
-  if (sharedWith.length === 0) {
-    return -1;
-  }
-  for (i = 0; i < sharedWith.length; i += 1) {
-    if (sharedWith[i].username === name) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-function getSharedGroup(sharedGroup, id) {
-  var i;
-  if (sharedGroup.length === 0) {
-    return -1;
-  }
-  for (i = 0; i < sharedGroup.length; i += 1) {
-    if (sharedGroup[i]._id === id) {
-      return i;
-    }
-  }
-  return -1;
 }
 
 function addUser(req, res, form) {
@@ -484,7 +356,7 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
 
-      var access = getAccess(req, form);
+      var access = reqUtils.getAccess(req, form);
 
       if (access === -1) {
         return res.send(403, 'you are not authorized to access this resource');
@@ -516,7 +388,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!reqUtils.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
@@ -581,7 +453,7 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
 
-      var access = getAccess(req, form);
+      var access = reqUtils.getAccess(req, form);
 
       if (access === -1) {
         return res.send(403, 'you are not authorized to access this resource');
@@ -605,7 +477,7 @@ module.exports = function (app) {
       if (!form) {
         return res.send(410, 'gone');
       }
-      if (!isOwner(req, form)) {
+      if (!reqUtils.isOwner(req, form)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       return res.render('share', {
@@ -617,7 +489,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/forms/:id/share/public', auth.ensureAuthenticated, filterBody(['access']), function (req, res) {
+  app.put('/forms/:id/share/public', auth.ensureAuthenticated, reqUtils.filterBody(['access']), function (req, res) {
     Form.findById(req.params.id, function (err, form) {
       if (err) {
         console.error(err);
@@ -626,7 +498,7 @@ module.exports = function (app) {
       if (!form) {
         return res.send(410, 'gone');
       }
-      if (!isOwner(req, form)) {
+      if (!reqUtils.isOwner(req, form)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       // change the access
@@ -660,7 +532,7 @@ module.exports = function (app) {
       if (!form) {
         return res.send(410, 'gone');
       }
-      if (!isOwner(req, form)) {
+      if (!reqUtils.isOwner(req, form)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       if (req.params.list === 'users') {
@@ -682,20 +554,20 @@ module.exports = function (app) {
       if (!form) {
         return res.send(410, 'gone');
       }
-      if (!isOwner(req, form)) {
+      if (!reqUtils.isOwner(req, form)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       var share = -2;
       if (req.params.list === 'users') {
         if (!!req.body.name) {
-          share = getSharedWith(form.sharedWith, req.body.name);
+          share = reqUtils.getSharedWith(form.sharedWith, req.body.name);
         } else {
           return res.send(400, 'user name is empty.');
         }
       }
       if (req.params.list === 'groups') {
         if (!!req.body.id) {
-          share = getSharedGroup(form.sharedGroup, req.body.id);
+          share = reqUtils.getSharedGroup(form.sharedGroup, req.body.id);
         } else {
           return res.send(400, 'group id is empty.');
         }
@@ -725,7 +597,7 @@ module.exports = function (app) {
       if (!form) {
         return res.send(410, 'gone');
       }
-      if (!isOwner(req, form)) {
+      if (!reqUtils.isOwner(req, form)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       var share;
@@ -785,7 +657,7 @@ module.exports = function (app) {
       if (!form) {
         return res.send(410, 'gone');
       }
-      if (!isOwner(req, form)) {
+      if (!reqUtils.isOwner(req, form)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       var share;
@@ -882,7 +754,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/forms/:id/archived', auth.ensureAuthenticated, filterBody(['archived']), function (req, res) {
+  app.put('/forms/:id/archived', auth.ensureAuthenticated, reqUtils.filterBody(['archived']), function (req, res) {
     Form.findById(req.params.id, 'createdBy owner archived').exec(function (err, doc) {
       if (err) {
         console.error(err);
@@ -892,7 +764,7 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
 
-      if (!isOwner(req, doc)) {
+      if (!reqUtils.isOwner(req, doc)) {
         return res.send(403, 'Only the owner can archive the form.');
       }
 
@@ -916,7 +788,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/forms/:id/owner', auth.ensureAuthenticated, filterBody(['name']), function (req, res) {
+  app.put('/forms/:id/owner', auth.ensureAuthenticated, reqUtils.filterBody(['name']), function (req, res) {
     Form.findById(req.params.id, 'createdBy owner').exec(function (err, doc) {
       if (err) {
         console.error(err);
@@ -926,7 +798,7 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
 
-      if (!isOwner(req, doc)) {
+      if (!reqUtils.isOwner(req, doc)) {
         return res.send(403, 'Only the current owner can transfer the ownership.');
       }
 
@@ -998,7 +870,7 @@ module.exports = function (app) {
         console.dir(err);
         return res.send(500, err.message || err.errmsg);
       }
-      if (getAccess(req, doc) !== 1) {
+      if (reqUtils.getAccess(req, doc) !== 1) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       doc.update(form, function (err, old) {
