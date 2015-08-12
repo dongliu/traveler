@@ -45,6 +45,8 @@ block content
         li.active
           a(href='#travelers', data-toggle='tab') My travelers
         li
+          a(href='#transferredtravelers', data-toggle='tab') transferred travelers
+        li
           a(href='#sharedtravelers', data-toggle='tab') Shared travelers
         li
           a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
@@ -55,10 +57,25 @@ block content
         #travelers.tab-pane.active
           .btn-toolbar
             .btn-group
-              button.btn.btn-warning#archive(data-toggle='tooltip', title='archive selected travelers')
+              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
+            .btn-group
+              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                i.fa.fa-user.fa-lg
+                | &nbsp;Transfer ownership
           table#traveler-table.table.table-bordered.table-hover
+        #transferredtravelers.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
+                i.fa.fa-archive.fa-lg
+                | &nbsp;Archive
+            .btn-group
+              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                i.fa.fa-user.fa-lg
+                | &nbsp;Transfer ownership
+          table#transferred-traveler-table.table.table-bordered.table-hover
         #sharedtravelers.tab-pane
           table#shared-traveler-table.table.table-bordered.table-hover
         #groupsharedtravelers.tab-pane
