@@ -1,7 +1,7 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, Binder: false, tinymce:false, rivets:false*/
 /*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
-/*global UID:false, input:false, spec:false, updateAjaxURL: false, prefix, false*/
+/*global UID:false, input:false, spec:false, updateAjaxURL: false, ajax401: false, disableAjaxCache: false, prefix, false*/
 
 function livespan(stamp) {
   return '<span data-livestamp="' + stamp + '"></span>';
@@ -865,12 +865,9 @@ function binding_events() {
 }
 
 $(function () {
-  $(document).ajaxError(function (event, jqXHR, settings, exception) {
-    if (jqXHR.status === 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="/" target="_blank">home</a>, log in, and then save the changes on this page.</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }
-  });
+  updateAjaxURL(prefix);
+  ajax401(prefix);
+  disableAjaxCache();
 
   init();
   working();
