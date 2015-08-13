@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false, prefix: false, Bloodhound: false*/
-/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupNameColumn: false, accessColumn: false, sDom: false, oTableTools: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
+/*global moment: false, Binder: false, prefix: false, Bloodhound: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, access: false, travelerGlobal: false*/
+/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupNameColumn: false, accessColumn: false, sDom: false, oTableTools: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false*/
 
 
 var path = window.location.pathname;
@@ -194,6 +194,7 @@ function addto(data, table, list) {
 $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
+  disableAjaxCache();
 
   if (typeof access !== 'undefined') {
     $('select[name="public"]').val(access);
@@ -225,6 +226,8 @@ $(function () {
         processData: false,
         success: function (res, status, jqXHR) {
           $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
+          initAccess = value;
+          $('#update').attr('disabled', true);
         },
         error: function (jqXHR, status, error) {
           if (jqXHR.status !== 401) {
