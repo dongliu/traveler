@@ -1193,7 +1193,7 @@ module.exports = function (app) {
         type: 'Traveler',
         id: req.params.id,
         title: traveler.title,
-        prefix: req.proxied ? req.proxied_prefix : ''
+        access: String(traveler.publicAccess)
       });
     });
   });
