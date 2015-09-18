@@ -735,6 +735,10 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
 
+      if (!reqUtils.canRead(req, doc)) {
+        return res.send(400, 'You cannot clone a form that you cannot read.');
+      }
+
       var form = {};
       form.html = doc.html;
       form.title = doc.title + ' clone';
