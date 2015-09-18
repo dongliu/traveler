@@ -6,6 +6,12 @@ var ObjectId = Schema.Types.ObjectId;
 
 var share = require('./share.js');
 
+/******
+publicAccess := 0 // for read or
+        | 1 // for write or
+        | -1 // no access
+******/
+
 var form = new Schema({
   title: String,
   createdBy: String,
