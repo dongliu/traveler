@@ -17,6 +17,12 @@ status := 0 // new
         | 3 // frozen
 *******/
 
+/******
+publicAccess := 0 // for read or
+        | 1 // for write or
+        | -1 // no access
+******/
+
 var traveler = new Schema({
   title: String,
   description: String,
@@ -32,6 +38,10 @@ var traveler = new Schema({
   updatedOn: Date,
   archivedOn: Date,
   deadline: Date,
+  publicAccess: {
+    type: Number,
+    default: 0
+  },
   sharedWith: [share.user],
   sharedGroup: [share.group],
   referenceForm: ObjectId,
