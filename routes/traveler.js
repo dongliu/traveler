@@ -623,7 +623,12 @@ module.exports = function (app) {
           prefix: req.proxied ? req.proxied_prefix : ''
         });
       }
-      return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
+
+      if (reqUtils.canRead(req, doc)) {
+        return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
+      }
+
+      return res.send(403, 'You are not authorized to access this resource');
     });
   });
 
