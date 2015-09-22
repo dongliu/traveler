@@ -65,7 +65,7 @@ function createTraveler(form, req, res) {
 
 function cloneTraveler(source, req, res) {
   var traveler = new Traveler({
-    title: source.title,
+    title: source.title + ' clone',
     description: source.description,
     devices: [],
     status: 1,
