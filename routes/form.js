@@ -237,7 +237,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       },
-      owner: null
+      owner: {$exists: false}
     }).lean().exec(function (err, forms) {
       if (err) {
         console.error(err);
