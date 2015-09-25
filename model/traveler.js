@@ -1,3 +1,5 @@
+/*jslint es5: true*/
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
@@ -37,6 +39,8 @@ var traveler = new Schema({
   updatedBy: String,
   updatedOn: Date,
   archivedOn: Date,
+  owner: String,
+  transferredOn: Date,
   deadline: Date,
   publicAccess: {
     type: Number,
