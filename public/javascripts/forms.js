@@ -4,8 +4,8 @@
 function travelFromModal() {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
+  var number = $('#modal .modal-body div.target').length;
+  $('#modal .modal-body div.target').each(function (index) {
     var that = this;
     var success = false;
     $.ajax({
@@ -36,8 +36,8 @@ function travelFromModal() {
 function archiveFromModal(archive, activeTable, archivedFormTable, theOtherTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
+  var number = $('#modal .modal-body div.target').length;
+  $('#modal .modal-body div.target').each(function (index) {
     var that = this;
     var success = false;
     $.ajax({
@@ -72,8 +72,8 @@ function archiveFromModal(archive, activeTable, archivedFormTable, theOtherTable
 function transferFromModal(newOwnerName, formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div.transfer').each(function (index) {
+  var number = $('#modal .modal-body div.target').length;
+  $('#modal .modal-body div.target').each(function (index) {
     var that = this;
     var success = false;
     $.ajax({
@@ -104,8 +104,8 @@ function transferFromModal(newOwnerName, formTable) {
 function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
+  var number = $('#modal .modal-body div.target').length;
+  $('#modal .modal-body div.target').each(function (index) {
     var that = this;
     var success = false;
     $.ajax({
@@ -136,7 +136,7 @@ function showHash() {
 }
 
 function formatItemUpdate(data) {
-  return '<div id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ((!!data.updatedOn) ? (', updated ' + moment(data.updatedOn).fromNow()) : '') + '</div>';
+  return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ((!!data.updatedOn) ? (', updated ' + moment(data.updatedOn).fromNow()) : '') + '</div>';
 }
 
 $(function () {
@@ -191,7 +191,7 @@ $(function () {
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#transferred-form-table', transferredFormAoColumns);
-  /*form table ends*/
+  /*transferred form table ends*/
 
   /*shared form table starts*/
   var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, ownerColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
@@ -319,7 +319,7 @@ $(function () {
         var data = activeTable.fnGetData(row);
         $('#modal .modal-body').append(formatItemUpdate(data));
       });
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
         archiveFromModal(true, activeTable, archivedFormTable);
@@ -344,7 +344,7 @@ $(function () {
       });
       $('#modal .modal-body').append('<h5>to the following user</h5>');
       $('#modal .modal-body').append('<form class="form-inline"><input id="username" type="text" placeholder="Last, First" name="name" class="input" required></form>');
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
 
       travelerGlobal.usernames.initialize();
@@ -379,7 +379,7 @@ $(function () {
         var data = activeTable.fnGetData(row);
         $('#modal .modal-body').append(formatItemUpdate(data));
       });
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
         cloneFromModal(formTable);
@@ -401,7 +401,7 @@ $(function () {
         var data = archivedFormTable.fnGetData(row);
         $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' archived ' + moment(data.archivedOn).fromNow() + '</div>');
       });
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function (e) {
         archiveFromModal(false, formTable, archivedFormTable, transferredFormTable);
