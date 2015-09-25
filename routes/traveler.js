@@ -439,13 +439,29 @@ module.exports = function (app) {
       createdBy: req.session.userid,
       archived: {
         $ne: true
-      }
+      },
+      owner: {$exists: false}
     }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
       }
       return res.json(200, docs);
+    });
+  });
+
+  app.get('/transferredtravelers/json', auth.ensureAuthenticated, function (req, res) {
+    Traveler.find({
+      owner: req.session.userid,
+      archived: {
+        $ne: true
+      }
+    }).lean().exec(function (err, travelers) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, travelers);
     });
   });
 
@@ -696,6 +712,63 @@ module.exports = function (app) {
         return res.send(204);
       });
 
+    });
+  });
+
+  app.put('/travelers/:id/owner', auth.ensureAuthenticated, reqUtils.filterBody(['name']), function (req, res) {
+    Traveler.findById(req.params.id, 'createdBy owner').exec(function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+
+      if (!reqUtils.isOwner(req, doc)) {
+        return res.send(403, 'Only the current owner can transfer the ownership.');
+      }
+
+      // get user id from name here
+      var name = req.body.name;
+      var nameFilter = ad.nameFilter.replace('_name', name);
+      var opts = {
+        filter: nameFilter,
+        attributes: ad.objAttributes,
+        scope: 'sub'
+      };
+
+      ldapClient.search(ad.searchBase, opts, false, function (err, result) {
+        if (err) {
+          console.error(err.name + ' : ' + err.message);
+          return res.send(500, err.message);
+        }
+
+        if (result.length === 0) {
+          return res.send(400, name + ' is not found in AD!');
+        }
+
+        if (result.length > 1) {
+          return res.send(400, name + ' is not unique!');
+        }
+
+        var id = result[0].sAMAccountName.toLowerCase();
+
+        if (doc.owner === id) {
+          return res.send(204);
+        }
+
+        doc.owner = id;
+        doc.transferredOn = Date.now();
+
+        doc.save(function (err) {
+          if (err) {
+            console.error(err);
+            return res.send(500, err.message);
+          }
+          return res.send(204);
+        });
+      });
     });
   });
 
