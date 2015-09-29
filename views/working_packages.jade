@@ -49,6 +49,8 @@ block content
         li.active
           a(href='#mypackages', data-toggle='tab') My packages
         li
+          a(href='#transferredpackages', data-toggle='tab') Transferred packages
+        li
           a(href='#sharedpackages', data-toggle='tab') Shared packages
         li
           a(href='#groupsharedpackages', data-toggle='tab') Group shared packages
@@ -58,10 +60,25 @@ block content
         #mypackages.tab-pane.active
           .btn-toolbar
             .btn-group
-              button.btn.btn-warning#archive(data-toggle='tooltip', title='archive selected packages, only you can see them after archived.')
+              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected packages, only you can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
+            .btn-group
+              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected packages to a coworker')
+                i.fa.fa-user.fa-lg
+                | &nbsp;Transfer ownership
           table#package-table.table.table-bordered.table-hover
+        #transferredpackages.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected packages, only you can see them after archived.')
+                i.fa.fa-archive.fa-lg
+                | &nbsp;Archive
+            .btn-group
+              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected packages to a coworker')
+                i.fa.fa-user.fa-lg
+                | &nbsp;Transfer ownership
+          table#transferred-package-table.table.table-bordered.table-hover
         #sharedpackages.tab-pane
           table#shared-package-table.table.table-bordered.table-hover
         #groupsharedpackages.tab-pane
@@ -85,6 +102,9 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajaxhelper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/working_packages.js')
 
 
