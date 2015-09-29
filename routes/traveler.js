@@ -16,8 +16,6 @@ var cheer = require('cheerio');
 
 var reqUtils = require('../lib/reqUtils');
 
-var uploadsDir = '../uploads/';
-
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
@@ -145,33 +143,6 @@ function filterBody(strings) {
       return res.send(400, 'cannot find required information in body');
     }
   };
-}
-
-
-function getSharedWith(sharedWith, name) {
-  var i;
-  if (sharedWith.length === 0) {
-    return -1;
-  }
-  for (i = 0; i < sharedWith.length; i += 1) {
-    if (sharedWith[i].username === name) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-function getSharedGroup(sharedGroup, id) {
-  var i;
-  if (sharedGroup.length === 0) {
-    return -1;
-  }
-  for (i = 0; i < sharedGroup.length; i += 1) {
-    if (sharedGroup[i]._id === id) {
-      return i;
-    }
-  }
-  return -1;
 }
 
 function addUserFromAD(req, res, traveler) {
@@ -1244,15 +1215,23 @@ module.exports = function (app) {
       if (!traveler) {
         return res.send(410, 'gone');
       }
-      if (traveler.createdBy !== req.session.userid) {
+      if (!reqUtils.isOwner(req, traveler)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       var share = -2;
       if (req.params.list === 'users') {
-        share = getSharedWith(traveler.sharedWith, req.body.name);
+        if (!!req.body.name) {
+          share = reqUtils.getSharedWith(traveler.sharedWith, req.body.name);
+        } else {
+          return res.send(400, 'user name is empty.');
+        }
       }
       if (req.params.list === 'groups') {
-        share = getSharedGroup(traveler.sharedGroup, req.body.id);
+        if (!!req.body.id) {
+          share = reqUtils.getSharedGroup(traveler.sharedGroup, req.body.id);
+        } else {
+          return res.send(400, 'group id is empty.');
+        }
       }
 
       if (share === -2) {

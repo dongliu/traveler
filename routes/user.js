@@ -304,6 +304,10 @@ module.exports = function (app) {
 
   // resource /adusers
 
+  app.get('/adusers/', auth.ensureAuthenticated, function (req, res) {
+    res.send(200, 'Please provide the user id');
+  });
+
   app.get('/adusers/:id', auth.ensureAuthenticated, function (req, res) {
 
     var searchFilter = ad.searchFilter.replace('_id', req.params.id);
