@@ -16,76 +16,6 @@ function formatTravelerStatus(s) {
   return 'unknown';
 }
 
-function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
-  $('#submit').prop('disabled', true);
-  $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
-    var that = this;
-    var success = false;
-    $.ajax({
-      url: '/travelers/' + that.id + '/archived',
-      type: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        archived: archive
-      })
-    }).done(function () {
-      $(that).prepend('<i class="fa fa-check"></i>');
-      $(that).addClass('text-success');
-      success = true;
-    }).fail(function (jqXHR, status, error) {
-      $(that).prepend('<i class="icon-question"></i>');
-      $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
-    }).always(function () {
-      number = number - 1;
-      if (number === 0) {
-        $('#return').prop('disabled', false);
-        if (success) {
-          travelerTable.fnReloadAjax();
-          archivedTravelerTable.fnReloadAjax();
-        }
-      }
-    });
-  });
-}
-
-function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable) {
-  $('#submit').prop('disabled', true);
-  $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
-    var that = this;
-    var success = false;
-    $.ajax({
-      url: '/travelers/',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        source: this.id
-      })
-    }).done(function () {
-      $(that).prepend('<i class="fa fa-check"></i>');
-      $(that).addClass('text-success');
-      success = true;
-    }).fail(function (jqXHR, status, error) {
-      $(that).prepend('<i class="icon-question"></i>');
-      $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
-    }).always(function () {
-      number = number - 1;
-      if (number === 0) {
-        $('#return').prop('disabled', false);
-        if (success) {
-          travelerTable.fnReloadAjax();
-          sharedTravelerTable.fnReloadAjax();
-          groupSharedTravelerTable.fnReloadAjax();
-        }
-      }
-    });
-  });
-}
 
 function showHash() {
   if (window.location.hash) {
@@ -114,6 +44,29 @@ $(function () {
     },
     bDeferRender: true,
     aoColumns: packageAoColumns,
+    aaSorting: [
+      [9, 'desc'],
+      [11, 'desc']
+    ],
+    sDom: sDomNoTools
+  });
+
+  var transferredPackageAoColumns = [selectColumn, packageConfigLinkColumn, packageShareLinkColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  fnAddFilterFoot('#transferred-package-table', transferredPackageAoColumns);
+  var transferredPackageTable = $('#transferred-package-table').dataTable({
+    sAjaxSource: '/transferredpackages/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, "All"]
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: transferredPackageAoColumns,
     aaSorting: [
       [9, 'desc'],
       [11, 'desc']
@@ -208,72 +161,6 @@ $(function () {
     showHash();
   };
 
-  // $('#archive').click(function (e) {
-  //   var selected = fnGetSelected(travelerTable, 'row-selected');
-  //   if (selected.length === 0) {
-  //     $('#modalLabel').html('Alert');
-  //     $('#modal .modal-body').html('No traveler has been selected!');
-  //     $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-  //     $('#modal').modal('show');
-  //   } else {
-  //     $('#modalLabel').html('Archive the following ' + selected.length + ' travelers? ');
-  //     $('#modal .modal-body').empty();
-  //     selected.forEach(function (row) {
-  //       var data = travelerTable.fnGetData(row);
-  //       $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b>, status: ' + formatTravelerStatus(data.status) + ', created ' + moment(data.createdOn).fromNow() + ', updated ' + moment(data.updatedOn).fromNow() + '</div>');
-  //     });
-  //     $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-  //     $('#modal').modal('show');
-  //     $('#submit').click(function (e) {
-  //       archiveFromModal(true, travelerTable, archivedTravelerTable);
-  //     });
-  //   }
-  // });
-
-  // $('#clone').click(function (e) {
-  //   var activeTable = $('.tab-pane.active table').dataTable();
-  //   var selected = fnGetSelected(activeTable, 'row-selected');
-  //   if (selected.length === 0) {
-  //     $('#modalLabel').html('Alert');
-  //     $('#modal .modal-body').html('No traveler has been selected!');
-  //     $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-  //     $('#modal').modal('show');
-  //   } else {
-  //     $('#modalLabel').html('Clone the following ' + selected.length + ' travelers? ');
-  //     $('#modal .modal-body').empty();
-  //     selected.forEach(function (row) {
-  //       var data = activeTable.fnGetData(row);
-  //       $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
-  //     });
-  //     $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-  //     $('#modal').modal('show');
-  //     $('#submit').click(function (e) {
-  //       cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable);
-  //     });
-  //   }
-  // });
-
-  // $('#dearchive').click(function (e) {
-  //   var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
-  //   if (selected.length === 0) {
-  //     $('#modalLabel').html('Alert');
-  //     $('#modal .modal-body').html('No traveler has been selected!');
-  //     $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-  //     $('#modal').modal('show');
-  //   } else {
-  //     $('#modalLabel').html('De-archive the following ' + selected.length + ' travelers? ');
-  //     $('#modal .modal-body').empty();
-  //     selected.forEach(function (row) {
-  //       var data = archivedTravelerTable.fnGetData(row);
-  //       $('#modal .modal-body').append('<div id="' + data._id + '">' + data.title + ' | ' + formatTravelerStatus(data.status) + '</div>');
-  //     });
-  //     $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-  //     $('#modal').modal('show');
-  //     $('#submit').click(function (e) {
-  //       archiveFromModal(false, travelerTable, archivedTravelerTable);
-  //     });
-  //   }
-  // });
 
   $('#reload').click(function (e) {
     packageTable.fnReloadAjax();
