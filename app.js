@@ -135,7 +135,7 @@ app.get('/api', function (req, res) {
 });
 app.get('/', routes.main);
 app.get('/login', auth.ensureAuthenticated, function (req, res) {
-  if (req.session.userid) {
+  if (!!req.session.userid) {
     return res.redirect(req.proxied ? auth.proxied_service : '/');
   }
   // something wrong
