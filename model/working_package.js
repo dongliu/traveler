@@ -40,6 +40,12 @@ var work = new Schema({
   color: String
 });
 
+/******
+publicAccess := 0 // for read or
+        | 1 // for write or
+        | -1 // no access
+******/
+
 var workingPackage = new Schema({
   title: String,
   description: String,
@@ -51,7 +57,13 @@ var workingPackage = new Schema({
   updatedBy: String,
   updatedOn: Date,
   archivedOn: Date,
+  owner: String,
+  transferredOn: Date,
   deadline: Date,
+  publicAccess: {
+    type: Number,
+    default: -1
+  },
   sharedWith: [sharedWithUser],
   sharedGroup: [sharedWithGroup],
   works: [ObjectId],
