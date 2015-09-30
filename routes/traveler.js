@@ -125,26 +125,6 @@ function cloneTraveler(source, req, res) {
   });
 }
 
-function filterBody(strings) {
-  return function (req, res, next) {
-    var k, found = false;
-    for (k in req.body) {
-      if (req.body.hasOwnProperty(k)) {
-        if (strings.indexOf(k) !== -1) {
-          found = true;
-        } else {
-          req.body[k] = null;
-        }
-      }
-    }
-    if (found) {
-      next();
-    } else {
-      return res.send(400, 'cannot find required information in body');
-    }
-  };
-}
-
 function addUserFromAD(req, res, traveler) {
   var name = req.param('name');
   var nameFilter = ad.nameFilter.replace('_name', name);
@@ -550,7 +530,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/travelers/', auth.ensureAuthenticated, filterBody(['form', 'source']), function (req, res) {
+  app.post('/travelers/', auth.ensureAuthenticated, reqUtils.filterBody(['form', 'source']), function (req, res) {
     if (req.body.form) {
       Form.findById(req.body.form, function (err, form) {
         if (err) {
@@ -651,7 +631,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/archived', auth.ensureAuthenticated, filterBody(['archived']), function (req, res) {
+  app.put('/travelers/:id/archived', auth.ensureAuthenticated, reqUtils.filterBody(['archived']), function (req, res) {
     Traveler.findById(req.params.id, 'createdBy archived').exec(function (err, doc) {
       if (err) {
         console.error(err);
@@ -762,7 +742,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description', 'deadline', 'location']), function (req, res) {
+  app.put('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.filterBody(['title', 'description', 'deadline', 'location']), function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       var k;
       if (err) {
@@ -857,7 +837,7 @@ module.exports = function (app) {
   });
 
 
-  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, filterBody(['newdevice']), function (req, res) {
+  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.filterBody(['newdevice']), function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
