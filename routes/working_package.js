@@ -12,20 +12,16 @@ var underscore = require('underscore');
 var path = require('path');
 require('../model/working_package.js');
 
+var reqUtils = require('../lib/reqUtils');
 
-var uploadsDir = '../uploads/';
-
-// var Form = mongoose.model('Form');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 var Work = mongoose.model('Work');
 var WorkingPackage = mongoose.model('WorkingPackage');
+
 // var Traveler = mongoose.model('Traveler');
 // var TravelerData = mongoose.model('TravelerData');
 // var TravelerNote = mongoose.model('TravelerNote');
-
-var travelerV1API = 'https://liud-dev:8181/traveler/api.php';
-var request = require('request');
 
 // function createTraveler(form, req, res) {
 //   // update the total input number and finished input number
@@ -147,32 +143,6 @@ function filterBody(strings) {
 }
 
 
-function getSharedWith(sharedWith, name) {
-  var i;
-  if (sharedWith.length === 0) {
-    return -1;
-  }
-  for (i = 0; i < sharedWith.length; i += 1) {
-    if (sharedWith[i].username === name) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-function getSharedGroup(sharedGroup, id) {
-  var i;
-  if (sharedGroup.length === 0) {
-    return -1;
-  }
-  for (i = 0; i < sharedGroup.length; i += 1) {
-    if (sharedGroup[i]._id === id) {
-      return i;
-    }
-  }
-  return -1;
-}
-
 function addUserFromAD(req, res, traveler) {
   var name = req.param('name');
   var nameFilter = ad.nameFilter.replace('_name', name);
@@ -284,71 +254,6 @@ function addGroupFromAD(req, res, traveler) {
       return res.send(201, 'The group ' + id + ' was added to the share list.');
     });
   });
-}
-
-function canWrite(req, doc) {
-  if (doc.createdBy === req.session.userid) {
-    return true;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
-    return true;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function canRead(req, doc) {
-  if (doc.createdBy === req.session.userid) {
-    return true;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
-    return true;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i])) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-/*****
-access := -1 // no access
-        | 0  // read
-        | 1  // write
-*****/
-
-function getAccess(req, doc) {
-  if (doc.createdBy === req.session.userid) {
-    return 1;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
-    return doc.sharedWith.id(req.session.userid).access;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
-        return 1;
-      }
-    }
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i])) {
-        return 0;
-      }
-    }
-  }
-  return -1;
 }
 
 // var gri, ha, generateShort;
@@ -478,8 +383,8 @@ function addGroup(req, res, traveler) {
       addGroupFromAD(req, res, traveler);
     }
   });
-}
 
+}
 function addShare(req, res, traveler) {
 
   if (req.params.list === 'users') {
@@ -552,7 +457,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (canWrite(req, doc)) {
+      if (reqUtils.canWrite(req, doc)) {
         return res.render('working_package_config', {
           package: doc
         });
@@ -570,7 +475,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!reqUtils.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       doc.updatedBy = req.session.userid;
@@ -595,7 +500,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!reqUtils.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       doc.updatedBy = req.session.userid;
@@ -621,7 +526,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!reqUtils.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       for (k in req.body) {
