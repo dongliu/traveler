@@ -4,22 +4,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
-
-/******
-access := 0 // for read or
-        | 1 // for write
-******/
-var sharedWithUser = new Schema({
-  _id: String,
-  username: String,
-  access: Number
-});
-
-var sharedWithGroup = new Schema({
-  _id: String,
-  groupname: String,
-  access: Number
-});
+var share = require('./share.js');
 
 var work = new Schema({
   traveler: ObjectId,
@@ -64,8 +49,8 @@ var workingPackage = new Schema({
     type: Number,
     default: -1
   },
-  sharedWith: [sharedWithUser],
-  sharedGroup: [sharedWithGroup],
+  sharedWith: [share.user],
+  sharedGroup: [share.group],
   works: [ObjectId],
   finishedWorks: Number,
   archived: {
