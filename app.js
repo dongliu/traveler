@@ -22,11 +22,10 @@ var key = fs.readFileSync('./config/node.key'),
 var mongoose = require('mongoose');
 mongoose.connection.close();
 
-var User = require('./model/user.js').User;
-var Form = require('./model/form.js').Form;
-var Traveler = require('./model/traveler.js').Traveler;
-var TravelerData = require('./model/traveler.js').TravelerData;
-var TravelerComment = require('./model/traveler.js').TravelerComment;
+require('./model/user.js');
+require('./model/form.js');
+require('./model/traveler.js');
+require('./model/working_package.js');
 
 var mongoOptions = {
   db: {
