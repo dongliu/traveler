@@ -238,50 +238,6 @@ function addGroupFromAD(req, res, traveler) {
   });
 }
 
-// var gri, ha, generateShort;
-/**
- * Returns an unsigned x-bit random integer.
- * @param {int} x A positive integer ranging from 0 to 53, inclusive.
- * @returns {int} An unsigned x-bit random integer (0 <= f(x) < 2^x).
- */
-function gri(x) { // _getRandomInt
-  if (x < 0) {
-    return NaN;
-  }
-  if (x <= 30) {
-    return (0 | Math.random() * (1 << x));
-  }
-  if (x <= 53) {
-    return (0 | Math.random() * (1 << 30)) + (0 | Math.random() * (1 << x - 30)) * (1 << 30);
-  }
-  return NaN;
-}
-
-/**
- * Converts an integer to a zero-filled hexadecimal string.
- * @param {int} num
- * @param {int} length
- * @returns {string}
- */
-function ha(num, length) { // _hexAligner
-  var str = num.toString(16),
-    i,
-    z = "0";
-  for (i = length - str.length; i > 0; i >>>= 1, z += z) {
-    if (i & 1) {
-      str = z + str;
-    }
-  }
-  return str;
-}
-
-/*a short uid*/
-
-function generateShort() {
-  var rand = gri,
-    hex = ha;
-  return hex(rand(32), 8);
-}
 
 function addUser(req, res, traveler) {
   var name = req.body.name;
