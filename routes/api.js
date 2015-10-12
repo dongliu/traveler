@@ -108,6 +108,6 @@ module.exports = function (app) {
         res.json(200, data);
       }
     });
-  })
+  });
 
 };
