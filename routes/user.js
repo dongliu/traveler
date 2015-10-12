@@ -164,7 +164,7 @@ module.exports = function (app) {
   app.get('/usernames/:name', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       name: req.params.name
-    }).lean().exec(function (err, user) {
+    }).exec(function (err, user) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -194,7 +194,7 @@ module.exports = function (app) {
     // check if already in db
     User.findOne({
       name: req.body.name
-    }).lean().exec(function (err, user) {
+    }).exec(function (err, user) {
       if (err) {
         return res.send(500, err.message);
       }
@@ -214,7 +214,7 @@ module.exports = function (app) {
     if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
       return res.send(403, "You are not authorized to access this resource. ");
     }
-    User.find().lean().exec(function (err, users) {
+    User.find().exec(function (err, users) {
       if (err) {
         console.error(err);
         return res.json(500, {
@@ -229,7 +229,7 @@ module.exports = function (app) {
   app.get('/users/:id', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.params.id
-    }).lean().exec(function (err, user) {
+    }).exec(function (err, user) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -256,7 +256,7 @@ module.exports = function (app) {
     }
     User.findOneAndUpdate({
       _id: req.params.id
-    }, req.body).lean().exec(function (err, user) {
+    }, req.body).exec(function (err, user) {
       if (err) {
         console.error(err);
         return res.json(500, {
@@ -271,7 +271,7 @@ module.exports = function (app) {
   app.get('/users/:id/json', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.params.id
-    }).lean().exec(function (err, user) {
+    }).exec(function (err, user) {
       if (err) {
         console.error(err);
         return res.json(500, {
