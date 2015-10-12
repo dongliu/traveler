@@ -33,7 +33,7 @@ module.exports = function (app) {
         $ne: true
       },
       owner: {$exists: false}
-    }, 'title description tags sharedWith sharedGroup clonedBy createdOn updatedOn updatedBy works finishedWorks').lean().exec(function (err, docs) {
+    }, 'title description tags sharedWith sharedGroup clonedBy createdOn updatedOn updatedBy works finishedWorks').exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -175,7 +175,7 @@ module.exports = function (app) {
       _id: req.session.userid
     }, 'packages').exec(function (err, me) {
       if (err) {
-        console.trace(err);
+        console.error(err);
         return res.send(500, err.message);
       }
       if (!me) {
@@ -188,7 +188,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }).lean().exec(function (err, packages) {
+      }).exec(function (err, packages) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -203,7 +203,7 @@ module.exports = function (app) {
       _id: {
         $in: req.session.memberOf
       }
-    }, 'packages').lean().exec(function (err, groups) {
+    }, 'packages').exec(function (err, groups) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -222,7 +222,7 @@ module.exports = function (app) {
         _id: {
           $in: packageIds
         }
-      }).lean().exec(function (err, packages) {
+      }).exec(function (err, packages) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -236,7 +236,7 @@ module.exports = function (app) {
     WorkingPackage.find({
       createdBy: req.session.userid,
       archived: true
-    }).lean().exec(function (err, packages) {
+    }).exec(function (err, packages) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
