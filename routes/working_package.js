@@ -170,6 +170,21 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/transferredpackages/json', auth.ensureAuthenticated, function (req, res) {
+    WorkingPackage.find({
+      owner: req.session.userid,
+      archived: {
+        $ne: true
+      }
+    }).exec(function (err, packages) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, packages);
+    });
+  });
+
   app.get('/sharedpackages/json', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.session.userid
