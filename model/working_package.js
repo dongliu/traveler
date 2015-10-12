@@ -31,6 +31,10 @@ publicAccess := 0 // for read or
         | -1 // no access
 ******/
 
+/*
+Currently there is no status for a working package.
+It is either active or archived.
+*/
 var workingPackage = new Schema({
   title: String,
   description: String,
