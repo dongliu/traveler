@@ -33,7 +33,7 @@ module.exports = function (app) {
         $ne: true
       },
       owner: {$exists: false}
-    }).lean().exec(function (err, forms) {
+    }).exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -48,7 +48,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }).lean().exec(function (err, forms) {
+    }).exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -60,7 +60,7 @@ module.exports = function (app) {
   app.get('/sharedforms/json', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.session.userid
-    }, 'forms').lean().exec(function (err, me) {
+    }, 'forms').exec(function (err, me) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -75,7 +75,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }).lean().exec(function (err, forms) {
+      }).exec(function (err, forms) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -90,7 +90,7 @@ module.exports = function (app) {
       _id: {
         $in: req.session.memberOf
       }
-    }, 'forms').lean().exec(function (err, groups) {
+    }, 'forms').exec(function (err, groups) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -112,7 +112,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }).lean().exec(function (err, forms) {
+      }).exec(function (err, forms) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -126,7 +126,7 @@ module.exports = function (app) {
     Form.find({
       createdBy: req.session.userid,
       archived: true
-    }).lean().exec(function (err, forms) {
+    }).exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -222,7 +222,7 @@ module.exports = function (app) {
   });
 
   app.get('/formfiles/:id', auth.ensureAuthenticated, function (req, res) {
-    FormFile.findById(req.params.id).lean().exec(function (err, data) {
+    FormFile.findById(req.params.id).exec(function (err, data) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -264,7 +264,7 @@ module.exports = function (app) {
   });
 
   app.get('/forms/:id/share/', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id).lean().exec(function (err, form) {
+    Form.findById(req.params.id).exec(function (err, form) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -319,7 +319,7 @@ module.exports = function (app) {
   });
 
   app.get('/forms/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id).lean().exec(function (err, form) {
+    Form.findById(req.params.id).exec(function (err, form) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);

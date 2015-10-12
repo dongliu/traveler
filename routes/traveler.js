@@ -139,7 +139,7 @@ module.exports = function (app) {
         $ne: true
       },
       owner: {$exists: false}
-    }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
+    }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -154,7 +154,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }).lean().exec(function (err, travelers) {
+    }).exec(function (err, travelers) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -166,7 +166,7 @@ module.exports = function (app) {
   app.get('/sharedtravelers/json', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.session.userid
-    }, 'travelers').lean().exec(function (err, me) {
+    }, 'travelers').exec(function (err, me) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -181,7 +181,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
+      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').exec(function (err, travelers) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -196,7 +196,7 @@ module.exports = function (app) {
       _id: {
         $in: req.session.memberOf
       }
-    }, 'travelers').lean().exec(function (err, groups) {
+    }, 'travelers').exec(function (err, groups) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -215,7 +215,7 @@ module.exports = function (app) {
         _id: {
           $in: travelerIds
         }
-      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
+      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').exec(function (err, travelers) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -268,7 +268,7 @@ module.exports = function (app) {
     Traveler.find({
       createdBy: req.session.userid,
       archived: true
-    }, 'title status devices archivedOn updatedBy updatedOn deadline sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
+    }, 'title status devices archivedOn updatedBy updatedOn deadline sharedWith sharedGroup finishedInput totalInput').exec(function (err, travelers) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -650,7 +650,7 @@ module.exports = function (app) {
         _id: {
           $in: doc.data
         }
-      }, 'name value inputType inputBy inputOn').lean().exec(function (err, docs) {
+      }, 'name value inputType inputBy inputOn').exec(function (err, docs) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -720,7 +720,7 @@ module.exports = function (app) {
         _id: {
           $in: doc.notes
         }
-      }, 'name value inputBy inputOn').lean().exec(function (err, docs) {
+      }, 'name value inputBy inputOn').exec(function (err, docs) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -869,7 +869,7 @@ module.exports = function (app) {
   });
 
   app.get('/data/:id', auth.ensureAuthenticated, function (req, res) {
-    TravelerData.findById(req.params.id).lean().exec(function (err, data) {
+    TravelerData.findById(req.params.id).exec(function (err, data) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -891,7 +891,7 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/share/', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id).lean().exec(function (err, traveler) {
+    Traveler.findById(req.params.id).exec(function (err, traveler) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -912,7 +912,7 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id).lean().exec(function (err, traveler) {
+    Traveler.findById(req.params.id).exec(function (err, traveler) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
