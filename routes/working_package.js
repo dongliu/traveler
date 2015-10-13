@@ -42,36 +42,6 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/workingpackages/new', auth.ensureAuthenticated, function (req, res) {
-    res.render('new_package');
-  });
-
-  app.post('/workingpackages/', auth.ensureAuthenticated, function (req, res) {
-    var workingPackage = {};
-    if (!!req.body.works && underscore.isArray(req.body.works)) {
-      workingPackage.works =  req.body.works;
-    } else {
-      workingPackage.works = [];
-    }
-
-    workingPackage.title = req.body.title;
-    if (!!req.body.description) {
-      workingPackage.description = req.body.description;
-    }
-    workingPackage.createdBy = req.session.userid;
-    workingPackage.createdOn = Date.now();
-    (new WorkingPackage(workingPackage)).save(function (err, newPackage) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/workingpackages/' + newPackage.id + '/';
-
-      res.set('Location', url);
-      return res.send(201, 'You can access the new packace at <a href="' + url + '">' + url + '</a>');
-    });
-  });
-
   app.get('/workingpackages/:id/config', auth.ensureAuthenticated, function (req, res) {
     WorkingPackage.findById(req.params.id).exec(function (err, doc) {
       if (err) {
@@ -167,6 +137,36 @@ module.exports = function (app) {
         }
         return res.send(204);
       });
+    });
+  });
+
+  app.get('/workingpackages/new', auth.ensureAuthenticated, function (req, res) {
+    res.render('new_package');
+  });
+
+  app.post('/workingpackages/', auth.ensureAuthenticated, function (req, res) {
+    var workingPackage = {};
+    if (!!req.body.works && underscore.isArray(req.body.works)) {
+      workingPackage.works =  req.body.works;
+    } else {
+      workingPackage.works = [];
+    }
+
+    workingPackage.title = req.body.title;
+    if (!!req.body.description) {
+      workingPackage.description = req.body.description;
+    }
+    workingPackage.createdBy = req.session.userid;
+    workingPackage.createdOn = Date.now();
+    (new WorkingPackage(workingPackage)).save(function (err, newPackage) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/workingpackages/' + newPackage.id + '/';
+
+      res.set('Location', url);
+      return res.send(201, 'You can access the new packace at <a href="' + url + '">' + url + '</a>');
     });
   });
 
