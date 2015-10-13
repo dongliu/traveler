@@ -313,9 +313,7 @@ module.exports = function (app) {
         }
         return res.send(200, 'public access is set to ' + req.body.access);
       });
-
     });
-
   });
 
   app.get('/forms/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
