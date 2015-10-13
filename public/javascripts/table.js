@@ -390,6 +390,10 @@ var deviceTravelerLinkColumn = {
   bSortable: false
 };
 
+function progressBar(percentage, finished, total) {
+  return '<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar" style="width:' + percentage + '%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">' + finished + '/' + total + '</span></div>';
+}
+
 var progressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
@@ -399,13 +403,13 @@ var progressColumn = {
       if (type === 'sort') {
         return 0;
       }
-      return '';
+      return 'unknown';
     }
     if (source.totalInput === 0) {
       if (type === 'sort') {
         return 0;
       }
-      return '';
+      return progressBar(100, 0, 0);
     }
     if (!source.hasOwnProperty('finishedInput')) {
       if (type === 'sort') {
@@ -417,7 +421,38 @@ var progressColumn = {
     if (type === 'sort') {
       return percentage;
     }
-    return '<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar" style="width:' + percentage + '%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">' + source.finishedInput + '/' + source.totalInput + '</span></div>';
+    return progressBar(percentage, source.finishedInput, source.totalInput);
+  }
+};
+
+var packageProgressColumn = {
+  sTitle: 'Estimated progress',
+  bSortable: true,
+  sType: 'numeric',
+  mData: function (source, type, val) {
+    if (!source.hasOwnProperty('works')) {
+      if (type === 'sort') {
+        return 0;
+      }
+      return 'unknown';
+    }
+    if (source.works.length === 0) {
+      if (type === 'sort') {
+        return 0;
+      }
+      return progressBar(100, 0, 0);
+    }
+    if (!source.hasOwnProperty('finishedWorks')) {
+      if (type === 'sort') {
+        return 0;
+      }
+      return 'unknown';
+    }
+    var percentage = Math.floor((source.finishedWorks / source.works.length) * 100);
+    if (type === 'sort') {
+      return percentage;
+    }
+    return progressBar(percentage, source.finishedWorks, source.works.length);
   }
 };
 
