@@ -899,7 +899,7 @@ module.exports = function (app) {
       if (!traveler) {
         return res.send(410, 'gone');
       }
-      if (traveler.createdBy !== req.session.userid) {
+      if (!reqUtils.isOwner(req, traveler)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       return res.render('share', {
@@ -920,7 +920,7 @@ module.exports = function (app) {
       if (!traveler) {
         return res.send(410, 'gone');
       }
-      if (traveler.createdBy !== req.session.userid) {
+      if (!reqUtils.isOwner(req, traveler)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       if (req.params.list === 'users') {
@@ -976,7 +976,6 @@ module.exports = function (app) {
     });
   });
 
-
   app.put('/travelers/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id, function (err, traveler) {
       if (err) {
@@ -986,7 +985,7 @@ module.exports = function (app) {
       if (!traveler) {
         return res.send(410, 'gone');
       }
-      if (traveler.createdBy !== req.session.userid) {
+      if (!reqUtils.isOwner(req, traveler)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       var share;
@@ -1046,7 +1045,7 @@ module.exports = function (app) {
       if (!traveler) {
         return res.send(410, 'gone');
       }
-      if (traveler.createdBy !== req.session.userid) {
+      if (!reqUtils.isOwner(req, traveler)) {
         return res.send(403, 'you are not authorized to access this resource');
       }
       var share;
