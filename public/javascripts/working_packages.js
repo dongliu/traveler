@@ -28,7 +28,7 @@ $(function () {
   updateAjaxURL(prefix);
   disableAjaxCache();
 
-  var packageAoColumns = [selectColumn, packageConfigLinkColumn, packageShareLinkColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var packageAoColumns = [selectColumn, packageConfigLinkColumn, packageShareLinkColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
   fnAddFilterFoot('#package-table', packageAoColumns);
   var packageTable = $('#package-table').dataTable({
     sAjaxSource: '/workingpackages/json',
@@ -51,7 +51,7 @@ $(function () {
     sDom: sDomNoTools
   });
 
-  var transferredPackageAoColumns = [selectColumn, packageConfigLinkColumn, packageShareLinkColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var transferredPackageAoColumns = [selectColumn, packageConfigLinkColumn, packageShareLinkColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
   fnAddFilterFoot('#transferred-package-table', transferredPackageAoColumns);
   var transferredPackageTable = $('#transferred-package-table').dataTable({
     sAjaxSource: '/transferredpackages/json',
@@ -75,7 +75,7 @@ $(function () {
   });
 
 
-  var sharedPackageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var sharedPackageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
   fnAddFilterFoot('#shared-package-table', sharedPackageAoColumns);
   var sharedPackageTable = $('#shared-package-table').dataTable({
     sAjaxSource: '/sharedpackages/json',
@@ -99,7 +99,7 @@ $(function () {
   });
 
 
-  var groupSharedPackageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var groupSharedPackageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
   fnAddFilterFoot('#group-shared-package-table', groupSharedPackageAoColumns);
   var groupSharedPackageTable = $('#group-shared-package-table').dataTable({
     sAjaxSource: '/groupsharedpackages/json',
@@ -123,7 +123,7 @@ $(function () {
   });
 
 
-  var archivedPackageAoColumns = [selectColumn, packageLinkColumn, titleColumn, archivedOnColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var archivedPackageAoColumns = [selectColumn, packageLinkColumn, titleColumn, archivedOnColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
   fnAddFilterFoot('#archived-package-table', archivedPackageAoColumns);
   var archivedPackageTable = $('#archived-package-table').dataTable({
     sAjaxSource: '/archivedpackages/json',
