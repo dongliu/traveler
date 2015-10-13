@@ -17,7 +17,6 @@ var addShare = require('../lib/share').addShare;
 
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
-var Work = mongoose.model('Work');
 var WorkingPackage = mongoose.model('WorkingPackage');
 
 module.exports = function (app) {
@@ -137,6 +136,239 @@ module.exports = function (app) {
         }
         return res.send(204);
       });
+    });
+  });
+
+
+  app.get('/workingpackages/:id/share/', auth.ensureAuthenticated, function (req, res) {
+    WorkingPackage.findById(req.params.id).exec(function (err, pack) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!pack) {
+        return res.send(410, 'gone');
+      }
+      if (!reqUtils.isOwner(req, pack)) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      return res.render('share', {
+        type: 'Working package',
+        id: req.params.id,
+        title: pack.title,
+        access: String(pack.publicAccess)
+      });
+    });
+  });
+
+  app.put('/workingpackages/:id/share/public', auth.ensureAuthenticated, reqUtils.filterBody(['access']), function (req, res) {
+    WorkingPackage.findById(req.params.id, function (err, pack) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!pack) {
+        return res.send(410, 'gone');
+      }
+      if (!reqUtils.isOwner(req, pack)) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      // change the access
+      var access = req.body.access;
+      if (['-1', '0', '1'].indexOf(access) === -1) {
+        return res.send(400, 'not valid value');
+      }
+      access = Number(access);
+      if (pack.publicAccess === access) {
+        return res.send(204);
+      }
+      pack.publicAccess = access;
+      pack.save(function (err) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+        return res.send(200, 'public access is set to ' + req.body.access);
+      });
+    });
+  });
+
+  app.get('/workingpackages/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
+    WorkingPackage.findById(req.params.id).exec(function (err, pack) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!pack) {
+        return res.send(410, 'gone');
+      }
+      if (!reqUtils.isOwner(req, pack)) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      if (req.params.list === 'users') {
+        return res.json(200, pack.sharedWith || []);
+      }
+      if (req.params.list === 'groups') {
+        return res.json(200, pack.sharedGroup || []);
+      }
+      return res.send(400, 'unknown share list.');
+    });
+  });
+
+  app.post('/workingpackages/:id/share/:list/', auth.ensureAuthenticated, function (req, res) {
+    WorkingPackage.findById(req.params.id, function (err, pack) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!pack) {
+        return res.send(410, 'gone');
+      }
+      if (!reqUtils.isOwner(req, pack)) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      var share = -2;
+      if (req.params.list === 'users') {
+        if (!!req.body.name) {
+          share = reqUtils.getSharedWith(pack.sharedWith, req.body.name);
+        } else {
+          return res.send(400, 'user name is empty.');
+        }
+      }
+      if (req.params.list === 'groups') {
+        if (!!req.body.id) {
+          share = reqUtils.getSharedGroup(pack.sharedGroup, req.body.id);
+        } else {
+          return res.send(400, 'group id is empty.');
+        }
+      }
+
+      if (share === -2) {
+        return res.send(400, 'unknown share list.');
+      }
+
+      if (share >= 0) {
+        return res.send(400, req.body.name || req.body.id + ' is already in the ' + req.params.list + ' list.');
+      }
+
+      if (share === -1) {
+        // new user
+        addShare(req, res, pack);
+      }
+    });
+  });
+
+  app.put('/workingpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
+    WorkingPackage.findById(req.params.id, function (err, pack) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!pack) {
+        return res.send(410, 'gone');
+      }
+      if (!reqUtils.isOwner(req, pack)) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      var share;
+      if (req.params.list === 'users') {
+        share = pack.sharedWith.id(req.params.shareid);
+      }
+      if (req.params.list === 'groups') {
+        share = pack.sharedGroup.id(req.params.shareid);
+      }
+      if (share) {
+        // change the access
+        if (req.body.access && req.body.access === 'write') {
+          share.access = 1;
+        } else {
+          share.access = 0;
+        }
+        pack.save(function (err) {
+          if (err) {
+            console.error(err);
+            return res.send(500, err.message);
+          }
+          // check consistency of user's traveler list
+          var Target;
+          if (req.params.list === 'users') {
+            Target = User;
+          }
+          if (req.params.list === 'groups') {
+            Target = Group;
+          }
+          Target.findByIdAndUpdate(req.params.shareid, {
+            $addToSet: {
+              packages: pack._id
+            }
+          }, function (err, target) {
+            if (err) {
+              console.error(err);
+            }
+            if (!target) {
+              console.error('The user/group ' + req.params.userid + ' is not in the db');
+            }
+          });
+          return res.send(204);
+        });
+      } else {
+        // the user should in the list
+        return res.send(400, 'cannot find ' + req.params.shareid + ' in the list.');
+      }
+    });
+  });
+
+  app.delete('/workingpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
+    WorkingPackage.findById(req.params.id, function (err, pack) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!pack) {
+        return res.send(410, 'gone');
+      }
+      if (!reqUtils.isOwner(req, pack)) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      var share;
+      if (req.params.list === 'users') {
+        share = pack.sharedWith.id(req.params.shareid);
+      }
+      if (req.params.list === 'groups') {
+        share = pack.sharedGroup.id(req.params.shareid);
+      }
+      if (share) {
+        share.remove();
+        pack.save(function (err) {
+          if (err) {
+            console.error(err);
+            return res.send(500, err.message);
+          }
+          // keep the consistency of user's traveler list
+          var Target;
+          if (req.params.list === 'users') {
+            Target = User;
+          }
+          if (req.params.list === 'groups') {
+            Target = Group;
+          }
+          Target.findByIdAndUpdate(req.params.shareid, {
+            $pull: {
+              packages: pack._id
+            }
+          }, function (err, target) {
+            if (err) {
+              console.error(err);
+            }
+            if (!target) {
+              console.error('The user/group ' + req.params.shareid + ' is not in the db');
+            }
+          });
+          return res.send(204);
+        });
+      } else {
+        return res.send(400, 'cannot find ' + req.params.shareid + ' in list.');
+      }
     });
   });
 
