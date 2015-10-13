@@ -376,7 +376,7 @@ var packageShareLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function (data, type, full) {
-    return '<a href="' + prefix + '/works/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the package"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/workingpackages/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the package"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
