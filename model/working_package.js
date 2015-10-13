@@ -6,8 +6,13 @@ var ObjectId = Schema.Types.ObjectId;
 
 var share = require('./share.js');
 
+// require('./traveler.js');
+
 var work = new Schema({
-  traveler: ObjectId,
+  traveler: {
+    type: ObjectId,
+    ref: 'Traveler'
+  },
   workingPackage: ObjectId,
   addedOn: Date,
   addedBy: String,
@@ -55,7 +60,7 @@ var workingPackage = new Schema({
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
-  works: [ObjectId],
+  works: [work],
   finishedWorks: Number,
   archived: {
     type: Boolean,
@@ -63,10 +68,10 @@ var workingPackage = new Schema({
   }
 });
 
-var Work = mongoose.model('Work', work);
+// var Work = mongoose.model('Work', work);
 var WorkingPackage = mongoose.model('WorkingPackage', workingPackage);
 
 module.exports = {
-  Work: Work,
+  // Work: Work,
   WorkingPackage: WorkingPackage
 };
