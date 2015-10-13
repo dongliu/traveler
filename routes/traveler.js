@@ -911,6 +911,38 @@ module.exports = function (app) {
     });
   });
 
+  app.put('/travelers/:id/share/public', auth.ensureAuthenticated, reqUtils.filterBody(['access']), function (req, res) {
+    Traveler.findById(req.params.id, function (err, traveler) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!traveler) {
+        return res.send(410, 'gone');
+      }
+      if (!reqUtils.isOwner(req, traveler)) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+      // change the access
+      var access = req.body.access;
+      if (['-1', '0', '1'].indexOf(access) === -1) {
+        return res.send(400, 'not valid value');
+      }
+      access = Number(access);
+      if (traveler.publicAccess === access) {
+        return res.send(204);
+      }
+      traveler.publicAccess = access;
+      traveler.save(function (err) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+        return res.send(200, 'public access is set to ' + req.body.access);
+      });
+    });
+  });
+
   app.get('/travelers/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
     Traveler.findById(req.params.id).exec(function (err, traveler) {
       if (err) {
