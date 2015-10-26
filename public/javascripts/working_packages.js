@@ -16,6 +16,38 @@ function formatTravelerStatus(s) {
   return 'unknown';
 }
 
+function transferFromModal(newOwnerName, table) {
+  $('#submit').prop('disabled', true);
+  $('#return').prop('disabled', true);
+  var number = $('#modal .modal-body div.target').length;
+  $('#modal .modal-body div.target').each(function (index) {
+    var that = this;
+    var success = false;
+    $.ajax({
+      url: '/workingpackages/' + that.id + '/owner',
+      type: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        name: newOwnerName
+      })
+    }).done(function () {
+      $(that).prepend('<i class="fa fa-check"></i>');
+      $(that).addClass('text-success');
+      success = true;
+    }).fail(function (jqXHR, status, error) {
+      $(that).prepend('<i class="fa fa-exclamation"></i>');
+      $(that).append(' : ' + jqXHR.responseText);
+      $(that).addClass('text-error');
+    }).always(function () {
+      number = number - 1;
+      if (number === 0 && success) {
+        $('#return').prop('disabled', false);
+        table.fnReloadAjax();
+      }
+    });
+  });
+}
+
 
 function showHash() {
   if (window.location.hash) {
@@ -164,9 +196,47 @@ $(function () {
 
   $('#reload').click(function (e) {
     packageTable.fnReloadAjax();
+    transferredPackageTable.fnReloadAjax();
     sharedPackageTable.fnReloadAjax();
     groupSharedPackageTable.fnReloadAjax();
     archivedPackageTable.fnReloadAjax();
+  });
+
+  $('button.transfer').click(function (e) {
+    var activeTable = $('.tab-pane.active table').dataTable();
+    var selected = fnGetSelected(activeTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No traveler has been selected!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html('Transfer the following ' + selected.length + ' packages? ');
+      $('#modal .modal-body').empty();
+      selected.forEach(function (row) {
+        var data = activeTable.fnGetData(row);
+        $('#modal .modal-body').append(formatItemUpdate(data));
+      });
+      $('#modal .modal-body').append('<h5>to the following user</h5>');
+      $('#modal .modal-body').append('<form class="form-inline"><input id="username" type="text" placeholder="Last, First" name="name" class="input" required></form>');
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+
+      travelerGlobal.usernames.initialize();
+      $('#username').typeahead({
+        minLength: 1,
+        highlight: true,
+        hint: true
+      }, {
+        name: 'usernames',
+        display: 'displayName',
+        limit: 20,
+        source: travelerGlobal.usernames
+      });
+      $('#submit').click(function (e) {
+        transferFromModal($('#username').val(), activeTable);
+      });
+    }
   });
 
   // binding events
