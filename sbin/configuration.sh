@@ -1,4 +1,2 @@
-export TRAVELER_VERSION_CONTROL_TYPE="svn"
-export TRAVELER_SVN_URL="svn+ssh://bioroid/home/phoebus3/DJAROSZ/development/localSVN/traveler" 
-
-
+export TRAVELER_VERSION_CONTROL_TYPE="git"
+export TRAVELER_SUPPORT_GIT_URL="https://github.com/iTerminate/traveler-support.git" 

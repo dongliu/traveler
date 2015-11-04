@@ -17,13 +17,15 @@ execute(){
 
 if [ -d $TRAVELER_SUPPORT_DIR ]; then
     cd $TRAVELER_SUPPORT_DIR
-    execute svn update
+    if [ $TRAVELER_VERSION_CONTROL_TYPE == "git" ]; then 
+    	execute git pull
+    fi
 else 
     echo "Creating new traveler support directory $TRAVELER_SUPPORT_DIR."
     # Go to one level up from the support directory 
     cd `dirname $TRAVELER_SUPPORT_DIR` 
-    if [ $TRAVELER_VERSION_CONTROL_TYPE == "svn" ]; then 
-	execute "svn co $TRAVELER_SVN_URL/support `basename $TRAVELER_SUPPORT_DIR`" || exit 1
+    if [ $TRAVELER_VERSION_CONTROL_TYPE == "git" ]; then 
+		execute "git clone $TRAVELER_SUPPORT_GIT_URL `basename $TRAVELER_SUPPORT_DIR`" || exit 1
     fi
 fi
 

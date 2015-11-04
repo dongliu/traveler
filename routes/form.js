@@ -1,13 +1,15 @@
 /*global FormFile: false, TravelerData: false*/
 /*jslint es5: true*/
 
-var ad = require('../config/ad.json');
+var configPath = require('../config/config.js').configPath;
+var ad = require('../' + configPath + '/ad.json');
 var ldapClient = require('../lib/ldap-client');
 
 var auth = require('../lib/auth');
-var authConfig = require('../config/auth.json');
+var authConfig = require('../' + configPath + '/auth.json');
 
 var mongoose = require('mongoose');
+var path = require('path');
 var sanitize = require('sanitize-caja');
 var util = require('util');
 var underscore = require('underscore');
@@ -487,7 +489,7 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (data.inputType === 'file') {
-        res.sendfile(data.file.path);
+        res.sendfile(path.resolve(data.file.path));
       } else {
         res.send(500, 'it is not a file');
       }
