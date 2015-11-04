@@ -1,5 +1,6 @@
+var configPath = require('../config/config.js').configPath;
 var auth = require('../lib/auth');
-var service = require('../config/service.json');
+var service = require('../' + configPath + '/service.json');
 var request = require('request');
 
 module.exports = function (app) {
