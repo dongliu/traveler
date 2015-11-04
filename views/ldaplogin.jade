@@ -1,0 +1,33 @@
+extends layout
+
+block head
+    meta(charset='urf-8')
+    title FRIB Traveler :: new form
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+    link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+    link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+    .container(style="margin-top: 25px")
+        if errorMessage
+            div.alert.alert-error
+                p An error occurred: #{errorMessage}
+
+        form.form-horizontal(name='login', action='./', method='POST')
+            .control-group
+                .control-label Username:
+                .controls
+                    input(type='text', name='username', required)
+            .control-group
+                .control-label Password:
+                .controls
+                    input(type='password', name='password', required)
+            .control-group
+                .controls
+                    .btn-group
+                        button.btn.btn-primary(type='submit') Log in
+block js
+    script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+    script(type='text/javascript', src='#{prefix}/jquery/jquery-ui-1.10.2.custom.js')
+    script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')

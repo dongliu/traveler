@@ -1,0 +1,5 @@
+{
+  "app_port": "3001",
+  "ssl_key": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.key)",
+  "ssl_cert": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.pem)"
+}
