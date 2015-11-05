@@ -33,18 +33,18 @@ block content
           span.caret
         ul.dropdown-menu
           li#devices
-            a(href='#{prefix}/devices/', target='_blank') Devices
+            a(href='#{prefix}/devices/') Devices
       .btn-group
-        a.btn(href='#{prefix}/profile', target='_blank')
+        a.btn(href='#{prefix}/profile')
           i.fa.fa-user.fa-lg
           | &nbsp;Profile
       if (locals.roles !== undefined && locals.roles.indexOf('admin') !== -1)
         .btn-group
-          a.btn(href='#{prefix}/users/', target='_blank')
+          a.btn(href='#{prefix}/users/')
             i.fa.fa-users.fa-lg
             | &nbsp;Users
       .btn-group
-        a.btn(href='#{prefix}/about', target='_blank')
+        a.btn(href='#{prefix}/about')
           i.fa.fa-info.fa-lg
           |&nbsp;About
     #message
