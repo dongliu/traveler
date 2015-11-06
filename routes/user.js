@@ -9,7 +9,7 @@ var User = mongoose.model('User');
 var auth = require('../lib/auth');
 var authConfig = require('../' + configPath + '/auth.json');
 
-var Roles = ['manager', 'admin'];
+var Roles = ['manager', 'admin', 'read_all_forms'];
 
 function updateUserProfile(user, res) {
   var searchFilter = ad.searchFilter.replace('_id', user._id);
