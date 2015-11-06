@@ -9,6 +9,7 @@ node_modules/
 # sublime stuff#
 *.sublime-project
 *.sublime-workspace
+*.idea
 
 # system related #
 .DS_Store
