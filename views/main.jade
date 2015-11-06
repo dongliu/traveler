@@ -57,7 +57,7 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#forms', data-toggle='tab') My forms
-        if (locals.roles !== undefined && locals.roles.indexOf('admin') !== -1)
+        if (locals.roles !== undefined && locals.roles.indexOf('read_all_forms') !== -1)
           li
             a(href="#allforms", data-toggle='tab') All Forms
         li
