@@ -4,6 +4,7 @@
 var configPath = require('../config/config.js').configPath;
 var ad = require('../' + configPath + '/ad.json');
 var ldapClient = require('../lib/ldap-client');
+var routesUtilities = require('../utilities/routes.js');
 
 var auth = require('../lib/auth');
 var authConfig = require('../' + configPath + '/auth.json');
@@ -749,6 +750,41 @@ module.exports = function (app) {
 
       res.set('Location', url);
       return res.send(201, 'You can see the new form at <a href="' + url + '">' + url + '</a>');
+    });
+  });
+
+  app.post('/forms/clone/', auth.ensureAuthenticated, routesUtilities.filterBody('form'), function (req,res) {
+    Form.findById(req.body.form, function(err, form){
+      var access = getAccess(req, form);
+      if ( access != -1 ) {
+        var clonedForm = new Form({
+          title: form.title,
+          createdBy: req.session.userid,
+          createdOn: Date.now(),
+          clonedFrom: form._id,
+          sharedWith: [],
+          sharedGroup: [],
+          html: form.html
+        });
+
+        clonedForm.save(function(err, createdForm){
+          if (err) {
+            console.error(err);
+            return res.send(500, err.message);
+          }
+
+          console.log('new form ' + createdForm.id + ' created');
+
+          var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + createdForm.id + '/';
+          res.set('Location', url);
+          return res.json(201, {
+            location: url
+          });
+        });
+
+      } else {
+        return res.send(400, 'you are not authorized to clone this form');
+      }
     });
   });
 

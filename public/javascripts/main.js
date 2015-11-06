@@ -88,11 +88,12 @@ function createCloneModalRequest(method, generateUrl, generateJson, successCallB
       type: method,
       contentType: 'application/json',
       data: JSON.stringify(jsonObject)
-    }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
-      $(that).addClass('text-success');
-      success = true;
     })
+        .done(function () {
+          $(that).prepend('<i class="icon-check"></i>');
+          $(that).addClass('text-success');
+          success = true;
+        })
         .fail(function (jqXHR, status, error) {
           $(that).prepend('<i class="icon-question"></i>');
           $(that).append(' : ' + jqXHR.responseText);
@@ -121,7 +122,7 @@ function travelFromModal() {
       });
 }
 
-function archiveFromModal(archive) {
+function archiveTravelerFromModal(archive) {
   createCloneModalRequest('PUT',
       function(that){
         return '/travelers/' + that.id + '/archived';
@@ -139,7 +140,7 @@ function archiveFromModal(archive) {
       });
 }
 
-function cloneFromModal() {
+function cloneTravelerFromModal() {
   createCloneModalRequest('POST',
       function(that){
         return '/travelers/';
@@ -154,6 +155,23 @@ function cloneFromModal() {
         initTable(sharedTravelerTable, '/sharedtravelers/json');
         initTable(groupSharedTravelerTable, '/groupsharedtravelers/json');
         initCurrentTables('/currenttravelers/json');
+      }
+  );
+}
+
+function cloneFormFromModal(){
+  createCloneModalRequest("POST",
+      function(that){
+        return '/forms/clone/'
+      },
+      function (that) {
+        return {
+          form: that.id
+        }
+      },
+      function () {
+        initTable(formTable, '/forms/json');
+        initTable(allformTable, '/allforms/json');
       }
   );
 }
@@ -383,33 +401,45 @@ $(function () {
     });
   });
 
-  $('#archive').click(function (e) {
+  $('#archive-traveler').click(function (e) {
     createTraveler('Archive the following', travelerTable, 'traveler', function(){
-      archiveFromModal(true);
+      archiveTravelerFromModal(true);
     });
   });
 
-  $('#clone').click(function (e) {
+  $('#clone-traveler').click(function (e) {
     createTraveler('Clone the following', travelerTable, 'traveler', function(){
-      cloneFromModal();
+      cloneTravelerFromModal();
     });
   });
 
-  $('#share-clone').click(function (e) {
+  $('#share-clone-traveler').click(function (e) {
     createTraveler('Clone the following', sharedTravelerTable, 'traveler', function(){
-      cloneFromModal();
+      cloneTravelerFromModal();
     });
   });
 
-  $('#group-share-clone').click(function (e) {
+  $('#group-share-clone-traveler').click(function (e) {
     createTraveler('Clone the following', groupSharedTravelerTable, 'traveler', function(){
-      cloneFromModal();
+      cloneTravelerFromModal();
     });
   });
 
-  $('#dearchive').click(function (e) {
+  $('#dearchive-traveler').click(function (e) {
     createTraveler('De-archive the following', archivedTravelerTable, 'traveler', function(){
-      archiveFromModal(false);
+      archiveTravelerFromModal(false);
+    });
+  });
+
+  $('#clone-all-form').click(function (e) {
+    createTraveler('Clone the following', allformTable, 'form', function(){
+      cloneFormFromModal();
+    });
+  });
+
+  $('#clone-form').click(function (e) {
+    createTraveler('Clone the following', formTable, 'form', function(){
+      cloneFormFromModal();
     });
   });
 
