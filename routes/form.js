@@ -173,7 +173,6 @@ access := -1 // no access
         | 0  // read
         | 1  // write
 *****/
-
 function getAccess(req, doc) {
   if (doc.createdBy === req.session.userid) {
     return 1;
@@ -193,6 +192,9 @@ function getAccess(req, doc) {
         return 0;
       }
     }
+  }
+  if(req.session.roles != undefined && req.session.roles.indexOf('read_all_forms') != -1) {
+    return 0;
   }
   return -1;
 }
@@ -336,6 +338,20 @@ module.exports = function (app) {
       }
       res.json(200, forms);
     });
+  });
+
+  app.get('/allforms/json', auth.ensureAuthenticated, function (req, res) {
+    if(req.session.roles != undefined && req.session.roles.indexOf('read_all_forms') != -1) {
+      Form.find({ }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+        res.json(200, forms);
+      });
+    } else {
+      res.json(200, "");
+    }
   });
 
   app.get('/sharedforms/json', auth.ensureAuthenticated, function (req, res) {
