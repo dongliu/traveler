@@ -26,6 +26,7 @@ var form = new Schema({
   createdOn: Date,
   updatedBy: String,
   updatedOn: Date,
+  clonedFrom: ObjectId,
   sharedWith: [sharedWithUser],
   sharedGroup: [sharedWithGroup],
   html: String
