@@ -1,33 +1,32 @@
 /*jslint es5: true*/
-
+var config = require('./config/config.js');
+config.loadPaths();
 var express = require('express'),
-  routes = require('./routes'),
-  about = require('./routes/about'),
-  http = require('http'),
-  https = require('https'),
-  fs = require('fs'),
-  multer = require('multer'),
-  path = require('path');
+    routes = require('./routes'),
+    about = require('./routes/about'),
+    http = require('http'),
+    https = require('https'),
+    fs = require('fs'),
+    multer = require('multer'),
+    path = require('path'),
+    rotator = require('file-stream-rotator'),
+    mongoose = require('mongoose');
 
-var rotator = require('file-stream-rotator');
+var configPath = config.configPath;
 
-var key = fs.readFileSync('./config/node.key'),
-  cert = fs.readFileSync('./config/node.pem'),
-  credentials = {
-    key: key,
-    cert: cert
-  };
-
-
-var mongoose = require('mongoose');
+// Load MongoDB object modeling tool
 mongoose.connection.close();
-
+// Load MongoDB models
 var User = require('./model/user.js').User;
+var Group = require('./model/user.js').Group;
 var Form = require('./model/form.js').Form;
 var Traveler = require('./model/traveler.js').Traveler;
 var TravelerData = require('./model/traveler.js').TravelerData;
-var TravelerComment = require('./model/traveler.js').TravelerComment;
+var TravelerNote = require('./model/traveler.js').TravelerNote;
 
+//Connect to mongo database
+var mongoConfig = require('./'+ configPath + '/mongo.json');
+var mongoAddress = mongoConfig.server_address + ":" + mongoConfig.server_port + "/" + mongoConfig.traveler_db;
 var mongoOptions = {
   db: {
     native_parser: true
@@ -41,32 +40,33 @@ var mongoOptions = {
   }
 };
 
-mongoose.connect('mongodb://localhost/traveler', mongoOptions);
+// Set authentication options if specified
+if(mongoConfig.username != undefined){
+  mongoOptions.user = mongoConfig.username;
+  mongoOptions.pass = mongoConfig.password;
+}
 
+mongoose.connect(mongoAddress, mongoOptions);
 mongoose.connection.on('connected', function () {
   console.log('Mongoose default connection opened.');
 });
-
 mongoose.connection.on('error', function (err) {
   console.log('Mongoose default connection error: ' + err);
 });
-
 mongoose.connection.on('disconnected', function () {
   console.log('Mongoose default connection disconnected');
 });
 
+// LDAP client
 var adClient = require('./lib/ldap-client').client;
-
+// CAS client
 var auth = require('./lib/auth');
 
+var uploadDir = './' + config.uploadPath + '/';
+
+/* Web Application */
 var app = express();
-
-var api = express();
-
-var uploadDir = './uploads/';
-
 app.enable('strict routing');
-
 if (app.get('env') === 'production') {
   var access_logfile = rotator.getStream({
     filename: __dirname + '/logs/access.log',
@@ -113,17 +113,12 @@ app.configure(function () {
 app.configure('development', function () {
   app.use(express.errorHandler());
 });
-
 require('./routes/form')(app);
-
 require('./routes/traveler')(app);
-
 require('./routes/user')(app);
-
 require('./routes/profile')(app);
-
 require('./routes/device')(app);
-
+require('./routes/ldaplogin')(app);
 app.get('/about', about.index);
 app.get('/api', function (req, res) {
   res.render('api', {
@@ -143,26 +138,56 @@ app.get('/apis', function (req, res) {
   res.redirect('https://' + req.host + ':' + api.get('port') + req.originalUrl);
 });
 
+// Start application using settings
+var appSettings = require('./'+ configPath + '/app.json');
+var appPort = appSettings.app_port;
+if (appSettings.ssl_key != undefined) {
+  var appCredentials = {
+    key: fs.readFileSync('./'+ configPath + '/'+appSettings.ssl_key),
+    cert: fs.readFileSync('./'+ configPath + '/'+appSettings.ssl_cert)
+  };
+
+  var server = https.createServer(appCredentials, app).listen(appPort, function(){
+    console.log('Express server listening on ssl port ' + appPort);
+  });
+} else {
+  var server = http.createServer(app).listen(app.get('port'), function () {
+    console.log('Express server listening on port ' + app.get('port'));
+  });
+}
+
+/* REST API */
+var api = express();
+var apiSettings = require('./'+ configPath + '/api.json');
+var apiPort = apiSettings.app_port;
 api.enable('strict routing');
 api.configure(function () {
-  api.set('port', process.env.APIPORT || 3443);
+  api.set('port', process.env.APIPORT || apiPort);
   api.use(express.logger('dev'));
   // api.use(express.logger({stream: access_logfile}));
   api.use(auth.basicAuth);
   api.use(express.compress());
   api.use(api.router);
 });
-
 require('./routes/api')(api);
 
-var server = http.createServer(app).listen(app.get('port'), function () {
-  console.log('Express server listening on port ' + app.get('port'));
-});
+//Start Api using settings
+if (apiSettings.ssl_key != undefined){
+  var apiCredentials = {
+    key: fs.readFileSync('./'+ configPath + '/'+apiSettings.ssl_key),
+    cert: fs.readFileSync('./'+ configPath + '/'+apiSettings.ssl_cert)
+  };
 
-var apiserver = https.createServer(credentials, api).listen(api.get('port'), function () {
-  console.log('API server listening on port ' + api.get('port'));
-});
+  var apiserver = https.createServer(apiCredentials, api).listen(api.get('port'), function () {
+    console.log('API server listening on ssl port ' + api.get('port'));
+  });
+}else {
+  var apiserver = http.createServer(api).listen(api.get('port'), function () {
+    console.log('API server listening on port ' + api.get('port'));
+  });
+}
 
+// When the node.js application is closed.
 function cleanup() {
   server._connections = 0;
   apiserver._connections = 0;
@@ -177,12 +202,10 @@ function cleanup() {
       process.exit();
     });
   });
-
   setTimeout(function () {
     console.error("Could not close connections in time, forcing shut down");
     process.exit(1);
   }, 30 * 1000);
 }
-
 process.on('SIGINT', cleanup);
 process.on('SIGTERM', cleanup);

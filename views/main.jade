@@ -15,11 +15,11 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='_blank')
+        a.btn.btn-primary#new(href='#{prefix}/forms/new')
           i.fa.fa-file-o.fa-lg
           | &nbsp;New Form
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/currenttravelers/', target='_blank')
+        a.btn.btn-primary#new(href='#{prefix}/currenttravelers/')
           i.fa.fa-list.fa-lg
           | &nbsp;All travelers
       .btn-group
@@ -33,18 +33,18 @@ block content
           span.caret
         ul.dropdown-menu
           li#devices
-            a(href='#{prefix}/devices/', target='_blank') Devices
+            a(href='#{prefix}/devices/') Devices
       .btn-group
-        a.btn(href='#{prefix}/profile', target='_blank')
+        a.btn(href='#{prefix}/profile')
           i.fa.fa-user.fa-lg
           | &nbsp;Profile
       if (locals.roles !== undefined && locals.roles.indexOf('admin') !== -1)
         .btn-group
-          a.btn(href='#{prefix}/users/', target='_blank')
+          a.btn(href='#{prefix}/users/')
             i.fa.fa-users.fa-lg
             | &nbsp;Users
       .btn-group
-        a.btn(href='#{prefix}/about', target='_blank')
+        a.btn(href='#{prefix}/about')
           i.fa.fa-info.fa-lg
           |&nbsp;About
     #message
@@ -57,6 +57,9 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#forms', data-toggle='tab') My forms
+        if (locals.roles !== undefined && locals.roles.indexOf('admin') !== -1)
+          li
+            a(href="#allforms", data-toggle='tab') All Forms
         li
           a(href='#sharedfroms', data-toggle='tab') Shared forms
         li
@@ -98,6 +101,8 @@ block content
                 i.fa.fa-square-o.fa-lg
                 | &nbsp;Clear selection
           table#form-table.table.table-bordered.table-hover
+        #allforms.tab-pane
+          table#all-form-table.table.table-bordered.table-hover
         #sharedfroms.tab-pane
           table#shared-form-table.table.table-bordered.table-hover
         #groupsharedfroms.tab-pane

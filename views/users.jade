@@ -26,6 +26,10 @@ block content
           input#admin(type='checkbox', value='admin')
           | admin
         != ' '
+        label.checkbox.inline
+          input#admin(type='checkbox', value='read_all_forms')
+          | read_all_forms
+        != ' '
         button.btn.btn-primary#add(type='submit') Add
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')

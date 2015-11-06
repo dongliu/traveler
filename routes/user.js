@@ -1,4 +1,5 @@
-var ad = require('../config/ad.json');
+var configPath = require('../config/config.js').configPath;
+var ad = require('../' + configPath + '/ad.json');
 
 var ldapClient = require('../lib/ldap-client');
 
@@ -6,9 +7,9 @@ var mongoose = require('mongoose');
 var User = mongoose.model('User');
 
 var auth = require('../lib/auth');
-var authConfig = require('../config/auth.json');
+var authConfig = require('../' + configPath + '/auth.json');
 
-var Roles = ['manager', 'admin'];
+var Roles = ['manager', 'admin', 'read_all_forms'];
 
 function updateUserProfile(user, res) {
   var searchFilter = ad.searchFilter.replace('_id', user._id);
@@ -321,7 +322,7 @@ module.exports = function (app) {
     }
     opts = {
       filter: nameFilter,
-      attributes: ['displayName'],
+      attributes: ad.memberAttributes,
       paged: {
         pageSize: 200
       },

@@ -128,7 +128,8 @@ $(function () {
         data: JSON.stringify({
           name: name,
           manager: $('#manager').prop('checked'),
-          admin: $('#admin').prop('checked')
+          admin: $('#admin').prop('checked'),
+          read_all_forms: $('#read_all_forms').prop('checked')
         }),
         success: function (data, status, jqXHR) {
           $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
@@ -173,7 +174,12 @@ $(function () {
     if (selected.length) {
       $('#modalLabel').html('Modify the following ' + selected.length + ' users\' role? ');
       $('#modal .modal-body').empty();
-      $('#modal .modal-body').append('<form id="modal-roles" class="form-inline"><label class="checkbox"><input id="modal-manager" type="checkbox" value="manager">manager</label> <label class="checkbox"><input id="modal-admin" type="checkbox" value="admin">admin</label> </form>');
+      $('#modal .modal-body').append(
+          '<form id="modal-roles" class="form-inline">' +
+          '<label class="checkbox"><input id="modal-manager" type="checkbox" value="manager">manager</label> ' +
+          '<label class="checkbox"><input id="modal-admin" type="checkbox" value="admin">admin</label> ' +
+          '<label class="checkbox"><input id="read_all_forms" type="checkbox" value="read_all_forms">read_all_forms</label> ' +
+          '</form>');
       selected.forEach(function (row) {
         var data = userTable.fnGetData(row);
         $('#modal .modal-body').append('<div id="' + data._id + '">' + data.name + '</div>');

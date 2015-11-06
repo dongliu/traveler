@@ -1,11 +1,13 @@
 /*jslint es5: true*/
+var config = require('../config/config.js');
+var configPath = config.configPath;
 
-var ad = require('../config/ad.json');
+var ad = require('../' + configPath + '/ad.json');
 var ldapClient = require('../lib/ldap-client');
 
 var fs = require('fs');
 var auth = require('../lib/auth');
-var authConfig = require('../config/auth.json');
+var authConfig = require('../' + configPath + '/auth.json');
 var mongoose = require('mongoose');
 var util = require('util');
 var path = require('path');
@@ -14,7 +16,7 @@ var underscore = require('underscore');
 var cheer = require('cheerio');
 // var sanitize = require('sanitize-caja'); // may need this later for new version of forms
 
-var uploadsDir = '../uploads/';
+var uploadsDir = '../' + config.uploadPath + '/';
 
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
