@@ -285,6 +285,17 @@ function canWrite(req, doc) {
   return false;
 }
 
+function canWriteActive(req,doc){
+  if (canWrite(req,doc)){
+    return true;
+  }else if(routesUtilities.checkUserRole(req, 'write_active_travelers')){
+    return true;
+  }
+
+
+  return false;
+}
+
 function canRead(req, doc) {
   if (doc.createdBy === req.session.userid) {
     return true;
@@ -653,7 +664,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (canWrite(req, doc)) {
+      if (canWriteActive(req, doc)) {
         return res.render('traveler', {
           traveler: doc,
           prefix: req.proxied ? req.proxied_prefix : ''
@@ -786,7 +797,7 @@ module.exports = function (app) {
       }
 
       if (req.body.status === 1.5) {
-        if (!canWrite(req, doc)) {
+        if (!canWriteActive(req, doc)) {
           return res.send(403, 'You are not authorized to access this resource');
         }
       } else {
@@ -838,7 +849,6 @@ module.exports = function (app) {
       });
     });
   });
-
 
   app.post('/travelers/:id/devices/', auth.ensureAuthenticated, routesUtilities.filterBody(['newdevice']), function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
@@ -925,7 +935,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!canWriteActive(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
@@ -994,7 +1004,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!canWriteActive(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
@@ -1037,7 +1047,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!canWriteActive(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
