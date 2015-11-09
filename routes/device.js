@@ -2,12 +2,11 @@ var config = require('../config/config.js');
 var auth = require('../lib/auth');
 var service = config.service;
 var request = require('request');
+var routesUtilities = require('../utilities/routes.js');
 
 module.exports = function (app) {
   app.get('/devices/', function (req, res) {
-    res.render('devices', {
-      prefix: req.proxied ? req.proxied_prefix : ''
-    });
+    res.render('devices', routesUtilities.getRenderObject(req));
   });
 
   app.get('/devices/json', function (req, res) {

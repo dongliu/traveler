@@ -4,6 +4,7 @@
 /**
  * The purpose of this file is to store all functions and utilities that are used by multiple routes.
  */
+var config = require('../config/config.js');
 
 function filterBody(strings) {
     return function (req, res, next) {
@@ -34,7 +35,21 @@ function checkUserRole(req, role){
     }
 }
 
+function getRenderObject(req, extraAttributes) {
+    var renderObject = {
+        prefix: req.proxied ? req.proxied_prefix : '',
+        viewConfig: config.viewConfig
+    };
+    if (extraAttributes != undefined) {
+        for (var key in extraAttributes){
+            renderObject[key] = extraAttributes[key];
+        }
+    }
+    return renderObject;
+}
+
 module.exports = {
     filterBody: filterBody,
-    checkUserRole: checkUserRole
+    checkUserRole: checkUserRole,
+    getRenderObject: getRenderObject
 };

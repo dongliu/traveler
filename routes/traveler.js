@@ -596,10 +596,9 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
-    return res.render('currenttravelers', {
-      device: req.query.device || null,
-      prefix: req.proxied ? req.proxied_prefix : ''
-    });
+    return res.render('currenttravelers', routesUtilities.getRenderObject(req, {
+      device: req.query.device || null
+    }));
   });
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function (req, res) {
@@ -665,10 +664,9 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (canWriteActive(req, doc)) {
-        return res.render('traveler', {
-          traveler: doc,
-          prefix: req.proxied ? req.proxied_prefix : ''
-        });
+        return res.render('traveler', routesUtilities.getRenderObject(req, {
+          traveler: doc
+        }));
       }
       return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
     });
@@ -683,10 +681,9 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      return res.render('travelerviewer', {
-        traveler: doc,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+      return res.render('travelerviewer', routesUtilities.getRenderObject(req, {
+        traveler: doc
+      }));
     });
   });
 
@@ -747,10 +744,9 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (canWrite(req, doc)) {
-        return res.render('config', {
-          traveler: doc,
-          prefix: req.proxied ? req.proxied_prefix : ''
-        });
+        return res.render('config', routesUtilities.getRenderObject(req, {
+          traveler: doc
+        }));
       }
       return res.send(403, 'You are not authorized to access this resource');
     });
@@ -1166,12 +1162,11 @@ module.exports = function (app) {
       if (traveler.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      return res.render('share', {
+      return res.render('share', routesUtilities.getRenderObject(req, {
         type: 'Traveler',
         id: req.params.id,
-        title: traveler.title,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+        title: traveler.title
+      }));
     });
   });
 
