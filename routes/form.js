@@ -1,13 +1,13 @@
 /*global FormFile: false, TravelerData: false*/
 /*jslint es5: true*/
 
-var configPath = require('../config/config.js').configPath;
-var ad = require('../' + configPath + '/ad.json');
+var config = require('../config/config.js');
+var ad = config.ad;
 var ldapClient = require('../lib/ldap-client');
 var routesUtilities = require('../utilities/routes.js');
 
 var auth = require('../lib/auth');
-var authConfig = require('../' + configPath + '/auth.json');
+var authConfig = config.auth;
 
 var mongoose = require('mongoose');
 var path = require('path');

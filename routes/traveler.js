@@ -1,14 +1,14 @@
 /*jslint es5: true*/
 var config = require('../config/config.js');
-var configPath = config.configPath;
+
 var routesUtilities = require('../utilities/routes.js');
 
-var ad = require('../' + configPath + '/ad.json');
+var ad = config.ad;
 var ldapClient = require('../lib/ldap-client');
 
 var fs = require('fs');
 var auth = require('../lib/auth');
-var authConfig = require('../' + configPath + '/auth.json');
+var authConfig = config.auth;
 var mongoose = require('mongoose');
 var util = require('util');
 var path = require('path');
