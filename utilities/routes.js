@@ -25,6 +25,16 @@ function filterBody(strings) {
     };
 }
 
+function checkUserRole(req, role){
+    if(req.session.roles != undefined && req.session.roles.indexOf(role) != -1) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 module.exports = {
-    filterBody: filterBody
+    filterBody: filterBody,
+    checkUserRole: checkUserRole
 };
