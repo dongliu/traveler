@@ -26,14 +26,15 @@ block content
         button.btn.btn-primary#reload
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload
-      .btn-group.dropdown
-        a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
-          i.fa.fa-gears.fa-lg
-          | &nbsp;Meta
-          span.caret
-        ul.dropdown-menu
-          li#devices
-            a(href='#{prefix}/devices/') Devices
+      if (viewConfig.showDevice)
+        .btn-group.dropdown
+          a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
+            i.fa.fa-gears.fa-lg
+            | &nbsp;Meta
+            span.caret
+          ul.dropdown-menu
+            li#devices
+              a(href='#{prefix}/devices/') Devices
       .btn-group
         a.btn(href='#{prefix}/profile')
           i.fa.fa-user.fa-lg
