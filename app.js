@@ -1,6 +1,6 @@
 /*jslint es5: true*/
 var config = require('./config/config.js');
-config.loadPaths();
+config.load();
 var express = require('express'),
     routes = require('./routes'),
     about = require('./routes/about'),
@@ -25,7 +25,7 @@ var TravelerData = require('./model/traveler.js').TravelerData;
 var TravelerNote = require('./model/traveler.js').TravelerNote;
 
 //Connect to mongo database
-var mongoConfig = require('./'+ configPath + '/mongo.json');
+var mongoConfig = config.mongo;
 var mongoAddress = mongoConfig.server_address + ":" + mongoConfig.server_port + "/" + mongoConfig.traveler_db;
 var mongoOptions = {
   db: {
@@ -139,7 +139,7 @@ app.get('/apis', function (req, res) {
 });
 
 // Start application using settings
-var appSettings = require('./'+ configPath + '/app.json');
+var appSettings = config.app;
 var appPort = appSettings.app_port;
 if (appSettings.ssl_key != undefined) {
   var appCredentials = {
@@ -158,7 +158,7 @@ if (appSettings.ssl_key != undefined) {
 
 /* REST API */
 var api = express();
-var apiSettings = require('./'+ configPath + '/api.json');
+var apiSettings = config.api;
 var apiPort = apiSettings.app_port;
 api.enable('strict routing');
 api.configure(function () {

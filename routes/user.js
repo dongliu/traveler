@@ -1,5 +1,5 @@
-var configPath = require('../config/config.js').configPath;
-var ad = require('../' + configPath + '/ad.json');
+var config = require('../config/config.js');
+var ad = config.ad;
 
 var ldapClient = require('../lib/ldap-client');
 
@@ -7,7 +7,7 @@ var mongoose = require('mongoose');
 var User = mongoose.model('User');
 
 var auth = require('../lib/auth');
-var authConfig = require('../' + configPath + '/auth.json');
+var authConfig = config.auth;
 
 var Roles = ['manager', 'admin', 'read_all_forms', 'write_active_travelers'];
 
