@@ -71,10 +71,13 @@ module.exports.load = function(){
     if (this.app.top_bar_urls){
         viewConfig.topBarUrls = this.app.top_bar_urls;
     }
-    viewConfig.version = this.travelerPackageFile;
+    if (this.app.deployment_name){
+        viewConfig.deploymentName = this.app.deployment_name;
+    }
+    viewConfig.appVersion = this.travelerPackageFile.version;
 
     module.exports.viewConfig = viewConfig;
-}
+};
 
 function getPath(desiredPath, defaultPath) {
     // Check to see that desired path exists.

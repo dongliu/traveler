@@ -14,17 +14,20 @@ html
           a.brand(href='http://www.frib.msu.edu/', target='_blank') FRIB
           .nav-collapse.collapse
             ul.nav
-              li
-                a(href='https://controls.frib.msu.edu/', target='_blank') Controls
               li.active
-                a(href='#{prefix}/') Traveler
-              li
-                a(href='https://controls.frib.msu.edu/controlshelp/', target='_blank') Report a problem
+                - var appName = "Traveler"
+                if (viewConfig.deploymentName)
+                    - appName += " - " + viewConfig.deploymentName
+                a(href='#{prefix}/') #{appName}
+              if (viewConfig.topBarUrls)
+                each url in viewConfig.topBarUrls
+                  li
+                    a(href=url.url, target='_blank') #{url.text}
               li
                 a(href='#{prefix}/logout') Logout
     block content
     .container-fluid
       h6.text-right
-        a(href='#{prefix}/release.txt', target='_blank') Release 2.3.8
+        a(href='#{prefix}/release.txt', target='_blank') Release #{viewConfig.appVersion}
     block js
 

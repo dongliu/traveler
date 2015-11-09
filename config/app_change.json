@@ -4,13 +4,13 @@
   "ssl_cert": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.pem)",
   "top_bar_urls" : [
     {
-      "Text": "Controls",
-      "Url": "https://controls.frib.msu.edu/"
+      "text": "Controls",
+      "url": "https://controls.frib.msu.edu/"
     },
     {
-      "Text": "Report a problem",
-      "Url": "https://controls.frib.msu.edu/controlshelp/"
+      "text": "Report a problem",
+      "url": "https://controls.frib.msu.edu/controlshelp/"
     }
   ],
-  "deployment_type": "development"
+  "deployment_name": "development"
 }

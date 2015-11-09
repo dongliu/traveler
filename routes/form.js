@@ -415,9 +415,7 @@ module.exports = function (app) {
   });
 
   app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
-    return res.render('newform', {
-      prefix: req.proxied ? req.proxied_prefix : ''
-    });
+    return res.render('newform', routesUtilities.getRenderObject(req));
   });
 
   app.get('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
@@ -437,12 +435,11 @@ module.exports = function (app) {
       }
 
       if (access === 1) {
-        return res.render('builder', {
+        return res.render('builder', routesUtilities.getRenderObject(req,{
           id: req.params.id,
           title: form.title,
-          html: form.html,
-          prefix: req.proxied ? req.proxied_prefix : ''
-        });
+          html: form.html
+        }));
       }
 
       return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + req.params.id + '/preview');
@@ -529,12 +526,11 @@ module.exports = function (app) {
         return res.send(403, 'you are not authorized to access this resource');
       }
 
-      return res.render('viewer', {
+      return res.render('viewer', routesUtilities.getRenderObject(req,{
         id: req.params.id,
         title: form.title,
-        html: form.html,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+        html: form.html
+      }));
     });
   });
 
@@ -550,12 +546,11 @@ module.exports = function (app) {
       if (form.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      return res.render('share', {
+      return res.render('share', routesUtilities.getRenderObject(req,{
         type: 'Form',
         id: req.params.id,
-        title: form.title,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+        title: form.title
+      }));
     });
   });
 
