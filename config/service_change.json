@@ -1,5 +1,10 @@
 {
-  "device" : {
-    "url" : "https://controlsapp1/conf/rs/v0/component/physical"
+  "device": {
+    "url": "https://controlsapp1/conf/rs/v0/component/physical"
+  },
+  "legacy_traveler": {
+    "api": "https://controls.frib.msu.edu/traveler1/api.php?resource=travelers&",
+    "devices": "https://controls.frib.msu.edu/traveler1/api.php?resource=travelers&device=",
+    "assigned": "https://controls.frib.msu.edu/traveler1/showForm.php?assigned="
   }
 }
