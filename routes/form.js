@@ -194,7 +194,7 @@ function getAccess(req, doc) {
       }
     }
   }
-  if(req.session.roles != undefined && req.session.roles.indexOf('read_all_forms') != -1) {
+  if(routesUtilities.checkUserRole(req,'read_all_forms')) {
     return 0;
   }
   return -1;
@@ -342,7 +342,7 @@ module.exports = function (app) {
   });
 
   app.get('/allforms/json', auth.ensureAuthenticated, function (req, res) {
-    if(req.session.roles != undefined && req.session.roles.indexOf('read_all_forms') != -1) {
+    if(routesUtilities.checkUserRole(req,'read_all_forms')) {
       Form.find({ }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
           console.error(err);
@@ -351,7 +351,7 @@ module.exports = function (app) {
         res.json(200, forms);
       });
     } else {
-      res.json(200, "");
+      res.json(200, "You are not authorized to view all forms.");
     }
   });
 
