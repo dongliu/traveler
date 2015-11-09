@@ -67,8 +67,9 @@ block content
           button.btn.btn-small.btn-warning.removeDevice
             i.fa.fa-trash-o.fa-lg
     br
-    .btn-group
-      button.btn.btn-primary#add Add devices
+    if (viewConfig.showDevice)
+      .btn-group
+        button.btn.btn-primary#add Add devices
     case traveler.status
       when 0
         .btn-group
@@ -87,8 +88,9 @@ block content
       when 3
         .btn-group
           button.btn.btn-primary#resume Resume
-    .btn-group
-        a.btn.btn-info(href='#{prefix}/devices/', target='_blank') Browse devices
+    if (viewConfig.showDevice)
+      .btn-group
+          a.btn.btn-info(href='#{prefix}/devices/', target='_blank') Browse devices
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
