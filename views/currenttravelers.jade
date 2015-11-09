@@ -10,9 +10,13 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
+  if (legacyTraveler)
+    script.
+      var legacyTraveler = !{JSON.stringify(legacyTraveler)};
   script.
     var device = !{JSON.stringify(device)};
     var prefix = '!{prefix}';
+
   .container-fluid
     #message
     h3 Travelers

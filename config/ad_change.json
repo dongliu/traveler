@@ -10,5 +10,18 @@
   "objAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName"],
   "memberAttributes": ["displayName", "memberOf"],
   "groupAttributes": ["sAMAccountName","displayName","mail"],
-  "rawAttributes": ["thumbnailPhoto"]
+  "rawAttributes": ["thumbnailPhoto"],
+  "defaultKeys": {
+    "displayName": "displayName",
+    "memberOf": "memberOf",
+    "mail": "mail",
+    "company": "company",
+    "thumbnailPhoto": "thumbnailPhoto",
+    "sAMAccountName": "sAMAccountName",
+    "mobile": "mobile",
+    "physicalDeliveryOfficeName": "physicalDeliveryOfficeName",
+    "telephoneNumber": "telephoneNumber"
+  },
+
+  "ldapsCA": "OPTIONAL CA file for accepting SSL Connections"
 }

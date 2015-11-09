@@ -1,10 +1,11 @@
-var auth = require('../config/auth.json');
+var config = require('../config/config.js');
+var authConfig = config.auth;
+var routesUtilities = require('../utilities/routes.js');
 
 exports.main = function (req, res) {
-  res.render('main', {
-    roles: req.session.roles,
-    prefix: req.proxied ? req.proxied_prefix : ''
-  });
+  res.render('main', routesUtilities.getRenderObject(req, {
+    roles: req.session.roles
+  }));
 };
 
 exports.logout = function (req, res) {
@@ -15,9 +16,14 @@ exports.logout = function (req, res) {
       }
     });
   }
-  if (res.proxied) {
-    res.redirect(auth.proxied_cas + '/logout');
+  if(authConfig.type === 'cas') {
+    if (res.proxied) {
+      res.redirect(authConfig.proxied_cas + '/logout');
+    } else {
+      res.redirect(authConfig.cas + '/logout');
+    }
   } else {
-    res.redirect(auth.cas + '/logout');
+    //ldap
+    res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/ldaplogin/')
   }
 };
