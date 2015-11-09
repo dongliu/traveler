@@ -4,6 +4,7 @@ var config = require('../config/config.js');
 var routesUtilities = require('../utilities/routes.js');
 
 var ad = config.ad;
+var serviceConfig = config.service;
 var ldapClient = require('../lib/ldap-client');
 
 var fs = require('fs');
@@ -596,9 +597,13 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
-    return res.render('currenttravelers', routesUtilities.getRenderObject(req, {
-      device: req.query.device || null
-    }));
+    var extraAttributes = {
+      device: req.query.device || null,
+    };
+    if(serviceConfig.legacy_traveler){
+      extraAttributes['legacyTraveler'] = serviceConfig.legacy_traveler;
+    }
+    return res.render('currenttravelers', routesUtilities.getRenderObject(req, extraAttributes));
   });
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function (req, res) {
