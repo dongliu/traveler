@@ -2,15 +2,15 @@
 var config = require('./config/config.js');
 config.load();
 var express = require('express'),
-    routes = require('./routes'),
-    about = require('./routes/about'),
-    http = require('http'),
-    https = require('https'),
-    fs = require('fs'),
-    multer = require('multer'),
-    path = require('path'),
-    rotator = require('file-stream-rotator'),
-    mongoose = require('mongoose');
+  routes = require('./routes'),
+  about = require('./routes/about'),
+  http = require('http'),
+  https = require('https'),
+  fs = require('fs'),
+  multer = require('multer'),
+  path = require('path'),
+  rotator = require('file-stream-rotator'),
+  mongoose = require('mongoose');
 
 var configPath = config.configPath;
 
@@ -26,7 +26,7 @@ var TravelerNote = require('./model/traveler.js').TravelerNote;
 
 //Connect to mongo database
 var mongoConfig = config.mongo;
-var mongoAddress = mongoConfig.server_address + ":" + mongoConfig.server_port + "/" + mongoConfig.traveler_db;
+var mongoAddress = mongoConfig.server_address + ':' + mongoConfig.server_port + '/' + mongoConfig.traveler_db;
 var mongoOptions = {
   db: {
     native_parser: true
@@ -41,7 +41,7 @@ var mongoOptions = {
 };
 
 // Set authentication options if specified
-if(mongoConfig.username != undefined){
+if (mongoConfig.username !== undefined) {
   mongoOptions.user = mongoConfig.username;
   mongoOptions.pass = mongoConfig.password;
 }
@@ -141,13 +141,13 @@ app.get('/apis', function (req, res) {
 // Start application using settings
 var appSettings = config.app;
 var appPort = appSettings.app_port;
-if (appSettings.ssl_key != undefined) {
+if (appSettings.ssl_key !== undefined) {
   var appCredentials = {
-    key: fs.readFileSync('./'+ configPath + '/'+appSettings.ssl_key),
-    cert: fs.readFileSync('./'+ configPath + '/'+appSettings.ssl_cert)
+    key: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_key),
+    cert: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_cert)
   };
 
-  var server = https.createServer(appCredentials, app).listen(appPort, function(){
+  var server = https.createServer(appCredentials, app).listen(appPort, function () {
     console.log('Express server listening on ssl port ' + appPort);
   });
 } else {
@@ -172,10 +172,10 @@ api.configure(function () {
 require('./routes/api')(api);
 
 //Start Api using settings
-if (apiSettings.ssl_key != undefined){
+if (apiSettings.ssl_key !== undefined) {
   var apiCredentials = {
-    key: fs.readFileSync('./'+ configPath + '/'+apiSettings.ssl_key),
-    cert: fs.readFileSync('./'+ configPath + '/'+apiSettings.ssl_cert)
+    key: fs.readFileSync('./' + configPath + '/' + apiSettings.ssl_key),
+    cert: fs.readFileSync('./' + configPath + '/' + apiSettings.ssl_cert)
   };
 
   var apiserver = https.createServer(apiCredentials, api).listen(api.get('port'), function () {
@@ -203,7 +203,7 @@ function cleanup() {
     });
   });
   setTimeout(function () {
-    console.error("Could not close connections in time, forcing shut down");
+    console.error('Could not close connections in time, forcing shut down');
     process.exit(1);
   }, 30 * 1000);
 }
