@@ -17,11 +17,11 @@ block content
       .btn-group
         a.btn.btn-primary#new(href='#{prefix}/forms/new')
           i.fa.fa-file-o.fa-lg
-          | &nbsp;New Form
+          | &nbsp;New #{viewConfig.terminology.form}
       .btn-group
         a.btn.btn-primary#new(href='#{prefix}/currenttravelers/')
           i.fa.fa-list.fa-lg
-          | &nbsp;All travelers
+          | &nbsp;All #{viewConfig.terminology.traveler}s
       .btn-group
         button.btn.btn-primary#reload
           i.fa.fa-refresh.fa-lg
@@ -57,30 +57,30 @@ block content
     .tabbable.tabs-left
       ul.nav.nav-tabs
         li.active
-          a(href='#forms', data-toggle='tab') My forms
+          a(href='#forms', data-toggle='tab') My #{viewConfig.terminology.form}s
         if (locals.roles !== undefined && locals.roles.indexOf('read_all_forms') !== -1)
           li
-            a(href="#allforms", data-toggle='tab') All Forms
+            a(href="#allforms", data-toggle='tab') All #{viewConfig.terminology.form}s
         li
-          a(href='#sharedfroms', data-toggle='tab') Shared forms
+          a(href='#sharedfroms', data-toggle='tab') Shared #{viewConfig.terminology.form}s
         li
-          a(href='#groupsharedfroms', data-toggle='tab') Group shared forms
+          a(href='#groupsharedfroms', data-toggle='tab') Group shared #{viewConfig.terminology.form}s
         li
-          a(href='#travelers', data-toggle='tab') My travelers
+          a(href='#travelers', data-toggle='tab') My #{viewConfig.terminology.traveler}s
         li
-          a(href='#sharedtravelers', data-toggle='tab') Shared travelers
+          a(href='#sharedtravelers', data-toggle='tab') Shared #{viewConfig.terminology.traveler}s
         li
-          a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
+          a(href='#groupsharedtravelers', data-toggle='tab') Group shared #{viewConfig.terminology.traveler}s
         li
-          a(href='#inittravelers', data-toggle='tab') Initial travelers
+          a(href='#inittravelers', data-toggle='tab') Initial #{viewConfig.terminology.traveler}s
         li
-          a(href='#activetravelers', data-toggle='tab') Active travelers
+          a(href='#activetravelers', data-toggle='tab') Active #{viewConfig.terminology.traveler}s
         li
-          a(href='#completetravelers', data-toggle='tab') Complete travelers
+          a(href='#completetravelers', data-toggle='tab') Complete #{viewConfig.terminology.traveler}s
         li
-          a(href='#frozentravelers', data-toggle='tab') Frozen travelers
+          a(href='#frozentravelers', data-toggle='tab') Frozen #{viewConfig.terminology.traveler}s
         li
-          a(href='#archivedtravelers', data-toggle='tab') Archived travelers
+          a(href='#archivedtravelers', data-toggle='tab') Archived #{viewConfig.terminology.traveler}s
 
       .tab-content
         #forms.tab-pane.active
@@ -88,7 +88,7 @@ block content
             .btn-group
               button.btn.btn-primary#form-travel(data-toggle='tooltip', title='select ONE form and create a traveler')
                 i.fa.fa-plane.fa-lg
-                | &nbsp;Travel
+                | &nbsp;#{viewConfig.terminology.travelBtn}
             //- .btn-group
             //-   button.btn.btn-warning#form-delete
             //-     i.fa.fa-trash-o.fa-lg
@@ -106,13 +106,14 @@ block content
                 i.fa.fa-square-o.fa-lg
                 | &nbsp;Clear selection
           table#form-table.table.table-bordered.table-hover
-        #allforms.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-primary#clone-all-form(data-toggle='tooltip', title='clone selected forms')
-                i.fa.fa-copy.fa-lg
-                | &nbsp;Clone
-          table#all-form-table.table.table-bordered.table-hover
+        if (locals.roles !== undefined && locals.roles.indexOf('read_all_forms') !== -1)
+          #allforms.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-primary#clone-all-form(data-toggle='tooltip', title='clone selected forms')
+                  i.fa.fa-copy.fa-lg
+                  | &nbsp;Clone
+            table#all-form-table.table.table-bordered.table-hover
         #sharedfroms.tab-pane
           table#shared-form-table.table.table-bordered.table-hover
         #groupsharedfroms.tab-pane

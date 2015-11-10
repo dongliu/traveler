@@ -12,7 +12,7 @@ block content
   .container(style="margin-top: 10px")
     form.form-horizontal(name='newform', action='./', method='POST')
       .control-group
-        .control-label Form title
+        .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} title
         .controls
           input(type='text', name='title', required)
       .control-group
