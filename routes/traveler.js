@@ -1,13 +1,15 @@
 /*jslint es5: true*/
 var config = require('../config/config.js');
-var configPath = config.configPath;
 
-var ad = require('../' + configPath + '/ad.json');
+var routesUtilities = require('../utilities/routes.js');
+
+var ad = config.ad;
+var serviceConfig = config.service;
 var ldapClient = require('../lib/ldap-client');
 
 var fs = require('fs');
 var auth = require('../lib/auth');
-var authConfig = require('../' + configPath + '/auth.json');
+var authConfig = config.auth;
 var mongoose = require('mongoose');
 var util = require('util');
 var path = require('path');
@@ -126,27 +128,6 @@ function cloneTraveler(source, req, res) {
     });
   });
 }
-
-function filterBody(strings) {
-  return function (req, res, next) {
-    var k, found = false;
-    for (k in req.body) {
-      if (req.body.hasOwnProperty(k)) {
-        if (strings.indexOf(k) !== -1) {
-          found = true;
-        } else {
-          req.body[k] = null;
-        }
-      }
-    }
-    if (found) {
-      next();
-    } else {
-      return res.send(400, 'cannot find required information in body');
-    }
-  };
-}
-
 
 function getSharedWith(sharedWith, name) {
   var i;
@@ -302,6 +283,17 @@ function canWrite(req, doc) {
       }
     }
   }
+  return false;
+}
+
+function canWriteActive(req,doc){
+  if (canWrite(req,doc)){
+    return true;
+  }else if(routesUtilities.checkUserRole(req, 'write_active_travelers')){
+    return true;
+  }
+
+
   return false;
 }
 
@@ -605,10 +597,13 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
-    return res.render('currenttravelers', {
+    var extraAttributes = {
       device: req.query.device || null,
-      prefix: req.proxied ? req.proxied_prefix : ''
-    });
+    };
+    if(serviceConfig.legacy_traveler){
+      extraAttributes['legacyTraveler'] = serviceConfig.legacy_traveler;
+    }
+    return res.render('currenttravelers', routesUtilities.getRenderObject(req, extraAttributes));
   });
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function (req, res) {
@@ -624,7 +619,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/travelers/', auth.ensureAuthenticated, filterBody(['form', 'source']), function (req, res) {
+  app.post('/travelers/', auth.ensureAuthenticated, routesUtilities.filterBody(['form', 'source']), function (req, res) {
     if (req.body.form) {
       Form.findById(req.body.form, function (err, form) {
         if (err) {
@@ -673,11 +668,10 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (canWrite(req, doc)) {
-        return res.render('traveler', {
-          traveler: doc,
-          prefix: req.proxied ? req.proxied_prefix : ''
-        });
+      if (canWriteActive(req, doc)) {
+        return res.render('traveler', routesUtilities.getRenderObject(req, {
+          traveler: doc
+        }));
       }
       return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
     });
@@ -692,10 +686,9 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      return res.render('travelerviewer', {
-        traveler: doc,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+      return res.render('travelerviewer', routesUtilities.getRenderObject(req, {
+        traveler: doc
+      }));
     });
   });
 
@@ -715,7 +708,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/archived', auth.ensureAuthenticated, filterBody(['archived']), function (req, res) {
+  app.put('/travelers/:id/archived', auth.ensureAuthenticated, routesUtilities.filterBody(['archived']), function (req, res) {
     Traveler.findById(req.params.id, 'createdBy archived').exec(function (err, doc) {
       if (err) {
         console.error(err);
@@ -756,16 +749,15 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (canWrite(req, doc)) {
-        return res.render('config', {
-          traveler: doc,
-          prefix: req.proxied ? req.proxied_prefix : ''
-        });
+        return res.render('config', routesUtilities.getRenderObject(req, {
+          traveler: doc
+        }));
       }
       return res.send(403, 'You are not authorized to access this resource');
     });
   });
 
-  app.put('/travelers/:id/config', auth.ensureAuthenticated, filterBody(['title', 'description', 'deadline']), function (req, res) {
+  app.put('/travelers/:id/config', auth.ensureAuthenticated, routesUtilities.filterBody(['title', 'description', 'deadline']), function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       var k;
       if (err) {
@@ -806,7 +798,7 @@ module.exports = function (app) {
       }
 
       if (req.body.status === 1.5) {
-        if (!canWrite(req, doc)) {
+        if (!canWriteActive(req, doc)) {
           return res.send(403, 'You are not authorized to access this resource');
         }
       } else {
@@ -859,8 +851,7 @@ module.exports = function (app) {
     });
   });
 
-
-  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, filterBody(['newdevice']), function (req, res) {
+  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, routesUtilities.filterBody(['newdevice']), function (req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
@@ -945,7 +936,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!canWriteActive(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
@@ -1014,7 +1005,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!canWriteActive(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
@@ -1057,7 +1048,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!canWriteActive(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
@@ -1176,12 +1167,11 @@ module.exports = function (app) {
       if (traveler.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      return res.render('share', {
+      return res.render('share', routesUtilities.getRenderObject(req, {
         type: 'Traveler',
         id: req.params.id,
-        title: traveler.title,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+        title: traveler.title
+      }));
     });
   });
 

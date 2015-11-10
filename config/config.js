@@ -26,8 +26,18 @@
 var fs = require('fs');
 module.exports.configPath = '';
 module.exports.uploadPath = '';
+module.exports.viewConfig = '';
+module.exports.ad = '';
+module.exports.api = '';
+module.exports.app = '';
+module.exports.auth = '';
+module.exports.mongo = '';
+module.exports.service = '';
+module.exports.travelerPackageFile = '';
 
-module.exports.loadPaths = function(){
+
+module.exports.load = function(){
+    // Load Paths
     if (process.env.TRAVELER_CONFIG_REL_PATH) {
         module.exports.configPath=process.env.TRAVELER_CONFIG_REL_PATH;
     } else {
@@ -39,7 +49,35 @@ module.exports.loadPaths = function(){
     } else {
         module.exports.uploadPath = getPath('../data/traveler-uploads', 'uploads');
     }
-}
+
+    // Load configuration files
+    var configPath = this.configPath;
+    module.exports.ad = require('../' + configPath + '/ad.json');
+    module.exports.api = require('../' + configPath + '/api.json');
+    module.exports.app = require('../' + configPath + '/app.json');
+    module.exports.auth = require('../' + configPath + '/auth.json');
+    module.exports.mongo = require('../' + configPath + '/mongo.json');
+    module.exports.service = require('../' + configPath + '/service.json');
+    module.exports.travelerPackageFile = require('../package.json');
+
+
+    // Load view configuration
+    var viewConfig = {};
+    if (this.service.device != undefined) {
+        viewConfig.showDevice = true;
+    } else {
+        viewConfig.showDevice = false;
+    }
+    if (this.app.top_bar_urls){
+        viewConfig.topBarUrls = this.app.top_bar_urls;
+    }
+    if (this.app.deployment_name){
+        viewConfig.deploymentName = this.app.deployment_name;
+    }
+    viewConfig.appVersion = this.travelerPackageFile.version;
+
+    module.exports.viewConfig = viewConfig;
+};
 
 function getPath(desiredPath, defaultPath) {
     // Check to see that desired path exists.

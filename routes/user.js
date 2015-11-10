@@ -1,5 +1,5 @@
-var configPath = require('../config/config.js').configPath;
-var ad = require('../' + configPath + '/ad.json');
+var config = require('../config/config.js');
+var ad = config.ad;
 
 var ldapClient = require('../lib/ldap-client');
 
@@ -7,9 +7,11 @@ var mongoose = require('mongoose');
 var User = mongoose.model('User');
 
 var auth = require('../lib/auth');
-var authConfig = require('../' + configPath + '/auth.json');
+var authConfig = config.auth;
 
-var Roles = ['manager', 'admin', 'read_all_forms'];
+var routesUtilities = require('../utilities/routes.js');
+
+var Roles = ['manager', 'admin', 'read_all_forms', 'write_active_travelers'];
 
 function updateUserProfile(user, res) {
   var searchFilter = ad.searchFilter.replace('_id', user._id);
@@ -107,9 +109,7 @@ module.exports = function (app) {
     if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
       return res.send(403, 'only admin allowed');
     }
-    return res.render('users', {
-      prefix: req.proxied ? req.proxied_prefix : ''
-    });
+    return res.render('users', routesUtilities.getRenderObject(req));
   });
 
   app.get('/usernames/:name', auth.ensureAuthenticated, function (req, res) {
@@ -121,11 +121,10 @@ module.exports = function (app) {
         return res.send(500, err.message);
       }
       if (user) {
-        return res.render('user', {
+        return res.render('user',routesUtilities.getRenderObject(req, {
           user: user,
-          myRoles: req.session.roles,
-          prefix: req.proxied ? req.proxied_prefix : ''
-        });
+          myRoles: req.session.roles
+        }));
       }
       return res.send(404, req.params.name + ' not found');
     });
@@ -186,11 +185,10 @@ module.exports = function (app) {
         return res.send(500, err.message);
       }
       if (user) {
-        return res.render('user', {
+        return res.render('user', routesUtilities.getRenderObject(req, {
           user: user,
-          myRoles: req.session.roles,
-          prefix: req.proxied ? req.proxied_prefix : ''
-        });
+          myRoles: req.session.roles
+        }));
       }
       return res.send(404, req.params.id + ' has never logged into the application.');
     });

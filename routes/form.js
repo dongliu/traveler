@@ -1,12 +1,13 @@
 /*global FormFile: false, TravelerData: false*/
 /*jslint es5: true*/
 
-var configPath = require('../config/config.js').configPath;
-var ad = require('../' + configPath + '/ad.json');
+var config = require('../config/config.js');
+var ad = config.ad;
 var ldapClient = require('../lib/ldap-client');
+var routesUtilities = require('../utilities/routes.js');
 
 var auth = require('../lib/auth');
-var authConfig = require('../' + configPath + '/auth.json');
+var authConfig = config.auth;
 
 var mongoose = require('mongoose');
 var path = require('path');
@@ -193,7 +194,7 @@ function getAccess(req, doc) {
       }
     }
   }
-  if(req.session.roles != undefined && req.session.roles.indexOf('read_all_forms') != -1) {
+  if(routesUtilities.checkUserRole(req,'read_all_forms')) {
     return 0;
   }
   return -1;
@@ -341,7 +342,7 @@ module.exports = function (app) {
   });
 
   app.get('/allforms/json', auth.ensureAuthenticated, function (req, res) {
-    if(req.session.roles != undefined && req.session.roles.indexOf('read_all_forms') != -1) {
+    if(routesUtilities.checkUserRole(req,'read_all_forms')) {
       Form.find({ }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
           console.error(err);
@@ -350,7 +351,7 @@ module.exports = function (app) {
         res.json(200, forms);
       });
     } else {
-      res.json(200, "");
+      res.json(200, "You are not authorized to view all forms.");
     }
   });
 
@@ -414,9 +415,7 @@ module.exports = function (app) {
   });
 
   app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
-    return res.render('newform', {
-      prefix: req.proxied ? req.proxied_prefix : ''
-    });
+    return res.render('newform', routesUtilities.getRenderObject(req));
   });
 
   app.get('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
@@ -436,12 +435,11 @@ module.exports = function (app) {
       }
 
       if (access === 1) {
-        return res.render('builder', {
+        return res.render('builder', routesUtilities.getRenderObject(req,{
           id: req.params.id,
           title: form.title,
-          html: form.html,
-          prefix: req.proxied ? req.proxied_prefix : ''
-        });
+          html: form.html
+        }));
       }
 
       return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + req.params.id + '/preview');
@@ -528,12 +526,11 @@ module.exports = function (app) {
         return res.send(403, 'you are not authorized to access this resource');
       }
 
-      return res.render('viewer', {
+      return res.render('viewer', routesUtilities.getRenderObject(req,{
         id: req.params.id,
         title: form.title,
-        html: form.html,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+        html: form.html
+      }));
     });
   });
 
@@ -549,12 +546,11 @@ module.exports = function (app) {
       if (form.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      return res.render('share', {
+      return res.render('share', routesUtilities.getRenderObject(req,{
         type: 'Form',
         id: req.params.id,
-        title: form.title,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+        title: form.title
+      }));
     });
   });
 
@@ -749,6 +745,41 @@ module.exports = function (app) {
 
       res.set('Location', url);
       return res.send(201, 'You can see the new form at <a href="' + url + '">' + url + '</a>');
+    });
+  });
+
+  app.post('/forms/clone/', auth.ensureAuthenticated, routesUtilities.filterBody('form'), function (req,res) {
+    Form.findById(req.body.form, function(err, form){
+      var access = getAccess(req, form);
+      if ( access != -1 ) {
+        var clonedForm = new Form({
+          title: form.title,
+          createdBy: req.session.userid,
+          createdOn: Date.now(),
+          clonedFrom: form._id,
+          sharedWith: [],
+          sharedGroup: [],
+          html: form.html
+        });
+
+        clonedForm.save(function(err, createdForm){
+          if (err) {
+            console.error(err);
+            return res.send(500, err.message);
+          }
+
+          console.log('new form ' + createdForm.id + ' created');
+
+          var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + createdForm.id + '/';
+          res.set('Location', url);
+          return res.json(201, {
+            location: url
+          });
+        });
+
+      } else {
+        return res.send(400, 'you are not authorized to clone this form');
+      }
     });
   });
 

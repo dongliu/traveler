@@ -26,14 +26,15 @@ block content
         button.btn.btn-primary#reload
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload
-      .btn-group.dropdown
-        a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
-          i.fa.fa-gears.fa-lg
-          | &nbsp;Meta
-          span.caret
-        ul.dropdown-menu
-          li#devices
-            a(href='#{prefix}/devices/') Devices
+      if (viewConfig.showDevice)
+        .btn-group.dropdown
+          a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
+            i.fa.fa-gears.fa-lg
+            | &nbsp;Meta
+            span.caret
+          ul.dropdown-menu
+            li#devices
+              a(href='#{prefix}/devices/') Devices
       .btn-group
         a.btn(href='#{prefix}/profile')
           i.fa.fa-user.fa-lg
@@ -57,7 +58,7 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#forms', data-toggle='tab') My forms
-        if (locals.roles !== undefined && locals.roles.indexOf('admin') !== -1)
+        if (locals.roles !== undefined && locals.roles.indexOf('read_all_forms') !== -1)
           li
             a(href="#allforms", data-toggle='tab') All Forms
         li
@@ -93,6 +94,10 @@ block content
             //-     i.fa.fa-trash-o.fa-lg
             //-     | &nbsp;Delete
             .btn-group
+              button.btn.btn-primary#clone-form(data-toggle='tooltip', title='clone selected forms')
+                i.fa.fa-copy.fa-lg
+                | &nbsp;Clone
+            .btn-group
               button.btn.btn-info#form-select-all
                 i.fa.fa-list.fa-lg
                 | &nbsp;Select all in the current view
@@ -102,6 +107,11 @@ block content
                 | &nbsp;Clear selection
           table#form-table.table.table-bordered.table-hover
         #allforms.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-primary#clone-all-form(data-toggle='tooltip', title='clone selected forms')
+                i.fa.fa-copy.fa-lg
+                | &nbsp;Clone
           table#all-form-table.table.table-bordered.table-hover
         #sharedfroms.tab-pane
           table#shared-form-table.table.table-bordered.table-hover
@@ -110,11 +120,11 @@ block content
         #travelers.tab-pane
           .btn-toolbar
             .btn-group
-              button.btn.btn-primary#archive(data-toggle='tooltip', title='archive selected travelers')
+              button.btn.btn-primary#archive-traveler(data-toggle='tooltip', title='archive selected travelers')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
             .btn-group
-              button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected travelers')
+              button.btn.btn-primary#clone-traveler(data-toggle='tooltip', title='clone selected travelers')
                 i.fa.fa-copy.fa-lg
                 | &nbsp;Clone
 
@@ -122,14 +132,14 @@ block content
         #sharedtravelers.tab-pane
           .btn-toolbar
             .btn-group
-              button.btn.btn-primary#share-clone(data-toggle='tooltip', title='clone selected travelers')
+              button.btn.btn-primary#share-clone-traveler(data-toggle='tooltip', title='clone selected travelers')
                 i.fa.fa-copy.fa-lg
                 | &nbsp;Clone
           table#shared-traveler-table.table.table-bordered.table-hover
         #groupsharedtravelers.tab-pane
           .btn-toolbar
             .btn-group
-              button.btn.btn-primary#group-share-clone(data-toggle='tooltip', title='clone selected travelers')
+              button.btn.btn-primary#group-share-clone-traveler(data-toggle='tooltip', title='clone selected travelers')
                 i.fa.fa-copy.fa-lg
                 | &nbsp;Clone
           table#group-shared-traveler-table.table.table-bordered.table-hover
@@ -144,7 +154,7 @@ block content
         #archivedtravelers.tab-pane
           .btn-toolbar
             .btn-group
-              button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
+              button.btn.btn-primary#dearchive-traveler(data-toggle='tooltip', title='de-archive selected travelers')
                 i.fa.fa-inbox.fa-lg
                 | &nbsp;De-archive
           table#archived-traveler-table.table.table-bordered.table-hover
