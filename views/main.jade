@@ -105,13 +105,14 @@ block content
                 i.fa.fa-square-o.fa-lg
                 | &nbsp;Clear selection
           table#form-table.table.table-bordered.table-hover
-        #allforms.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-primary#clone-all-form(data-toggle='tooltip', title='clone selected forms')
-                i.fa.fa-copy.fa-lg
-                | &nbsp;Clone
-          table#all-form-table.table.table-bordered.table-hover
+        if (locals.roles !== undefined && locals.roles.indexOf('read_all_forms') !== -1)
+          #allforms.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-primary#clone-all-form(data-toggle='tooltip', title='clone selected forms')
+                  i.fa.fa-copy.fa-lg
+                  | &nbsp;Clone
+            table#all-form-table.table.table-bordered.table-hover
         #sharedfroms.tab-pane
           table#shared-form-table.table.table-bordered.table-hover
         #groupsharedfroms.tab-pane
