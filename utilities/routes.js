@@ -38,7 +38,12 @@ function checkUserRole(req, role){
 function getRenderObject(req, extraAttributes) {
     var renderObject = {
         prefix: req.proxied ? req.proxied_prefix : '',
-        viewConfig: config.viewConfig
+        viewConfig: config.viewConfig,
+        helper: {
+            upperCaseFirstLetter: function(text){
+                return text.charAt(0).toUpperCase() + text.slice(1);
+            }
+        }
     };
     if (extraAttributes != undefined) {
         for (var key in extraAttributes){

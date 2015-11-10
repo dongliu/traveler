@@ -34,6 +34,7 @@ module.exports.auth = '';
 module.exports.mongo = '';
 module.exports.service = '';
 module.exports.travelerPackageFile = '';
+module.exports.ui = '';
 
 
 module.exports.load = function(){
@@ -58,6 +59,7 @@ module.exports.load = function(){
     module.exports.auth = require('../' + configPath + '/auth.json');
     module.exports.mongo = require('../' + configPath + '/mongo.json');
     module.exports.service = require('../' + configPath + '/service.json');
+    module.exports.ui = require('../' + configPath + '/ui.json');
     module.exports.travelerPackageFile = require('../package.json');
 
 
@@ -75,6 +77,7 @@ module.exports.load = function(){
         viewConfig.deploymentName = this.app.deployment_name;
     }
     viewConfig.appVersion = this.travelerPackageFile.version;
+    viewConfig.terminology = this.ui.terminology;
 
     module.exports.viewConfig = viewConfig;
 };
