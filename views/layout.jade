@@ -4,6 +4,8 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
   body
+    script.
+      var terminology = !{JSON.stringify(viewConfig.terminology)};
     .navbar.navbar-inverse.navbar-fixed-top
       .navbar-inner
         .container-fluid

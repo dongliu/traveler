@@ -21,7 +21,7 @@ block content
         h3#modalLabel
       .modal-body
       .modal-footer
-    h3 Traveler title:  #{traveler.title}
+    h3 #{helper.upperCaseFirstLetter(viewConfig.terminology.traveler)} title:  #{traveler.title}
     if (locals.traveler.status !== undefined)
       h4 Status:
         case locals.traveler.status
