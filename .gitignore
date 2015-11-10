@@ -24,6 +24,8 @@ config/node.key
 config/api.json
 config/service.json
 config/auth.json
+config/mongo.json
+config/app.json
 
 # npm stuff #
 npm-debug.log*
