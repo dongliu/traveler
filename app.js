@@ -3,8 +3,6 @@
 var config = require('./config/config.js');
 config.load();
 var express = require('express');
-var routes = require('./routes');
-var about = require('./routes/about');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
@@ -124,6 +122,8 @@ app.configure(function () {
 app.configure('development', function () {
   app.use(express.errorHandler());
 });
+var routes = require('./routes');
+var about = require('./routes/about');
 
 require('./routes/form')(app);
 require('./routes/traveler')(app);
@@ -178,6 +178,7 @@ api.configure(function () {
   api.use(express.logger('dev'));
 
   // api.use(express.logger({stream: access_logfile}));
+  api.use(express.urlencoded());
   api.use(auth.basicAuth);
   api.use(express.compress());
   api.use(api.router);
