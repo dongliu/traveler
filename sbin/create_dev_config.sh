@@ -55,9 +55,11 @@ echo "Creating configuration files: "
 # Create configuration files 
 
 # Prompt user for api information 
-read -s -p "Please enter the password for the api (it will be stored in a configuration file): " apiPass
+read -s -p "Please enter the password for the api readOnly access (it will be stored in a configuration file): " apiReadPass
 echo ''
-read -p "Plase enter the port for the api (default: 3443) " apiPort
+read -s -p "[OPTIONAL] Please enter the password for the api write access (it will be stored in a configuration file): " apiWritePass 
+echo ''
+read -p "Please enter the port for the api (default: 3443) " apiPort
  
 if [ -z $apiPort ]; then
     apiPort=3443
@@ -67,12 +69,18 @@ echo $apiPort
 
 # API config file
 apiJson="{"
-apiJson="$apiJson\n   \"api\": \"$apiPass\","
+apiJson="$apiJson\n   \"api_users\": {"
+apiJson="$apiJson\n       \"api_read\": \"$apiReadPass\""
+if [ ! -z $apiWritePass ]; then
+    apiJson="$apiJson,\n       \"api_write\": \"$apiWritePass\""
+fi
+apiJson="$apiJson\n    },"
 apiJson="$apiJson\n   \"app_port\": \"$apiPort\""
 if [ $apiSSL = "y" ]; then
     apiJson="$apiJson,\n   \"ssl_key\": \"ssl/$SSL_BASE_NAME.key\","
     apiJson="$apiJson\n   \"ssl_cert\": \"ssl/$SSL_BASE_NAME.crt\""
-fi 
+fi
+
 apiJson="$apiJson\n}"
 
 echo "Configuration for the api has been generated"
@@ -80,7 +88,7 @@ echo -e $apiJson
 
 # Prompt user for web application information
 read -p "Plase enter the port for the web application (default: 3001) " appPort
-
+read -p "[OPTIONAL] Please enter the deployment name of this traveler instance: " deploymentName
 if [ -z $appPort ]; then
     appPort=3001
 fi
@@ -91,6 +99,9 @@ appJson="$appJson\n   \"app_port\": \"$appPort\""
 if [ $appSSL = "y" ]; then
     appJson="$appJson,\n   \"ssl_key\": \"ssl/$SSL_BASE_NAME.key\","
     appJson="$appJson\n   \"ssl_cert\": \"ssl/$SSL_BASE_NAME.crt\""
+fi
+if [ ! -z $deploymentName ]; then 
+    appJson="$appJson,\n   \"deployment_name\": \"$deploymentName\""
 fi
 appJson="$appJson\n}"
 
@@ -120,18 +131,29 @@ fi
 
 
 if [ -f "$TRAVELER_ROOT_DIR/config/service_change.json" ]; then
-    echo -e "\nThe service confiuration includes urls to external services such as devices"   
-    echo -e "The default configuration will be copied" 
-	cp "$TRAVELER_ROOT_DIR/config/service_change.json" service.json
+    echo -e "\nThe service configuration includes urls to external services such as devices"
+    echo -e "A blank configuration will be created" 
+	echo "{}" >  service.json
 fi
 
 if [ -f "$TRAVELER_ROOT_DIR/config/ad_change.json" ]; then
-    echo -e "\nThe ad confiuration includes ldap configuration"   
+    echo -e "\nThe ad configuration includes ldap configuration"
     echo -e "The default configuration will be copied" 
 	cp "$TRAVELER_ROOT_DIR/config/ad_change.json" ad.json
 fi
 
+if [ -f "$TRAVELER_ROOT_DIR/config/ui_change.json" ]; then
+    echo -e "\nThe ui configuration includes web UI configuration"
+    echo -e "The default configuration will be copied"
+        cp "$TRAVELER_ROOT_DIR/config/ui_change.json" ui.json
+fi
+
+
 echo -e "\nAll of the traveler configuration is located in $TRAVELER_CONFIG_DIR"
+
+echo -e "\nNOTE: The app.json config file could also contain a list of top bar urls"
+echo "   Please see $TRAVELER_ROOT_DIR/config/app_change.json." 
+
 echo -e "\nPlease edit the following configuration files before starting the application:"
 echo "	ad.json" 
 if [ ! $createAuth == "y" ]; then
