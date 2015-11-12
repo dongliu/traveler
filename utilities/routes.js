@@ -8,6 +8,8 @@ var config = require('../config/config.js');
 
 var mongoose = require('mongoose');
 var Form = mongoose.model('Form');
+var Traveler = mongoose.model('Traveler');
+var cheer = require('cheerio');
 
 function filterBody(strings, findAll) {
   return function (req, res, next) {
@@ -67,7 +69,7 @@ function getRenderObject(req, extraAttributes) {
 }
 
 var form = {
-    //Parameters for newFormResultCallBack are (err, newForm)
+  //Parameters for newFormResultCallBack are (err, newForm)
   createForm: function (title, createdBy, html, newFormResultCallBack) {
     var formToCreate = {};
     formToCreate.title = title;
@@ -79,10 +81,39 @@ var form = {
   }
 };
 
+var traveler = {
+  // Parameters for newTravelerCallBack are (err, traveler)
+  createTraveler: function (form, title, userName, devices, newTravelerCallBack) {
+    // update the total input number and finished input number
+    var $ = cheer.load(form.html);
+    var num = $('input, textarea').length;
+    // console.log('total input number is ' + num);
+    var traveler = new Traveler({
+      title: title,
+      description: '',
+      devices: devices,
+      status: 0,
+      createdBy: userName,
+      createdOn: Date.now(),
+      sharedWith: [],
+      referenceForm: form._id,
+      forms: [{
+        html: form.html
+      }],
+      data: [],
+      comments: [],
+      totalInput: num,
+      finishedInput: 0
+    });
+    traveler.save(newTravelerCallBack);
+  }
+
+};
+
 module.exports = {
   filterBody: filterBody,
   checkUserRole: checkUserRole,
   getRenderObject: getRenderObject,
-  form: form
-
+  form: form,
+  traveler: traveler
 };
