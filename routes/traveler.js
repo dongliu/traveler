@@ -30,42 +30,6 @@ var TravelerNote = mongoose.model('TravelerNote');
 var travelerV1API = 'https://liud-dev:8181/traveler/api.php';
 var request = require('request');
 
-function createTraveler(form, req, res) {
-  // update the total input number and finished input number
-  var $ = cheer.load(form.html);
-  var num = $('input, textarea').length;
-  // console.log('total input number is ' + num);
-  var traveler = new Traveler({
-    title: form.title,
-    description: '',
-    devices: [],
-    status: 0,
-    createdBy: req.session.userid,
-    createdOn: Date.now(),
-    sharedWith: [],
-    referenceForm: form._id,
-    forms: [{
-      html: form.html
-    }],
-    data: [],
-    comments: [],
-    totalInput: num,
-    finishedInput: 0
-  });
-  traveler.save(function (err, doc) {
-    if (err) {
-      console.error(err);
-      return res.send(500, err.message);
-    }
-    console.log('new traveler ' + doc.id + ' created');
-    var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
-    res.set('Location', url);
-    return res.json(201, {
-      location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
-    });
-  });
-}
-
 function cloneTraveler(source, req, res) {
   var traveler = new Traveler({
     title: source.title,
@@ -628,7 +592,18 @@ module.exports = function (app) {
         }
         if (form) {
           if (form.createdBy === req.session.userid) {
-            createTraveler(form, req, res);
+            routesUtilities.traveler.createTraveler(form, form.title, req.session.userid, [], function (err, doc) {
+              if (err) {
+                console.error(err);
+                return res.send(500, err.message);
+              }
+              console.log('new traveler ' + doc.id + ' created');
+              var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
+              res.set('Location', url);
+              return res.json(201, {
+                location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
+              });
+            });
           } else {
             return res.send(400, 'You cannot create a traveler based on a form that you do not own.');
           }
