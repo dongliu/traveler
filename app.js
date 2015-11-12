@@ -3,8 +3,6 @@
 var config = require('./config/config.js');
 config.load();
 var express = require('express');
-var routes = require('./routes');
-var about = require('./routes/about');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
@@ -14,6 +12,9 @@ var rotator = require('file-stream-rotator');
 var mongoose = require('mongoose');
 
 var configPath = config.configPath;
+var apiSettings = config.api;
+var mongoConfig = config.mongo;
+var appSettings = config.app;
 
 // Load MongoDB object modeling tool
 mongoose.connection.close();
@@ -26,7 +27,6 @@ require('./model/traveler.js');
 require('./model/traveler.js');
 
 //Connect to mongo database
-var mongoConfig = config.mongo;
 var mongoAddress = mongoConfig.server_address + ':' + mongoConfig.server_port + '/' + mongoConfig.traveler_db;
 var mongoOptions = {
   db: {
@@ -68,8 +68,11 @@ var auth = require('./lib/auth');
 
 var uploadDir = './' + config.uploadPath + '/';
 
-/* Web Application */
+// api and web app
+var api = express();
 var app = express();
+
+/* Configure Web Application */
 app.enable('strict routing');
 if (app.get('env') === 'production') {
   var access_logfile = rotator.getStream({
@@ -119,6 +122,8 @@ app.configure(function () {
 app.configure('development', function () {
   app.use(express.errorHandler());
 });
+var routes = require('./routes');
+var about = require('./routes/about');
 
 require('./routes/form')(app);
 require('./routes/traveler')(app);
@@ -149,7 +154,6 @@ app.get('/apis', function (req, res) {
 });
 
 // Start application using settings
-var appSettings = config.app;
 var appPort = appSettings.app_port;
 var server;
 if (appSettings.ssl_key !== undefined) {
@@ -166,9 +170,7 @@ if (appSettings.ssl_key !== undefined) {
   });
 }
 
-/* REST API */
-var api = express();
-var apiSettings = config.api;
+/* Configure REST API */
 var apiPort = apiSettings.app_port;
 api.enable('strict routing');
 api.configure(function () {
@@ -176,6 +178,7 @@ api.configure(function () {
   api.use(express.logger('dev'));
 
   // api.use(express.logger({stream: access_logfile}));
+  api.use(express.urlencoded());
   api.use(auth.basicAuth);
   api.use(express.compress());
   api.use(api.router);
