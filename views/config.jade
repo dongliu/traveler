@@ -63,9 +63,10 @@ block content
     ul#devices
       each device in traveler.devices
         li
-          | #{device}
-          button.btn.btn-small.btn-warning.removeDevice
-            i.fa.fa-trash-o.fa-lg
+          | !{device}
+          if (devicesRemovable)
+            button.btn.btn-small.btn-warning.removeDevice
+              i.fa.fa-trash-o.fa-lg
     br
     if (viewConfig.showDevice)
       .btn-group
