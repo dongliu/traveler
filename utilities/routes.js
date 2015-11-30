@@ -11,6 +11,12 @@ var Form = mongoose.model('Form');
 var Traveler = mongoose.model('Traveler');
 var cheer = require('cheerio');
 
+var devices = require('./devices/default.js');
+// Override devices for a specific component system.
+if (config.service.device_application === 'cdb') {
+  devices = require('./devices/cdb.js');
+}
+
 function filterBody(strings, findAll) {
   return function (req, res, next) {
     var k;
@@ -68,6 +74,18 @@ function getRenderObject(req, extraAttributes) {
   return renderObject;
 }
 
+function getDeviceValue(value){
+  return new Promise(function(resolve, reject){
+    devices.getDeviceValue(value, function(value){
+      resolve(value);
+    });
+  });
+}
+
+function deviceRemovalAllowed(){
+  return devices.devicesRemovalAllowed;
+}
+
 var form = {
   //Parameters for newFormResultCallBack are (err, newForm)
   createForm: function (title, createdBy, html, newFormResultCallBack) {
@@ -107,13 +125,14 @@ var traveler = {
     });
     traveler.save(newTravelerCallBack);
   }
-
 };
 
 module.exports = {
   filterBody: filterBody,
   checkUserRole: checkUserRole,
   getRenderObject: getRenderObject,
+  getDeviceValue: getDeviceValue,
+  deviceRemovalAllowed: deviceRemovalAllowed,
   form: form,
   traveler: traveler
 };
