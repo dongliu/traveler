@@ -41,7 +41,7 @@ block content
           default
             = ' '
     if (locals.traveler.devices && traveler.devices.length > 0)
-      h4 Devices: #{traveler.devices}
+      h4 Devices: !{traveler.devices}
     if (locals.traveler.status !== undefined && locals.traveler.status > 0)
       .btn-group(data-toggle='buttons-radio')
         button.btn.btn-info#show-validation Show validation
