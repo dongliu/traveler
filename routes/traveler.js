@@ -736,7 +736,7 @@ module.exports = function (app) {
           doc.devices[0] = value;
           return res.render('config', routesUtilities.getRenderObject(req, {
             traveler: doc,
-            devicesRemovable: routesUtilities.deviceRemovalAllowed
+            devicesRemovable: routesUtilities.deviceRemovalAllowed()
           }));
         });
       } else {
