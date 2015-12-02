@@ -643,12 +643,17 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
+
       if (canWriteActive(req, doc)) {
-        return res.render('traveler', routesUtilities.getRenderObject(req, {
-          traveler: doc
-        }));
+        routesUtilities.getDeviceValue(doc.devices[0]).then(function (value) {
+          doc.devices[0] = value;
+          return res.render('traveler', routesUtilities.getRenderObject(req, {
+            traveler: doc
+          }));
+        });
+      } else {
+        return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
       }
-      return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
     });
   });
 
@@ -661,9 +666,12 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      return res.render('travelerviewer', routesUtilities.getRenderObject(req, {
-        traveler: doc
-      }));
+      routesUtilities.getDeviceValue(doc.devices[0]).then(function(value){
+        doc.devices[0] = value;
+        return res.render('travelerviewer', routesUtilities.getRenderObject(req, {
+          traveler: doc
+        }));
+      });
     });
   });
 
@@ -724,11 +732,17 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (canWrite(req, doc)) {
-        return res.render('config', routesUtilities.getRenderObject(req, {
-          traveler: doc
-        }));
+        routesUtilities.getDeviceValue(doc.devices[0]).then(function(value){
+          doc.devices[0] = value;
+          return res.render('config', routesUtilities.getRenderObject(req, {
+            traveler: doc,
+            devicesRemovable: routesUtilities.deviceRemovalAllowed()
+          }));
+        });
+      } else {
+        return res.send(403, 'You are not authorized to access this resource');
       }
-      return res.send(403, 'You are not authorized to access this resource');
+
     });
   });
 

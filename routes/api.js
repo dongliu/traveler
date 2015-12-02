@@ -95,6 +95,18 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/apis/forms/', function (req, res){
+    Form.find({}, function(err, forms){
+      performMongoResponse(err,forms, res);
+    });
+  });
+
+  app.get('/apis/forms/:id/', function (req, res){
+    Form.findById(req.params.id, function(err, forms){
+      performMongoResponse(err,forms, res);
+    });
+  });
+
   app.get('/apis/travelers/:id/', function (req, res) {
     Traveler.findById(req.params.id, function(travelerErr, traveler){
       performMongoResponse(travelerErr, traveler, res);
