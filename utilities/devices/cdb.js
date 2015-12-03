@@ -51,47 +51,60 @@ function getCDBEntityReference(valueOrig, cb){
     }
 
     function processComponentResponse(data,error){
-        var displayValue;
-        if(error){
-            displayValue = valueOrig;
-        }else {
-            displayValue = "Component: " + data.name;
-        }
-        constructFinalUrl(config.service.cdb.component_path, displayValue);
+        performErrorChecking(data,error).then(function(value) {
+            var displayValue = value;
+            if (displayValue == undefined) {
+                displayValue = "Component: " + data.name;
+            }
+            constructFinalUrl(config.service.cdb.component_path, displayValue);
+        });
     }
     function processComponentInstanceResponse(data,error){
-        var displayValue;
-        if(error){
-            displayValue = valueOrig;
-        }else {
-            displayValue = "Component Instance: " + data.component.name;
-            if(data.qrId){
-                displayValue += "<br/>QRID: " + data.qrId;
+        performErrorChecking(data,error).then(function(value) {
+            var displayValue = value;
+            if (displayValue == undefined) {
+                displayValue = "Component Instance: " + data.component.name;
+                if(data.qrId){
+                    displayValue += "<br/>QRID: " + data.qrId;
+                }
             }
-        }
-        constructFinalUrl(config.service.cdb.component_instance_path, displayValue);
+            constructFinalUrl(config.service.cdb.component_instance_path, displayValue);
+        });
     }
 
     function processDesignResponse(data,error){
-        var displayValue;
-
-        if(error){
-            displayValue = valueOrig;
-        }else {
-            displayValue = "Design: " + data.name;
-        }
-        constructFinalUrl(config.service.cdb.design_path, displayValue);
+        performErrorChecking(data,error).then(function(value) {
+            var displayValue = value;
+            if (displayValue == undefined) {
+                displayValue = "Design: " + data.name;
+            }
+            constructFinalUrl(config.service.cdb.design_path, displayValue);
+        });
     }
 
     function processDesignElementResponse(data,error){
-        var displayValue;
+        performErrorChecking(data,error).then(function(value){
+            var displayValue = value;
+            if(displayValue == undefined){
+                displayValue = "Design Element: " + data.name;
+            }
+            constructFinalUrl(config.service.cdb.design_element_path, displayValue);
+        });
+    }
 
-        if(error){
-            displayValue = valueOrig;
-        }else {
-            displayValue = "Design Element: " + data.name;
-        }
-        constructFinalUrl(config.service.cdb.design_element_path, displayValue);
+    function performErrorChecking(data, error){
+        return new Promise(function(resolve){
+            var displayValue;
+            if(error){
+                displayValue = valueOrig;
+            }else {
+                if (data.errorMessage) {
+                    console.error(data.errorMessage);
+                    displayValue = "Error: " + data.errorMessage;
+                }
+            }
+            resolve(displayValue)
+        });
     }
 
 
@@ -121,6 +134,11 @@ function getDesignById(id, cb){
     performServiceRequest(fullUrl, cb);
 }
 
+function getDesignElementById(id, cb){
+    var fullUrl = webServiceUrl + '/designElements/' + id;
+    performServiceRequest(fullUrl, cb);
+}
+
 function performServiceRequest(fullUrl, cb){
     console.log("Performing API Request: " + fullUrl);
     request({
@@ -129,7 +147,11 @@ function performServiceRequest(fullUrl, cb){
         },
         function(error, response){
             if(response != undefined){
-                response = JSON.parse(response.body);
+                try {
+                    response = JSON.parse(response.body);
+                } catch (e){
+                    error = "Response from server could not be parsed.";
+                }
             }
             if (error != undefined){
                 console.error(error); 
