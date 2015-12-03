@@ -13,7 +13,8 @@
  *  "web_service_url": "URL to the CDB web services",
  *  "component_path": "/views/component/view.xhtml?id=REPLACE_ID",
  *  "component_instance_path": "/views/componentInstance/view.xhtml?id=REPLACE_ID",
- *  "design_path": "/views/design/view.xhtml?id=REPLACE_ID"
+ *  "design_path": "/views/design/view.xhtml?id=REPLACE_ID",
+ *  "design_element_path": "﻿/views/designElement/view?id=REPLACE_ID"
  * }
  *
  */
@@ -41,6 +42,9 @@ function getCDBEntityReference(valueOrig, cb){
             break;
         case 'design':
             getDesignById(id, processDesignResponse);
+            break;
+        case 'designElement':
+            getDesignElementById(id, processDesignElementResponse);
             break;
         default:
             cb(valueOrig);
@@ -78,6 +82,19 @@ function getCDBEntityReference(valueOrig, cb){
         }
         constructFinalUrl(config.service.cdb.design_path, displayValue);
     }
+
+    function processDesignElementResponse(data,error){
+        var displayValue;
+
+        if(error){
+            displayValue = valueOrig;
+        }else {
+            displayValue = "Design Element: " + data.name;
+        }
+        constructFinalUrl(config.service.cdb.design_element_path, displayValue);
+    }
+
+
 
     function constructFinalUrl(urlPath, displayValue){
         var urlPath = urlPath.replace('REPLACE_ID', id);
