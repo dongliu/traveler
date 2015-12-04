@@ -9,6 +9,7 @@
   "login_proxied_service": "https://intra-gw.nscl.msu.edu/3001/login",
 
   "default_roles": [
-    "OPTIONAL: Please remove if no default role is desired. Role will only be assigned to new users."
+    "OPTIONAL: Please remove if no default role is desired. Role will only be assigned to new users.",
+    "Currently Allowed Roles are:  'manager', 'admin', 'read_all_forms', 'write_active_travelers'"
   ]
 }
