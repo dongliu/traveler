@@ -76,9 +76,20 @@ function getRenderObject(req, extraAttributes) {
 
 function getDeviceValue(value){
   return new Promise(function(resolve, reject){
-    devices.getDeviceValue(value, function(value){
-      resolve(value);
-    });
+    var deviceIndex = 0;
+    processNextDevice();
+
+    function processNextDevice(){
+      if(value.length > deviceIndex) {
+        devices.getDeviceValue(value[deviceIndex], function(curDeviceValue){
+          value[deviceIndex] = curDeviceValue;
+          deviceIndex ++;
+          processNextDevice();
+        })
+      } else {
+        resolve(value)
+      }
+    }
   });
 }
 
