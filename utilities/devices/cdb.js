@@ -65,7 +65,7 @@ function getCDBEntityReference(valueOrig, cb){
             if (displayValue == undefined) {
                 displayValue = "Component Instance: " + data.component.name;
                 if(data.qrId){
-                    displayValue += "<br/>QRID: " + data.qrId;
+                    displayValue += " (QRID: " + data.qrId + ")";
                 }
             }
             constructFinalUrl(config.service.cdb.component_instance_path, displayValue);
