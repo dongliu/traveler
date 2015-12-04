@@ -645,8 +645,8 @@ module.exports = function (app) {
       }
 
       if (canWriteActive(req, doc)) {
-        routesUtilities.getDeviceValue(doc.devices[0]).then(function (value) {
-          doc.devices[0] = value;
+        routesUtilities.getDeviceValue(doc.devices).then(function (value) {
+          doc.devices = value;
           return res.render('traveler', routesUtilities.getRenderObject(req, {
             traveler: doc
           }));
@@ -666,8 +666,8 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      routesUtilities.getDeviceValue(doc.devices[0]).then(function(value){
-        doc.devices[0] = value;
+      routesUtilities.getDeviceValue(doc.devices).then(function(value){
+        doc.devices = value;
         return res.render('travelerviewer', routesUtilities.getRenderObject(req, {
           traveler: doc
         }));
@@ -732,8 +732,8 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (canWrite(req, doc)) {
-        routesUtilities.getDeviceValue(doc.devices[0]).then(function(value){
-          doc.devices[0] = value;
+        routesUtilities.getDeviceValue(doc.devices).then(function(value){
+          doc.devices = value;
           return res.render('config', routesUtilities.getRenderObject(req, {
             traveler: doc,
             devicesRemovable: routesUtilities.deviceRemovalAllowed()
