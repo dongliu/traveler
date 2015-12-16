@@ -6,12 +6,12 @@ SUBDIRS = src
 
 .PHONY: support, certificates, dev-mongo, dev-config, update
 
-default: 
+default:
 
-support: 
+support:
 	$(TOP)/sbin/traveler_install_support.sh
 
-update: 
+update:
 	$(TOP)/sbin/traveler_update_support.sh
 
 
@@ -21,5 +21,5 @@ certificates:
 dev-mongo:
 	$(TOP)/sbin/configure_mongo_dev.sh
 
-dev-config: 
-	$(TOP)/sbin/create_dev_config.sh
+default-config:
+	$(TOP)/sbin/create_traveler_config.sh
