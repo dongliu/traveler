@@ -43,7 +43,7 @@ if [ $appSSL == "y" -o $apiSSL == "y" -o $mongoExpressSSL == "y" \
   echo -e "\nThe configuration for ssl will include files ssl/node.key and ssl/node.pem within the config folder"
   read -p "Would you like to run script to create self signed certificates for the configuration? (Y/n): " createCerts
   if [[ -z $createCerts ]]; then
-    createCerts = "y"
+    createCerts="y"
   fi
   SSL_BASE_NAME=`hostname -f`
   if [ $createCerts == 'y' -o $createCerts == 'Y' ]; then
