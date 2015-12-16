@@ -59,7 +59,7 @@ if [ $appSSL == "y" -o $apiSSL == "y" -o $mongoExpressSSL == "y" \
   fi
 fi
 
-if [ $mongoExpressSSL == "y" ]; then
+if [ $mongoExpressSSL == "y" -o $mongoExpressSSL == "Y" ]; then
   mongoExpressConfigFile=$TRAVELER_INSTALL_ETC_DIR/mongo-express-configuration.sh
   cmd="cat $mongoExpressConfigFile | sed 's?#export MONGO_EXPRESS_SSL_ENABLED=.*?export MONGO_EXPRESS_SSL_ENABLED=true?g' > $mongoExpressConfigFile.2 && mv $mongoExpressConfigFile.2 $mongoExpressConfigFile"
   eval $cmd
@@ -67,6 +67,16 @@ if [ $mongoExpressSSL == "y" ]; then
   eval $cmd
   cmd="cat $mongoExpressConfigFile | sed 's?#export MONGO_EXPRESS_SSL_KEY=.*?export MONGO_EXPRESS_SSL_KEY=$TRAVELER_CONFIG_DIR/ssl/$SSL_BASE_NAME.key?g' > $mongoExpressConfigFile.2 && mv $mongoExpressConfigFile.2 $mongoExpressConfigFile"
   eval $cmd
+fi
+
+source $mongoExpressConfigFile
+if [[ ! -f $MONGO_EXPRESS_DAEMON_PASSWD_FILE ]]; then
+  read -s -p "Please enter password for mongo-express to create passwd file for user $MONGO_EXPRESS_DAEMON_USERNAME [admin]: " mongoExpressAdminPass
+  if [[ -z $mongoExpressAdminPass ]]; then
+    mongoExpressAdminPass="admin"
+  fi
+  echo $mongoExpressAdminPass > $MONGO_EXPRESS_DAEMON_PASSWD_FILE
+  chmod 400 $MONGO_EXPRESS_DAEMON_PASSWD_FILE
 fi
 
 echo "Creating configuration files: "
