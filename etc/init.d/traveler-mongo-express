@@ -3,24 +3,24 @@
 MY_DIR=`dirname $0`
 CUR_DIR=`pwd`
 cd $MY_DIR
-MY_DIR=`pwd` 
-cd $CUR_DIR 
+MY_DIR=`pwd`
+cd $CUR_DIR
 
 source $MY_DIR/../../setup.sh
 
-MONGO_EXPRESS_CONFIGURATION=$TRAVELER_INSTALL_ETC_DIR/mongo-express-confiugration.sh
-if [ ! -f $MONGO_EXPRESS_CONFIGURATION ]; then 
-    >&2 echo "$MONGO_EXPRESS_CONFIGURATION is not defined"
-    >&2 echo "Please use the default file to configure it."
-    exit 1
+MONGO_EXPRESS_CONFIGURATION=$TRAVELER_INSTALL_ETC_DIR/mongo-express-configuration.sh
+if [ ! -f $MONGO_EXPRESS_CONFIGURATION ]; then
+  >&2 echo "$MONGO_EXPRESS_CONFIGURATION is not defined"
+  >&2 echo "Please use the default file to configure it."
+  exit 1
 fi
 source $MONGO_EXPRESS_CONFIGURATION
 
 MONGO_CONFIGURATION=$TRAVELER_INSTALL_ETC_DIR/mongo-configuration.sh
-if [ ! -f $MONGO_CONFIGURATION ]; then 
-    >&2 echo "$MONGO_CONFIGURATION is not defined"
-    >&2 echo "Please use the default file to configure it."
-    exit 1
+if [ ! -f $MONGO_CONFIGURATION ]; then
+  >&2 echo "$MONGO_CONFIGURATION is not defined"
+  >&2 echo "Please use the default file to configure it."
+  exit 1
 fi
 source $MONGO_CONFIGURATION
 
@@ -28,98 +28,97 @@ ERR_RED='\033[0;31m'
 ERR_END='\033[0m\n'
 
 printErr(){
-    printf "${ERR_RED}${1}${ERR_END}"
+  printf "${ERR_RED}${1}${ERR_END}"
 }
 
 start(){
-    echo $MONGO_EXPRESS_DAEMON_SOURCE_DIR
-    if [ ! -d $MONGO_EXPRESS_DAEMON_SOURCE_DIR ]; then
-	>&2 printErr "ERROR: Make sure mongo-express is installed. It could be done by running 'make support' from $TRAVELER_ROOT_DIR"
-	exit 1 
-    fi
+  echo $MONGO_EXPRESS_DAEMON_SOURCE_DIR
+  if [ ! -d $MONGO_EXPRESS_DAEMON_SOURCE_DIR ]; then
+    >&2 printErr "ERROR: Make sure mongo-express is installed. It could be done by running 'make support' from $TRAVELER_ROOT_DIR"
+    exit 1
+  fi
 
-    if [ -f $MONGO_EXPRESS_DAEMON_PID_FILE ]; then
-	>&2 printErr "ERROR: Make sure the mongo-express is not running. A pid file exists: $MONGO_EXPRESS_DAEMON_PID_FILE"
-	exit 1
-    fi
+  if [ -f $MONGO_EXPRESS_DAEMON_PID_FILE ]; then
+    >&2 printErr "ERROR: Make sure the mongo-express is not running. A pid file exists: $MONGO_EXPRESS_DAEMON_PID_FILE"
+    exit 1
+  fi
 
-    read -s -p "Please enter the password for mongodb username $MONGO_ADMIN_USERNAME: " adminPass 
-    echo ''
-    
-   
-    if [ -f $MONGO_EXPRESS_DAEMON_PASSWD_FILE ]; then 
-	mongoExpressAdminPass=`cat $MONGO_EXPRESS_DAEMON_PASSWD_FILE`
-    else 
-	printErr "No passwd file exists for mongo-express basic-auth. Location $MONGO_EXPRESS_DAEMON_PASSWD_FILE"
-	printErr "basic-auth login is: $MONGO_EXPRESS_DAEMON_USERNAME" 
-	read -s -p "Please enter password for mongo-express to create passwd file: " \mongoExpressAdminPass
-	echo ''
-	echo $mongoExpressAdminPass > $MONGO_EXPRESS_DAEMON_PASSWD_FILE
-    fi
+  if [[ -f $MONGO_ADMIN_PASSWD_FILE ]]; then
+    adminPass=`cat $MONGO_ADMIN_PASSWD_FILE`
+  else
+    printErr "No passwd file exists for mongodb admin. Location $MONGO_ADMIN_PASSWD_FILE"
+  fi
 
-    ME_CONFIG_SITE_SSL_ENABLED=$MONGO_EXPRESS_SSL_ENABLED \
-    ME_CONFIG_SITE_SSL_CRT_PATH=$MONGO_EXPRESS_SSL_CRT \
-    ME_CONFIG_SITE_SSL_KEY_PATH=$MONGO_EXPRESS_SSL_KEY \
-    ME_CONFIG_MONGODB_PORT=$MONGO_SERVER_PORT \
-	ME_CONFIG_MONGODB_SERVER=$MONGO_SERVER_ADDRESS \
-	ME_CONFIG_MONGODB_ADMINUSERNAME=$MONGO_ADMIN_USERNAME \
-	ME_CONFIG_MONGODB_ADMINPASSWORD=$adminPass \
-	ME_CONFIG_BASICAUTH_USERNAME=$MONGO_EXPRESS_DAEMON_USERNAME \
-	ME_CONFIG_BASICAUTH_PASSWORD=$mongoExpressAdminPass \
-	$FOREVER_BIN/forever start --sourceDIR $TRAVELERD_SOURCE_DIR \
-	--workingDir $MONGO_EXPRESS_DAEMON_WORKING_DIR \
-	-p $MONGO_EXPRESS_FOREVER_PATH \
-	--pidFile $MONGO_EXPRESS_DAEMON_PID_FILE \
-	-l $MONGO_EXPRESS_DAEMON_LOG \
-	-o $MONGO_EXPRESS_DAEMON_OUT \
-	-e $MONGO_EXPRESS_DAEMON_ERR \
-	--append \
-	--killSignal=$MONGO_EXPRESS_DAEMON_KILSIG \
-	$MONGO_EXPRESS_DAEMON_APP_DIR
+  if [[ -f $MONGO_EXPRESS_DAEMON_PASSWD_FILE ]]; then
+    mongoExpressAdminPass=`cat $MONGO_EXPRESS_DAEMON_PASSWD_FILE`
+  else
+    printErr "No passwd file exists for mongo-express basic-auth. Location $MONGO_EXPRESS_DAEMON_PASSWD_FILE"
+    exit 1
+  fi
+
+  ME_CONFIG_SITE_SSL_ENABLED=$MONGO_EXPRESS_SSL_ENABLED \
+  ME_CONFIG_SITE_SSL_CRT_PATH=$MONGO_EXPRESS_SSL_CRT \
+  ME_CONFIG_SITE_SSL_KEY_PATH=$MONGO_EXPRESS_SSL_KEY \
+  ME_CONFIG_MONGODB_PORT=$MONGO_SERVER_PORT \
+  ME_CONFIG_MONGODB_SERVER=$MONGO_SERVER_ADDRESS \
+  ME_CONFIG_MONGODB_ADMINUSERNAME=$MONGO_ADMIN_USERNAME \
+  ME_CONFIG_MONGODB_ADMINPASSWORD=$adminPass \
+  ME_CONFIG_BASICAUTH_USERNAME=$MONGO_EXPRESS_DAEMON_USERNAME \
+  ME_CONFIG_BASICAUTH_PASSWORD=$mongoExpressAdminPass \
+  $FOREVER_BIN/forever start --sourceDIR $TRAVELERD_SOURCE_DIR \
+  --workingDir $MONGO_EXPRESS_DAEMON_WORKING_DIR \
+  -p $MONGO_EXPRESS_FOREVER_PATH \
+  --pidFile $MONGO_EXPRESS_DAEMON_PID_FILE \
+  -l $MONGO_EXPRESS_DAEMON_LOG \
+  -o $MONGO_EXPRESS_DAEMON_OUT \
+  -e $MONGO_EXPRESS_DAEMON_ERR \
+  --append \
+  --killSignal=$MONGO_EXPRESS_DAEMON_KILSIG \
+  $MONGO_EXPRESS_DAEMON_APP_DIR
 
 }
 
 stop(){
-    if [ -f $MONGO_EXPRESS_DAEMON_PID_FILE ]; then
-	$FOREVER_BIN/forever stop `cat $MONGO_EXPRESS_DAEMON_PID_FILE`
-    else
-	>&2 printErr "ERROR: Cannot stop process. No pid file exists: $TRAVELERD_PID_FILE"
-	exit 1
-    fi
+  if [ -f $MONGO_EXPRESS_DAEMON_PID_FILE ]; then
+    $FOREVER_BIN/forever stop `cat $MONGO_EXPRESS_DAEMON_PID_FILE`
+  else
+    >&2 printErr "ERROR: Cannot stop process. No pid file exists: $TRAVELERD_PID_FILE"
+    exit 1
+  fi
 }
 
 restart(){
-    stop
-    start
+  stop
+  start
 }
 
 status(){
-    if [ -f $MONGO_EXPRESS_DAEMON_PID_FILE ]; then
-	echo "Status for travelerd pid: `cat $MONGO_EXPRESS_DAEMON_PID_FILE`"
-	$FOREVER_BIN/forever list
-    else
-	>&2 printErr "ERROR: Cannot find the pid file: ${MONGO_EXPRESS_DAEMON_PID_FILE}"
-	echo "Output for forever list: "
-	$FOREVER_BIN/forever list 
-	exit 1
-    fi
+  if [ -f $MONGO_EXPRESS_DAEMON_PID_FILE ]; then
+    echo "Status for travelerd pid: `cat $MONGO_EXPRESS_DAEMON_PID_FILE`"
+    $FOREVER_BIN/forever list
+  else
+    >&2 printErr "ERROR: Cannot find the pid file: ${MONGO_EXPRESS_DAEMON_PID_FILE}"
+    echo "Output for forever list: "
+    $FOREVER_BIN/forever list
+    exit 1
+  fi
 }
 
 case "$1" in
-    start)
-        start
-    ;;
-    stop)
-        stop
-    ;;
-    restart)
-        restart
-    ;;
-    status)
-        status
-    ;;
-    *)
-        echo "Usage: $0 {start|stop|restart|status}"
-        exit 1
-    ;;
+  start)
+  start
+  ;;
+  stop)
+  stop
+  ;;
+  restart)
+  restart
+  ;;
+  status)
+  status
+  ;;
+  *)
+  echo "Usage: $0 {start|stop|restart|status}"
+  exit 1
+  ;;
 esac

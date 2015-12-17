@@ -3,123 +3,127 @@
 MY_DIR=`dirname $0`
 CUR_DIR=`pwd`
 cd $MY_DIR
-MY_DIR=`pwd` 
-cd $CUR_DIR 
+MY_DIR=`pwd`
+cd $CUR_DIR
 
-source $MY_DIR/../../setup.sh 
+source $MY_DIR/../../setup.sh
 
 MONGO_CONFIGURATION=$TRAVELER_INSTALL_ETC_DIR/mongo-configuration.sh
-if [ ! -f $MONGO_CONFIGURATION ]; then 
-    >&2 echo "$MONGO_CONFIGURATION is not defined"
-    >&2 echo "Please use the default file to configure it."
-    exit 1
+if [ ! -f $MONGO_CONFIGURATION ]; then
+  >&2 echo "$MONGO_CONFIGURATION is not defined"
+  >&2 echo "Please use the default file to configure it."
+  exit 1
 fi
 source $MONGO_CONFIGURATION
 
-# Should only be used for administrative configurations 
+# Should only be used for administrative configurations
 startNoAuth(){
-    echo "Starting mongo deamon"
-    # Create the log file when it does not exist
-    if [ ! -f $MONGO_LOG_DIRECTORY ]; then
-        touch $MONGO_LOG_DIRECTORY
-    fi
-    
-    $MONGO_BIN_DIRECTORY/mongod \
-        --port=$MONGO_SERVER_PORT \
-        --fork --logpath=$MONGO_LOG_DIRECTORY --logappend\
-        --dbpath=$MONGO_DATA_DIRECTORY \
-        --pidfilepath=$MONGO_PID_DIRECTORY \
-	--bind_ip $MONGO_BIND_IP
+  echo "Starting mongo deamon"
+  # Create the log file when it does not exist
+  if [ ! -f $MONGO_LOG_DIRECTORY ]; then
+    touch $MONGO_LOG_DIRECTORY
+  fi
+
+  $MONGO_BIN_DIRECTORY/mongod \
+  --port=$MONGO_SERVER_PORT \
+  --fork --logpath=$MONGO_LOG_DIRECTORY --logappend\
+  --dbpath=$MONGO_DATA_DIRECTORY \
+  --pidfilepath=$MONGO_PID_DIRECTORY \
+  --bind_ip $MONGO_BIND_IP
 }
 start(){
-    echo "Starting mongo deamon" 
-    # Create the log file when it does not exist
-    if [ ! -f $MONGO_LOG_DIRECTORY ]; then
-	touch $MONGO_LOG_DIRECTORY
-    fi
+  echo "Starting mongo deamon"
+  # Create the log file when it does not exist
+  if [ ! -f $MONGO_LOG_DIRECTORY ]; then
+    touch $MONGO_LOG_DIRECTORY
+  fi
 
-    $MONGO_BIN_DIRECTORY/mongod \
-	--auth \
-	--port=$MONGO_SERVER_PORT \
-	--fork --logpath=$MONGO_LOG_DIRECTORY --logappend\
-	--dbpath=$MONGO_DATA_DIRECTORY \
-	--pidfilepath=$MONGO_PID_DIRECTORY \
-	--bind_ip $MONGO_BIND_IP
+  $MONGO_BIN_DIRECTORY/mongod \
+  --auth \
+  --port=$MONGO_SERVER_PORT \
+  --fork --logpath=$MONGO_LOG_DIRECTORY --logappend\
+  --dbpath=$MONGO_DATA_DIRECTORY \
+  --pidfilepath=$MONGO_PID_DIRECTORY \
+  --bind_ip $MONGO_BIND_IP
 }
 
 stop (){
-    if [ ! -f $MONGO_PID_DIRECTORY ]; then
-	echo "$MONGO_PID_DIRECTORY does not exist"
-	exit 0
-    fi
-    if [ `uname` == "Linux" ]; then
-	$MONGO_BIN_DIRECTORY/mongod --shutdown --dbpath=$MONGO_DATA_DIRECTORY
-    elif [ `uname` == "Darwin" ]; then 
-	read -s -p "Enter admin password for mongodb to perform shutdown: " adminPass
-	echo ''
-	$MONGO_BIN_DIRECTORY/mongo \
-	    $MONGO_SERVER_ADDRESS:$MONGO_SERVER_PORT/admin \
-	    --username $MONGO_ADMIN_USERNAME \
-	    --password $adminPass \
-	    --eval "db.shutdownServer();"
-    fi
-    # Check if pid file should be removed 
-    sleep 2
-    pid=`cat $MONGO_PID_DIRECTORY`
-    processResult=`ps $pid | grep $pid`
-    if [ -z "$processResult" ]; then
-	rm $MONGO_PID_DIRECTORY
+  if [ ! -f $MONGO_PID_DIRECTORY ]; then
+    echo "$MONGO_PID_DIRECTORY does not exist"
+    exit 0
+  fi
+  if [ `uname` == "Linux" ]; then
+    $MONGO_BIN_DIRECTORY/mongod --shutdown --dbpath=$MONGO_DATA_DIRECTORY
+  elif [ `uname` == "Darwin" ]; then
+    if [[ -f $MONGO_ADMIN_PASSWD_FILE ]]; then
+      adminPass=`cat $MONGO_ADMIN_PASSWD_FILE`
     else
-	echo "Mongo process couldn't be stopped" 
-	stop 
+      printErr "No passwd file exists for mongodb admin: $MONGO_ADMIN_PASSWD_FILE"
+      exit 1
     fi
-    
+
+    $MONGO_BIN_DIRECTORY/mongo \
+    $MONGO_SERVER_ADDRESS:$MONGO_SERVER_PORT/admin \
+    --username $MONGO_ADMIN_USERNAME \
+    --password $adminPass \
+    --eval "db.shutdownServer();"
+  fi
+  # Check if pid file should be removed
+  sleep 2
+  pid=`cat $MONGO_PID_DIRECTORY`
+  processResult=`ps $pid | grep $pid`
+  if [ -z "$processResult" ]; then
+    rm $MONGO_PID_DIRECTORY
+  else
+    echo "Mongo process couldn't be stopped"
+    stop
+  fi
+
 }
 
 restart(){
-    stop
-    start
+  stop
+  start
 }
 
 status(){
-    pid=`cat $MONGO_PID_DIRECTORY`
-    processResult=`ps $pid | grep $pid`
-    if [ ! -z "$processResult" ]; then
-	echo "The traveler-mongod is running"
-	ps $pid 
-	read -p "Would you like to see the detailed server status? (y/n) " showDetailedStatus 
-	if [ $showDetailedStatus == 'y' ]; then
-	    read -s -p "Enter admin password for mongodb to view status: " adminPass
-	    echo ''
-	    $MONGO_BIN_DIRECTORY/mongo \
-		$MONGO_SERVER_ADDRESS:$MONGO_SERVER_PORT/admin \
-		--username $MONGO_ADMIN_USERNAME \
-		--password $adminPass \
-		--eval "printjson(db.serverStatus())"
-	fi
-    else
-	echo "The traveler-mongod is not running"
-    fi
+  pid=`cat $MONGO_PID_DIRECTORY`
+  processResult=`ps $pid | grep $pid`
+  if [ ! -z "$processResult" ]; then
+    echo "The traveler-mongod is running"
+    ps $pid
+
+
+    #    adminPass=`cat $MONGO_ADMIN_PASSWD_FILE`
+    #    echo ''
+    #    $MONGO_BIN_DIRECTORY/mongo \
+    #  	 $MONGO_SERVER_ADDRESS:$MONGO_SERVER_PORT/admin \
+    #	--username $MONGO_ADMIN_USERNAME \
+    #	--password $adminPass \
+    #	--eval "printjson(db.serverStatus())"
+
+  else
+    echo "The traveler-mongod is not running"
+  fi
 }
 case "$1" in
-    start)
-        start
-    ;;
-    stop)
-        stop
-    ;;
-    restart)
-        restart
-    ;;
-    status)
-        status
-    ;;
-    startNoAuth)
-	startNoAuth
-    ;;
-    *)
-        echo "Usage: $0 {start|stop|restart|status}"
-        exit 1
-    ;;
+  start)
+  start
+  ;;
+  stop)
+  stop
+  ;;
+  restart)
+  restart
+  ;;
+  status)
+  status
+  ;;
+  startNoAuth)
+  startNoAuth
+  ;;
+  *)
+  echo "Usage: $0 {start|stop|restart|status}"
+  exit 1
+  ;;
 esac
-
