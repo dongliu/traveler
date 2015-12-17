@@ -37,7 +37,7 @@ $TRAVELER_ETC_INIT_DIRECTORY/traveler-mongodb startNoAuth
 
 # Get password for the users that will be created
 echo "Admin password will be stored in a passwd file: $MONGO_ADMIN_PASSWD_FILE"
-read -s -p "Enter admin password for mongodb [admin]: " adminPass
+read -s -p "Enter admin password for mongodb(it will be stored in a config file) [admin]: " adminPass
 echo ''
 read -s -p "Enter traveler db password for mongodb(it will be stored in a config file) [traveler]: " travelerPass
 echo ''
@@ -51,6 +51,8 @@ fi
 
 echo $adminPass > $MONGO_ADMIN_PASSWD_FILE
 chmod 400 $MONGO_ADMIN_PASSWD_FILE
+echo $travelerPass > $MONGO_TRAVELER_PASSWD_FILE
+chmod 400 $MONGO_TRAVELER_PASSWD_FILE
 
 commandjs="use admin;"
 commandjs="$commandjs \n db.createUser({ user: \"$MONGO_ADMIN_USERNAME\", pwd: \"$adminPass\", roles: [ \"root\" ] } )"
