@@ -27,7 +27,7 @@ if [[ -z $mongoPort ]]; then
 fi
 if [ ! -z $mongoPort ]; then
   mongoConfigurationFile=$TRAVELER_INSTALL_ETC_DIR/mongo-configuration.sh
-  cmd="cat $mongoConfigurationFile | sed 's?#export MONGO_SERVER_PORT=.*?export MONGO_SERVER_PORT=$mongoPort?g' > $mongoExpressConfigFile.2 && mv $mongoConfigurationFile.2 $mongoConfigurationFile"
+  cmd="cat $mongoConfigurationFile | sed 's?export MONGO_SERVER_PORT=.*?export MONGO_SERVER_PORT=$mongoPort?g' > $mongoExpressConfigFile.2 && mv $mongoConfigurationFile.2 $mongoConfigurationFile"
   eval $cmd
   export MONGO_SERVER_PORT=$mongoPort
 fi
