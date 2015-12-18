@@ -1,7 +1,7 @@
 # Traveler
 
 # Instalation
-For detailed deployment instructions please see https://confluence.aps.anl.gov/display/APSUCMS/Deployment+and+Developer+Guide+for+the+Traveler+Module
+For detailed deployment instructions please see https://confluence.aps.anl.gov/display/APSUCMS/Developer+Guide+for+the+Traveler+Module
 
 **Deployment of the traveler module:**
 
