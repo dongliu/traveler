@@ -1,6 +1,6 @@
 {
   "name": "traveler",
-  "version": "2.3.8",
+  "version": "APS-0.1.1",
   "private": true,
   "scripts": {
     "start": "node app"
