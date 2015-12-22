@@ -1,9 +1,14 @@
 {
-  "name": "traveler",
-  "version": "APS-0.1.1",
+  "name": "traveler-aps",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "start": "node app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dongliu/traveler.git#APS",
+    "release": "APS-0.1.1"
   },
   "dependencies": {
     "basic-auth": "1.0.0",

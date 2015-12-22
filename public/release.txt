@@ -1,3 +1,31 @@
+release APS-0.1.1
+date: Dec 18, 2015
+- automated setup scripts for installation of all required support software.
+- api and app could either be configured to run on ssl or without depending weather required ssl certificated are specified.
+- automated configuration scripts for support software and traveler module.
+- control scripts for properly running the daemon with mongodb, traveler module, and mongo-express (if needed for viewing mongodb).
+- control scripts for easy control of various
+- cloning forms
+- New roles added
+-- 'read_all_forms', 'write_active_travelers'
+- LDAP login
+-- It is no longer required to run a CAS. traveler module can also perform ldap authentication.
+- Improved configuration.
+-- LDAP configuration allows specifying attributes specific to facility.
+-- LDAP configuration allows specifying a ssl certificate to accept when connecting.
+-- Default roles could be applied to new roles
+-- UI configuration allows specifying terminology for forms and travelers specific to facility.
+-- App configuration allows specifying URLS that could be placed on top bar of the application.
+-- Configuration controller allows placement of configuration files in various paths allows for easy changes to configurations across the entire application.
+- API improvement
+-- Fixed a vulnerability allowing a user to log into api using any credential in the configuration file (ex: api:3443)
+-- Writing to traveler db is now possible if an api_write user has been added.
+- Devices
+-- Added support for Component Database (CDB)
+-- Designed for easy integration for fetching device names from various device applications specific to facility.
+- Added routes utilities for reuse of code amongst various routes.
+- More fixes and improvements.
+
 release v2.3.8
 date: March 2, 2015
 - enable sharing with groups for forms and travelers
@@ -75,32 +103,4 @@ release v2.0.0
 date: Mar. 4, 2014
 - ready for first production deployment
 - form builder
-
-release APS-0.1.1
-date: Dec 18, 2015
-- automated setup scripts for installation of all required support software.
-- api and app could either be configured to run on ssl or without depending weather required ssl certificated are specified.
-- automated configuration scripts for support software and traveler module.
-- control scripts for properly running the daemon with mongodb, traveler module, and mongo-express (if needed for viewing mongodb).
-- control scripts for easy control of various
-- cloning forms
-- New roles added
--- 'read_all_forms', 'write_active_travelers'
-- LDAP login
--- It is no longer required to run a CAS. traveler module can also perform ldap authentication.
-- Improved configuration.
--- LDAP configuration allows specifying attributes specific to facility.
--- LDAP configuration allows specifying a ssl certificate to accept when connecting.
--- Default roles could be applied to new roles
--- UI configuration allows specifying terminology for forms and travelers specific to facility.
--- App configuration allows specifying URLS that could be placed on top bar of the application.
--- Configuration controller allows placement of configuration files in various paths allows for easy changes to configurations across the entire application.
-- API improvement
--- Fixed a vulnerability allowing a user to log into api using any credential in the configuration file (ex: api:3443)
--- Writing to traveler db is now possible if an api_write user has been added.
-- Devices
--- Added support for Component Database (CDB)
--- Designed for easy integration for fetching device names from various device applications specific to facility.
-- Added routes utilities for reuse of code amongst various routes.
-- More fixes and improvements.
 
