@@ -7,14 +7,9 @@ var fs = require('fs');
 var auth = require('../lib/auth');
 var authConfig = require('../config/auth.json');
 var mongoose = require('mongoose');
-var util = require('util');
-var path = require('path');
-var pause = require('pause');
 var underscore = require('underscore');
 var cheer = require('cheerio');
 // var sanitize = require('sanitize-caja'); // may need this later for new version of forms
-
-var uploadsDir = '../uploads/';
 
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
@@ -760,6 +755,25 @@ module.exports = function (app) {
         });
       }
       return res.send(403, 'You are not authorized to access this resource');
+    });
+  });
+
+  app.get('/travelers/:id/form', auth.ensureAuthenticated, function formviewer(req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      res.render('form-manager', {
+        traveler: doc,
+        prefix: req.proxied ? req.proxied_prefix : ''
+      });
     });
   });
 
