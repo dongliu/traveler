@@ -6,12 +6,14 @@ block head
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
   script.
     var prefix = '!{prefix}';
+    var traveler = !{JSON.stringify(traveler)};
   .container-fluid
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -24,14 +26,14 @@ block content
         button.btn.btn-primary#confirm Use selected form
     .row-fluid
       .span4
-        h3 Current active form
-        table#current-form.table.table-bordered.table-hover
-        h3 List of used forms
-        table#uesd-forms.table.table-bordered.table-hover
-        h3 List of available forms
+        h3 Current form
+        table#active-form.table.table-bordered.table-hover
+        h3 Used forms
+        table#used-forms.table.table-bordered.table-hover
+        h3 Available forms
         table#available-forms.table.table-bordered.table-hover
       .span8
-        h3 Traveler preview of the selected form
+        h3 Traveler preview with the selected form
         h3 Traveler title:  #{traveler.title}
         if (locals.traveler.status !== undefined)
           h4 Status:
@@ -91,6 +93,11 @@ block content
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/travelerviewer.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/form-manager.js')
