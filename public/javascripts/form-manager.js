@@ -1,5 +1,5 @@
 /*global ajax401: false, prefix: false, updateAjaxURL: false, traveler: false*/
-/*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false, activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn: false, formLinkColumn: false*/
+/*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false, activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn: false, formColumn: false, sDomPage: false*/
 $(function () {
 
   ajax401(prefix);
@@ -11,6 +11,7 @@ $(function () {
   var form = traveler.forms[traveler.activeForm];
   var active = {
     activatedOn: form.activatedOn.length ? form.activatedOn : [traveler.createdOn],
+    _id: form._id,
     reference: form.reference || traveler.referenceForm,
     alias: form.alias || 'not set yet'
   };
@@ -50,6 +51,15 @@ $(function () {
       [2, 'desc']
     ],
     sDom: sDomPage
+  });
+
+  $('tbody').on('click', 'td', function (e) {
+    if ($(e.target).closest('tr').hasClass('row-selected') && !$(e.target).is('a') && !$(e.target).is('i')) {
+      $(e.target).closest('tr').removeClass('row-selected');
+    } else {
+      $('tr').removeClass('row-selected');
+      $(e.target).closest('tr').addClass('row-selected');
+    }
   });
 
 });
