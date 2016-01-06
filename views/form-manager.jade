@@ -23,7 +23,15 @@ block content
       .modal-footer
     .btn-toolbar
       .btn-group
-        button.btn.btn-primary#confirm Use selected form
+        button.btn.btn-primary#use
+          i.fa.fa-eject.fa-lg
+          = ' '
+          span Use selected form
+      .btn-group
+        button.btn.btn-warning#edit
+          i.fa.fa-edit.fa-lg
+          = ' '
+          span Edit alias
     .row-fluid
       .span4
         h3 Current form
