@@ -219,8 +219,8 @@ var previewColumn = {
   sTitle: '',
   mData: '_id',
   bSortable: false,
-  mRender: function () {
-    return '<a data-toggle="tooltip" title="preview the traveler with this form"><i class="fa fa-eye fa-lg"></i></a>';
+  mRender: function (data) {
+    return '<a data-toggle="tooltip" title="preview the traveler with this form" class="preview" id="' + data + '"><i class="fa fa-eye fa-lg"></i></a>';
   }
 };
 

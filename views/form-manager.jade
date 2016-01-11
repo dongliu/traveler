@@ -96,7 +96,6 @@ block content
               span.time #{traveler.updatedOn}
         br
         form.form-horizontal#form
-          != traveler.forms[0].html
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
@@ -107,5 +106,5 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/travelerviewer.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/traveler-form-loader.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-manager.js')

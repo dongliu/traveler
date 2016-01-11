@@ -1,5 +1,6 @@
-/*global ajax401: false, prefix: false, updateAjaxURL: false, traveler: false*/
+/*global ajax401: false, prefix: false, updateAjaxURL: false, traveler: false, FormLoader: false*/
 /*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false, activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn: false, formColumn: false, sDomPage: false*/
+
 $(function () {
 
   ajax401(prefix);
@@ -9,6 +10,7 @@ $(function () {
   var activeColumns = [previewColumn, aliasColumn, activatedOnColumn, referenceFormLinkColumn];
   // fnAddFilterFoot('#active-form', activeColumns);
   var form = traveler.forms[traveler.activeForm];
+  var viewedFormId = form._id;
   var active = {
     activatedOn: form.activatedOn.length ? form.activatedOn : [traveler.createdOn],
     _id: form._id,
@@ -18,9 +20,9 @@ $(function () {
   var activeTable = $('#active-form').dataTable({
     aaData: [active],
     aoColumns: activeColumns,
-    // bAutoWidth: false,
     sDom: sDomClean
   });
+  $('#active-form tbody tr:first-child').addClass('row-selected');
 
   var usedColumns = activeColumns;
   var used = [];
@@ -33,7 +35,6 @@ $(function () {
   var usedTable = $('#used-forms').dataTable({
     aaData: used,
     aoColumns: usedColumns,
-    // bAutoWidth: false,
     sDom: sDomPage
   });
 
@@ -41,7 +42,6 @@ $(function () {
   var availableTable = $('#available-forms').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
-    // bAutoWidth: false,
     bProcessing: true,
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -53,12 +53,33 @@ $(function () {
     sDom: sDomPage
   });
 
-  $('tbody').on('click', 'td', function (e) {
-    if ($(e.target).closest('tr').hasClass('row-selected') && !$(e.target).is('a') && !$(e.target).is('i')) {
-      $(e.target).closest('tr').removeClass('row-selected');
-    } else {
-      $('tr').removeClass('row-selected');
-      $(e.target).closest('tr').addClass('row-selected');
+  FormLoader.setTravelerId(traveler._id);
+  FormLoader.setFormHTML(form.html);
+  FormLoader.loadForm();
+  FormLoader.bind();
+  FormLoader.note();
+
+  $('tbody').on('click', 'a.preview', function preview() {
+    var row = $(this).closest('tr');
+    if (row.hasClass('row-selected')) {
+      return;
+    }
+
+    $('tr').removeClass('row-selected');
+    row.addClass('row-selected');
+
+    var tableId = $(this).closest('table').prop('id');
+
+    if (tableId === 'active-form' || tableId === 'used-forms') {
+      // bind the form locally
+
+      return;
+    }
+
+    if (tableId === 'available-forms') {
+      // fetch the form and bind it
+
+      return;
     }
   });
 
