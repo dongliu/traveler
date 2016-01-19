@@ -1,5 +1,5 @@
 /*global ajax401: false, prefix: false, updateAjaxURL: false, traveler: false, FormLoader: false*/
-/*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false, activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn: false, formColumn: false, sDomPage: false*/
+/*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false, activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn: false, formColumn: false, sDomPage: false, fnAddFilterFoot: false, filterEvent: false*/
 
 $(function () {
 
@@ -8,9 +8,7 @@ $(function () {
   updateAjaxURL(prefix);
 
   var activeColumns = [previewColumn, aliasColumn, activatedOnColumn, referenceFormLinkColumn];
-  // fnAddFilterFoot('#active-form', activeColumns);
   var form = traveler.forms[traveler.activeForm];
-  var viewedFormId = form._id;
   var active = {
     activatedOn: form.activatedOn.length ? form.activatedOn : [traveler.createdOn],
     _id: form._id,
@@ -32,6 +30,7 @@ $(function () {
     }
   });
 
+  fnAddFilterFoot('#used-forms', usedColumns);
   var usedTable = $('#used-forms').dataTable({
     aaData: used,
     aoColumns: usedColumns,
@@ -39,6 +38,7 @@ $(function () {
   });
 
   var availableColumns = [previewColumn, titleColumn, updatedOnColumn, formColumn];
+  fnAddFilterFoot('#available-forms', availableColumns);
   var availableTable = $('#available-forms').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
@@ -53,33 +53,46 @@ $(function () {
     sDom: sDomPage
   });
 
+  function loadForm(html) {
+    FormLoader.setFormHTML(html);
+    FormLoader.loadForm();
+    FormLoader.bind();
+    FormLoader.note();
+  }
+
   FormLoader.setTravelerId(traveler._id);
-  FormLoader.setFormHTML(form.html);
-  FormLoader.loadForm();
-  FormLoader.bind();
-  FormLoader.note();
+  loadForm(form.html);
+
+  // local cache of available forms
+  var availableForms = {};
+
+  // add forms to available forms object
+  traveler.forms.forEach(function (f) {
+    availableForms[f._id] = f;
+  });
+
+  filterEvent();
 
   $('tbody').on('click', 'a.preview', function preview() {
     var row = $(this).closest('tr');
     if (row.hasClass('row-selected')) {
       return;
     }
-
+    $('#form').fadeTo('slow', 0.5);
     $('tr').removeClass('row-selected');
     row.addClass('row-selected');
 
-    var tableId = $(this).closest('table').prop('id');
+    var fid = this.id;
 
-    if (tableId === 'active-form' || tableId === 'used-forms') {
-      // bind the form locally
-
-      return;
-    }
-
-    if (tableId === 'available-forms') {
-      // fetch the form and bind it
-
-      return;
+    if (!availableForms.hasOwnProperty(fid)) {
+      FormLoader.retrieveForm(fid, function (json) {
+        $('#form').fadeTo('slow', 1);
+        availableForms[fid] = json;
+        loadForm(availableForms[fid].html);
+      });
+    } else {
+      $('#form').fadeTo('slow', 1);
+      loadForm(availableForms[fid].html);
     }
   });
 
