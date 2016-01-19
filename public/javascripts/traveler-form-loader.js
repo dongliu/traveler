@@ -47,6 +47,7 @@ var FormLoader = (function (parent, $) {
   }
 
   function createSideNav() {
+    $('.sidebar').empty();
     var $legend = $('legend');
     var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
     var i;
@@ -251,6 +252,21 @@ var FormLoader = (function (parent, $) {
     });
   }
 
+/**
+ * @param  {String} fid The form id to retrieve.
+ * @return {undefined}
+ */
+  function retrieveForm(fid, cb) {
+    $.ajax({
+      url: '/forms/' + fid + '/json',
+      type: 'GET',
+      dataType: 'json',
+      success: function (json) {
+        cb(json);
+      }
+    });
+  }
+
   /**
    * Loads the form html, bind the data and notes.
    * @return {undefined}
@@ -286,6 +302,7 @@ var FormLoader = (function (parent, $) {
     formHTML = html;
   }
 
+  parent.retrieveForm = retrieveForm;
   parent.setFormHTML = setFormHTML;
   parent.setTravelerId = setTravelerId;
   parent.loadForm = loadForm;
