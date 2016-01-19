@@ -40,11 +40,13 @@ block content
         table#used-forms.table.table-bordered.table-hover
         h3 Available forms
         table#available-forms.table.table-bordered.table-hover
-      .span8
+      .span6
         h3 Traveler preview with the selected form
         h3 Traveler title:  #{traveler.title}
         if (locals.traveler.status !== undefined)
           h4 Status:
+
+
             case locals.traveler.status
               when 1
                 = ' '
@@ -96,6 +98,7 @@ block content
               span.time #{traveler.updatedOn}
         br
         form.form-horizontal#form
+      .span2.sidebar
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
