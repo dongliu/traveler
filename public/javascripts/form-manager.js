@@ -1,6 +1,24 @@
 /*global ajax401: false, prefix: false, updateAjaxURL: false, traveler: false, FormLoader: false*/
 /*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false, activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn: false, formColumn: false, sDomPage: false, fnAddFilterFoot: false, filterEvent: false*/
 
+function setAlias(fid, alias, updateTd) {
+  $.ajax({
+    url: './forms/' + fid + '/alias',
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      value: alias
+    })
+  }).done(function () {
+    $('#modal .modal-body').append('<div class="text-success">The new alias was set.</div>');
+    // update local table data
+    updateTd();
+  }).fail(function (jqXHR) {
+    $('#modal .modal-body').append('<div class="text-error">Something was wrong: ' + jqXHR.responseText + '</div>');
+  });
+}
+
+
 $(function () {
 
   ajax401(prefix);
@@ -96,4 +114,32 @@ $(function () {
     }
   });
 
+  $('#set-alias').click(function () {
+    // $('#set-alias').prop('disabled', true);
+    var selected = $('.row-selected');
+    var tid = selected.closest('table').prop('id');
+    if (tid === 'available-forms') {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('Please select a form from either current form or used forms tables.');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html('Set the alias to');
+      $('#modal .modal-body').empty();
+      $('#modal .modal-body').append('<div><input id="new-alias" type="text" placeholder="new alias"</div>');
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+      $('#submit').click(function () {
+        $('#submit').prop('disabled', true);
+        var fid = $('a.preview', selected).prop('id');
+        var alias = $('#new-alias').val();
+        setAlias(fid, alias, function updateTd() {
+          var table = $('#' + tid).dataTable();
+          var data = table.fnGetData(selected[0]);
+          data.alias = alias;
+          table.fnUpdate(data, table.fnGetPosition(selected[0]));
+        });
+      });
+    }
+  });
 });

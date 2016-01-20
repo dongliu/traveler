@@ -28,10 +28,10 @@ block content
           = ' '
           span Use selected form
       .btn-group
-        button.btn.btn-warning#edit
+        button.btn.btn-warning#set-alias
           i.fa.fa-edit.fa-lg
           = ' '
-          span Edit alias
+          span Set alias
     .row-fluid
       .span4
         h3 Current form
@@ -45,8 +45,6 @@ block content
         h3 Traveler title:  #{traveler.title}
         if (locals.traveler.status !== undefined)
           h4 Status:
-
-
             case locals.traveler.status
               when 1
                 = ' '
