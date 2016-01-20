@@ -779,7 +779,7 @@ module.exports = function (app) {
   });
 
   // use the form in the request as the active form
-  app.post('/traveler/:id/forms/', auth.ensureAuthenticated, function addForm(req, res) {
+  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, function addForm(req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
@@ -796,7 +796,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/traveler/:id/forms/active', auth.ensureAuthenticated, function putForm(req, res) {
+  app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, function putActiveForm(req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
@@ -813,7 +813,6 @@ module.exports = function (app) {
         return res.send(400, 'form id unknown');
       }
 
-
       var activeIndex = -1;
       doc.forms.forEach(function findForm(form, index) {
         if (form._id === formid) {
@@ -826,13 +825,41 @@ module.exports = function (app) {
       }
 
       doc.activeForm = activeIndex;
-
       doc.save(function saveDoc(e, newDoc) {
         if (e) {
           console.error(e);
           return res.send(500, e.message);
         }
         return res.json(200, newDoc);
+      });
+    });
+  });
+
+  app.put('/travelers/:id/forms/:fid/alias', auth.ensureAuthenticated, function putFormAlias(req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'traveler ' + req.params.id + ' gone');
+      }
+      if (!canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      var form = doc.forms.id(req.params.fid);
+      if (!form) {
+        return res.send(410, 'from ' + req.params.fid + ' not found.');
+      }
+
+      form.alias = req.body.value;
+
+      doc.save(function saveDoc(e) {
+        if (e) {
+          console.error(e);
+          return res.send(500, e.message);
+        }
+        return res.send(204);
       });
     });
   });
