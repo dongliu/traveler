@@ -18,6 +18,18 @@ function setAlias(fid, alias, updateTd) {
   });
 }
 
+function addForm(form, cb) {
+  $.ajax({
+    url: './forms/',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(form),
+    processData: false
+  }).done(function (data) {
+    cb(data);
+  });
+}
+
 
 $(function () {
 
@@ -44,6 +56,8 @@ $(function () {
   var used = [];
   traveler.forms.forEach(function (value, index) {
     if (index !== traveler.activeForm) {
+      value.activatedOn = value.activatedOn.length ? value.activatedOn : [traveler.createdOn];
+      value.reference = value.reference || traveler.referenceForm;
       used.push(value);
     }
   });
@@ -115,7 +129,6 @@ $(function () {
   });
 
   $('#set-alias').click(function () {
-    // $('#set-alias').prop('disabled', true);
     var selected = $('.row-selected');
     var tid = selected.closest('table').prop('id');
     if (tid === 'available-forms') {
@@ -139,6 +152,32 @@ $(function () {
           data.alias = alias;
           table.fnUpdate(data, table.fnGetPosition(selected[0]));
         });
+      });
+    }
+  });
+
+  $('#use').click(function () {
+    var selected = $('.row-selected');
+    var fid = $('a.preview', selected).prop('id');
+    var tid = selected.closest('table').prop('id');
+    var newform;
+    if (tid === 'active-form') {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('The selected form is currently in use.');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else if (tid === 'used-forms') {
+      // set the active form id
+    } else {
+      // add the new form to the traveler forms list and set it active
+      newform = {
+        html: availableForms[fid].html,
+        _id: availableForms[fid]._id,
+        title: availableForms[fid].title
+      };
+      // console.log(newform);
+      addForm(newform, function (data) {
+        console.log(data);
       });
     }
   });
