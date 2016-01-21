@@ -140,6 +140,23 @@ function filterBody(strings) {
   };
 }
 
+function filterBodyAll(strings) {
+  return function (req, res, next) {
+    var i;
+    var miss = false;
+    for (i = 0; i < strings.length; i += 1) {
+      if (!req.body.hasOwnProperty(strings[i])) {
+        miss = true;
+        break;
+      }
+    }
+    if (miss) {
+      return res.send(400, 'cannot find required information in body');
+    }
+    next();
+  };
+}
+
 
 function getSharedWith(sharedWith, name) {
   var i;
@@ -779,7 +796,7 @@ module.exports = function (app) {
   });
 
   // use the form in the request as the active form
-  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, function addForm(req, res) {
+  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, filterBodyAll(['html', '_id', 'title']), function addForm(req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
@@ -792,10 +809,27 @@ module.exports = function (app) {
         return res.send(403, 'You are not authorized to access this resource');
       }
 
-      return res.send(200, req.body);
+      var form = {
+        html: req.body.html,
+        activatedOn: [Date.now()],
+        reference: req.body._id,
+        alias: req.body.title
+      };
+
+      doc.forms.push(form);
+      doc.activeForm = doc.forms.length - 1;
+      doc.save(function saveDoc(e, newDoc) {
+        if (e) {
+          console.error(e);
+          return res.send(500, e.message);
+        }
+        return res.json(200, newDoc);
+      });
     });
   });
 
+
+  // set active form
   app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, function putActiveForm(req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
@@ -835,6 +869,7 @@ module.exports = function (app) {
     });
   });
 
+  // set form alias
   app.put('/travelers/:id/forms/:fid/alias', auth.ensureAuthenticated, function putFormAlias(req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
