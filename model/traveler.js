@@ -19,8 +19,16 @@ var sharedWithGroup = new Schema({
   access: Number
 });
 
+
+// A form can become active, inactive, and reactive
+// The form's activated date and the form's updated data can tell if the form has been updated since it is used by the traveler.
+// activatedOn: the dates when this form starts to be active
+// alias : a name for convenience to distinguish forms.
 var form = new Schema({
-  html: String
+  html: String,
+  activatedOn: [Date],
+  reference: ObjectId,
+  alias: String
 });
 
 

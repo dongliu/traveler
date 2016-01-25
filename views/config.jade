@@ -69,6 +69,8 @@ block content
     br
     .btn-group
       button.btn.btn-primary#add Add devices
+    .btn-group
+      a.btn.btn-primary#manage(href='./formmanager', target='_blank') Manage form
     case traveler.status
       when 0
         .btn-group
@@ -82,8 +84,6 @@ block content
         .btn-group
           button.btn.btn-warning#more More work
       when 2
-        //- .btn-group
-        //-   button.btn.btn-primary#resume Resume
       when 3
         .btn-group
           button.btn.btn-primary#resume Resume
