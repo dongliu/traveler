@@ -14,7 +14,8 @@ node_modules/
 .DS_Store
 
 # special folders #
-logs/
+logs/*
+!logs/readme
 doc/
 uploads
 config/ad.json
