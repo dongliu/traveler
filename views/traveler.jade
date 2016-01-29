@@ -14,7 +14,6 @@ block content
     var travelerStatus = !{JSON.stringify(traveler.status)};
     var finishedInput = !{JSON.stringify(traveler.finishedInput)};
     var prefix = '!{prefix}';
-    //- var traveler = !{JSON.stringify(traveler)};
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -81,7 +80,12 @@ block content
               span.time #{traveler.updatedOn}
         br
         form.form-horizontal#form
-          != traveler.forms.length === 1 ? traveler.forms[0].html : traveler.forms.id(traveler.activeForm).html
+          if (traveler.forms.length === 1)
+            != traveler.forms[0].html
+          else if (traveler.forms.id(traveler.activeForm))
+            != traveler.forms.id(traveler.activeForm).html
+          else
+            != ''
       .span3.sidebar
 
 block js
