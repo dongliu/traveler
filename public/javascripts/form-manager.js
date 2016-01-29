@@ -65,15 +65,22 @@ function setActive(fid, cb) {
 
 
 function initUsedForms(traveler, activeTable, usedTable) {
-  var form = traveler.forms.length === 1 ? traveler.forms[0] : findById(traveler.forms, traveler.activeForm);
-  var active = {
-    activatedOn: form.activatedOn.length ? form.activatedOn : [traveler.createdOn],
-    _id: form._id,
-    reference: form.reference || traveler.referenceForm,
-    alias: form.alias || 'not set yet'
-  };
-  activeTable.fnClearTable();
-  activeTable.fnAddData(active);
+  var form;
+  if (traveler.forms.length === 1) {
+    form = traveler.forms[0];
+  } else {
+    form = findById(traveler.forms, traveler.activeForm);
+  }
+  if (form) {
+    var active = {
+      activatedOn: form.activatedOn.length ? form.activatedOn : [traveler.createdOn],
+      _id: form._id,
+      reference: form.reference || traveler.referenceForm,
+      alias: form.alias || 'not set yet'
+    };
+    activeTable.fnClearTable();
+    activeTable.fnAddData(active);
+  }
   var used = [];
   traveler.forms.forEach(function (value) {
     if (value._id !== traveler.activeForm) {
@@ -139,7 +146,18 @@ $(function () {
   }
 
   FormLoader.setTravelerId(traveler._id);
-  loadForm(traveler.forms.length === 1 ? traveler.forms[0].html : findById(traveler.forms, traveler.activeForm).html);
+  var form;
+  if (traveler.forms.length === 1) {
+    form = traveler.forms[0];
+  } else {
+    form = findById(traveler.forms, traveler.activeForm);
+  }
+
+  if (!form) {
+    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>HTTP request failed.</div>');
+    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+  }
+  loadForm(form.html);
 
   // local cache of available forms
   var availableForms = {};
