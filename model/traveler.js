@@ -56,10 +56,7 @@ var traveler = new Schema({
   sharedGroup: [sharedWithGroup],
   referenceForm: ObjectId,
   forms: [form],
-  activeForm: {
-    type: Number,
-    default: 0
-  },
+  activeForm: ObjectId,
   data: [ObjectId],
   notes: [ObjectId],
   totalInput: Number,
