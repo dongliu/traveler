@@ -35,14 +35,19 @@ function createTraveler(form, req, res) {
     createdOn: Date.now(),
     sharedWith: [],
     referenceForm: form._id,
-    forms: [{
-      html: form.html
-    }],
+    forms: [],
     data: [],
     comments: [],
     totalInput: num,
     finishedInput: 0
   });
+  traveler.forms.push({
+    html: form.html,
+    activatedOn: [Date.now()],
+    reference: form._id,
+    alias: form.title
+  });
+  traveler.activeForm = traveler.forms[0]._id;
   traveler.save(function (err, doc) {
     if (err) {
       console.error(err);
@@ -71,6 +76,7 @@ function cloneTraveler(source, req, res) {
     sharedGroup: source.sharedGroup,
     referenceForm: source.referenceForm,
     forms: source.forms,
+    activeForm: source.activeForm,
     data: [],
     comments: [],
     totalInput: source.totalInput,
@@ -675,7 +681,7 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id).lean().exec(function (err, doc) {
+    Traveler.findById(req.params.id).exec(function (err, doc) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -687,6 +693,7 @@ module.exports = function (app) {
       if (canWrite(req, doc)) {
         return res.render('traveler', {
           traveler: doc,
+          formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html,
           prefix: req.proxied ? req.proxied_prefix : ''
         });
       }
@@ -816,8 +823,11 @@ module.exports = function (app) {
         alias: req.body.title
       };
 
+      var $ = cheer.load(form.html);
+      var num = $('input, textarea').length;
       doc.forms.push(form);
-      doc.activeForm = doc.forms.length - 1;
+      doc.activeForm = doc.forms[doc.forms.length - 1]._id;
+      doc.totalInput = num;
       doc.save(function saveDoc(e, newDoc) {
         if (e) {
           console.error(e);
@@ -847,18 +857,17 @@ module.exports = function (app) {
         return res.send(400, 'form id unknown');
       }
 
-      var activeIndex = -1;
-      doc.forms.forEach(function findForm(form, index) {
-        if (form._id === formid) {
-          activeIndex = index;
-        }
-      });
+      var form = doc.forms.id(formid);
 
-      if (activeIndex === -1) {
-        return res.send(410, 'form ' + req.params.formid + ' gone');
+      if (!form) {
+        return res.send(410, 'form ' + req.body.formid + ' gone');
       }
 
-      doc.activeForm = activeIndex;
+      doc.activeForm = form._id;
+      var $ = cheer.load(form.html);
+      var num = $('input, textarea').length;
+      form.activatedOn.push(Date.now());
+      doc.totalInput = num;
       doc.save(function saveDoc(e, newDoc) {
         if (e) {
           console.error(e);
