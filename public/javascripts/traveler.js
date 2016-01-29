@@ -6,7 +6,6 @@ function livespan(stamp) {
   return '<span data-livestamp="' + stamp + '"></span>';
 }
 
-
 function history(found) {
   var i, output = '';
   if (found.length > 0) {
@@ -274,6 +273,8 @@ $(function () {
     }
   });
 
+  var realFinishedInput = 0;
+
   $.ajax({
     url: './data/',
     type: 'GET',
@@ -284,6 +285,7 @@ $(function () {
         return e.name === element.name;
       });
       if (found.length) {
+        realFinishedInput += 1;
         found.sort(function (a, b) {
           if (a.inputOn > b.inputOn) {
             return -1;
@@ -303,6 +305,12 @@ $(function () {
     // check if active here
     if (travelerStatus === 1) {
       $('#form input,textarea').removeAttr('disabled');
+    }
+
+    // update finished input number
+    if (realFinishedInput !== finishedInput) {
+      finishedInput = realFinishedInput;
+      updateFinished(finishedInput);
     }
 
     // load the notes here
