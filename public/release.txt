@@ -1,3 +1,7 @@
+release v2.4.0
+date: Feb. 02, 2016
+- add the form manager feature, details see /about/form-manager
+
 release v2.3.8
 date: March 2, 2015
 - enable sharing with groups for forms and travelers
