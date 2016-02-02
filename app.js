@@ -2,7 +2,7 @@
 
 var express = require('express'),
   routes = require('./routes'),
-  about = require('./routes/about'),
+  // about = require('./routes/about'),
   http = require('http'),
   https = require('https'),
   fs = require('fs'),
@@ -124,7 +124,8 @@ require('./routes/profile')(app);
 
 require('./routes/device')(app);
 
-app.get('/about', about.index);
+require('./routes/about')(app);
+
 app.get('/api', function (req, res) {
   res.render('api', {
     prefix: req.proxied ? req.proxied_prefix : ''
