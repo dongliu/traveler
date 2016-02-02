@@ -82,13 +82,15 @@ function initUsedForms(traveler, activeTable, usedTable) {
     activeTable.fnAddData(active);
   }
   var used = [];
-  traveler.forms.forEach(function (value) {
-    if (value._id !== traveler.activeForm) {
-      value.activatedOn = value.activatedOn.length ? value.activatedOn : [traveler.createdOn];
-      value.reference = value.reference || traveler.referenceForm;
-      used.push(value);
-    }
-  });
+  if (traveler.forms.length > 1) {
+    traveler.forms.forEach(function (value) {
+      if (value._id !== traveler.activeForm) {
+        value.activatedOn = value.activatedOn.length ? value.activatedOn : [traveler.createdOn];
+        value.reference = value.reference || traveler.referenceForm;
+        used.push(value);
+      }
+    });
+  }
   usedTable.fnClearTable();
   usedTable.fnAddData(used);
   $('tr').removeClass('row-selected');
