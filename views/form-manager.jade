@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB Traveler :: traveler :: #{traveler._id} :: manage form
+  title FRIB Traveler - traveler - #{traveler._id} - form manager
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -34,7 +34,7 @@ block content
           span Set alias
     .row-fluid
       .span4
-        h3 Current form
+        h3 Active form
         table#active-form.table.table-bordered.table-hover
         h3 Used forms
         table#used-forms.table.table-bordered.table-hover
