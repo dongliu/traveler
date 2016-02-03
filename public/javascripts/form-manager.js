@@ -87,6 +87,7 @@ function initUsedForms(traveler, activeTable, usedTable) {
       if (value._id !== traveler.activeForm) {
         value.activatedOn = value.activatedOn.length ? value.activatedOn : [traveler.createdOn];
         value.reference = value.reference || traveler.referenceForm;
+        value.alias = value.alias || 'not set yest';
         used.push(value);
       }
     });
