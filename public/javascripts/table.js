@@ -251,6 +251,52 @@ var selectColumn = {
   asSorting: ['desc', 'asc']
 };
 
+
+var previewColumn = {
+  sTitle: '',
+  mData: '_id',
+  bSortable: false,
+  mRender: function (data) {
+    return '<a data-toggle="tooltip" title="preview the traveler with this form" class="preview" id="' + data + '"><i class="fa fa-eye fa-lg"></i></a>';
+  }
+};
+
+var referenceFormLinkColumn = {
+  sTitle: 'Reference',
+  mData: 'reference',
+  mRender: function (data) {
+    return '<a href="' + prefix + '/forms/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
+var formColumn = {
+  sTitle: 'Link',
+  mData: '_id',
+  mRender: function (data) {
+    return '<a href="' + prefix + '/forms/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
+var aliasColumn = {
+  sTitle: 'Alias',
+  mData: 'alias',
+  bFilter: true
+};
+
+var activatedOnColumn = {
+  sTitle: 'Activated',
+  mData: function (source, type) {
+    var a = source.activatedOn;
+    if (type === 'sort') {
+      return a[a.length - 1];
+    }
+    return formatDate(a[a.length - 1]);
+  },
+  sDefaultContent: ''
+};
+
 var idColumn = {
   sTitle: '',
   mData: '_id',
@@ -260,7 +306,7 @@ var idColumn = {
 var formLinkColumn = {
   sTitle: '',
   mData: '_id',
-  mRender: function (data, type, full) {
+  mRender: function (data) {
     return '<a href="' + prefix + '/forms/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
   },
   bSortable: false
@@ -628,8 +674,8 @@ var sDom = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span6'l><'span
 var sDom2i = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
 var sDom2i1p = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span3'r><'span3'f>>t<'row-fluid'<'span6'i><'span6'p>>";
 var sDomNoTools = "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDomNoLength = "<'row-fluid'<'span6'<'control-group'T>><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
-
+var sDomClean = "t";
+var sDomPage = "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>";
 
 /**
  * By default DataTables only uses the sAjaxSource variable at initialisation

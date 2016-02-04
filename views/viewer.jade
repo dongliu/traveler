@@ -13,11 +13,14 @@ block content
   script.
     var prefix = '!{prefix}';
   .container
-    h3 #{title}
-    .well-large
-      form.form-horizontal#output
-        != html
-    #validation.well.hide
+    .row
+      .span9
+        h3 #{title}
+        .well-large
+          form.form-horizontal#output
+            != html
+        #validation.well.hide
+      .span3.sidebar
     .btn-group(data-toggle='buttons-radio')
       button.btn.btn-info#show-validation Show validation
       button.btn.btn-info#hide-validation.active Hide validation

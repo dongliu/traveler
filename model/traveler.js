@@ -6,8 +6,16 @@ var ObjectId = Schema.Types.ObjectId;
 
 var share = require('./share.js');
 
+
+// A form can become active, inactive, and reactive
+// The form's activated date and the form's updated data can tell if the form has been updated since it is used by the traveler.
+// activatedOn: the dates when this form starts to be active
+// alias : a name for convenience to distinguish forms.
 var form = new Schema({
-  html: String
+  html: String,
+  activatedOn: [Date],
+  reference: ObjectId,
+  alias: String
 });
 
 
@@ -50,10 +58,7 @@ var traveler = new Schema({
   sharedGroup: [share.group],
   referenceForm: ObjectId,
   forms: [form],
-  activeForm: {
-    type: Number,
-    default: 0
-  },
+  activeForm: String,
   data: [ObjectId],
   notes: [ObjectId],
   totalInput: Number,
