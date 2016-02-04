@@ -7,9 +7,6 @@ var fs = require('fs');
 var auth = require('../lib/auth');
 var authConfig = require('../config/auth.json');
 var mongoose = require('mongoose');
-var util = require('util');
-var path = require('path');
-var pause = require('pause');
 var underscore = require('underscore');
 var cheer = require('cheerio');
 // var sanitize = require('sanitize-caja'); // may need this later for new version of forms
@@ -40,14 +37,19 @@ function createTraveler(form, req, res) {
     createdOn: Date.now(),
     sharedWith: [],
     referenceForm: form._id,
-    forms: [{
-      html: form.html
-    }],
+    forms: [],
     data: [],
     comments: [],
     totalInput: num,
     finishedInput: 0
   });
+  traveler.forms.push({
+    html: form.html,
+    activatedOn: [Date.now()],
+    reference: form._id,
+    alias: form.title
+  });
+  traveler.activeForm = traveler.forms[0]._id;
   traveler.save(function (err, doc) {
     if (err) {
       console.error(err);
@@ -76,6 +78,7 @@ function cloneTraveler(source, req, res) {
     sharedGroup: source.sharedGroup,
     referenceForm: source.referenceForm,
     forms: source.forms,
+    activeForm: source.activeForm,
     data: [],
     comments: [],
     totalInput: source.totalInput,
@@ -318,7 +321,7 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
+    Traveler.findById(req.params.id).exec(function (err, doc) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -334,6 +337,7 @@ module.exports = function (app) {
       if (reqUtils.canWrite(req, doc)) {
         return res.render('traveler', {
           traveler: doc,
+          formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html,
           prefix: req.proxied ? req.proxied_prefix : ''
         });
       }
@@ -486,6 +490,131 @@ module.exports = function (app) {
         });
       }
       return res.send(403, 'You are not authorized to access this resource');
+    });
+  });
+
+  app.get('/travelers/:id/formmanager', auth.ensureAuthenticated, function formviewer(req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!reqUtils.canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      res.render('form-manager', {
+        traveler: doc,
+        prefix: req.proxied ? req.proxied_prefix : ''
+      });
+    });
+  });
+
+  // use the form in the request as the active form
+  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, reqUtils.filterBodyAll(['html', '_id', 'title']), function addForm(req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'gone');
+      }
+      if (!reqUtils.canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+
+      var form = {
+        html: req.body.html,
+        activatedOn: [Date.now()],
+        reference: req.body._id,
+        alias: req.body.title
+      };
+
+      var $ = cheer.load(form.html);
+      var num = $('input, textarea').length;
+      doc.forms.push(form);
+      doc.activeForm = doc.forms[doc.forms.length - 1]._id;
+      doc.totalInput = num;
+      doc.save(function saveDoc(e, newDoc) {
+        if (e) {
+          console.error(e);
+          return res.send(500, e.message);
+        }
+        return res.json(200, newDoc);
+      });
+    });
+  });
+
+
+  // set active form
+  app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, function putActiveForm(req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'traveler ' + req.params.id + ' gone');
+      }
+      if (!reqUtils.canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      var formid = req.body.formid;
+      if (!formid) {
+        return res.send(400, 'form id unknown');
+      }
+
+      var form = doc.forms.id(formid);
+
+      if (!form) {
+        return res.send(410, 'form ' + req.body.formid + ' gone');
+      }
+
+      doc.activeForm = form._id;
+      var $ = cheer.load(form.html);
+      var num = $('input, textarea').length;
+      form.activatedOn.push(Date.now());
+      doc.totalInput = num;
+      doc.save(function saveDoc(e, newDoc) {
+        if (e) {
+          console.error(e);
+          return res.send(500, e.message);
+        }
+        return res.json(200, newDoc);
+      });
+    });
+  });
+
+  // set form alias
+  app.put('/travelers/:id/forms/:fid/alias', auth.ensureAuthenticated, function putFormAlias(req, res) {
+    Traveler.findById(req.params.id, function (err, doc) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!doc) {
+        return res.send(410, 'traveler ' + req.params.id + ' gone');
+      }
+      if (!reqUtils.canWrite(req, doc)) {
+        return res.send(403, 'You are not authorized to access this resource');
+      }
+      var form = doc.forms.id(req.params.fid);
+      if (!form) {
+        return res.send(410, 'from ' + req.params.fid + ' not found.');
+      }
+
+      form.alias = req.body.value;
+
+      doc.save(function saveDoc(e) {
+        if (e) {
+          console.error(e);
+          return res.send(500, e.message);
+        }
+        return res.send(204);
+      });
     });
   });
 
