@@ -54,8 +54,18 @@ echo "Performing mongo dump for date: $datestamp - $timestamp"
 
 adminPassword=`cat $MONGO_ADMIN_PASSWD_FILE`
 
-$MONGO_BIN_DIRECTORY/mongodump \
+output=$($MONGO_BIN_DIRECTORY/mongodump \
 --host $MONGO_SERVER_ADDRESS \
 --port $MONGO_SERVER_PORT \
 --username $MONGO_ADMIN_USERNAME \
---password $adminPassword
+--password $adminPassword 2>&1)
+
+# All output from mongodump is stderr
+error=`echo "$output" | grep -i error`
+if [ ! -z "$error" ]; then
+  >&2 echo $output
+  cd $TRAVELER_BACKUP_DIRECTORY/$datestamp
+  rm -R $timestamp
+else
+  echo -e $output
+fi
