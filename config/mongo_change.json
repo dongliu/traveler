@@ -2,6 +2,6 @@
  "server_address": "127.0.0.1",
  "server_port": "27017",
  "traveler_db": "traveler",
- "username": "user",
- "password": "pass"
+ "user": "user",
+ "pass": "pass"
 }
