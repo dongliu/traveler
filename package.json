@@ -14,7 +14,7 @@
     "file-stream-rotator": "0.0.5",
     "jade": "1.2.0",
     "ldapjs": "0.7.1",
-    "mongoose": "3.8.8",
+    "mongoose": "4.4.3",
     "multer": "0.1.0",
     "pause": "0.0.1",
     "request": "2.34.0",
