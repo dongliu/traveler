@@ -3,5 +3,8 @@
  "server_port": "27017",
  "traveler_db": "traveler",
  "user": "user",
- "pass": "pass"
+ "pass": "pass",
+ "auth": {
+    "authdb": "admin"
+  }
 }
