@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var User = mongoose.model('User');
 
 var auth = require('../lib/auth');
-var authConfig = require('../config/auth.json');
+var authConfig = require('../config/config').auth;
 
 var Roles = ['manager', 'admin'];
 
