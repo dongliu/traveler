@@ -17,8 +17,8 @@ var key;
 var cert;
 
 if (api.ssl_key && api.ssl_cert) {
-  key = fs.readFileSync(api.ssl_key);
-  cert = fs.readFileSync(api.ssl_cert);
+  key = fs.readFileSync(path.resolve(__dirname, api.ssl_key));
+  cert = fs.readFileSync(path.resolve(__dirname, api.ssl_cert));
   api.credentials = {
     key: key,
     cert: cert
@@ -27,15 +27,16 @@ if (api.ssl_key && api.ssl_cert) {
 
 //load app keys
 if (app.ssl_key && app.ssl_cert) {
-  key = fs.readFileSync(app.ssl_key);
-  cert = fs.readFileSync(app.ssl_cert);
+  key = fs.readFileSync(__dirname, app.ssl_key);
+  cert = fs.readFileSync(__dirname, app.ssl_cert);
   app.credentials = {
     key: key,
     cert: cert
   };
 }
 
-app.upload_dir = path.resolve(app.upload_dir);
+app.upload_dir = path.resolve(__dirname, app.upload_dir || '../uploads/');
+app.log_dir = path.resolve(__dirname, app.log_dir || '../logs/');
 
 
 module.exports = {
