@@ -19,14 +19,12 @@ var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
-// var travelerV1API = 'https://liud-dev:8181/traveler/api.php';
 var request = require('request');
 
 function createTraveler(form, req, res) {
   // update the total input number and finished input number
   var $ = cheer.load(form.html);
   var num = $('input, textarea').length;
-  // console.log('total input number is ' + num);
   var traveler = new Traveler({
     title: form.title,
     description: '',
@@ -405,14 +403,6 @@ function ha(num, length) { // _hexAligner
   }
   return str;
 }
-
-/*a short uid*/
-
-// function generateShort() {
-//   var rand = gri,
-//     hex = ha;
-//   return hex(rand(32), 8);
-// }
 
 function addUser(req, res, traveler) {
   var name = req.body.name;
