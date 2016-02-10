@@ -1,9 +1,5 @@
 var fs = require('fs');
 var mongoose = require('mongoose');
-var util = require('util');
-
-// var Form = mongoose.model('Form');
-// var User = mongoose.model('User');
 var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
@@ -108,6 +104,6 @@ module.exports = function (app) {
         res.json(200, data);
       }
     });
-  })
+  });
 
 };

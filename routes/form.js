@@ -1,15 +1,13 @@
-/*global FormFile: false, TravelerData: false*/
 /*jslint es5: true*/
 
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
 
 var auth = require('../lib/auth');
-var authConfig = require('../config/auth.json');
+var authConfig = require('../config/config').auth;
 
 var mongoose = require('mongoose');
 var sanitize = require('sanitize-caja');
-var util = require('util');
 var underscore = require('underscore');
 
 
