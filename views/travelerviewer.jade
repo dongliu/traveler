@@ -75,7 +75,12 @@ block content
               span.time #{traveler.updatedOn}
         br
         form.form-horizontal#form
-          != traveler.forms[traveler.activeForm || 0].html
+          if (traveler.forms.length === 1)
+            != traveler.forms[0].html
+          else if (traveler.forms.id(traveler.activeForm))
+            != traveler.forms.id(traveler.activeForm).html
+          else
+            != ''
       .span3.sidebar
 
 block js
