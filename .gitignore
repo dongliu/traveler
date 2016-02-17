@@ -26,6 +26,8 @@ config/service.json
 config/auth.json
 config/app.json
 config/mongo.json
+config/alias.json
+
 
 # npm stuff #
 npm-debug.log*
