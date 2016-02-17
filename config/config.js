@@ -11,6 +11,7 @@ var app = require('./app.json');
 var auth = require('./auth.json');
 var mongo = require('./mongo.json');
 var service = require('./service.json');
+var alias = require('./alias.json');
 
 // load api keys
 var key;
@@ -45,5 +46,6 @@ module.exports = {
   app: app,
   auth: auth,
   mongo: mongo,
-  service: service
+  service: service,
+  alias: alias
 };
