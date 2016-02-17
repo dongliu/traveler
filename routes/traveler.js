@@ -9,7 +9,7 @@ var authConfig = require('../config/auth.json');
 var mongoose = require('mongoose');
 var underscore = require('underscore');
 var cheer = require('cheerio');
-// var sanitize = require('sanitize-caja'); // may need this later for new version of forms
+var sanitize = require('sanitize-caja');
 
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
@@ -817,7 +817,7 @@ module.exports = function (app) {
       }
 
       var form = {
-        html: req.body.html,
+        html: sanitize(req.body.html),
         activatedOn: [Date.now()],
         reference: req.body._id,
         alias: req.body.title
