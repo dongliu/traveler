@@ -3,13 +3,13 @@ var service = require('../config/service.json');
 var request = require('request');
 
 module.exports = function (app) {
-  app.get('/devices/', function (req, res) {
+  app.get('/devices/', auth.ensureAuthenticated, function (req, res) {
     res.render('devices', {
       prefix: req.proxied ? req.proxied_prefix : ''
     });
   });
 
-  app.get('/devices/json', function (req, res) {
+  app.get('/devices/json', auth.ensureAuthenticated, function (req, res) {
     request({
       url: service.device.url,
       timeout: 30 * 1000,

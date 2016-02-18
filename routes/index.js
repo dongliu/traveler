@@ -1,4 +1,4 @@
-var auth = require('../config/auth.json');
+var authConfig = require('../config/config').auth;
 
 exports.main = function (req, res) {
   // console.log(req.session);
@@ -14,8 +14,8 @@ exports.logout = function (req, res) {
     });
   }
   if (res.proxied) {
-    res.redirect(auth.proxied_cas + '/logout');
+    res.redirect(authConfig.proxied_cas + '/logout');
   } else {
-    res.redirect(auth.cas + '/logout');
+    res.redirect(authConfig.cas + '/logout');
   }
 };
