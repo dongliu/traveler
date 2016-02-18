@@ -26,8 +26,12 @@ config/node.key
 config/api.json
 config/service.json
 config/auth.json
+<<<<<<< HEAD
 config/app.json
 config/mongo.json
+=======
+config/alias.json
+>>>>>>> rc/frib
 
 # npm stuff #
 npm-debug.log*
