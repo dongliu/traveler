@@ -5,7 +5,8 @@ var ldapClient = require('../lib/ldap-client');
 
 var fs = require('fs');
 var auth = require('../lib/auth');
-var authConfig = require('../config/auth.json');
+var config = require('../config/config');
+var authConfig = config.auth;
 var mongoose = require('mongoose');
 var underscore = require('underscore');
 var cheer = require('cheerio');
@@ -21,7 +22,6 @@ var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
-var travelerV1API = 'https://liud-dev:8181/traveler/api.php';
 var request = require('request');
 
 function createTraveler(form, req, res) {
@@ -250,9 +250,10 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelersinv1/json', auth.ensureAuthenticated, function (req, res) {
-    var fullurl = travelerV1API + '?resource=travelers';
+    // var fullurl = travelerV1API + '?resource=travelers';
+    var fullurl = config.legacy_traveler.travelers;
     if (req.query.hasOwnProperty('device')) {
-      fullurl = fullurl + '&device=' + req.query.device;
+      fullurl = config.legacy_traveler.devices + req.query.device;
     }
     request({
       strictSSL: false,
