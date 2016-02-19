@@ -15,17 +15,17 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        button.btn.btn-info#reload
-          i.fa.fa-refresh.fa-lg
-          | &nbsp;Reload all tables
-      .btn-group
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected travelers')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
       .btn-group
-        a.btn.btn-info#alltravelers(href='#{prefix}/currenttravelers/', target='_blank', data-toggle='tooltip', title='see all the travelers')
+        button.btn.btn-info#reload
+          i.fa.fa-refresh.fa-lg
+          | &nbsp;Reload all tables
+      .btn-group
+        a.btn.btn-info#all-travelers(href='#{prefix}/publictravelers/', target='_blank', data-toggle='tooltip', title='see all public travelers')
           i.fa.fa-institution.fa-lg
-          | &nbsp;All travelers
+          | &nbsp;All public travelers
       .btn-group.dropdown
         a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
           i.fa.fa-gears.fa-lg
