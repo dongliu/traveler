@@ -22,7 +22,7 @@ var WorkingPackage = mongoose.model('WorkingPackage');
 module.exports = function (app) {
 
   app.get('/workingpackages/', auth.ensureAuthenticated, function (req, res) {
-    res.render('working_packages');
+    res.render('working-packages');
   });
 
   app.get('/workingpackages/json', auth.ensureAuthenticated, function (req, res) {
@@ -51,7 +51,7 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (reqUtils.canWrite(req, doc)) {
-        return res.render('working_package_config', {
+        return res.render('working-package-config', {
           package: doc
         });
       }
