@@ -121,6 +121,8 @@ require('./routes/traveler')(app);
 
 require('./routes/working_package')(app);
 
+require('./routes/admin')(app);
+
 require('./routes/user')(app);
 
 require('./routes/profile')(app);
