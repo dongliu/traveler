@@ -10,7 +10,7 @@ var mongoose = require('mongoose');
 var util = require('util');
 var underscore = require('underscore');
 var path = require('path');
-require('../model/working_package.js');
+require('../model/working-package.js');
 
 var reqUtils = require('../lib/reqUtils');
 var addShare = require('../lib/share').addShare;
