@@ -136,7 +136,7 @@ app.get('/api', function (req, res) {
 });
 app.get('/', routes.main);
 app.get('/login', auth.ensureAuthenticated, function (req, res) {
-  if (!!req.session.userid) {
+  if (req.session.userid) {
     return res.redirect(req.proxied ? auth.proxied_service : '/');
   }
   // something wrong
@@ -183,7 +183,7 @@ function cleanup() {
   });
 
   setTimeout(function () {
-    console.error("Could not close connections in time, forcing shut down");
+    console.error('Could not close connections in time, forcing shut down');
     process.exit(1);
   }, 30 * 1000);
 }
