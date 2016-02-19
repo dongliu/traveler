@@ -1,4 +1,4 @@
-/*jslint es5: true*/
+/*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
@@ -91,14 +91,14 @@ function cloneTraveler(source, req, res) {
       return res.send(500, err.message);
     }
     console.log('new traveler ' + doc.id + ' created');
-    doc.sharedWith.forEach(function (e, i, a) {
+    doc.sharedWith.forEach(function (e) {
       User.findByIdAndUpdate(e._id, {
         $addToSet: {
           travelers: doc._id
         }
-      }, function (err, user) {
-        if (err) {
-          console.error(err);
+      }, function (userErr, user) {
+        if (userErr) {
+          console.error(userErr);
         }
         if (!user) {
           console.error('The user ' + e._id + ' does not in the db');
@@ -106,14 +106,14 @@ function cloneTraveler(source, req, res) {
       });
     });
 
-    doc.sharedGroup.forEach(function (e, i, a) {
+    doc.sharedGroup.forEach(function (e) {
       Group.findByIdAndUpdate(e._id, {
         $addToSet: {
           travelers: doc._id
         }
-      }, function (err, user) {
-        if (err) {
-          console.error(err);
+      }, function (groupErr, user) {
+        if (groupErr) {
+          console.error(groupErr);
         }
         if (!user) {
           console.error('The group ' + e._id + ' does not in the db');
@@ -141,7 +141,9 @@ module.exports = function (app) {
       archived: {
         $ne: true
       },
-      owner: {$exists: false}
+      owner: {
+        $exists: false
+      }
     }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').exec(function (err, docs) {
       if (err) {
         console.error(err);
@@ -184,10 +186,10 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').exec(function (err, travelers) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').exec(function (tErr, travelers) {
+        if (tErr) {
+          console.error(tErr);
+          return res.send(500, tErr.message);
         }
         return res.json(200, travelers);
       });
@@ -205,7 +207,8 @@ module.exports = function (app) {
         return res.send(500, err.message);
       }
       var travelerIds = [];
-      var i, j;
+      var i;
+      var j;
       // merge the travelers arrays
       for (i = 0; i < groups.length; i += 1) {
         for (j = 0; j < groups[i].travelers.length; j += 1) {
@@ -218,10 +221,10 @@ module.exports = function (app) {
         _id: {
           $in: travelerIds
         }
-      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').exec(function (err, travelers) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').exec(function (tErr, travelers) {
+        if (tErr) {
+          console.error(tErr);
+          return res.send(500, tErr.message);
         }
         res.json(200, travelers);
       });
@@ -229,7 +232,6 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
-    // var device = req.query.device;
     var search = {
       archived: {
         $ne: true
@@ -250,7 +252,6 @@ module.exports = function (app) {
   });
 
   app.get('/currenttravelersinv1/json', auth.ensureAuthenticated, function (req, res) {
-    // var fullurl = travelerV1API + '?resource=travelers';
     var fullurl = config.legacy_traveler.travelers;
     if (req.query.hasOwnProperty('device')) {
       fullurl = config.legacy_traveler.devices + req.query.device;
@@ -264,7 +265,6 @@ module.exports = function (app) {
   app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
     return res.render('currenttravelers', {
       device: req.query.device || null
-      // prefix: req.proxied ? req.proxied_prefix : ''
     });
   });
 
@@ -289,11 +289,7 @@ module.exports = function (app) {
           return res.send(500, err.message);
         }
         if (form) {
-          // if (form.createdBy === req.session.userid) {
           createTraveler(form, req, res);
-          // } else {
-          //   return res.send(400, 'You cannot create a traveler based on a form that you do not own.');
-          // }
         } else {
           return res.send(400, 'cannot find the form ' + req.body.form);
         }
@@ -306,9 +302,9 @@ module.exports = function (app) {
           return res.send(500, err.message);
         }
         if (traveler) {
-          if (traveler.status === 0) {
-            return res.send(400, 'You cannot clone an initialized traveler.');
-          }
+          // if (traveler.status === 0) {
+          //   return res.send(400, 'You cannot clone an initialized traveler.');
+          // }
           if (reqUtils.canRead(req, traveler)) {
             cloneTraveler(traveler, req, res);
           } else {
@@ -338,8 +334,7 @@ module.exports = function (app) {
       if (reqUtils.canWrite(req, doc)) {
         return res.render('traveler', {
           traveler: doc,
-          formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html,
-          prefix: req.proxied ? req.proxied_prefix : ''
+          formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html
         });
       }
 
@@ -361,8 +356,7 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       return res.render('travelerviewer', {
-        traveler: doc,
-        prefix: req.proxied ? req.proxied_prefix : ''
+        traveler: doc
       });
     });
   });
@@ -407,10 +401,10 @@ module.exports = function (app) {
         doc.archivedOn = Date.now();
       }
 
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -441,10 +435,10 @@ module.exports = function (app) {
         scope: 'sub'
       };
 
-      ldapClient.search(ad.searchBase, opts, false, function (err, result) {
-        if (err) {
-          console.error(err.name + ' : ' + err.message);
-          return res.send(500, err.message);
+      ldapClient.search(ad.searchBase, opts, false, function (ldapErr, result) {
+        if (ldapErr) {
+          console.error(ldapErr.name + ' : ' + ldapErr.message);
+          return res.send(500, ldapErr.message);
         }
 
         if (result.length === 0) {
@@ -464,10 +458,10 @@ module.exports = function (app) {
         doc.owner = id;
         doc.transferredOn = Date.now();
 
-        doc.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        doc.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           return res.send(204);
         });
@@ -486,8 +480,7 @@ module.exports = function (app) {
       }
       if (reqUtils.canWrite(req, doc)) {
         return res.render('config', {
-          traveler: doc,
-          prefix: req.proxied ? req.proxied_prefix : ''
+          traveler: doc
         });
       }
       return res.send(403, 'You are not authorized to access this resource');
@@ -507,8 +500,7 @@ module.exports = function (app) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       res.render('form-manager', {
-        traveler: doc,
-        prefix: req.proxied ? req.proxied_prefix : ''
+        traveler: doc
       });
     });
   });
@@ -639,10 +631,10 @@ module.exports = function (app) {
       }
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -661,19 +653,19 @@ module.exports = function (app) {
 
       if (req.body.status === 1.5) {
         if (!reqUtils.canWrite(req, doc)) {
-          return res.send(403, 'You are not authorized to access this resource');
+          return res.send(403, 'You are not authorized to access this resource. ');
         }
-      } else {
-        if (doc.createdBy !== req.session.userid) {
-          return res.send(403, 'You are not authorized to access this resource');
-        }
+      }
+
+      if (reqUtils.isOwner(req, doc)) {
+        return res.send(403, 'You are not authorized to change the status. ');
       }
 
       if (req.body.status === 1) {
         if ([0, 1.5, 3].indexOf(doc.status) !== -1) {
           doc.status = 1;
         } else {
-          return res.send(400, 'cannot start to work from the current status');
+          return res.send(400, 'cannot start to work from the current status. ');
         }
       }
 
@@ -681,7 +673,7 @@ module.exports = function (app) {
         if ([1].indexOf(doc.status) !== -1) {
           doc.status = 1.5;
         } else {
-          return res.send(400, 'cannot complete from the current status');
+          return res.send(400, 'cannot complete from the current status. ');
         }
       }
 
@@ -689,7 +681,7 @@ module.exports = function (app) {
         if ([1, 1.5].indexOf(doc.status) !== -1) {
           doc.status = 2;
         } else {
-          return res.send(400, 'cannot complete from the current status');
+          return res.send(400, 'cannot complete from the current status. ');
         }
       }
 
@@ -697,16 +689,16 @@ module.exports = function (app) {
         if ([1].indexOf(doc.status) !== -1) {
           doc.status = 3;
         } else {
-          return res.send(400, 'cannot freeze from the current status');
+          return res.send(400, 'cannot freeze from the current status. ');
         }
       }
 
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -729,10 +721,10 @@ module.exports = function (app) {
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.devices.addToSet(req.body.newdevice);
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -754,10 +746,10 @@ module.exports = function (app) {
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.devices.pull(req.params.number);
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -780,10 +772,10 @@ module.exports = function (app) {
         _id: {
           $in: doc.data
         }
-      }, 'name value inputType inputBy inputOn').exec(function (err, docs) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }, 'name value inputType inputBy inputOn').exec(function (dataErr, docs) {
+        if (dataErr) {
+          console.error(dataErr);
+          return res.send(500, dataErr.message);
         }
         return res.json(200, docs);
       });
@@ -814,19 +806,19 @@ module.exports = function (app) {
         inputBy: req.session.userid,
         inputOn: Date.now()
       });
-      data.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      data.save(function (dataErr) {
+        if (dataErr) {
+          console.error(dataErr);
+          return res.send(500, dataErr.message);
         }
         doc.data.push(data._id);
         doc.manPower.addToSet(req.session.userid);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        doc.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        doc.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           return res.send(204);
         });
@@ -850,10 +842,10 @@ module.exports = function (app) {
         _id: {
           $in: doc.notes
         }
-      }, 'name value inputBy inputOn').exec(function (err, docs) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }, 'name value inputBy inputOn').exec(function (noteErr, docs) {
+        if (noteErr) {
+          console.error(noteErr);
+          return res.send(500, noteErr.message);
         }
         return res.json(200, docs);
       });
@@ -884,19 +876,19 @@ module.exports = function (app) {
         inputBy: req.session.userid,
         inputOn: Date.now()
       });
-      note.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      note.save(function (noteErr) {
+        if (noteErr) {
+          console.error(noteErr);
+          return res.send(500, noteErr.message);
         }
         doc.notes.push(note._id);
         doc.manPower.addToSet(req.session.userid);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        doc.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        doc.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           return res.send(204);
         });
@@ -927,10 +919,10 @@ module.exports = function (app) {
 
       doc.update({
         finishedInput: req.body.finishedInput
-      }, function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }, function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -975,18 +967,18 @@ module.exports = function (app) {
       });
 
       // console.dir(data);
-      data.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      data.save(function (dataErr) {
+        if (dataErr) {
+          console.error(dataErr);
+          return res.send(500, dataErr.message);
         }
         doc.data.push(data._id);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        doc.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        doc.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/data/' + data._id;
           res.set('Location', url);
@@ -1063,10 +1055,10 @@ module.exports = function (app) {
         return res.send(204);
       }
       traveler.publicAccess = access;
-      traveler.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      traveler.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(200, 'public access is set to ' + req.body.access);
       });
@@ -1109,14 +1101,14 @@ module.exports = function (app) {
       }
       var share = -2;
       if (req.params.list === 'users') {
-        if (!!req.body.name) {
+        if (req.body.name) {
           share = reqUtils.getSharedWith(traveler.sharedWith, req.body.name);
         } else {
           return res.send(400, 'user name is empty.');
         }
       }
       if (req.params.list === 'groups') {
-        if (!!req.body.id) {
+        if (req.body.id) {
           share = reqUtils.getSharedGroup(traveler.sharedGroup, req.body.id);
         } else {
           return res.send(400, 'group id is empty.');
@@ -1164,10 +1156,10 @@ module.exports = function (app) {
         } else {
           share.access = 0;
         }
-        traveler.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        traveler.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           // check consistency of user's traveler list
           var Target;
@@ -1181,9 +1173,9 @@ module.exports = function (app) {
             $addToSet: {
               travelers: traveler._id
             }
-          }, function (err, target) {
-            if (err) {
-              console.error(err);
+          }, function (updateErr, target) {
+            if (updateErr) {
+              console.error(updateErr);
             }
             if (!target) {
               console.error('The user/group ' + req.params.userid + ' is not in the db');
@@ -1219,10 +1211,10 @@ module.exports = function (app) {
       }
       if (share) {
         share.remove();
-        traveler.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        traveler.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           // keep the consistency of user's traveler list
           var Target;
@@ -1236,9 +1228,9 @@ module.exports = function (app) {
             $pull: {
               travelers: traveler._id
             }
-          }, function (err, target) {
-            if (err) {
-              console.error(err);
+          }, function (updateErr, target) {
+            if (updateErr) {
+              console.error(updateErr);
             }
             if (!target) {
               console.error('The user/group ' + req.params.shareid + ' is not in the db');
