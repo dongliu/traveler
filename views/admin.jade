@@ -1,0 +1,73 @@
+extends layout
+
+block head
+  title FRIB Forms
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script.
+    var prefix = '!{prefix}';
+  .container-fluid
+    #message
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body(style='overflow-y: visible;')
+      .modal-footer
+    div
+      ul.nav.nav-tabs
+        li.active
+          a(href='#users', data-toggle='tab') Users
+        li
+          a(href='#groups', data-toggle='tab') Groups
+      .tab-content
+        #users.tab-pane.active
+          .well
+            form.form-inline
+              input#username.input(type='text', placeholder='Last, First', name='name')
+              != ' '
+              label.checkbox.inline
+                input#manager(type='checkbox', value='manager')
+                | manager
+              != ' '
+              label.checkbox.inline
+                input#admin(type='checkbox', value='admin')
+                | admin
+              != ' '
+              button.btn.btn-primary#add(type='submit') Add
+          h3 User list
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info#user-modify
+                i.fa.fa-wrench.fa-lg
+                | &nbsp;Modify role
+            .btn-group
+              button.btn.btn-warning#user-update
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Update profile
+
+          table#users-table.table.table-bordered.table-hover
+        #groups.tab-pane
+
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajaxhelper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/users.js')
+
+
