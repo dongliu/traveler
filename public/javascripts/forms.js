@@ -1,13 +1,13 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
-/*global moment: false, Binder: false, ajax401: false, disableAjaxCache: false, prefix: false, updateAjaxURL: false, travelerGlobal: false*/
-/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, sDomNoTools: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
+/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false, updateAjaxURL: false, travelerGlobal: false*/
+/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
 function travelFromModal() {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function (index) {
+  $('#modal .modal-body div.target').each(function () {
     var that = this;
-    var success = false;
+    // var success = false;
     $.ajax({
       url: '/travelers/',
       type: 'POST',
@@ -18,8 +18,8 @@ function travelFromModal() {
     }).done(function () {
       $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
-      success = true;
-    }).fail(function (jqXHR, status, error) {
+      // success = true;
+    }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
@@ -37,7 +37,7 @@ function archiveFromModal(archive, activeTable, archivedFormTable, theOtherTable
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function (index) {
+  $('#modal .modal-body div.target').each(function () {
     var that = this;
     var success = false;
     $.ajax({
@@ -51,7 +51,7 @@ function archiveFromModal(archive, activeTable, archivedFormTable, theOtherTable
       $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
@@ -60,7 +60,7 @@ function archiveFromModal(archive, activeTable, archivedFormTable, theOtherTable
       if (number === 0 && success) {
         $('#return').prop('disabled', false);
         activeTable.fnReloadAjax();
-        if (!!theOtherTable) {
+        if (theOtherTable) {
           theOtherTable.fnReloadAjax();
         }
         archivedFormTable.fnReloadAjax();
@@ -73,7 +73,7 @@ function transferFromModal(newOwnerName, formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function (index) {
+  $('#modal .modal-body div.target').each(function () {
     var that = this;
     var success = false;
     $.ajax({
@@ -87,7 +87,7 @@ function transferFromModal(newOwnerName, formTable) {
       $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).prepend('<i class="fa fa-exclamation"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
@@ -105,7 +105,7 @@ function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function (index) {
+  $('#modal .modal-body div.target').each(function () {
     var that = this;
     var success = false;
     $.ajax({
@@ -115,7 +115,7 @@ function cloneFromModal(formTable) {
       $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
@@ -136,7 +136,7 @@ function showHash() {
 }
 
 function formatItemUpdate(data) {
-  return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ((!!data.updatedOn) ? (', updated ' + moment(data.updatedOn).fromNow()) : '') + '</div>';
+  return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') + '</div>';
 }
 
 $(function () {
@@ -152,7 +152,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -177,7 +177,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -202,7 +202,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -226,7 +226,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -251,7 +251,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
@@ -272,7 +272,7 @@ $(function () {
   showHash();
 
   // add state for tab changes
-  $('.nav-tabs a').on('click', function (e) {
+  $('.nav-tabs a').on('click', function () {
     window.history.pushState(null, 'FRIB forms :: ' + this.text, this.href);
   });
 
@@ -281,7 +281,7 @@ $(function () {
     showHash();
   };
 
-  $('#form-travel').click(function (e) {
+  $('#form-travel').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -298,13 +298,13 @@ $(function () {
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         travelFromModal();
       });
     }
   });
 
-  $('button.archive').click(function (e) {
+  $('button.archive').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -321,13 +321,13 @@ $(function () {
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         archiveFromModal(true, activeTable, archivedFormTable);
       });
     }
   });
 
-  $('button.transfer').click(function (e) {
+  $('button.transfer').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -358,13 +358,13 @@ $(function () {
         limit: 20,
         source: travelerGlobal.usernames
       });
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         transferFromModal($('#username').val(), activeTable);
       });
     }
   });
 
-  $('#clone').click(function (e) {
+  $('#clone').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -381,13 +381,13 @@ $(function () {
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         cloneFromModal(formTable);
       });
     }
   });
 
-  $('#dearchive').click(function (e) {
+  $('#dearchive').click(function () {
     var selected = fnGetSelected(archivedFormTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
@@ -403,13 +403,13 @@ $(function () {
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         archiveFromModal(false, formTable, archivedFormTable, transferredFormTable);
       });
     }
   });
 
-  $('#reload').click(function (e) {
+  $('#reload').click(function () {
     formTable.fnReloadAjax();
     transferredFormTable.fnReloadAjax();
     sharedFormTable.fnReloadAjax();
