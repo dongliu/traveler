@@ -30,7 +30,9 @@ module.exports = function (app) {
       archived: {
         $ne: true
       },
-      owner: {$exists: false}
+      owner: {
+        $exists: false
+      }
     }).exec(function (err, forms) {
       if (err) {
         console.error(err);
@@ -124,6 +126,27 @@ module.exports = function (app) {
     Form.find({
       createdBy: req.session.userid,
       archived: true
+    }).exec(function (err, forms) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, forms);
+    });
+  });
+
+  app.get('/publicforms/', auth.ensureAuthenticated, function (req, res) {
+    res.render('public-forms');
+  });
+
+  app.get('/publicforms/json', auth.ensureAuthenticated, function (req, res) {
+    Form.find({
+      publicAccess: {
+        $in: [0, 1]
+      },
+      archived: {
+        $ne: true
+      }
     }).exec(function (err, forms) {
       if (err) {
         console.error(err);
