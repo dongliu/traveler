@@ -1,4 +1,4 @@
-/*jslint es5: true*/
+/*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
@@ -75,10 +75,10 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }).exec(function (err, forms) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }).exec(function (fErr, forms) {
+        if (fErr) {
+          console.error(fErr);
+          return res.send(500, fErr.message);
         }
         res.json(200, forms);
       });
@@ -96,7 +96,8 @@ module.exports = function (app) {
         return res.send(500, err.message);
       }
       var formids = [];
-      var i, j;
+      var i;
+      var j;
       // merge the forms arrays
       for (i = 0; i < groups.length; i += 1) {
         for (j = 0; j < groups[i].forms.length; j += 1) {
@@ -112,10 +113,10 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }).exec(function (err, forms) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }).exec(function (fErr, forms) {
+        if (fErr) {
+          console.error(fErr);
+          return res.send(500, fErr.message);
         }
         res.json(200, forms);
       });
@@ -205,7 +206,7 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
 
-      var access = getAccess(req, form);
+      var access = reqUtils.getAccess(req, form);
 
       if (access === -1) {
         return res.send(403, 'you are not authorized to access this resource');
@@ -250,10 +251,10 @@ module.exports = function (app) {
       });
 
       // console.dir(data);
-      file.save(function (err, newfile) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      file.save(function (saveErr, newfile) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/formfiles/' + newfile.id;
         res.set('Location', url);
@@ -347,10 +348,10 @@ module.exports = function (app) {
         return res.send(204);
       }
       form.publicAccess = access;
-      form.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      form.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(200, 'public access is set to ' + req.body.access);
       });
@@ -393,14 +394,14 @@ module.exports = function (app) {
       }
       var share = -2;
       if (req.params.list === 'users') {
-        if (!!req.body.name) {
+        if (req.body.name) {
           share = reqUtils.getSharedWith(form.sharedWith, req.body.name);
         } else {
           return res.send(400, 'user name is empty.');
         }
       }
       if (req.params.list === 'groups') {
-        if (!!req.body.id) {
+        if (req.body.id) {
           share = reqUtils.getSharedGroup(form.sharedGroup, req.body.id);
         } else {
           return res.send(400, 'group id is empty.');
@@ -417,7 +418,6 @@ module.exports = function (app) {
 
       if (share === -1) {
         // new user
-        // addShare(req, res, form);
         addShare(req, res, form);
       }
     });
@@ -449,10 +449,10 @@ module.exports = function (app) {
         } else {
           share.access = 0;
         }
-        form.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        form.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           // check consistency of user's form list
           var Target;
@@ -466,9 +466,9 @@ module.exports = function (app) {
             $addToSet: {
               forms: form._id
             }
-          }, function (err, target) {
-            if (err) {
-              console.error(err);
+          }, function (updateErr, target) {
+            if (updateErr) {
+              console.error(updateErr);
             }
             if (!target) {
               console.error('The user/group ' + req.params.userid + ' is not in the db');
@@ -504,10 +504,10 @@ module.exports = function (app) {
       }
       if (share) {
         share.remove();
-        form.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        form.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           // keep the consistency of user's form list
           var Target;
@@ -521,9 +521,9 @@ module.exports = function (app) {
             $pull: {
               forms: form._id
             }
-          }, function (err, target) {
-            if (err) {
-              console.error(err);
+          }, function (updateErr, target) {
+            if (updateErr) {
+              console.error(updateErr);
             }
             if (!target) {
               console.error('The user/group ' + req.params.shareid + ' is not in the db');
@@ -539,7 +539,7 @@ module.exports = function (app) {
 
   app.post('/forms/', auth.ensureAuthenticated, function (req, res) {
     var form = {};
-    if (!!req.body.html) {
+    if (req.body.html) {
       form.html = sanitize(req.body.html);
     } else {
       form.html = '';
@@ -581,10 +581,10 @@ module.exports = function (app) {
       form.createdOn = Date.now();
       form.sharedWith = [];
 
-      (new Form(form)).save(function (err, newform) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      (new Form(form)).save(function (saveErr, newform) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + newform.id + '/';
         res.set('Location', url);
@@ -616,10 +616,10 @@ module.exports = function (app) {
         doc.archivedOn = Date.now();
       }
 
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -650,10 +650,10 @@ module.exports = function (app) {
         scope: 'sub'
       };
 
-      ldapClient.search(ad.searchBase, opts, false, function (err, result) {
-        if (err) {
-          console.error(err.name + ' : ' + err.message);
-          return res.send(500, err.message);
+      ldapClient.search(ad.searchBase, opts, false, function (ldapErr, result) {
+        if (ldapErr) {
+          console.error(ldapErr.name + ' : ' + ldapErr.message);
+          return res.send(500, ldapErr.message);
         }
 
         if (result.length === 0) {
@@ -673,10 +673,10 @@ module.exports = function (app) {
         doc.owner = id;
         doc.transferredOn = Date.now();
 
-        doc.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        doc.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           return res.send(204);
         });
@@ -712,10 +712,10 @@ module.exports = function (app) {
       if (reqUtils.getAccess(req, doc) !== 1) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      doc.update(form, function (err, old) {
-        if (err) {
-          console.dir(err);
-          return res.send(500, err.message || err.errmsg);
+      doc.update(form, function (updateErr, old) {
+        if (updateErr) {
+          console.dir(updateErr);
+          return res.send(500, updateErr.message || updateErr.errmsg);
         }
         if (old) {
           return res.send(204);
