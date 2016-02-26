@@ -390,9 +390,11 @@ var travelerConfigLinkColumn = {
 
 var travelerShareLinkColumn = {
   sTitle: '',
-  mData: '_id',
-  mRender: function (data, type, full) {
-    return '<a href="' + prefix + '/travelers/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>';
+  mData: function (source) {
+    if (source.publicAccess >= 0) {
+      return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+    }
+    return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
