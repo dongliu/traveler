@@ -56,8 +56,14 @@ function personColumn(title, key) {
     sTitle: title,
     mData: key,
     sDefaultContent: '',
-    mRender: function (data, type, full) {
-      return '<a href = "' + prefix + '/users/' + data + '" target="_blank">' + data + '</a>';
+    mRender: function (data, type) {
+      if (type === 'sort' || type === 'filter') {
+        return data;
+      } else if (data) {
+        return '<img class="user" src="/adusers/' + data + '/photo" title="' + data + '">';
+      } else {
+        return '';
+      }
     },
     bFilter: true
   };
@@ -519,15 +525,23 @@ var deviceColumn = {
 
 var sharedWithColumn = {
   sTitle: 'Shared with',
-  mData: function (source, type, val) {
+  mData: function (source, type) {
     if (source.sharedWith) {
       if (source.sharedWith.length === 0) {
         return '';
       }
       var names = source.sharedWith.map(function (u) {
-        return u.username;
+        if (type === 'filter' || type === 'sort') {
+          return u.username;
+        } else {
+          return '<img class="user" src="/adusers/' + u._id + '/photo" title="' + u.username + '">';
+        }
       });
-      return names.join('; ');
+      if (type === 'filter' || type === 'sort') {
+        return names.join('; ');
+      } else {
+        return names.join(' ');
+      }
     }
     return '';
   },
