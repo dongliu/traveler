@@ -42,22 +42,28 @@ function fetch_photo_from_ad(id) {
       cleanList(id, function (res) {
         res.send(400, id + ' is not unique!');
       });
-    } else if (fs.existsSync(options.root + id + '.jpg')) {
-      cleanList(id, function (res) {
-        res.set('Content-Type', 'image/jpeg');
-        res.set('Cache-Control', 'public, max-age=' + options.maxAge);
-        res.send(result[0].thumbnailPhoto);
-      });
-    } else {
-      fs.writeFile(options.root + id + '.jpg', result[0].thumbnailPhoto, function (fsErr) {
-        if (fsErr) {
-          console.error(fsErr);
-        }
+    } else if (result[0].thumbnailPhoto && result[0].thumbnailPhoto.length) {
+      if (!fs.existsSync(options.root + id + '.jpg')) {
+        fs.writeFile(options.root + id + '.jpg', result[0].thumbnailPhoto, function (fsErr) {
+          if (fsErr) {
+            console.error(fsErr);
+          }
+          cleanList(id, function (res) {
+            res.set('Content-Type', 'image/jpeg');
+            res.set('Cache-Control', 'public, max-age=' + options.maxAge);
+            res.send(result[0].thumbnailPhoto);
+          });
+        });
+      } else {
         cleanList(id, function (res) {
           res.set('Content-Type', 'image/jpeg');
           res.set('Cache-Control', 'public, max-age=' + options.maxAge);
           res.send(result[0].thumbnailPhoto);
         });
+      }
+    } else {
+      cleanList(id, function (res) {
+        res.send(400, id + ' photo is not found');
       });
     }
   });
