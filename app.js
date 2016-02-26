@@ -58,6 +58,15 @@ mongoose.connection.on('disconnected', function () {
 });
 
 var adClient = require('./lib/ldap-client').client;
+adClient.on('connect', function () {
+  console.log('ldap client connected');
+});
+adClient.on('timeout', function (message) {
+  console.error(message);
+});
+adClient.on('error', function (error) {
+  console.error(error);
+});
 
 var auth = require('./lib/auth');
 
