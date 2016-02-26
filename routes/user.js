@@ -15,6 +15,12 @@ var options = {
   maxAge: 30 * 24 * 3600 * 1000
 };
 
+function cleanList(id, f) {
+  var res_list = pending_photo[id];
+  delete pending_photo[id];
+  res_list.forEach(f);
+}
+
 function fetch_photo_from_ad(id) {
   var searchFilter = ad.searchFilter.replace('_id', id);
   var opts = {
@@ -23,35 +29,36 @@ function fetch_photo_from_ad(id) {
     scope: 'sub'
   };
   ldapClient.search(ad.searchBase, opts, true, function (err, result) {
-    var res_list = pending_photo[id];
-    delete pending_photo[id];
     if (err) {
       console.error(err);
-      res_list.forEach(function (res) {
+      cleanList(id, function (res) {
         res.send(500, 'ldap error');
       });
     } else if (result.length === 0) {
-      res_list.forEach(function (res) {
-        res.status(400, id + ' is not found');
+      cleanList(id, function (res) {
+        res.send(400, id + ' is not found');
       });
     } else if (result.length > 1) {
-      res_list.forEach(function (res) {
-        res.status(400, id + ' is not unique!');
+      cleanList(id, function (res) {
+        res.send(400, id + ' is not unique!');
       });
-    } else {
-      res_list.forEach(function (res) {
+    } else if (fs.existsSync(options.root + id + '.jpg')) {
+      cleanList(id, function (res) {
         res.set('Content-Type', 'image/jpeg');
         res.set('Cache-Control', 'public, max-age=' + options.maxAge);
         res.send(result[0].thumbnailPhoto);
       });
-      // there is a chance that the file was created but not seen by the current leading request
-      if (!fs.existsSync(options.root + id + '.jpg')) {
-        fs.writeFile(options.root + id + '.jpg', result[0].thumbnailPhoto, function (fsErr) {
-          if (fsErr) {
-            console.error(fsErr);
-          }
+    } else {
+      fs.writeFile(options.root + id + '.jpg', result[0].thumbnailPhoto, function (fsErr) {
+        if (fsErr) {
+          console.error(fsErr);
+        }
+        cleanList(id, function (res) {
+          res.set('Content-Type', 'image/jpeg');
+          res.set('Cache-Control', 'public, max-age=' + options.maxAge);
+          res.send(result[0].thumbnailPhoto);
         });
-      }
+      });
     }
   });
 }
