@@ -22,7 +22,7 @@ var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
-var request = require('request');
+// var request = require('request');
 
 function createTraveler(form, req, res) {
   // update the total input number and finished input number
@@ -144,7 +144,7 @@ module.exports = function (app) {
       owner: {
         $exists: false
       }
-    }, 'title description status devices sharedWith sharedGroup clonedBy createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').exec(function (err, docs) {
+    }, 'title description status devices sharedWith sharedGroup publicAccess clonedBy createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -186,7 +186,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').exec(function (tErr, travelers) {
+      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup publicAccess finishedInput totalInput').exec(function (tErr, travelers) {
         if (tErr) {
           console.error(tErr);
           return res.send(500, tErr.message);
@@ -221,7 +221,7 @@ module.exports = function (app) {
         _id: {
           $in: travelerIds
         }
-      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').exec(function (tErr, travelers) {
+      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup publicAccess finishedInput totalInput').exec(function (tErr, travelers) {
         if (tErr) {
           console.error(tErr);
           return res.send(500, tErr.message);
@@ -231,7 +231,28 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
+  app.get('/publictravelers/', auth.ensureAuthenticated, function (req, res) {
+    res.render('public-travelers');
+  });
+
+  app.get('/publictravelers/json', auth.ensureAuthenticated, function (req, res) {
+    Traveler.find({
+      publicAccess: {
+        $ne: -1
+      },
+      archived: {
+        $ne: true
+      }
+    }).exec(function (err, travelers) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, travelers);
+    });
+  });
+
+/*  app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
     var search = {
       archived: {
         $ne: true
@@ -266,7 +287,7 @@ module.exports = function (app) {
     return res.render('currenttravelers', {
       device: req.query.device || null
     });
-  });
+  });*/
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function (req, res) {
     Traveler.find({
