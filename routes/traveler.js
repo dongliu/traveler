@@ -678,7 +678,7 @@ module.exports = function (app) {
         }
       }
 
-      if (reqUtils.isOwner(req, doc)) {
+      if (!reqUtils.isOwner(req, doc)) {
         return res.send(403, 'You are not authorized to change the status. ');
       }
 
