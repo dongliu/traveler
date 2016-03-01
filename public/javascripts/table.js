@@ -534,7 +534,7 @@ var sharedWithColumn = {
         if (type === 'filter' || type === 'sort') {
           return u.username;
         } else {
-          return '<img class="user" data-src="holder.js/27x40?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '">';
+          return '<img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '">';
         }
       });
       if (type === 'filter' || type === 'sort') {
@@ -575,7 +575,7 @@ var statusColumn = {
 };
 
 /*shared user columns*/
-var useridColumn = personColumn('User id', '_id');
+var useridColumn = personColumn('User', '_id');
 
 var useridNoLinkColumn = {
   sTitle: 'User id',
