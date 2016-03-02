@@ -71,7 +71,8 @@ block content
     ul#devices
       each device in traveler.devices
         li
-          | #{device}
+          span.device #{device}
+          = ' '
           button.btn.btn-small.btn-warning.removeDevice
             i.fa.fa-trash-o.fa-lg
     br
