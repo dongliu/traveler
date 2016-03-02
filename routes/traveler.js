@@ -500,7 +500,7 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
       if (reqUtils.canWrite(req, doc)) {
-        return res.render('config', {
+        return res.render('traveler-config', {
           traveler: doc
         });
       }
