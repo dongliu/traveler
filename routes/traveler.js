@@ -159,7 +159,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }).exec(function (err, travelers) {
+    }, 'title description status devices sharedWith sharedGroup publicAccess clonedBy createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput').exec(function (err, travelers) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);

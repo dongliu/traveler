@@ -33,7 +33,7 @@ module.exports = function (app) {
       owner: {
         $exists: false
       }
-    }).exec(function (err, forms) {
+    }, 'title createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -48,7 +48,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }).exec(function (err, forms) {
+    }, 'title createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -75,7 +75,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }).exec(function (fErr, forms) {
+      }, 'title owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
         if (fErr) {
           console.error(fErr);
           return res.send(500, fErr.message);
@@ -113,7 +113,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }).exec(function (fErr, forms) {
+      }, 'title owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
         if (fErr) {
           console.error(fErr);
           return res.send(500, fErr.message);
@@ -127,7 +127,7 @@ module.exports = function (app) {
     Form.find({
       createdBy: req.session.userid,
       archived: true
-    }).exec(function (err, forms) {
+    }, 'title archivedOn sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
