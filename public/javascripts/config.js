@@ -1,5 +1,5 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false, ajax401: false, Modernizr: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, Bloodhound: false*/
+/*global moment: false, ajax401: false, Modernizr: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, Bloodhound: false*/
 
 function cleanDeviceForm() {
   $('#newDevice').closest('li').remove();
@@ -15,6 +15,7 @@ function setStatus(s) {
       status: s
     })
   }).done(function (data, status, jqXHR) {
+    // TODO: avoid refresh the whole page
     document.location.href = window.location.pathname;
   }).fail(function (jqXHR, status, error) {
     if (jqXHR.status !== 401) {
@@ -45,10 +46,9 @@ $(function () {
     location: $('#location').text()
   };
 
-  $('span.editable').editable(function (value, settings) {
+  $('span.editable').editable(function (value) {
     var that = this;
     if (value === initValue[that.id]) {
-      // console.log('not changed');
       return value;
     }
     var data = {};
@@ -58,10 +58,10 @@ $(function () {
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify(data),
-      success: function (data) {
+      success: function () {
         initValue[that.id] = value;
       },
-      error: function (jqXHR, status, error) {
+      error: function (jqXHR) {
         $(that).text(initValue[that.id]);
         $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config : ' + jqXHR.responseText + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -79,13 +79,13 @@ $(function () {
     tooltip: 'Click to edit...'
   });
 
-  $('button.editable').click(function (e) {
+  $('button.editable').click(function () {
     $(this).siblings('span.editable').first().click();
   });
 
   var deadline = $('#deadline').val();
 
-  $('#deadline').change(function (e) {
+  $('#deadline').change(function () {
     var $dl = $(this).parent();
     if ($dl.children('.buttons').length === 0) {
       $dl.append('<span class="buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></span>');
@@ -103,10 +103,10 @@ $(function () {
       data: JSON.stringify({
         deadline: moment($input.val()).utc()
       })
-    }).done(function (data, status, jqXHR) {
+    }).done(function () {
       deadline = $input.val();
       $this.parent().remove();
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $this.val(deadline);
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config :  ' + jqXHR.responseText + '</div>');
@@ -115,7 +115,6 @@ $(function () {
     });
   });
 
-
   $('#deadline').parent().on('click', 'button[value="reset"]', function (e) {
     e.preventDefault();
     var $this = $(this);
@@ -123,17 +122,13 @@ $(function () {
     $this.parent().remove();
   });
 
-
-
   $('#add').click(function (e) {
     e.preventDefault();
     // add an input and a button add
     $('#add').attr('disabled', true);
     $('#devices').append('<li><form class="form-inline"><input id="newDevice" type="text"> <button id="confirm" class="btn btn-primary">Confirm</button> <button id="cancel" class="btn">Cancel</button></form></li>');
-    $('#cancel').click(function (e) {
-      e.preventDefault();
-      // $('#newDevice').closest('li').remove();
-      // $('#add').removeAttr('disabled');
+    $('#cancel').click(function (cancelE) {
+      cancelE.preventDefault();
       cleanDeviceForm();
     });
 
@@ -164,8 +159,8 @@ $(function () {
       source: devices
     });
 
-    $('#confirm').click(function (e) {
-      e.preventDefault();
+    $('#confirm').click(function (confirmE) {
+      confirmE.preventDefault();
       if ($('#newDevice').val()) {
         $.ajax({
           url: './devices/',
@@ -174,24 +169,26 @@ $(function () {
           data: JSON.stringify({
             newdevice: $('#newDevice').val()
           })
-        }).done(function (data, status, jqXHR) {
-          document.location.href = window.location.pathname;
-        }).fail(function (jqXHR, status, error) {
+        }).done(function () {
+          $('#devices').append('<li><span class="device">' + $('#newDevice').val() + '</span> <button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button></li>');
+        }).fail(function (jqXHR) {
           if (jqXHR.status !== 401) {
             $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot add the device</div>');
             $(window).scrollTop($('#message div:last-child').offset().top - 40);
           }
-        }).always();
+        }).always(function () {
+          cleanDeviceForm();
+        });
       }
-      cleanDeviceForm();
+
     });
   });
 
-  $('.removeDevice').click(function (e) {
+  $('#devices').on('click', '.removeDevice', function (e) {
     e.preventDefault();
     var $that = $(this);
     $.ajax({
-      url: './devices/' + encodeURIComponent($that.closest('li').text()),
+      url: './devices/' + encodeURIComponent($that.siblings('span.device').text()),
       type: 'DELETE'
     }).done(function (data, status, jqXHR) {
       $that.closest('li').remove();
