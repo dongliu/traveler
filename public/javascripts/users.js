@@ -1,4 +1,4 @@
-/*global selectColumn: false, useridColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDom: false, oTableTools: false*/
+/*global selectColumn: false, useridColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, fnAddFilterFoot: false*/
 /*global updateAjaxURL: false, prefix: false*/
 /*global travelerGlobal: false*/
 
@@ -10,20 +10,6 @@ function inArray(name, ao) {
     }
   }
   return false;
-}
-
-function initTable(oTable) {
-  $.ajax({
-    url: '/users/json',
-    type: 'GET',
-    dataType: 'json'
-  }).done(function (json) {
-    oTable.fnClearTable();
-    oTable.fnAddData(json);
-    oTable.fnDraw();
-  }).fail(function () {
-    $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for users information.</div>');
-  }).always();
 }
 
 function updateFromModal(cb) {
@@ -100,17 +86,28 @@ $(function () {
     source: travelerGlobal.usernames
   });
 
+  var userColumns = [selectColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn];
+
   var userTable = $('#users-table').dataTable({
-    aaData: [],
-    // bAutoWidth: false,
-    aoColumns: [selectColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn],
-    aaSorting: [
-      [4, 'desc'],
-      [1, 'asc']
+    sAjaxSource: '/users/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: userColumns,
+    aaSorting: [
+      [4, 'desc']
+    ],
+    sDom: sDomNoTools
   });
+  fnAddFilterFoot('#users-table', userColumns);
   selectEvent();
   filterEvent();
 
@@ -132,7 +129,7 @@ $(function () {
         }),
         success: function (data, status, jqXHR) {
           $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
-          initTable(userTable);
+          userTable.fnReloadAjax();
         },
         error: function (jqXHR) {
           $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
@@ -156,7 +153,7 @@ $(function () {
         e.preventDefault();
         $('#update').prop('disabled', true);
         updateFromModal(function () {
-          initTable(userTable);
+          userTable.fnReloadAjax();
         });
       });
       $('#modal').modal('show');
@@ -183,7 +180,7 @@ $(function () {
         e.preventDefault();
         $('#modify').prop('disabled', true);
         modifyFromModal(function () {
-          initTable(userTable);
+          userTable.fnReloadAjax();
         });
       });
       $('#modal').modal('show');
@@ -194,7 +191,4 @@ $(function () {
       $('#modal').modal('show');
     }
   });
-
-
-  initTable(userTable);
 });
