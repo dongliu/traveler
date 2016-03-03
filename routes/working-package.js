@@ -1,20 +1,13 @@
-/*jslint es5: true*/
+/*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
-var ad = require('../config/ad.json');
-var ldapClient = require('../lib/ldap-client');
-
-var fs = require('fs');
 var auth = require('../lib/auth');
-var authConfig = require('../config/auth.json');
+var authConfig = require('../config/config').auth;
 var mongoose = require('mongoose');
-var util = require('util');
 var underscore = require('underscore');
-var path = require('path');
-require('../model/working-package.js');
-
 var reqUtils = require('../lib/reqUtils');
 var addShare = require('../lib/share').addShare;
 
+require('../model/working-package.js');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 var WorkingPackage = mongoose.model('WorkingPackage');
@@ -31,8 +24,10 @@ module.exports = function (app) {
       archived: {
         $ne: true
       },
-      owner: {$exists: false}
-    }, 'title description tags sharedWith sharedGroup clonedBy createdOn updatedOn updatedBy works finishedWorks').exec(function (err, docs) {
+      owner: {
+        $exists: false
+      }
+    }).exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -74,10 +69,10 @@ module.exports = function (app) {
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.tags.addToSet(req.body.newtag);
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -99,10 +94,10 @@ module.exports = function (app) {
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.tags.pull(req.params.number);
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -129,10 +124,10 @@ module.exports = function (app) {
       }
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(204);
       });
@@ -183,10 +178,10 @@ module.exports = function (app) {
         return res.send(204);
       }
       pack.publicAccess = access;
-      pack.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      pack.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
         return res.send(200, 'public access is set to ' + req.body.access);
       });
@@ -229,14 +224,14 @@ module.exports = function (app) {
       }
       var share = -2;
       if (req.params.list === 'users') {
-        if (!!req.body.name) {
+        if (req.body.name) {
           share = reqUtils.getSharedWith(pack.sharedWith, req.body.name);
         } else {
           return res.send(400, 'user name is empty.');
         }
       }
       if (req.params.list === 'groups') {
-        if (!!req.body.id) {
+        if (req.body.id) {
           share = reqUtils.getSharedGroup(pack.sharedGroup, req.body.id);
         } else {
           return res.send(400, 'group id is empty.');
@@ -284,10 +279,10 @@ module.exports = function (app) {
         } else {
           share.access = 0;
         }
-        pack.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        pack.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           // check consistency of user's traveler list
           var Target;
@@ -301,9 +296,9 @@ module.exports = function (app) {
             $addToSet: {
               packages: pack._id
             }
-          }, function (err, target) {
-            if (err) {
-              console.error(err);
+          }, function (updateErr, target) {
+            if (updateErr) {
+              console.error(updateErr);
             }
             if (!target) {
               console.error('The user/group ' + req.params.userid + ' is not in the db');
@@ -339,10 +334,10 @@ module.exports = function (app) {
       }
       if (share) {
         share.remove();
-        pack.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
+        pack.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
           }
           // keep the consistency of user's traveler list
           var Target;
@@ -356,9 +351,9 @@ module.exports = function (app) {
             $pull: {
               packages: pack._id
             }
-          }, function (err, target) {
-            if (err) {
-              console.error(err);
+          }, function (updateErr, target) {
+            if (updateErr) {
+              console.error(updateErr);
             }
             if (!target) {
               console.error('The user/group ' + req.params.shareid + ' is not in the db');
@@ -378,14 +373,14 @@ module.exports = function (app) {
 
   app.post('/workingpackages/', auth.ensureAuthenticated, function (req, res) {
     var workingPackage = {};
-    if (!!req.body.works && underscore.isArray(req.body.works)) {
-      workingPackage.works =  req.body.works;
+    if (req.body.works && underscore.isArray(req.body.works)) {
+      workingPackage.works = req.body.works;
     } else {
       workingPackage.works = [];
     }
 
     workingPackage.title = req.body.title;
-    if (!!req.body.description) {
+    if (req.body.description) {
       workingPackage.description = req.body.description;
     }
     workingPackage.createdBy = req.session.userid;
@@ -435,10 +430,10 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }).exec(function (err, packages) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }).exec(function (pErr, packages) {
+        if (pErr) {
+          console.error(pErr);
+          return res.send(500, pErr.message);
         }
         return res.json(200, packages);
       });
@@ -456,7 +451,8 @@ module.exports = function (app) {
         return res.send(500, err.message);
       }
       var packageIds = [];
-      var i, j;
+      var i;
+      var j;
       // merge the packages arrays
       for (i = 0; i < groups.length; i += 1) {
         for (j = 0; j < groups[i].packages.length; j += 1) {
@@ -469,10 +465,10 @@ module.exports = function (app) {
         _id: {
           $in: packageIds
         }
-      }).exec(function (err, packages) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }).exec(function (pErr, packages) {
+        if (pErr) {
+          console.error(pErr);
+          return res.send(500, pErr.message);
         }
         res.json(200, packages);
       });
