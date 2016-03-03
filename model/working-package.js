@@ -6,14 +6,13 @@ var ObjectId = Schema.Types.ObjectId;
 
 var share = require('./share.js');
 
-// require('./traveler.js');
-
 var work = new Schema({
-  traveler: {
-    type: ObjectId,
-    ref: 'Traveler'
+  alias: String,
+  reference: String,
+  refType: {
+    type: String,
+    enum: ['traveler', 'package']
   },
-  workingPackage: ObjectId,
   addedOn: Date,
   addedBy: String,
   priority: {
@@ -68,10 +67,8 @@ var workingPackage = new Schema({
   }
 });
 
-// var Work = mongoose.model('Work', work);
 var WorkingPackage = mongoose.model('WorkingPackage', workingPackage);
 
 module.exports = {
-  // Work: Work,
   WorkingPackage: WorkingPackage
 };
