@@ -133,7 +133,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -161,7 +161,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -192,7 +192,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -219,7 +219,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -246,7 +246,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -264,7 +264,7 @@ $(function () {
   showHash();
 
   // add state for tab changes
-  $('.nav-tabs a').on('click', function (e) {
+  $('.nav-tabs a').on('click', function () {
     if (!$(this).parent().hasClass('active')) {
       window.history.pushState(null, 'FRIB traveler :: ' + this.text, this.href);
     }
@@ -275,7 +275,7 @@ $(function () {
     showHash();
   };
 
-  $('button.archive').click(function (e) {
+  $('button.archive').click(function () {
     var selected = fnGetSelected(travelerTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
@@ -291,13 +291,13 @@ $(function () {
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         archiveFromModal(true, travelerTable, archivedTravelerTable);
       });
     }
   });
 
-  $('#clone').click(function (e) {
+  $('#clone').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -314,13 +314,13 @@ $(function () {
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable);
       });
     }
   });
 
-  $('button.transfer').click(function (e) {
+  $('button.transfer').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -351,13 +351,13 @@ $(function () {
         limit: 20,
         source: travelerGlobal.usernames
       });
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         transferFromModal($('#username').val(), activeTable);
       });
     }
   });
 
-  $('#dearchive').click(function (e) {
+  $('#dearchive').click(function () {
     var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
@@ -373,13 +373,13 @@ $(function () {
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         archiveFromModal(false, travelerTable, archivedTravelerTable);
       });
     }
   });
 
-  $('#reload').click(function (e) {
+  $('#reload').click(function () {
     travelerTable.fnReloadAjax();
     transferredTravelerTable.fnReloadAjax();
     sharedTravelerTable.fnReloadAjax();
