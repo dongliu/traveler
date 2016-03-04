@@ -252,46 +252,6 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/readabletravelers/json', auth.ensureAuthenticated, function (req, res) {
-    var search = {
-      archived: {
-        $ne: true
-      },
-      $or: [{
-        createdBy: req.session.userid,
-        owner: {
-          $exists: false
-        }
-      }, {
-        owner: req.session.userid
-      }, {
-        sharedWith: {
-          $elemMatch: {
-            _id: req.session.userid
-          }
-        }
-      }, {
-        sharedGroup: {
-          $elemMatch: {
-            _id: {
-              $in: req.session.memberOf
-            }
-          }
-        }
-      }, {
-        publicAccess: {
-          $ne: -1
-        }
-      }]
-    };
-    Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      return res.json(200, travelers);
-    });
-  });
 
   /*  app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
       var search = {

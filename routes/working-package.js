@@ -412,6 +412,30 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/ownedpackages/json', auth.ensureAuthenticated, function (req, res) {
+    var search = {
+      archived: {
+        $ne: true
+      },
+      $or: [{
+        createdBy: req.session.userid,
+        owner: {
+          $exists: false
+        }
+      }, {
+        owner: req.session.userid
+      }]
+    };
+
+    WorkingPackage.find(search).lean().exec(function (err, packages) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      return res.json(200, packages);
+    });
+  });
+
   app.get('/sharedpackages/json', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.session.userid
