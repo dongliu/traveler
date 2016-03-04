@@ -1,5 +1,5 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
-/*global moment: false, Binder: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false*/
+/*global moment: false, Binder: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder: false*/
 /*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, sDomNoTools: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false, archivedOnColumn: false*/
 
 function formatTravelerStatus(s) {
@@ -138,6 +138,11 @@ $(function () {
   var travelerTable = $('#traveler-table').dataTable({
     sAjaxSource: '/travelers/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
@@ -161,6 +166,11 @@ $(function () {
   var transferredTravelerTable = $('#transferred-traveler-table').dataTable({
     sAjaxSource: '/transferredtravelers/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
@@ -187,6 +197,11 @@ $(function () {
   var sharedTravelerTable = $('#shared-traveler-table').dataTable({
     sAjaxSource: '/sharedtravelers/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
@@ -209,6 +224,11 @@ $(function () {
   var groupSharedTravelerTable = $('#group-shared-traveler-table').dataTable({
     sAjaxSource: '/groupsharedtravelers/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
@@ -231,6 +251,11 @@ $(function () {
   var archivedTravelerTable = $('#archived-traveler-table').dataTable({
     sAjaxSource: '/archivedtravelers/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
