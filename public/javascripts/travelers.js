@@ -1,30 +1,16 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
-/*global moment: false, Binder: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, sDomNoTools: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false, archivedOnColumn: false*/
-
-function formatTravelerStatus(s) {
-  var status = {
-    '1': 'active',
-    '1.5': 'submitted for completion',
-    '2': 'completed',
-    '3': 'frozen',
-    '0': 'initialized'
-  };
-  if (status[s.toString()]) {
-    return status[s.toString()];
-  }
-  return 'unknown';
-}
+/*global moment: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder: false*/
+/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false, archivedOnColumn: false*/
 
 function formatItemUpdate(data) {
-  return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + ((!!data.updatedOn) ? (', updated ' + moment(data.updatedOn).fromNow()) : '') + '</div>';
+  return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') + '</div>';
 }
 
 function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function (index) {
+  $('#modal .modal-body div.target').each(function () {
     var that = this;
     var success = false;
     $.ajax({
@@ -38,7 +24,7 @@ function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
       $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
@@ -59,7 +45,7 @@ function transferFromModal(newOwnerName, table) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function (index) {
+  $('#modal .modal-body div.target').each(function () {
     var that = this;
     var success = false;
     $.ajax({
@@ -73,7 +59,7 @@ function transferFromModal(newOwnerName, table) {
       $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).prepend('<i class="fa fa-exclamation"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
@@ -91,7 +77,7 @@ function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerT
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function (index) {
+  $('#modal .modal-body div.target').each(function () {
     var that = this;
     var success = false;
     $.ajax({
@@ -105,7 +91,7 @@ function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerT
       $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
