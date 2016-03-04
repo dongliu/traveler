@@ -1,5 +1,5 @@
 /*global selectColumn: false, useridColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, fnAddFilterFoot: false*/
-/*global updateAjaxURL: false, prefix: false*/
+/*global updateAjaxURL: false, prefix: false, Holder: false*/
 /*global travelerGlobal: false*/
 
 function inArray(name, ao) {
@@ -91,6 +91,11 @@ $(function () {
   var userTable = $('#users-table').dataTable({
     sAjaxSource: '/users/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [

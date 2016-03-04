@@ -1,5 +1,5 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
-/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false, updateAjaxURL: false, travelerGlobal: false*/
+/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false, updateAjaxURL: false, travelerGlobal: false, Holder: false*/
 /*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
 function travelFromModal() {
   $('#submit').prop('disabled', true);
@@ -148,6 +148,11 @@ $(function () {
   var formTable = $('#form-table').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
@@ -173,6 +178,11 @@ $(function () {
   var transferredFormTable = $('#transferred-form-table').dataTable({
     sAjaxSource: '/transferredforms/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
@@ -198,6 +208,11 @@ $(function () {
   var sharedFormTable = $('#shared-form-table').dataTable({
     sAjaxSource: '/sharedforms/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
@@ -222,6 +237,11 @@ $(function () {
   var groupSharedFormTable = $('#group-shared-form-table').dataTable({
     sAjaxSource: '/groupsharedforms/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
@@ -247,6 +267,11 @@ $(function () {
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
