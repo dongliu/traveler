@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false, archivedOnColumn: false*/
+/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false, archivedOnColumn: false, packageLinkColumn: false, tagsColumn: false, sDomNoTNoR: false*/
 
 function formatItemUpdate(data) {
   return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') + '</div>';
@@ -107,6 +107,42 @@ function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerT
       }
     });
   });
+}
+
+function addFromModal() {
+  $('#submit').prop('disabled', true);
+  $('#return').prop('disabled', true);
+  // get the traveler id's
+  var travelers = [];
+  $('#modal .modal-body div.target').each(function () {
+    travelers.push(this.id);
+  });
+  // find owned working packages
+  $('#modalLabel').html('Select a working package');
+  $('#modal .modal-body').html('<table id="owned-package-table" class="table table-bordered table-hover"></table>');
+  var packageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, createdOnColumn, updatedOnColumn];
+  fnAddFilterFoot('#owned-package-table', packageAoColumns);
+  var ownedPackageTable = $('#owned-package-table').dataTable({
+    sAjaxSource: '/ownedpackages/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    iDisplayLength: 5,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: packageAoColumns,
+    aaSorting: [
+      [4, 'desc'],
+      [5, 'desc']
+    ],
+    sDom: sDomNoTNoR
+  });
+  selectEvent();
+  filterEvent();
+  $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  // $('#return').prop('disabled', false);
+  // console.log(travelers);
 }
 
 function showHash() {
@@ -316,6 +352,29 @@ $(function () {
       $('#modal').modal('show');
       $('#submit').click(function () {
         cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable);
+      });
+    }
+  });
+
+  $('#add-to-package').click(function () {
+    var activeTable = $('.tab-pane.active table').dataTable();
+    var selected = fnGetSelected(activeTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No traveler has been selected!');
+      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html('Add the ' + selected.length + ' travelers? ');
+      $('#modal .modal-body').empty();
+      selected.forEach(function (row) {
+        var data = activeTable.fnGetData(row);
+        $('#modal .modal-body').append(formatItemUpdate(data));
+      });
+      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal').modal('show');
+      $('#submit').click(function () {
+        addFromModal();
       });
     }
   });
