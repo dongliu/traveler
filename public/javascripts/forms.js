@@ -7,7 +7,6 @@ function travelFromModal() {
   var number = $('#modal .modal-body div.target').length;
   $('#modal .modal-body div.target').each(function () {
     var that = this;
-    // var success = false;
     $.ajax({
       url: '/travelers/',
       type: 'POST',
