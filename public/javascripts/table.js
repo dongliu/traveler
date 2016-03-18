@@ -331,7 +331,21 @@ var formShareLinkColumn = {
 
 var createdOnColumn = dateColumn('Created', 'createdOn');
 var createdByColumn = personColumn('Created by', 'createdBy');
-var ownerColumn = personColumn('Owner', 'owner');
+var ownerColumn = {
+  sTitle: 'Owner',
+  sDefaultContent: '',
+  mData: function (source, type) {
+    var owner = source.owner || source.createdBy;
+    if (type === 'sort' || type === 'filter') {
+      return owner;
+    } else if (owner) {
+      return '<img class="user" data-src="holder.js/27x40?size=20&text=' + owner.substr(0, 1).toUpperCase() + '" src="/adusers/' + owner + '/photo" title="' + owner + '">';
+    } else {
+      return '';
+    }
+  },
+  bFilter: true
+};
 
 var clonedByColumn = personColumn('Cloned by', 'clonedBy');
 

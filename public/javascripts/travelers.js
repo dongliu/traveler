@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, manPowerColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false, archivedOnColumn: false, packageLinkColumn: false, tagsColumn: false, sDomNoTNoR: false*/
+/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, manPowerColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, ownerColumn: false, deadlineColumn: false, progressColumn: false, archivedOnColumn: false, packageLinkColumn: false, tagsColumn: false, sDomNoTNoR: false*/
 
 function formatItemUpdate(data) {
   return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') + '</div>';
@@ -123,7 +123,7 @@ $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
-  var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, clonedByColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, progressColumn];
+  var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
     sAjaxSource: '/travelers/json',
@@ -145,14 +145,14 @@ $(function () {
     bDeferRender: true,
     aoColumns: travelerAoColumns,
     aaSorting: [
-      [10, 'desc'],
-      [13, 'desc']
+      [12, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDomNoTools
   });
 
   /*transferred traveler table starts*/
-  var transferredTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, transferredOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, progressColumn];
+  var transferredTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, progressColumn];
   var transferredTravelerTable = $('#transferred-traveler-table').dataTable({
     sAjaxSource: '/transferredtravelers/json',
     sAjaxDataProp: '',
@@ -173,16 +173,16 @@ $(function () {
     bDeferRender: true,
     aoColumns: transferredTravelerAoColumns,
     aaSorting: [
+      [13, 'desc'],
       [10, 'desc'],
-      [11, 'desc'],
-      [14, 'desc']
+      [9, 'desc']
     ],
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#transferred-traveler-table', transferredTravelerAoColumns);
   /*transferred traveler table ends*/
 
-  var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, progressColumn];
+  var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   var sharedTravelerTable = $('#shared-traveler-table').dataTable({
     sAjaxSource: '/sharedtravelers/json',
@@ -204,12 +204,12 @@ $(function () {
     bDeferRender: true,
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
-      [10, 'desc'],
-      [13, 'desc']
+      [12, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDomNoTools
   });
-  var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, progressColumn];
+  var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#group-shared-traveler-table', sharedTravelerAoColumns);
   var groupSharedTravelerTable = $('#group-shared-traveler-table').dataTable({
     sAjaxSource: '/groupsharedtravelers/json',
@@ -231,8 +231,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: groupSharedTravelerAoColumns,
     aaSorting: [
-      [10, 'desc'],
-      [13, 'desc']
+      [12, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDomNoTools
   });
