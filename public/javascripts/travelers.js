@@ -109,40 +109,8 @@ function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerT
   });
 }
 
-function addFromModal() {
-  $('#submit').prop('disabled', true);
-  $('#return').prop('disabled', true);
-  // get the traveler id's
-  var travelers = [];
-  $('#modal .modal-body div.target').each(function () {
-    travelers.push(this.id);
-  });
-  // find owned working packages
-  $('#modalLabel').html('Select a working package');
-  $('#modal .modal-body').html('<table id="owned-package-table" class="table table-bordered table-hover"></table>');
-  var packageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, createdOnColumn, updatedOnColumn];
-  fnAddFilterFoot('#owned-package-table', packageAoColumns);
-  var ownedPackageTable = $('#owned-package-table').dataTable({
-    sAjaxSource: '/ownedpackages/json',
-    sAjaxDataProp: '',
-    bAutoWidth: false,
-    iDisplayLength: 5,
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...'
-    },
-    bDeferRender: true,
-    aoColumns: packageAoColumns,
-    aaSorting: [
-      [4, 'desc'],
-      [5, 'desc']
-    ],
-    sDom: sDomNoTNoR
-  });
-  selectEvent();
-  filterEvent();
-  $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-  // $('#return').prop('disabled', false);
-  // console.log(travelers);
+function addTravelers(travelers, packages) {
+
 }
 
 function showHash() {
@@ -359,6 +327,7 @@ $(function () {
   $('#add-to-package').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
+    var travelers = [];
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No traveler has been selected!');
@@ -369,12 +338,42 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
+        travelers.push(data._id);
         $('#modal .modal-body').append(formatItemUpdate(data));
       });
+      $('#modal .modal-body').append('<h3 id="select"> into selected packages </h3>');
+      $('#modal .modal-body').append('<table id="owned-package-table" class="table table-bordered table-hover"></table>');
+      var packageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, createdOnColumn, updatedOnColumn];
+      fnAddFilterFoot('#owned-package-table', packageAoColumns);
+      var ownedPackageTable = $('#owned-package-table').dataTable({
+        sAjaxSource: '/ownedpackages/json',
+        sAjaxDataProp: '',
+        bAutoWidth: false,
+        iDisplayLength: 5,
+        oLanguage: {
+          sLoadingRecords: 'Please wait - loading data from the server ...'
+        },
+        bDeferRender: true,
+        aoColumns: packageAoColumns,
+        aaSorting: [
+          [4, 'desc'],
+          [5, 'desc']
+        ],
+        sDom: sDomNoTNoR
+      });
+      selectEvent();
+      filterEvent();
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function () {
-        addFromModal();
+        var packages = [];
+        var selected = fnGetSelected(ownedPackageTable, 'row-selected');
+        if (selected.length === 0) {
+          $('#modal #select').text('Please select package!').addClass('text-warning');
+        } else {
+
+          addTravelers(travelers, packages);
+        }
       });
     }
   });
