@@ -19,6 +19,12 @@ var form = new Schema({
 });
 
 
+var user = new Schema({
+  _id: String,
+  username: String
+});
+
+
 /*******
 status := 0 // new
         | 1 // active
@@ -38,7 +44,7 @@ var traveler = new Schema({
   description: String,
   devices: [String],
   location: String,
-  manPower: [String],
+  manPower: [user],
   status: Number,
   createdBy: String,
   createdOn: Date,

@@ -834,7 +834,10 @@ module.exports = function (app) {
           return res.send(500, dataErr.message);
         }
         doc.data.push(data._id);
-        doc.manPower.addToSet(req.session.userid);
+        doc.manPower.addToSet({
+          _id: req.session.userid,
+          username: req.session.username
+        });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
         doc.save(function (saveErr) {
@@ -904,7 +907,10 @@ module.exports = function (app) {
           return res.send(500, noteErr.message);
         }
         doc.notes.push(note._id);
-        doc.manPower.addToSet(req.session.userid);
+        doc.manPower.addToSet({
+          _id: req.session.userid,
+          username: req.session.username
+        });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
         doc.save(function (saveErr) {

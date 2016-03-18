@@ -525,30 +525,37 @@ var deviceColumn = {
   bFilter: true
 };
 
-var sharedWithColumn = {
-  sTitle: 'Shared with',
-  mData: function (source, type) {
-    if (source.sharedWith) {
-      if (source.sharedWith.length === 0) {
-        return '';
-      }
-      var names = source.sharedWith.map(function (u) {
-        if (type === 'filter' || type === 'sort') {
-          return u.username;
-        } else {
-          return '<img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '">';
+function userColumn(title, prop) {
+  return {
+    sTitle: title,
+    mData: function (source, type) {
+      if (source[prop]) {
+        if (source[prop].length === 0) {
+          return '';
         }
-      });
-      if (type === 'filter' || type === 'sort') {
-        return names.join('; ');
-      } else {
-        return names.join(' ');
+        var names = source[prop].map(function (u) {
+          if (type === 'filter' || type === 'sort') {
+            return u.username;
+          } else {
+            return '<img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '">';
+          }
+        });
+        if (type === 'filter' || type === 'sort') {
+          return names.join('; ');
+        } else {
+          return names.join(' ');
+        }
       }
-    }
-    return '';
-  },
-  bFilter: true
-};
+      return '';
+    },
+    bFilter: true
+  };
+}
+
+
+var sharedWithColumn = userColumn('Shared with', 'sharedWith');
+
+var manPowerColumn = userColumn('Powered by', 'manPower');
 
 var sharedGroupColumn = {
   sTitle: 'Shared groups',
