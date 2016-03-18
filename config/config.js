@@ -28,8 +28,8 @@ if (api.ssl_key && api.ssl_cert) {
 
 //load app keys
 if (app.ssl_key && app.ssl_cert) {
-  key = fs.readFileSync(__dirname, app.ssl_key);
-  cert = fs.readFileSync(__dirname, app.ssl_cert);
+  key = fs.readFileSync(path.resolve(__dirname, app.ssl_key));
+  cert = fs.readFileSync(path.resolve(__dirname, app.ssl_cert));
   app.credentials = {
     key: key,
     cert: cert
