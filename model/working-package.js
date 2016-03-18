@@ -8,7 +8,7 @@ var share = require('./share.js');
 
 var work = new Schema({
   alias: String,
-  reference: String,
+  _id: String,
   refType: {
     type: String,
     enum: ['traveler', 'package']
@@ -26,7 +26,10 @@ var work = new Schema({
     min: 1,
     defualt: 1
   },
-  color: String
+  color: {
+    type: String,
+    default: '#FFFFFF'
+  }
 });
 
 /******
