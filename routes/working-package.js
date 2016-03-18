@@ -512,4 +512,12 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/workingpackages/:id/', auth.ensureAuthenticated, function (req, res) {
+    res.send('under development');
+  });
+
+  app.post('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.filterBodyAll(['travelers']), function (req, res) {
+    res.send('under development');
+  });
+
 };
