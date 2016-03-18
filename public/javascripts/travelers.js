@@ -110,7 +110,22 @@ function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerT
 }
 
 function addTravelers(travelers, packages) {
-
+  var number = packages.length;
+  packages.forEach(function (p) {
+    $.ajax({
+      url: '/workingpackages/' + p + '/',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        travelers: travelers
+      })
+    }).always(function () {
+      number -= 1;
+      if (number === 0) {
+        $('#return').prop('disabled', false);
+      }
+    });
+  });
 }
 
 function showHash() {
@@ -366,12 +381,19 @@ $(function () {
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function () {
+        $('#submit').prop('disabled', true);
+        $('#return').prop('disabled', true);
         var packages = [];
-        var selected = fnGetSelected(ownedPackageTable, 'row-selected');
-        if (selected.length === 0) {
+        var selectedRow = fnGetSelected(ownedPackageTable, 'row-selected');
+        if (selectedRow.length === 0) {
           $('#modal #select').text('Please select package!').addClass('text-warning');
+          $('#submit').prop('disabled', false);
+          $('#return').prop('disabled', false);
         } else {
-
+          selectedRow.forEach(function (row) {
+            var data = ownedPackageTable.fnGetData(row);
+            packages.push(data._id);
+          });
           addTravelers(travelers, packages);
         }
       });
