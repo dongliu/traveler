@@ -104,10 +104,6 @@ hr.soften {
 }
 /* FRIB style */
 
-/*.navbar .navbar-inner {
-  background-color: #46a546;
-  background-image: none;
-}*/
 
 /* section for the main page
 -------------------------------------------------- */
@@ -186,6 +182,12 @@ text {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+}
+
+/*modal scroll*/
+.modal-body {
+    max-height: calc(100vh - 212px);
+    overflow-y: auto;
 }
 
 /* builder stuff */
@@ -533,50 +535,6 @@ figcaption {
   }
   .main-byline {
     font-size: 18px;
-  }
-  /* center example sites */
-  .example-sites {
-    margin-left: 0;
-  }
-  .example-sites > li {
-    float: none;
-    display: block;
-    max-width: 280px;
-    margin: 0 auto 18px;
-    text-align: center;
-  }
-  .example-sites .thumbnail > img {
-    max-width: 270px;
-  }
-  /* Do our best to make tables work in narrow viewports */
-  table code {
-    white-space: normal;
-    word-wrap: break-word;
-    word-break: break-all;
-  }
-  /* Examples:dropdowns */
-  .bs-docs-example-submenus > .pull-left {
-    float: none;
-    clear: both;
-  }
-  .bs-docs-example-submenus > .pull-left, .bs-docs-example-submenus > .pull-left + .pull-left {
-    margin-left: 0;
-  }
-  .bs-docs-example-submenus p {
-    margin-bottom: 0;
-  }
-  .bs-docs-example-submenus .dropup > .dropdown-menu, .bs-docs-example-submenus .dropdown > .dropdown-menu {
-    margin-bottom: 10px;
-    float: none;
-    max-width: 180px;
-  }
-  /* Examples:modal */
-  .modal-example .modal {
-    position: relative;
-    top: auto;
-    right: auto;
-    bottom: auto;
-    left: auto;
   }
   /* Tighten up footer */
   .footer {
