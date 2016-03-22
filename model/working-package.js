@@ -8,7 +8,6 @@ var share = require('./share.js');
 
 var work = new Schema({
   alias: String,
-  _id: String,
   refType: {
     type: String,
     enum: ['traveler', 'package']
