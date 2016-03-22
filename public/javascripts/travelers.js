@@ -160,8 +160,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: travelerAoColumns,
     aaSorting: [
-      [12, 'desc'],
-      [9, 'desc']
+      [9, 'desc'],
+      [12, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -188,9 +188,9 @@ $(function () {
     bDeferRender: true,
     aoColumns: transferredTravelerAoColumns,
     aaSorting: [
-      [13, 'desc'],
+      [9, 'desc'],
       [10, 'desc'],
-      [9, 'desc']
+      [13, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -274,7 +274,7 @@ $(function () {
     aoColumns: archivedTravelerAoColumns,
     aaSorting: [
       [3, 'desc'],
-      [12, 'desc']
+      [11, 'desc']
     ],
     sDom: sDomNoTools
   });
