@@ -11,6 +11,7 @@ require('../model/working-package.js');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 var WorkingPackage = mongoose.model('WorkingPackage');
+var Traveler = mongoose.model('Traveler');
 
 module.exports = function (app) {
 
@@ -516,8 +517,84 @@ module.exports = function (app) {
     res.send('under development');
   });
 
-  app.post('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.filterBodyAll(['travelers']), function (req, res) {
-    res.send('under development');
+  function addWork(p, req, res) {
+    var tids = req.body.travelers;
+    var pids = req.body.packages;
+    var type;
+    var model;
+    if (tids) {
+      if (tids.length === 0) {
+        return res.send(204);
+      }
+      type = 'traveler';
+      model = Traveler;
+    } else {
+      if (pids.length === 0) {
+        return res.send(204);
+      }
+      type = 'package';
+      model = WorkingPackage;
+    }
+
+    var works = p.works;
+    var added = [];
+
+    model.find({
+      _id: {
+        $in: tids
+      }
+    }).exec(function (err, items) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+
+      if (items.length === 0) {
+        return res.send(204);
+      }
+
+      items.forEach(function (item) {
+        if (!works.id(item._id)) {
+          works.push({
+            _id: item._id,
+            alias: item.title,
+            refType: type,
+            addedOn: Date.now(),
+            addedBy: req.session.userid
+          });
+          added.push(item.id);
+        }
+      });
+
+      if (added.length === 0) {
+        return res.send(204);
+      }
+
+      p.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
+        }
+        return res.json(200, {
+          items: added,
+          type: type
+        });
+      });
+    });
+  }
+
+  app.post('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.filterBody(['travelers', 'packages']), function (req, res) {
+    WorkingPackage.findById(req.params.id).exec(function (err, p) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+
+      if (!p) {
+        return res.send(404, 'working package ' + req.params.id + ' is not found.');
+      }
+      addWork(p, req, res);
+    });
   });
 
 };
