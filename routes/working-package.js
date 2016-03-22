@@ -574,6 +574,9 @@ module.exports = function (app) {
         return res.send(204);
       }
 
+      p.updatedOn = Date.now();
+      p.updatedBy = req.session.userid;
+
       p.save(function (saveErr) {
         if (saveErr) {
           console.error(saveErr);
