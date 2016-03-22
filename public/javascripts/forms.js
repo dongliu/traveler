@@ -164,8 +164,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: formAoColumns,
     aaSorting: [
-      [5, 'desc'],
-      [4, 'desc']
+      [4, 'desc'],
+      [5, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -194,8 +194,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
     aaSorting: [
-      [7, 'desc'],
-      [6, 'desc']
+      [6, 'desc'],
+      [7, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -203,7 +203,7 @@ $(function () {
   /*transferred form table ends*/
 
   /*shared form table starts*/
-  var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, ownerColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, ownerColumn, updatedByColumn, updatedOnColumn, sharedWithColumn, sharedGroupColumn];
   var sharedFormTable = $('#shared-form-table').dataTable({
     sAjaxSource: '/sharedforms/json',
     sAjaxDataProp: '',
@@ -224,7 +224,7 @@ $(function () {
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
     aaSorting: [
-      [4, 'desc']
+      [5, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -253,7 +253,6 @@ $(function () {
     bDeferRender: true,
     aoColumns: groupSharedFormAoColumns,
     aaSorting: [
-      [4, 'desc'],
       [5, 'desc']
     ],
     sDom: sDomNoTools
