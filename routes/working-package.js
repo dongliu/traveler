@@ -80,7 +80,7 @@ module.exports = function (app) {
     });
   });
 
-  app.delete('/workingpackages/:id/tags/:number', auth.ensureAuthenticated, function (req, res) {
+  app.delete('/workingpackages/:id/tags/:tag', auth.ensureAuthenticated, function (req, res) {
     WorkingPackage.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
@@ -94,7 +94,7 @@ module.exports = function (app) {
       }
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      doc.tags.pull(req.params.number);
+      doc.tags.pull(req.params.tag);
       doc.save(function (saveErr) {
         if (saveErr) {
           console.error(saveErr);
@@ -601,6 +601,37 @@ module.exports = function (app) {
         return res.send(404, 'working package ' + req.params.id + ' is not found.');
       }
       addWork(p, req, res);
+    });
+  });
+
+
+  app.delete('/workingpackages/:id/works/:wid', auth.ensureAuthenticated, function (req, res) {
+    WorkingPackage.findById(req.params.id).exec(function (err, p) {
+      if (err) {
+        console.log(err);
+        res.send(500, err.message);
+      }
+      if (!p) {
+        res.send(404, 'Working package ' + req.params.id + ' not found.');
+      }
+
+      var work = p.works.id(req.params.wid);
+
+      if (!work) {
+        res.send(404, 'Work ' + req.params.wid + ' not found in the package.');
+      }
+
+      work.remove();
+      p.updatedBy = req.session.userid;
+      p.updatedOn = Date.now();
+
+      p.save(function (saveErr) {
+        if (saveErr) {
+          console.log(saveErr);
+          res.send(500, saveErr.message);
+        }
+        res.send(204);
+      });
     });
   });
 
