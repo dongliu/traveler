@@ -554,6 +554,10 @@ module.exports = function (app) {
       }
 
       items.forEach(function (item) {
+        if (type === 'package' && item.id === p.id) {
+          // do not add itself as a work
+          return;
+        }
         if (!works.id(item._id)) {
           works.push({
             _id: item._id,
