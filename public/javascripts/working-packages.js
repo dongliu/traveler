@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
-/*global moment: false, Binder: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false*/
-/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDom: false, sDomNoTools: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, clonedByColumn: false, deadlineColumn: false, progressColumn: false, archivedOnColumn: false*/
+/*global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false*/
+/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, archivedOnColumn: false, packageConfigLinkColumn: false, packageShareLinkColumn: false, packageLinkColumn: false, tagsColumn: false, packageProgressColumn: false, transferredOnColumn: false, ownerColumn: false*/
 
 function formatTravelerStatus(s) {
   var status = {
@@ -20,7 +20,7 @@ function transferFromModal(newOwnerName, table) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function (index) {
+  $('#modal .modal-body div.target').each(function () {
     var that = this;
     var success = false;
     $.ajax({
@@ -34,7 +34,7 @@ function transferFromModal(newOwnerName, table) {
       $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
       success = true;
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).prepend('<i class="fa fa-exclamation"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
@@ -60,7 +60,7 @@ $(function () {
   updateAjaxURL(prefix);
   disableAjaxCache();
 
-  var packageAoColumns = [selectColumn, packageConfigLinkColumn, packageShareLinkColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
+  var packageAoColumns = [selectColumn, packageConfigLinkColumn, packageShareLinkColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
   fnAddFilterFoot('#package-table', packageAoColumns);
   var packageTable = $('#package-table').dataTable({
     sAjaxSource: '/workingpackages/json',
@@ -69,7 +69,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -77,8 +77,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: packageAoColumns,
     aaSorting: [
-      [9, 'desc'],
-      [11, 'desc']
+      [10, 'desc'],
+      [8, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -92,7 +92,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -100,14 +100,15 @@ $(function () {
     bDeferRender: true,
     aoColumns: transferredPackageAoColumns,
     aaSorting: [
+      [11, 'desc'],
       [9, 'desc'],
-      [11, 'desc']
+      [8, 'desc']
     ],
     sDom: sDomNoTools
   });
 
 
-  var sharedPackageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
+  var sharedPackageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
   fnAddFilterFoot('#shared-package-table', sharedPackageAoColumns);
   var sharedPackageTable = $('#shared-package-table').dataTable({
     sAjaxSource: '/sharedpackages/json',
@@ -116,7 +117,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -124,8 +125,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: sharedPackageAoColumns,
     aaSorting: [
-      [8, 'desc'],
-      [10, 'desc']
+      [9, 'desc'],
+      [7, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -140,7 +141,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -164,7 +165,7 @@ $(function () {
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
-      [10, 50, 100, "All"]
+      [10, 50, 100, 'All']
     ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...'
@@ -182,7 +183,7 @@ $(function () {
   showHash();
 
   // add state for tab changes
-  $('.nav-tabs a').on('click', function (e) {
+  $('.nav-tabs a').on('click', function () {
     if (!$(this).parent().hasClass('active')) {
       window.history.pushState(null, 'FRIB traveler :: ' + this.text, this.href);
     }
@@ -194,7 +195,7 @@ $(function () {
   };
 
 
-  $('#reload').click(function (e) {
+  $('#reload').click(function () {
     packageTable.fnReloadAjax();
     transferredPackageTable.fnReloadAjax();
     sharedPackageTable.fnReloadAjax();
@@ -202,7 +203,7 @@ $(function () {
     archivedPackageTable.fnReloadAjax();
   });
 
-  $('button.transfer').click(function (e) {
+  $('button.transfer').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -233,7 +234,7 @@ $(function () {
         limit: 20,
         source: travelerGlobal.usernames
       });
-      $('#submit').click(function (e) {
+      $('#submit').click(function () {
         transferFromModal($('#username').val(), activeTable);
       });
     }
