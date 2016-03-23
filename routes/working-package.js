@@ -309,7 +309,7 @@ module.exports = function (app) {
         });
       } else {
         // the user should in the list
-        return res.send(400, 'cannot find ' + req.params.shareid + ' in the list.');
+        return res.send(404, 'cannot find ' + req.params.shareid + ' in the list.');
       }
     });
   });
@@ -363,7 +363,7 @@ module.exports = function (app) {
           return res.send(204);
         });
       } else {
-        return res.send(400, 'cannot find ' + req.params.shareid + ' in list.');
+        return res.send(404, 'cannot find ' + req.params.shareid + ' in list.');
       }
     });
   });
@@ -515,6 +515,10 @@ module.exports = function (app) {
 
   app.get('/workingpackages/:id/', auth.ensureAuthenticated, function (req, res) {
     res.send('under development');
+  });
+
+  app.get('/workingpackages/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), function (req, res) {
+    res.json(200, req[req.params.id]);
   });
 
   function addWork(p, req, res) {
