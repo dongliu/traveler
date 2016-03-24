@@ -6,55 +6,7 @@ function cleanTagForm() {
   $('#add-tag').removeAttr('disabled');
 }
 
-$(function () {
-  updateAjaxURL(prefix);
-  ajax401(prefix);
-  disableAjaxCache();
-  $('span.time').each(function () {
-    $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
-  });
-  var initValue = {
-    title: $('#title').text(),
-    description: $('#description').text()
-  };
-
-  $('span.editable').editable(function (value) {
-    var that = this;
-    if (value === initValue[that.id]) {
-      return value;
-    }
-    var data = {};
-    data[that.id] = value;
-    $.ajax({
-      url: './config',
-      type: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify(data),
-      success: function () {
-        initValue[that.id] = value;
-      },
-      error: function (jqXHR) {
-        $(that).text(initValue[that.id]);
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the package config : ' + jqXHR.responseText + '</div>');
-        $(window).scrollTop($('#message div:last-child').offset().top - 40);
-      }
-    });
-    return value;
-  }, {
-    type: 'textarea',
-    rows: 1,
-    cols: 120,
-    style: 'display: inline',
-    cancel: 'Cancel',
-    submit: 'Update',
-    indicator: 'Updating...',
-    tooltip: 'Click to edit...'
-  });
-
-  $('button.editable').click(function () {
-    $(this).siblings('span.editable').first().click();
-  });
-
+function tagEvents() {
   $('#add-tag').click(function (e) {
     e.preventDefault();
     // add an input and a button add
@@ -105,4 +57,61 @@ $(function () {
       }
     });
   });
+}
+
+function editEvents(initValue) {
+  $('span.editable').editable(function (value) {
+    var that = this;
+    if (value === initValue[that.id]) {
+      return value;
+    }
+    var data = {};
+    data[that.id] = value;
+    $.ajax({
+      url: './config',
+      type: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      success: function () {
+        initValue[that.id] = value;
+      },
+      error: function (jqXHR) {
+        $(that).text(initValue[that.id]);
+        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the package config : ' + jqXHR.responseText + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    });
+    return value;
+  }, {
+    type: 'textarea',
+    rows: 1,
+    cols: 120,
+    style: 'display: inline',
+    cancel: 'Cancel',
+    submit: 'Update',
+    indicator: 'Updating...',
+    tooltip: 'Click to edit...'
+  });
+
+  $('button.editable').click(function () {
+    $(this).siblings('span.editable').first().click();
+  });
+}
+
+
+$(function () {
+  updateAjaxURL(prefix);
+  ajax401(prefix);
+  disableAjaxCache();
+  $('span.time').each(function () {
+    $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
+  });
+  var initValue = {
+    title: $('#title').text(),
+    description: $('#description').text()
+  };
+
+  editEvents(initValue);
+
+  tagEvents();
 });
