@@ -66,18 +66,18 @@ $(function () {
     });
 
     $('#confirm').click(function (confirmE) {
+      var newTag = $('#new-tag').val().trim();
       confirmE.preventDefault();
-      if ($('#new-tag').val()) {
+      if (newTag) {
         $.ajax({
           url: './tags/',
           type: 'POST',
           contentType: 'application/json',
           data: JSON.stringify({
-            newtag: $('#new-tag').val()
+            newtag: newTag
           })
         }).done(function () {
-          // TODO: update only the tag part
-          $('#tags').append('<li><span class="tag">' + $('#new-tag').val() + '</span> <button class="btn btn-small btn-warning remove-tag"><i class="fa fa-trash-o fa-lg"></i></button></li>');
+          $('#tags').append('<li><span class="tag">' + newTag + '</span> <button class="btn btn-small btn-warning remove-tag"><i class="fa fa-trash-o fa-lg"></i></button></li>');
         }).fail(function (jqXHR) {
           if (jqXHR.status !== 401) {
             $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot add the tag</div>');
