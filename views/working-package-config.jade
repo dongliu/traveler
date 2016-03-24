@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB traveler - package - #{package._id} - configuration
+  title working package - #{package._id} - configuration
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -23,9 +23,18 @@ block content
     h3 Title:
       = ' '
       span#title.editable #{package.title}
+      button.btn-primary.editable Edit
     h4 Description:
       = ' '
       span#description.editable #{package.description}
+      button.btn-primary.editable Edit
+    p Created on
+      = ' '
+      span.time #{package.createdOn}
+    if (locals.package.updatedOn != undefined)
+      p Updated by #{package.updatedBy} on
+        = ' '
+        span.time #{package.updatedOn}
     h4 Tags
     ul#tags
       each tag in package.tags
