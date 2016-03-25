@@ -1204,7 +1204,7 @@ module.exports = function (app) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
-      if (doc.status !== 1) {
+      if (doc.status < 1 || doc.status >= 2) {
         return res.send(400, 'The traveler ' + req.params.id + ' is not active');
       }
 
