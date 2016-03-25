@@ -568,7 +568,10 @@ module.exports = function (app) {
             alias: item.title,
             refType: type,
             addedOn: Date.now(),
-            addedBy: req.session.userid
+            addedBy: req.session.userid,
+            status: item.status || 0,
+            finishedValue: item.finishedInput || item.finishedValue,
+            totalValue: item.totalInput || item.totalValue
           });
           added.push(item.id);
         }
