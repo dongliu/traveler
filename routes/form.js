@@ -10,7 +10,7 @@ var mongoose = require('mongoose');
 var sanitize = require('sanitize-caja');
 var underscore = require('underscore');
 
-var reqUtils = require('../lib/reqUtils');
+var reqUtils = require('../lib/req-utils');
 var addShare = require('../lib/share').addShare;
 
 var Form = mongoose.model('Form');
