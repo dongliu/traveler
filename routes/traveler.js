@@ -12,7 +12,7 @@ var underscore = require('underscore');
 var cheer = require('cheerio');
 var sanitize = require('sanitize-caja');
 
-var reqUtils = require('../lib/reqUtils');
+var reqUtils = require('../lib/req-utils');
 var addShare = require('../lib/share').addShare;
 
 var Form = mongoose.model('Form');
