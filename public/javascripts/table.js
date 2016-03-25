@@ -267,6 +267,15 @@ var previewColumn = {
   }
 };
 
+var removeColumn = {
+  sTitle: '',
+  mData: '_id',
+  bSortable: false,
+  mRender: function (data) {
+    return '<a data-toggle="tooltip" title="remove the item" class="remove" id="' + data + '"><i class="fa fa-trash fa-lg"></i></a>';
+  }
+};
+
 var referenceFormLinkColumn = {
   sTitle: 'Reference',
   mData: 'reference',
