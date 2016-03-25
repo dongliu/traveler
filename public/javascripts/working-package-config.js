@@ -111,6 +111,29 @@ $(function () {
     description: $('#description').text()
   };
 
+  var workAoColumns = [removeColumn, sequenceColumn, colorColumn, priorityColumn, valueColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceColumn, sharedWithColumn, sharedGroupColumn];
+
+  $('#work-table').dataTable({
+    sAjaxSource: './works/json',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, -1],
+      [10, 'All']
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: workAoColumns,
+    aaSorting: [
+      [10, 'desc'],
+      [8, 'desc']
+    ],
+    sDom: sDomNoTools
+  });
+
   editEvents(initValue);
 
   tagEvents();
