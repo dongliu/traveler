@@ -1,10 +1,13 @@
-/*jslint es5: true*/
-
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
 var share = require('./share.js');
+
+/**
+ * finishedValue = traveler.finishedInput | workingPackage.finishedValue
+ * totalValue = traveler.totalInput | workingPackage.totalValue
+ */
 
 var work = new Schema({
   alias: String,
@@ -14,6 +17,9 @@ var work = new Schema({
   },
   addedOn: Date,
   addedBy: String,
+  status: Number,
+  totalValue: Number,
+  finishedValue: Number,
   priority: {
     type: Number,
     min: 1,
@@ -25,22 +31,36 @@ var work = new Schema({
     min: 1,
     defualt: 1
   },
+  value: {
+    type: Number,
+    min: 0,
+    default: 10
+  },
   color: {
     type: String,
     default: '#FFFFFF'
   }
 });
 
-/******
-publicAccess := 0 // for read or
-        | 1 // for write or
-        | -1 // no access
-******/
+/**
+ * publicAccess := 0 // for read or
+ *               | 1 // for write or
+ *               | -1 // no access
+ *
+ */
 
-/*
-Currently there is no status for a working package.
-It is either active or archived.
-*/
+
+/**
+ * Currently there is no status for a working package.
+ * It is either active or archived.
+ */
+
+/**
+ * The progress of a working package is calculated by
+ * Sum(value * complete ? 1 : finishedValue/totalValue) / Sum(value)
+ *
+ */
+
 var workingPackage = new Schema({
   title: String,
   description: String,
@@ -62,7 +82,8 @@ var workingPackage = new Schema({
   sharedWith: [share.user],
   sharedGroup: [share.group],
   works: [work],
-  finishedWorks: Number,
+  finishedValue: Number,
+  totalValue: Number,
   archived: {
     type: Boolean,
     default: false
