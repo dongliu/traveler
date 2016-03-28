@@ -4,7 +4,7 @@ var auth = require('../lib/auth');
 var authConfig = require('../config/config').auth;
 var mongoose = require('mongoose');
 var underscore = require('underscore');
-var reqUtils = require('../lib/reqUtils');
+var reqUtils = require('../lib/req-utils');
 var addShare = require('../lib/share').addShare;
 
 require('../model/working-package.js');
@@ -37,21 +37,9 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/workingpackages/:id/config', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.findById(req.params.id).exec(function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (reqUtils.canWrite(req, doc)) {
-        return res.render('working-package-config', {
-          package: doc
-        });
-      }
-      return res.send(403, 'You are not authorized to access this resource');
+  app.get('/workingpackages/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
+    return res.render('working-package-config', {
+      package: req[req.params.id]
     });
   });
 
@@ -520,6 +508,39 @@ module.exports = function (app) {
   app.get('/workingpackages/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), function (req, res) {
     res.json(200, req[req.params.id]);
   });
+
+  app.get('/workingpackages/:id/works/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), function (req, res) {
+    var works = req[req.params.id].works;
+    var tids = works.map(function (w) {
+      return w._id;
+    });
+
+    if (tids.length === 0) {
+      return res.json(200, []);
+    }
+
+    var merged = [];
+
+    Traveler.find({
+      _id: {
+        $in: tids
+      }
+    }).lean().exec(function (err, travelers) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      travelers.forEach(function (t) {
+        // console.dir(t);
+        var picked = underscore.pick(t, 'devices', 'locations', 'manPower', 'status', 'createdBy', 'owner');
+        underscore.extend(picked, works.id(t._id).toJSON());
+        console.dir(picked);
+        merged.push(picked);
+      });
+      res.json(200, merged);
+    });
+  });
+
 
   function addWork(p, req, res) {
     var tids = req.body.travelers;
