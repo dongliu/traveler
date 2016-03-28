@@ -20,7 +20,7 @@
     "request": "2.34.0",
     "sanitize-caja": "0.1.2",
     "templatizer": "0.2.10",
-    "underscore": "1.6.0"
+    "underscore": "1.8.0"
   },
   "devDependencies": {
     "should": "~4.0.4",
