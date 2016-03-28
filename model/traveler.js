@@ -43,7 +43,7 @@ var traveler = new Schema({
   title: String,
   description: String,
   devices: [String],
-  location: String,
+  locations: [String],
   manPower: [user],
   status: Number,
   createdBy: String,
