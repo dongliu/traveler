@@ -144,7 +144,7 @@ module.exports = function (app) {
       owner: {
         $exists: false
       }
-    }, 'title description status devices sharedWith sharedGroup publicAccess clonedBy createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').exec(function (err, docs) {
+    }, 'title description status devices sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -159,7 +159,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }, 'title description status devices sharedWith sharedGroup publicAccess clonedBy createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput').exec(function (err, travelers) {
+    }, 'title description status devices sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -186,7 +186,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup publicAccess finishedInput totalInput').exec(function (tErr, travelers) {
+      }, 'title description status devices locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput').lean().exec(function (tErr, travelers) {
         if (tErr) {
           console.error(tErr);
           return res.send(500, tErr.message);
@@ -221,7 +221,7 @@ module.exports = function (app) {
         _id: {
           $in: travelerIds
         }
-      }, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup publicAccess finishedInput totalInput').exec(function (tErr, travelers) {
+      }, 'title description status devices locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput').lean().exec(function (tErr, travelers) {
         if (tErr) {
           console.error(tErr);
           return res.send(500, tErr.message);
@@ -291,10 +291,21 @@ module.exports = function (app) {
     });*/
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function (req, res) {
-    Traveler.find({
-      createdBy: req.session.userid,
-      archived: true
-    }, 'title status devices archivedOn updatedBy updatedOn deadline sharedWith sharedGroup finishedInput totalInput').exec(function (err, travelers) {
+    var search = {
+      $and: [{
+        $or: [{
+          createdBy: req.session.userid,
+          owner: {
+            $exists: false
+          }
+        }, {
+          owner: req.session.userid
+        }]
+      }, {
+        archived: true
+      }]
+    };
+    Traveler.find(search, 'title description status devices locations archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -339,64 +350,34 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/travelers/:id/', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id).exec(function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
+  app.get('/travelers/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), function (req, res) {
+    var doc = req[req.params.id];
+    if (doc.archived) {
+      return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
+    }
 
-      if (doc.archived) {
-        return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
-      }
-
-      if (reqUtils.canWrite(req, doc)) {
-        return res.render('traveler', {
-          traveler: doc,
-          formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html
-        });
-      }
-
-      if (reqUtils.canRead(req, doc)) {
-        return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
-      }
-
-      return res.send(403, 'You are not authorized to access this resource');
-    });
-  });
-
-  app.get('/travelers/:id/view', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      return res.render('travelerviewer', {
-        traveler: doc
+    if (reqUtils.canWrite(req, doc)) {
+      return res.render('traveler', {
+        traveler: doc,
+        formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html
       });
+    }
+
+    if (reqUtils.canRead(req, doc)) {
+      return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
+    }
+
+    return res.send(403, 'You are not authorized to access this resource');
+  });
+
+  app.get('/travelers/:id/view', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), function (req, res) {
+    return res.render('travelerviewer', {
+      traveler: req[req.params.id]
     });
   });
 
-  app.get('/travelers/:id/json', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canRead(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      return res.json(200, doc);
-    });
+  app.get('/travelers/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
+    return res.json(200, req[req.params.id]);
   });
 
   app.put('/travelers/:id/archived', auth.ensureAuthenticated, reqUtils.filterBody(['archived']), function (req, res) {
@@ -434,223 +415,269 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/owner', auth.ensureAuthenticated, reqUtils.filterBody(['name']), function (req, res) {
-    Traveler.findById(req.params.id, 'createdBy owner').exec(function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.put('/travelers/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filterBody(['name']), function (req, res) {
+    // get user id from name here
+    var doc = req[req.params.id];
+    var name = req.body.name;
+    var nameFilter = ad.nameFilter.replace('_name', name);
+    var opts = {
+      filter: nameFilter,
+      attributes: ad.objAttributes,
+      scope: 'sub'
+    };
+
+    ldapClient.search(ad.searchBase, opts, false, function (ldapErr, result) {
+      if (ldapErr) {
+        console.error(ldapErr.name + ' : ' + ldapErr.message);
+        return res.send(500, ldapErr.message);
       }
-      if (!doc) {
-        return res.send(410, 'gone');
+
+      if (result.length === 0) {
+        return res.send(400, name + ' is not found in AD!');
       }
 
-      if (!reqUtils.isOwner(req, doc)) {
-        return res.send(403, 'Only the current owner can transfer the ownership.');
+      if (result.length > 1) {
+        return res.send(400, name + ' is not unique!');
       }
 
-      // get user id from name here
-      var name = req.body.name;
-      var nameFilter = ad.nameFilter.replace('_name', name);
-      var opts = {
-        filter: nameFilter,
-        attributes: ad.objAttributes,
-        scope: 'sub'
-      };
+      var id = result[0].sAMAccountName.toLowerCase();
 
-      ldapClient.search(ad.searchBase, opts, false, function (ldapErr, result) {
-        if (ldapErr) {
-          console.error(ldapErr.name + ' : ' + ldapErr.message);
-          return res.send(500, ldapErr.message);
+      if (doc.owner === id) {
+        return res.send(204);
+      }
+
+      doc.owner = id;
+      doc.transferredOn = Date.now();
+
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.send(500, saveErr.message);
         }
-
-        if (result.length === 0) {
-          return res.send(400, name + ' is not found in AD!');
-        }
-
-        if (result.length > 1) {
-          return res.send(400, name + ' is not unique!');
-        }
-
-        var id = result[0].sAMAccountName.toLowerCase();
-
-        if (doc.owner === id) {
-          return res.send(204);
-        }
-
-        doc.owner = id;
-        doc.transferredOn = Date.now();
-
-        doc.save(function (saveErr) {
-          if (saveErr) {
-            console.error(saveErr);
-            return res.send(500, saveErr.message);
-          }
-          return res.send(204);
-        });
+        return res.send(204);
       });
     });
   });
 
-  app.get('/travelers/:id/config', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, 'title description deadline location status devices sharedWith sharedGroup createdBy createdOn updatedOn updatedBy').exec(function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (reqUtils.canWrite(req, doc)) {
-        return res.render('traveler-config', {
-          traveler: doc
-        });
-      }
-      return res.send(403, 'You are not authorized to access this resource');
+  app.get('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+    return res.render('traveler-config', {
+      traveler: req[req.params.id]
     });
   });
 
-  app.get('/travelers/:id/formmanager', auth.ensureAuthenticated, function formviewer(req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      res.render('form-manager', {
-        traveler: doc
-      });
+  app.get('/travelers/:id/formmanager', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), function formviewer(req, res) {
+    res.render('form-manager', {
+      traveler: req[req.params.id]
     });
   });
 
   // use the form in the request as the active form
-  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, reqUtils.filterBodyAll(['html', '_id', 'title']), function addForm(req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
+  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filterBodyAll(['html', '_id', 'title']), function addForm(req, res) {
+    var doc = req[req.params.id];
+    var form = {
+      html: sanitize(req.body.html),
+      activatedOn: [Date.now()],
+      reference: req.body._id,
+      alias: req.body.title
+    };
 
-      var form = {
-        html: sanitize(req.body.html),
-        activatedOn: [Date.now()],
-        reference: req.body._id,
-        alias: req.body.title
-      };
-
-      var $ = cheer.load(form.html);
-      var num = $('input, textarea').length;
-      doc.forms.push(form);
-      doc.activeForm = doc.forms[doc.forms.length - 1]._id;
-      doc.totalInput = num;
-      doc.save(function saveDoc(e, newDoc) {
-        if (e) {
-          console.error(e);
-          return res.send(500, e.message);
-        }
-        return res.json(200, newDoc);
-      });
+    var $ = cheer.load(form.html);
+    var num = $('input, textarea').length;
+    doc.forms.push(form);
+    doc.activeForm = doc.forms[doc.forms.length - 1]._id;
+    doc.totalInput = num;
+    doc.save(function saveDoc(e, newDoc) {
+      if (e) {
+        console.error(e);
+        return res.send(500, e.message);
+      }
+      return res.json(200, newDoc);
     });
   });
 
-
   // set active form
-  app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, function putActiveForm(req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'traveler ' + req.params.id + ' gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      var formid = req.body.formid;
-      if (!formid) {
-        return res.send(400, 'form id unknown');
-      }
+  app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), function putActiveForm(req, res) {
+    var doc = req[req.params.id];
+    var formid = req.body.formid;
+    if (!formid) {
+      return res.send(400, 'form id unknown');
+    }
 
-      var form = doc.forms.id(formid);
+    var form = doc.forms.id(formid);
 
-      if (!form) {
-        return res.send(410, 'form ' + req.body.formid + ' gone');
+    if (!form) {
+      return res.send(410, 'form ' + req.body.formid + ' gone');
+    }
+
+    doc.activeForm = form._id;
+    var $ = cheer.load(form.html);
+    var num = $('input, textarea').length;
+    form.activatedOn.push(Date.now());
+    doc.totalInput = num;
+    doc.save(function saveDoc(e, newDoc) {
+      if (e) {
+        console.error(e);
+        return res.send(500, e.message);
       }
-
-      doc.activeForm = form._id;
-      var $ = cheer.load(form.html);
-      var num = $('input, textarea').length;
-      form.activatedOn.push(Date.now());
-      doc.totalInput = num;
-      doc.save(function saveDoc(e, newDoc) {
-        if (e) {
-          console.error(e);
-          return res.send(500, e.message);
-        }
-        return res.json(200, newDoc);
-      });
+      return res.json(200, newDoc);
     });
   });
 
   // set form alias
-  app.put('/travelers/:id/forms/:fid/alias', auth.ensureAuthenticated, function putFormAlias(req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'traveler ' + req.params.id + ' gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      var form = doc.forms.id(req.params.fid);
-      if (!form) {
-        return res.send(410, 'from ' + req.params.fid + ' not found.');
-      }
+  app.put('/travelers/:id/forms/:fid/alias', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwner('id'), function putFormAlias(req, res) {
+    var doc = req[req.params.id];
+    var form = doc.forms.id(req.params.fid);
+    if (!form) {
+      return res.send(410, 'from ' + req.params.fid + ' not found.');
+    }
 
-      form.alias = req.body.value;
+    form.alias = req.body.value;
 
-      doc.save(function saveDoc(e) {
-        if (e) {
-          console.error(e);
-          return res.send(500, e.message);
-        }
-        return res.send(204);
-      });
+    doc.save(function saveDoc(e) {
+      if (e) {
+        console.error(e);
+        return res.send(500, e.message);
+      }
+      return res.send(204);
     });
   });
 
-  app.put('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.filterBody(['title', 'description', 'deadline', 'location']), function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      var k;
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.put('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filterBody(['title', 'description', 'deadline']), function (req, res) {
+    var doc = req[req.params.id];
+    var k;
+    for (k in req.body) {
+      if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
+        doc[k] = req.body[k];
       }
-      if (!doc) {
-        return res.send(410, 'gone');
+    }
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
+      return res.send(204);
+    });
+  });
+
+  app.put('/travelers/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+
+    if (req.body.status !== 1.5 && !reqUtils.isOwner(req, doc)) {
+      return res.send(403, 'You are not authorized to change the status. ');
+    }
+
+    if (req.body.status === 1) {
+      if ([0, 1.5, 3].indexOf(doc.status) !== -1) {
+        doc.status = 1;
+      } else {
+        return res.send(400, 'cannot start to work from the current status. ');
       }
-      for (k in req.body) {
-        if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
-          doc[k] = req.body[k];
-        }
+    }
+
+    if (req.body.status === 1.5) {
+      if ([1].indexOf(doc.status) !== -1) {
+        doc.status = 1.5;
+      } else {
+        return res.send(400, 'cannot complete from the current status. ');
       }
+    }
+
+    if (req.body.status === 2) {
+      if ([1, 1.5].indexOf(doc.status) !== -1) {
+        doc.status = 2;
+      } else {
+        return res.send(400, 'cannot complete from the current status. ');
+      }
+    }
+
+    if (req.body.status === 3) {
+      if ([1].indexOf(doc.status) !== -1) {
+        doc.status = 3;
+      } else {
+        return res.send(400, 'cannot freeze from the current status. ');
+      }
+    }
+
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
+      }
+      return res.send(204);
+    });
+  });
+
+
+  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filterBody(['newdevice']), function (req, res) {
+    var doc = req[req.params.id];
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.devices.addToSet(req.body.newdevice);
+    doc.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
+      }
+      return res.send(204);
+    });
+  });
+
+  app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.devices.pull(req.params.number);
+    doc.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
+      }
+      return res.send(204);
+    });
+  });
+
+  app.get('/travelers/:id/data/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+    TravelerData.find({
+      _id: {
+        $in: doc.data
+      }
+    }, 'name value inputType inputBy inputOn').exec(function (dataErr, docs) {
+      if (dataErr) {
+        console.error(dataErr);
+        return res.send(500, dataErr.message);
+      }
+      return res.json(200, docs);
+    });
+  });
+
+  app.post('/travelers/:id/data/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+    if (doc.status !== 1) {
+      return res.send(400, 'The traveler ' + req.params.id + ' is not active');
+    }
+    var data = new TravelerData({
+      traveler: doc._id,
+      name: req.body.name,
+      value: req.body.value,
+      inputType: req.body.type,
+      inputBy: req.session.userid,
+      inputOn: Date.now()
+    });
+    data.save(function (dataErr) {
+      if (dataErr) {
+        console.error(dataErr);
+        return res.send(500, dataErr.message);
+      }
+      doc.data.push(data._id);
+      doc.manPower.addToSet({
+        _id: req.session.userid,
+        username: req.session.username
+      });
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.save(function (saveErr) {
@@ -663,58 +690,45 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/status', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.get('/travelers/:id/notes/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+    TravelerNote.find({
+      _id: {
+        $in: doc.notes
       }
-      if (!doc) {
-        return res.send(410, 'gone');
+    }, 'name value inputBy inputOn').exec(function (noteErr, docs) {
+      if (noteErr) {
+        console.error(noteErr);
+        return res.send(500, noteErr.message);
       }
+      return res.json(200, docs);
+    });
+  });
 
-      if (req.body.status === 1.5) {
-        if (!reqUtils.canWrite(req, doc)) {
-          return res.send(403, 'You are not authorized to access this resource. ');
-        }
-      }
+  app.post('/travelers/:id/notes/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+    var doc = req[req.params.id];
 
-      if (!reqUtils.isOwner(req, doc)) {
-        return res.send(403, 'You are not authorized to change the status. ');
+    // allow add note for all status
+    // if (doc.status !== 1) {
+    //   return res.send(400, 'The traveler ' + req.params.id + ' is not active');
+    // }
+    var note = new TravelerNote({
+      traveler: doc._id,
+      name: req.body.name,
+      value: req.body.value,
+      inputBy: req.session.userid,
+      inputOn: Date.now()
+    });
+    note.save(function (noteErr) {
+      if (noteErr) {
+        console.error(noteErr);
+        return res.send(500, noteErr.message);
       }
-
-      if (req.body.status === 1) {
-        if ([0, 1.5, 3].indexOf(doc.status) !== -1) {
-          doc.status = 1;
-        } else {
-          return res.send(400, 'cannot start to work from the current status. ');
-        }
-      }
-
-      if (req.body.status === 1.5) {
-        if ([1].indexOf(doc.status) !== -1) {
-          doc.status = 1.5;
-        } else {
-          return res.send(400, 'cannot complete from the current status. ');
-        }
-      }
-
-      if (req.body.status === 2) {
-        if ([1, 1.5].indexOf(doc.status) !== -1) {
-          doc.status = 2;
-        } else {
-          return res.send(400, 'cannot complete from the current status. ');
-        }
-      }
-
-      if (req.body.status === 3) {
-        if ([1].indexOf(doc.status) !== -1) {
-          doc.status = 3;
-        } else {
-          return res.send(400, 'cannot freeze from the current status. ');
-        }
-      }
-
+      doc.notes.push(note._id);
+      doc.manPower.addToSet({
+        _id: req.session.userid,
+        username: req.session.username
+      });
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.save(function (saveErr) {
@@ -727,233 +741,24 @@ module.exports = function (app) {
     });
   });
 
+  app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+    if (doc.status < 1 || doc.status >= 2) {
+      return res.send(400, 'The traveler ' + req.params.id + ' is not active');
+    }
 
-  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.filterBody(['newdevice']), function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      doc.updatedBy = req.session.userid;
-      doc.updatedOn = Date.now();
-      doc.devices.addToSet(req.body.newdevice);
-      doc.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
-      });
-    });
-  });
+    if (!req.body.hasOwnProperty('finishedInput')) {
+      return res.send(400, 'need finished input number');
+    }
 
-  app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+    doc.update({
+      finishedInput: req.body.finishedInput
+    }, function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      doc.updatedBy = req.session.userid;
-      doc.updatedOn = Date.now();
-      doc.devices.pull(req.params.number);
-      doc.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
-      });
-    });
-  });
-
-  app.get('/travelers/:id/data/', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canRead(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      TravelerData.find({
-        _id: {
-          $in: doc.data
-        }
-      }, 'name value inputType inputBy inputOn').exec(function (dataErr, docs) {
-        if (dataErr) {
-          console.error(dataErr);
-          return res.send(500, dataErr.message);
-        }
-        return res.json(200, docs);
-      });
-    });
-  });
-
-  app.post('/travelers/:id/data/', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource.');
-      }
-
-      if (doc.status !== 1) {
-        return res.send(400, 'The traveler ' + req.params.id + ' is not active');
-      }
-      var data = new TravelerData({
-        traveler: doc._id,
-        name: req.body.name,
-        value: req.body.value,
-        inputType: req.body.type,
-        inputBy: req.session.userid,
-        inputOn: Date.now()
-      });
-      data.save(function (dataErr) {
-        if (dataErr) {
-          console.error(dataErr);
-          return res.send(500, dataErr.message);
-        }
-        doc.data.push(data._id);
-        doc.manPower.addToSet({
-          _id: req.session.userid,
-          username: req.session.username
-        });
-        doc.updatedBy = req.session.userid;
-        doc.updatedOn = Date.now();
-        doc.save(function (saveErr) {
-          if (saveErr) {
-            console.error(saveErr);
-            return res.send(500, saveErr.message);
-          }
-          return res.send(204);
-        });
-      });
-    });
-  });
-
-  app.get('/travelers/:id/notes/', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canRead(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      TravelerNote.find({
-        _id: {
-          $in: doc.notes
-        }
-      }, 'name value inputBy inputOn').exec(function (noteErr, docs) {
-        if (noteErr) {
-          console.error(noteErr);
-          return res.send(500, noteErr.message);
-        }
-        return res.json(200, docs);
-      });
-    });
-  });
-
-  app.post('/travelers/:id/notes/', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource.');
-      }
-
-      // allow add note for all status
-      // if (doc.status !== 1) {
-      //   return res.send(400, 'The traveler ' + req.params.id + ' is not active');
-      // }
-      var note = new TravelerNote({
-        traveler: doc._id,
-        name: req.body.name,
-        value: req.body.value,
-        inputBy: req.session.userid,
-        inputOn: Date.now()
-      });
-      note.save(function (noteErr) {
-        if (noteErr) {
-          console.error(noteErr);
-          return res.send(500, noteErr.message);
-        }
-        doc.notes.push(note._id);
-        doc.manPower.addToSet({
-          _id: req.session.userid,
-          username: req.session.username
-        });
-        doc.updatedBy = req.session.userid;
-        doc.updatedOn = Date.now();
-        doc.save(function (saveErr) {
-          if (saveErr) {
-            console.error(saveErr);
-            return res.send(500, saveErr.message);
-          }
-          return res.send(204);
-        });
-      });
-    });
-  });
-
-  app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, function (req, res) {
-    Traveler.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource.');
-      }
-
-      if (doc.status !== 1) {
-        return res.send(400, 'The traveler ' + req.params.id + ' is not active');
-      }
-
-      if (!req.body.hasOwnProperty('finishedInput')) {
-        return res.send(400, 'need finished input number');
-      }
-
-      doc.update({
-        finishedInput: req.body.finishedInput
-      }, function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
-      });
+      return res.send(204);
     });
   });
 
