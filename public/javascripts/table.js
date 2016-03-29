@@ -548,7 +548,7 @@ var deviceColumn = {
   bFilter: true
 };
 
-function userColumn(title, prop) {
+function usersColumn(title, prop) {
   return {
     sTitle: title,
     mData: function (source, type) {
@@ -560,6 +560,9 @@ function userColumn(title, prop) {
           if (type === 'filter' || type === 'sort') {
             return u.username;
           } else {
+            if (!u._id) {
+              return u;
+            }
             return '<img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '">';
           }
         });
@@ -576,9 +579,9 @@ function userColumn(title, prop) {
 }
 
 
-var sharedWithColumn = userColumn('Shared with', 'sharedWith');
+var sharedWithColumn = usersColumn('Shared with', 'sharedWith');
 
-var manPowerColumn = userColumn('Powered by', 'manPower');
+var manPowerColumn = usersColumn('Powered by', 'manPower');
 
 var sharedGroupColumn = {
   sTitle: 'Shared groups',
