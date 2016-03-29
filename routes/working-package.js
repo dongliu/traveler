@@ -43,316 +43,216 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/workingpackages/:id/tags/', auth.ensureAuthenticated, reqUtils.filterBody(['newtag']), function (req, res) {
-    WorkingPackage.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.post('/workingpackages/:id/tags/', auth.ensureAuthenticated, reqUtils.filterBody(['newtag']), reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.tags.addToSet(req.body.newtag);
+    doc.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      doc.updatedBy = req.session.userid;
-      doc.updatedOn = Date.now();
-      doc.tags.addToSet(req.body.newtag);
-      doc.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
-      });
+      return res.send(204);
     });
   });
 
-  app.delete('/workingpackages/:id/tags/:tag', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.delete('/workingpackages/:id/tags/:tag', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.tags.pull(req.params.tag);
+    doc.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      doc.updatedBy = req.session.userid;
-      doc.updatedOn = Date.now();
-      doc.tags.pull(req.params.tag);
-      doc.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
-      });
+      return res.send(204);
     });
   });
 
-  app.put('/workingpackages/:id/config', auth.ensureAuthenticated, reqUtils.filterBody(['title', 'description']), function (req, res) {
-    WorkingPackage.findById(req.params.id, function (err, doc) {
-      var k;
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.put('/workingpackages/:id/config', auth.ensureAuthenticated, reqUtils.filterBody(['title', 'description']), reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
+    var k;
+    var doc = req[req.params.id];
+    for (k in req.body) {
+      if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
+        doc[k] = req.body[k];
       }
-      if (!doc) {
-        return res.send(410, 'gone');
+    }
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!reqUtils.canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-      for (k in req.body) {
-        if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
-          doc[k] = req.body[k];
-        }
-      }
-      doc.updatedBy = req.session.userid;
-      doc.updatedOn = Date.now();
-      doc.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
-      });
+      return res.send(204);
     });
   });
 
 
-  app.get('/workingpackages/:id/share/', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.findById(req.params.id).exec(function (err, pack) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!pack) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.isOwner(req, pack)) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      return res.render('share', {
-        type: 'Working package',
-        id: req.params.id,
-        title: pack.title,
-        access: String(pack.publicAccess)
-      });
+  app.get('/workingpackages/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+    var pack = req[req.params.id];
+    return res.render('share', {
+      type: 'Working package',
+      id: req.params.id,
+      title: pack.title,
+      access: String(pack.publicAccess)
     });
   });
 
-  app.put('/workingpackages/:id/share/public', auth.ensureAuthenticated, reqUtils.filterBody(['access']), function (req, res) {
-    WorkingPackage.findById(req.params.id, function (err, pack) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.put('/workingpackages/:id/share/public', auth.ensureAuthenticated, reqUtils.filterBody(['access']), reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+    var pack = req[req.params.id];
+    var access = req.body.access;
+    if (['-1', '0', '1'].indexOf(access) === -1) {
+      return res.send(400, 'not valid value');
+    }
+    access = Number(access);
+    if (pack.publicAccess === access) {
+      return res.send(204);
+    }
+    pack.publicAccess = access;
+    pack.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!pack) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.isOwner(req, pack)) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      // change the access
-      var access = req.body.access;
-      if (['-1', '0', '1'].indexOf(access) === -1) {
-        return res.send(400, 'not valid value');
-      }
-      access = Number(access);
-      if (pack.publicAccess === access) {
-        return res.send(204);
-      }
-      pack.publicAccess = access;
-      pack.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(200, 'public access is set to ' + req.body.access);
-      });
+      return res.send(200, 'public access is set to ' + req.body.access);
     });
   });
 
-  app.get('/workingpackages/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.findById(req.params.id).exec(function (err, pack) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.get('/workingpackages/:id/share/:list/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), function (req, res) {
+    var pack = req[req.params.id];
+    if (req.params.list === 'users') {
+      return res.json(200, pack.sharedWith || []);
+    }
+    if (req.params.list === 'groups') {
+      return res.json(200, pack.sharedGroup || []);
+    }
+    return res.send(400, 'unknown share list.');
+  });
+
+  app.post('/workingpackages/:id/share/:list/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+    var pack = req[req.params.id];
+    var share = -2;
+    if (req.params.list === 'users') {
+      if (req.body.name) {
+        share = reqUtils.getSharedWith(pack.sharedWith, req.body.name);
+      } else {
+        return res.send(400, 'user name is empty.');
       }
-      if (!pack) {
-        return res.send(410, 'gone');
+    }
+    if (req.params.list === 'groups') {
+      if (req.body.id) {
+        share = reqUtils.getSharedGroup(pack.sharedGroup, req.body.id);
+      } else {
+        return res.send(400, 'group id is empty.');
       }
-      if (!reqUtils.isOwner(req, pack)) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      if (req.params.list === 'users') {
-        return res.json(200, pack.sharedWith || []);
-      }
-      if (req.params.list === 'groups') {
-        return res.json(200, pack.sharedGroup || []);
-      }
+    }
+
+    if (share === -2) {
       return res.send(400, 'unknown share list.');
+    }
+
+    if (share >= 0) {
+      return res.send(400, req.body.name || req.body.id + ' is already in the ' + req.params.list + ' list.');
+    }
+
+    if (share === -1) {
+      // new user in the list
+      addShare(req, res, pack);
+    }
+  });
+
+  app.put('/workingpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+    var pack = req[req.params.id];
+    var share;
+    if (req.params.list === 'users') {
+      share = pack.sharedWith.id(req.params.shareid);
+    }
+    if (req.params.list === 'groups') {
+      share = pack.sharedGroup.id(req.params.shareid);
+    }
+
+    if (!share) {
+      // the user should in the list
+      return res.send(404, 'cannot find ' + req.params.shareid + ' in the list.');
+    }
+
+    // change the access
+    if (req.body.access && req.body.access === 'write') {
+      share.access = 1;
+    } else {
+      share.access = 0;
+    }
+    pack.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
+      }
+      // check consistency of user's traveler list
+      var Target;
+      if (req.params.list === 'users') {
+        Target = User;
+      }
+      if (req.params.list === 'groups') {
+        Target = Group;
+      }
+      Target.findByIdAndUpdate(req.params.shareid, {
+        $addToSet: {
+          packages: pack._id
+        }
+      }, function (updateErr, target) {
+        if (updateErr) {
+          console.error(updateErr);
+        }
+        if (!target) {
+          console.error('The user/group ' + req.params.userid + ' is not in the db');
+        }
+      });
+      return res.send(204);
     });
   });
 
-  app.post('/workingpackages/:id/share/:list/', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.findById(req.params.id, function (err, pack) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.delete('/workingpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+    var pack = req[req.params.id];
+    var share;
+    if (req.params.list === 'users') {
+      share = pack.sharedWith.id(req.params.shareid);
+    }
+    if (req.params.list === 'groups') {
+      share = pack.sharedGroup.id(req.params.shareid);
+    }
+    if (!share) {
+      return res.send(404, 'cannot find ' + req.params.shareid + ' in list.');
+    }
+    share.remove();
+    pack.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!pack) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.isOwner(req, pack)) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      var share = -2;
+      // keep the consistency of user's traveler list
+      var Target;
       if (req.params.list === 'users') {
-        if (req.body.name) {
-          share = reqUtils.getSharedWith(pack.sharedWith, req.body.name);
-        } else {
-          return res.send(400, 'user name is empty.');
-        }
+        Target = User;
       }
       if (req.params.list === 'groups') {
-        if (req.body.id) {
-          share = reqUtils.getSharedGroup(pack.sharedGroup, req.body.id);
-        } else {
-          return res.send(400, 'group id is empty.');
+        Target = Group;
+      }
+      Target.findByIdAndUpdate(req.params.shareid, {
+        $pull: {
+          packages: pack._id
         }
-      }
-
-      if (share === -2) {
-        return res.send(400, 'unknown share list.');
-      }
-
-      if (share >= 0) {
-        return res.send(400, req.body.name || req.body.id + ' is already in the ' + req.params.list + ' list.');
-      }
-
-      if (share === -1) {
-        // new user
-        addShare(req, res, pack);
-      }
-    });
-  });
-
-  app.put('/workingpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.findById(req.params.id, function (err, pack) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!pack) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.isOwner(req, pack)) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      var share;
-      if (req.params.list === 'users') {
-        share = pack.sharedWith.id(req.params.shareid);
-      }
-      if (req.params.list === 'groups') {
-        share = pack.sharedGroup.id(req.params.shareid);
-      }
-      if (share) {
-        // change the access
-        if (req.body.access && req.body.access === 'write') {
-          share.access = 1;
-        } else {
-          share.access = 0;
+      }, function (updateErr, target) {
+        if (updateErr) {
+          console.error(updateErr);
         }
-        pack.save(function (saveErr) {
-          if (saveErr) {
-            console.error(saveErr);
-            return res.send(500, saveErr.message);
-          }
-          // check consistency of user's traveler list
-          var Target;
-          if (req.params.list === 'users') {
-            Target = User;
-          }
-          if (req.params.list === 'groups') {
-            Target = Group;
-          }
-          Target.findByIdAndUpdate(req.params.shareid, {
-            $addToSet: {
-              packages: pack._id
-            }
-          }, function (updateErr, target) {
-            if (updateErr) {
-              console.error(updateErr);
-            }
-            if (!target) {
-              console.error('The user/group ' + req.params.userid + ' is not in the db');
-            }
-          });
-          return res.send(204);
-        });
-      } else {
-        // the user should in the list
-        return res.send(404, 'cannot find ' + req.params.shareid + ' in the list.');
-      }
-    });
-  });
-
-  app.delete('/workingpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.findById(req.params.id, function (err, pack) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!pack) {
-        return res.send(410, 'gone');
-      }
-      if (!reqUtils.isOwner(req, pack)) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      var share;
-      if (req.params.list === 'users') {
-        share = pack.sharedWith.id(req.params.shareid);
-      }
-      if (req.params.list === 'groups') {
-        share = pack.sharedGroup.id(req.params.shareid);
-      }
-      if (share) {
-        share.remove();
-        pack.save(function (saveErr) {
-          if (saveErr) {
-            console.error(saveErr);
-            return res.send(500, saveErr.message);
-          }
-          // keep the consistency of user's traveler list
-          var Target;
-          if (req.params.list === 'users') {
-            Target = User;
-          }
-          if (req.params.list === 'groups') {
-            Target = Group;
-          }
-          Target.findByIdAndUpdate(req.params.shareid, {
-            $pull: {
-              packages: pack._id
-            }
-          }, function (updateErr, target) {
-            if (updateErr) {
-              console.error(updateErr);
-            }
-            if (!target) {
-              console.error('The user/group ' + req.params.shareid + ' is not in the db');
-            }
-          });
-          return res.send(204);
-        });
-      } else {
-        return res.send(404, 'cannot find ' + req.params.shareid + ' in list.');
-      }
+        if (!target) {
+          console.error('The user/group ' + req.params.shareid + ' is not in the db');
+        }
+      });
+      return res.send(204);
     });
   });
 
@@ -382,7 +282,7 @@ module.exports = function (app) {
       var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/workingpackages/' + newPackage.id + '/';
 
       res.set('Location', url);
-      return res.send(201, 'You can access the new packace at <a href="' + url + '">' + url + '</a>');
+      return res.send(201, 'You can access the new package at <a href="' + url + '">' + url + '</a>');
     });
   });
 
@@ -531,8 +431,9 @@ module.exports = function (app) {
         return res.send(500, err.message);
       }
       travelers.forEach(function (t) {
-        // console.dir(t);
         var picked = underscore.pick(t, 'devices', 'locations', 'manPower', 'status', 'createdBy', 'owner');
+        // works has its own toJSON, therefore need to merge only the plain
+        // object
         underscore.extend(picked, works.id(t._id).toJSON());
         console.dir(picked);
         merged.push(picked);
@@ -540,7 +441,6 @@ module.exports = function (app) {
       res.json(200, merged);
     });
   });
-
 
   function addWork(p, req, res) {
     var tids = req.body.travelers;
