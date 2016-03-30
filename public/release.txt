@@ -1,3 +1,9 @@
+release v2.4.1
+date: March 30, 2016
+- bug fixes for form manager for traveler
+- use absolute date inside traveler pages
+- load new device list
+
 release v2.4.0
 date: Feb. 02, 2016
 - add the form manager feature, details see /about/form-manager
