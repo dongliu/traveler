@@ -136,11 +136,11 @@ $(function () {
 
     var devices = new Bloodhound({
       datumTokenizer: function (device) {
-        return Bloodhound.tokenizers.whitespace(device.serialNumber);
+        return Bloodhound.tokenizers.nonword(device.inventoryId);
       },
-      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      queryTokenizer: Bloodhound.tokenizers.nonword,
       identify: function (device) {
-        return device.serialNumber;
+        return device.inventoryId;
       },
       prefetch: {
         url: prefix + '/devices/json',
@@ -157,7 +157,7 @@ $(function () {
     }, {
       name: 'devices',
       limit: 20,
-      display: 'serialNumber',
+      display: 'inventoryId',
       source: devices
     });
 
