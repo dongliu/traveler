@@ -20,9 +20,7 @@ module.exports = function (app) {
     }, function (err, response, resBody) {
       if (err) {
         console.log(err);
-        return res.json(503, {
-          error: 'cannot retrieve device list from ctlapp-wheezy-temp'
-        });
+        return res.send(503, 'cannot retrieve device list from' + service.device.url);
       }
       res.status(response.statusCode);
       if (response.statusCode === 200) {
