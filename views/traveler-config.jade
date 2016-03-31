@@ -39,14 +39,6 @@ block content
         else
           input#deadline(type='date', value='#{traveler.deadline}')
         = ' '
-    h4 Location:
-      = ' '
-      if (locals.traveler.location == undefined)
-        span#location.editable No specific location
-      else
-        span#location.editable #{traveler.location}
-      = ' '
-      button.btn-primary.editable Edit
     p Created on
       = ' '
       span.time #{traveler.createdOn}
@@ -67,6 +59,14 @@ block content
           | completed
         when 3
           | frozen
+    h4 Locations
+    ul#locations
+      each location in traveler.locations
+        li
+          span.location #{location}
+          = ' '
+          button.btn.btn-small.btn-warning.removeLocation
+            i.fa.fa-trash-o.fa-lg
     h4 Devices
     ul#devices
       each device in traveler.devices
