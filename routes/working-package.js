@@ -401,11 +401,11 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/workingpackages/:id/', auth.ensureAuthenticated, function (req, res) {
+  app.get('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), function (req, res) {
     res.send('under development');
   });
 
-  app.get('/workingpackages/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), function (req, res) {
+  app.get('/workingpackages/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), reqUtils.exist('id', WorkingPackage), function (req, res) {
     res.json(200, req[req.params.id]);
   });
 
@@ -518,48 +518,29 @@ module.exports = function (app) {
     });
   }
 
-  app.post('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.filterBody(['travelers', 'packages']), function (req, res) {
-    WorkingPackage.findById(req.params.id).exec(function (err, p) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-
-      if (!p) {
-        return res.send(404, 'working package ' + req.params.id + ' is not found.');
-      }
-      addWork(p, req, res);
-    });
+  app.post('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), reqUtils.filterBody(['travelers', 'packages']), function (req, res) {
+    addWork(req[req.params.id], req, res);
   });
 
 
-  app.delete('/workingpackages/:id/works/:wid', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.findById(req.params.id).exec(function (err, p) {
-      if (err) {
-        console.log(err);
-        res.send(500, err.message);
+  app.delete('/workingpackages/:id/works/:wid', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
+    var p = req[req.params.id];
+    var work = p.works.id(req.params.wid);
+
+    if (!work) {
+      res.send(404, 'Work ' + req.params.wid + ' not found in the package.');
+    }
+
+    work.remove();
+    p.updatedBy = req.session.userid;
+    p.updatedOn = Date.now();
+
+    p.save(function (saveErr) {
+      if (saveErr) {
+        console.log(saveErr);
+        res.send(500, saveErr.message);
       }
-      if (!p) {
-        res.send(404, 'Working package ' + req.params.id + ' not found.');
-      }
-
-      var work = p.works.id(req.params.wid);
-
-      if (!work) {
-        res.send(404, 'Work ' + req.params.wid + ' not found in the package.');
-      }
-
-      work.remove();
-      p.updatedBy = req.session.userid;
-      p.updatedOn = Date.now();
-
-      p.save(function (saveErr) {
-        if (saveErr) {
-          console.log(saveErr);
-          res.send(500, saveErr.message);
-        }
-        res.send(204);
-      });
+      res.send(204);
     });
   });
 
