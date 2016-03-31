@@ -49,7 +49,6 @@ var work = new Schema({
  *
  */
 
-
 /**
  * Currently there is no status for a working package.
  * It is either active or archived.
