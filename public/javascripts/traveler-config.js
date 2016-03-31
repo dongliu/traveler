@@ -14,10 +14,10 @@ function setStatus(s) {
     data: JSON.stringify({
       status: s
     })
-  }).done(function (data, status, jqXHR) {
+  }).done(function () {
     // TODO: avoid refresh the whole page
     document.location.href = window.location.pathname;
-  }).fail(function (jqXHR, status, error) {
+  }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -122,6 +122,8 @@ $(function () {
     $this.parent().remove();
   });
 
+  var devices;
+
   $('#add').click(function (e) {
     e.preventDefault();
     // add an input and a button add
@@ -132,21 +134,22 @@ $(function () {
       cleanDeviceForm();
     });
 
-    var devices = new Bloodhound({
-      datumTokenizer: function (device) {
-        return Bloodhound.tokenizers.nonword(device.inventoryId);
-      },
-      queryTokenizer: Bloodhound.tokenizers.nonword,
-      identify: function (device) {
-        return device.inventoryId;
-      },
-      prefetch: {
-        url: prefix + '/devices/json',
-        cacheKey: 'devices'
-      }
-    });
-
-    devices.initialize();
+    if (!devices) {
+      devices = new Bloodhound({
+        datumTokenizer: function (device) {
+          return Bloodhound.tokenizers.nonword(device.inventoryId);
+        },
+        queryTokenizer: Bloodhound.tokenizers.nonword,
+        identify: function (device) {
+          return device.inventoryId;
+        },
+        prefetch: {
+          url: prefix + '/devices/json',
+          cacheKey: 'devices'
+        }
+      });
+      devices.initialize();
+    }
 
     $('#newDevice').typeahead({
       minLength: 1,
@@ -161,13 +164,13 @@ $(function () {
 
     $('#confirm').click(function (confirmE) {
       confirmE.preventDefault();
-      if ($('#newDevice').val()) {
+      if ($('#newDevice').val().trim()) {
         $.ajax({
           url: './devices/',
           type: 'POST',
           contentType: 'application/json',
           data: JSON.stringify({
-            newdevice: $('#newDevice').val()
+            newdevice: $('#newDevice').val().trim()
           })
         }).done(function () {
           $('#devices').append('<li><span class="device">' + $('#newDevice').val() + '</span> <button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button></li>');
@@ -180,7 +183,6 @@ $(function () {
           cleanDeviceForm();
         });
       }
-
     });
   });
 
@@ -190,9 +192,9 @@ $(function () {
     $.ajax({
       url: './devices/' + encodeURIComponent($that.siblings('span.device').text()),
       type: 'DELETE'
-    }).done(function (data, status, jqXHR) {
+    }).done(function () {
       $that.closest('li').remove();
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
