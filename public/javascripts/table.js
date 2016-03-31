@@ -464,7 +464,7 @@ var packageShareLinkColumn = {
 
 var deviceTravelerLinkColumn = {
   sTitle: '',
-  mData: 'serialNumber',
+  mData: 'inventoryId',
   mRender: function (data, type, full) {
     return '<a href="' + prefix + '/currenttravelers/?device=' + data + '" target="_blank" data-toggle="tooltip" title="travelers for this device"><i class="fa fa-search fa-lg"></i></a>';
   },
@@ -682,21 +682,21 @@ var lastVisitedOnColumn = dateColumn('Last visited', 'lastVisitedOn');
 
 var serialColumn = {
   sTitle: 'Serial',
-  mData: 'serialNumber',
+  mData: 'inventoryId',
   sDefaultContent: '',
   bFilter: true
 };
 
 var typeColumn = {
   sTitle: 'Type',
-  mData: 'componentType',
+  mData: 'deviceType.name',
   sDefaultContent: '',
   bFilter: true
 };
 
 var descriptionColumn = {
   sTitle: 'Description',
-  mData: 'description',
+  mData: 'deviceType.description',
   sDefaultContent: '',
   bFilter: true
 };
