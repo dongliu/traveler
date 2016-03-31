@@ -2,15 +2,19 @@
 /*global moment: false, Binder: false, Modernizr: false*/
 /*global travelerStatus: true, finishedInput: true, ajax401: false*/
 
-function livespan(stamp) {
-  return '<span data-livestamp="' + stamp + '"></span>';
+function livespan(stamp, live) {
+  if (live) {
+    return '<span data-livestamp="' + stamp + '"></span>';
+  } else {
+    return '<span>' + moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') + '</span>';
+  }
 }
 
 function history(found) {
   var i, output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
     }
   }
   return output;
@@ -23,7 +27,7 @@ function fileHistory(found) {
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
-      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
     }
   }
   return output;
@@ -33,7 +37,7 @@ function notes(found) {
   var i, output = '<dl>';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + moment(found[i].inputOn).fromNow() + '</b>: </dt>';
+      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
       output = output + '<dd>' + found[i].value + '</dd>';
     }
   }

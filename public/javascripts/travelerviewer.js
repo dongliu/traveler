@@ -6,26 +6,46 @@ function cleanForm() {
   $('.control-group-buttons').remove();
 }
 
+function livespan(stamp, live) {
+  if (live) {
+    return '<span data-livestamp="' + stamp + '"></span>';
+  } else {
+    return '<span>' + moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') + '</span>';
+  }
+}
+
 function history(found) {
   var i, output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
     }
   }
   return output;
 }
 
 function fileHistory(found) {
-  var i, output = '',
+  var i,
+    output = '',
     link;
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
-      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
     }
   }
   return output;
+}
+
+function notes(found) {
+  var i, output = '<dl>';
+  if (found.length > 0) {
+    for (i = 0; i < found.length; i += 1) {
+      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
+      output = output + '<dd>' + found[i].value + '</dd>';
+    }
+  }
+  return output + '</dl>';
 }
 
 function createSideNav() {
@@ -83,16 +103,6 @@ function validation_message(form) {
   return output;
 }
 
-function notes(found) {
-  var i, output = '<dl>';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + moment(found[i].inputOn).fromNow() + '</b>: </dt>';
-      output = output + '<dd>' + found[i].value + '</dd>';
-    }
-  }
-  return output + '</dl>';
-}
 
 function renderNotes() {
   $.ajax({
@@ -127,6 +137,10 @@ function renderNotes() {
 $(function () {
   createSideNav();
   cleanForm();
+
+  $('span.time').each(function () {
+    $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
+  });
 
   // update img
   $('#form').find('img').each(function (index) {
