@@ -58,8 +58,9 @@ $(function () {
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify(data),
-      success: function () {
-        initValue[that.id] = value;
+      success: function (json) {
+        initValue[that.id] = json[that.id];
+        $(that).text(json[that.id]);
       },
       error: function (jqXHR) {
         $(that).text(initValue[that.id]);
@@ -67,7 +68,7 @@ $(function () {
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     });
-    return value;
+    return '';
   }, {
     type: 'textarea',
     rows: 1,
@@ -172,8 +173,13 @@ $(function () {
           data: JSON.stringify({
             newdevice: $('#newDevice').val().trim()
           })
-        }).done(function () {
-          $('#devices').append('<li><span class="device">' + $('#newDevice').val() + '</span> <button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button></li>');
+        }).done(function (data, textStatus, jqXHR) {
+          if (jqXHR.status === 204) {
+            return;
+          }
+          if (jqXHR.status === 200) {
+            $('#devices').append('<li><span class="device">' + data.device + '</span> <button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button></li>');
+          }
         }).fail(function (jqXHR) {
           if (jqXHR.status !== 401) {
             $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot add the device</div>');
