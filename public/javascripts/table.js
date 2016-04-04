@@ -710,6 +710,66 @@ var modifiedByColumn = {
   bFilter: true
 };
 
+var addedByColumn = personColumn('Added by', 'addedBy');
+
+var addedOnColumn = dateColumn('Added on', 'addedOn');
+
+
+var sequenceColumn = {
+  sTitle: 'S',
+  mData: 'sequence',
+  sClass: 'editable',
+  bFilter: true,
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      return '<input type="number" class="input-mini" value="' + data + '">';
+    }
+  }
+};
+
+var priorityColumn = {
+  sTitle: 'P',
+  mData: 'priority',
+  sClass: 'editable',
+  bFilter: true,
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      return '<input type="number"  class="input-mini" value="' + data + '">';
+    }
+  }
+};
+
+var valueColumn = {
+  sTitle: 'V',
+  mData: 'value',
+  sClass: 'editable',
+  bFilter: true,
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      return '<input type="number" class="input-mini" value="' + data + '">';
+    }
+  }
+};
+
+var colorColumn = {
+  sTitle: 'C',
+  mData: 'color',
+  // sClass: 'editable',
+  // bFilter: true,
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      return '<input type="color" class="input-mini" value="' + data + '">';
+    }
+  }
+};
 
 var oTableTools = {
   sSwfPath: prefix ? prefix + '/datatables/swf/copy_csv_xls_pdf.swf' : '/datatables/swf/copy_csv_xls_pdf.swf',
