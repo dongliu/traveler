@@ -29,7 +29,7 @@ var work = new Schema({
   sequence: {
     type: Number,
     min: 1,
-    defualt: 1
+    default: 1
   },
   value: {
     type: Number,
