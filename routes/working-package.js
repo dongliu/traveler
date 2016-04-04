@@ -43,7 +43,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/workingpackages/:id/tags/', auth.ensureAuthenticated, reqUtils.filterBody(['newtag']), reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
+  app.post('/workingpackages/:id/tags/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['newtag']), reqUtils.sanitize('body', ['newtag']), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
@@ -71,7 +71,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/workingpackages/:id/config', auth.ensureAuthenticated, reqUtils.filterBody(['title', 'description']), reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
+  app.put('/workingpackages/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['title', 'description']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
     var k;
     var doc = req[req.params.id];
     for (k in req.body) {
@@ -101,7 +101,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/workingpackages/:id/share/public', auth.ensureAuthenticated, reqUtils.filterBody(['access']), reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+  app.put('/workingpackages/:id/share/public', auth.ensureAuthenticated, reqUtils.filter('body', ['access']), reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
     var pack = req[req.params.id];
     var access = req.body.access;
     if (['-1', '0', '1'].indexOf(access) === -1) {
@@ -260,7 +260,7 @@ module.exports = function (app) {
     res.render('new_package');
   });
 
-  app.post('/workingpackages/', auth.ensureAuthenticated, function (req, res) {
+  app.post('/workingpackages/', auth.ensureAuthenticated, reqUtils.filter('body', ['title', 'description']), reqUtils.hasAll('body', ['title']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
     var workingPackage = {};
     if (req.body.works && underscore.isArray(req.body.works)) {
       workingPackage.works = req.body.works;
@@ -518,7 +518,7 @@ module.exports = function (app) {
     });
   }
 
-  app.post('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), reqUtils.filterBody(['travelers', 'packages']), function (req, res) {
+  app.post('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['travelers', 'packages']), function (req, res) {
     addWork(req[req.params.id], req, res);
   });
 
