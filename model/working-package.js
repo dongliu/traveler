@@ -60,9 +60,19 @@ var work = new Schema({
  *
  */
 
+/**
+ * status := 0 // new
+ *         | 1 // active
+ *         | 2 // completed
+ */
+
 var workingPackage = new Schema({
   title: String,
   description: String,
+  status: {
+    type: Number,
+    default: 0
+  },
   tags: [String],
   createdBy: String,
   createdOn: Date,
