@@ -5,8 +5,9 @@ var ObjectId = Schema.Types.ObjectId;
 var share = require('./share.js');
 
 /**
- * finishedValue = traveler.finishedInput | workingPackage.finishedValue
- * totalValue = traveler.totalInput | workingPackage.totalValue
+ * finished is the percentage of value that is completed.
+ * inProgress is the percentage of value that is still in progress.
+ * If status === 2, then finished = 100, and inProgress = 0;
  */
 
 var work = new Schema({
@@ -18,8 +19,14 @@ var work = new Schema({
   addedOn: Date,
   addedBy: String,
   status: Number,
-  totalValue: Number,
-  finishedValue: Number,
+  finished: {
+    type: Number,
+    default: 0
+  },
+  inProgress: {
+    type: Number,
+    default: 0
+  },
   priority: {
     type: Number,
     min: 1,
@@ -55,9 +62,9 @@ var work = new Schema({
  */
 
 /**
- * The progress of a working package is calculated by
- * Sum(value * complete ? 1 : finishedValue/totalValue) / Sum(value)
- *
+ * totalValue = sum(work value)
+ * finishedValue = sum(work value X finished)
+ * inProgressValue = sum(work value X inProgress)
  */
 
 /**
@@ -91,8 +98,18 @@ var workingPackage = new Schema({
   sharedWith: [share.user],
   sharedGroup: [share.group],
   works: [work],
-  finishedValue: Number,
-  totalValue: Number,
+  finishedValue: {
+    type: Number,
+    default: 0
+  },
+  inProgressValue: {
+    type: Number,
+    default: 0
+  },
+  totalValue: {
+    type: Number,
+    default: 0
+  },
   archived: {
     type: Boolean,
     default: false
