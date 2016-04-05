@@ -48,7 +48,10 @@ var traveler = new Schema({
   devices: [String],
   locations: [String],
   manPower: [user],
-  status: Number,
+  status: {
+    type: Number,
+    default: 0
+  },
   createdBy: String,
   createdOn: Date,
   clonedBy: String,
