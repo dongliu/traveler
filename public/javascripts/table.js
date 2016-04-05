@@ -471,38 +471,80 @@ var deviceTravelerLinkColumn = {
   bSortable: false
 };
 
-function progressBar(percentage, finished, total) {
-  return '<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar" style="width:' + percentage + '%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">' + finished + '/' + total + '</span></div>';
+// function progressBar(percentage, finished, total) {
+//   if (finished === undefined) {
+//     return '<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + percentage + '%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">completed</span></div>';
+//   }
+//   return '<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar" style="width:' + percentage + '%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">' + finished + '/' + total + '</span></div>';
+// }
+
+function progressBar(active, finished, inProgress) {
+  var bar = $('<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div></div>');
+  if (active) {
+    bar.addClass('active').addClass('progress-striped');
+  }
+  return bar[0].outerHTML;
 }
 
 var progressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
   sType: 'numeric',
-  mData: function (source, type, val) {
+  mData: function (source, type) {
+    if (source.status === 2) {
+      if (type === 'sort') {
+        return 1;
+      }
+      return progressBar(false, 100, 0);
+    }
+
     if (!source.hasOwnProperty('totalInput')) {
       if (type === 'sort') {
         return 0;
       }
       return 'unknown';
     }
-    if (source.totalInput === 0) {
+
+    if (source.totalInput === 0 || source.totalValue === 0) {
       if (type === 'sort') {
         return 0;
       }
-      return progressBar(100, 0, 0);
+      if (source.status === 1) {
+        return progressBar(true, 100, 0);
+      } else {
+        return progressBar(false, 100, 0);
+      }
     }
-    if (!source.hasOwnProperty('finishedInput')) {
+
+    if (!source.hasOwnProperty('finished') || !source.hasOwnProperty('finishedInput')) {
       if (type === 'sort') {
         return 0;
       }
       return 'unknown';
     }
-    var percentage = Math.floor((source.finishedInput / source.totalInput) * 100);
-    if (type === 'sort') {
-      return percentage;
+
+    var inProgress;
+
+    if (source.hasOwnProperty('finishedInput')) {
+      inProgress = Math.floor(source.finishedInput / source.totalInput * 100);
+    } else {
+      inProgress = source.inProgress;
     }
-    return progressBar(percentage, source.finishedInput, source.totalInput);
+
+    var finished = 0;
+
+    if (source.hasOwnProperty('finished')) {
+      finished = source.finished;
+    }
+
+    if (type === 'sort') {
+      return finished + inProgress;
+    }
+    if (source.status === 1) {
+      return progressBar(true, finished, inProgress);
+    } else {
+      return progressBar(false, finished, inProgress);
+    }
   }
 };
 
@@ -716,7 +758,7 @@ var addedOnColumn = dateColumn('Added on', 'addedOn');
 
 
 var sequenceColumn = {
-  sTitle: 'S',
+  sTitle: 'Sequence',
   mData: 'sequence',
   sClass: 'editable',
   bFilter: true,
@@ -730,7 +772,7 @@ var sequenceColumn = {
 };
 
 var priorityColumn = {
-  sTitle: 'P',
+  sTitle: 'Priority',
   mData: 'priority',
   sClass: 'editable',
   bFilter: true,
@@ -744,7 +786,7 @@ var priorityColumn = {
 };
 
 var valueColumn = {
-  sTitle: 'V',
+  sTitle: 'Value',
   mData: 'value',
   sClass: 'editable',
   bFilter: true,
@@ -758,7 +800,7 @@ var valueColumn = {
 };
 
 var colorColumn = {
-  sTitle: 'C',
+  sTitle: 'Color',
   mData: 'color',
   // sClass: 'editable',
   // bFilter: true,
