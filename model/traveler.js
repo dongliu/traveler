@@ -73,8 +73,14 @@ var traveler = new Schema({
   activeForm: String,
   data: [ObjectId],
   notes: [ObjectId],
-  totalInput: Number,
-  finishedInput: Number,
+  totalInput: {
+    type: Number,
+    default: 0
+  },
+  finishedInput: {
+    type: Number,
+    default: 0
+  },
   archived: {
     type: Boolean,
     default: false
