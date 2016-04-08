@@ -24,7 +24,6 @@ function initTable(list, oTable) {
 
 
 function removeFromModal(list, cb) {
-  $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
     var that = this;
@@ -80,7 +79,6 @@ function remove(list, oTable) {
 }
 
 function modifyFromModal(list, cb) {
-  $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function (index) {
     var that = this;
