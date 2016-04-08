@@ -1,4 +1,7 @@
+/*eslint max-nested-callbacks: [2, 4]*/
+
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
+/*global removeColumn, sequenceColumn, colorColumn, priorityColumn, valueColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, sDomNoTools*/
 /*global moment: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false*/
 
 function cleanTagForm() {
@@ -99,6 +102,21 @@ function editEvents(initValue) {
 }
 
 
+function removeWork(id, cb) {
+  $.ajax({
+    url: './works/' + id,
+    type: 'DELETE'
+  }).done(function () {
+    $('#' + id).wrap('<del></del>');
+    $('#' + id).addClass('text-success');
+    cb(null);
+  }).fail(function (jqXHR, status, error) {
+    $('#' + id).append(' : ' + jqXHR.responseText);
+    $('#' + id).addClass('text-error');
+    cb(error);
+  });
+}
+
 $(function () {
   updateAjaxURL(prefix);
   ajax401(prefix);
@@ -113,7 +131,7 @@ $(function () {
 
   var workAoColumns = [removeColumn, sequenceColumn, colorColumn, priorityColumn, valueColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceColumn, sharedWithColumn, sharedGroupColumn];
 
-  $('#work-table').dataTable({
+  var worksTable = $('#work-table').dataTable({
     sAjaxSource: './works/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
@@ -132,6 +150,25 @@ $(function () {
       [8, 'desc']
     ],
     sDom: sDomNoTools
+  });
+
+
+  $('#work-table').on('click', 'a.remove', function () {
+    $('#modalLabel').html('Remove the following work from this package?');
+    $('#modal .modal-body').empty();
+    var row = $(this).closest('tr')[0];
+    var data = worksTable.fnGetData(row);
+    $('#modal .modal-body').append('<div class="target" id="' + data._id + '"><b>' + data.alias + '</b>, added ' + moment(data.addedOn).fromNow() + '</div>');
+    $('#modal .modal-footer').html('<button id="remove" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+    $('#modal').modal('show');
+    $('#remove').click(function () {
+      $('#submit').prop('disabled', true);
+      removeWork(data._id, function (err) {
+        if (!err) {
+          worksTable.fnDeleteRow(row);
+        }
+      });
+    });
   });
 
   editEvents(initValue);
