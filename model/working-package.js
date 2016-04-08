@@ -116,6 +116,31 @@ var workingPackage = new Schema({
   }
 });
 
+workingPackage.methods.updateProgress = function (cb) {
+  var works = this.works;
+  var totalValue = 0;
+  var finishedValue = 0;
+  var inProgressValue = 0;
+  works.forEach(function (w) {
+    totalValue = totalValue + w.value;
+    finishedValue = finishedValue + w.value * w.finished;
+    inProgressValue = inProgressValue + w.value * w.inProgress;
+  });
+
+  this.totalValue = totalValue;
+  this.finishedValue = finishedValue;
+  this.inProgressValue = inProgressValue;
+  if (this.isModified()) {
+    this.save(function (err, newPackage) {
+      if (cb) {
+        cb(err, newPackage);
+      } else {
+        console.error(err);
+      }
+    });
+  }
+};
+
 var WorkingPackage = mongoose.model('WorkingPackage', workingPackage);
 
 module.exports = {
