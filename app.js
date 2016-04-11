@@ -110,7 +110,7 @@ app.configure(function () {
     dest: uploadDir,
     limits: {
       files: 1,
-      fileSize: 5 * 1024 * 1024
+      fileSize: 10 * 1024 * 1024
     }
   }));
   app.use(express.json());
@@ -123,7 +123,6 @@ app.configure('development', function () {
   app.use(express.errorHandler());
 });
 var routes = require('./routes');
-var about = require('./routes/about');
 
 require('./routes/form')(app);
 require('./routes/traveler')(app);
@@ -131,7 +130,8 @@ require('./routes/user')(app);
 require('./routes/profile')(app);
 require('./routes/device')(app);
 require('./routes/ldaplogin')(app);
-app.get('/about', about.index);
+require('./routes/about')(app);
+
 app.get('/api', function (req, res) {
   res.render('api', {
     prefix: req.proxied ? req.proxied_prefix : ''
