@@ -411,6 +411,7 @@ module.exports = function (app) {
 
   app.get('/workingpackages/:id/works/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), function (req, res) {
     var works = req[req.params.id].works;
+    //TODO: work might be package
     var tids = works.map(function (w) {
       return w._id;
     });
@@ -435,7 +436,6 @@ module.exports = function (app) {
         // works has its own toJSON, therefore need to merge only the plain
         // object
         underscore.extend(picked, works.id(t._id).toJSON());
-        console.dir(picked);
         merged.push(picked);
       });
       res.json(200, merged);
@@ -483,17 +483,36 @@ module.exports = function (app) {
           // do not add itself as a work
           return;
         }
+        var newWork;
         if (!works.id(item._id)) {
-          works.push({
+          newWork = {
             _id: item._id,
             alias: item.title,
             refType: type,
             addedOn: Date.now(),
             addedBy: req.session.userid,
             status: item.status || 0,
-            finishedValue: item.finishedInput || item.finishedValue,
-            totalValue: item.totalInput || item.totalValue
-          });
+            value: item.value || 10
+          };
+          if (item.status === 2) {
+            newWork.finished = 1;
+            newWork.inProgress = 0;
+          } else if (type === 'traveler') {
+            newWork.finished = 0;
+            if (item.totalInput === 0) {
+              newWork.inProgress = 1;
+            } else {
+              newWork.inProgress = item.finishedInput / item.totalInput;
+            }
+          } else {
+            newWork.finished = 0;
+            if (item.totalValue === 0) {
+              newWork.inProgress = 1;
+            } else {
+              newWork.inProgress = item.finishedValue / item.totalValue;
+            }
+          }
+          works.push(newWork);
           added.push(item.id);
         }
       });
@@ -505,15 +524,13 @@ module.exports = function (app) {
       p.updatedOn = Date.now();
       p.updatedBy = req.session.userid;
 
-      p.save(function (saveErr) {
+      // update the totalValue, finishedValue, and finishedValye
+      p.updateProgress(function (saveErr, newPackage) {
         if (saveErr) {
           console.error(saveErr);
           return res.send(500, saveErr.message);
         }
-        return res.json(200, {
-          items: added,
-          type: type
-        });
+        return res.json(200, newPackage);
       });
     });
   }
@@ -535,11 +552,12 @@ module.exports = function (app) {
     p.updatedBy = req.session.userid;
     p.updatedOn = Date.now();
 
-    p.save(function (saveErr) {
+    p.save(function (saveErr, newPackage) {
       if (saveErr) {
         console.log(saveErr);
         res.send(500, saveErr.message);
       }
+      newPackage.updateProgress();
       res.send(204);
     });
   });
