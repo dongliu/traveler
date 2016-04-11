@@ -2,10 +2,10 @@ body {
   position: relative;
   padding-top: 40px;
 }
-/* a {
-  color: #00B7FF;
+.a-color {
+  color: #0088cc;
 }
- */
+
 
 /* Tweak navbar brand link to be super sleek
 -------------------------------------------------- */
@@ -135,9 +135,6 @@ text {
 }
 
 /* builder stuff */
-.row-selected td {
-  background-color: #c09853 !important;
-}
 ul.dropdown-menu input[type="checkbox"] {
   margin-left: 0;
 }
@@ -189,11 +186,13 @@ figcaption {
   background-color: #F5F6CE;
 }
 
-.sidenavtoggle {
-  position: fixed;
-  /*right: 4em;*/
-  top: 40px;
-  /*margin-top: -2.5em;*/
+.table-hover tbody tr:hover.row-selected > td {
+  background-color: #c09853;
+  opacity: 0.75;
+}
+
+.table-hover tbody tr.row-selected > td {
+  background-color: #c09853;
 }
 
 
