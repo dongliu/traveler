@@ -2,16 +2,19 @@
 /*global moment: false, Binder: false, Modernizr: false*/
 /*global travelerStatus: true, finishedInput: true, ajax401: false*/
 
-function livespan(stamp) {
-  return '<span data-livestamp="' + stamp + '"></span>';
+function livespan(stamp, live) {
+  if (live) {
+    return '<span data-livestamp="' + stamp + '"></span>';
+  } else {
+    return '<span>' + moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') + '</span>';
+  }
 }
-
 
 function history(found) {
   var i, output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
     }
   }
   return output;
@@ -24,7 +27,7 @@ function fileHistory(found) {
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
-      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
     }
   }
   return output;
@@ -34,7 +37,7 @@ function notes(found) {
   var i, output = '<dl>';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + moment(found[i].inputOn).fromNow() + '</b>: </dt>';
+      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
       output = output + '<dd>' + found[i].value + '</dd>';
     }
   }
@@ -77,21 +80,14 @@ function setStatus(s) {
 function createSideNav() {
   var $legend = $('legend');
   var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
-  var $toggle = $('<div class="sidenavtoggle"><a id="toggle" class="btn btn-primary" data-toggle="tooltip" title="show/hide side nav"><i class="fa fa-anchor fa-lg"></i></a></div>');
   var i;
   if ($legend.length > 1) {
     for (i = 0; i < $legend.length; i += 1) {
       $affix.append('<li><a href="#' + $legend[i].id + '">' + $legend[i].textContent + '</a></li>');
     }
-    $('body').append($('<div id="affixlist" class="bs-docs-sidebar"></div>').append($affix));
+    $('.sidebar').append($('<div id="affixlist"></div>').append($affix));
     $('body').attr('data-spy', 'scroll');
     $('body').attr('data-target', '#affixlist');
-    $('#affixlist').hide();
-    $('body').append($toggle);
-    $('#toggle').click(function (e) {
-      e.preventDefault();
-      $('#affixlist').toggle();
-    });
   }
 }
 
@@ -281,6 +277,8 @@ $(function () {
     }
   });
 
+  var realFinishedInput = 0;
+
   $.ajax({
     url: './data/',
     type: 'GET',
@@ -291,6 +289,7 @@ $(function () {
         return e.name === element.name;
       });
       if (found.length) {
+        realFinishedInput += 1;
         found.sort(function (a, b) {
           if (a.inputOn > b.inputOn) {
             return -1;
@@ -310,6 +309,12 @@ $(function () {
     // check if active here
     if (travelerStatus === 1) {
       $('#form input,textarea').removeAttr('disabled');
+    }
+
+    // update finished input number
+    if (realFinishedInput !== finishedInput) {
+      finishedInput = realFinishedInput;
+      updateFinished(finishedInput);
     }
 
     // load the notes here
@@ -447,7 +452,7 @@ $(function () {
       $cgw.children('.control-group-buttons').remove();
       return;
     }
-    if (file.size > 5000000) {
+    if (file.size > 10 * 1024 * 1024) {
       $validation.html('<p class="text-error">' + file.size + ' is too large to upload</p>');
       $cgw.children('.control-group-buttons').remove();
       return;

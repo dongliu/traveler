@@ -1,20 +1,19 @@
 /*global FormFile: false, TravelerData: false*/
 /*jslint es5: true*/
 
-var configPath = require('../config/config.js').configPath;
-var ad = require('../' + configPath + '/ad.json');
+var config = require('../config/config.js');
+var ad = config.ad;
 var ldapClient = require('../lib/ldap-client');
-var routesUtilities = require('../utilities/routes.js');
 
 var auth = require('../lib/auth');
-var authConfig = require('../' + configPath + '/auth.json');
+var authConfig = config.auth;
 
 var mongoose = require('mongoose');
 var path = require('path');
 var sanitize = require('sanitize-caja');
 var util = require('util');
 var underscore = require('underscore');
-
+var routesUtilities = require('../utilities/routes.js');
 
 var Form = mongoose.model('Form');
 var FormFile = mongoose.model('FormFile');
@@ -194,7 +193,7 @@ function getAccess(req, doc) {
       }
     }
   }
-  if(routesUtilities.checkUserRole(req,'read_all_forms')) {
+  if (routesUtilities.checkUserRole(req, 'read_all_forms')) {
     return 0;
   }
   return -1;
@@ -342,7 +341,7 @@ module.exports = function (app) {
   });
 
   app.get('/allforms/json', auth.ensureAuthenticated, function (req, res) {
-    if(routesUtilities.checkUserRole(req,'read_all_forms')) {
+    if (routesUtilities.checkUserRole(req, 'read_all_forms')) {
       Form.find({ }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
           console.error(err);
@@ -351,7 +350,7 @@ module.exports = function (app) {
         res.json(200, forms);
       });
     } else {
-      res.json(200, "You are not authorized to view all forms.");
+      res.json(200, 'You are not authorized to view all forms.');
     }
   });
 
@@ -415,9 +414,7 @@ module.exports = function (app) {
   });
 
   app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
-    return res.render('newform', {
-      prefix: req.proxied ? req.proxied_prefix : ''
-    });
+    return res.render('newform', routesUtilities.getRenderObject(req));
   });
 
   app.get('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
@@ -437,15 +434,34 @@ module.exports = function (app) {
       }
 
       if (access === 1) {
-        return res.render('builder', {
+        return res.render('builder', routesUtilities.getRenderObject(req, {
           id: req.params.id,
           title: form.title,
-          html: form.html,
-          prefix: req.proxied ? req.proxied_prefix : ''
-        });
+          html: form.html
+        }));
       }
 
       return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + req.params.id + '/preview');
+    });
+  });
+
+  app.get('/forms/:id/json', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id, function (err, form) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!form) {
+        return res.send(410, 'gone');
+      }
+
+      var access = getAccess(req, form);
+
+      if (access === -1) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+
+      return res.json(200, form);
     });
   });
 
@@ -529,12 +545,11 @@ module.exports = function (app) {
         return res.send(403, 'you are not authorized to access this resource');
       }
 
-      return res.render('viewer', {
+      return res.render('viewer', routesUtilities.getRenderObject(req, {
         id: req.params.id,
         title: form.title,
-        html: form.html,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+        html: form.html
+      }));
     });
   });
 
@@ -550,12 +565,11 @@ module.exports = function (app) {
       if (form.createdBy !== req.session.userid) {
         return res.send(403, 'you are not authorized to access this resource');
       }
-      return res.render('share', {
+      return res.render('share', routesUtilities.getRenderObject(req, {
         type: 'Form',
         id: req.params.id,
-        title: form.title,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+        title: form.title
+      }));
     });
   });
 
@@ -731,17 +745,13 @@ module.exports = function (app) {
   });
 
   app.post('/forms/', auth.ensureAuthenticated, function (req, res) {
-    var form = {};
+    var html;
     if (!!req.body.html) {
-      form.html = sanitize(req.body.html);
+      html = sanitize(req.body.html);
     } else {
-      form.html = '';
+      html = '';
     }
-    form.title = req.body.title;
-    form.createdBy = req.session.userid;
-    form.createdOn = Date.now();
-    form.sharedWith = [];
-    (new Form(form)).save(function (err, newform) {
+    routesUtilities.form.createForm(req.body.title, req.session.userid, html, function (err, newform) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -749,14 +759,14 @@ module.exports = function (app) {
       var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + newform.id + '/';
 
       res.set('Location', url);
-      return res.send(201, 'You can see the new form at <a href="' + url + '">' + url + '</a>');
+      return res.redirect(url);
     });
   });
 
-  app.post('/forms/clone/', auth.ensureAuthenticated, routesUtilities.filterBody('form'), function (req,res) {
-    Form.findById(req.body.form, function(err, form){
+  app.post('/forms/clone/', auth.ensureAuthenticated, routesUtilities.filterBody('form'), function (req, res) {
+    Form.findById(req.body.form, function (err, form) {
       var access = getAccess(req, form);
-      if ( access != -1 ) {
+      if ( access !== -1 ) {
         var clonedForm = new Form({
           title: form.title,
           createdBy: req.session.userid,
@@ -767,7 +777,7 @@ module.exports = function (app) {
           html: form.html
         });
 
-        clonedForm.save(function(err, createdForm){
+        clonedForm.save(function (err, createdForm) {
           if (err) {
             console.error(err);
             return res.send(500, err.message);

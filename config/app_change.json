@@ -1,5 +1,16 @@
 {
   "app_port": "3001",
   "ssl_key": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.key)",
-  "ssl_cert": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.pem)"
+  "ssl_cert": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.pem)",
+  "top_bar_urls" : [
+    {
+      "text": "Controls",
+      "url": "https://controls.frib.msu.edu/"
+    },
+    {
+      "text": "Report a problem",
+      "url": "https://controls.frib.msu.edu/controlshelp/"
+    }
+  ],
+  "deployment_name": "development"
 }

@@ -4,16 +4,21 @@
 TOP = .
 SUBDIRS = src
 
-.PHONY: support, certificates, dev-mongo, dev-config, update
+.PHONY: support, certificates, dev-mongo, dev-config, update, db-backup, db-restore
 
-default: 
+default:
 
-support: 
+support:
 	$(TOP)/sbin/traveler_install_support.sh
 
-update: 
+update:
 	$(TOP)/sbin/traveler_update_support.sh
 
+db-backup:
+	$(TOP)/sbin/mongodb-backup.sh
+
+db-restore:
+	$(TOP)/sbin/mongodb-restore.sh
 
 certificates:
 	$(TOP)/sbin/create_web_service_certificates.sh
@@ -21,5 +26,5 @@ certificates:
 dev-mongo:
 	$(TOP)/sbin/configure_mongo_dev.sh
 
-dev-config: 
-	$(TOP)/sbin/create_dev_config.sh
+default-config:
+	$(TOP)/sbin/create_traveler_config.sh

@@ -18,7 +18,10 @@ function addData(oTable, url) {
   }).always();
 }
 
-var externalUrl = "https://controls.frib.msu.edu/traveler1/showForm.php?assigned=";
+var legacyAssignedUrl;
+var legacyTravelerApiUrl;
+var legacyDevicesUrl;
+var searchLegacy = false;
 
 var template = {
   title: {
@@ -98,6 +101,13 @@ function addExternalData(oTable, url) {
 }
 
 $(function () {
+  if(typeof legacyTraveler != 'undefined'){
+    legacyTravelerApiUrl = legacyTraveler.api;
+    legacyDevicesUrl = legacyTraveler.devices;
+    legacyAssignedUrl = legacyTraveler.assigned;
+    searchLegacy = true;
+  }
+
   ajax401();
   var currentTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#current-traveler-table', currentTravelerAoColumns);
@@ -115,10 +125,14 @@ $(function () {
   currentTravelerTable.fnClearTable();
   if (device) {
     addData(currentTravelerTable, prefix + '/currenttravelers/json?device=' + device);
-    addExternalData(currentTravelerTable, 'https://controls.frib.msu.edu/traveler1/api.php?resource=travelers&device=' + device);
+    if (searchLegacy){
+      addExternalData(currentTravelerTable, legacyDevicesUrl + device);
+    }
   } else {
     addData(currentTravelerTable, prefix + '/currenttravelers/json');
-    addExternalData(currentTravelerTable, 'https://controls.frib.msu.edu/traveler1/api.php?resource=travelers');
+    if (searchLegacy){
+      addExternalData(currentTravelerTable, legacyTravelerApiUrl);
+    }
   }
   // binding events
   filterEvent();

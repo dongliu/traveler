@@ -13,7 +13,7 @@ For detailed deployment instructions please see https://confluence.aps.anl.gov/d
     # Install all of the support software
     make support
     # Automate configuration of the application
-    make dev-config
+    make default-config
     # Navigate to configuration directory
     cd ../etc/traveler-config
     # End of output from make dev-config has a list of file(s) that need to be edited
@@ -27,7 +27,7 @@ For detailed deployment instructions please see https://confluence.aps.anl.gov/d
     # It is good to start the project using node to make sure everything works properly.
     source setup.sh
     node app.js
-    # When everything works, staret traveler as daemon
+    # When everything works, start traveler as daemon
     ./etc/init.d/traveler-webapp start
     # Check progress of traveler-webapp
     ./etc/init.d/traveler-webapp status

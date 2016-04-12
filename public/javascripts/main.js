@@ -223,8 +223,8 @@ $(function () {
     // bAutoWidth: false,
     aoColumns: formAoColumns,
     aaSorting: [
-      [4, 'desc'],
-      [5, 'desc']
+      [5, 'desc'],
+      [4, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -406,49 +406,49 @@ $(function () {
   };
 
   $('#form-travel').click(function () {
-    createTraveler('Create travelers from the following', formTable, 'form', function () {
-      travelFromModal();
+    createTraveler('Create ' + terminology.traveler + 's from the following', formTable, terminology.form, function () {
+      travelFromModal()
     });
   });
 
   $('#archive-traveler').click(function () {
-    createTraveler('Archive the following', travelerTable, 'traveler', function () {
+    createTraveler('Archive the following', travelerTable, terminology.traveler, function(){
       archiveTravelerFromModal(true);
     });
   });
 
   $('#clone-traveler').click(function () {
-    createTraveler('Clone the following', travelerTable, 'traveler', function () {
+    createTraveler('Clone the following', travelerTable, terminology.traveler, function(){
       cloneTravelerFromModal();
     });
   });
 
   $('#share-clone-traveler').click(function () {
-    createTraveler('Clone the following', sharedTravelerTable, 'traveler', function () {
+    createTraveler('Clone the following', sharedTravelerTable, terminology.traveler, function(){
       cloneTravelerFromModal();
     });
   });
 
   $('#group-share-clone-traveler').click(function () {
-    createTraveler('Clone the following', groupSharedTravelerTable, 'traveler', function () {
+    createTraveler('Clone the following', groupSharedTravelerTable, terminology.traveler, function(){
       cloneTravelerFromModal();
     });
   });
 
   $('#dearchive-traveler').click(function () {
-    createTraveler('De-archive the following', archivedTravelerTable, 'traveler', function () {
+    createTraveler('De-archive the following', archivedTravelerTable, terminology.traveler, function(){
       archiveTravelerFromModal(false);
     });
   });
 
   $('#clone-all-form').click(function () {
-    createTraveler('Clone the following', allformTable, 'form', function () {
+    createTraveler('Clone the following', allformTable, terminology.form, function(){
       cloneFormFromModal();
     });
   });
 
   $('#clone-form').click(function () {
-    createTraveler('Clone the following', formTable, 'form', function () {
+    createTraveler('Clone the following', formTable, terminology.form, function(){
       cloneFormFromModal();
     });
   });

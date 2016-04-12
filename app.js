@@ -1,10 +1,8 @@
 /* jslint es5: true */
 
 var config = require('./config/config.js');
-config.loadPaths();
+config.load();
 var express = require('express');
-var routes = require('./routes');
-var about = require('./routes/about');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
@@ -14,10 +12,12 @@ var rotator = require('file-stream-rotator');
 var mongoose = require('mongoose');
 
 var configPath = config.configPath;
+var apiSettings = config.api;
+var mongoConfig = config.mongo;
+var appSettings = config.app;
 
 // Load MongoDB object modeling tool
 mongoose.connection.close();
-
 // Load MongoDB models
 require('./model/user.js');
 require('./model/user.js');
@@ -27,7 +27,6 @@ require('./model/traveler.js');
 require('./model/traveler.js');
 
 //Connect to mongo database
-var mongoConfig = require('./' + configPath + '/mongo.json');
 var mongoAddress = mongoConfig.server_address + ':' + mongoConfig.server_port + '/' + mongoConfig.traveler_db;
 var mongoOptions = {
   db: {
@@ -69,8 +68,11 @@ var auth = require('./lib/auth');
 
 var uploadDir = './' + config.uploadPath + '/';
 
-/* Web Application */
+// api and web app
+var api = express();
 var app = express();
+
+/* Configure Web Application */
 app.enable('strict routing');
 if (app.get('env') === 'production') {
   var access_logfile = rotator.getStream({
@@ -108,7 +110,7 @@ app.configure(function () {
     dest: uploadDir,
     limits: {
       files: 1,
-      fileSize: 5 * 1024 * 1024
+      fileSize: 10 * 1024 * 1024
     }
   }));
   app.use(express.json());
@@ -120,6 +122,7 @@ app.configure(function () {
 app.configure('development', function () {
   app.use(express.errorHandler());
 });
+var routes = require('./routes');
 
 require('./routes/form')(app);
 require('./routes/traveler')(app);
@@ -127,7 +130,8 @@ require('./routes/user')(app);
 require('./routes/profile')(app);
 require('./routes/device')(app);
 require('./routes/ldaplogin')(app);
-app.get('/about', about.index);
+require('./routes/about')(app);
+
 app.get('/api', function (req, res) {
   res.render('api', {
     prefix: req.proxied ? req.proxied_prefix : ''
@@ -150,7 +154,6 @@ app.get('/apis', function (req, res) {
 });
 
 // Start application using settings
-var appSettings = require('./' + configPath + '/app.json');
 var appPort = appSettings.app_port;
 var server;
 if (appSettings.ssl_key !== undefined) {
@@ -158,7 +161,6 @@ if (appSettings.ssl_key !== undefined) {
     key: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_key),
     cert: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_cert)
   };
-
   server = https.createServer(appCredentials, app).listen(appPort, function () {
     console.log('Express server listening on ssl port ' + appPort);
   });
@@ -168,9 +170,7 @@ if (appSettings.ssl_key !== undefined) {
   });
 }
 
-/* REST API */
-var api = express();
-var apiSettings = require('./' + configPath + '/api.json');
+/* Configure REST API */
 var apiPort = apiSettings.app_port;
 api.enable('strict routing');
 api.configure(function () {
@@ -178,6 +178,7 @@ api.configure(function () {
   api.use(express.logger('dev'));
 
   // api.use(express.logger({stream: access_logfile}));
+  api.use(express.urlencoded());
   api.use(auth.basicAuth);
   api.use(express.compress());
   api.use(api.router);
@@ -186,7 +187,6 @@ api.configure(function () {
 require('./routes/api')(api);
 
 //Start Api using settings
-
 var apiserver;
 if (apiSettings.ssl_key !== undefined) {
   var apiCredentials = {
