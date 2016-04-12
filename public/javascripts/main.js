@@ -223,8 +223,8 @@ $(function () {
     // bAutoWidth: false,
     aoColumns: formAoColumns,
     aaSorting: [
-      [4, 'desc'],
-      [5, 'desc']
+      [5, 'desc'],
+      [4, 'desc']
     ],
     sDom: sDomNoTools
   });

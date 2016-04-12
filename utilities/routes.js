@@ -47,6 +47,23 @@ function filterBody(strings, findAll) {
   };
 }
 
+function filterBodyAll(strings) {
+  return function (req, res, next) {
+    var i;
+    var miss = false;
+    for (i = 0; i < strings.length; i += 1) {
+      if (!req.body.hasOwnProperty(strings[i])) {
+        miss = true;
+        break;
+      }
+    }
+    if (miss) {
+      return res.send(400, 'cannot find required information in body');
+    }
+    next();
+  };
+}
+
 function checkUserRole(req, role) {
   if (req.session.roles !== undefined && req.session.roles.indexOf(role) !== -1) {
     return true;
@@ -140,6 +157,7 @@ var traveler = {
 
 module.exports = {
   filterBody: filterBody,
+  filterBodyAll: filterBodyAll,
   checkUserRole: checkUserRole,
   getRenderObject: getRenderObject,
   getDeviceValue: getDeviceValue,
