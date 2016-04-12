@@ -409,37 +409,86 @@ module.exports = function (app) {
     res.json(200, req[req.params.id]);
   });
 
+  function sendMerged(t, p, res, merged, workingPackage) {
+    if (t && p) {
+      if (workingPackage.isModified()) {
+        workingPackage.updateProgress();
+      }
+      res.json(200, merged);
+    }
+  }
+
   app.get('/workingpackages/:id/works/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), function (req, res) {
-    var works = req[req.params.id].works;
-    //TODO: work might be package
-    var tids = works.map(function (w) {
-      return w._id;
+    var workingPackage = req[req.params.id];
+    var works = workingPackage.works;
+
+    var tids = [];
+    var pids = [];
+
+    works.forEach(function (w) {
+      if (w.refType === 'traveler') {
+        tids.push(w._id);
+      } else {
+        pids.push(w._id);
+      }
     });
 
-    if (tids.length === 0) {
+    if (tids.length + pids.length === 0) {
       return res.json(200, []);
     }
 
     var merged = [];
 
-    Traveler.find({
-      _id: {
-        $in: tids
-      }
-    }).lean().exec(function (err, travelers) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      travelers.forEach(function (t) {
-        var picked = underscore.pick(t, 'devices', 'locations', 'manPower', 'status', 'createdBy', 'owner');
-        // works has its own toJSON, therefore need to merge only the plain
-        // object
-        underscore.extend(picked, works.id(t._id).toJSON());
-        merged.push(picked);
+    var tFinished = false;
+    var pFinished = false;
+
+    if (tids.length === 0) {
+      tFinished = true;
+    }
+
+    if (pids.length === 0) {
+      pFinished = true;
+    }
+
+    if (tids.length !== 0) {
+      Traveler.find({
+        _id: {
+          $in: tids
+        }
+      }, 'devices locations manPower status createdBy owner finishedInput totalInput').lean().exec(function (err, travelers) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+        travelers.forEach(function (t) {
+          workingPackage.updateWorkProgress(t);
+
+          // works has its own toJSON, therefore need to merge only the plain
+          // object
+          underscore.extend(t, works.id(t._id).toJSON());
+          merged.push(t);
+        });
+        tFinished = true;
+        // check if ready to respond
+        sendMerged(tFinished, pFinished, res, merged, workingPackage);
       });
-      res.json(200, merged);
-    });
+    }
+
+    if (pids.length !== 0) {
+      WorkingPackage.find({
+        _id: {
+          $in: pids
+        }
+      }, 'tags status createdBy owner finishedValue inProgressValue totalValue').lean().exec(function (err, workingPackages) {
+        workingPackages.forEach(function (p) {
+          workingPackage.updateWorkProgress(p);
+          underscore.extend(p, works.id(p._id).toJSON());
+          merged.push(p);
+        });
+        pFinished = true;
+        sendMerged(tFinished, pFinished, res, merged, workingPackage);
+      });
+    }
   });
 
   function addWork(p, req, res) {
@@ -504,13 +553,12 @@ module.exports = function (app) {
             } else {
               newWork.inProgress = item.finishedInput / item.totalInput;
             }
-          } else {
+          } else if (item.totalValue === 0) {
             newWork.finished = 0;
-            if (item.totalValue === 0) {
-              newWork.inProgress = 1;
-            } else {
-              newWork.inProgress = item.finishedValue / item.totalValue;
-            }
+            newWork.inProgress = 1;
+          } else {
+            newWork.finished = item.finishedValue / item.totalValue;
+            newWork.inProgress = item.inProgressValue / item.totalValue;
           }
           works.push(newWork);
           added.push(item.id);
@@ -524,7 +572,7 @@ module.exports = function (app) {
       p.updatedOn = Date.now();
       p.updatedBy = req.session.userid;
 
-      // update the totalValue, finishedValue, and finishedValye
+      // update the totalValue, finishedValue, and finishedValue
       p.updateProgress(function (saveErr, newPackage) {
         if (saveErr) {
           console.error(saveErr);
