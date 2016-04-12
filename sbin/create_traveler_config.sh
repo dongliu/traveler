@@ -182,6 +182,11 @@ if [ -f "$TRAVELER_ROOT_DIR/config/ui_change.json" ]; then
   cp "$TRAVELER_ROOT_DIR/config/ui_change.json" ui.json
 fi
 
+if [ -f "$TRAVELER_ROOT_DIR/config/alias_change.json" ]; then
+  echo -e "\nThe alias configuration includes group naming configuration"
+  echo -e "The default configuration will be copied"
+  cp "$TRAVELER_ROOT_DIR/config/alias_change.json" alias.json
+fi
 
 echo -e "\nAll of the traveler configuration is located in $TRAVELER_CONFIG_DIR"
 

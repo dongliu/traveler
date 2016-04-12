@@ -1,28 +1,18 @@
-/*global deviceTravelerLinkColumn: false, serialColumn: false, typeColumn: false, descriptionColumn: false, modifiedByColumn: false, modifiedOnColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, filterEvent: false, prefix: false*/
+/*global deviceTravelerLinkColumn: false, serialColumn: false, typeColumn: false, descriptionColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, filterEvent: false, prefix: false*/
 $(function () {
-  var aoColumns = [deviceTravelerLinkColumn, serialColumn, typeColumn, descriptionColumn, modifiedByColumn, modifiedOnColumn];
+  var aoColumns = [deviceTravelerLinkColumn, serialColumn, typeColumn, descriptionColumn];
   fnAddFilterFoot('#device-table', aoColumns);
-  var deviceTable = $('#device-table').dataTable({
-    aaData: [],
+  $('#device-table').dataTable({
+    sAjaxSource: prefix + '/devices/json',
+    sAjaxDataProp: '',
     aoColumns: aoColumns,
-    aaSorting: [
-      [5, 'desc']
-    ],
+    bProcessing: true,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
     sDom: sDom,
     oTableTools: oTableTools
   });
 
   filterEvent();
-
-  $.ajax({
-    url: prefix + '/devices/json',
-    type: 'GET',
-    dataType: 'json'
-  }).done(function (json) {
-    deviceTable.fnClearTable();
-    deviceTable.fnAddData(json);
-    deviceTable.fnDraw();
-  }).fail(function (jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for device information.</div>');
-  }).always();
 });
