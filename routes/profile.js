@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var auth = require('../lib/auth');
+var config = require('../config/config.js');
+var routesUtilities = require('../utilities/routes.js');
 
 module.exports = function (app) {
   app.get('/profile', auth.ensureAuthenticated, function (req, res) {
@@ -12,10 +14,9 @@ module.exports = function (app) {
         console.error(err);
         return res.send(500, 'something is wrong with the DB.');
       }
-      return res.render('profile', {
-        user: user,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+      return res.render('profile', routesUtilities.getRenderObject(req,{
+        user: user
+      }));
     });
   });
 

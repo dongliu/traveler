@@ -2,27 +2,46 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB Traveler :: traveler :: #{traveler._id}
+  title FRIB Traveler - traveler - #{traveler._id} - form manager
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
   script.
-    var travelerStatus = !{JSON.stringify(traveler.status)};
-    var finishedInput = !{JSON.stringify(traveler.finishedInput)};
     var prefix = '!{prefix}';
-  .container
+    var traveler = !{JSON.stringify(traveler)};
+  .container-fluid
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
         h3#modalLabel
       .modal-body
       .modal-footer
-    .row
-      .span9
+    .btn-toolbar
+      .btn-group
+        button.btn.btn-primary#use
+          i.fa.fa-eject.fa-lg
+          = ' '
+          span Use selected form
+      .btn-group
+        button.btn.btn-warning#set-alias
+          i.fa.fa-edit.fa-lg
+          = ' '
+          span Set alias
+    .row-fluid
+      .span4
+        h3 Active form
+        table#active-form.table.table-bordered.table-hover
+        h3 Used forms
+        table#used-forms.table.table-bordered.table-hover
+        h3 Available forms
+        table#available-forms.table.table-bordered.table-hover
+      .span6
+        h3 Traveler preview with the selected form
         h3 Traveler title:  #{traveler.title}
         if (locals.traveler.status !== undefined)
           h4 Status:
@@ -45,10 +64,7 @@ block content
               default
                 = ' '
         if (locals.traveler.devices && traveler.devices.length > 0)
-          h4 Devices: !{traveler.devices}
-        if (locals.traveler.status !== undefined && locals.traveler.status == 1)
-          .btn-group
-            button.btn.btn-primary#complete Submit for completion
+          h4 Devices: #{traveler.devices}
         if (locals.traveler.status !== undefined && locals.traveler.status > 0)
           .btn-group(data-toggle='buttons-radio')
             button.btn.btn-info#show-validation Show validation
@@ -80,21 +96,16 @@ block content
               span.time #{traveler.updatedOn}
         br
         form.form-horizontal#form
-          if (traveler.forms.length === 1)
-            != traveler.forms[0].html
-          else if (traveler.forms.id(traveler.activeForm))
-            != traveler.forms.id(traveler.activeForm).html
-          else
-            != ''
-      .span3.sidebar
+      .span2.sidebar
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
   script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/traveler.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/traveler-form-loader.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/form-manager.js')
