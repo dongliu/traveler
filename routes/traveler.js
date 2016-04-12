@@ -832,10 +832,9 @@ module.exports = function (app) {
       if (!canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
-      res.render('form-manager', {
-        traveler: doc,
-        prefix: req.proxied ? req.proxied_prefix : ''
-      });
+      res.render('form-manager', routesUtilities.getRenderObject(req, {
+        traveler: doc
+      }));
     });
   });
 
