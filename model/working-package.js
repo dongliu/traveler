@@ -14,6 +14,7 @@ var work = new Schema({
   alias: String,
   refType: {
     type: String,
+    required: true,
     enum: ['traveler', 'package']
   },
   addedOn: Date,
@@ -115,6 +116,31 @@ var workingPackage = new Schema({
     default: false
   }
 });
+
+workingPackage.methods.updateWorkProgress = function (spec) {
+  var w = this.works.id(spec._id);
+  if (!w) {
+    return;
+  }
+  if (spec.status === 2) {
+    w.finished = 1;
+    w.inProgress = 0;
+  } else if (w.refType === 'traveler') {
+    work.finished = 0;
+    if (spec.totalInput === 0) {
+      w.inProgress = 1;
+    } else {
+      w.inProgress = spec.finishedInput / spec.totalInput;
+    }
+  } else if (spec.totalValue === 0) {
+    w.finished = 0;
+    spec.inProgress = 1;
+  } else {
+    w.finished = spec.finishedValue / spec.totalValue;
+    w.inProgress = spec.inProgressValue / spec.totalValue;
+  }
+};
+
 
 workingPackage.methods.updateProgress = function (cb) {
   var works = this.works;
