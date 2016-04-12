@@ -11,6 +11,7 @@ var fs = require('fs');
 var auth = require('../lib/auth');
 var authConfig = config.auth;
 var mongoose = require('mongoose');
+var path = require('path');
 var underscore = require('underscore');
 var cheer = require('cheerio');
 var sanitize = require('sanitize-caja');
@@ -130,42 +131,7 @@ function cloneTraveler(source, req, res) {
   });
 }
 
-function filterBody(strings) {
-  return function (req, res, next) {
-    var k, found = false;
-    for (k in req.body) {
-      if (req.body.hasOwnProperty(k)) {
-        if (strings.indexOf(k) !== -1) {
-          found = true;
-        } else {
-          req.body[k] = null;
-        }
-      }
-    }
-    if (found) {
-      next();
-    } else {
-      return res.send(400, 'cannot find required information in body');
-    }
-  };
-}
 
-function filterBodyAll(strings) {
-  return function (req, res, next) {
-    var i;
-    var miss = false;
-    for (i = 0; i < strings.length; i += 1) {
-      if (!req.body.hasOwnProperty(strings[i])) {
-        miss = true;
-        break;
-      }
-    }
-    if (miss) {
-      return res.send(400, 'cannot find required information in body');
-    }
-    next();
-  };
-}
 
 function getSharedWith(sharedWith, name) {
   var i;
@@ -839,7 +805,7 @@ module.exports = function (app) {
   });
 
   // use the form in the request as the active form
-  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, filterBodyAll(['html', '_id', 'title']), function addForm(req, res) {
+  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, routesUtilities.filterBodyAll(['html', '_id', 'title']), function addForm(req, res) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
@@ -1332,7 +1298,7 @@ module.exports = function (app) {
       if (data.inputType === 'file') {
         fs.exists(data.file.path, function (exists) {
           if (exists) {
-            return res.sendfile(data.file.path);
+            return res.sendfile(path.resolve(data.file.path));
           }
           return res.send(410, 'gone');
         });
