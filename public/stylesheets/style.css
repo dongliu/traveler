@@ -185,7 +185,7 @@ text {
 }
 
 /*modal scroll*/
-.modal-body {
+.modal-body-scroll {
     max-height: calc(100vh - 212px);
     overflow-y: auto;
 }
