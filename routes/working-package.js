@@ -409,6 +409,44 @@ module.exports = function (app) {
     res.json(200, req[req.params.id]);
   });
 
+  app.put('/workingpackages/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
+    var p = req[req.params.id];
+    var s = req.body.status;
+
+    if ([1, 2].indexOf(s) === -1) {
+      return res.send(400, 'invalid status');
+    }
+
+    if (p.status === s) {
+      return res.send(204);
+    }
+
+    if (s === 1) {
+      if ([0, 2].indexOf(p.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        p.status = s;
+      }
+    } else if (s === 2) {
+      if ([1].indexOf(p.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        p.status = s;
+      }
+    } else {
+      return res.send(400, 'invalid status');
+    }
+
+    p.save(function (err) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.send(200, 'status updated to ' + s);
+    });
+
+  });
+
   function sendMerged(t, p, res, merged, workingPackage) {
     if (t && p) {
       if (workingPackage.isModified()) {

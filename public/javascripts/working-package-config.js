@@ -6,14 +6,33 @@
 
 function cleanTagForm() {
   $('#new-tag').closest('li').remove();
-  $('#add-tag').removeAttr('disabled');
+  $('#add-tag').prop('disabled', false);
+}
+
+function setStatus(s) {
+  $.ajax({
+    url: './status',
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      status: s
+    })
+  }).done(function () {
+    // TODO: avoid refresh the whole page
+    document.location.href = window.location.pathname;
+  }).fail(function (jqXHR) {
+    if (jqXHR.status !== 401) {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    }
+  }).always();
 }
 
 function tagEvents() {
   $('#add-tag').click(function (e) {
     e.preventDefault();
     // add an input and a button add
-    $('#add-tag').attr('disabled', true);
+    $('#add-tag').prop('disabled', true);
     $('#tags').append('<li><form class="form-inline"><input id="new-tag" type="text"> <button id="confirm" class="btn btn-primary">Confirm</button> <button id="cancel" class="btn">Cancel</button></form></li>');
     $('#cancel').click(function (cancelE) {
       cancelE.preventDefault();
@@ -169,6 +188,18 @@ $(function () {
         }
       });
     });
+  });
+
+  $('#active').click(function () {
+    setStatus(1);
+  });
+
+  $('#complete').click(function () {
+    setStatus(2);
+  });
+
+  $('#more').click(function () {
+    setStatus(1);
   });
 
   editEvents(initValue);
