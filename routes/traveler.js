@@ -573,6 +573,10 @@ module.exports = function (app) {
       return res.send(400, 'invalid status');
     }
 
+    if (doc.status === req.body.status) {
+      return res.send(204);
+    }
+
     if (req.body.status !== 1.5 && !reqUtils.isOwner(req, doc)) {
       return res.send(403, 'You are not authorized to change the status. ');
     }
