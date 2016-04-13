@@ -486,7 +486,8 @@ function progressBar(active, finished, inProgress) {
   return bar[0].outerHTML;
 }
 
-var progressColumn = {
+
+var travelerProgressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
   sType: 'numeric',
@@ -498,6 +499,8 @@ var progressColumn = {
       return progressBar(false, 100, 0);
     }
 
+    var inProgress;
+
     if (!source.hasOwnProperty('totalInput')) {
       if (type === 'sort') {
         return 0;
@@ -505,7 +508,7 @@ var progressColumn = {
       return 'unknown';
     }
 
-    if (source.totalInput === 0 || source.totalValue === 0) {
+    if (source.totalInput === 0) {
       if (type === 'sort') {
         return 0;
       }
@@ -516,21 +519,40 @@ var progressColumn = {
       }
     }
 
-    if (!source.hasOwnProperty('finished') || !source.hasOwnProperty('finishedInput')) {
+    if (!source.hasOwnProperty('finishedInput')) {
       if (type === 'sort') {
         return 0;
       }
       return 'unknown';
     }
 
-    var inProgress;
+    inProgress = Math.floor(source.finishedInput / source.totalInput * 100);
 
-    if (source.hasOwnProperty('finishedInput')) {
-      inProgress = Math.floor(source.finishedInput / source.totalInput * 100);
+    if (source.status === 1) {
+      return progressBar(true, 0, inProgress);
     } else {
-      inProgress = source.inProgress;
+      return progressBar(false, 0, inProgress);
     }
 
+    return 'unknown';
+  }
+
+};
+
+
+var workProgressColumn = {
+  sTitle: 'Estimated progress',
+  bSortable: true,
+  sType: 'numeric',
+  mData: function (source, type) {
+    if (source.status === 2) {
+      if (type === 'sort') {
+        return 1;
+      }
+      return progressBar(false, 100, 0);
+    }
+
+    var inProgress = source.inProgress;
     var finished = 0;
 
     if (source.hasOwnProperty('finished')) {
@@ -545,7 +567,9 @@ var progressColumn = {
     } else {
       return progressBar(false, finished, inProgress);
     }
+    return 'unknown';
   }
+
 };
 
 var packageProgressColumn = {
@@ -553,29 +577,36 @@ var packageProgressColumn = {
   bSortable: true,
   sType: 'numeric',
   mData: function (source, type, val) {
-    if (!source.hasOwnProperty('works')) {
+    if (source.status === 2) {
+      if (type === 'sort') {
+        return 1;
+      }
+      return progressBar(false, 100, 0);
+    }
+
+    if (source.totalValue === 0) {
       if (type === 'sort') {
         return 0;
       }
-      return 'unknown';
-    }
-    if (source.works.length === 0) {
-      if (type === 'sort') {
-        return 0;
+      if (source.status === 1) {
+        return progressBar(true, 100, 0);
+      } else {
+        return progressBar(false, 100, 0);
       }
-      return progressBar(100, 0, 0);
     }
-    if (!source.hasOwnProperty('finishedWorks')) {
-      if (type === 'sort') {
-        return 0;
-      }
-      return 'unknown';
-    }
-    var percentage = Math.floor((source.finishedWorks / source.works.length) * 100);
+
+    var inProgress = source.inProgressValue / source.totalValue;
+    var finished = source.finishedValue / source.totalValue;
+
     if (type === 'sort') {
-      return percentage;
+      return finished + inProgress;
     }
-    return progressBar(percentage, source.finishedWorks, source.works.length);
+    if (source.status === 1) {
+      return progressBar(true, finished, inProgress);
+    } else {
+      return progressBar(false, finished, inProgress);
+    }
+    return 'unknown';
   }
 };
 
@@ -787,14 +818,15 @@ var priorityColumn = {
 
 var valueColumn = {
   sTitle: 'Value',
-  mData: 'value',
   sClass: 'editable',
   bFilter: true,
-  mRender: function (data, type) {
-    if (type === 'sort' || type === 'filter') {
-      return data;
+  mData: function (source, type) {
+    if (source.refType === 'package') {
+      return source.value;
+    } else if (type === 'sort' || type === 'filter') {
+      return source.value;
     } else {
-      return '<input type="number" class="input-mini" value="' + data + '">';
+      return '<input type="number" class="input-mini" value="' + source.value + '">';
     }
   }
 };
