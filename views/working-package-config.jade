@@ -35,6 +35,25 @@ block content
       p Updated by #{package.updatedBy} on
         = ' '
         span.time #{package.updatedOn}
+    h4 Status:
+      = ' '
+      case package.status
+        when 0
+          | new
+        when 1
+          | active
+        when 2
+          | completed
+    case package.status
+      when 0
+        .btn-group
+          button.btn.btn-primary#active(data-toggle='tooltip', title='change the status') Activate
+      when 1
+        .btn-group
+          button.btn.btn-primary#complete(data-toggle='tooltip', title='change the status') Complete
+      when 2
+        .btn-group
+          button.btn.btn-primary#more(data-toggle='tooltip', title='change the status') More work
     h4 Tags
     ul#tags
       each tag in package.tags
