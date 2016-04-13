@@ -75,11 +75,13 @@ var traveler = new Schema({
   notes: [ObjectId],
   totalInput: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   finishedInput: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   archived: {
     type: Boolean,
