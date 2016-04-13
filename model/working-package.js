@@ -22,11 +22,13 @@ var work = new Schema({
   status: Number,
   finished: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   inProgress: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   priority: {
     type: Number,
@@ -101,15 +103,18 @@ var workingPackage = new Schema({
   works: [work],
   finishedValue: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   inProgressValue: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   totalValue: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   archived: {
     type: Boolean,
