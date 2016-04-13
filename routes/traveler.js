@@ -569,6 +569,10 @@ module.exports = function (app) {
   app.put('/travelers/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
     var doc = req[req.params.id];
 
+    if ([1, 1.5, 2, 3].indexOf(req.body.status) === -1) {
+      return res.send(400, 'invalid status');
+    }
+
     if (req.body.status !== 1.5 && !reqUtils.isOwner(req, doc)) {
       return res.send(403, 'You are not authorized to change the status. ');
     }
