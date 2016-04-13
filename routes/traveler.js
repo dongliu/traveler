@@ -620,7 +620,7 @@ module.exports = function (app) {
         console.error(saveErr);
         return res.send(500, saveErr.message);
       }
-      return res.send(204);
+      return res.send(200, 'status updated to ' + req.body.status);
     });
   });
 
