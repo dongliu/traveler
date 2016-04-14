@@ -402,7 +402,7 @@ module.exports = function (app) {
   });
 
   app.get('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), function (req, res) {
-    res.send('under development');
+    res.render('working-package', {package: req[req.params.id]});
   });
 
   app.get('/workingpackages/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), reqUtils.exist('id', WorkingPackage), function (req, res) {
