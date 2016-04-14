@@ -176,7 +176,7 @@ module.exports = function (app) {
     }
 
     if (access === 1) {
-      return res.render('builder', {
+      return res.render('form-builder', {
         id: req.params.id,
         title: form.title,
         html: form.html,
@@ -236,7 +236,7 @@ module.exports = function (app) {
 
   app.get('/forms/:id/preview', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
     var form = req[req.params.id];
-    return res.render('viewer', {
+    return res.render('form-viewer', {
       id: req.params.id,
       title: form.title,
       html: form.html,

@@ -370,7 +370,7 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/view', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), function (req, res) {
-    return res.render('travelerviewer', {
+    return res.render('traveler-viewer', {
       traveler: req[req.params.id]
     });
   });
