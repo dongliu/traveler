@@ -471,13 +471,6 @@ var deviceTravelerLinkColumn = {
   bSortable: false
 };
 
-// function progressBar(percentage, finished, total) {
-//   if (finished === undefined) {
-//     return '<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + percentage + '%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">completed</span></div>';
-//   }
-//   return '<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar" style="width:' + percentage + '%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">' + finished + '/' + total + '</span></div>';
-// }
-
 function progressBar(active, finished, inProgress) {
   var bar = $('<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div></div>');
   if (active) {
