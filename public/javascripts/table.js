@@ -556,9 +556,9 @@ var workProgressColumn = {
       return finished + inProgress;
     }
     if (source.status === 1) {
-      return progressBar(true, finished, inProgress);
+      return progressBar(true, finished * 100, inProgress * 100);
     } else {
-      return progressBar(false, finished, inProgress);
+      return progressBar(false, finished * 100, inProgress * 100);
     }
     return 'unknown';
   }
@@ -595,9 +595,9 @@ var packageProgressColumn = {
       return finished + inProgress;
     }
     if (source.status === 1) {
-      return progressBar(true, finished, inProgress);
+      return progressBar(true, finished * 100, inProgress * 100);
     } else {
-      return progressBar(false, finished, inProgress);
+      return progressBar(false, finished * 100, inProgress * 100);
     }
     return 'unknown';
   }
