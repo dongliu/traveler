@@ -272,35 +272,6 @@ function addGroupFromAD(req, res, traveler) {
   });
 }
 
-function canWrite(req, doc) {
-  if (doc.createdBy === req.session.userid) {
-    return true;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
-    return true;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function canWriteActive(req, doc) {
-  if (canWrite(req, doc)) {
-    return true;
-  } else if (routesUtilities.checkUserRole(req, 'write_active_travelers')) {
-    return true;
-  }
-
-
-  return false;
-}
-
 function canRead(req, doc) {
   if (doc.createdBy === req.session.userid) {
     return true;
@@ -662,7 +633,7 @@ module.exports = function (app) {
           if (traveler.status === 0) {
             return res.send(400, 'You cannot clone an initialized traveler.');
           }
-          if (canWrite(req, traveler)) {
+          if (routesUtilities.traveler.canWrite(req, traveler)) {
             cloneTraveler(traveler, req, res);
           } else {
             return res.send(400, 'You cannot clone a traveler that you cannot write.');
@@ -683,7 +654,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (canWriteActive(req, doc)) {
+      if (routesUtilities.traveler.canWriteActive(req, doc)) {
         routesUtilities.getDeviceValue(doc.devices).then(function (value) {
           doc.devices = value;
           return res.render('traveler', routesUtilities.getRenderObject(req, {
@@ -771,7 +742,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (canWrite(req, doc)) {
+      if (routesUtilities.traveler.canWrite(req, doc)) {
         routesUtilities.getDeviceValue(doc.devices).then(function (value) {
           doc.devices = value;
           return res.render('config', routesUtilities.getRenderObject(req, {
@@ -795,7 +766,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!routesUtilities.traveler.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       res.render('form-manager', routesUtilities.getRenderObject(req, {
@@ -814,7 +785,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!routesUtilities.traveler.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
 
@@ -851,7 +822,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'traveler ' + req.params.id + ' gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!routesUtilities.traveler.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       var formid = req.body.formid;
@@ -890,7 +861,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'traveler ' + req.params.id + ' gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!routesUtilities.traveler.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       var form = doc.forms.id(req.params.fid);
@@ -920,7 +891,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!routesUtilities.traveler.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       for (k in req.body) {
@@ -950,56 +921,16 @@ module.exports = function (app) {
         return res.send(410, 'gone');
       }
 
-      if (req.body.status === 1.5) {
-        if (!canWriteActive(req, doc)) {
-          return res.send(403, 'You are not authorized to access this resource');
-        }
-      } else {
-        if (doc.createdBy !== req.session.userid) {
-          return res.send(403, 'You are not authorized to access this resource');
-        }
-      }
-
-      if (req.body.status === 1) {
-        if ([0, 1.5, 3].indexOf(doc.status) !== -1) {
-          doc.status = 1;
-        } else {
-          return res.send(400, 'cannot start to work from the current status');
-        }
-      }
-
-      if (req.body.status === 1.5) {
-        if ([1].indexOf(doc.status) !== -1) {
-          doc.status = 1.5;
-        } else {
-          return res.send(400, 'cannot complete from the current status');
-        }
-      }
-
-      if (req.body.status === 2) {
-        if ([1, 1.5].indexOf(doc.status) !== -1) {
-          doc.status = 2;
-        } else {
-          return res.send(400, 'cannot complete from the current status');
-        }
-      }
-
-      if (req.body.status === 3) {
-        if ([1].indexOf(doc.status) !== -1) {
-          doc.status = 3;
-        } else {
-          return res.send(400, 'cannot freeze from the current status');
-        }
-      }
-
-      doc.updatedBy = req.session.userid;
-      doc.updatedOn = Date.now();
-      doc.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
-        }
-        return res.send(204);
+      routesUtilities.traveler.updateTravelerStatus(req, res, doc, req.body.status, true, function(){
+        doc.updatedBy = req.session.userid;
+        doc.updatedOn = Date.now();
+        doc.save(function (err) {
+          if (err) {
+            console.error(err);
+            return res.send(500, err.message);
+          }
+          return res.send(204);
+        });
       });
     });
   });
@@ -1013,7 +944,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!routesUtilities.traveler.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       doc.updatedBy = req.session.userid;
@@ -1038,7 +969,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!routesUtilities.traveler.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource');
       }
       doc.updatedBy = req.session.userid;
@@ -1089,7 +1020,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWriteActive(req, doc)) {
+      if (!routesUtilities.traveler.canWriteActive(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
@@ -1158,7 +1089,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWriteActive(req, doc)) {
+      if (!routesUtilities.traveler.canWriteActive(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
@@ -1201,7 +1132,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWriteActive(req, doc)) {
+      if (!routesUtilities.traveler.canWriteActive(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
@@ -1234,7 +1165,7 @@ module.exports = function (app) {
       if (!doc) {
         return res.send(410, 'gone');
       }
-      if (!canWrite(req, doc)) {
+      if (!routesUtilities.traveler.canWrite(req, doc)) {
         return res.send(403, 'You are not authorized to access this resource.');
       }
 
