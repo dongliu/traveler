@@ -33,10 +33,11 @@ block content
         each tag in package.tags
           li
             span.tag #{tag}
-      h4 Progress
+      h4 Overall progress
       .progress(class=package.status === 1 ? "active progress-striped" : undefined)
-        .bar.bar-success(style="width: #{package.finishedValue/package.totalValue*100} %;")
+        .bar.bar-success(style="width: #{package.finishedValue/package.totalValue*100}%;")
         .bar.bar-info(style="width: #{package.inProgressValue/package.totalValue*100}%;")
+    table#work-table.table.table-bordered.table-hover
 
 
 block js
@@ -50,4 +51,4 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajaxhelper.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/working-package.js')
