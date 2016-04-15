@@ -48,7 +48,7 @@ var work = new Schema({
   },
   color: {
     type: String,
-    default: '#FFFFFF'
+    default: '#3a87ad'
   }
 });
 
