@@ -614,6 +614,20 @@ var deviceColumn = {
   bFilter: true
 };
 
+var deviceTagColumn = {
+  sTitle: 'Devices/Tags',
+  sDefaultContent: '',
+  mData: function (source, type, val) {
+    if (source.tags) {
+      return source.tags.join();
+    } else if (source.devices) {
+      return source.devices.join('; ');
+    }
+    return '';
+  },
+  bFilter: true
+};
+
 function usersColumn(title, prop) {
   return {
     sTitle: title,
@@ -795,6 +809,12 @@ var sequenceColumn = {
   }
 };
 
+var sColumn = {
+  sTitle: 'S',
+  mData: 'sequence',
+  bFilter: true
+};
+
 var priorityColumn = {
   sTitle: 'Priority',
   mData: 'priority',
@@ -807,6 +827,12 @@ var priorityColumn = {
       return '<input type="number"  class="input-mini" value="' + data + '">';
     }
   }
+};
+
+var pColumn = {
+  sTitle: 'P',
+  mData: 'priority',
+  bFilter: true
 };
 
 var valueColumn = {
@@ -824,16 +850,35 @@ var valueColumn = {
   }
 };
 
+var vColumn = {
+  sTitle: 'V',
+  mData: 'value',
+  bFilter: true
+};
+
 var colorColumn = {
   sTitle: 'Color',
   mData: 'color',
-  // sClass: 'editable',
-  // bFilter: true,
   mRender: function (data, type) {
     if (type === 'sort' || type === 'filter') {
       return data;
     } else {
       return '<input type="color" class="input-mini" value="' + data + '">';
+    }
+  }
+};
+
+var cColumn = {
+  sTitle: 'C',
+  mData: 'color',
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      if (/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(data)) {
+        return '<i class="fa fa-flag fa-lg" style="color:' + data + '"></i>';
+      }
+      return '<i class="fa fa-flag fa-lg"></i>';
     }
   }
 };
