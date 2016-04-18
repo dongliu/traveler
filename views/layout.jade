@@ -20,9 +20,7 @@ html
               li
                 a(href='#{prefix}/workingpackages/') Works
               li
-                a(href='https://controls.frib.msu.edu/controlshelp/', target='_blank') Problem?
-              li
-                a(href='https://controls.frib.msu.edu/', target='_blank') Controls
+                a(href='#{prefix}/about/', target='_blank') Help
               if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
                 li
                   a(href='#{prefix}/admin/', target='_blank') Admin
