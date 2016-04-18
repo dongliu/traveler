@@ -15,9 +15,14 @@ block content
     var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
     h3 #{package.title}
+      != ' '
+      .btn-group
+        button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
     h4 #{package.description}
-    .btn-group
-      button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
+    h4 total value: #{package.totalValue} finished value: #{package.finishedValue} in-progress value: #{package.inProgressValue}
+    .progress(class=package.status === 1 ? "active progress-striped" : undefined)
+      .bar.bar-success(style="width: #{package.finishedValue/package.totalValue*100}%;")
+      .bar.bar-info(style="width: #{package.inProgressValue/package.totalValue*100}%;")
     #details.collapse.out
       h4 Owner: #{package.owner || package.createdBy}
       h4 Status:
@@ -34,10 +39,6 @@ block content
         each tag in package.tags
           li
             span.tag #{tag}
-      h4 Overall progress
-      .progress(class=package.status === 1 ? "active progress-striped" : undefined)
-        .bar.bar-success(style="width: #{package.finishedValue/package.totalValue*100}%;")
-        .bar.bar-info(style="width: #{package.inProgressValue/package.totalValue*100}%;")
     table#work-table.table.table-bordered.table-hover
 
 
