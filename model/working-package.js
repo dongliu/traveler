@@ -48,7 +48,8 @@ var work = new Schema({
   },
   color: {
     type: String,
-    default: '#3a87ad'
+    default: 'blue',
+    enum: ['green', 'yellow', 'red', 'blue', 'black']
   }
 });
 
