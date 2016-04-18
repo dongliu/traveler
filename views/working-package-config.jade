@@ -67,13 +67,15 @@ block content
       button.btn.btn-primary#add-tag
         i.fa.fa-tag.fa-lg
         | &nbsp;Add tag
+    hr
+    h3 Work list
     .btn-toolbar
       .btn-group
         button.btn.btn-primary#save
-          i.fa.fa-arrows-v.fa-lg
+          i.fa.fa-save.fa-lg
           | &nbsp;Save changes
       .btn-group
-        button.btn.btn-info#view
+        a.btn.btn-info#view(href='./', target='_blank')
           i.fa.fa-eye.fa-lg
           | &nbsp;View package
     table#work-table.table.table-bordered.table-hover
