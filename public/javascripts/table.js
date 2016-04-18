@@ -471,8 +471,9 @@ var deviceTravelerLinkColumn = {
   bSortable: false
 };
 
-function progressBar(active, finished, inProgress) {
-  var bar = $('<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div></div>');
+function progressBar(active, finished, inProgress, width) {
+  var w = width ||'100px';
+  var bar = $('<div class="progress" style="margin-bottom: 0; width: ' + w + '; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div></div>');
   if (active) {
     bar.addClass('active').addClass('progress-striped');
   }
@@ -484,6 +485,8 @@ var travelerProgressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
   sType: 'numeric',
+  bAutoWidth: false,
+  sWidth: '105px',
   mData: function (source, type) {
     if (source.status === 2) {
       if (type === 'sort') {
@@ -537,12 +540,15 @@ var workProgressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
   sType: 'numeric',
+  bAutoWidth: false,
+  sWidth: '210px',
   mData: function (source, type) {
+    var w = '200px'
     if (source.status === 2) {
       if (type === 'sort') {
         return 1;
       }
-      return progressBar(false, 100, 0);
+      return progressBar(false, 100, 0, w);
     }
 
     var inProgress = source.inProgress;
@@ -556,9 +562,9 @@ var workProgressColumn = {
       return finished + inProgress;
     }
     if (source.status === 1) {
-      return progressBar(true, finished * 100, inProgress * 100);
+      return progressBar(true, finished * 100, inProgress * 100, w);
     } else {
-      return progressBar(false, finished * 100, inProgress * 100);
+      return progressBar(false, finished * 100, inProgress * 100, w);
     }
     return 'unknown';
   }
@@ -569,6 +575,8 @@ var packageProgressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
   sType: 'numeric',
+  bAutoWidth: false,
+  sWidth: '105px',
   mData: function (source, type, val) {
     if (source.status === 2) {
       if (type === 'sort') {
