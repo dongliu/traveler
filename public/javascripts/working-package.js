@@ -29,8 +29,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: workAoColumns,
     aaSorting: [
-      [1, 'desc'],
-      [2, 'desc']
+      [1, 'asc'],
+      [2, 'asc']
     ],
     sDom: sDomNoTools
   });
