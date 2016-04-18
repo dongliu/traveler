@@ -860,10 +860,13 @@ var colorColumn = {
   sTitle: 'Color',
   mData: 'color',
   mRender: function (data, type) {
+    var snippet;
     if (type === 'sort' || type === 'filter') {
       return data;
     } else {
-      return '<input type="color" class="input-mini" value="' + data + '">';
+      snippet = $('<select name="select" class="input-small"><option value = "blue" class="text-info">blue</option><option value = "green" class="text-success">green</option><option value = "yellow" class="text-warning">yellow</option><option value = "red" class="text-error">red</option><option value = "black">black</option></select>');
+      $('option[value="' + data + '"]', snippet).attr('selected', 'selected');
+      return snippet[0].outerHTML;
     }
   }
 };
@@ -872,13 +875,26 @@ var cColumn = {
   sTitle: 'C',
   mData: 'color',
   mRender: function (data, type) {
+    var snippet = $('<i class="fa fa-flag fa-lg"></i>');
     if (type === 'sort' || type === 'filter') {
       return data;
     } else {
-      if (/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(data)) {
-        return '<i class="fa fa-flag fa-lg" style="color:' + data + '"></i>';
+      switch (data) {
+      case 'blue':
+        snippet.addClass('text-info');
+        break;
+      case 'green':
+        snippet.addClass('text-success');
+        break;
+      case 'yellow':
+        snippet.addClass('text-warning');
+        break;
+      case 'red':
+        snippet.addClass('text-error');
+        break;
+      default:
       }
-      return '<i class="fa fa-flag fa-lg"></i>';
+      return snippet[0].outerHTML;
     }
   }
 };
