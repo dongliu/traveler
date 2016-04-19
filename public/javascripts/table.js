@@ -812,7 +812,7 @@ var sequenceColumn = {
     if (type === 'sort' || type === 'filter') {
       return data;
     } else {
-      return '<input type="number" class="input-mini" value="' + data + '">';
+      return '<input type="number" min=1 step=1 class="input-mini" value="' + data + '">';
     }
   }
 };
@@ -832,7 +832,7 @@ var priorityColumn = {
     if (type === 'sort' || type === 'filter') {
       return data;
     } else {
-      return '<input type="number"  class="input-mini" value="' + data + '">';
+      return '<input type="number" min=1 step=1 class="input-mini" value="' + data + '">';
     }
   }
 };
@@ -853,7 +853,7 @@ var valueColumn = {
     } else if (type === 'sort' || type === 'filter') {
       return source.value;
     } else {
-      return '<input type="number" class="input-mini" value="' + source.value + '">';
+      return '<input type="number" min=0 class="input-mini" value="' + source.value + '">';
     }
   }
 };
