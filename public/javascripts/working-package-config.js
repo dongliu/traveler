@@ -154,6 +154,7 @@ $(function () {
     sAjaxSource: './works/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
+    bPaginate: false,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, -1],
