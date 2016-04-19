@@ -807,6 +807,7 @@ var sequenceColumn = {
   sTitle: 'Sequence',
   mData: 'sequence',
   sClass: 'editable',
+  sType: 'numeric',
   bFilter: true,
   mRender: function (data, type) {
     if (type === 'sort' || type === 'filter') {
@@ -827,6 +828,7 @@ var priorityColumn = {
   sTitle: 'Priority',
   mData: 'priority',
   sClass: 'editable',
+  sType: 'numeric',
   bFilter: true,
   mRender: function (data, type) {
     if (type === 'sort' || type === 'filter') {
@@ -846,6 +848,7 @@ var pColumn = {
 var valueColumn = {
   sTitle: 'Value',
   sClass: 'editable',
+  sType: 'numeric',
   bFilter: true,
   mData: function (source, type) {
     if (source.refType === 'package') {
