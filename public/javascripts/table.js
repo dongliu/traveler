@@ -472,7 +472,7 @@ var deviceTravelerLinkColumn = {
 };
 
 function progressBar(active, finished, inProgress, width) {
-  var w = width ||'100px';
+  var w = width || '100px';
   var bar = $('<div class="progress" style="margin-bottom: 0; width: ' + w + '; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div></div>');
   if (active) {
     bar.addClass('active').addClass('progress-striped');
@@ -645,12 +645,12 @@ function usersColumn(title, prop) {
           return '';
         }
         var names = source[prop].map(function (u) {
+          if (!u._id) {
+            return u;
+          }
           if (type === 'filter' || type === 'sort') {
             return u.username;
           } else {
-            if (!u._id) {
-              return u;
-            }
             return '<img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '">';
           }
         });
