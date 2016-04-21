@@ -870,6 +870,7 @@ var vColumn = {
 var colorColumn = {
   sTitle: 'Color',
   mData: 'color',
+  sClass: 'editable',
   mRender: function (data, type) {
     var snippet;
     if (type === 'sort' || type === 'filter') {
