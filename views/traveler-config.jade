@@ -78,24 +78,25 @@ block content
     br
     .btn-group
       button.btn.btn-primary#add Add devices
-    .btn-group
-      a.btn.btn-primary#manage(href='./formmanager', target='_blank') Manage forms
-    case traveler.status
-      when 0
-        .btn-group
-          button.btn.btn-primary#work Start to work
-      when 1
-        .btn-group
-          button.btn.btn-warning#freeze Freeze
-      when 1.5
-        .btn-group
-          button.btn.btn-primary#approve Approve completion
-        .btn-group
-          button.btn.btn-warning#more More work
-      //- when 2
-      when 3
-        .btn-group
-          button.btn.btn-primary#resume Resume
+    if (locals.isOwner != undefined && locals.isOwner)
+      .btn-group
+        a.btn.btn-primary#manage(href='./formmanager', target='_blank') Manage forms
+      case traveler.status
+        when 0
+          .btn-group
+            button.btn.btn-primary#work Start to work
+        when 1
+          .btn-group
+            button.btn.btn-warning#freeze Freeze
+        when 1.5
+          .btn-group
+            button.btn.btn-primary#approve Approve completion
+          .btn-group
+            button.btn.btn-warning#more More work
+        //- when 2
+        when 3
+          .btn-group
+            button.btn.btn-primary#resume Resume
     .btn-group
         a.btn.btn-info(href='#{prefix}/devices/', target='_blank') Browse devices
 

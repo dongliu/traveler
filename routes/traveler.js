@@ -357,6 +357,7 @@ module.exports = function (app) {
 
     if (reqUtils.canWrite(req, doc)) {
       return res.render('traveler', {
+        isOwner: reqUtils.isOwner(req, doc),
         traveler: doc,
         formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html
       });
@@ -459,8 +460,10 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+    var doc = req[req.params.id];
     return res.render('traveler-config', {
-      traveler: req[req.params.id]
+      traveler: doc,
+      isOwner: reqUtils.isOwner(req, doc)
     });
   });
 
