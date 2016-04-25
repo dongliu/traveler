@@ -47,6 +47,23 @@ function filterBody(strings, findAll) {
   };
 }
 
+function filterBodyAll(strings) {
+  return function (req, res, next) {
+    var i;
+    var miss = false;
+    for (i = 0; i < strings.length; i += 1) {
+      if (!req.body.hasOwnProperty(strings[i])) {
+        miss = true;
+        break;
+      }
+    }
+    if (miss) {
+      return res.send(400, 'cannot find required information in body');
+    }
+    next();
+  };
+}
+
 function checkUserRole(req, role) {
   if (req.session.roles !== undefined && req.session.roles.indexOf(role) !== -1) {
     return true;
@@ -135,11 +152,93 @@ var traveler = {
       finishedInput: 0
     });
     traveler.save(newTravelerCallBack);
+  },
+  updateTravelerStatus: function (req, res, travelerDoc, status, isSession, onSuccess) {
+    if (isSession) {
+      if (status === 1.5) {
+        if (!traveler.canWriteActive(req, travelerDoc)) {
+          return res.send(403, 'You are not authorized to access this resource');
+        }
+      } else {
+        if (travelerDoc.createdBy !== req.session.userid) {
+          return res.send(403, 'You are not authorized to access this resource');
+        }
+      }
+    }
+
+    if (travelerDoc.status == status) {
+      // Nothing to update
+      onSuccess();
+    } else {
+      switch (status) {
+        case 1:
+          if ([0, 1.5, 3].indexOf(travelerDoc.status) !== -1) {
+            travelerDoc.status = status;
+          } else {
+            return res.send(400, 'cannot start to work from the current status');
+          }
+          break;
+        case 1.5:
+          if ([1].indexOf(travelerDoc.status) !== -1) {
+            travelerDoc.status = status;
+          } else {
+            return res.send(400, 'cannot complete from the current status');
+          }
+          break;
+        case 2:
+          if ([1, 1.5].indexOf(travelerDoc.status) !== -1) {
+            travelerDoc.status = 2;
+          } else {
+            return res.send(400, 'cannot complete from the current status');
+          }
+          break;
+        case 3:
+          if ([1].indexOf(travelerDoc.status) !== -1) {
+            travelerDoc.status = 3;
+          } else {
+            return res.send(400, 'cannot freeze from the current status');
+          }
+      }
+      onSuccess();
+    }
+  },
+  canWriteActive: function(req, travelerDoc) {
+    if (traveler.canWrite(req, travelerDoc)) {
+      return true;
+    } else if (this.checkUserRole(req, 'write_active_travelers')) {
+      return true;
+    }
+
+    return false;
+  },
+  canWrite: function(req, travelerDoc, userid) {
+    if (req.session == undefined) {
+
+    } else {
+
+    }
+
+    if (travelerDoc.createdBy === req.session.userid) {
+      return true;
+    }
+    if (travelerDoc.sharedWith && travelerDoc.sharedWith.id(req.session.userid) && travelerDoc.sharedWith.id(req.session.userid).access === 1) {
+      return true;
+    }
+    var i;
+    if (travelerDoc.sharedGroup) {
+      for (i = 0; i < req.session.memberOf.length; i += 1) {
+        if (travelerDoc.sharedGroup.id(req.session.memberOf[i]) && travelerDoc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 };
 
 module.exports = {
   filterBody: filterBody,
+  filterBodyAll: filterBodyAll,
   checkUserRole: checkUserRole,
   getRenderObject: getRenderObject,
   getDeviceValue: getDeviceValue,

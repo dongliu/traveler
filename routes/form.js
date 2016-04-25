@@ -445,6 +445,26 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/forms/:id/json', auth.ensureAuthenticated, function (req, res) {
+    Form.findById(req.params.id, function (err, form) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      if (!form) {
+        return res.send(410, 'gone');
+      }
+
+      var access = getAccess(req, form);
+
+      if (access === -1) {
+        return res.send(403, 'you are not authorized to access this resource');
+      }
+
+      return res.json(200, form);
+    });
+  });
+
   app.post('/forms/:id/uploads/', auth.ensureAuthenticated, function (req, res) {
     Form.findById(req.params.id, function (err, doc) {
       if (err) {

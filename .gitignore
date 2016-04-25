@@ -15,9 +15,10 @@ node_modules/
 .DS_Store
 
 # special folders #
-logs/
+logs/*
+!logs/readme
 doc/
-uploads/
+uploads
 config/ad.json
 config/node.pem
 config/node.key
@@ -26,6 +27,7 @@ config/service.json
 config/auth.json
 config/mongo.json
 config/app.json
+config/alias.json
 
 # npm stuff #
 npm-debug.log*

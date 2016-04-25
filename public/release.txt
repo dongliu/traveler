@@ -1,3 +1,18 @@
+release APS-0.2
+date: April 15, 2016
+- Merged improvements and features from versions 2.4.0 & 2.4.1
+- Added API functionality for configuring a traveler.
+
+release v2.4.1
+date: March 30, 2016
+- bug fixes for form manager for traveler
+- use absolute date inside traveler pages
+- load new device list
+
+release v2.4.0
+date: Feb. 02, 2016
+- add the form manager feature, details see /about/form-manager
+
 release APS-0.1.1
 date: Dec 18, 2015
 - automated setup scripts for installation of all required support software.

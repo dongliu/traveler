@@ -153,6 +153,36 @@ module.exports = function (app) {
     });
   });
 
+  app.post('/apis/update/traveler/:id/', routesUtilities.filterBody(['userName', 'title', 'description', 'deadline', 'status'], true), checkWritePermissions, function (req, res) {
+    try {
+      var status = parseFloat(req.body.status);
+    } catch (ex) {
+      return res.json(400, {error: "Status provided was of invalid type. Expected: Float."});
+    }
+
+    Traveler.findById(req.params.id, function(travelerErr, traveler){
+      performMongoResponse(travelerErr, traveler, res, function () {
+        routesUtilities.traveler.updateTravelerStatus(req, res, traveler, status, false, function() {
+          var deadline = req.body.deadline;
+          if (deadline == "") {
+            traveler.deadline = undefined;
+          } else {
+            traveler.deadline = deadline;
+          }
+          traveler.title = req.body.title;
+          traveler.description = req.body.description;
+          traveler.updatedBy = req.body.userName;
+          traveler.updatedOn = Date.now();
+          traveler.save(function(err) {
+            performMongoResponse(err, traveler, res, function() {
+              return res.json(200, traveler);
+            })
+          });
+        });
+      });
+    });
+  });
+
   app.post('/apis/create/traveler/', routesUtilities.filterBody(['formId', 'title', 'userName', 'devices'], true), checkWritePermissions, function (req, res) {
     Form.findById(req.body.formId, function(formErr, form){
       performMongoResponse(formErr,form,res, function () {
