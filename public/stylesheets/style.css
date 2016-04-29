@@ -104,6 +104,15 @@ hr.soften {
 }
 /* FRIB style */
 
+.progress {
+  text-align:center;
+}
+
+.progress-value {
+  position:absolute;
+  right:0;
+  left:0;
+}
 
 /* section for the main page
 -------------------------------------------------- */
