@@ -471,9 +471,10 @@ var deviceTravelerLinkColumn = {
   bSortable: false
 };
 
-function progressBar(active, finished, inProgress, width) {
+function progressBar(active, finished, inProgress, text, width) {
   var w = width || '100px';
-  var bar = $('<div class="progress" style="margin-bottom: 0; width: ' + w + '; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div></div>');
+  var t = text || '';
+  var bar = $('<div class="progress" style="margin-bottom: 0; width: ' + w + '; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div><div class="progress-value">' + t + '</div></div>');
   if (active) {
     bar.addClass('active').addClass('progress-striped');
   }
@@ -524,13 +525,7 @@ var travelerProgressColumn = {
 
     inProgress = Math.floor(source.finishedInput / source.totalInput * 100);
 
-    if (source.status === 1) {
-      return progressBar(true, 0, inProgress);
-    } else {
-      return progressBar(false, 0, inProgress);
-    }
-
-    return 'unknown';
+    return progressBar(source.status === 1, 0, inProgress, '' + source.finishedInput + ' / ' + source.totalInput);
   }
 
 };
@@ -561,12 +556,8 @@ var workProgressColumn = {
     if (type === 'sort') {
       return finished + inProgress;
     }
-    if (source.status === 1) {
-      return progressBar(true, finished * 100, inProgress * 100, w);
-    } else {
-      return progressBar(false, finished * 100, inProgress * 100, w);
-    }
-    return 'unknown';
+
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(finished * source.value) + ' + ' + Math.round(inProgress * source.value) + ' / ' + source.value, w);
   }
 
 };
@@ -602,12 +593,8 @@ var packageProgressColumn = {
     if (type === 'sort') {
       return finished + inProgress;
     }
-    if (source.status === 1) {
-      return progressBar(true, finished * 100, inProgress * 100);
-    } else {
-      return progressBar(false, finished * 100, inProgress * 100);
-    }
-    return 'unknown';
+
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + source.finishedValue + ' + ' + source.inProgressValue + ' / ' + source.totalValue);
   }
 };
 

@@ -27,6 +27,7 @@ block content
     .progress(class=package.status === 1 ? "active progress-striped" : undefined)
       .bar.bar-success(style="width: #{package.finishedValue/package.totalValue*100}%;")
       .bar.bar-info(style="width: #{package.inProgressValue/package.totalValue*100}%;")
+      .progress-value #{package.finishedValue} + #{package.inProgressValue} / #{package.totalValue}
     #details.collapse.out
       h4 Owner: #{package.owner || package.createdBy}
       h4 Status:
