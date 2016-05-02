@@ -435,7 +435,7 @@ var packageLinkColumn = {
       return '<a href="' + source.url + '" target="_blank" data-toggle="tooltip" title="go to the package"><i class="fa fa-eye fa-lg"></i></a>';
     }
     if (source.hasOwnProperty('_id')) {
-      return '<a href="' + prefix + '/workingpackages/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the package"><i class="fa fa-eye fa-lg"></i></a>';
+      return '<a href="' + prefix + '/workpackages/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the package"><i class="fa fa-eye fa-lg"></i></a>';
     }
     return 'unknown';
   },
@@ -446,7 +446,7 @@ var packageConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function (data, type, full) {
-    return '<a href="' + prefix + '/workingpackages/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the package"><i class="fa fa-gear fa-lg"></i></a>';
+    return '<a href="' + prefix + '/workpackages/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the package"><i class="fa fa-gear fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -455,9 +455,9 @@ var packageShareLinkColumn = {
   sTitle: '',
   mData: function (source) {
     if (source.publicAccess >= 0) {
-      return '<a href="' + prefix + '/workingpackages/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+      return '<a href="' + prefix + '/workpackages/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
     }
-    return '<a href="' + prefix + '/workingpackages/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/workpackages/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };

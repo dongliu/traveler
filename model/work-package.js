@@ -61,7 +61,7 @@ var work = new Schema({
  */
 
 /**
- * Currently there is no status for a working package.
+ * Currently there is no status for a work package.
  * It is either active or archived.
  */
 
@@ -77,7 +77,7 @@ var work = new Schema({
  *         | 2 // completed
  */
 
-var workingPackage = new Schema({
+var workPackage = new Schema({
   title: String,
   description: String,
   status: {
@@ -123,7 +123,7 @@ var workingPackage = new Schema({
   }
 });
 
-workingPackage.methods.updateWorkProgress = function (spec) {
+workPackage.methods.updateWorkProgress = function (spec) {
   var w = this.works.id(spec._id);
   if (!w) {
     return;
@@ -148,7 +148,7 @@ workingPackage.methods.updateWorkProgress = function (spec) {
 };
 
 
-workingPackage.methods.updateProgress = function (cb) {
+workPackage.methods.updateProgress = function (cb) {
   var works = this.works;
   var totalValue = 0;
   var finishedValue = 0;
@@ -173,8 +173,8 @@ workingPackage.methods.updateProgress = function (cb) {
   }
 };
 
-var WorkingPackage = mongoose.model('WorkingPackage', workingPackage);
+var WorkPackage = mongoose.model('WorkPackage', workPackage);
 
 module.exports = {
-  WorkingPackage: WorkingPackage
+  WorkPackage: WorkPackage
 };

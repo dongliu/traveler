@@ -7,20 +7,20 @@ var underscore = require('underscore');
 var reqUtils = require('../lib/req-utils');
 var addShare = require('../lib/share').addShare;
 
-require('../model/working-package.js');
+require('../model/work-package.js');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
-var WorkingPackage = mongoose.model('WorkingPackage');
+var WorkPackage = mongoose.model('WorkPackage');
 var Traveler = mongoose.model('Traveler');
 
 module.exports = function (app) {
 
-  app.get('/workingpackages/', auth.ensureAuthenticated, function (req, res) {
-    res.render('working-packages');
+  app.get('/workpackages/', auth.ensureAuthenticated, function (req, res) {
+    res.render('work-packages');
   });
 
-  app.get('/workingpackages/json', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.find({
+  app.get('/workpackages/json', auth.ensureAuthenticated, function (req, res) {
+    WorkPackage.find({
       createdBy: req.session.userid,
       archived: {
         $ne: true
@@ -37,13 +37,13 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/workingpackages/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
-    return res.render('working-package-config', {
+  app.get('/workpackages/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), function (req, res) {
+    return res.render('work-package-config', {
       package: req[req.params.id]
     });
   });
 
-  app.post('/workingpackages/:id/tags/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['newtag']), reqUtils.sanitize('body', ['newtag']), function (req, res) {
+  app.post('/workpackages/:id/tags/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['newtag']), reqUtils.sanitize('body', ['newtag']), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
@@ -57,7 +57,7 @@ module.exports = function (app) {
     });
   });
 
-  app.delete('/workingpackages/:id/tags/:tag', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
+  app.delete('/workpackages/:id/tags/:tag', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
@@ -71,7 +71,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/workingpackages/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['title', 'description']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
+  app.put('/workpackages/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['title', 'description']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
     var k;
     var doc = req[req.params.id];
     for (k in req.body) {
@@ -91,17 +91,17 @@ module.exports = function (app) {
   });
 
 
-  app.get('/workingpackages/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+  app.get('/workpackages/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
     var pack = req[req.params.id];
     return res.render('share', {
-      type: 'Working package',
+      type: 'Work package',
       id: req.params.id,
       title: pack.title,
       access: String(pack.publicAccess)
     });
   });
 
-  app.put('/workingpackages/:id/share/public', auth.ensureAuthenticated, reqUtils.filter('body', ['access']), reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+  app.put('/workpackages/:id/share/public', auth.ensureAuthenticated, reqUtils.filter('body', ['access']), reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
     var pack = req[req.params.id];
     var access = req.body.access;
     if (['-1', '0', '1'].indexOf(access) === -1) {
@@ -121,7 +121,7 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/workingpackages/:id/share/:list/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), function (req, res) {
+  app.get('/workpackages/:id/share/:list/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), function (req, res) {
     var pack = req[req.params.id];
     if (req.params.list === 'users') {
       return res.json(200, pack.sharedWith || []);
@@ -132,7 +132,7 @@ module.exports = function (app) {
     return res.send(400, 'unknown share list.');
   });
 
-  app.post('/workingpackages/:id/share/:list/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+  app.post('/workpackages/:id/share/:list/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
     var pack = req[req.params.id];
     var share = -2;
     if (req.params.list === 'users') {
@@ -164,7 +164,7 @@ module.exports = function (app) {
     }
   });
 
-  app.put('/workingpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+  app.put('/workpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
     var pack = req[req.params.id];
     var share;
     if (req.params.list === 'users') {
@@ -214,7 +214,7 @@ module.exports = function (app) {
     });
   });
 
-  app.delete('/workingpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), function (req, res) {
+  app.delete('/workpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
     var pack = req[req.params.id];
     var share;
     if (req.params.list === 'users') {
@@ -256,11 +256,11 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/workingpackages/new', auth.ensureAuthenticated, function (req, res) {
+  app.get('/workpackages/new', auth.ensureAuthenticated, function (req, res) {
     res.render('new_package');
   });
 
-  app.post('/workingpackages/', auth.ensureAuthenticated, reqUtils.filter('body', ['title', 'description']), reqUtils.hasAll('body', ['title']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
+  app.post('/workpackages/', auth.ensureAuthenticated, reqUtils.filter('body', ['title', 'description']), reqUtils.hasAll('body', ['title']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
     var workingPackage = {};
     if (req.body.works && underscore.isArray(req.body.works)) {
       workingPackage.works = req.body.works;
@@ -274,12 +274,12 @@ module.exports = function (app) {
     }
     workingPackage.createdBy = req.session.userid;
     workingPackage.createdOn = Date.now();
-    (new WorkingPackage(workingPackage)).save(function (err, newPackage) {
+    (new WorkPackage(workingPackage)).save(function (err, newPackage) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
       }
-      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/workingpackages/' + newPackage.id + '/';
+      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/workpackages/' + newPackage.id + '/';
 
       res.set('Location', url);
       return res.send(201, 'You can access the new package at <a href="' + url + '">' + url + '</a>');
@@ -287,7 +287,7 @@ module.exports = function (app) {
   });
 
   app.get('/transferredpackages/json', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.find({
+    WorkPackage.find({
       owner: req.session.userid,
       archived: {
         $ne: true
@@ -316,7 +316,7 @@ module.exports = function (app) {
       }]
     };
 
-    WorkingPackage.find(search).lean().exec(function (err, packages) {
+    WorkPackage.find(search).lean().exec(function (err, packages) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -336,7 +336,7 @@ module.exports = function (app) {
       if (!me) {
         return res.send(400, 'cannot identify the current user');
       }
-      WorkingPackage.find({
+      WorkPackage.find({
         _id: {
           $in: me.packages
         },
@@ -374,7 +374,7 @@ module.exports = function (app) {
           }
         }
       }
-      WorkingPackage.find({
+      WorkPackage.find({
         _id: {
           $in: packageIds
         }
@@ -389,7 +389,7 @@ module.exports = function (app) {
   });
 
   app.get('/archivedpackages/json', auth.ensureAuthenticated, function (req, res) {
-    WorkingPackage.find({
+    WorkPackage.find({
       createdBy: req.session.userid,
       archived: true
     }).exec(function (err, packages) {
@@ -401,15 +401,15 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), function (req, res) {
-    res.render('working-package', {package: req[req.params.id]});
+  app.get('/workpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), function (req, res) {
+    res.render('work-package', {package: req[req.params.id]});
   });
 
-  app.get('/workingpackages/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), reqUtils.exist('id', WorkingPackage), function (req, res) {
+  app.get('/workpackages/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), reqUtils.exist('id', WorkPackage), function (req, res) {
     res.json(200, req[req.params.id]);
   });
 
-  app.put('/workingpackages/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
+  app.put('/workpackages/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
     var p = req[req.params.id];
     var s = req.body.status;
 
@@ -456,7 +456,7 @@ module.exports = function (app) {
     }
   }
 
-  app.get('/workingpackages/:id/works/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canReadMw('id'), function (req, res) {
+  app.get('/workpackages/:id/works/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), function (req, res) {
     var workingPackage = req[req.params.id];
     var works = workingPackage.works;
 
@@ -513,7 +513,7 @@ module.exports = function (app) {
     }
 
     if (pids.length !== 0) {
-      WorkingPackage.find({
+      WorkPackage.find({
         _id: {
           $in: pids
         }
@@ -545,7 +545,7 @@ module.exports = function (app) {
         return res.send(204);
       }
       type = 'package';
-      model = WorkingPackage;
+      model = WorkPackage;
     }
 
     var works = p.works;
@@ -621,12 +621,12 @@ module.exports = function (app) {
     });
   }
 
-  app.post('/workingpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['travelers', 'packages']), function (req, res) {
+  app.post('/workpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['travelers', 'packages']), function (req, res) {
     addWork(req[req.params.id], req, res);
   });
 
 
-  app.delete('/workingpackages/:id/works/:wid', auth.ensureAuthenticated, reqUtils.exist('id', WorkingPackage), reqUtils.canWriteMw('id'), function (req, res) {
+  app.delete('/workpackages/:id/works/:wid', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), function (req, res) {
     var p = req[req.params.id];
     var work = p.works.id(req.params.wid);
 
