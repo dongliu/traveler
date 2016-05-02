@@ -24,7 +24,7 @@ function transferFromModal(newOwnerName, table) {
     var that = this;
     var success = false;
     $.ajax({
-      url: '/workingpackages/' + that.id + '/owner',
+      url: '/workpackages/' + that.id + '/owner',
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -63,7 +63,7 @@ $(function () {
   var packageAoColumns = [selectColumn, packageConfigLinkColumn, packageShareLinkColumn, packageLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, packageProgressColumn];
   fnAddFilterFoot('#package-table', packageAoColumns);
   var packageTable = $('#package-table').dataTable({
-    sAjaxSource: '/workingpackages/json',
+    sAjaxSource: '/workpackages/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
     iDisplayLength: 10,

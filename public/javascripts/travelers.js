@@ -113,7 +113,7 @@ function addTravelers(travelers, packages) {
   var number = packages.length;
   packages.forEach(function (p) {
     $.ajax({
-      url: '/workingpackages/' + p + '/',
+      url: '/workpackages/' + p + '/',
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
