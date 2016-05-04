@@ -369,17 +369,30 @@ module.exports = function (app) {
 
   app.delete('/forms/:id/share/:list/:shareid', reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), auth.ensureAuthenticated, function (req, res) {
     var form = req[req.params.id];
-    var share;
+    // var share;
+    var list;
+    var ids = req.params.shareid.split(',');
+    var removed = [];
+
     if (req.params.list === 'users') {
-      share = form.sharedWith.id(req.params.shareid);
+      list = form.sharedWith;
     }
     if (req.params.list === 'groups') {
-      share = form.sharedGroup.id(req.params.shareid);
+      list = form.sharedGroup;
     }
-    if (!share) {
+
+    ids.forEach(function (id) {
+      var share = list.id(id);
+      if (share) {
+        removed.push(id);
+        share.remove();
+      }
+    });
+
+    if (removed.length === 0) {
       return res.send(400, 'cannot find ' + req.params.shareid + ' in list.');
     }
-    share.remove();
+
     form.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
@@ -393,19 +406,23 @@ module.exports = function (app) {
       if (req.params.list === 'groups') {
         Target = Group;
       }
-      Target.findByIdAndUpdate(req.params.shareid, {
-        $pull: {
-          forms: form._id
-        }
-      }, function (updateErr, target) {
-        if (updateErr) {
-          console.error(updateErr);
-        }
-        if (!target) {
-          console.error('The user/group ' + req.params.shareid + ' is not in the db');
-        }
+
+      removed.forEach(function (id) {
+        Target.findByIdAndUpdate(id, {
+          $pull: {
+            forms: form._id
+          }
+        }, function (updateErr, target) {
+          if (updateErr) {
+            console.error(updateErr);
+          }
+          if (!target) {
+            console.error('The ' + req.params.list + ' ' + id + ' is not in the db');
+          }
+        });
       });
-      return res.send(204);
+
+      return res.json(200, removed);
     });
   });
 
