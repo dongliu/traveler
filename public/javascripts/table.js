@@ -474,7 +474,7 @@ var deviceTravelerLinkColumn = {
 function progressBar(active, finished, inProgress, text, width) {
   var w = width || '100px';
   var t = text || '';
-  var bar = $('<div class="progress" style="margin-bottom: 0; width: ' + w + '; background: #FFFF00; position: relative;"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div><div class="progress-value">' + t + '</div></div>');
+  var bar = $('<div class="progress" style="width: ' + w + ';"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div><div class="progress-value">' + t + '</div></div>');
   if (active) {
     bar.addClass('active').addClass('progress-striped');
   }
@@ -509,11 +509,7 @@ var travelerProgressColumn = {
       if (type === 'sort') {
         return 0;
       }
-      if (source.status === 1) {
-        return progressBar(true, 100, 0);
-      } else {
-        return progressBar(false, 100, 0);
-      }
+      return progressBar(source.status === 1, 0, 0);
     }
 
     if (!source.hasOwnProperty('finishedInput')) {
@@ -580,11 +576,7 @@ var packageProgressColumn = {
       if (type === 'sort') {
         return 0;
       }
-      if (source.status === 1) {
-        return progressBar(true, 100, 0);
-      } else {
-        return progressBar(false, 100, 0);
-      }
+      return progressBar(source.status === 1, 0, 0);
     }
 
     var inProgress = source.inProgressValue / source.totalValue;
