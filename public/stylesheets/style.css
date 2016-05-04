@@ -106,6 +106,12 @@ hr.soften {
 
 .progress {
   text-align:center;
+  margin-bottom: 0;
+  position: relative;
+}
+
+.progress.active {
+  background: #FFFF00;
 }
 
 .progress-value {
