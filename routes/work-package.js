@@ -5,7 +5,7 @@ var authConfig = require('../config/config').auth;
 var mongoose = require('mongoose');
 var underscore = require('underscore');
 var reqUtils = require('../lib/req-utils');
-var addShare = require('../lib/share').addShare;
+var shareLib = require('../lib/share');
 
 require('../model/work-package.js');
 var User = mongoose.model('User');
@@ -160,7 +160,7 @@ module.exports = function (app) {
 
     if (share === -1) {
       // new user in the list
-      addShare(req, res, pack);
+      shareLib.addShare(req, res, pack);
     }
   });
 
@@ -216,44 +216,7 @@ module.exports = function (app) {
 
   app.delete('/workpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
     var pack = req[req.params.id];
-    var share;
-    if (req.params.list === 'users') {
-      share = pack.sharedWith.id(req.params.shareid);
-    }
-    if (req.params.list === 'groups') {
-      share = pack.sharedGroup.id(req.params.shareid);
-    }
-    if (!share) {
-      return res.send(404, 'cannot find ' + req.params.shareid + ' in list.');
-    }
-    share.remove();
-    pack.save(function (saveErr) {
-      if (saveErr) {
-        console.error(saveErr);
-        return res.send(500, saveErr.message);
-      }
-      // keep the consistency of user's traveler list
-      var Target;
-      if (req.params.list === 'users') {
-        Target = User;
-      }
-      if (req.params.list === 'groups') {
-        Target = Group;
-      }
-      Target.findByIdAndUpdate(req.params.shareid, {
-        $pull: {
-          packages: pack._id
-        }
-      }, function (updateErr, target) {
-        if (updateErr) {
-          console.error(updateErr);
-        }
-        if (!target) {
-          console.error('The user/group ' + req.params.shareid + ' is not in the db');
-        }
-      });
-      return res.send(204);
-    });
+    shareLib.removeShare(req, res, pack);
   });
 
   app.get('/workpackages/new', auth.ensureAuthenticated, function (req, res) {

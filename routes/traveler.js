@@ -12,7 +12,7 @@ var underscore = require('underscore');
 var cheer = require('cheerio');
 
 var reqUtils = require('../lib/req-utils');
-var addShare = require('../lib/share').addShare;
+var shareLib = require('../lib/share');
 
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
@@ -237,7 +237,7 @@ module.exports = function (app) {
   app.get('/publictravelers/json', auth.ensureAuthenticated, function (req, res) {
     Traveler.find({
       publicAccess: {
-        $ne: -1
+        $in: [0, 1]
       },
       archived: {
         $ne: true
@@ -917,7 +917,7 @@ module.exports = function (app) {
 
     if (share === -1) {
       // new user
-      addShare(req, res, traveler);
+      shareLib.addShare(req, res, traveler);
     }
   });
 
@@ -970,44 +970,7 @@ module.exports = function (app) {
 
   app.delete('/travelers/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), function (req, res) {
     var traveler = req[req.params.id];
-    var share;
-    if (req.params.list === 'users') {
-      share = traveler.sharedWith.id(req.params.shareid);
-    }
-    if (req.params.list === 'groups') {
-      share = traveler.sharedGroup.id(req.params.shareid);
-    }
-    if (!share) {
-      return res.send(400, 'cannot find ' + req.params.shareid + ' in list.');
-    }
-    share.remove();
-    traveler.save(function (saveErr) {
-      if (saveErr) {
-        console.error(saveErr);
-        return res.send(500, saveErr.message);
-      }
-      // keep the consistency of user's traveler list
-      var Target;
-      if (req.params.list === 'users') {
-        Target = User;
-      }
-      if (req.params.list === 'groups') {
-        Target = Group;
-      }
-      Target.findByIdAndUpdate(req.params.shareid, {
-        $pull: {
-          travelers: traveler._id
-        }
-      }, function (updateErr, target) {
-        if (updateErr) {
-          console.error(updateErr);
-        }
-        if (!target) {
-          console.error('The user/group ' + req.params.shareid + ' is not in the db');
-        }
-      });
-      return res.send(204);
-    });
+    shareLib.removeShare(req, res, traveler);
   });
 
 };
