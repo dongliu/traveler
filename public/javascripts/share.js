@@ -24,12 +24,10 @@ function initTable(list, oTable) {
 
 
 function removeFromModal(list, cb) {
-  // var number = $('#modal .modal-body div').length;
   var ids = [];
   $('#modal .modal-body .target').each(function () {
     ids.push(this.id);
   });
-  // var that = this;
   $.ajax({
     url: path + list + '/' + ids.join(),
     type: 'DELETE',
@@ -41,8 +39,7 @@ function removeFromModal(list, cb) {
       item.addClass('text-success');
     });
   }).fail(function (jqXHR) {
-    $('.modal-body').append(' : ' + jqXHR.responseText);
-    // $(that).addClass('text-error');
+    $('.modal-body').append('Error : ' + jqXHR.responseText);
   }).always(function () {
     cb();
   });

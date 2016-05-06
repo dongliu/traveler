@@ -11,7 +11,7 @@ var sanitize = require('sanitize-caja');
 var underscore = require('underscore');
 
 var reqUtils = require('../lib/req-utils');
-var addShare = require('../lib/share').addShare;
+var shareLib = require('../lib/share');
 
 var Form = mongoose.model('Form');
 var FormFile = mongoose.model('FormFile');
@@ -314,7 +314,7 @@ module.exports = function (app) {
 
     if (share === -1) {
       // new user
-      addShare(req, res, form);
+      shareLib.addShare(req, res, form);
     }
   });
 
@@ -369,61 +369,7 @@ module.exports = function (app) {
 
   app.delete('/forms/:id/share/:list/:shareid', reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), auth.ensureAuthenticated, function (req, res) {
     var form = req[req.params.id];
-    // var share;
-    var list;
-    var ids = req.params.shareid.split(',');
-    var removed = [];
-
-    if (req.params.list === 'users') {
-      list = form.sharedWith;
-    }
-    if (req.params.list === 'groups') {
-      list = form.sharedGroup;
-    }
-
-    ids.forEach(function (id) {
-      var share = list.id(id);
-      if (share) {
-        removed.push(id);
-        share.remove();
-      }
-    });
-
-    if (removed.length === 0) {
-      return res.send(400, 'cannot find ' + req.params.shareid + ' in list.');
-    }
-
-    form.save(function (saveErr) {
-      if (saveErr) {
-        console.error(saveErr);
-        return res.send(500, saveErr.message);
-      }
-      // keep the consistency of user's form list
-      var Target;
-      if (req.params.list === 'users') {
-        Target = User;
-      }
-      if (req.params.list === 'groups') {
-        Target = Group;
-      }
-
-      removed.forEach(function (id) {
-        Target.findByIdAndUpdate(id, {
-          $pull: {
-            forms: form._id
-          }
-        }, function (updateErr, target) {
-          if (updateErr) {
-            console.error(updateErr);
-          }
-          if (!target) {
-            console.error('The ' + req.params.list + ' ' + id + ' is not in the db');
-          }
-        });
-      });
-
-      return res.json(200, removed);
-    });
+    shareLib.removeShare(req, res, form);
   });
 
   app.post('/forms/', auth.ensureAuthenticated, reqUtils.filter('body', ['html']), reqUtils.sanitize('body', ['html']), function (req, res) {
