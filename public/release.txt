@@ -1,3 +1,25 @@
+release v3.0.0
+- add a new main page with log in and feature highlights
+- separate form list page and traveler list page
+- add work package feature
+- work package list models views and controllers
+- work package share models views and controllers
+- work package configuration models views and controllers
+- enable transfer of ownership for forms, travelers, and work packages
+- enable public access control for form/traveler/package
+- add public form/traveler/package views and controllers
+- enable to archive/de-archive forms
+- enable to create travelers from shared forms
+- add transfered form/traveler/package list tab
+- change bootstrap tabs from vertical to horizontal for better display on
+  various devices
+- use user photo for user display
+- update progress bar with active color and progress text
+- add ESLint support to the project
+- refactor client JS lib and ESLint the files
+- refactor server JS lib and ESLint the files
+- update dependent JS libraries
+
 release v2.4.1
 date: March 30, 2016
 - bug fixes for form manager for traveler
