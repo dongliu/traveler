@@ -421,9 +421,9 @@ var travelerShareLinkColumn = {
   sTitle: '',
   mData: function (source) {
     if (source.publicAccess >= 0) {
-      return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+      return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
     }
-    return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -455,9 +455,9 @@ var packageShareLinkColumn = {
   sTitle: '',
   mData: function (source) {
     if (source.publicAccess >= 0) {
-      return '<a href="' + prefix + '/workpackages/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+      return '<a href="' + prefix + '/workpackages/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the package" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
     }
-    return '<a href="' + prefix + '/workpackages/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/workpackages/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the package"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
