@@ -64,7 +64,7 @@ var traveler = new Schema({
   deadline: Date,
   publicAccess: {
     type: Number,
-    default: 0
+    default: -1
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
