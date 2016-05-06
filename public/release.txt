@@ -23,6 +23,7 @@ release v3.0.0
 release v2.4.1
 date: March 30, 2016
 - bug fixes for form manager for traveler
+- support group alias
 - use absolute date inside traveler pages
 - load new device list
 
