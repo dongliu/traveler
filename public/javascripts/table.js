@@ -348,7 +348,7 @@ var ownerColumn = {
     if (type === 'sort' || type === 'filter') {
       return owner;
     } else if (owner) {
-      return '<img class="user" data-src="holder.js/27x40?size=20&text=' + owner.substr(0, 1).toUpperCase() + '" src="/adusers/' + owner + '/photo" title="' + owner + '">';
+      return '<a target="_blank" href="/users/' + owner + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + owner.substr(0, 1).toUpperCase() + '" src="/adusers/' + owner + '/photo" title="' + owner + '"></a>';
     } else {
       return '';
     }
@@ -630,7 +630,7 @@ function usersColumn(title, prop) {
           if (type === 'filter' || type === 'sort') {
             return u.username;
           } else {
-            return '<img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '">';
+            return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
           }
         });
         if (type === 'filter' || type === 'sort') {
