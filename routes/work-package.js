@@ -210,7 +210,7 @@ module.exports = function (app) {
           console.error('The user/group ' + req.params.userid + ' is not in the db');
         }
       });
-      return res.send(204);
+      return res.json(200, share);
     });
   });
 
