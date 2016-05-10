@@ -416,47 +416,8 @@ module.exports = function (app) {
   });
 
   app.put('/travelers/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
-    // get user id from name here
     var doc = req[req.params.id];
-    var name = req.body.name;
-    var nameFilter = ad.nameFilter.replace('_name', name);
-    var opts = {
-      filter: nameFilter,
-      attributes: ad.objAttributes,
-      scope: 'sub'
-    };
-
-    ldapClient.search(ad.searchBase, opts, false, function (ldapErr, result) {
-      if (ldapErr) {
-        console.error(ldapErr.name + ' : ' + ldapErr.message);
-        return res.send(500, ldapErr.message);
-      }
-
-      if (result.length === 0) {
-        return res.send(400, name + ' is not found in AD!');
-      }
-
-      if (result.length > 1) {
-        return res.send(400, name + ' is not unique!');
-      }
-
-      var id = result[0].sAMAccountName.toLowerCase();
-
-      if (doc.owner === id) {
-        return res.send(204);
-      }
-
-      doc.owner = id;
-      doc.transferredOn = Date.now();
-
-      doc.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
-      });
-    });
+    shareLib.changeOwner(req, res, doc);
   });
 
   app.get('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
