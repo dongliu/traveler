@@ -364,6 +364,12 @@ module.exports = function (app) {
     });
   });
 
+
+  app.put('/workpackages/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
+    var doc = req[req.params.id];
+    shareLib.changeOwner(req, res, doc);
+  });
+
   app.get('/workpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), function (req, res) {
     res.render('work-package', {package: req[req.params.id]});
   });

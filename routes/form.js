@@ -437,46 +437,7 @@ module.exports = function (app) {
 
   app.put('/forms/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
     var doc = req[req.params.id];
-    // get user id from name here
-    var name = req.body.name;
-    var nameFilter = ad.nameFilter.replace('_name', name);
-    var opts = {
-      filter: nameFilter,
-      attributes: ad.objAttributes,
-      scope: 'sub'
-    };
-
-    ldapClient.search(ad.searchBase, opts, false, function (ldapErr, result) {
-      if (ldapErr) {
-        console.error(ldapErr.name + ' : ' + ldapErr.message);
-        return res.send(500, ldapErr.message);
-      }
-
-      if (result.length === 0) {
-        return res.send(400, name + ' is not found in AD!');
-      }
-
-      if (result.length > 1) {
-        return res.send(400, name + ' is not unique!');
-      }
-
-      var id = result[0].sAMAccountName.toLowerCase();
-
-      if (doc.owner === id) {
-        return res.send(204);
-      }
-
-      doc.owner = id;
-      doc.transferredOn = Date.now();
-
-      doc.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
-      });
-    });
+    shareLib.changeOwner(req, res, doc);
   });
 
   app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.filter('body', ['html', 'title']), reqUtils.sanitize('body', ['html', 'title']), function (req, res) {
