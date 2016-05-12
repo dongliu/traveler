@@ -6,6 +6,16 @@ function formatItemUpdate(data) {
   return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') + '</div>';
 }
 
+function modalScroll(scroll) {
+  if (scroll) {
+    $('#modal .modal-body').removeClass('modal-body-visible');
+    $('#modal .modal-body').addClass('modal-body-scroll');
+  } else {
+    $('#modal .modal-body').removeClass('modal-body-scroll');
+    $('#modal .modal-body').addClass('modal-body-visible');
+  }
+}
+
 function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
@@ -296,6 +306,7 @@ $(function () {
 
   $('button.archive').click(function () {
     var selected = fnGetSelected(travelerTable, 'row-selected');
+    modalScroll(false);
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No traveler has been selected!');
@@ -319,6 +330,7 @@ $(function () {
   $('#clone').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
+    modalScroll(false);
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No traveler has been selected!');
@@ -351,6 +363,7 @@ $(function () {
     } else {
       $('#modalLabel').html('Add the ' + selected.length + ' travelers? ');
       $('#modal .modal-body').empty();
+      modalScroll(true);
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
         travelers.push(data._id);
@@ -403,6 +416,7 @@ $(function () {
   $('button.transfer').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
+    modalScroll(false);
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No traveler has been selected!');
@@ -439,6 +453,7 @@ $(function () {
 
   $('#dearchive').click(function () {
     var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
+    modalScroll(false);
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('No traveler has been selected!');
