@@ -201,6 +201,11 @@ text {
     overflow-y: auto;
 }
 
+/*modal visible*/
+.modal-body-visible {
+    overflow-y: visible;
+}
+
 /* builder stuff */
 ul.dropdown-menu input[type="checkbox"] {
   margin-left: 0;

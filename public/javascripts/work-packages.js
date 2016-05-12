@@ -1,6 +1,21 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
-/*global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false*/
+/*global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, moment: false, travelerGlobal: false*/
 /*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, archivedOnColumn: false, packageConfigLinkColumn: false, packageShareLinkColumn: false, packageLinkColumn: false, tagsColumn: false, packageProgressColumn: false, transferredOnColumn: false, ownerColumn: false*/
+
+
+function formatItemUpdate(data) {
+  return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') + '</div>';
+}
+
+function modalScroll(scroll) {
+  if (scroll) {
+    $('#modal .modal-body').removeClass('modal-body-visible');
+    $('#modal .modal-body').addClass('modal-body-scroll');
+  } else {
+    $('#modal .modal-body').removeClass('modal-body-scroll');
+    $('#modal .modal-body').addClass('modal-body-visible');
+  }
+}
 
 function formatTravelerStatus(s) {
   var status = {
@@ -206,13 +221,14 @@ $(function () {
   $('button.transfer').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
+    modalScroll(false);
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
+      $('#modal .modal-body').html('No work package has been selected!');
       $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
     } else {
-      $('#modalLabel').html('Transfer the following ' + selected.length + ' packages? ');
+      $('#modalLabel').html('Transfer the following ' + selected.length + ' work packages? ');
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = activeTable.fnGetData(row);
