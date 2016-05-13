@@ -38,7 +38,6 @@ function archiveFromModal(archive, activeTable, archivedFormTable, theOtherTable
   var number = $('#modal .modal-body div.target').length;
   $('#modal .modal-body div.target').each(function () {
     var that = this;
-    var success = false;
     $.ajax({
       url: '/forms/' + that.id + '/archived',
       type: 'PUT',
@@ -49,14 +48,13 @@ function archiveFromModal(archive, activeTable, archivedFormTable, theOtherTable
     }).done(function () {
       $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
-      success = true;
     }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
     }).always(function () {
       number = number - 1;
-      if (number === 0 && success) {
+      if (number === 0) {
         $('#return').prop('disabled', false);
         activeTable.fnReloadAjax();
         if (theOtherTable) {
@@ -422,7 +420,7 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = archivedFormTable.fnGetData(row);
-        $('#modal .modal-body').append('<div id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' archived ' + moment(data.archivedOn).fromNow() + '</div>');
+        $('#modal .modal-body').append('<div class="target" id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' archived ' + moment(data.archivedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
