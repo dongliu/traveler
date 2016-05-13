@@ -364,6 +364,27 @@ module.exports = function (app) {
     });
   });
 
+  app.put('/workpackages/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
+    var doc = req[req.params.id];
+    if (doc.archived === req.body.archived) {
+      return res.send(204);
+    }
+
+    doc.archived = req.body.archived;
+
+    if (doc.archived) {
+      doc.archivedOn = Date.now();
+    }
+
+    doc.save(function (saveErr, newDoc) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
+      }
+      return res.send(200, 'Work package ' + req.params.id + ' archived state set to ' + newDoc.archived);
+    });
+
+  });
 
   app.put('/workpackages/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
     var doc = req[req.params.id];
@@ -371,7 +392,9 @@ module.exports = function (app) {
   });
 
   app.get('/workpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), function (req, res) {
-    res.render('work-package', {package: req[req.params.id]});
+    res.render('work-package', {
+      package: req[req.params.id]
+    });
   });
 
   app.get('/workpackages/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), reqUtils.exist('id', WorkPackage), function (req, res) {
