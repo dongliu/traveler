@@ -31,73 +31,6 @@ function travelFromModal() {
   });
 }
 
-
-function archiveFromModal(archive, activeTable, archivedFormTable, theOtherTable) {
-  $('#submit').prop('disabled', true);
-  $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function () {
-    var that = this;
-    $.ajax({
-      url: '/forms/' + that.id + '/archived',
-      type: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        archived: archive
-      })
-    }).done(function () {
-      $(that).prepend('<i class="fa fa-check"></i>');
-      $(that).addClass('text-success');
-    }).fail(function (jqXHR) {
-      $(that).prepend('<i class="icon-question"></i>');
-      $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
-    }).always(function () {
-      number = number - 1;
-      if (number === 0) {
-        $('#return').prop('disabled', false);
-        activeTable.fnReloadAjax();
-        if (theOtherTable) {
-          theOtherTable.fnReloadAjax();
-        }
-        archivedFormTable.fnReloadAjax();
-      }
-    });
-  });
-}
-
-function transferFromModal(newOwnerName, formTable) {
-  $('#submit').prop('disabled', true);
-  $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function () {
-    var that = this;
-    var success = false;
-    $.ajax({
-      url: '/forms/' + that.id + '/owner',
-      type: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        name: newOwnerName
-      })
-    }).done(function () {
-      $(that).prepend('<i class="fa fa-check"></i>');
-      $(that).addClass('text-success');
-      success = true;
-    }).fail(function (jqXHR) {
-      $(that).prepend('<i class="fa fa-exclamation"></i>');
-      $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
-    }).always(function () {
-      number = number - 1;
-      if (number === 0 && success) {
-        $('#return').prop('disabled', false);
-        formTable.fnReloadAjax();
-      }
-    });
-  });
-}
-
 function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
@@ -343,7 +276,7 @@ $(function () {
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function () {
-        archiveFromModal(true, activeTable, archivedFormTable);
+        archiveFromModal(true, 'forms', activeTable, archivedFormTable);
       });
     }
   });
@@ -380,7 +313,7 @@ $(function () {
         source: travelerGlobal.usernames
       });
       $('#submit').click(function () {
-        transferFromModal($('#username').val(), activeTable);
+        transferFromModal($('#username').val(), 'forms', activeTable);
       });
     }
   });
@@ -425,7 +358,7 @@ $(function () {
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function () {
-        archiveFromModal(false, formTable, archivedFormTable, transferredFormTable);
+        archiveFromModal(false, 'forms', formTable, archivedFormTable, transferredFormTable);
       });
     }
   });
