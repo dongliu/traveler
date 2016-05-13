@@ -1,3 +1,14 @@
+
+function modalScroll(scroll) {
+  if (scroll) {
+    $('#modal .modal-body').removeClass('modal-body-visible');
+    $('#modal .modal-body').addClass('modal-body-scroll');
+  } else {
+    $('#modal .modal-body').removeClass('modal-body-scroll');
+    $('#modal .modal-body').addClass('modal-body-visible');
+  }
+}
+
 function archiveFromModal(archive, type, fromTable, toTable, otherTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);

@@ -2,85 +2,11 @@
 /*global moment: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder: false*/
 /*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, manPowerColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, ownerColumn: false, deadlineColumn: false, travelerProgressColumn: false, archivedOnColumn: false, packageLinkColumn: false, tagsColumn: false, sDomNoTNoR: false*/
 
+/*global archiveFromModal, transferFromModal, modalScroll*/
+
+
 function formatItemUpdate(data) {
   return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') + '</div>';
-}
-
-function modalScroll(scroll) {
-  if (scroll) {
-    $('#modal .modal-body').removeClass('modal-body-visible');
-    $('#modal .modal-body').addClass('modal-body-scroll');
-  } else {
-    $('#modal .modal-body').removeClass('modal-body-scroll');
-    $('#modal .modal-body').addClass('modal-body-visible');
-  }
-}
-
-function archiveFromModal(archive, travelerTable, archivedTravelerTable) {
-  $('#submit').prop('disabled', true);
-  $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function () {
-    var that = this;
-    var success = false;
-    $.ajax({
-      url: '/travelers/' + that.id + '/archived',
-      type: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        archived: archive
-      })
-    }).done(function () {
-      $(that).prepend('<i class="fa fa-check"></i>');
-      $(that).addClass('text-success');
-      success = true;
-    }).fail(function (jqXHR) {
-      $(that).prepend('<i class="icon-question"></i>');
-      $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
-    }).always(function () {
-      number = number - 1;
-      if (number === 0) {
-        $('#return').prop('disabled', false);
-        if (success) {
-          travelerTable.fnReloadAjax();
-          archivedTravelerTable.fnReloadAjax();
-        }
-      }
-    });
-  });
-}
-
-function transferFromModal(newOwnerName, table) {
-  $('#submit').prop('disabled', true);
-  $('#return').prop('disabled', true);
-  var number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function () {
-    var that = this;
-    var success = false;
-    $.ajax({
-      url: '/travelers/' + that.id + '/owner',
-      type: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        name: newOwnerName
-      })
-    }).done(function () {
-      $(that).prepend('<i class="fa fa-check"></i>');
-      $(that).addClass('text-success');
-      success = true;
-    }).fail(function (jqXHR) {
-      $(that).prepend('<i class="fa fa-exclamation"></i>');
-      $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
-    }).always(function () {
-      number = number - 1;
-      if (number === 0 && success) {
-        $('#return').prop('disabled', false);
-        table.fnReloadAjax();
-      }
-    });
-  });
 }
 
 function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable) {
@@ -305,7 +231,8 @@ $(function () {
   };
 
   $('button.archive').click(function () {
-    var selected = fnGetSelected(travelerTable, 'row-selected');
+    var activeTable = $('.tab-pane.active table').dataTable();
+    var selected = fnGetSelected(activeTable, 'row-selected');
     modalScroll(false);
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
@@ -322,7 +249,7 @@ $(function () {
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function () {
-        archiveFromModal(true, travelerTable, archivedTravelerTable);
+        archiveFromModal(true, 'travelers', activeTable, archivedTravelerTable);
       });
     }
   });
@@ -446,7 +373,7 @@ $(function () {
         source: travelerGlobal.usernames
       });
       $('#submit').click(function () {
-        transferFromModal($('#username').val(), activeTable);
+        transferFromModal($('#username').val(), 'travelers', activeTable);
       });
     }
   });
@@ -464,12 +391,12 @@ $(function () {
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
         var data = archivedTravelerTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
+        $('#modal .modal-body').append('<div class="target" id="' + data._id + '"><b>' + data.title + '</b> created ' + moment(data.createdOn).fromNow() + ' archived ' + moment(data.archivedOn).fromNow() + '</div>');
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function () {
-        archiveFromModal(false, travelerTable, archivedTravelerTable);
+        archiveFromModal(false, 'travelers', travelerTable, archivedTravelerTable, transferredTravelerTable);
       });
     }
   });
