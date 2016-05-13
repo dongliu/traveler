@@ -380,39 +380,26 @@ module.exports = function (app) {
     return res.json(200, req[req.params.id]);
   });
 
-  app.put('/travelers/:id/archived', auth.ensureAuthenticated, reqUtils.filter('body', ['archived']), function (req, res) {
-    Traveler.findById(req.params.id, 'createdBy archived').exec(function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.put('/travelers/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
+    var doc = req[req.params.id];
+    if (doc.archived === req.body.archived) {
+      return res.send(204);
+    }
+
+    doc.archived = req.body.archived;
+
+    if (doc.archived) {
+      doc.archivedOn = Date.now();
+    }
+
+    doc.save(function (saveErr, newDoc) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-
-      if (doc.createdBy !== req.session.userid) {
-        return res.send(403, 'You are not authorized to access this resource');
-      }
-
-      if (doc.archived === req.body.archived) {
-        return res.send(204);
-      }
-
-      doc.archived = req.body.archived;
-
-      if (doc.archived) {
-        doc.archivedOn = Date.now();
-      }
-
-      doc.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
-      });
-
+      return res.send(200, 'traveler ' + req.params.id + ' archived state set to ' + newDoc.archived);
     });
+
   });
 
   app.put('/travelers/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
