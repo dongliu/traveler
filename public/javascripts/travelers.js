@@ -243,7 +243,7 @@ $(function () {
       $('#modalLabel').html('Archive the following ' + selected.length + ' travelers? ');
       $('#modal .modal-body').empty();
       selected.forEach(function (row) {
-        var data = travelerTable.fnGetData(row);
+        var data = activeTable.fnGetData(row);
         $('#modal .modal-body').append(formatItemUpdate(data));
       });
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
