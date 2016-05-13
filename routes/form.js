@@ -426,12 +426,12 @@ module.exports = function (app) {
       doc.archivedOn = Date.now();
     }
 
-    doc.save(function (saveErr) {
+    doc.save(function (saveErr, newDoc) {
       if (saveErr) {
         console.error(saveErr);
         return res.send(500, saveErr.message);
       }
-      return res.send(204);
+      return res.send(200, 'Form ' + req.params.id + ' archived state set to ' + newDoc.archived);
     });
   });
 
