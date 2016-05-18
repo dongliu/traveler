@@ -645,10 +645,65 @@ function usersColumn(title, prop) {
   };
 }
 
+function usersFilteredColumn(title, filter) {
+  return {
+    sTitle: title,
+    mData: function (source, type) {
+      var users = filter(source);
+      if (users.length === 0) {
+        return '';
+      }
+      var names = users.map(function (u) {
+        if (!u._id) {
+          return u;
+        }
+        if (type === 'filter' || type === 'sort') {
+          return u.username;
+        } else {
+          return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
+        }
+      });
+      if (type === 'filter' || type === 'sort') {
+        return names.join('; ');
+      } else {
+        return names.join(' ');
+      }
+    },
+    bFilter: true
+  };
+}
 
 var sharedWithColumn = usersColumn('Shared with', 'sharedWith');
 
-var manPowerColumn = usersColumn('Powered by', 'manPower');
+function notIn(user, users) {
+  var i;
+  for (i = 0; i < users.length; i += 1) {
+    if (users[i]._id === user._id) {
+      return false;
+    }
+  }
+  return true;
+}
+
+var manPowerColumn = usersFilteredColumn('Powered by', function (source) {
+  var out = [];
+  source.manPower.forEach(function (m) {
+    if (notIn(m, out)) {
+      out.push(m);
+    }
+  });
+
+  source.sharedWith.forEach(function (s) {
+    if (s.access === 1) {
+      if (notIn(s, out)) {
+        out.push(s);
+      }
+    }
+  });
+  return out;
+});
+
+var filledByColumn = usersColumn('Filled by', 'manPower');
 
 var sharedGroupColumn = {
   sTitle: 'Shared groups',

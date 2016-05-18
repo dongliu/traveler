@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, manPowerColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, ownerColumn: false, deadlineColumn: false, travelerProgressColumn: false, archivedOnColumn: false, packageLinkColumn: false, tagsColumn: false, sDomNoTNoR: false*/
+/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, filledByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, ownerColumn: false, deadlineColumn: false, travelerProgressColumn: false, archivedOnColumn: false, packageLinkColumn: false, tagsColumn: false, sDomNoTNoR: false*/
 
 /*global archiveFromModal, transferFromModal, modalScroll*/
 
@@ -74,7 +74,7 @@ $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
-  var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, travelerProgressColumn];
+  var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
     sAjaxSource: '/travelers/json',
@@ -103,7 +103,7 @@ $(function () {
   });
 
   /*transferred traveler table starts*/
-  var transferredTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, travelerProgressColumn];
+  var transferredTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   var transferredTravelerTable = $('#transferred-traveler-table').dataTable({
     sAjaxSource: '/transferredtravelers/json',
     sAjaxDataProp: '',
@@ -133,7 +133,7 @@ $(function () {
   fnAddFilterFoot('#transferred-traveler-table', transferredTravelerAoColumns);
   /*transferred traveler table ends*/
 
-  var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, travelerProgressColumn];
+  var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   var sharedTravelerTable = $('#shared-traveler-table').dataTable({
     sAjaxSource: '/sharedtravelers/json',
@@ -160,7 +160,7 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, travelerProgressColumn];
+  var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   fnAddFilterFoot('#group-shared-traveler-table', sharedTravelerAoColumns);
   var groupSharedTravelerTable = $('#group-shared-traveler-table').dataTable({
     sAjaxSource: '/groupsharedtravelers/json',
@@ -187,7 +187,7 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
-  var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, archivedOnColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, manPowerColumn, updatedOnColumn, travelerProgressColumn];
+  var archivedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, archivedOnColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);
   var archivedTravelerTable = $('#archived-traveler-table').dataTable({
     sAjaxSource: '/archivedtravelers/json',
