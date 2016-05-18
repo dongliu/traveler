@@ -61,6 +61,10 @@ block content
         #travelers.tab-pane.active
           .btn-toolbar
             .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
+            .btn-group
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
@@ -72,6 +76,10 @@ block content
         #transferredtravelers.tab-pane
           .btn-toolbar
             .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
+            .btn-group
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
@@ -81,11 +89,25 @@ block content
                 | &nbsp;Transfer ownership
           table#transferred-traveler-table.table.table-bordered.table-hover
         #sharedtravelers.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
           table#shared-traveler-table.table.table-bordered.table-hover
         #groupsharedtravelers.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
           table#group-shared-traveler-table.table.table-bordered.table-hover
         #archivedtravelers.tab-pane
           .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
             .btn-group
               button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
                 i.fa.fa-inbox.fa-lg

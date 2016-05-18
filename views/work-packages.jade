@@ -60,6 +60,10 @@ block content
         #mypackages.tab-pane.active
           .btn-toolbar
             .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
+            .btn-group
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected packages, only you can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
@@ -71,6 +75,10 @@ block content
         #transferredpackages.tab-pane
           .btn-toolbar
             .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
+            .btn-group
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected packages, only you can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
@@ -80,11 +88,25 @@ block content
                 | &nbsp;Transfer ownership
           table#transferred-package-table.table.table-bordered.table-hover
         #sharedpackages.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
           table#shared-package-table.table.table-bordered.table-hover
         #groupsharedpackages.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
           table#group-shared-package-table.table.table-bordered.table-hover
         #archivedpackages.tab-pane
           .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload date
             .btn-group
               button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
                 i.fa.fa-inbox.fa-lg

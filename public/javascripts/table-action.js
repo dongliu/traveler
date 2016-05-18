@@ -1,4 +1,3 @@
-
 function modalScroll(scroll) {
   if (scroll) {
     $('#modal .modal-body').removeClass('modal-body-visible');
@@ -73,3 +72,8 @@ function transferFromModal(newOwnerName, type, table) {
     });
   });
 }
+
+$('button.reload').click(function () {
+  var activeTable = $('.tab-pane.active table').dataTable();
+  activeTable.fnReloadAjax();
+});
