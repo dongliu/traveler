@@ -1,7 +1,8 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false, tinymce:false, rivets:false*/
-/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, fnAddFilterFoot: false, sDom: false, oTableTools: false, fnSelectAll: false, fnDeselect: false, createdByColumn: false, createdOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
-/*global UID:false, input:false, spec:false, updateAjaxURL: false, ajax401: false, disableAjaxCache: false, prefix, false*/
+/* global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
+
+/* global tinymce: false, rivets: false, UID: false, input: false, spec: false, ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false */
+
+/* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
 function livespan(stamp) {
   return '<span data-livestamp="' + stamp + '"></span>';
@@ -12,12 +13,12 @@ var mce_content = {
   content_css: '/bootstrap/css/bootstrap.css',
   browser_spellcheck: true,
   plugins: [
-    ["advlist autolink link image lists charmap hr anchor spellchecker"],
-    ["wordcount visualblocks visualchars code media nonbreaking"],
-    ["contextmenu directionality paste"]
+    ['advlist autolink link image lists charmap hr anchor spellchecker'],
+    ['wordcount visualblocks visualchars code media nonbreaking'],
+    ['contextmenu directionality paste']
   ],
-  toolbar1: "charmap | link image | undo redo | removeformat | bullist numlist outdent indent | formatselect bold italic underline strikethrough",
-  contextmenu: "charmap link image",
+  toolbar1: 'charmap | link image | undo redo | removeformat | bullist numlist outdent indent | formatselect bold italic underline strikethrough',
+  contextmenu: 'charmap link image',
   menubar: false,
   statusbar: false
 };
@@ -26,7 +27,8 @@ var initHtml = '';
 
 function sendRequest(data, cb, saveas) {
   var path = window.location.pathname;
-  var url, type;
+  var url;
+  var type;
   if (saveas) {
     url = prefix + '/forms/';
     type = 'POST';
@@ -41,7 +43,7 @@ function sendRequest(data, cb, saveas) {
     data: JSON.stringify(data),
     contentType: 'application/json',
     processData: false
-  }).done(function (json) {
+  }).done(function () {
     var location;
     var timestamp = formRequest.getResponseHeader('Date');
     if (saveas) {
@@ -55,7 +57,7 @@ function sendRequest(data, cb, saveas) {
     if (cb) {
       cb();
     }
-  }).fail(function (jqXHR, status, error) {
+  }).fail(function (jqXHR) {
     $('form#output').fadeTo('slow', 1);
     if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The save request failed. You might need to try again or contact the admin.</div>');
@@ -99,19 +101,19 @@ function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
 }
 
 function binding($edit, $out, model, $done) {
-  $('input:text', $edit).keyup(function (e) {
+  $('input:text', $edit).keyup(function () {
     model[$(this).attr('name')] = $(this).val();
   });
 
-  $('input[type="number"]', $edit).on('input', function (e) {
+  $('input[type="number"]', $edit).on('input', function () {
     model[$(this).attr('name')] = $(this).val();
   });
 
-  $('select', $edit).change(function (e) {
+  $('select', $edit).change(function () {
     model[$(this).attr('name')] = $(this).val();
   });
 
-  $('input:checkbox', $edit).change(function (e) {
+  $('input:checkbox', $edit).change(function () {
     model[$(this).attr('name')] = $(this).prop('checked');
   });
 
@@ -221,6 +223,7 @@ function figure_edit($cgr) {
     $new_cgr.remove();
   });
 
+  var model;
   if ($cgr) {
     $('img', $figure).prop('src', src);
     // enable the spec inputs
@@ -232,7 +235,7 @@ function figure_edit($cgr) {
     $('input', $figcaption).val(figcaption);
     $('input', $width).val(width);
 
-    var model = {
+    model = {
       alt: alt,
       figcaption: figcaption,
       width: width
@@ -257,7 +260,7 @@ function figure_edit($cgr) {
       $validation = $('<div class="validation"></div>').appendTo($file.find('.controls'));
     }
 
-    if (!(/image\/(gif|jpe?g|png)$/i.test(file.type))) {
+    if (!/image\/(gif|jpe?g|png)$/i.test(file.type)) {
       $validation.html('<p class="text-error">' + file.type + ' is not allowed to upload</p>');
       $file.children('.file-upload-buttons').remove();
       return;
@@ -315,7 +318,7 @@ function figure_edit($cgr) {
       $('input', $alt).val(alt);
       $('input', $figcaption).val(figcaption);
 
-      var model = {
+      model = {
         alt: alt,
         figcaption: figcaption,
         width: width
@@ -323,7 +326,7 @@ function figure_edit($cgr) {
 
       binding($edit, $figure, model, $done);
 
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -338,8 +341,6 @@ function figure_edit($cgr) {
   });
 
 }
-
-
 
 function other_edit($cgr) {
   $('#output .well.spec').remove();
@@ -577,7 +578,7 @@ function rich_edit($cgr) {
 }
 
 function init() {
-  $('#output').find('img').each(function (index) {
+  $('#output').find('img').each(function () {
     var $this = $(this);
     if ($this.attr('name')) {
       if ($this.attr('src') === undefined) {
@@ -679,7 +680,7 @@ function binding_events() {
       $('#preview').attr('disabled', true);
       $('#more').attr('disabled', true);
       $('#output').sortable({
-        placeholder: "ui-state-highlight"
+        placeholder: 'ui-state-highlight'
       });
     } else {
       $(this).text('Adjust location');
@@ -787,7 +788,7 @@ function binding_events() {
     }
     cleanBeforeSave();
     var html = $('#output').html();
-    var path = window.location.pathname;
+    // var path = window.location.pathname;
     if (html !== initHtml) {
       sendRequest({
         html: html
@@ -830,7 +831,7 @@ function binding_events() {
     $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">New form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
     $('#modal .modal-footer').html('<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
-    $('#modal button[value="confirm"]').click(function (e) {
+    $('#modal button[value="confirm"]').click(function () {
       var newTitle = $('#title').val();
       sendRequest({
         title: newTitle
@@ -853,7 +854,7 @@ function binding_events() {
     $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
     $('#modal .modal-footer').html('<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
-    $('#modal button[value="confirm"]').click(function (e) {
+    $('#modal button[value="confirm"]').click(function () {
       var title = $('#title').val();
       sendRequest({
         html: html,
