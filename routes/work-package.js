@@ -524,6 +524,7 @@ module.exports = function (app) {
   function addWork(p, req, res) {
     var tids = req.body.travelers;
     var pids = req.body.packages;
+    var ids;
     var type;
     var model;
     if (tids) {
@@ -532,12 +533,14 @@ module.exports = function (app) {
       }
       type = 'traveler';
       model = Traveler;
+      ids = tids;
     } else {
       if (pids.length === 0) {
         return res.send(204);
       }
       type = 'package';
       model = WorkPackage;
+      ids = pids;
     }
 
     var works = p.works;
@@ -545,7 +548,7 @@ module.exports = function (app) {
 
     model.find({
       _id: {
-        $in: tids
+        $in: ids
       }
     }).exec(function (err, items) {
       if (err) {
