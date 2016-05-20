@@ -136,10 +136,36 @@ function removeWork(id, cb) {
   });
 }
 
+function getUpdate(element, updates, table) {
+  var td = element.parentNode;
+  var workData = table.fnGetData(td.parentNode);
+  var workID = workData._id;
+  var aoColumns = table.fnSettings().aoColumns;
+  var columnDef = aoColumns[table.fnGetPosition(td)[2]];
+  var property = columnDef.mData;
+  var oldValue = table.fnGetData(td);
+  var newValue;
+  if (columnDef.sType === 'numeric') {
+    newValue = Number($(element).val());
+  } else {
+    newValue = $(element).val();
+  }
+  // console.log(workID + ' . ' + property + ' : ' + oldValue + ' -> ' + newValue);
+  if (newValue !== oldValue) {
+    if (!updates[workID]) {
+      updates[workID] = {};
+    }
+    updates[workID][property] = newValue;
+  }
+}
+
 $(function () {
   updateAjaxURL(prefix);
   ajax401(prefix);
   disableAjaxCache();
+
+  $('#save').prop('disabled', true);
+
   $('span.time').each(function () {
     $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
   });
@@ -150,7 +176,7 @@ $(function () {
 
   var workAoColumns = [removeColumn, sequenceColumn, priorityColumn, valueColumn, colorColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceTagColumn, sharedWithColumn, sharedGroupColumn];
 
-  var works;
+  // var works;
 
   var worksTable = $('#work-table').dataTable({
     sAjaxSource: './works/json',
@@ -171,7 +197,17 @@ $(function () {
       Holder.run({
         images: 'img.user'
       });
-      works = worksTable.fnGetData();
+      // works = worksTable.fnGetData();
+      $('input.config, select.config').change(function () {
+        $(this).addClass('input-changed');
+        $(this).css({
+          'border': '1px solid #c09853',
+          'box-shadow': '0 0 5px rgba(192, 152, 83, 1)'
+        });
+        if ($('#save').prop('disabled')) {
+          $('#save').prop('disabled', false);
+        }
+      });
     },
     aaSorting: [
       [1, 'asc'],
@@ -209,6 +245,15 @@ $(function () {
 
   $('#more').click(function () {
     setStatus(1);
+  });
+
+  $('#save').click(function () {
+    var updates = {};
+    $('input.input-changed, select.input-changed').each(function (index, element) {
+      getUpdate(element, updates, worksTable);
+      // console.log(updates);
+    });
+
   });
 
   editEvents(initValue);
