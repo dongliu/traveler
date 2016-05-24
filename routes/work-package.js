@@ -643,4 +643,45 @@ module.exports = function (app) {
     });
   });
 
+  app.put('/workpackages/:id/works/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), function (req, res) {
+    var workPackage = req[req.params.id];
+    var works = workPackage.works;
+    var updates = req.body;
+    var wid;
+    var work;
+    var prop;
+    var u;
+    for (wid in updates) {
+      if (!updates.hasOwnProperty(wid)) {
+        continue;
+      }
+
+      work = works.id(wid);
+      if (!work) {
+        continue;
+      }
+
+      u = updates[wid];
+      for (prop in u) {
+        if (!u.hasOwnProperty(prop)) {
+          continue;
+        }
+        if (work[prop] !== u[prop]) {
+          work[prop] = u[prop];
+        }
+      }
+    }
+
+    if (!workPackage.isModified()) {
+      return res.send(204);
+    }
+    workPackage.save(function (err, newWP) {
+      if (err) {
+        console.error(err);
+        return res.send(500, 'cannot save the updates to work package ' + workPackage._id);
+      }
+      res.json(200, newWP.works);
+    });
+  });
+
 };
