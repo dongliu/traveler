@@ -32,6 +32,19 @@ function setStatus(s) {
   }).always();
 }
 
+function changeEvents() {
+  $('input.config, select.config').change(function () {
+    $(this).addClass('input-changed');
+    $(this).css({
+      'border': '1px solid #c09853',
+      'box-shadow': '0 0 5px rgba(192, 152, 83, 1)'
+    });
+    if ($('#save').prop('disabled')) {
+      $('#save').prop('disabled', false);
+    }
+  });
+}
+
 function tagEvents() {
   $('#add-tag').click(function (e) {
     e.preventDefault();
@@ -149,7 +162,9 @@ function updateWorks(updates, cb) {
   }).done(function (data, status, jqXHR) {
     var timestamp = jqXHR.getResponseHeader('Date');
     $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Works updated ' + livespan(timestamp) + '</div>');
-    cb(null);
+    if (jqXHR.status !== 204) {
+      cb(null, data);
+    }
   }).fail(function (jqXHR, status, error) {
     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the works: ' + jqXHR.responseText + '</div>');
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -171,7 +186,6 @@ function getUpdate(element, updates, table) {
   } else {
     newValue = $(element).val();
   }
-  // console.log(workID + ' . ' + property + ' : ' + oldValue + ' -> ' + newValue);
   if (newValue !== oldValue) {
     if (!updates[workID]) {
       updates[workID] = {};
@@ -199,7 +213,7 @@ $(function () {
 
   var workAoColumns = [removeColumn, sequenceColumn, priorityColumn, valueColumn, colorColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceTagColumn, sharedWithColumn, sharedGroupColumn];
 
-  // var works;
+  var works;
 
   var worksTable = $('#work-table').dataTable({
     sAjaxSource: './works/json',
@@ -220,17 +234,8 @@ $(function () {
       Holder.run({
         images: 'img.user'
       });
-      // works = worksTable.fnGetData();
-      $('input.config, select.config').change(function () {
-        $(this).addClass('input-changed');
-        $(this).css({
-          'border': '1px solid #c09853',
-          'box-shadow': '0 0 5px rgba(192, 152, 83, 1)'
-        });
-        if ($('#save').prop('disabled')) {
-          $('#save').prop('disabled', false);
-        }
-      });
+      works = worksTable.fnGetData();
+      changeEvents();
     },
     aaSorting: [
       [1, 'asc'],
@@ -278,9 +283,22 @@ $(function () {
     });
 
     if (!$.isEmptyObject(updates)) {
-      updateWorks(updates, function (err) {
+      updateWorks(updates, function (err, data) {
         if (!err) {
-          worksTable.fnReloadAjax();
+          data.forEach(function (newW) {
+            works.forEach(function (w) {
+              if (newW._id === w._id) {
+                w.sequence = newW.sequence;
+                w.priority = newW.priority;
+                w.value = newW.value;
+                w.color = newW.color;
+              }
+            });
+          });
+
+          worksTable.fnClearTable();
+          worksTable.fnAddData(works);
+          changeEvents();
         }
       });
     }
