@@ -4,6 +4,10 @@
 /*global removeColumn, sequenceColumn, colorColumn, priorityColumn, valueColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceTagColumn, sharedWithColumn, sharedGroupColumn, sDomNoTools*/
 /*global moment: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, Holder*/
 
+function livespan(stamp) {
+  return '<span data-livestamp="' + stamp + '"></span>';
+}
+
 function cleanTagForm() {
   $('#new-tag').closest('li').remove();
   $('#add-tag').prop('disabled', false);
@@ -136,6 +140,23 @@ function removeWork(id, cb) {
   });
 }
 
+function updateWorks(updates, cb) {
+  $.ajax({
+    url: './works/',
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify(updates)
+  }).done(function (data, status, jqXHR) {
+    var timestamp = jqXHR.getResponseHeader('Date');
+    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Works updated ' + livespan(timestamp) + '</div>');
+    cb(null);
+  }).fail(function (jqXHR, status, error) {
+    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the works: ' + jqXHR.responseText + '</div>');
+    $(window).scrollTop($('#message div:last-child').offset().top - 40);
+    cb(error);
+  });
+}
+
 function getUpdate(element, updates, table) {
   var td = element.parentNode;
   var workData = table.fnGetData(td.parentNode);
@@ -163,6 +184,8 @@ $(function () {
   updateAjaxURL(prefix);
   ajax401(prefix);
   disableAjaxCache();
+
+  $.livestamp.interval(30 * 1000);
 
   $('#save').prop('disabled', true);
 
@@ -248,11 +271,19 @@ $(function () {
   });
 
   $('#save').click(function () {
+    $('#save').prop('disabled', true);
     var updates = {};
     $('input.input-changed, select.input-changed').each(function (index, element) {
       getUpdate(element, updates, worksTable);
-      // console.log(updates);
     });
+
+    if (!$.isEmptyObject(updates)) {
+      updateWorks(updates, function (err) {
+        if (!err) {
+          worksTable.fnReloadAjax();
+        }
+      });
+    }
 
   });
 
