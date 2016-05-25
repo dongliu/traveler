@@ -881,16 +881,15 @@ var pColumn = {
 
 var valueColumn = {
   sTitle: 'Value',
+  mData: 'value',
   sClass: 'editable',
   sType: 'numeric',
   bFilter: true,
-  mData: function (source, type) {
-    if (source.refType === 'package') {
-      return source.value;
-    } else if (type === 'sort' || type === 'filter') {
-      return source.value;
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data;
     } else {
-      return '<input type="number" min=0 class="input-mini config" value="' + source.value + '">';
+      return '<input type="number" min=0 class="input-mini config" value="' + data + '">';
     }
   }
 };
