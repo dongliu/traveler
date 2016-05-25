@@ -23,11 +23,6 @@ block content
           i.fa.fa-sort-numeric-asc.fa-large
           | &nbsp;Default sorting
     h4 #{package.description}
-    h4 total value: #{package.totalValue}; finished value: #{package.finishedValue}; in-progress value: #{package.inProgressValue};
-    .progress(class=package.status === 1 ? "active progress-striped" : undefined)
-      .bar.bar-success(style="width: #{package.finishedValue/package.totalValue*100}%;")
-      .bar.bar-info(style="width: #{package.inProgressValue/package.totalValue*100}%;")
-      .progress-value #{package.finishedValue} + #{package.inProgressValue} / #{package.totalValue}
     #details.collapse.out
       h4 Owner: #{package.owner || package.createdBy}
       h4 Status:
@@ -44,6 +39,12 @@ block content
         each tag in package.tags
           li
             span.tag #{tag}
+    h4 total value: #{package.totalValue}; finished value: #{package.finishedValue}; in-progress value: #{package.inProgressValue};
+    .progress(class=package.status === 1 ? "active progress-striped" : undefined)
+      .bar.bar-success(style="width: #{package.finishedValue/package.totalValue*100}%;")
+      .bar.bar-info(style="width: #{package.inProgressValue/package.totalValue*100}%;")
+      .progress-value #{package.finishedValue} + #{package.inProgressValue} / #{package.totalValue}
+    br
     table#work-table.table.table-bordered.table-hover
 
 
