@@ -539,7 +539,7 @@ var workProgressColumn = {
       if (type === 'sort') {
         return 1;
       }
-      return progressBar(false, 100, 0, w);
+      return progressBar(false, 100, 0, '' + source.value + ' + 0 / ' + source.value, w);
     }
 
     var inProgress = source.inProgress;
