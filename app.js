@@ -138,7 +138,7 @@ require('./routes/profile')(app);
 
 require('./routes/device')(app);
 
-require('./routes/about')(app);
+require('./routes/doc')(app);
 
 app.get('/api', function (req, res) {
   res.render('api', {
