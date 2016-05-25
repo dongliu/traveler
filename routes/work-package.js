@@ -651,6 +651,7 @@ module.exports = function (app) {
     var work;
     var prop;
     var u;
+    var valueChanged = false;
     for (wid in updates) {
       if (!updates.hasOwnProperty(wid)) {
         continue;
@@ -667,6 +668,9 @@ module.exports = function (app) {
           continue;
         }
         if (work[prop] !== u[prop]) {
+          if (prop === 'value') {
+            valueChanged = true;
+          }
           work[prop] = u[prop];
         }
       }
@@ -675,13 +679,21 @@ module.exports = function (app) {
     if (!workPackage.isModified()) {
       return res.send(204);
     }
-    workPackage.save(function (err, newWP) {
+
+    var cb = function (err, newWP) {
       if (err) {
         console.error(err);
         return res.send(500, 'cannot save the updates to work package ' + workPackage._id);
       }
       res.json(200, newWP.works);
-    });
+    };
+
+    if (valueChanged) {
+      workPackage.updateProgress(cb);
+    } else {
+      workPackage.save(cb);
+    }
+
   });
 
 };
