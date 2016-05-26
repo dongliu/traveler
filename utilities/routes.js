@@ -205,7 +205,7 @@ var traveler = {
   canWriteActive: function(req, travelerDoc) {
     if (traveler.canWrite(req, travelerDoc)) {
       return true;
-    } else if (this.checkUserRole(req, 'write_active_travelers')) {
+    } else if (checkUserRole(req, 'write_active_travelers')) {
       return true;
     }
 
@@ -213,9 +213,7 @@ var traveler = {
   },
   canWrite: function(req, travelerDoc, userid) {
     if (req.session == undefined) {
-
-    } else {
-
+      return false;
     }
 
     if (travelerDoc.createdBy === req.session.userid) {
