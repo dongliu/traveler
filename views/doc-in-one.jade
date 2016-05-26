@@ -9,48 +9,15 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 block content
-  header
-    .container
-      //- .hero-unit
+  //- header
+  .container
+    .hero-unit
       h1 FRIB Traveler
-      h2 A Web application to create, manage, and share forms and travelers
-      h4 A traveler contains a sequence of actions defined by a user in a form. An action requires a person to verify the action is performed and/or collect data as defined in the form. The traveler application records who collects what data at what time before the traveler is completed.
+      h2 A Web application to create, manage, and share forms, travelers, and work packages
 
   //- .container-fluid
   .container
     .row
-      .span3.bs-docs-sidebar
-        ul.nav.nav-list.bs-docs-sidenav.affix(data-offset-top='282', data-spy='affix', style="top: 40px;")
-          li
-            a(href='#log') Login and logout
-          li
-            a(href='#layout') Interface layout
-          li
-            a(href='#table') Data table
-          li
-            a(href='#compose') Compose a form
-          li
-            a(href='#validation') Validation rules
-          li
-            a(href='#figure') Figure from local file
-          li
-            a(href='#share-form') Share a form
-          li
-            a(href='#create') Create a traveler
-          li
-            a(href='#configure') Configure a traveler
-          li
-            a(href='#share-traveler') Share a traveler
-          li
-            a(href='#work') Work on a traveler
-          li
-            a(href='#notes') Notes in a traveler
-          li
-            a(href='#clone-traveler') Clone a traveler
-          li
-            a(href='#archive') Archive a traveler
-          li
-            a(href='#bug') Bugs and suggestions
       .span9
         section#log
           .page-header
@@ -139,7 +106,40 @@ block content
             = ' '
             a(href='mailto:liud@frib.msu.edu?Subject=traveler%20issues',target='_top') Dong Liu
             | . Thank you.
+      .span3.sidebar
+        ul#affixlist.nav.nav-list.nav-stacked.bs-docs-sidenav
+          li
+            a(href='#log') Login and logout
+          li
+            a(href='#layout') Interface layout
+          li
+            a(href='#table') Data table
+          li
+            a(href='#compose') Compose a form
+          li
+            a(href='#validation') Validation rules
+          li
+            a(href='#figure') Figure from local file
+          li
+            a(href='#share-form') Share a form
+          li
+            a(href='#create') Create a traveler
+          li
+            a(href='#configure') Configure a traveler
+          li
+            a(href='#share-traveler') Share a traveler
+          li
+            a(href='#work') Work on a traveler
+          li
+            a(href='#notes') Notes in a traveler
+          li
+            a(href='#clone-traveler') Clone a traveler
+          li
+            a(href='#archive') Archive a traveler
+          li
+            a(href='#bug') Bugs and suggestions
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/docs.js')
