@@ -10,7 +10,7 @@ function createSideNav() {
     }
     $('.sidebar').append($('<div id="affixlist"></div>').append($affix));
     $('body').attr('data-spy', 'scroll');
-    $('body').attr('data-target', '#affixlist');
+    $('body').attr('data-target', '.sidebar');
   }
 }
 
