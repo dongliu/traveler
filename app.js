@@ -17,7 +17,7 @@ mongoose.connection.close();
 require('./model/user.js');
 require('./model/form.js');
 require('./model/traveler.js');
-require('./model/work-package.js');
+require('./model/binder.js');
 
 var mongoOptions = {
   db: {
@@ -128,7 +128,7 @@ require('./routes/form')(app);
 
 require('./routes/traveler')(app);
 
-require('./routes/work-package')(app);
+require('./routes/binder')(app);
 
 require('./routes/admin')(app);
 
