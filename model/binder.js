@@ -15,7 +15,7 @@ var work = new Schema({
   refType: {
     type: String,
     required: true,
-    enum: ['traveler', 'package']
+    enum: ['traveler', 'binder']
   },
   addedOn: Date,
   addedBy: String,
@@ -61,11 +61,6 @@ var work = new Schema({
  */
 
 /**
- * Currently there is no status for a work package.
- * It is either active or archived.
- */
-
-/**
  * totalValue = sum(work value)
  * finishedValue = sum(work value X finished)
  * inProgressValue = sum(work value X inProgress)
@@ -77,7 +72,7 @@ var work = new Schema({
  *         | 2 // completed
  */
 
-var workPackage = new Schema({
+var binder = new Schema({
   title: String,
   description: String,
   status: {
@@ -123,7 +118,7 @@ var workPackage = new Schema({
   }
 });
 
-workPackage.methods.updateWorkProgress = function (spec) {
+binder.methods.updateWorkProgress = function (spec) {
   var w = this.works.id(spec._id);
   if (!w) {
     return;
@@ -148,7 +143,7 @@ workPackage.methods.updateWorkProgress = function (spec) {
 };
 
 
-workPackage.methods.updateProgress = function (cb) {
+binder.methods.updateProgress = function (cb) {
   var works = this.works;
   var totalValue = 0;
   var finishedValue = 0;
@@ -163,9 +158,9 @@ workPackage.methods.updateProgress = function (cb) {
   this.finishedValue = finishedValue;
   this.inProgressValue = inProgressValue;
   if (this.isModified()) {
-    this.save(function (err, newPackage) {
+    this.save(function (err, newBinder) {
       if (cb) {
-        cb(err, newPackage);
+        cb(err, newBinder);
       } else {
         console.error(err);
       }
@@ -173,8 +168,8 @@ workPackage.methods.updateProgress = function (cb) {
   }
 };
 
-var WorkPackage = mongoose.model('WorkPackage', workPackage);
+var Binder = mongoose.model('Binder', binder);
 
 module.exports = {
-  WorkPackage: WorkPackage
+  Binder: Binder
 };
