@@ -116,7 +116,7 @@ function editEvents(initValue) {
       },
       error: function (jqXHR) {
         $(that).text(initValue[that.id]);
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the package config : ' + jqXHR.responseText + '</div>');
+        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the binder config : ' + jqXHR.responseText + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     });
@@ -246,7 +246,7 @@ $(function () {
 
 
   $('#work-table').on('click', 'a.remove', function () {
-    $('#modalLabel').html('Remove the following work from this package?');
+    $('#modalLabel').html('Remove the following work from this binder?');
     $('#modal .modal-body').empty();
     var row = $(this).closest('tr')[0];
     var data = worksTable.fnGetData(row);
