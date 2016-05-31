@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB - new working package
+  title FRIB - new binder
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -10,9 +10,9 @@ block head
 
 block content
   .container(style="margin-top: 10px")
-    form.form-horizontal(name='newpackage', action='./', method='POST')
+    form.form-horizontal(name='newbinder', action='./', method='POST')
       .control-group
-        .control-label Package title
+        .control-label Binder title
         .controls
           input(type='text', name='title', required)
       .control-group
