@@ -19,6 +19,7 @@ release v3.0.0
 - refactor client JS lib and ESLint the files
 - refactor server JS lib and ESLint the files
 - update dependent JS libraries
+- new documents
 
 release v2.4.1
 date: March 30, 2016
