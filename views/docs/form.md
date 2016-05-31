@@ -1,0 +1,2 @@
+### What is a form?
+A form is a template for travelers. We implement it with HTML form elements as the name suggests. A user can define forms, edit them, and make copies. A user can share her/his forms with other users with read or write permission. A user can create a new form based on the form shared with her/him. The traveler application provides a WYSIWYG (what you see is what you get) editor to edit a form. A form can be archived. An archived form can only accessed by its owner. The [forms section](#forms) describes the details of how to work with forms. 
