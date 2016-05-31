@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title FRIB Working Package
+  title FRIB Binder
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -15,11 +15,11 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/workpackages/new', target='_blank', data-toggle='tooltip', title='create a new working package')
+        a.btn.btn-primary#new(href='#{prefix}/binders/new', target='_blank', data-toggle='tooltip', title='create a new binder')
           i.fa.fa-paperclip.fa-lg
-          | &nbsp;New Package
+          | &nbsp;New Binder
       //- .btn-group
-        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected package')
+        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected binder')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
       .btn-group
@@ -27,9 +27,9 @@ block content
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
       .btn-group
-        a.btn.btn-info#all-packages(href='#{prefix}/publicpackages/', target='_blank', data-toggle='tooltip', title='see all public packages')
+        a.btn.btn-info#all-binders(href='#{prefix}/publicbinders/', target='_blank', data-toggle='tooltip', title='see all public binders')
           i.fa.fa-institution.fa-lg
-          | &nbsp;All public packages
+          | &nbsp;All public binders
       //- .btn-group.dropdown
         a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
           i.fa.fa-gears.fa-lg
@@ -47,61 +47,61 @@ block content
     div
       ul.nav.nav-tabs
         li.active
-          a(href='#mypackages', data-toggle='tab') My packages
+          a(href='#mybinders', data-toggle='tab') My binders
         li
-          a(href='#transferredpackages', data-toggle='tab') Transferred packages
+          a(href='#transferredbinders', data-toggle='tab') Transferred binders
         li
-          a(href='#sharedpackages', data-toggle='tab') Shared packages
+          a(href='#sharedbinders', data-toggle='tab') Shared binders
         li
-          a(href='#groupsharedpackages', data-toggle='tab') Group shared packages
+          a(href='#groupsharedbinders', data-toggle='tab') Group shared binders
         li
-          a(href='#archivedpackages', data-toggle='tab') Archived packages
+          a(href='#archivedbinders', data-toggle='tab') Archived binders
       .tab-content
-        #mypackages.tab-pane.active
+        #mybinders.tab-pane.active
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload date
             .btn-group
-              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected packages, only you can see them after archived.')
+              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected binders, only you can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
             .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected packages to a coworker')
+              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected binders to a coworker')
                 i.fa.fa-user.fa-lg
                 | &nbsp;Transfer ownership
-          table#package-table.table.table-bordered.table-hover
-        #transferredpackages.tab-pane
+          table#binder-table.table.table-bordered.table-hover
+        #transferredbinders.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload date
             .btn-group
-              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected packages, only you can see them after archived.')
+              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected binders, only you can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
             .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected packages to a coworker')
+              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected binders to a coworker')
                 i.fa.fa-user.fa-lg
                 | &nbsp;Transfer ownership
-          table#transferred-package-table.table.table-bordered.table-hover
-        #sharedpackages.tab-pane
+          table#transferred-binder-table.table.table-bordered.table-hover
+        #sharedbinders.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload date
-          table#shared-package-table.table.table-bordered.table-hover
-        #groupsharedpackages.tab-pane
+          table#shared-binder-table.table.table-bordered.table-hover
+        #groupsharedbinders.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload date
-          table#group-shared-package-table.table.table-bordered.table-hover
-        #archivedpackages.tab-pane
+          table#group-shared-binder-table.table.table-bordered.table-hover
+        #archivedbinders.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
@@ -111,7 +111,7 @@ block content
               button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
                 i.fa.fa-inbox.fa-lg
                 | &nbsp;De-archive
-          table#archived-package-table.table.table-bordered.table-hover
+          table#archived-binder-table.table.table-bordered.table-hover
 
 
 block js

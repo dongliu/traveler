@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB - package - #{package.title}
+  title FRIB - binder - #{binder.title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -14,7 +14,7 @@ block content
   script.
     var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
-    h3 #{package.title}
+    h3 #{binder.title}
       != ' '
       .btn-group
         button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
@@ -22,12 +22,12 @@ block content
         button.btn.btn-info#sort
           i.fa.fa-sort-numeric-asc.fa-large
           | &nbsp;Default sorting
-    h4 #{package.description}
+    h4 #{binder.description}
     #details.collapse.out
-      h4 Owner: #{package.owner || package.createdBy}
+      h4 Owner: #{binder.owner || binder.createdBy}
       h4 Status:
         = ' '
-        case package.status
+        case binder.status
           when 0
             | new
           when 1
@@ -36,14 +36,14 @@ block content
             | completed
       h4 Tags
       ul#tags
-        each tag in package.tags
+        each tag in binder.tags
           li
             span.tag #{tag}
-    h4 total value: #{package.totalValue}; finished value: #{package.finishedValue}; in-progress value: #{package.inProgressValue};
-    .progress(class=package.status === 1 ? "active progress-striped" : undefined)
-      .bar.bar-success(style="width: #{package.finishedValue/package.totalValue*100}%;")
-      .bar.bar-info(style="width: #{package.inProgressValue/package.totalValue*100}%;")
-      .progress-value #{package.finishedValue} + #{package.inProgressValue} / #{package.totalValue}
+    h4 total value: #{binder.totalValue}; finished value: #{binder.finishedValue}; in-progress value: #{binder.inProgressValue};
+    .progress(class=binder.status === 1 ? "active progress-striped" : undefined)
+      .bar.bar-success(style="width: #{binder.finishedValue/binder.totalValue*100}%;")
+      .bar.bar-info(style="width: #{binder.inProgressValue/binder.totalValue*100}%;")
+      .progress-value #{binder.finishedValue} + #{binder.inProgressValue} / #{binder.totalValue}
     br
     table#work-table.table.table-bordered.table-hover
 
