@@ -1,8 +1,5 @@
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
-var ad = require('../config/ad.json');
-var ldapClient = require('../lib/ldap-client');
-
 var auth = require('../lib/auth');
 var authConfig = require('../config/config').auth;
 
@@ -158,7 +155,7 @@ module.exports = function (app) {
   });
 
   app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
-    return res.render('newform', {
+    return res.render('form-new', {
       prefix: req.proxied ? req.proxied_prefix : ''
     });
   });
