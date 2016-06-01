@@ -369,7 +369,7 @@ module.exports = function (app) {
     shareLib.removeShare(req, res, form);
   });
 
-  app.post('/forms/', auth.ensureAuthenticated, reqUtils.filter('body', ['html']), reqUtils.sanitize('body', ['html']), function (req, res) {
+  app.post('/forms/', auth.ensureAuthenticated, reqUtils.sanitize('body', ['html']), function (req, res) {
     var form = {};
     if (req.body.html) {
       form.html = req.body.html;
