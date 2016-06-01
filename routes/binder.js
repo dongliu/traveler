@@ -7,20 +7,20 @@ var underscore = require('underscore');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
 
-require('../model/work-package.js');
+require('../model/binder.js');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
-var WorkPackage = mongoose.model('WorkPackage');
+var Binder = mongoose.model('Binder');
 var Traveler = mongoose.model('Traveler');
 
 module.exports = function (app) {
 
-  app.get('/workpackages/', auth.ensureAuthenticated, function (req, res) {
-    res.render('work-packages');
+  app.get('/binders/', auth.ensureAuthenticated, function (req, res) {
+    res.render('binders');
   });
 
-  app.get('/workpackages/json', auth.ensureAuthenticated, function (req, res) {
-    WorkPackage.find({
+  app.get('/binders/json', auth.ensureAuthenticated, function (req, res) {
+    Binder.find({
       createdBy: req.session.userid,
       archived: {
         $ne: true
@@ -37,13 +37,13 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/workpackages/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), function (req, res) {
-    return res.render('work-package-config', {
-      package: req[req.params.id]
+  app.get('/binders/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), function (req, res) {
+    return res.render('binder-config', {
+      binder: req[req.params.id]
     });
   });
 
-  app.post('/workpackages/:id/tags/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['newtag']), reqUtils.sanitize('body', ['newtag']), function (req, res) {
+  app.post('/binders/:id/tags/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['newtag']), reqUtils.sanitize('body', ['newtag']), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
@@ -57,7 +57,7 @@ module.exports = function (app) {
     });
   });
 
-  app.delete('/workpackages/:id/tags/:tag', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), function (req, res) {
+  app.delete('/binders/:id/tags/:tag', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
@@ -71,7 +71,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/workpackages/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['title', 'description']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
+  app.put('/binders/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['title', 'description']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
     var k;
     var doc = req[req.params.id];
     for (k in req.body) {
@@ -91,28 +91,28 @@ module.exports = function (app) {
   });
 
 
-  app.get('/workpackages/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
-    var pack = req[req.params.id];
+  app.get('/binders/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), function (req, res) {
+    var binder = req[req.params.id];
     return res.render('share', {
-      type: 'Work package',
+      type: 'Binder',
       id: req.params.id,
-      title: pack.title,
-      access: String(pack.publicAccess)
+      title: binder.title,
+      access: String(binder.publicAccess)
     });
   });
 
-  app.put('/workpackages/:id/share/public', auth.ensureAuthenticated, reqUtils.filter('body', ['access']), reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
-    var pack = req[req.params.id];
+  app.put('/binders/:id/share/public', auth.ensureAuthenticated, reqUtils.filter('body', ['access']), reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), function (req, res) {
+    var binder = req[req.params.id];
     var access = req.body.access;
     if (['-1', '0', '1'].indexOf(access) === -1) {
       return res.send(400, 'not valid value');
     }
     access = Number(access);
-    if (pack.publicAccess === access) {
+    if (binder.publicAccess === access) {
       return res.send(204);
     }
-    pack.publicAccess = access;
-    pack.save(function (saveErr) {
+    binder.publicAccess = access;
+    binder.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
         return res.send(500, saveErr.message);
@@ -121,30 +121,30 @@ module.exports = function (app) {
     });
   });
 
-  app.get('/workpackages/:id/share/:list/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), function (req, res) {
-    var pack = req[req.params.id];
+  app.get('/binders/:id/share/:list/json', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canReadMw('id'), function (req, res) {
+    var binder = req[req.params.id];
     if (req.params.list === 'users') {
-      return res.json(200, pack.sharedWith || []);
+      return res.json(200, binder.sharedWith || []);
     }
     if (req.params.list === 'groups') {
-      return res.json(200, pack.sharedGroup || []);
+      return res.json(200, binder.sharedGroup || []);
     }
     return res.send(400, 'unknown share list.');
   });
 
-  app.post('/workpackages/:id/share/:list/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
-    var pack = req[req.params.id];
+  app.post('/binders/:id/share/:list/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), function (req, res) {
+    var binder = req[req.params.id];
     var share = -2;
     if (req.params.list === 'users') {
       if (req.body.name) {
-        share = reqUtils.getSharedWith(pack.sharedWith, req.body.name);
+        share = reqUtils.getSharedWith(binder.sharedWith, req.body.name);
       } else {
         return res.send(400, 'user name is empty.');
       }
     }
     if (req.params.list === 'groups') {
       if (req.body.id) {
-        share = reqUtils.getSharedGroup(pack.sharedGroup, req.body.id);
+        share = reqUtils.getSharedGroup(binder.sharedGroup, req.body.id);
       } else {
         return res.send(400, 'group id is empty.');
       }
@@ -160,18 +160,18 @@ module.exports = function (app) {
 
     if (share === -1) {
       // new user in the list
-      shareLib.addShare(req, res, pack);
+      shareLib.addShare(req, res, binder);
     }
   });
 
-  app.put('/workpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
-    var pack = req[req.params.id];
+  app.put('/binders/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), function (req, res) {
+    var binder = req[req.params.id];
     var share;
     if (req.params.list === 'users') {
-      share = pack.sharedWith.id(req.params.shareid);
+      share = binder.sharedWith.id(req.params.shareid);
     }
     if (req.params.list === 'groups') {
-      share = pack.sharedGroup.id(req.params.shareid);
+      share = binder.sharedGroup.id(req.params.shareid);
     }
 
     if (!share) {
@@ -185,7 +185,7 @@ module.exports = function (app) {
     } else {
       share.access = 0;
     }
-    pack.save(function (saveErr) {
+    binder.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
         return res.send(500, saveErr.message);
@@ -200,7 +200,7 @@ module.exports = function (app) {
       }
       Target.findByIdAndUpdate(req.params.shareid, {
         $addToSet: {
-          packages: pack._id
+          binders: binder._id
         }
       }, function (updateErr, target) {
         if (updateErr) {
@@ -214,57 +214,57 @@ module.exports = function (app) {
     });
   });
 
-  app.delete('/workpackages/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), function (req, res) {
-    var pack = req[req.params.id];
-    shareLib.removeShare(req, res, pack);
+  app.delete('/binders/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), function (req, res) {
+    var binder = req[req.params.id];
+    shareLib.removeShare(req, res, binder);
   });
 
-  app.get('/workpackages/new', auth.ensureAuthenticated, function (req, res) {
-    res.render('new_package');
+  app.get('/binders/new', auth.ensureAuthenticated, function (req, res) {
+    res.render('binder-new');
   });
 
-  app.post('/workpackages/', auth.ensureAuthenticated, reqUtils.filter('body', ['title', 'description']), reqUtils.hasAll('body', ['title']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
-    var workingPackage = {};
+  app.post('/binders/', auth.ensureAuthenticated, reqUtils.filter('body', ['title', 'description']), reqUtils.hasAll('body', ['title']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
+    var binder = {};
     if (req.body.works && underscore.isArray(req.body.works)) {
-      workingPackage.works = req.body.works;
+      binder.works = req.body.works;
     } else {
-      workingPackage.works = [];
+      binder.works = [];
     }
 
-    workingPackage.title = req.body.title;
+    binder.title = req.body.title;
     if (req.body.description) {
-      workingPackage.description = req.body.description;
+      binder.description = req.body.description;
     }
-    workingPackage.createdBy = req.session.userid;
-    workingPackage.createdOn = Date.now();
-    (new WorkPackage(workingPackage)).save(function (err, newPackage) {
+    binder.createdBy = req.session.userid;
+    binder.createdOn = Date.now();
+    (new Binder(binder)).save(function (err, newPackage) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
       }
-      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/workpackages/' + newPackage.id + '/';
+      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/binders/' + newPackage.id + '/';
 
       res.set('Location', url);
-      return res.send(201, 'You can access the new package at <a href="' + url + '">' + url + '</a>');
+      return res.send(201, 'You can access the new binder at <a href="' + url + '">' + url + '</a>');
     });
   });
 
-  app.get('/transferredpackages/json', auth.ensureAuthenticated, function (req, res) {
-    WorkPackage.find({
+  app.get('/transferredbinders/json', auth.ensureAuthenticated, function (req, res) {
+    Binder.find({
       owner: req.session.userid,
       archived: {
         $ne: true
       }
-    }).exec(function (err, packages) {
+    }).exec(function (err, binders) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
       }
-      res.json(200, packages);
+      res.json(200, binders);
     });
   });
 
-  app.get('/ownedpackages/json', auth.ensureAuthenticated, function (req, res) {
+  app.get('/ownedbinders/json', auth.ensureAuthenticated, function (req, res) {
     var search = {
       archived: {
         $ne: true
@@ -279,19 +279,19 @@ module.exports = function (app) {
       }]
     };
 
-    WorkPackage.find(search).lean().exec(function (err, packages) {
+    Binder.find(search).lean().exec(function (err, binders) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
       }
-      return res.json(200, packages);
+      return res.json(200, binders);
     });
   });
 
-  app.get('/sharedpackages/json', auth.ensureAuthenticated, function (req, res) {
+  app.get('/sharedbinders/json', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.session.userid
-    }, 'packages').exec(function (err, me) {
+    }, 'binders').exec(function (err, me) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -299,72 +299,72 @@ module.exports = function (app) {
       if (!me) {
         return res.send(400, 'cannot identify the current user');
       }
-      WorkPackage.find({
+      Binder.find({
         _id: {
-          $in: me.packages
+          $in: me.binders
         },
         archived: {
           $ne: true
         }
-      }).exec(function (pErr, packages) {
+      }).exec(function (pErr, binders) {
         if (pErr) {
           console.error(pErr);
           return res.send(500, pErr.message);
         }
-        return res.json(200, packages);
+        return res.json(200, binders);
       });
     });
   });
 
-  app.get('/groupsharedpackages/json', auth.ensureAuthenticated, function (req, res) {
+  app.get('/groupsharedbinders/json', auth.ensureAuthenticated, function (req, res) {
     Group.find({
       _id: {
         $in: req.session.memberOf
       }
-    }, 'packages').exec(function (err, groups) {
+    }, 'binders').exec(function (err, groups) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
       }
-      var packageIds = [];
+      var binderIds = [];
       var i;
       var j;
-      // merge the packages arrays
+      // merge the binders arrays
       for (i = 0; i < groups.length; i += 1) {
-        for (j = 0; j < groups[i].packages.length; j += 1) {
-          if (packageIds.indexOf(groups[i].packages[j]) === -1) {
-            packageIds.push(groups[i].packages[j]);
+        for (j = 0; j < groups[i].binders.length; j += 1) {
+          if (binderIds.indexOf(groups[i].binders[j]) === -1) {
+            binderIds.push(groups[i].binders[j]);
           }
         }
       }
-      WorkPackage.find({
+      Binder.find({
         _id: {
-          $in: packageIds
+          $in: binderIds
         }
-      }).exec(function (pErr, packages) {
+      }).exec(function (pErr, binders) {
         if (pErr) {
           console.error(pErr);
           return res.send(500, pErr.message);
         }
-        res.json(200, packages);
+        res.json(200, binders);
       });
     });
   });
 
-  app.get('/archivedpackages/json', auth.ensureAuthenticated, function (req, res) {
-    WorkPackage.find({
+  app.get('/archivedbinders/json', auth.ensureAuthenticated, function (req, res) {
+    Binder.find({
       createdBy: req.session.userid,
       archived: true
-    }).exec(function (err, packages) {
+    }).exec(function (err, binders) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
       }
-      return res.json(200, packages);
+      return res.json(200, binders);
     });
   });
 
-  app.put('/workpackages/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
+  app.put('/binders/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
     var doc = req[req.params.id];
     if (doc.archived === req.body.archived) {
       return res.send(204);
@@ -381,27 +381,27 @@ module.exports = function (app) {
         console.error(saveErr);
         return res.send(500, saveErr.message);
       }
-      return res.send(200, 'Work package ' + req.params.id + ' archived state set to ' + newDoc.archived);
+      return res.send(200, 'Binder ' + req.params.id + ' archived state set to ' + newDoc.archived);
     });
 
   });
 
-  app.put('/workpackages/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
+  app.put('/binders/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
     var doc = req[req.params.id];
     shareLib.changeOwner(req, res, doc);
   });
 
-  app.get('/workpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), function (req, res) {
-    res.render('work-package', {
-      package: req[req.params.id]
+  app.get('/binders/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canReadMw('id'), function (req, res) {
+    res.render('binder', {
+      binder: req[req.params.id]
     });
   });
 
-  app.get('/workpackages/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), reqUtils.exist('id', WorkPackage), function (req, res) {
+  app.get('/binders/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canReadMw('id'), reqUtils.exist('id', Binder), function (req, res) {
     res.json(200, req[req.params.id]);
   });
 
-  app.put('/workpackages/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
+  app.put('/binders/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
     var p = req[req.params.id];
     var s = req.body.status;
 
@@ -439,18 +439,18 @@ module.exports = function (app) {
 
   });
 
-  function sendMerged(t, p, res, merged, workingPackage) {
+  function sendMerged(t, p, res, merged, binder) {
     if (t && p) {
-      if (workingPackage.isModified()) {
-        workingPackage.updateProgress();
+      if (binder.isModified()) {
+        binder.updateProgress();
       }
       res.json(200, merged);
     }
   }
 
-  app.get('/workpackages/:id/works/json', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canReadMw('id'), function (req, res) {
-    var workingPackage = req[req.params.id];
-    var works = workingPackage.works;
+  app.get('/binders/:id/works/json', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canReadMw('id'), function (req, res) {
+    var binder = req[req.params.id];
+    var works = binder.works;
 
     var tids = [];
     var pids = [];
@@ -491,7 +491,7 @@ module.exports = function (app) {
           return res.send(500, err.message);
         }
         travelers.forEach(function (t) {
-          workingPackage.updateWorkProgress(t);
+          binder.updateWorkProgress(t);
 
           // works has its own toJSON, therefore need to merge only the plain
           // object
@@ -500,30 +500,30 @@ module.exports = function (app) {
         });
         tFinished = true;
         // check if ready to respond
-        sendMerged(tFinished, pFinished, res, merged, workingPackage);
+        sendMerged(tFinished, pFinished, res, merged, binder);
       });
     }
 
     if (pids.length !== 0) {
-      WorkPackage.find({
+      Binder.find({
         _id: {
           $in: pids
         }
-      }, 'tags status createdBy owner finishedValue inProgressValue totalValue').lean().exec(function (err, workingPackages) {
-        workingPackages.forEach(function (p) {
-          workingPackage.updateWorkProgress(p);
+      }, 'tags status createdBy owner finishedValue inProgressValue totalValue').lean().exec(function (err, binders) {
+        binders.forEach(function (p) {
+          binder.updateWorkProgress(p);
           underscore.extend(p, works.id(p._id).toJSON());
           merged.push(p);
         });
         pFinished = true;
-        sendMerged(tFinished, pFinished, res, merged, workingPackage);
+        sendMerged(tFinished, pFinished, res, merged, binder);
       });
     }
   });
 
   function addWork(p, req, res) {
     var tids = req.body.travelers;
-    var pids = req.body.packages;
+    var pids = req.body.binders;
     var ids;
     var type;
     var model;
@@ -538,8 +538,8 @@ module.exports = function (app) {
       if (pids.length === 0) {
         return res.send(204);
       }
-      type = 'package';
-      model = WorkPackage;
+      type = 'binder';
+      model = Binder;
       ids = pids;
     }
 
@@ -561,7 +561,7 @@ module.exports = function (app) {
       }
 
       items.forEach(function (item) {
-        if (type === 'package' && item.id === p.id) {
+        if (type === 'binder' && item.id === p.id) {
           // do not add itself as a work
           return;
         }
@@ -616,17 +616,17 @@ module.exports = function (app) {
     });
   }
 
-  app.post('/workpackages/:id/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['travelers', 'packages']), function (req, res) {
+  app.post('/binders/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['travelers', 'binders']), function (req, res) {
     addWork(req[req.params.id], req, res);
   });
 
 
-  app.delete('/workpackages/:id/works/:wid', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), function (req, res) {
+  app.delete('/binders/:id/works/:wid', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), function (req, res) {
     var p = req[req.params.id];
     var work = p.works.id(req.params.wid);
 
     if (!work) {
-      res.send(404, 'Work ' + req.params.wid + ' not found in the package.');
+      res.send(404, 'Work ' + req.params.wid + ' not found in the binder.');
     }
 
     work.remove();
@@ -643,9 +643,9 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/workpackages/:id/works/', auth.ensureAuthenticated, reqUtils.exist('id', WorkPackage), reqUtils.canWriteMw('id'), function (req, res) {
-    var workPackage = req[req.params.id];
-    var works = workPackage.works;
+  app.put('/binders/:id/works/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), function (req, res) {
+    var binder = req[req.params.id];
+    var works = binder.works;
     var updates = req.body;
     var wid;
     var work;
@@ -676,22 +676,22 @@ module.exports = function (app) {
       }
     }
 
-    if (!workPackage.isModified()) {
+    if (!binder.isModified()) {
       return res.send(204);
     }
 
     var cb = function (err, newWP) {
       if (err) {
         console.error(err);
-        return res.send(500, 'cannot save the updates to work package ' + workPackage._id);
+        return res.send(500, 'cannot save the updates to binder ' + binder._id);
       }
       res.json(200, newWP.works);
     };
 
     if (valueChanged) {
-      workPackage.updateProgress(cb);
+      binder.updateProgress(cb);
     } else {
-      workPackage.save(cb);
+      binder.save(cb);
     }
 
   });
