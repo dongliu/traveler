@@ -22,7 +22,7 @@ $(function () {
   var binderAoColumns = [selectColumn, binderConfigLinkColumn, binderShareLinkColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
   fnAddFilterFoot('#binder-table', binderAoColumns);
   var binderTable = $('#binder-table').dataTable({
-    sAjaxSource: '/workbinders/json',
+    sAjaxSource: '/binders/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
     iDisplayLength: 10,
@@ -195,7 +195,7 @@ $(function () {
         source: travelerGlobal.usernames
       });
       $('#submit').click(function () {
-        transferFromModal($('#username').val(), 'workbinders', activeTable);
+        transferFromModal($('#username').val(), 'binders', activeTable);
       });
     }
   });
@@ -219,7 +219,7 @@ $(function () {
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function () {
-        archiveFromModal(true, 'workbinders', activeTable, archivedBinderTable);
+        archiveFromModal(true, 'binders', activeTable, archivedBinderTable);
       });
     }
   });
@@ -242,7 +242,7 @@ $(function () {
       $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
       $('#modal').modal('show');
       $('#submit').click(function () {
-        archiveFromModal(false, 'workbinders', binderTable, archivedBinderTable, transferredBinderTable);
+        archiveFromModal(false, 'binders', binderTable, archivedBinderTable, transferredBinderTable);
       });
     }
   });
