@@ -424,6 +424,9 @@ module.exports = function (app) {
   // use the form in the request as the active form
   app.post('/travelers/:id/forms/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['html', '_id', 'title']), reqUtils.hasAll('body', ['html', '_id', 'title']), reqUtils.sanitize('body', ['html', 'title']), function addForm(req, res) {
     var doc = req[req.params.id];
+    if (doc.status > 1 || doc.archived) {
+      return res.send(400, 'cannot update form because of current traveler state');
+    }
     var form = {
       html: req.body.html,
       activatedOn: [Date.now()],
@@ -448,6 +451,9 @@ module.exports = function (app) {
   // set active form
   app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), function putActiveForm(req, res) {
     var doc = req[req.params.id];
+    if (doc.status > 1 || doc.archived) {
+      return res.send(400, 'cannot update form because of current traveler state');
+    }
     var formid = req.body.formid;
     if (!formid) {
       return res.send(400, 'form id unknown');
@@ -476,6 +482,9 @@ module.exports = function (app) {
   // set form alias
   app.put('/travelers/:id/forms/:fid/alias', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['value']), reqUtils.sanitize('body', ['value']), function putFormAlias(req, res) {
     var doc = req[req.params.id];
+    if (doc.status > 1 || doc.archived) {
+      return res.send(400, 'cannot update form because of current traveler state');
+    }
     var form = doc.forms.id(req.params.fid);
     if (!form) {
       return res.send(410, 'from ' + req.params.fid + ' not found.');
