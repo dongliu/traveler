@@ -30,14 +30,14 @@ block content
         a.btn.btn-info#all-travelers(href='#{prefix}/publictravelers/', target='_blank', data-toggle='tooltip', title='see all public travelers')
           i.fa.fa-institution.fa-lg
           | &nbsp;All public travelers
-      //- .btn-group.dropdown
-        a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
+      .btn-group.dropdown
+        a#ref.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
           i.fa.fa-gears.fa-lg
-          | &nbsp;Meta
+          | &nbsp;References
           span.caret
         ul.dropdown-menu
           li#devices
-            a(href='#{prefix}/devices/', target='_blank') Devices
+            a(href='#{prefix}/devices/', target='_blank') Devices in CCDB
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
