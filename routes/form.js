@@ -437,43 +437,30 @@ module.exports = function (app) {
     shareLib.changeOwner(req, res, doc);
   });
 
-  app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.filter('body', ['html', 'title']), reqUtils.sanitize('body', ['html', 'title']), function (req, res) {
+  app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['html', 'title']), reqUtils.sanitize('body', ['html', 'title']), function (req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
-    var form = {};
+    var doc = req[req.params.id];
     if (req.body.hasOwnProperty('html')) {
-      form.html = req.body.html;
+      doc.html = req.body.html;
     }
     if (req.body.hasOwnProperty('title')) {
-      form.title = req.body.title;
+      if (reqUtils.isOwner(req, doc)) {
+        doc.title = req.body.title;
+      } else {
+        req.send(403, 'not authorized to access this resource');
+      }
     }
 
-    if (form.hasOwnProperty('html') || form.hasOwnProperty('title')) {
-      form.updatedBy = req.session.userid;
-      form.updatedOn = Date.now();
-    } else {
-      return res.send('400', 'no update details found');
-    }
-
-    Form.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.dir(err);
-        return res.send(500, err.message || err.errmsg);
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.save(function (saveErr, newDoc) {
+      if (saveErr) {
+        console.dir(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (reqUtils.getAccess(req, doc) !== 1) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      doc.update(form, function (updateErr, old) {
-        if (updateErr) {
-          console.dir(updateErr);
-          return res.send(500, updateErr.message || updateErr.errmsg);
-        }
-        if (old) {
-          return res.send(204);
-        }
-        return res.send(410, 'cannot find form ' + req.params.id);
-      });
+      return res.json(newDoc);
     });
   });
 };
