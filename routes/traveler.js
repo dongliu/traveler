@@ -492,7 +492,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['title', 'description', 'deadline']), reqUtils.sanitize('body', ['title', 'description', 'deadline']), function (req, res) {
+  app.put('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['title', 'description', 'deadline']), reqUtils.sanitize('body', ['title', 'description', 'deadline']), function (req, res) {
     var doc = req[req.params.id];
     var k;
     for (k in req.body) {

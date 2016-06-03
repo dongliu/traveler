@@ -71,7 +71,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/binders/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['title', 'description']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
+  app.put('/binders/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['title', 'description']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
     var k;
     var doc = req[req.params.id];
     for (k in req.body) {
