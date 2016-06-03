@@ -591,7 +591,7 @@ var binderProgressColumn = {
 };
 
 var deviceColumn = {
-  sTitle: 'Devices',
+  sTitle: 'Tags',
   mData: function (source, type, val) {
     if (source.devices) {
       return source.devices.join('; ');
