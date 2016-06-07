@@ -25,6 +25,7 @@ $(function () {
     sAjaxSource: '/binders/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -48,6 +49,7 @@ $(function () {
     sAjaxSource: '/transferredbinders/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -73,6 +75,7 @@ $(function () {
     sAjaxSource: '/sharedbinders/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -97,6 +100,7 @@ $(function () {
     sAjaxSource: '/groupsharedbinders/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -121,6 +125,7 @@ $(function () {
     sAjaxSource: '/archivedbinders/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],

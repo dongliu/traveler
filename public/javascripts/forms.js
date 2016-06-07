@@ -86,6 +86,7 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -116,6 +117,7 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -146,6 +148,7 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -175,6 +178,7 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -204,15 +208,14 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
       [10, 50, 100, 'All']
     ],
     oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-      sZeroRecords: 'No records to display.',
-      sInfoEmpty: 'No entries to display.'
+      sLoadingRecords: 'Please wait - loading data from the server ...'
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,

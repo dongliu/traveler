@@ -85,6 +85,7 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -113,6 +114,7 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -144,6 +146,7 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -171,6 +174,7 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
@@ -198,6 +202,7 @@ $(function () {
       });
     },
     bAutoWidth: false,
+    bProcessing: true,
     iDisplayLength: 10,
     aLengthMenu: [
       [10, 50, 100, -1],
