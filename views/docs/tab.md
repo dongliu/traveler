@@ -3,14 +3,14 @@ The forms, travelers, and binders pages use tabs for different list of entities.
 
 A typical table has 6 areas each of which either hold a tool or display information. 
 
-|position | content|
-|---------| --------|
-|top left | a select input to change the number of records shown per page |
-|top middle | show a message when the data inside the table is in processing |
-|top right | a text input to filter all the columns in the table |
-|bottom row | text inputs to filter the corresponding table column |
-|bottom left | the numbers of entries out of the total number shown in the view |
-|bottom right | pagination controls |  
+|area | location | content|
+|---------| --------|-------- |
+|1 | top left | a select input to change the number of records shown per page |
+|2 | top middle | show a message when the data inside the table is in processing |
+|3 | top right | a text input to filter all the columns in the table |
+|4 | bottom row | text inputs to filter the corresponding table column |
+|5 | bottom left | the numbers of entries out of the total number shown in the view |
+|6 | bottom right | pagination controls |  
 
 </br>
 <img src="../images/data-tables.png" alt="the areas of a data table">
