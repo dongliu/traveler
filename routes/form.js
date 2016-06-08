@@ -373,6 +373,7 @@ module.exports = function (app) {
     var form = {};
     if (req.body.html) {
       form.html = req.body.html;
+      form.clonedFrom = req.body.id;
     } else {
       form.html = '';
     }
@@ -399,6 +400,7 @@ module.exports = function (app) {
     form.title = sanitize(doc.title) + ' clone';
     form.createdBy = req.session.userid;
     form.createdOn = Date.now();
+    form.clonedFrom = doc._id;
     form.sharedWith = [];
 
     (new Form(form)).save(function (saveErr, newform) {
