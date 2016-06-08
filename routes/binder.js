@@ -71,7 +71,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/binders/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['title', 'description']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
+  app.put('/binders/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['title', 'description']), reqUtils.sanitize('body', ['title', 'description']), function (req, res) {
     var k;
     var doc = req[req.params.id];
     for (k in req.body) {
@@ -386,7 +386,7 @@ module.exports = function (app) {
 
   });
 
-  app.put('/binders/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
+  app.put('/binders/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['name']), function (req, res) {
     var doc = req[req.params.id];
     shareLib.changeOwner(req, res, doc);
   });
@@ -616,12 +616,12 @@ module.exports = function (app) {
     });
   }
 
-  app.post('/binders/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['travelers', 'binders']), function (req, res) {
+  app.post('/binders/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['travelers', 'binders']), function (req, res) {
     addWork(req[req.params.id], req, res);
   });
 
 
-  app.delete('/binders/:id/works/:wid', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), function (req, res) {
+  app.delete('/binders/:id/works/:wid', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), function (req, res) {
     var p = req[req.params.id];
     var work = p.works.id(req.params.wid);
 
@@ -643,7 +643,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/binders/:id/works/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), function (req, res) {
+  app.put('/binders/:id/works/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), function (req, res) {
     var binder = req[req.params.id];
     var works = binder.works;
     var updates = req.body;
