@@ -402,7 +402,7 @@ module.exports = function (app) {
 
   });
 
-  app.put('/travelers/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
+  app.put('/travelers/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.status('id', [0, 1, 1.5]), reqUtils.filter('body', ['name']), function (req, res) {
     var doc = req[req.params.id];
     shareLib.changeOwner(req, res, doc);
   });
@@ -422,7 +422,7 @@ module.exports = function (app) {
   });
 
   // use the form in the request as the active form
-  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['html', '_id', 'title']), reqUtils.hasAll('body', ['html', '_id', 'title']), reqUtils.sanitize('body', ['html', 'title']), function addForm(req, res) {
+  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['html', '_id', 'title']), reqUtils.hasAll('body', ['html', '_id', 'title']), reqUtils.sanitize('body', ['html', 'title']), function addForm(req, res) {
     var doc = req[req.params.id];
     if (doc.status > 1 || doc.archived) {
       return res.send(400, 'cannot update form because of current traveler state');
@@ -449,7 +449,7 @@ module.exports = function (app) {
   });
 
   // set active form
-  app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), function putActiveForm(req, res) {
+  app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.status('id', [0, 1]), function putActiveForm(req, res) {
     var doc = req[req.params.id];
     if (doc.status > 1 || doc.archived) {
       return res.send(400, 'cannot update form because of current traveler state');
@@ -480,7 +480,7 @@ module.exports = function (app) {
   });
 
   // set form alias
-  app.put('/travelers/:id/forms/:fid/alias', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['value']), reqUtils.sanitize('body', ['value']), function putFormAlias(req, res) {
+  app.put('/travelers/:id/forms/:fid/alias', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['value']), reqUtils.sanitize('body', ['value']), function putFormAlias(req, res) {
     var doc = req[req.params.id];
     if (doc.status > 1 || doc.archived) {
       return res.send(400, 'cannot update form because of current traveler state');
@@ -501,7 +501,7 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['title', 'description', 'deadline']), reqUtils.sanitize('body', ['title', 'description', 'deadline']), function (req, res) {
+  app.put('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['title', 'description', 'deadline']), reqUtils.sanitize('body', ['title', 'description', 'deadline']), function (req, res) {
     var doc = req[req.params.id];
     var k;
     for (k in req.body) {
@@ -585,7 +585,7 @@ module.exports = function (app) {
   });
 
 
-  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['newdevice']), reqUtils.sanitize('body', ['newdevice']), function (req, res) {
+  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newdevice']), reqUtils.sanitize('body', ['newdevice']), function (req, res) {
     var newdevice = req.body.newdevice;
     if (!newdevice) {
       return res.send(400, 'the new device name not accepted');
@@ -608,7 +608,7 @@ module.exports = function (app) {
     });
   });
 
-  app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+  app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
@@ -637,11 +637,8 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/travelers/:id/data/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['name', 'value', 'type']), reqUtils.hasAll('body', ['name', 'value', 'type']), reqUtils.sanitize('body', ['name', 'value', 'type']), function (req, res) {
+  app.post('/travelers/:id/data/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [1]), reqUtils.filter('body', ['name', 'value', 'type']), reqUtils.hasAll('body', ['name', 'value', 'type']), reqUtils.sanitize('body', ['name', 'value', 'type']), function (req, res) {
     var doc = req[req.params.id];
-    if (doc.status !== 1) {
-      return res.send(400, 'The traveler ' + req.params.id + ' is not active');
-    }
     var data = new TravelerData({
       traveler: doc._id,
       name: req.body.name,
@@ -689,11 +686,6 @@ module.exports = function (app) {
 
   app.post('/travelers/:id/notes/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['name', 'value']), reqUtils.hasAll('body', ['name', 'value']), reqUtils.sanitize('body', ['name', 'value']), function (req, res) {
     var doc = req[req.params.id];
-
-    // allow add note for all status
-    // if (doc.status !== 1) {
-    //   return res.send(400, 'The traveler ' + req.params.id + ' is not active');
-    // }
     var note = new TravelerNote({
       traveler: doc._id,
       name: req.body.name,
@@ -723,16 +715,8 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+  app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [1, 1.5, 2]), reqUtils.filter('body', ['finishedInput']), function (req, res) {
     var doc = req[req.params.id];
-    if (doc.status < 1 || doc.status >= 2) {
-      return res.send(400, 'The traveler ' + req.params.id + ' is not active');
-    }
-
-    if (!req.body.hasOwnProperty('finishedInput')) {
-      return res.send(400, 'need finished input number');
-    }
-
     doc.update({
       finishedInput: req.body.finishedInput
     }, function (saveErr) {
@@ -744,11 +728,8 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/travelers/:id/uploads/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+  app.post('/travelers/:id/uploads/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [1]), function (req, res) {
     var doc = req[req.params.id];
-    if (doc.status !== 1) {
-      return res.send(400, 'The traveler ' + req.params.id + ' is not active');
-    }
 
     if (underscore.isEmpty(req.files)) {
       return res.send(400, 'Expecte One uploaded file');
