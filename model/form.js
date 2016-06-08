@@ -11,11 +11,18 @@ publicAccess := 0 // for read or
         | 1 // for write or
         | -1 // no access
 ******/
+/******
+status := 0 // editable
+        | 1 // published
+        | 2 // obsoleted
+******/
+
 
 var form = new Schema({
   title: String,
   createdBy: String,
   createdOn: Date,
+  clonedFrom: ObjectId,
   updatedBy: String,
   updatedOn: Date,
   owner: String,

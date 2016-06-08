@@ -32,6 +32,7 @@ function sendRequest(data, cb, saveas) {
   if (saveas) {
     url = prefix + '/forms/';
     type = 'POST';
+    data.id = id;
   } else {
     url = path;
     type = 'PUT';
