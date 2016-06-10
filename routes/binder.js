@@ -419,14 +419,14 @@ module.exports = function (app) {
       } else {
         p.status = s;
       }
-    } else if (s === 2) {
+    }
+
+    if (s === 2) {
       if ([1].indexOf(p.status) === -1) {
         return res.send(400, 'invalid status change');
       } else {
         p.status = s;
       }
-    } else {
-      return res.send(400, 'invalid status');
     }
 
     p.save(function (err) {
