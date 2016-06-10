@@ -13,6 +13,7 @@ publicAccess := 0 // for read or
 ******/
 /******
 status := 0 // editable
+        | 0.5 // ready to publish
         | 1 // published
         | 2 // obsoleted
 ******/
@@ -26,6 +27,10 @@ var form = new Schema({
   updatedBy: String,
   updatedOn: Date,
   owner: String,
+  status: {
+    type: Number,
+    default: 0
+  },
   transferredOn: Date,
   archivedOn: Date,
   archived: {

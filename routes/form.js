@@ -177,6 +177,7 @@ module.exports = function (app) {
         id: req.params.id,
         title: form.title,
         html: form.html,
+        status: form.status,
         prefix: req.proxied ? req.proxied_prefix : ''
       });
     }
@@ -439,7 +440,7 @@ module.exports = function (app) {
     shareLib.changeOwner(req, res, doc);
   });
 
-  app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['html', 'title']), reqUtils.sanitize('body', ['html', 'title']), function (req, res) {
+  app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canWriteMw('id'), reqUtils.status('id', [0]), reqUtils.filter('body', ['html', 'title']), reqUtils.sanitize('body', ['html', 'title']), function (req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
@@ -464,5 +465,60 @@ module.exports = function (app) {
       }
       return res.json(newDoc);
     });
+  });
+
+  app.put('/forms/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
+    var f = req[req.params.id];
+    var s = req.body.status;
+
+    if ([0, 0.5, 1, 2].indexOf(s) === -1) {
+      return res.send(400, 'invalid status');
+    }
+
+    // no change
+    if (f.status === s) {
+      return res.send(204);
+    }
+
+    if (s === 0) {
+      if ([0.5].indexOf(f.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        f.status = s;
+      }
+    }
+
+    if (s === 0.5) {
+      if ([0].indexOf(f.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        f.status = s;
+      }
+    }
+
+    if (s === 1) {
+      if ([0.5].indexOf(f.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        f.status = s;
+      }
+    }
+
+    if (s === 2) {
+      if ([1].indexOf(f.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        f.status = s;
+      }
+    }
+
+    f.save(function (err) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.send(200, 'status updated to ' + s);
+    });
+
   });
 };

@@ -190,6 +190,19 @@ function formatTravelerStatus(s) {
   return 'unknown';
 }
 
+function formatFormStatus(s) {
+  var status = {
+    '0': 'editable',
+    '0.5': 'ready to publish',
+    '1': 'published',
+    '2': 'obsoleted'
+  };
+  if (status[s.toString()]) {
+    return status[s.toString()];
+  }
+  return 'unknown';
+}
+
 $.fn.dataTableExt.oApi.fnAddDataAndDisplay = function (oSettings, aData) {
   /* Add the data */
   var iAdded = this.oApi._fnAddData(oSettings, aData);
@@ -727,6 +740,15 @@ var statusColumn = {
   mData: 'status',
   mRender: function (data, type, full) {
     return formatTravelerStatus(data);
+  },
+  bFilter: true
+};
+
+var formStatusColumn = {
+  sTitle: 'Status',
+  mData: 'status',
+  mRender: function (data, type, full) {
+    return formatFormStatus(data);
   },
   bFilter: true
 };

@@ -872,6 +872,8 @@ $(function () {
   disableAjaxCache();
 
   init();
-  working();
+  if (status === 0) {
+    working();
+  }
   binding_events();
 });
