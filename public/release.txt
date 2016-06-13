@@ -1,16 +1,16 @@
 release v3.0.0
 - add a new main page with log in and feature highlights
 - separate form list page and traveler list page
-- add work package feature
-- work package list models views and controllers
-- work package share models views and controllers
-- work package configuration models views and controllers
-- enable transfer of ownership for forms, travelers, and work packages
-- enable public access control for form/traveler/package
-- add public form/traveler/package views and controllers
+- add binder feature
+- binder list models views and controllers
+- binder share models views and controllers
+- binder configuration models views and controllers
+- enable transfer of ownership for forms, travelers, and binders
+- enable public access control for form/traveler/binder
+- add public form/traveler/binder views and controllers
 - enable to archive/de-archive forms
 - enable to create travelers from shared forms
-- add transfered form/traveler/package list tab
+- add transfered form/traveler/binder list tab
 - change bootstrap tabs from vertical to horizontal for better display on
   various devices
 - use user photo for user display
