@@ -10,7 +10,7 @@ release v3.0.0
 - add public form/traveler/binder views and controllers
 - enable to archive/de-archive forms
 - enable to create travelers from shared forms
-- add transfered form/traveler/binder list tab
+- add transferred form/traveler/binder list tab
 - change bootstrap tabs from vertical to horizontal for better display on
   various devices
 - use user photo for user display
