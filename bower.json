@@ -1,0 +1,29 @@
+{
+  "name": "traveler",
+  "version": "0.0.1",
+  "homepage": "https://github.com/dongliu/traveler",
+  "authors": [
+    "Dong Liu <edongliu@gmail.com>",
+    "Pengquan Wen <wenpq@mail.ustc.edu.cn>"
+  ],
+  "description": "Use bower to manage web front end dependencies",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~1.9.1",
+    "bootstrap": "~2.3.2",
+    "bootstrap-datepicker": "~1.5.1",
+    "datatables": "~1.9.4",
+    "font-awesome": "~4.3.0"
+  },
+  "resolutions": {
+    "jquery": "~1.9.1"
+  }
+}

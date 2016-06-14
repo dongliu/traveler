@@ -1,6 +1,9 @@
 # Node modules #
 node_modules/
 
+# front dependencies
+bower_components/
+
 # Git related files. #
 *.orig
 
@@ -33,3 +36,6 @@ config/alias.json
 
 # npm stuff #
 npm-debug.log*
+
+#ide file
+.idea/
