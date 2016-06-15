@@ -12,6 +12,16 @@ var rotator = require('file-stream-rotator');
 var config = require('./config/config.js');
 
 var mongoose = require('mongoose');
+
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var methodOverride = require('method-override');
+var session = require('express-session');
+var bodyParser = require('body-parser');
+var errorHandler = require('errorhandler');
+var compression = require('compression');
+var cookieParser = require('cookie-parser');
+
 mongoose.connection.close();
 
 require('./model/user.js');
@@ -83,47 +93,47 @@ if (app.get('env') === 'production') {
   });
 }
 
-app.configure(function () {
-  app.set('port', process.env.PORT || config.app.port);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  if (app.get('env') === 'production') {
-    app.use(express.logger({
-      stream: access_logfile
-    }));
-  }
-  app.use(express.compress());
-  app.use(express.static(path.join(__dirname, 'public')));
-  app.use(express.static(path.join(__dirname, 'bower_components')));
-  app.use(express.favicon(__dirname + '/public/favicon.ico'));
-  if (app.get('env') === 'development') {
-    app.use(express.logger('dev'));
-  }
-  app.use(express.methodOverride());
-  app.use(express.cookieParser());
-  app.use(express.session({
-    secret: config.app.cookie_sec || 'traveler_secret',
-    cookie: {
-      maxAge: config.app.cookie_life || 28800000
-    }
-  }));
-  app.use(multer({
-    dest: config.app.upload_dir,
-    limits: {
-      files: 1,
-      fileSize: (config.app.upload_size || 10) * 1024 * 1024
-    }
-  }));
-  app.use(express.json());
-  app.use(express.urlencoded());
-  app.use(auth.proxied);
-  app.use(auth.sessionLocals);
-  app.use(app.router);
-});
 
-app.configure('development', function () {
-  app.use(express.errorHandler());
-});
+app.set('port', process.env.PORT || config.app.port);
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+if (app.get('env') === 'production') {
+  app.use(logger({
+    stream: access_logfile
+  }));
+}
+app.use(compression());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'bower_components')));
+app.use(favicon(__dirname + '/public/favicon.ico'));
+if (app.get('env') === 'development') {
+  app.use(logger('dev'));
+}
+app.use(methodOverride());
+app.use(cookieParser());
+app.use(session({
+  secret: config.app.cookie_sec || 'traveler_secret',
+  cookie: {
+    maxAge: config.app.cookie_life || 28800000
+  },
+  resave: true,
+  saveUninitialized: true
+}));
+app.use(multer({
+  dest: config.app.upload_dir,
+  limits: {
+    files: 1,
+    fileSize: (config.app.upload_size || 10) * 1024 * 1024
+  }
+}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(auth.proxied);
+app.use(auth.sessionLocals);
+
+if ('development' == app.get('env')) {
+  app.use(errorHandler());
+}
 
 require('./routes/form')(app);
 
@@ -160,14 +170,12 @@ app.get('/apis', function (req, res) {
 });
 
 api.enable('strict routing');
-api.configure(function () {
-  api.set('port', process.env.APIPORT || config.api.port);
-  api.use(express.logger('dev'));
-  // api.use(express.logger({stream: access_logfile}));
-  api.use(auth.basicAuth);
-  api.use(express.compress());
-  api.use(api.router);
-});
+
+api.set('port', process.env.APIPORT || config.api.port);
+api.use(logger('dev'));
+api.use(auth.basicAuth);
+api.use(compression());
+
 
 require('./routes/api')(api);
 

@@ -20,7 +20,7 @@ module.exports = function (app) {
     }, function (err, response, resBody) {
       if (err) {
         console.log(err);
-        return res.send(503, 'cannot retrieve device list from' + service.device.url);
+        return res.status(503).send('cannot retrieve device list from' + service.device.url);
       }
       res.status(response.statusCode);
       if (response.statusCode === 200) {

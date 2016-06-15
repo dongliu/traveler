@@ -10,7 +10,7 @@ module.exports = function (app) {
     }).exec(function (err, user) {
       if (err) {
         console.error(err);
-        return res.send(500, 'something is wrong with the DB.');
+        return res.status(500).send('something is wrong with the DB.');
       }
       return res.render('profile', {
         user: user,
@@ -22,7 +22,7 @@ module.exports = function (app) {
   // user update her/his profile. This is a little different from the admin update the user's roles.
   app.put('/profile', auth.ensureAuthenticated, function (req, res) {
     if (!req.is('json')) {
-      return res.json(415, {
+      return res.status(415).json({
         error: 'json request expected.'
       });
     }
@@ -33,11 +33,11 @@ module.exports = function (app) {
     }).exec(function (err, user) {
       if (err) {
         console.error(err);
-        return res.json(500, {
+        return res.status(500).json({
           error: err.message
         });
       }
-      res.send(204);
+      res.status(204).end();
     });
   });
 };

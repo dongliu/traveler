@@ -19,9 +19,9 @@ module.exports = function (app) {
     Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      return res.json(200, travelers);
+      return res.status(200).json(travelers);
     });
   });
 
@@ -29,12 +29,12 @@ module.exports = function (app) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       if (!doc) {
-        return res.send(410, 'gone');
+        return res.status(410).send('gone');
       }
-      return res.json(200, doc);
+      return res.status(200).json(doc);
     });
   });
 
@@ -42,10 +42,10 @@ module.exports = function (app) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       if (!doc) {
-        return res.send(410, 'gone');
+        return res.status(410).send('gone');
       }
       TravelerData.find({
         _id: {
@@ -54,9 +54,9 @@ module.exports = function (app) {
       }, 'name value inputType inputBy inputOn').exec(function (err, docs) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        return res.json(200, docs);
+        return res.status(200).json(docs);
       });
     });
   });
@@ -65,10 +65,10 @@ module.exports = function (app) {
     Traveler.findById(req.params.id, function (err, doc) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       if (!doc) {
-        return res.send(410, 'gone');
+        return res.status(410).send('gone');
       }
       TravelerNote.find({
         _id: {
@@ -77,9 +77,9 @@ module.exports = function (app) {
       }, 'name value inputBy inputOn').exec(function (err, docs) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        return res.json(200, docs);
+        return res.status(200).json(docs);
       });
     });
   });
@@ -88,20 +88,20 @@ module.exports = function (app) {
     TravelerData.findById(req.params.id).exec(function (err, data) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       if (!data) {
-        return res.send(410, 'gone');
+        return res.status(410).send('gone');
       }
       if (data.inputType === 'file') {
         fs.exists(data.file.path, function (exists) {
           if (exists) {
             return res.sendfile(data.file.path);
           }
-          return res.send(410, 'gone');
+          return res.status(410).send('gone');
         });
       } else {
-        res.json(200, data);
+        res.status(200).json(data);
       }
     });
   });
