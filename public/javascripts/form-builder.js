@@ -872,7 +872,7 @@ $(function () {
   disableAjaxCache();
 
   init();
-  if (status === 0) {
+  if (formStatus === 0) {
     working();
   }
   binding_events();

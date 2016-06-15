@@ -1,4 +1,5 @@
 release v3.0.0
+data: June, 2016
 - add a new main page with log in and feature highlights
 - separate form list page and traveler list page
 - add binder feature
@@ -20,6 +21,11 @@ release v3.0.0
 - refactor server JS lib and ESLint the files
 - update dependent JS libraries
 - new documents
+
+release v2.4.2
+date: April 11, 2016
+- explicit log in url in messages
+- increase upload file size limit to 10MB
 
 release v2.4.1
 date: March 30, 2016

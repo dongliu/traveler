@@ -456,7 +456,7 @@ $(function () {
       $cgw.children('.control-group-buttons').remove();
       return;
     }
-    if (file.size > 5000000) {
+    if (file.size > 10 * 1024 * 1024) {
       $validation.html('<p class="text-error">' + file.size + ' is too large to upload</p>');
       $cgw.children('.control-group-buttons').remove();
       return;

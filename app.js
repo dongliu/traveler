@@ -111,7 +111,7 @@ app.configure(function () {
     dest: config.app.upload_dir,
     limits: {
       files: 1,
-      fileSize: (config.app.upload_size || 5) * 1024 * 1024
+      fileSize: (config.app.upload_size || 10) * 1024 * 1024
     }
   }));
   app.use(express.json());
