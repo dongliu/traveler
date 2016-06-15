@@ -93,7 +93,7 @@ app.configure(function () {
     }));
   }
   app.use(express.compress());
-  // app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.static(path.join(__dirname, 'public')));
   app.use(express.static(path.join(__dirname, 'bower_components')));
   app.use(express.favicon(__dirname + '/public/favicon.ico'));
   if (app.get('env') === 'development') {

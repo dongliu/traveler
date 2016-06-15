@@ -20,7 +20,6 @@
     "jquery": "~1.9.1",
     "bootstrap": "~2.3.2",
     "bootstrap-datepicker": "~1.5.1",
-    "datatables": "~1.9.4",
     "font-awesome": "~4.3.0"
   },
   "resolutions": {
