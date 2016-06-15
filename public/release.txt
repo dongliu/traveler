@@ -1,4 +1,5 @@
 release v3.0.0
+data: June, 2016
 - add a new main page with log in and feature highlights
 - separate form list page and traveler list page
 - add binder feature
