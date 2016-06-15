@@ -22,6 +22,11 @@ data: June, 2016
 - update dependent JS libraries
 - new documents
 
+release v2.4.2
+date: April 11, 2016
+- explicit log in url in messages
+- increase upload file size limit to 10MB
+
 release v2.4.1
 date: March 30, 2016
 - bug fixes for form manager for traveler
