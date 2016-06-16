@@ -16,6 +16,8 @@ node_modules/
 # special folders #
 logs/*
 !logs/readme
+userphoto/*
+!userphoto/readme
 doc/
 uploads
 config/ad.json
@@ -24,7 +26,10 @@ config/node.key
 config/api.json
 config/service.json
 config/auth.json
+config/app.json
+config/mongo.json
 config/alias.json
+
 
 # npm stuff #
 npm-debug.log*

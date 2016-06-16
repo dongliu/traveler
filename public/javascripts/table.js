@@ -21,10 +21,19 @@ function selectEvent() {
 
 
 function filterEvent() {
-  $('tfoot').on('keyup', 'input', function (e) {
+  $('.filter').on('keyup', 'input', function (e) {
     var table = $(this).closest('table');
     var th = $(this).closest('th');
-    table.dataTable().fnFilter(this.value, $('tfoot th', table).index(th));
+    var filter = $(this).closest('.filter');
+    var index;
+    if (filter.is('thead')) {
+      index = $('thead.filter th', table).index(th);
+      $('tfoot.filter th:nth-child(' + (index + 1) + ') input', table).val(this.value);
+    } else {
+      index = $('tfoot.filter th', table).index(th);
+      $('thead.filter th:nth-child(' + (index + 1) + ') input', table).val(this.value);
+    }
+    table.dataTable().fnFilter(this.value, index);
   });
 }
 
@@ -47,8 +56,26 @@ function personColumn(title, key) {
     sTitle: title,
     mData: key,
     sDefaultContent: '',
+    mRender: function (data, type) {
+      if (type === 'sort' || type === 'filter') {
+        return data;
+      } else if (data) {
+        return '<img class="user" data-src="holder.js/27x40?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/adusers/' + data + '/photo" title="' + data + '">';
+      } else {
+        return '';
+      }
+    },
+    bFilter: true
+  };
+}
+
+function personNameColumn(title, key) {
+  return {
+    sTitle: title,
+    mData: key,
+    sDefaultContent: '',
     mRender: function (data, type, full) {
-      return '<a href = "' + prefix + '/users/' + data + '" target="_blank">' + data + '</a>';
+      return '<a href = "/usernames/' + data + '" target="_blank">' + data + '</a>';
     },
     bFilter: true
   };
@@ -71,9 +98,10 @@ function fnUnwrap(oTableLocal) {
 
 
 function fnGetSelected(oTableLocal, selectedClass) {
-  var aReturn = [];
+  var aReturn = [],
+    i;
   var aTrs = oTableLocal.fnGetNodes();
-  var i;
+
   for (i = 0; i < aTrs.length; i++) {
     if ($(aTrs[i]).hasClass(selectedClass)) {
       aReturn.push(aTrs[i]);
@@ -83,8 +111,9 @@ function fnGetSelected(oTableLocal, selectedClass) {
 }
 
 function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
-  var aTrs = oTableLocal.fnGetNodes();
-  var i;
+  var aTrs = oTableLocal.fnGetNodes(),
+    i;
+
   for (i = 0; i < aTrs.length; i++) {
     if ($(aTrs[i]).hasClass(selectedClass)) {
       $(aTrs[i]).removeClass(selectedClass);
@@ -97,12 +126,14 @@ function fnSelectAll(oTableLocal, selectedClass, checkboxClass, filtered) {
   fnDeselect(oTableLocal, selectedClass, checkboxClass);
   var rows, i;
   if (filtered) {
-    rows = oTableLocal.$('tr', {"filter":"applied"});
+    rows = oTableLocal.$('tr', {
+      "filter": "applied"
+    });
   } else {
     rows = oTableLocal.$('tr');
   }
 
-  for(i = 0; i < rows.length; i += 1) {
+  for (i = 0; i < rows.length; i += 1) {
     $(rows[i]).addClass(selectedClass);
     $(rows[i]).find('input.' + checkboxClass).prop('checked', true);
   }
@@ -130,7 +161,19 @@ function fnAddFilterFoot(sTable, aoColumns) {
       tr.append('<th></th>');
     }
   });
-  $(sTable).append($('<tfoot>').append(tr));
+  $(sTable).append($('<tfoot class="filter">').append(tr));
+}
+
+function fnAddFilterHead(sTable, aoColumns) {
+  var tr = $('<tr role="row">');
+  aoColumns.forEach(function (c) {
+    if (c.bFilter) {
+      tr.append('<th><input type="text" placeholder="' + c.sTitle + '" style="width:80%;" autocomplete="off"></th>');
+    } else {
+      tr.append('<th></th>');
+    }
+  });
+  $(sTable).append($('<thead class="filter">').append(tr));
 }
 
 function formatTravelerStatus(s) {
@@ -140,6 +183,19 @@ function formatTravelerStatus(s) {
     '2': 'completed',
     '3': 'frozen',
     '0': 'initialized'
+  };
+  if (status[s.toString()]) {
+    return status[s.toString()];
+  }
+  return 'unknown';
+}
+
+function formatFormStatus(s) {
+  var status = {
+    '0': 'editable',
+    '0.5': 'ready to publish',
+    '1': 'published',
+    '2': 'obsoleted'
   };
   if (status[s.toString()]) {
     return status[s.toString()];
@@ -224,6 +280,15 @@ var previewColumn = {
   }
 };
 
+var removeColumn = {
+  sTitle: '',
+  mData: '_id',
+  bSortable: false,
+  mRender: function (data) {
+    return '<a data-toggle="tooltip" title="remove the item" class="remove text-warning" id="' + data + '"><i class="fa fa-trash fa-lg"></i></a>';
+  }
+};
+
 var referenceFormLinkColumn = {
   sTitle: 'Reference',
   mData: 'reference',
@@ -277,20 +342,41 @@ var formLinkColumn = {
 
 var formShareLinkColumn = {
   sTitle: '',
-  mData: '_id',
-  mRender: function (data, type, full) {
-    return '<a href="' + prefix + '/forms/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
+  mData: function (source) {
+    if (source.publicAccess >= 0) {
+      return '<a href="' + prefix + '/forms/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+    }
+    return '<a href="' + prefix + '/forms/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
 
 var createdOnColumn = dateColumn('Created', 'createdOn');
 var createdByColumn = personColumn('Created by', 'createdBy');
+var ownerColumn = {
+  sTitle: 'Owner',
+  sDefaultContent: '',
+  mData: function (source, type) {
+    var owner = source.owner || source.createdBy;
+    if (type === 'sort' || type === 'filter') {
+      return owner;
+    } else if (owner) {
+      return '<a target="_blank" href="/users/' + owner + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + owner.substr(0, 1).toUpperCase() + '" src="/adusers/' + owner + '/photo" title="' + owner + '"></a>';
+    } else {
+      return '';
+    }
+  },
+  bFilter: true
+};
 
 var clonedByColumn = personColumn('Cloned by', 'clonedBy');
 
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
+
+var transferredOnColumn = dateColumn('transferred', 'transferredOn');
+
+var archivedOnColumn = dateColumn('Archived', 'archivedOn');
 
 var deadlineColumn = dateColumn('Deadline', 'deadline');
 
@@ -316,6 +402,7 @@ var commentsColumn = {
 
 var titleColumn = {
   sTitle: 'Title',
+  sDefaultContent: 'unknown',
   mData: 'title',
   bFilter: true
 };
@@ -345,9 +432,45 @@ var travelerConfigLinkColumn = {
 
 var travelerShareLinkColumn = {
   sTitle: '',
+  mData: function (source) {
+    if (source.publicAccess >= 0) {
+      return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+    }
+    return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
+var binderLinkColumn = {
+  sTitle: '',
+  mData: function (source, type, val) {
+    if (source.hasOwnProperty('url')) {
+      return '<a href="' + source.url + '" target="_blank" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>';
+    }
+    if (source.hasOwnProperty('_id')) {
+      return '<a href="' + prefix + '/binders/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>';
+    }
+    return 'unknown';
+  },
+  bSortable: false
+};
+
+var binderConfigLinkColumn = {
+  sTitle: '',
   mData: '_id',
   mRender: function (data, type, full) {
-    return '<a href="' + prefix + '/travelers/' + data + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/binders/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the binder"><i class="fa fa-gear fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
+var binderShareLinkColumn = {
+  sTitle: '',
+  mData: function (source) {
+    if (source.publicAccess >= 0) {
+      return '<a href="' + prefix + '/binders/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the binder" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+    }
+    return '<a href="' + prefix + '/binders/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the binder"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -361,39 +484,127 @@ var deviceTravelerLinkColumn = {
   bSortable: false
 };
 
-var progressColumn = {
+function progressBar(active, finished, inProgress, text, width) {
+  var w = width || '100px';
+  var t = text || '';
+  var bar = $('<div class="progress" style="width: ' + w + ';"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div><div class="progress-value">' + t + '</div></div>');
+  if (active) {
+    bar.addClass('active').addClass('progress-striped');
+  }
+  return bar[0].outerHTML;
+}
+
+
+var travelerProgressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
   sType: 'numeric',
-  mData: function (source, type, val) {
+  bAutoWidth: false,
+  sWidth: '105px',
+  mData: function (source, type) {
+    if (source.status === 2) {
+      if (type === 'sort') {
+        return 1;
+      }
+      return progressBar(false, 100, 0);
+    }
+
+    var inProgress;
+
     if (!source.hasOwnProperty('totalInput')) {
       if (type === 'sort') {
         return 0;
       }
-      return '';
+      return 'unknown';
     }
+
     if (source.totalInput === 0) {
       if (type === 'sort') {
         return 0;
       }
-      return '';
+      return progressBar(source.status === 1, 0, 0);
     }
+
     if (!source.hasOwnProperty('finishedInput')) {
       if (type === 'sort') {
         return 0;
       }
       return 'unknown';
     }
-    var percentage = Math.floor((source.finishedInput / source.totalInput) * 100);
-    if (type === 'sort') {
-      return percentage;
+
+    inProgress = Math.floor(source.finishedInput / source.totalInput * 100);
+
+    return progressBar(source.status === 1, 0, inProgress, '' + source.finishedInput + ' / ' + source.totalInput);
+  }
+
+};
+
+
+var workProgressColumn = {
+  sTitle: 'Estimated progress',
+  bSortable: true,
+  sType: 'numeric',
+  bAutoWidth: false,
+  sWidth: '210px',
+  mData: function (source, type) {
+    var w = '200px'
+    if (source.status === 2) {
+      if (type === 'sort') {
+        return 1;
+      }
+      return progressBar(false, 100, 0, '' + source.value + ' + 0 / ' + source.value, w);
     }
-    return '<div class="progress" style="margin-bottom: 0; width: 100px; background: #FFFF00; position: relative;"><div class="bar" style="width:' + percentage + '%;"></div><span style="position: absolute; text-align: center; width: 100%; z-index: 100; color: #000000; display: block;">' + source.finishedInput + '/' + source.totalInput + '</span></div>';
+
+    var inProgress = source.inProgress;
+    var finished = 0;
+
+    if (source.hasOwnProperty('finished')) {
+      finished = source.finished;
+    }
+
+    if (type === 'sort') {
+      return finished + inProgress;
+    }
+
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(finished * source.value) + ' + ' + Math.round(inProgress * source.value) + ' / ' + source.value, w);
+  }
+
+};
+
+var binderProgressColumn = {
+  sTitle: 'Estimated progress',
+  bSortable: true,
+  sType: 'numeric',
+  bAutoWidth: false,
+  sWidth: '105px',
+  mData: function (source, type, val) {
+    if (source.status === 2) {
+      if (type === 'sort') {
+        return 1;
+      }
+      return progressBar(false, 100, 0);
+    }
+
+    if (source.totalValue === 0) {
+      if (type === 'sort') {
+        return 0;
+      }
+      return progressBar(source.status === 1, 0, 0);
+    }
+
+    var inProgress = source.inProgressValue / source.totalValue;
+    var finished = source.finishedValue / source.totalValue;
+
+    if (type === 'sort') {
+      return finished + inProgress;
+    }
+
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + source.finishedValue + ' + ' + source.inProgressValue + ' / ' + source.totalValue);
   }
 };
 
 var deviceColumn = {
-  sTitle: 'Devices',
+  sTitle: 'Tags',
   mData: function (source, type, val) {
     if (source.devices) {
       return source.devices.join('; ');
@@ -403,22 +614,109 @@ var deviceColumn = {
   bFilter: true
 };
 
-var sharedWithColumn = {
-  sTitle: 'Shared with',
+var deviceTagColumn = {
+  sTitle: 'Tags',
+  sDefaultContent: '',
   mData: function (source, type, val) {
-    if (source.sharedWith) {
-      if (source.sharedWith.length === 0) {
-        return '';
-      }
-      var names = source.sharedWith.map(function (u) {
-        return u.username;
-      });
-      return names.join('; ');
+    if (source.tags) {
+      return source.tags.join();
+    } else if (source.devices) {
+      return source.devices.join('; ');
     }
     return '';
   },
   bFilter: true
 };
+
+function usersColumn(title, prop) {
+  return {
+    sTitle: title,
+    mData: function (source, type) {
+      if (source[prop]) {
+        if (source[prop].length === 0) {
+          return '';
+        }
+        var names = source[prop].map(function (u) {
+          if (!u._id) {
+            return u;
+          }
+          if (type === 'filter' || type === 'sort') {
+            return u.username;
+          } else {
+            return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
+          }
+        });
+        if (type === 'filter' || type === 'sort') {
+          return names.join('; ');
+        } else {
+          return names.join(' ');
+        }
+      }
+      return '';
+    },
+    bFilter: true
+  };
+}
+
+function usersFilteredColumn(title, filter) {
+  return {
+    sTitle: title,
+    mData: function (source, type) {
+      var users = filter(source);
+      if (users.length === 0) {
+        return '';
+      }
+      var names = users.map(function (u) {
+        if (!u._id) {
+          return u;
+        }
+        if (type === 'filter' || type === 'sort') {
+          return u.username;
+        } else {
+          return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
+        }
+      });
+      if (type === 'filter' || type === 'sort') {
+        return names.join('; ');
+      } else {
+        return names.join(' ');
+      }
+    },
+    bFilter: true
+  };
+}
+
+var sharedWithColumn = usersColumn('Shared with', 'sharedWith');
+
+function notIn(user, users) {
+  var i;
+  for (i = 0; i < users.length; i += 1) {
+    if (users[i]._id === user._id) {
+      return false;
+    }
+  }
+  return true;
+}
+
+var manPowerColumn = usersFilteredColumn('Powered by', function (source) {
+  var out = [];
+  source.manPower.forEach(function (m) {
+    if (notIn(m, out)) {
+      out.push(m);
+    }
+  });
+
+  source.sharedWith.forEach(function (s) {
+    if (s.access === 1) {
+      if (notIn(s, out)) {
+        out.push(s);
+      }
+    }
+  });
+  return out;
+});
+
+var filledByColumn = usersColumn('Filled by', 'manPower');
 
 var sharedGroupColumn = {
   sTitle: 'Shared groups',
@@ -446,8 +744,17 @@ var statusColumn = {
   bFilter: true
 };
 
+var formStatusColumn = {
+  sTitle: 'Status',
+  mData: 'status',
+  mRender: function (data, type, full) {
+    return formatFormStatus(data);
+  },
+  bFilter: true
+};
+
 /*shared user columns*/
-var useridColumn = personColumn('User id', '_id');
+var useridColumn = personColumn('User', '_id');
 
 var useridNoLinkColumn = {
   sTitle: 'User id',
@@ -547,6 +854,117 @@ var modifiedByColumn = {
   bFilter: true
 };
 
+var addedByColumn = personColumn('Added by', 'addedBy');
+
+var addedOnColumn = dateColumn('Added on', 'addedOn');
+
+
+var sequenceColumn = {
+  sTitle: 'Sequence',
+  mData: 'sequence',
+  sClass: 'editable',
+  sType: 'numeric',
+  bFilter: true,
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      return '<input type="number" min=1 step=1 class="input-mini config" value="' + data + '">';
+    }
+  }
+};
+
+var sColumn = {
+  sTitle: 'S',
+  mData: 'sequence',
+  bFilter: true
+};
+
+var priorityColumn = {
+  sTitle: 'Priority',
+  mData: 'priority',
+  sClass: 'editable',
+  sType: 'numeric',
+  bFilter: true,
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      return '<input type="number" min=1 step=1 class="input-mini config" value="' + data + '">';
+    }
+  }
+};
+
+var pColumn = {
+  sTitle: 'P',
+  mData: 'priority',
+  bFilter: true
+};
+
+var valueColumn = {
+  sTitle: 'Value',
+  mData: 'value',
+  sClass: 'editable',
+  sType: 'numeric',
+  bFilter: true,
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      return '<input type="number" min=0 class="input-mini config" value="' + data + '">';
+    }
+  }
+};
+
+var vColumn = {
+  sTitle: 'V',
+  mData: 'value',
+  bFilter: true
+};
+
+var colorColumn = {
+  sTitle: 'Color',
+  mData: 'color',
+  sClass: 'editable',
+  mRender: function (data, type) {
+    var snippet;
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      snippet = $('<select name="select" class="input-small config"><option value = "blue" class="text-info">blue</option><option value = "green" class="text-success">green</option><option value = "yellow" class="text-warning">yellow</option><option value = "red" class="text-error">red</option><option value = "black">black</option></select>');
+      $('option[value="' + data + '"]', snippet).attr('selected', 'selected');
+      return snippet[0].outerHTML;
+    }
+  }
+};
+
+var cColumn = {
+  sTitle: 'C',
+  mData: 'color',
+  mRender: function (data, type) {
+    var snippet = $('<i class="fa fa-flag fa-lg"></i>');
+    if (type === 'sort' || type === 'filter') {
+      return data;
+    } else {
+      switch (data) {
+      case 'blue':
+        snippet.addClass('text-info');
+        break;
+      case 'green':
+        snippet.addClass('text-success');
+        break;
+      case 'yellow':
+        snippet.addClass('text-warning');
+        break;
+      case 'red':
+        snippet.addClass('text-error');
+        break;
+      default:
+      }
+      return snippet[0].outerHTML;
+    }
+  }
+};
 
 var oTableTools = {
   sSwfPath: prefix ? prefix + '/datatables/swf/copy_csv_xls_pdf.swf' : '/datatables/swf/copy_csv_xls_pdf.swf',
@@ -561,7 +979,10 @@ var oTableTools = {
 };
 
 var sDom = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDomNoTools = "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
+var sDom2i = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
+var sDom2i1p = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span3'r><'span3'f>>t<'row-fluid'<'span6'i><'span6'p>>";
+var sDomNoTools = "<'row-fluid'<'span4'l><'span4'<'text-center'r>><'span4'f>>t<'row-fluid'<'span6'i><'span6'p>>";
+var sDomNoTNoR = "t<'row-fluid'<'span6'i><'span6'p>>";
 var sDomClean = "t";
 var sDomPage = "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>";
 

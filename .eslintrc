@@ -3,7 +3,8 @@
   "env": {
     "browser": true,
     "jquery": true,
-    "node": true
+    "node": true,
+    "mocha": true
   },
   "extends": "defaults/configurations/walmart/es5",
   "rules": {
