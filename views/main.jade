@@ -3,8 +3,7 @@ extends layout
 block head
   title FRIB Traveler Application
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
@@ -19,54 +18,54 @@ block content
         | &nbsp;
         a(href='#{prefix}/docs/', target='_blank') Need help?
       hr.soften
-      .row-fluid
-        .span4
+      .row
+        .col-md-4
           h1
             a(href='#{prefix}/forms/', target='_blank')
               i.fa.fa-list-ol.fa-4x
           h2 Design forms
-        .span4
+        .col-md-4
           h1
             a(href='#{prefix}/travelers/', target='_blank')
               i.fa.fa-check-square-o.fa-4x
           h2 Carry out
-        .span4
+        .col-md-4
           h1
             a(href='#{prefix}/binders/', target='_blank')
               i.fa.fa-briefcase.fa-4x
           h2 Organize works
       hr.soften
       h2 Ownership
-      .row-fluid
-        .span4
+      .row
+        .col-md-4
           h2.text-info
             i.fa.fa-user.fa-4x
           h3 Take Responsibility
           p.main-byline The owner is responsible to take part in and oversee the process from plan to delivery. The ownership is transferable.
-        .span4
+        .col-md-4
           h2.text-info
             i.fa.fa-user-plus.fa-4x
           h3 Share for Collaboration
           p.main-byline The owner shares items with colleagues and groups of colleagues in the organization. Sharing brings connection, transparency, and attention.
-        .span4
+        .col-md-4
           h2.text-info
             i.fa.fa-users.fa-4x
           h3 Powered by Co-workers
           p.main-byline Accomplished works are recorded and traceable. Co-workers are acknowledged.
       hr.soften
       h2 Performance
-      .row-fluid
-        .span4
+      .row
+        .col-md-4
           h2.text-info
             i.fa.fa-sort-numeric-asc.fa-4x
           h3 Prioritize Works
           p.main-byline Works are organized by sequence and priorities.
-        .span4
+        .col-md-4
           h2.text-info
             i.fa.fa-flag.fa-4x
           h3 Attention
           p.main-byline Works can be assigned to different levels of attentions. This helps identify the bottlenecks.
-        .span4
+        .col-md-4
           h2.text-info
             i.fa.fa-diamond.fa-4x
           h3 Earn Values
@@ -75,7 +74,7 @@ block content
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/docs/assets/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/javascripts/main.js')
 

@@ -4,34 +4,32 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     title FRIB Traveler :: about :: manage forms in traveler
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap.css')
-    link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap-responsive.css')
+    link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
     link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
     link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
   body(data-spy='scroll', data-target='.bs-docs-sidebar')
-    .navbar.navbar-inverse.navbar-fixed-top
-      .navbar-inner
-        .container-fluid
-          button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-          a.brand(href='http://www.frib.msu.edu/', target='_blank') FRIB
-          .nav-collapse.collapse
-            ul.nav
-              li
-                a(href='https://controls.frib.msu.edu/', target='_blank') Controls
-              li.active
-                a(href='#{prefix}/') Traveler
-              li
-                a(href='https://controls.frib.msu.edu/controlshelp/', target='_blank') Report a problem
-              li
-                a(href='#{prefix}/logout') Logout
+    .navbar-nav.navbar-inverse.navbar-fixed-top
+      .container-fluid
+        button.btn.navbar-btn(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.navbar-brand(href='http://www.frib.msu.edu/', target='_blank') FRIB
+        .navbar-collapse.collapse
+          ul.nav
+            li
+              a(href='https://controls.frib.msu.edu/', target='_blank') Controls
+            li.active
+              a(href='#{prefix}/') Traveler
+            li
+              a(href='https://controls.frib.msu.edu/controlshelp/', target='_blank') Report a problem
+            li
+              a(href='#{prefix}/logout') Logout
     //- .container-fluid
     .container
       .row
-        .span3.bs-docs-sidebar
-          ul.nav.nav-list.bs-docs-sidenav.affix(data-offset-top='282', data-spy='affix', style="top: 40px;")
+        .col-md-3.bs-docs-sidebar
+          ul.navbar-nav.nav-list.bs-docs-sidenav.affix(data-offset-top='282', data-spy='affix', style="top: 40px;")
             li
               a(href='#manage') Manage forms
             li
@@ -42,7 +40,7 @@ html
               a(href='#alias') Set form alias
             li
               a(href='#progress') Progress estimation
-        .span9
+        .col-md-9
           section#manage
             .page-header
               h2 Manage forms in a traveler
@@ -86,4 +84,4 @@ html
       p
       p
     script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
-    script(type='text/javascript', src='#{prefix}/bootstrap/docs/assets/js/bootstrap.js')
+    script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')

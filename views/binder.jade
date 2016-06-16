@@ -4,8 +4,7 @@ block head
   meta(charset='urf-8')
   title FRIB - binder - #{binder.title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
@@ -41,8 +40,8 @@ block content
             span.tag #{tag}
     h4 total value: #{binder.totalValue}; finished value: #{binder.finishedValue}; in-progress value: #{binder.inProgressValue};
     .progress(class=binder.status === 1 ? "active progress-striped" : undefined)
-      .bar.bar-success(style="width: #{binder.finishedValue/binder.totalValue*100}%;")
-      .bar.bar-info(style="width: #{binder.inProgressValue/binder.totalValue*100}%;")
+      .progress-bar.progress-bar-success(style="width: #{binder.finishedValue/binder.totalValue*100}%;")
+      .progress-bar.progress-bar-info(style="width: #{binder.inProgressValue/binder.totalValue*100}%;")
       .progress-value #{binder.finishedValue} + #{binder.inProgressValue} / #{binder.totalValue}
     br
     table#work-table.table.table-bordered.table-hover
@@ -51,7 +50,7 @@ block content
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/docs/assets/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')

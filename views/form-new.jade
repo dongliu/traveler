@@ -4,18 +4,17 @@ block head
   meta(charset='urf-8')
   title FRIB Traveler - new form
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
   .container(style="margin-top: 10px")
     form.form-horizontal(name='newform', action='./', method='POST')
-      .control-group
+      .form-group
         .control-label Form title
         .controls
           input(type='text', name='title', required)
-      .control-group
+      .form-group
         .controls
           .btn-group
             button.btn.btn-primary(type='submit') Confirm
@@ -26,4 +25,4 @@ block content
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
   script(type='text/javascript', src='#{prefix}/jquery-ui/ui/minified/jquery-ui.custom.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/docs/assets/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')

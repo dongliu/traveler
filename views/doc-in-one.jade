@@ -3,22 +3,21 @@ extends layout
 block head
   title FRIB Traveler - documentation
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/doc.css')
 block content
   //- header
   .container
-    .hero-unit
+    .jumbotron
       h1 FRIB Traveler
       h2 A Web application to design, carry out and organize travelers
 
   //- .container-fluid
   .container
     .row
-      .span9
+      .col-md-9
         section#basics
           include ./docs/basics.jade
         section#forms
@@ -34,8 +33,8 @@ block content
         section#contact
           include:marked ./docs/contact.md
 
-      .span3.sidebar
-        ul#affixlist.nav.nav-list.nav-stacked.bs-docs-sidenav
+      .col-md-3.sidebar
+        ul#affixlist.navbar-nav.nav-list.nav-stacked.bs-docs-sidenav
           li
             a(href='#basics') Basics
           li
@@ -54,5 +53,5 @@ block content
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/docs/assets/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/javascripts/docs.js')

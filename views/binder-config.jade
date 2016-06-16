@@ -4,9 +4,8 @@ block head
   meta(charset='urf-8')
   title FRIB - binder - #{binder._id} - configuration
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
+link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
@@ -60,7 +59,7 @@ block content
         li
           span.tag #{tag}
           = ' '
-          button.btn.btn-small.btn-warning.remove-tag
+          button.btn.btn-sm.btn-warning.remove-tag
             i.fa.fa-trash-o.fa-lg
     br
     .btn-group
@@ -84,7 +83,7 @@ block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
   script(type='text/javascript', src='#{prefix}/jeditable/jquery.jeditable.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/docs/assets/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')

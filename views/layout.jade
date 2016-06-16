@@ -4,15 +4,16 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
   body
-    .navbar.navbar-fixed-top
-      .navbar-inner
+    .navbar-nav.navbar-fixed-top
         .container-fluid
-          button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-          .nav-collapse.collapse
-            ul.nav
+          .navbar-header.navbar-right
+            button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+              span.sr-only Toggle navigation
+              span.icon-bar
+              span.icon-bar
+              span.icon-bar
+          .navbar-collapse.collapse
+            ul.nav.navbar-nav
               li
                 a(href='#{prefix}/forms/') Forms
               li
@@ -24,7 +25,7 @@ html
               if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
                 li
                   a(href='#{prefix}/admin/', target='_blank') Admin
-            ul.nav.pull-right
+            ul.nav.navbar-nav.navbar-right
               if (locals.session && locals.session.userid)
                 li
                   .user

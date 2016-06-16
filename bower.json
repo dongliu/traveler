@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "jquery": "~1.9.1",
-    "bootstrap": "~2.3.2",
+    "bootstrap": "~3.3.6",
     "bootstrap-datepicker": "~1.5.1",
     "font-awesome": "~4.3.0",
     "jquery-ui": "~1.10.2",

@@ -4,8 +4,7 @@ block head
   meta(charset='urf-8')
   title FRIB - traveler - #{traveler._id} - config
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/docs/assets/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap-datepicker/dist/css/datepicker.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
@@ -65,7 +64,7 @@ block content
         li
           span.location #{location}
           = ' '
-          button.btn.btn-small.btn-warning.removeLocation
+          button.btn.btn-sm.btn-warning.removeLocation
             i.fa.fa-trash-o.fa-lg
     h4 Tags
     ul#devices
@@ -73,7 +72,7 @@ block content
         li
           span.device #{device}
           = ' '
-          button.btn.btn-small.btn-warning.removeDevice
+          button.btn.btn-sm.btn-warning.removeDevice
             i.fa.fa-trash-o.fa-lg
     br
     .btn-group
@@ -102,7 +101,7 @@ block content
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/docs/assets/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
   script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
   script(type='text/javascript', src='#{prefix}/jeditable/jquery.jeditable.js')
