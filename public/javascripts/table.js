@@ -615,7 +615,7 @@ var deviceColumn = {
 };
 
 var deviceTagColumn = {
-  sTitle: 'Devices/Tags',
+  sTitle: 'Tags',
   sDefaultContent: '',
   mData: function (source, type, val) {
     if (source.tags) {
