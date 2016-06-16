@@ -1,10 +1,8 @@
-var auth = require('../config/auth.json');
+var authConfig = require('../config/config').auth;
 
 exports.main = function (req, res) {
-  res.render('main', {
-    roles: req.session.roles,
-    prefix: req.proxied ? req.proxied_prefix : ''
-  });
+  // console.log(req.session);
+  res.render('main');
 };
 
 exports.logout = function (req, res) {
@@ -16,8 +14,8 @@ exports.logout = function (req, res) {
     });
   }
   if (res.proxied) {
-    res.redirect(auth.proxied_cas + '/logout');
+    res.redirect(authConfig.proxied_cas + '/logout');
   } else {
-    res.redirect(auth.cas + '/logout');
+    res.redirect(authConfig.cas + '/logout');
   }
 };
