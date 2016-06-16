@@ -34,7 +34,14 @@ function removeFromModal(list, cb) {
     dataType: 'json'
   }).done(function (json) {
     json.forEach(function (id) {
-      var item = $('#' + id);
+      var item;
+      if (list === 'users') {
+        item = $('#' + id);
+      } else if (list === 'groups') {
+        item = $('[title="' + encodeURIComponent(id) + '"]');
+      } else {
+        return;
+      }
       item.wrap('<del></del>');
       item.addClass('text-success');
     });
@@ -53,10 +60,10 @@ function remove(list, oTable) {
     selected.forEach(function (row) {
       var data = oTable.fnGetData(row);
       if (list === 'users') {
-        $('#modal .modal-body').append('<div class="target" id="' + data._id + '"">' + data.username + '</div>');
+        $('#modal .modal-body').append('<div class="target" id="' + data._id + '">' + data.username + '</div>');
       }
       if (list === 'groups') {
-        $('#modal .modal-body').append('<div class="target" id="' + data._id + '"">' + data.groupname + '</div>');
+        $('#modal .modal-body').append('<div class="target" id="' + encodeURIComponent(data._id) + '" title="' + encodeURIComponent(data._id) + '">' + data.groupname + '</div>');
       }
     });
     $('#modal .modal-footer').html('<button id="remove" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
@@ -118,7 +125,7 @@ function modify(list, oTable) {
       }
 
       if (list === 'groups') {
-        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.groupname + '</div>');
+        $('#modal .modal-body').append('<div id="' + encodeURIComponent(data._id) + '">' + data.groupname + '</div>');
       }
     });
     $('#modal .modal-footer').html('<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
