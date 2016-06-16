@@ -1,5 +1,6 @@
 var auth = require('../lib/auth');
-var service = require('../config/service.json');
+var config = require('../config/config.js');
+var service = config.service;
 var request = require('request');
 
 module.exports = function (app) {
@@ -10,6 +11,9 @@ module.exports = function (app) {
   });
 
   app.get('/devices/json', auth.ensureAuthenticated, function (req, res) {
+    if (!(service && service.device && service.device.url)) {
+      return res.send(500, 'do not know device service url');
+    }
     request({
       url: service.device.url,
       timeout: 30 * 1000,
