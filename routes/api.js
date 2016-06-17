@@ -1,9 +1,5 @@
 var fs = require('fs');
 var mongoose = require('mongoose');
-var util = require('util');
-
-// var Form = mongoose.model('Form');
-// var User = mongoose.model('User');
 var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
@@ -55,7 +51,7 @@ module.exports = function (app) {
         _id: {
           $in: doc.data
         }
-      }, 'name value inputType inputBy inputOn').lean().exec(function (err, docs) {
+      }, 'name value inputType inputBy inputOn').exec(function (err, docs) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -78,7 +74,7 @@ module.exports = function (app) {
         _id: {
           $in: doc.notes
         }
-      }, 'name value inputBy inputOn').lean().exec(function (err, docs) {
+      }, 'name value inputBy inputOn').exec(function (err, docs) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -89,7 +85,7 @@ module.exports = function (app) {
   });
 
   app.get('/apis/data/:id/', function (req, res) {
-    TravelerData.findById(req.params.id).lean().exec(function (err, data) {
+    TravelerData.findById(req.params.id).exec(function (err, data) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -108,6 +104,6 @@ module.exports = function (app) {
         res.json(200, data);
       }
     });
-  })
+  });
 
 };

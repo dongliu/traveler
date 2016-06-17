@@ -4,27 +4,47 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
   body
-    .navbar.navbar-inverse.navbar-fixed-top
+    .navbar.navbar-fixed-top
       .navbar-inner
         .container-fluid
           button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
             span.icon-bar
             span.icon-bar
             span.icon-bar
-          a.brand(href='http://www.frib.msu.edu/', target='_blank') FRIB
           .nav-collapse.collapse
             ul.nav
               li
-                a(href='https://controls.frib.msu.edu/', target='_blank') Controls
-              li.active
-                a(href='#{prefix}/') Traveler
+                a(href='#{prefix}/forms/') Forms
               li
-                a(href='https://controls.frib.msu.edu/controlshelp/', target='_blank') Report a problem
+                a(href='#{prefix}/travelers/') Travelers
               li
-                a(href='#{prefix}/logout') Logout
+                a(href='#{prefix}/binders/') Binders
+              li
+                a(href='#{prefix}/docs/', target='_blank') Documents
+              if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
+                li
+                  a(href='#{prefix}/admin/', target='_blank') Admin
+            ul.nav.pull-right
+              if (locals.session && locals.session.userid)
+                li
+                  .user
+                    img(src='#{prefix}/adusers/#{session.userid}/photo', title='#{session.username}')
+                li.dropdown
+                  a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
+                    b.caret
+                  ul.dropdown-menu
+                    li
+                      a(href='#{prefix}/profile', target='_blank') Profile
+                    li
+                      a(href='#{prefix}/logout') Log out
+              else
+                li
+                  i.fa.fa-user.fa-3x
+                li
+                  a(href='#{prefix}/login') Log in
     block content
     .container-fluid
       h6.text-right
-        a(href='#{prefix}/release.txt', target='_blank') Release 2.4.0
+        a(href='#{prefix}/release.txt', target='_blank') Release 3.0.0
     block js
 
