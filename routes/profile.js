@@ -7,7 +7,7 @@ module.exports = function (app) {
     // render the profile page
     User.findOne({
       _id: req.session.userid
-    }).lean().exec(function (err, user) {
+    }).exec(function (err, user) {
       if (err) {
         console.error(err);
         return res.send(500, 'something is wrong with the DB.');
@@ -30,7 +30,7 @@ module.exports = function (app) {
       _id: req.session.userid
     }, {
       subscribe: req.body.subscribe
-    }).lean().exec(function (err, user) {
+    }).exec(function (err, user) {
       if (err) {
         console.error(err);
         return res.json(500, {

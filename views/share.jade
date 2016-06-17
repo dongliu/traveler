@@ -2,17 +2,18 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB traveler :: #{type} :: #{id} :: share
+  title FRIB traveler - #{type} - #{id} - share
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
   link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  script.
+  script(type='text/javascript').
     var prefix = '!{prefix}';
+    var access = !{access};
   .container(style="margin-top: 10px")
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -20,18 +21,28 @@ block content
         h3#modalLabel
       .modal-body
       .modal-footer
+    h3 Public access for #{type}
+      = ' '
+      span.text-info #{title}
+    form.form-inline(name='public')
+      select(name='public')
+        option(value='-1') no access
+        option(value='0') read
+        option(value='1') write
+      = ' '
+      button.btn.btn-primary(type='submit', disabled)#update Update
     h3 Shared user list for #{type}
       = ' '
       span.text-info #{title}
     //- .well
-    form.form-inline
+    form.form-inline(name='user')
       input#username.input(type='text', placeholder='Last, First', name='name')
       != ' '
       label.checkbox
         input#access(type='checkbox', name='access', value='write')
         | Write
       != ' '
-      button.btn.btn-primary#add(type='submit') Add to share
+      button.btn.btn-primary#add(type='submit', disabled) Add to share
     .btn-toolbar
       .btn-group
         button.btn.btn-info#share-modify
@@ -46,14 +57,14 @@ block content
       = ' '
       span.text-info #{title}
     //- .well
-    form.form-inline
+    form.form-inline(name='group')
       input#groupid.input.input-xlarge(type='text', placeholder='LAB.FRIB.DIV.Department.Group', name='group')
       != ' '
       label.checkbox
         input#groupaccess(type='checkbox', name='access', value='write')
         | Write
       != ' '
-      button.btn.btn-primary#addgroup(type='submit') Add to share
+      button.btn.btn-primary#addgroup(type='submit', disabled) Add to share
     .btn-toolbar
       .btn-group
         button.btn.btn-info#groupshare-modify
@@ -76,7 +87,7 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/groupids.js')

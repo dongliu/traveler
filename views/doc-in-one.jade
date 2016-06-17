@@ -1,0 +1,56 @@
+extends layout
+
+block head
+  title FRIB Traveler - documentation
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/doc.css')
+block content
+  //- header
+  .container
+    .hero-unit
+      include:marked ./docs/hero.md
+
+  .container
+    .row
+      .span9
+        section#basics
+          include ./docs/basics.jade
+        section#forms
+          include ./docs/forms.jade
+        section#travelers
+          include ./docs/travelers.jade
+        section#binders
+          include ./docs/binders.jade
+        section#api
+          include ./docs/api.jade
+        section#faq
+          include ./docs/faq.jade
+        section#contact
+          include:marked ./docs/contact.md
+
+      .span3.sidebar
+        ul#affixlist.nav.nav-list.nav-stacked.bs-docs-sidenav
+          li
+            a(href='#basics') Basics
+          li
+            a(href='#forms') Forms
+          li
+            a(href='#travelers') Travelers
+          li
+            a(href='#binders') Binders
+          li
+            a(href='#api') API
+          li
+            a(href='#faq') FAQ
+          li
+            a(href='#contact') Contact
+
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/docs.js')

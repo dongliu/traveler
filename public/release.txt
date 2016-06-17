@@ -1,3 +1,44 @@
+release v3.0.0
+data: June, 2016
+- add a new main page with log in and feature highlights
+- separate form list page and traveler list page
+- add binder feature
+- binder list models views and controllers
+- binder share models views and controllers
+- binder configuration models views and controllers
+- enable transfer of ownership for forms, travelers, and binders
+- enable public access control for form/traveler/binder
+- add public form/traveler views and controllers
+- enable to archive/de-archive forms
+- enable to create travelers from shared forms
+- add transferred form/traveler/binder list tab
+- change bootstrap tabs from vertical to horizontal for better display on
+  various devices
+- use user photo for user display
+- new documents (partial)
+- use the name "tags" instead of "devices" to avoid confusion
+- update progress bar with active color and progress text
+- add ESLint support to the project
+- fix script in jade after upgrade jade version
+- fix removal and modification for multiple items in share page
+- refactor client JS lib and ESLint the files
+- refactor server JS lib and ESLint the files
+- update dependent JS libraries
+- support markdown syntax in documents
+- add and use middleware lib to handle common request filter tasks
+
+release v2.4.2
+date: April 11, 2016
+- explicit log in url in messages
+- increase upload file size limit to 10MB
+
+release v2.4.1
+date: March 30, 2016
+- bug fixes for form manager for traveler
+- support group alias
+- use absolute date inside traveler pages
+- load new device list
+
 release v2.4.0
 date: Feb. 02, 2016
 - add the form manager feature, details see /about/form-manager
