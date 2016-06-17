@@ -27,7 +27,7 @@ function archiveFromModal(archive, type, fromTable, toTable, otherTable) {
     }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
@@ -62,7 +62,7 @@ function transferFromModal(newOwnerName, type, table) {
     }).fail(function (jqXHR) {
       $(that).prepend('<i class="fa fa-exclamation"></i>');
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {

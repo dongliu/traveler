@@ -93,7 +93,7 @@ function modifyFromModal(list, cb) {
       $(that).addClass('text-success');
     }).fail(function (jqXHR) {
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
@@ -176,7 +176,7 @@ function addto(data, table, list) {
         },
         error: function (jqXHR) {
           if (jqXHR.status !== 401) {
-            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ' + list + ' share list : ' + jqXHR.responseText + '</div>');
+            $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the ' + list + ' share list : ' + jqXHR.responseText + '</div>');
           }
         }
       });
@@ -227,7 +227,7 @@ $(function () {
         },
         error: function (jqXHR) {
           if (jqXHR.status !== 401) {
-            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the public access setting : ' + jqXHR.responseText + '</div>');
+            $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the public access setting : ' + jqXHR.responseText + '</div>');
           }
         }
       });

@@ -931,7 +931,7 @@ var colorColumn = {
     if (type === 'sort' || type === 'filter') {
       return data;
     } else {
-      snippet = $('<select name="select" class="input-small config"><option value = "blue" class="text-info">blue</option><option value = "green" class="text-success">green</option><option value = "yellow" class="text-warning">yellow</option><option value = "red" class="text-error">red</option><option value = "black">black</option></select>');
+      snippet = $('<select name="select" class="input-small config"><option value = "blue" class="text-info">blue</option><option value = "green" class="text-success">green</option><option value = "yellow" class="text-warning">yellow</option><option value = "red" class="text-danger">red</option><option value = "black">black</option></select>');
       $('option[value="' + data + '"]', snippet).attr('selected', 'selected');
       return snippet[0].outerHTML;
     }
@@ -957,7 +957,7 @@ var cColumn = {
         snippet.addClass('text-warning');
         break;
       case 'red':
-        snippet.addClass('text-error');
+        snippet.addClass('text-danger');
         break;
       default:
       }

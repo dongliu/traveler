@@ -38,11 +38,13 @@ block content
           li#devices
             a(href='#{prefix}/devices/', target='_blank') Devices
     #message
-    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
-      .modal-header
-        h3#modalLabel
-      .modal-body.modal-body-visible
-      .modal-footer
+    #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h3#modalLabel
+          .modal-body.modal-body-visible
+          .modal-footer
     div
       ul.navbar-nav.nav-tabs
         li.active

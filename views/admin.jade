@@ -13,11 +13,13 @@ block content
     var prefix = '!{prefix}';
   .container-fluid
     #message
-    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
-      .modal-header
-        h3#modalLabel
-      .modal-body(style='overflow-y: visible;')
-      .modal-footer
+    #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h3#modalLabel
+          .modal-body(style='overflow-y: visible;')
+          .modal-footer
     div
       ul.navbar-nav.nav-tabs
         li.active

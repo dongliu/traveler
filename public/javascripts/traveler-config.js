@@ -19,7 +19,7 @@ function setStatus(s) {
     document.location.href = window.location.pathname;
   }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   }).always();
@@ -64,7 +64,7 @@ $(function () {
       },
       error: function (jqXHR) {
         $(that).text(initValue[that.id]);
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config : ' + jqXHR.responseText + '</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config : ' + jqXHR.responseText + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     });
@@ -110,7 +110,7 @@ $(function () {
     }).fail(function (jqXHR) {
       $this.val(deadline);
       if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config :  ' + jqXHR.responseText + '</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config :  ' + jqXHR.responseText + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     });
@@ -182,7 +182,7 @@ $(function () {
           }
         }).fail(function (jqXHR) {
           if (jqXHR.status !== 401) {
-            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot add the device</div>');
+            $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot add the device</div>');
             $(window).scrollTop($('#message div:last-child').offset().top - 40);
           }
         }).always(function () {
@@ -202,7 +202,7 @@ $(function () {
       $that.closest('li').remove();
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always();

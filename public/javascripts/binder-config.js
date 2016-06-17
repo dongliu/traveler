@@ -26,7 +26,7 @@ function setStatus(s) {
     document.location.href = window.location.pathname;
   }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   }).always();
@@ -71,7 +71,7 @@ function tagEvents() {
           $('#tags').append('<li><span class="tag">' + newTag + '</span> <button class="btn btn-small btn-warning remove-tag"><i class="fa fa-trash-o fa-lg"></i></button></li>');
         }).fail(function (jqXHR) {
           if (jqXHR.status !== 401) {
-            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot add the tag</div>');
+            $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot add the tag</div>');
             $(window).scrollTop($('#message div:last-child').offset().top - 40);
           }
         }).always(function () {
@@ -91,7 +91,7 @@ function tagEvents() {
       $that.closest('li').remove();
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot remove the tag</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot remove the tag</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     });
@@ -116,7 +116,7 @@ function editEvents(initValue) {
       },
       error: function (jqXHR) {
         $(that).text(initValue[that.id]);
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the binder config : ' + jqXHR.responseText + '</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the binder config : ' + jqXHR.responseText + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     });
@@ -148,7 +148,7 @@ function removeWork(id, cb) {
     cb(null);
   }).fail(function (jqXHR, status, error) {
     $('#' + id).append(' : ' + jqXHR.responseText);
-    $('#' + id).addClass('text-error');
+    $('#' + id).addClass('text-danger');
     cb(error);
   });
 }
@@ -166,7 +166,7 @@ function updateWorks(updates, cb) {
       cb(null, data);
     }
   }).fail(function (jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the works: ' + jqXHR.responseText + '</div>');
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the works: ' + jqXHR.responseText + '</div>');
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
     cb(error);
   });

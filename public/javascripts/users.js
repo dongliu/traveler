@@ -25,7 +25,7 @@ function updateFromModal(cb) {
       $(that).addClass('text-success');
     }).fail(function (jqXHR) {
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
@@ -58,7 +58,7 @@ function modifyFromModal(cb) {
       $(that).addClass('text-success');
     }).fail(function (jqXHR) {
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
@@ -137,7 +137,7 @@ $(function () {
           userTable.fnReloadAjax();
         },
         error: function (jqXHR) {
-          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
+          $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
         }
       });
     }

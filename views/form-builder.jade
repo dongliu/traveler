@@ -8,7 +8,7 @@ block head
     title FRIB - forms - #{title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/jquery/ui-lightness/jquery-ui-1.10.2.custom.css')
+  link(rel='stylesheet', href='#{prefix}/jquery-ui/ui/jquery-ui.custom.js')
   link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
@@ -19,11 +19,13 @@ block content
     var formStatus = !{JSON.stringify(locals.status)} || 0;
   .container
     #message
-    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
-      .modal-header
-        h3#modalLabel
-      .modal-body
-      .modal-footer
+    #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h3#modalLabel
+          .modal-body
+          .modal-footer
     h3#formtitle #{title}
     .well-large
       form.form-horizontal#output
@@ -47,6 +49,7 @@ block content
             a Upload file
           li#add-other
             a other types
+      != ' '
       .btn-group.dropdown
         button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Advanced control
           span.caret
@@ -57,23 +60,30 @@ block content
             a Section
           li#add-rich
             a Rich instruction
+      != ' '
       .btn-group
         button.btn#adjust Adjust location
+      != ' '
       .btn-group
         button.btn.btn-primary#save Save
+    != ' '
     .btn-group
       a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='_blank') Preview
+    != ' '
     .btn-group
       button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
     if (locals.status === 0)
+      != ' '
       .btn-group
         button.btn.btn-primary#rename(data-toggle='tooltip', title='rename the form') Rename
       //- .btn-group
         button.btn.btn-primary#ready(data-toggle='tooltip', title='ready to publish form') Ready to publish
     if (locals.status === 0.5)
+      != ' '
       .btn-group
         button.btn.btn-primary#publish(data-toggle='tooltip', title='publish the form') Publish
     if (locals.status === 1)
+      != ' '
       .btn-group
         button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
   br
@@ -89,7 +99,7 @@ block content
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
-  script(type='text/javascript', src='#{prefix}/jquery-ui/ui/minified/jquery-ui.custom.js')
+  script(type='text/javascript', src='#{prefix}/jquery-ui/ui/jquery-ui.custom.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/rivets/rivets.min.js')
   script(type='text/javascript', src='#{prefix}/tinymce/tinymce.min.js')
