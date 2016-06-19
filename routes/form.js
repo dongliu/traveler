@@ -226,7 +226,7 @@ module.exports = function (app) {
   app.get('/formfiles/:id', auth.ensureAuthenticated, reqUtils.exist('id', FormFile), function (req, res) {
     var data = req[req.params.id];
     if (data.inputType === 'file') {
-      res.sendfile(data.file.path);
+      res.sendFile(data.file.path);
     } else {
       res.status(500).send('it is not a file');
     }

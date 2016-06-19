@@ -334,7 +334,7 @@ module.exports = function (app) {
 
   app.get('/adusers/:id/photo', auth.ensureAuthenticated, function (req, res) {
     if (fs.existsSync(options.root + req.params.id + '.jpg')) {
-      res.sendfile(req.params.id + '.jpg', options);
+      res.sendFile(req.params.id + '.jpg', options);
     } else if (pending_photo[req.params.id]) {
       pending_photo[req.params.id].push(res);
     } else {

@@ -149,7 +149,7 @@ function validation_message(form) {
       p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
       span.text(input.validationMessage);
     }
-    $(input).closest('.controls').append(span);
+    $(input).closest('.col-xs-offset-2').append(span);
     output.append(p);
   }
   return output;
@@ -207,7 +207,7 @@ $(function () {
         var found = data.filter(function (e) {
           return e.name === element.name;
         });
-        $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
+        $(element).closest('.col-xs-offset-2').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
         if (found.length) {
           found.sort(function (a, b) {
             if (a.inputOn > b.inputOn) {
@@ -215,7 +215,7 @@ $(function () {
             }
             return 1;
           });
-          $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
         }
       });
 
@@ -231,7 +231,7 @@ $(function () {
     e.preventDefault();
     var $that = $(this);
     $('#modalLabel').html('Add new note');
-    $('#modal .modal-body').html('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Note: </label><div class="controls"><textarea name="note-content" rows=5></textarea><input type="hidden" name="inputname" value="' + $(this).closest('.controls').find('input, textarea').prop('name') + '"></div></div></form>');
+    $('#modal .modal-body').html('<form class="form-horizontal" id="modalform"><div class="form-group"><label class="col-sm-4 control-label">Note: </label><div class="col-sm-6"><textarea name="note-content" rows=5></textarea><input type="hidden" name="inputname" value="' + $(this).closest('.col-xs-offset-2').find('input, textarea').prop('name') + '"></div></div></form>');
     $('#modal .modal-footer').html('<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
     $('#modal button[value="submit"]').click(function () {
@@ -249,14 +249,14 @@ $(function () {
       }).done(function (data, status, jqXHR) {
         var timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' + livespan(timestamp) + '</div>');
-        var $notes_number = $that.closest('.controls').find('a.notes-number span.badge');
+        var $notes_number = $that.closest('.col-xs-offset-2').find('a.notes-number span.badge');
         $notes_number.text(parseInt($notes_number.text(), 10) + 1);
 
         // add new note
-        if ($that.closest('.controls').find('.input-notes').length) {
-          $that.closest('.controls').find('.input-notes dl').prepend('<dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd>');
+        if ($that.closest('.col-xs-offset-2').find('.input-notes').length) {
+          $that.closest('.col-xs-offset-2').find('.input-notes dl').prepend('<dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd>');
         } else {
-          $that.closest('.controls').append('<div class="input-notes"><dl><dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd></dl></div>');
+          $that.closest('.col-xs-offset-2').append('<div class="input-notes"><dl><dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd></dl></div>');
         }
 
         // $.livestamp.resume();
@@ -272,7 +272,7 @@ $(function () {
 
   $('#form').on('click', 'a.notes-number', function (e) {
     e.preventDefault();
-    var $input_notes = $(this).closest('.controls').find('.input-notes');
+    var $input_notes = $(this).closest('.col-xs-offset-2').find('.input-notes');
     if ($input_notes.is(':visible')) {
       $input_notes.hide();
     } else {
@@ -300,11 +300,11 @@ $(function () {
           return 1;
         });
         if (this.type === 'file') {
-          $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + history(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<div class="input-history"><b>history</b>: ' + history(found) + '</div>');
         }
       }
     });
@@ -397,7 +397,7 @@ $(function () {
         if (finishedInput !== realFinishedInput) {
           updateFinished(realFinishedInput);
         }
-        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
+        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.col-xs-offset-2'));
       }
       $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by you ' + livespan(timestamp) + '; ' + $history.html());
       // $.livestamp.resume();
@@ -449,7 +449,7 @@ $(function () {
     if ($validation.length) {
       $validation = $($validation[0]);
     } else {
-      $validation = $('<div class="validation"></div>').appendTo($cgw.find('.controls'));
+      $validation = $('<div class="validation"></div>').appendTo($cgw.find('.col-xs-offset-2'));
     }
     if (!(/^(image|text)\//i.test(file.type) || file.type === 'application/pdf' || file.type === 'application/vnd.ms-excel' || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-xpsdocument' || file.type === 'application/oxps')) {
       $validation.html('<p class="text-danger">' + file.type + ' is not allowed to upload</p>');
@@ -498,7 +498,7 @@ $(function () {
         if (finishedInput !== realFinishedInput) {
           updateFinished(realFinishedInput);
         }
-        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
+        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.col-xs-offset-2'));
       }
       $history.html('<strong><a href=' + json.location + ' target="_blank">' + input.files[0].name + '</a></strong> uploaded by you ' + livespan(timestamp) + '; ' + $history.html());
       // $.livestamp.resume();

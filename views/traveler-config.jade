@@ -6,7 +6,7 @@ block head
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap-datepicker/dist/css/datepicker.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap-datepicker/dist/css/bootstrap-datepicker.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
@@ -78,24 +78,31 @@ block content
     .btn-group
       button.btn.btn-primary#add Add devices
     if (locals.isOwner != undefined && locals.isOwner)
+      != ' '
       .btn-group
         a.btn.btn-primary#manage(href='./formmanager', target='_blank') Manage forms
       case traveler.status
         when 0
+          != ' '
           .btn-group
             button.btn.btn-primary#work Start to work
         when 1
+          != ' '
           .btn-group
             button.btn.btn-warning#freeze Freeze
         when 1.5
+          != ' '
           .btn-group
             button.btn.btn-primary#approve Approve completion
+          != ' '
           .btn-group
             button.btn.btn-warning#more More work
         //- when 2
         when 3
+          != ' '
           .btn-group
             button.btn.btn-primary#resume Resume
+    != ' '
     .btn-group
         a.btn.btn-info(href='#{prefix}/devices/', target='_blank') Browse devices
 
@@ -106,6 +113,6 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
   script(type='text/javascript', src='#{prefix}/jeditable/jquery.jeditable.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/dist/js/bootstrap-datepicker/dist.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/dist/js/bootstrap-datepicker.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler-config.js')

@@ -102,7 +102,7 @@ var FormLoader = (function (parent, $) {
         p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
         span.text(input.validationMessage);
       }
-      $(input).closest('.controls').append(span);
+      $(input).closest('.col-xs-offset-2').append(span);
       output.append(p);
     }
     return output;
@@ -133,7 +133,7 @@ var FormLoader = (function (parent, $) {
       var found = notes.filter(function (e) {
         return e.name === element.name;
       });
-      $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a></div>');
+      $(element).closest('.col-xs-offset-2').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a></div>');
       if (found.length) {
         found.sort(function (a, b) {
           if (a.inputOn > b.inputOn) {
@@ -141,7 +141,7 @@ var FormLoader = (function (parent, $) {
           }
           return 1;
         });
-        $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + generateNotes(found) + '</div>');
+        $(element).closest('.col-xs-offset-2').append('<div class="input-notes" style="display: none;">' + generateNotes(found) + '</div>');
       }
     });
   }
@@ -169,7 +169,7 @@ var FormLoader = (function (parent, $) {
   function viewerEvents() {
     $('#form').on('click', 'a.notes-number', function (e) {
       e.preventDefault();
-      var $input_notes = $(this).closest('.controls').find('.input-notes');
+      var $input_notes = $(this).closest('.col-xs-offset-2').find('.input-notes');
       if ($input_notes.is(':visible')) {
         $input_notes.hide();
       } else {
@@ -220,11 +220,11 @@ var FormLoader = (function (parent, $) {
           return 1;
         });
         if (this.type === 'file') {
-          $(element).closest('.controls').append('<div class="input-history">' + fileHistory(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<div class="input-history">' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.controls').append('<div class="input-history">' + history(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<div class="input-history">' + history(found) + '</div>');
         }
       }
     });
