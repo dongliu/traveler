@@ -19,7 +19,8 @@ logs/*
 userphoto/*
 !userphoto/readme
 doc/
-uploads
+traveler_uploads/*
+!traveler_uploads/readme
 config/ad.json
 config/node.pem
 config/node.key
