@@ -22,6 +22,14 @@ html
                 a(href='https://controls.frib.msu.edu/controlshelp/', target='_blank') Report a problem
               li
                 a(href='#{prefix}/logout') Logout
+    .container-fluid
+      .alert.alert-info
+        button.close(type='button', data-dismiss='alert')
+          |&times;
+        | Traveler 3.0 is available. Please go to
+        != ' '
+        a(href='http://traveler:3011', target='_blank') http://traveler:3011
+
     block content
     .container-fluid
       h6.text-right
