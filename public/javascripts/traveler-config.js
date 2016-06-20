@@ -42,8 +42,7 @@ $(function () {
   }
   var initValue = {
     title: $('#title').text(),
-    description: $('#description').text(),
-    location: $('#location').text()
+    description: $('#description').text()
   };
 
   $('span.editable').editable(function (value) {
