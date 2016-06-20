@@ -700,19 +700,23 @@ function notIn(user, users) {
 
 var manPowerColumn = usersFilteredColumn('Powered by', function (source) {
   var out = [];
-  source.manPower.forEach(function (m) {
-    if (notIn(m, out)) {
-      out.push(m);
-    }
-  });
-
-  source.sharedWith.forEach(function (s) {
-    if (s.access === 1) {
-      if (notIn(s, out)) {
-        out.push(s);
+  if (source.manPower) {
+    source.manPower.forEach(function (m) {
+      if (notIn(m, out)) {
+        out.push(m);
       }
-    }
-  });
+    });
+  }
+
+  if (source.sharedWith) {
+    source.sharedWith.forEach(function (s) {
+      if (s.access === 1) {
+        if (notIn(s, out)) {
+          out.push(s);
+        }
+      }
+    });
+  }
   return out;
 });
 
