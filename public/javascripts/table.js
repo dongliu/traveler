@@ -566,7 +566,7 @@ var workProgressColumn = {
       return finished + inProgress;
     }
 
-    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(finished * source.value) + ' + ' + Math.round(inProgress * source.value) + ' / ' + source.value, w);
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(finished * source.value) + ' + ' + Math.round(inProgress * source.value) + ' / ' + Math.round(source.value), w);
   }
 
 };
@@ -599,7 +599,7 @@ var binderProgressColumn = {
       return finished + inProgress;
     }
 
-    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + source.finishedValue + ' + ' + source.inProgressValue + ' / ' + source.totalValue);
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(source.finishedValue) + ' + ' + Math.round(source.inProgressValue) + ' / ' + Math.round(source.totalValue));
   }
 };
 
