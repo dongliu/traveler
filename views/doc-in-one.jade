@@ -8,6 +8,7 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/doc.css')
 block content
+  body(data-spy='scroll', data-target='#myScrollspy')
   //- header
   .container
     .jumbotron
@@ -16,7 +17,7 @@ block content
 
   //- .container-fluid
   .container
-    .row
+    .row#myScrollspy
       .col-md-9
         section#basics
           include ./docs/basics.jade
@@ -33,9 +34,9 @@ block content
         section#contact
           include:marked ./docs/contact.md
 
-      .col-md-3.sidebar
-        ul#affixlist.navbar-nav.nav-list.nav-stacked.bs-docs-sidenav
-          li
+      nav.col-md-3
+        ul#affixlist.nav.nav-pills.nav-stacked
+          li.active
             a(href='#basics') Basics
           li
             a(href='#forms') Forms

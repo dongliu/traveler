@@ -487,9 +487,9 @@ var deviceTravelerLinkColumn = {
 function progressBar(active, finished, inProgress, text, width) {
   var w = width || '100px';
   var t = text || '';
-  var bar = $('<div class="progress" style="width: ' + w + ';"><div class="bar bar-success" style="width:' + finished + '%;"></div><div class="bar bar-info" style="width:' + inProgress + '%;"></div><div class="progress-value">' + t + '</div></div>');
+  var bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-success" style="width:' + finished + '%;"></div><div class="progress-bar progress-bar-info" style="width:' + inProgress + '%;"></div><div class="progress-value">' + t + '</div></div>');
   if (active) {
-    bar.addClass('active').addClass('progress-striped');
+    bar.addClass('active').addClass('progress-bar-striped');
   }
   return bar[0].outerHTML;
 }

@@ -124,7 +124,7 @@ function editEvents(initValue) {
   }, {
     type: 'textarea',
     rows: 1,
-    cols: 120,
+    cols: 35,
     style: 'display: inline',
     cancel: 'Cancel',
     submit: 'Update',
