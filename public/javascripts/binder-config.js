@@ -254,7 +254,7 @@ $(function () {
     $('#modal .modal-footer').html('<button id="remove" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
     $('#modal').modal('show');
     $('#remove').click(function () {
-      $('#submit').prop('disabled', true);
+      $('#remove').prop('disabled', true);
       removeWork(data._id, function (err) {
         if (!err) {
           worksTable.fnDeleteRow(row);
