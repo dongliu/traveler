@@ -8,6 +8,7 @@ var share = require('./share.js');
  * finished is the percentage of value that is completed.
  * inProgress is the percentage of value that is still in progress.
  * If status === 2, then finished = 100, and inProgress = 0;
+ * If status === 0, then finished = 0, and inProgress = 0;
  */
 
 var work = new Schema({
@@ -123,22 +124,32 @@ binder.methods.updateWorkProgress = function (spec) {
   if (!w) {
     return;
   }
+  if (w.status !== spec.status) {
+    w.status = spec.status;
+  }
   if (spec.status === 2) {
     w.finished = 1;
     w.inProgress = 0;
-  } else if (w.refType === 'traveler') {
-    work.finished = 0;
-    if (spec.totalInput === 0) {
-      w.inProgress = 1;
-    } else {
-      w.inProgress = spec.finishedInput / spec.totalInput;
-    }
-  } else if (spec.totalValue === 0) {
+  } else if (spec.status === 0) {
     w.finished = 0;
-    spec.inProgress = 1;
+    w.inProgress = 0;
   } else {
-    w.finished = spec.finishedValue / spec.totalValue;
-    w.inProgress = spec.inProgressValue / spec.totalValue;
+    if (w.refType === 'traveler') {
+      work.finished = 0;
+      if (spec.totalInput === 0) {
+        w.inProgress = 1;
+      } else {
+        w.inProgress = spec.finishedInput / spec.totalInput;
+      }
+    } else {
+      if (spec.totalValue === 0) {
+        w.finished = 0;
+        w.inProgress = 1;
+      } else {
+        w.finished = spec.finishedValue / spec.totalValue;
+        w.inProgress = spec.inProgressValue / spec.totalValue;
+      }
+    }
   }
 };
 
@@ -162,7 +173,9 @@ binder.methods.updateProgress = function (cb) {
       if (cb) {
         cb(err, newBinder);
       } else {
-        console.error(err);
+        if (err) {
+          console.error(err);
+        }
       }
     });
   }
