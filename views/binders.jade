@@ -29,14 +29,6 @@ block content
         a.btn.btn-info#all-binders(href='#{prefix}/publicbinders/', target='_blank', data-toggle='tooltip', title='see all public binders')
           i.fa.fa-institution.fa-lg
           | &nbsp;All public binders
-      //- .btn-group.dropdown
-        a#meta.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
-          i.fa.fa-gears.fa-lg
-          | &nbsp;Meta
-          span.caret
-        ul.dropdown-menu
-          li#devices
-            a(href='#{prefix}/devices/', target='_blank') Devices
     #message
     #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
       .modal-dialog

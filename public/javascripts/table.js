@@ -566,7 +566,7 @@ var workProgressColumn = {
       return finished + inProgress;
     }
 
-    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(finished * source.value) + ' + ' + Math.round(inProgress * source.value) + ' / ' + source.value, w);
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(finished * source.value) + ' + ' + Math.round(inProgress * source.value) + ' / ' + Math.round(source.value), w);
   }
 
 };
@@ -599,7 +599,7 @@ var binderProgressColumn = {
       return finished + inProgress;
     }
 
-    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + source.finishedValue + ' + ' + source.inProgressValue + ' / ' + source.totalValue);
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(source.finishedValue) + ' + ' + Math.round(source.inProgressValue) + ' / ' + Math.round(source.totalValue));
   }
 };
 
@@ -615,7 +615,7 @@ var deviceColumn = {
 };
 
 var deviceTagColumn = {
-  sTitle: 'Devices/Tags',
+  sTitle: 'Tags',
   sDefaultContent: '',
   mData: function (source, type, val) {
     if (source.tags) {
@@ -700,19 +700,23 @@ function notIn(user, users) {
 
 var manPowerColumn = usersFilteredColumn('Powered by', function (source) {
   var out = [];
-  source.manPower.forEach(function (m) {
-    if (notIn(m, out)) {
-      out.push(m);
-    }
-  });
-
-  source.sharedWith.forEach(function (s) {
-    if (s.access === 1) {
-      if (notIn(s, out)) {
-        out.push(s);
+  if (source.manPower) {
+    source.manPower.forEach(function (m) {
+      if (notIn(m, out)) {
+        out.push(m);
       }
-    }
-  });
+    });
+  }
+
+  if (source.sharedWith) {
+    source.sharedWith.forEach(function (s) {
+      if (s.access === 1) {
+        if (notIn(s, out)) {
+          out.push(s);
+        }
+      }
+    });
+  }
   return out;
 });
 

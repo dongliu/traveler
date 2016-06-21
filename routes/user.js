@@ -32,15 +32,15 @@ function fetch_photo_from_ad(id) {
     if (err) {
       console.error(err);
       cleanList(id, function (res) {
-        res.status(500).send('ldap error');
+        return res.status(500).send('ldap error');
       });
     } else if (result.length === 0) {
       cleanList(id, function (res) {
-        res.status(400).send(id + ' is not found');
+        return res.status(400).send(id + ' is not found');
       });
     } else if (result.length > 1) {
       cleanList(id, function (res) {
-        res.status(400).send(id + ' is not unique!');
+        return res.status(400).send(id + ' is not unique!');
       });
     } else if (result[0].thumbnailPhoto && result[0].thumbnailPhoto.length) {
       if (!fs.existsSync(options.root + id + '.jpg')) {
@@ -51,19 +51,19 @@ function fetch_photo_from_ad(id) {
           cleanList(id, function (res) {
             res.set('Content-Type', 'image/jpeg');
             res.set('Cache-Control', 'public, max-age=' + options.maxAge);
-            res.send(result[0].thumbnailPhoto);
+            return res.send(result[0].thumbnailPhoto);
           });
         });
       } else {
         cleanList(id, function (res) {
           res.set('Content-Type', 'image/jpeg');
           res.set('Cache-Control', 'public, max-age=' + options.maxAge);
-          res.send(result[0].thumbnailPhoto);
+          return res.send(result[0].thumbnailPhoto);
         });
       }
     } else {
       cleanList(id, function (res) {
-        res.status(400).send(id + ' photo is not found');
+        return res.status(400).send(id + ' photo is not found');
       });
     }
   });
@@ -100,7 +100,7 @@ function updateUserProfile(user, res) {
       if (err) {
         return res.status(500).json(err);
       }
-      res.status(204).end();
+      return res.status(204).end();
     });
   });
 }
@@ -151,7 +151,7 @@ function addUser(req, res) {
       }
       var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/users/' + newUser._id;
       res.set('Location', url);
-      res.status(201).send('The new user is at <a target="_blank" href="' + url + '">' + url + '</a>');
+      return res.status(201).send('The new user is at <a target="_blank" href="' + url + '">' + url + '</a>');
     });
 
   });
@@ -258,7 +258,7 @@ module.exports = function (app) {
           error: err.message
         });
       }
-      res.status(204).end();
+      return res.status(204).end();
     });
   });
 
@@ -300,7 +300,7 @@ module.exports = function (app) {
   // resource /adusers
 
   app.get('/adusers/', auth.ensureAuthenticated, function (req, res) {
-    res.status(200).send('Please provide the user id');
+    return res.status(200).send('Please provide the user id');
   });
 
   app.get('/adusers/:id', auth.ensureAuthenticated, function (req, res) {
@@ -334,7 +334,7 @@ module.exports = function (app) {
 
   app.get('/adusers/:id/photo', auth.ensureAuthenticated, function (req, res) {
     if (fs.existsSync(options.root + req.params.id + '.jpg')) {
-      res.sendFile(req.params.id + '.jpg', options);
+      return res.sendFile(req.params.id + '.jpg', options);
     } else if (pending_photo[req.params.id]) {
       pending_photo[req.params.id].push(res);
     } else {

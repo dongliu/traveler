@@ -226,10 +226,9 @@ module.exports = function (app) {
   app.get('/formfiles/:id', auth.ensureAuthenticated, reqUtils.exist('id', FormFile), function (req, res) {
     var data = req[req.params.id];
     if (data.inputType === 'file') {
-      res.sendFile(data.file.path);
-    } else {
-      res.status(500).send('it is not a file');
+      return res.sendFile(data.file.path);
     }
+    return res.send(500, 'it is not a file');
   });
 
   app.get('/forms/:id/preview', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
@@ -517,7 +516,7 @@ module.exports = function (app) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      res.status(200).send('status updated to ' + s);
+      return res.status(200).send('status updated to ' + s);
     });
 
   });

@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, filledByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, ownerColumn: false, deadlineColumn: false, travelerProgressColumn: false, archivedOnColumn: false, packageLinkColumn: false, tagsColumn: false, sDomNoTNoR: false*/
+/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, filledByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, ownerColumn: false, deadlineColumn: false, travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false, tagsColumn: false, sDomNoTNoR: false*/
 
 /*global archiveFromModal, transferFromModal, modalScroll*/
 
@@ -45,11 +45,11 @@ function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerT
   });
 }
 
-function addTravelers(travelers, packages) {
-  var number = packages.length;
-  packages.forEach(function (p) {
+function addTravelers(travelers, binders) {
+  var number = binders.length;
+  binders.forEach(function (p) {
     $.ajax({
-      url: '/workpackages/' + p + '/',
+      url: '/binders/' + p + '/',
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -283,7 +283,7 @@ $(function () {
     }
   });
 
-  $('#add-to-package').click(function () {
+  $('#add-to-binder').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     var travelers = [];
@@ -301,12 +301,12 @@ $(function () {
         travelers.push(data._id);
         $('#modal .modal-body').append(formatItemUpdate(data));
       });
-      $('#modal .modal-body').append('<h3 id="select"> into selected packages </h3>');
-      $('#modal .modal-body').append('<table id="owned-package-table" class="table table-bordered table-hover"></table>');
-      var packageAoColumns = [selectColumn, packageLinkColumn, titleColumn, tagsColumn, createdOnColumn, updatedOnColumn];
-      fnAddFilterFoot('#owned-package-table', packageAoColumns);
-      var ownedPackageTable = $('#owned-package-table').dataTable({
-        sAjaxSource: '/ownedpackages/json',
+      $('#modal .modal-body').append('<h3 id="select"> into selected binders </h3>');
+      $('#modal .modal-body').append('<table id="owned-binder-table" class="table table-bordered table-hover"></table>');
+      var binderAoColumns = [selectColumn, binderLinkColumn, titleColumn, tagsColumn, createdOnColumn, updatedOnColumn];
+      fnAddFilterFoot('#owned-binder-table', binderAoColumns);
+      var ownedBinderTable = $('#owned-binder-table').dataTable({
+        sAjaxSource: '/ownedbinders/json',
         sAjaxDataProp: '',
         bAutoWidth: false,
         iDisplayLength: 5,
@@ -314,7 +314,7 @@ $(function () {
           sLoadingRecords: 'Please wait - loading data from the server ...'
         },
         bDeferRender: true,
-        aoColumns: packageAoColumns,
+        aoColumns: binderAoColumns,
         aaSorting: [
           [4, 'desc'],
           [5, 'desc']
@@ -328,18 +328,18 @@ $(function () {
       $('#submit').click(function () {
         $('#submit').prop('disabled', true);
         $('#return').prop('disabled', true);
-        var packages = [];
-        var selectedRow = fnGetSelected(ownedPackageTable, 'row-selected');
+        var binders = [];
+        var selectedRow = fnGetSelected(ownedBinderTable, 'row-selected');
         if (selectedRow.length === 0) {
-          $('#modal #select').text('Please select package!').addClass('text-warning');
+          $('#modal #select').text('Please select binder!').addClass('text-warning');
           $('#submit').prop('disabled', false);
           $('#return').prop('disabled', false);
         } else {
           selectedRow.forEach(function (row) {
-            var data = ownedPackageTable.fnGetData(row);
-            packages.push(data._id);
+            var data = ownedBinderTable.fnGetData(row);
+            binders.push(data._id);
           });
-          addTravelers(travelers, packages);
+          addTravelers(travelers, binders);
         }
       });
     }

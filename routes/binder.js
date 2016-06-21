@@ -434,7 +434,7 @@ module.exports = function (app) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      res.status(200).send('status updated to ' + s);
+      return res.status(200).send('status updated to ' + s);
     });
 
   });
@@ -579,20 +579,29 @@ module.exports = function (app) {
           if (item.status === 2) {
             newWork.finished = 1;
             newWork.inProgress = 0;
-          } else if (type === 'traveler') {
+          } else if (item.status === 0) {
             newWork.finished = 0;
-            if (item.totalInput === 0) {
-              newWork.inProgress = 1;
-            } else {
-              newWork.inProgress = item.finishedInput / item.totalInput;
-            }
-          } else if (item.totalValue === 0) {
-            newWork.finished = 0;
-            newWork.inProgress = 1;
+            newWork.inProgress = 0;
           } else {
-            newWork.finished = item.finishedValue / item.totalValue;
-            newWork.inProgress = item.inProgressValue / item.totalValue;
+            if (type === 'traveler') {
+              newWork.finished = 0;
+              if (item.totalInput === 0) {
+                newWork.inProgress = 1;
+              } else {
+                newWork.inProgress = item.finishedInput / item.totalInput;
+              }
+            } else {
+              if (item.totalValue === 0) {
+                newWork.finished = 0;
+                newWork.inProgress = 1;
+              } else {
+                newWork.finished = item.finishedValue / item.totalValue;
+                newWork.inProgress = item.inProgressValue / item.totalValue;
+              }
+            }
+
           }
+
           works.push(newWork);
           added.push(item.id);
         }
@@ -626,21 +635,21 @@ module.exports = function (app) {
     var work = p.works.id(req.params.wid);
 
     if (!work) {
-      res.status(404).send('Work ' + req.params.wid + ' not found in the binder.');
+      return res.status(404).send('Work ' + req.params.wid + ' not found in the binder.');
     }
 
     work.remove();
     p.updatedBy = req.session.userid;
     p.updatedOn = Date.now();
 
-    p.save(function (saveErr, newPackage) {
-      if (saveErr) {
-        console.log(saveErr);
-        res.status(500).send(saveErr.message);
+    p.updateProgress(function (err, newPackage) {
+      if (err) {
+        console.log(err);
+        res.status(500).send(err.message);
       }
-      newPackage.updateProgress();
-      res.status(204).end();
+      return res.json(newPackage);
     });
+
   });
 
   app.put('/binders/:id/works/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), function (req, res) {
