@@ -69,7 +69,7 @@ function cloneTraveler(source, req, res) {
     description: source.description,
     devices: [],
     status: 1,
-    createdBy: source.createdBy,
+    createdBy: req.session.userid,
     createdOn: Date.now(),
     clonedBy: req.session.userid,
     clonedFrom: source._id,
