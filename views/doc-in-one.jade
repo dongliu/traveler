@@ -7,13 +7,13 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/doc.css')
+
 block content
   body(data-spy='scroll', data-target='#myScrollspy')
   //- header
   .container
     .jumbotron
-      h1 FRIB Traveler
-      h2 A Web application to design, carry out and organize travelers
+      include:marked ./docs/hero.md
 
   //- .container-fluid
   .container
@@ -55,4 +55,3 @@ block content
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/docs.js')
