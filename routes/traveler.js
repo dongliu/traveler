@@ -558,7 +558,7 @@ module.exports = function (app) {
     }
 
     if (req.body.status === 2) {
-      if ([1, 1.5].indexOf(doc.status) !== -1) {
+      if ([1.5].indexOf(doc.status) !== -1) {
         doc.status = 2;
       } else {
         return res.send(400, 'cannot complete from the current status. ');
