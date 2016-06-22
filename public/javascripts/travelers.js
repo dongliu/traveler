@@ -36,9 +36,9 @@ function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerT
       if (number === 0) {
         $('#return').prop('disabled', false);
         if (success) {
-          travelerTable.fnReloadAjax();
-          sharedTravelerTable.fnReloadAjax();
-          groupSharedTravelerTable.fnReloadAjax();
+          travelerTable.api().ajax.reload();
+          sharedTravelerTable.api().ajax.reload();
+          groupSharedTravelerTable.api().ajax.reload();
         }
       }
     });
@@ -407,11 +407,11 @@ $(function () {
   });
 
   $('#reload').click(function () {
-    travelerTable.fnReloadAjax();
-    transferredTravelerTable.fnReloadAjax();
-    sharedTravelerTable.fnReloadAjax();
-    groupSharedTravelerTable.fnReloadAjax();
-    archivedTravelerTable.fnReloadAjax();
+    travelerTable.api().ajax.reload();
+    transferredTravelerTable.api().ajax.reload();
+    sharedTravelerTable.api().ajax.reload();
+    groupSharedTravelerTable.api().ajax.reload();
+    archivedTravelerTable.api().ajax.reload();
   });
   // binding events
   selectEvent();

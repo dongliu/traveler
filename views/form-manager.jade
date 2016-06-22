@@ -5,7 +5,7 @@ block head
   title FRIB Traveler - traveler - #{traveler._id} - form manager
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/media/css/dataTables.bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
@@ -101,9 +101,9 @@ block content
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
+  script(type='text/javascript', src='#{prefix}/datatables/media/js/jquery.dataTables.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/media/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')

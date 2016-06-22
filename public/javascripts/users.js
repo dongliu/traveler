@@ -134,7 +134,7 @@ $(function () {
         }),
         success: function (data, status, jqXHR) {
           $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
-          userTable.fnReloadAjax();
+          userTable.api().ajax.reload();
         },
         error: function (jqXHR) {
           $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
@@ -158,7 +158,7 @@ $(function () {
         e.preventDefault();
         $('#update').prop('disabled', true);
         updateFromModal(function () {
-          userTable.fnReloadAjax();
+          userTable.api().ajax.reload();
         });
       });
       $('#modal').modal('show');
@@ -185,7 +185,7 @@ $(function () {
         e.preventDefault();
         $('#modify').prop('disabled', true);
         modifyFromModal(function () {
-          userTable.fnReloadAjax();
+          userTable.api().ajax.reload();
         });
       });
       $('#modal').modal('show');

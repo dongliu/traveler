@@ -22,7 +22,8 @@
     "bootstrap-datepicker": "~1.5.1",
     "font-awesome": "~4.3.0",
     "jquery-ui": "~1.10.2",
-    "jeditable": "~1.7.1"
+    "jeditable": "~1.7.1",
+    "datatables": "1.10.12"
   },
   "resolutions": {
     "jquery": "~1.9.1"

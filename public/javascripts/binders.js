@@ -160,11 +160,11 @@ $(function () {
 
 
   $('#reload').click(function () {
-    binderTable.fnReloadAjax();
-    transferredBinderTable.fnReloadAjax();
-    sharedBinderTable.fnReloadAjax();
-    groupSharedBinderTable.fnReloadAjax();
-    archivedBinderTable.fnReloadAjax();
+    binderTable.api().ajax.reload();
+    transferredBinderTable.api().ajax.reload();
+    sharedBinderTable.api().ajax.reload();
+    groupSharedBinderTable.api().ajax.reload();
+    archivedBinderTable.api().ajax.reload();
   });
 
   $('button.transfer').click(function () {

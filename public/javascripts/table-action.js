@@ -32,10 +32,10 @@ function archiveFromModal(archive, type, fromTable, toTable, otherTable) {
       number = number - 1;
       if (number === 0) {
         $('#return').prop('disabled', false);
-        fromTable.fnReloadAjax();
-        toTable.fnReloadAjax();
+        fromTable.api().ajax.reload();
+        toTable.api().ajax.reload();
         if (otherTable) {
-          otherTable.fnReloadAjax();
+          otherTable.api().ajax.reload();
         }
       }
     });
@@ -67,7 +67,7 @@ function transferFromModal(newOwnerName, type, table) {
       number = number - 1;
       if (number === 0) {
         $('#return').prop('disabled', false);
-        table.fnReloadAjax();
+        table.api().ajax.reload();
       }
     });
   });
@@ -75,5 +75,5 @@ function transferFromModal(newOwnerName, type, table) {
 
 $('button.reload').click(function () {
   var activeTable = $('.tab-pane.active table').dataTable();
-  activeTable.fnReloadAjax();
+  activeTable.api().ajax.reload();
 });

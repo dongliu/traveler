@@ -55,7 +55,7 @@ function cloneFromModal(formTable) {
       number = number - 1;
       if (number === 0 && success) {
         $('#return').prop('disabled', false);
-        formTable.fnReloadAjax();
+        formTable.api().ajax.reload();
       }
     });
   });
@@ -369,11 +369,11 @@ $(function () {
   });
 
   $('#reload').click(function () {
-    formTable.fnReloadAjax();
-    transferredFormTable.fnReloadAjax();
-    sharedFormTable.fnReloadAjax();
-    groupSharedFormTable.fnReloadAjax();
-    archivedFormTable.fnReloadAjax();
+    formTable.api().ajax.reload();
+    transferredFormTable.api().ajax.reload();
+    sharedFormTable.api().ajax.reload();
+    groupSharedFormTable.api().ajax.reload();
+    archivedFormTable.api().ajax.reload();
   });
   // binding events
   selectEvent();

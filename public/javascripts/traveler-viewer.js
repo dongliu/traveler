@@ -50,7 +50,7 @@ function notes(found) {
 
 function createSideNav() {
   var $legend = $('legend');
-  var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
+  var $affix = $('<ul class="nav nav-pills nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
   var i;
   if ($legend.length > 1) {
     for (i = 0; i < $legend.length; i += 1) {
