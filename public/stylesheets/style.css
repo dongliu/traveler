@@ -348,3 +348,9 @@ figcaption {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+
+.input-mini{
+  width: 60px;
+  padding-top:2px;
+  padding-bottom: 2px;
+}
