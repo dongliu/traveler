@@ -31,11 +31,11 @@ function fileHistory(found) {
       link = prefix + '/data/' + found[i]._id;
       output = output + '<li class="list-group-item">' +
           '<strong><a href=' + link + ' target="_blank" class="a-img">' + found[i].value + '</a>' +
-          '<img src='+link+' class="img-display img-thumbnail">'+
+          '<img src=' + link + ' class="img-display img-thumbnail">' +
           '</strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) +
           '</li>';
     }
-  };
+  }
   return output;
 }
 
@@ -505,7 +505,7 @@ $(function () {
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.col-xs-offset-2'));
       }
       $history.html('<li class="list-group-item"><strong><a href=' + json.location + ' target="_blank" class="a-img">' + input.files[0].name + '</a>' +
-          '<img src='+json.location+' class="img-display img-thumbnail">'+
+          '<img src=' + json.location + ' class="img-display img-thumbnail">' +
           '</strong> uploaded by you ' + livespan(timestamp) + '</li>' + $history.html());
       // $.livestamp.resume();
       $this.closest('.control-group-buttons').remove();

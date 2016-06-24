@@ -27,19 +27,17 @@ function history(found) {
 }
 
 function fileHistory(found) {
-  var i,
-      output = '',
-      link;
+  var i, output = '', link;
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
       output = output + '<li class="list-group-item">' +
           '<strong><a href=' + link + ' target="_blank" class="a-img">' + found[i].value + '</a>' +
-          '<img src='+link+' class="img-display img-thumbnail">'+
+          '<img src=' + link + ' class="img-display img-thumbnail">' +
           '</strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) +
           '</li>';
     }
-  };
+  }
   return output;
 }
 
@@ -69,8 +67,7 @@ function createSideNav() {
 }
 
 function validation_message(form) {
-  var i = 0,
-    output = $('<div>');
+  var i = 0, output = $('<div>');
   var p, value, input, label, span;
   for (i = 0; i < form.elements.length; i += 1) {
     input = form.elements[i];
@@ -185,11 +182,11 @@ $(function () {
           return 1;
         });
         if (this.type === 'file') {
-          $(element).closest('.col-xs-offset-2').append('<div class="input-history list-group">' + fileHistory(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<b>history:</b><div class="input-history list-group">' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.col-xs-offset-2').append('<div class="input-history list-group">' + history(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<b>history:</b><div class="input-history list-group">' + history(found) + '</div>');
         }
       }
     });
