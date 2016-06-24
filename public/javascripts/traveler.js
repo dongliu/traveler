@@ -16,7 +16,7 @@ function history(found) {
   var output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
+      output = output + '<li class="list-group-item">changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '</li>';
     }
   }
   return output;
@@ -29,9 +29,13 @@ function fileHistory(found) {
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
-      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
+      output = output + '<li class="list-group-item">' +
+          '<strong><a href=' + link + ' target="_blank" class="a-img">' + found[i].value + '</a>' +
+          '<img src='+link+' class="img-display img-thumbnail">'+
+          '</strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) +
+          '</li>';
     }
-  }
+  };
   return output;
 }
 
@@ -300,11 +304,11 @@ $(function () {
           return 1;
         });
         if (this.type === 'file') {
-          $(element).closest('.col-xs-offset-2').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<b>history:</b><div class="input-history list-group">' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.col-xs-offset-2').append('<div class="input-history"><b>history</b>: ' + history(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<b>history:</b><div class="input-history list-group">' + history(found) + '</div>');
         }
       }
     });
@@ -500,7 +504,9 @@ $(function () {
         }
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.col-xs-offset-2'));
       }
-      $history.html('<strong><a href=' + json.location + ' target="_blank">' + input.files[0].name + '</a></strong> uploaded by you ' + livespan(timestamp) + '; ' + $history.html());
+      $history.html('<li class="list-group-item"><strong><a href=' + json.location + ' target="_blank" class="a-img">' + input.files[0].name + '</a>' +
+          '<img src='+json.location+' class="img-display img-thumbnail">'+
+          '</strong> uploaded by you ' + livespan(timestamp) + '</li>' + $history.html());
       // $.livestamp.resume();
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR) {

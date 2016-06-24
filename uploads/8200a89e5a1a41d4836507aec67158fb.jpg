@@ -1,2 +1,0 @@
-#!/bin/sh
-mongod --fork --logpath /home/wenpq/Desktop/traveler/var/logs/mongod.log --dbpath /home/wenpq/Desktop/traveler/data/mongodb

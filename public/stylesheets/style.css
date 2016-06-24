@@ -348,9 +348,21 @@ figcaption {
   margin-top: 10px;
   margin-bottom: 10px;
 }
-
 .input-mini{
   width: 60px;
   padding-top:2px;
   padding-bottom: 2px;
+}
+
+/*styles for img list show*/
+.img-display {
+  display: none;
+  max-width:400px;
+  height:auto
+}
+.a-img{
+  position: relative;
+}
+.a-img:hover + .img-display {
+  display: block
 }

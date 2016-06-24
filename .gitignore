@@ -22,8 +22,8 @@ logs/*
 userphoto/*
 !userphoto/readme
 doc/
-traveler_uploads/*
-!traveler_uploads/readme
+uploads/*
+!uploads/readme
 config/ad.json
 config/node.pem
 config/node.key

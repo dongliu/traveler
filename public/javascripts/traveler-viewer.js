@@ -18,7 +18,9 @@ function history(found) {
   var i, output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
+      output = output + '<li class="list-group-item">' +
+          'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn)
+          + '</li>';
     }
   }
   return output;
@@ -26,14 +28,18 @@ function history(found) {
 
 function fileHistory(found) {
   var i,
-    output = '',
-    link;
+      output = '',
+      link;
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
-      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
+      output = output + '<li class="list-group-item">' +
+          '<strong><a href=' + link + ' target="_blank" class="a-img">' + found[i].value + '</a>' +
+          '<img src='+link+' class="img-display img-thumbnail">'+
+          '</strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) +
+          '</li>';
     }
-  }
+  };
   return output;
 }
 
@@ -97,7 +103,7 @@ function validation_message(form) {
       p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
       span.text(input.validationMessage);
     }
-    $(input).closest('.controls').append(span);
+    $(input).closest('.col-xs-offset-2').append(span);
     output.append(p);
   }
   return output;
@@ -179,11 +185,11 @@ $(function () {
           return 1;
         });
         if (this.type === 'file') {
-          $(element).closest('.col-xs-offset-2').append('<div class="input-history">' + fileHistory(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<div class="input-history list-group">' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.col-xs-offset-2').append('<div class="input-history">' + history(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<div class="input-history list-group">' + history(found) + '</div>');
         }
       }
     });
