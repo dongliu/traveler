@@ -44,7 +44,9 @@ function notes(found) {
   var output = '<dl>';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
+      output = output + '<dt>' +
+          '<button type="button" class="btn btn-default btn-xs edit-note"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>' +
+          '<b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
       output = output + '<dd>' + found[i].value + '</dd>';
     }
   }
@@ -265,6 +267,45 @@ $(function () {
 
         // $.livestamp.resume();
 
+      }).fail(function (jqXHR) {
+        if (jqXHR.status !== 401) {
+          $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
+          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        }
+      });
+    });
+  });
+
+  // edit note action
+  $('#form').on('click', 'button.edit-note', function (e) {
+    e.preventDefault();
+    var $that = $(this);
+    $('#modalLabel').html('Eddit note: ' + $(this).next().text());
+    var preValue = $(this).parent().next().text();
+    var modbody = '<form class="form-horizontal" id="modalform"><div class="form-group"><label class="col-sm-4 control-label">Note: </label><div class="col-sm-6">' +
+        '<textarea name="note-content" rows=5>' + preValue + '</textarea>' +
+        '<input type="hidden" name="inputname" value="' + $(this).closest('.col-xs-offset-2').find('input, textarea').prop('name') + '"></div></div></form>';
+    $('#modal .modal-body').html(modbody);
+    $('#modal .modal-footer').html('<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
+    $('#modal').modal('show');
+    $('#modal button[value="submit"]').click({preValue: preValue}, function (event) { // pass parameter preValue
+      var name = $('#modal input[name="inputname"]').val();
+      var value = $('#modal textarea[name="note-content"]').val();
+
+      e.preventDefault();
+      $.ajax({
+        url: './notes_edit/',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          name: name,
+          value: value,
+          preValue: event.data.preValue
+        })
+      }).done(function (data, status, jqXHR) {
+        // refresh note
+        console.log($that.parent().next().text());
+        $that.parent().next().text(value);
       }).fail(function (jqXHR) {
         if (jqXHR.status !== 401) {
           $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');

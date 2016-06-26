@@ -715,6 +715,51 @@ module.exports = function (app) {
     });
   });
 
+  app.post('/travelers/:id/notes_edit/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['name', 'value']), reqUtils.hasAll('body', ['name', 'value']), reqUtils.sanitize('body', ['name', 'value']), function (req, res) {
+    // delete previous note
+    console.log(req.body);
+    console.log(req.body.preValue);
+    console.log(req.body.value);
+    
+    TravelerNote.remove({'value': req.body.preValue}, function (err) {
+      if(err) {
+        console.log(err);
+        return res.status(500).send(err.message);
+      }
+    });
+
+    var doc = req[req.params.id];
+    var note = new TravelerNote({
+      traveler: doc._id,
+      name: req.body.name,
+      value: req.body.value,
+      inputBy: req.session.userid,
+      inputOn: Date.now(),
+      preValue: req.body.preValue
+    });
+
+    note.save(function (noteErr) {
+      if (noteErr) {
+        console.error(noteErr);
+        return res.status(500).send(noteErr.message);
+      }
+      doc.notes.push(note._id);
+      doc.manPower.addToSet({
+        _id: req.session.userid,
+        username: req.session.username
+      });
+      doc.updatedBy = req.session.userid;
+      doc.updatedOn = Date.now();
+      doc.save(function (saveErr) {
+        if (saveErr) {
+          console.error(saveErr);
+          return res.status(500).send(saveErr.message);
+        }
+        return res.status(204).end();
+      });
+    });
+  });
+
   app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [1, 1.5, 2]), reqUtils.filter('body', ['finishedInput']), function (req, res) {
     var doc = req[req.params.id];
     doc.update({
