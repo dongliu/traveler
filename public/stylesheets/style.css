@@ -257,7 +257,6 @@ figcaption {
   margin-bottom: 0;
   display: block;
   color: #595959;
-  background-color: #F5F6CE;
 }
 
 .table-hover tbody tr:hover.row-selected > td {
@@ -365,4 +364,14 @@ figcaption {
 }
 .a-img:hover + .img-display {
   display: block
+}
+
+/*styles for string(note) diff*/
+.str-remove{
+  color: red;
+  text-decoration: line-through;
+}
+.str-add{
+  color: green;
+  text-decoration: underline;
 }

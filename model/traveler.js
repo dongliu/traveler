@@ -118,10 +118,7 @@ var travelerNote = new Schema({
   inputBy: String,
   inputOn: Date,
   // track first changes
-  preName: String,
-  preValue: String,
-  preInputBy: String,
-  preInputOn: Date
+  preValue: String
 });
 
 var Traveler = mongoose.model('Traveler', traveler);

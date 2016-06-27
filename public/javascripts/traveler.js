@@ -39,18 +39,35 @@ function fileHistory(found) {
   return output;
 }
 
+// set notes pannel string
+function setPannel(author, time, content, noteId, istrack) {
+  var pannel = '';
+  if (istrack) {
+    pannel = '<div class="panel panel-info" name="' + noteId + '"><div class="panel-heading">' +
+        author + ' noted ' + time +
+        '<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-time" aria-hidden="true"></span></button>' +
+        '<button type="button" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>' +
+        '</div><div class="panel-body">' +
+        content + '</div></div>';
+  }else{
+    pannel = '<div class="panel panel-info" name="' + noteId + '"><div class="panel-heading">' +
+        author + ' noted ' + time +
+        '<button type="button" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>' +
+        '</div><div class="panel-body">' +
+        content + '</div></div>';
+  }
+  return pannel;
+}
+
 function notes(found) {
   var i;
-  var output = '<dl>';
+  var output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + '<dt>' +
-          '<button type="button" class="btn btn-default btn-xs edit-note"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>' +
-          '<b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
-      output = output + '<dd>' + found[i].value + '</dd>';
+      output = output + setPannel(found[i].inputBy, livespan(found[i].inputOn), found[i].value, found[i]._id, found[i].preValue);
     }
   }
-  return output + '</dl>';
+  return output;
 }
 
 
@@ -202,7 +219,6 @@ $(function () {
   dateSupport();
 
   var binder = new Binder.FormBinder(document.forms[0]);
-
   function renderNotes() {
     $.ajax({
       url: './notes/',
@@ -260,13 +276,14 @@ $(function () {
 
         // add new note
         if ($that.closest('.col-xs-offset-2').find('.input-notes').length) {
-          $that.closest('.col-xs-offset-2').find('.input-notes dl').prepend('<dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd>');
+          $that.closest('.col-xs-offset-2').find('.input-notes').prepend(setPannel('You', livespan(timestamp), value));
         } else {
-          $that.closest('.col-xs-offset-2').append('<div class="input-notes"><dl><dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd></dl></div>');
+          $that.closest('.col-xs-offset-2').append('<div class="input-notes">' +
+              setPannel('You', livespan(timestamp), value) +
+              '</div>');
         }
 
         // $.livestamp.resume();
-
       }).fail(function (jqXHR) {
         if (jqXHR.status !== 401) {
           $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
@@ -276,44 +293,97 @@ $(function () {
     });
   });
 
-  // edit note action
+  /*edit note action*/
+  var preValue; // the previous value edited
   $('#form').on('click', 'button.edit-note', function (e) {
     e.preventDefault();
-    var $that = $(this);
-    $('#modalLabel').html('Eddit note: ' + $(this).next().text());
-    var preValue = $(this).parent().next().text();
-    var modbody = '<form class="form-horizontal" id="modalform"><div class="form-group"><label class="col-sm-4 control-label">Note: </label><div class="col-sm-6">' +
-        '<textarea name="note-content" rows=5>' + preValue + '</textarea>' +
-        '<input type="hidden" name="inputname" value="' + $(this).closest('.col-xs-offset-2').find('input, textarea').prop('name') + '"></div></div></form>';
-    $('#modal .modal-body').html(modbody);
-    $('#modal .modal-footer').html('<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
-    $('#modal').modal('show');
-    $('#modal button[value="submit"]').click({preValue: preValue}, function (event) { // pass parameter preValue
-      var name = $('#modal input[name="inputname"]').val();
-      var value = $('#modal textarea[name="note-content"]').val();
+    if ($(this).parent().next().text().match('UpdateCacell')) {
+      return;
+    }else {
+      // cacell previous edited pannel
+      if ($('textarea[name="note-content"]')) {
+        $('textarea[name="note-content"]').parent().html(preValue);
+      }
+      preValue = $(this).parent().next().text();
+      $(this).parent().next().html('<textarea name="note-content" style="width:100%">' + preValue + '</textarea>' +
+          '<div><button type="button" class="btn btn-primary pull-right update-note">Update</button>' +
+          '<button type="button" class="btn btn-warning pull-right cacell-edit">Cacell</button><div>');
+    }
+  });
 
-      e.preventDefault();
-      $.ajax({
-        url: './notes_edit/',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-          name: name,
+  $('#form').on('click', 'button.cacell-edit', function (e) {
+    e.preventDefault();
+    $(this).parent().parent().html(preValue);
+  });
+
+  $('#form').on('click', 'button.update-note', function (e) {
+    e.preventDefault();
+    var $that = $(this);
+    var value = $(this).parent().prev().val();
+    var noteId = $(this).parent().parent().parent().attr('name');
+    $.ajax({
+      url: './notes_update/',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        name: name,
+        value: {
           value: value,
-          preValue: event.data.preValue
-        })
-      }).done(function (data, status, jqXHR) {
-        // refresh note
-        console.log($that.parent().next().text());
-        $that.parent().next().text(value);
-      }).fail(function (jqXHR) {
-        if (jqXHR.status !== 401) {
-          $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
-          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          noteId: noteId
         }
-      });
+      })
+    }).done(function (data) {
+      // refresh note
+      $that.parent().parent().html(value);
+    }).fail(function (jqXHR) {
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the note: ' + jqXHR.responseText + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
     });
   });
+
+  // diff from current note to previous note
+  $('#form').on('click', 'button.diff-note', function (e) {
+    e.preventDefault();
+    var $that = $(this);
+    var noteId = $(this).parent().parent().attr('name');
+    if (!noteId) {// in edit status
+      return;
+    }
+    $.ajax({
+      url: './notes_findById/',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        noteId: noteId
+      })
+    }).done(function (data) {
+      var diff = JsDiff.diffChars(data.preValue, data.value);
+      var display = $that.parent().next();
+      var diffstr = '';
+      diff.forEach(function (part) {
+        // green for additions, red for deletions, grey for common parts
+        var color = part.added ? 'green' :
+            part.removed ? 'red' : 'grey';
+        if(part.removed) {
+          diffstr = diffstr + '<span class="str-remove">' + part.value + '</span>';
+        }else if(part.added) {
+          diffstr = diffstr + '<span class="str-add">' + part.value + '</span>';
+        }else {
+          diffstr = diffstr + part.value;
+        }
+        console.log(diffstr);
+        $that.parent().next().html(diffstr);
+      });
+    }).fail(function (jqXHR) {
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot find current note in DB: ' + jqXHR.responseText + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    });
+  });
+
 
   $('#form').on('click', 'a.notes-number', function (e) {
     e.preventDefault();
