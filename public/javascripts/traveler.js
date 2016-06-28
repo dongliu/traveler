@@ -45,8 +45,8 @@ function setPannel(author, time, content, noteId, istrack) {
   if (istrack) {
     pannel = '<div class="panel panel-info" name="' + noteId + '"><div class="panel-heading">' +
         author + ' noted ' + time +
-        '<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-time" aria-hidden="true"></span></button>' +
         '<button type="button" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>' +
+        '<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-time" aria-hidden="true"></span></button>' +
         '</div><div class="panel-body">' +
         content + '</div></div>';
   }else{
@@ -276,10 +276,10 @@ $(function () {
 
         // add new note
         if ($that.closest('.col-xs-offset-2').find('.input-notes').length) {
-          $that.closest('.col-xs-offset-2').find('.input-notes').prepend(setPannel('You', livespan(timestamp), value));
+          $that.closest('.col-xs-offset-2').find('.input-notes').prepend(setPannel('You', livespan(timestamp), value, data));
         } else {
           $that.closest('.col-xs-offset-2').append('<div class="input-notes">' +
-              setPannel('You', livespan(timestamp), value) +
+              setPannel('You', livespan(timestamp), value, data) +
               '</div>');
         }
 
@@ -293,7 +293,7 @@ $(function () {
     });
   });
 
-  /*edit note action*/
+  /*edit and update note */
   var preValue; // the previous value edited
   $('#form').on('click', 'button.edit-note', function (e) {
     e.preventDefault();
@@ -320,7 +320,7 @@ $(function () {
     e.preventDefault();
     var $that = $(this);
     var value = $(this).parent().prev().val();
-    var noteId = $(this).parent().parent().parent().attr('name');
+    var noteId = $(this).parents('.panel').attr('name');
     $.ajax({
       url: './notes_update/',
       type: 'POST',
@@ -332,9 +332,13 @@ $(function () {
           noteId: noteId
         }
       })
-    }).done(function (data) {
+    }).done(function () {
+      //append button
+      if($that.parents('.panel').find('.diff-note').length === 0) {
+        $that.parents('.panel').find('.panel-heading').append('<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-time" aria-hidden="true"></span></button>');
+      }
       // refresh note
-      $that.parent().parent().html(value);
+      $that.parents('.panel-body').html(value);
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the note: ' + jqXHR.responseText + '</div>');
@@ -346,9 +350,18 @@ $(function () {
   // diff from current note to previous note
   $('#form').on('click', 'button.diff-note', function (e) {
     e.preventDefault();
-    var $that = $(this);
-    var noteId = $(this).parent().parent().attr('name');
-    if (!noteId) {// in edit status
+    var $pannel = $(this).parents('.panel');
+    var $pannelbody = $(this).parent().next();
+    var noteId = $pannel.attr('name');
+    if ($pannelbody.find('textarea').length !== 0) {// in edit status
+      return;
+    }
+    if($pannelbody.find('span').length !== 0) {// has been in diff status
+      var s = $pannelbody.html();
+      s = s.replace(/<span class="str-remove">(.*?)<\/span>/g, '');
+      s = s.replace(/<span.*?>/, '');
+      s = s.replace(/<\/span>/, '');
+      $pannelbody.html(s);
       return;
     }
     $.ajax({
@@ -360,12 +373,9 @@ $(function () {
       })
     }).done(function (data) {
       var diff = JsDiff.diffChars(data.preValue, data.value);
-      var display = $that.parent().next();
       var diffstr = '';
       diff.forEach(function (part) {
         // green for additions, red for deletions, grey for common parts
-        var color = part.added ? 'green' :
-            part.removed ? 'red' : 'grey';
         if(part.removed) {
           diffstr = diffstr + '<span class="str-remove">' + part.value + '</span>';
         }else if(part.added) {
@@ -373,8 +383,7 @@ $(function () {
         }else {
           diffstr = diffstr + part.value;
         }
-        console.log(diffstr);
-        $that.parent().next().html(diffstr);
+        $pannelbody.html(diffstr);
       });
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {

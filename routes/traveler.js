@@ -710,7 +710,7 @@ module.exports = function (app) {
           console.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
-        return res.status(204).end();
+        return res.status(200).json(note._id);
       });
     });
   });
@@ -723,6 +723,9 @@ module.exports = function (app) {
         return res.status(500).send(noteErr.message);
       }
       var preValue = note.value;
+      if(req.body.value.value == preValue) {
+        return res.status(204).send('Nothing changed');
+      }
       note.value = req.body.value.value;
       note.preValue = preValue;
       note.save(function (noteErr) {
