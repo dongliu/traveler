@@ -64,7 +64,7 @@ function notes(found) {
   var output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + setPannel(found[i].inputBy, livespan(found[i].inputOn), found[i].value, found[i]._id, found[i].preValue);
+      output = output + setPannel(found[i].inputBy, livespan(found[i].inputOn), found[i].value, found[i]._id, found[i].preId);
     }
   }
   return output;
@@ -229,6 +229,9 @@ $(function () {
         var found = data.filter(function (e) {
           return e.name === element.name;
         });
+        found = found.filter(function (e) {
+          return e.isPre === undefined || e.isPre === false;
+        });
         $(element).closest('.col-xs-offset-2').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
         if (found.length) {
           found.sort(function (a, b) {
@@ -240,7 +243,6 @@ $(function () {
           $(element).closest('.col-xs-offset-2').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
         }
       });
-
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
@@ -326,13 +328,15 @@ $(function () {
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
-        name: name,
+        name: '',
         value: {
           value: value,
           noteId: noteId
         }
       })
-    }).done(function () {
+    }).done(function (data) {
+      //update id
+      $that.parents('.panel').attr('name', data);
       //append button
       if($that.parents('.panel').find('.diff-note').length === 0) {
         $that.parents('.panel').find('.panel-heading').append('<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-time" aria-hidden="true"></span></button>');
@@ -352,6 +356,7 @@ $(function () {
     e.preventDefault();
     var $pannel = $(this).parents('.panel');
     var $pannelbody = $(this).parent().next();
+    var curValue = $pannelbody.text();
     var noteId = $pannel.attr('name');
     if ($pannelbody.find('textarea').length !== 0) {// in edit status
       return;
@@ -365,14 +370,14 @@ $(function () {
       return;
     }
     $.ajax({
-      url: './notes_findById/',
+      url: './notes_findOrigin/',
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
         noteId: noteId
       })
     }).done(function (data) {
-      var diff = JsDiff.diffChars(data.preValue, data.value);
+      var diff = JsDiff.diffChars(data.value, curValue);
       var diffstr = '';
       diff.forEach(function (part) {
         // green for additions, red for deletions, grey for common parts

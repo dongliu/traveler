@@ -628,7 +628,7 @@ module.exports = function (app) {
       _id: {
         $in: doc.data
       }
-    }, 'name value inputType inputBy inputOn').exec(function (dataErr, docs) {
+    }).exec(function (dataErr, docs) {
       if (dataErr) {
         console.error(dataErr);
         return res.status(500).send(dataErr.message);
@@ -675,7 +675,7 @@ module.exports = function (app) {
       _id: {
         $in: doc.notes
       }
-    }, 'name value inputBy inputOn preValue').exec(function (noteErr, docs) {
+    }).exec(function (noteErr, docs) {
       if (noteErr) {
         console.error(noteErr);
         return res.status(500).send(noteErr.message);
@@ -716,37 +716,76 @@ module.exports = function (app) {
   });
 
   app.post('/travelers/:id/notes_update/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['name', 'value']), reqUtils.hasAll('body', ['name', 'value']), reqUtils.sanitize('body', ['name', 'value']), function (req, res) {
-    // delete previous note
+    var doc = req[req.params.id];
+
+    // update previous note status
     TravelerNote.findOne({_id: req.body.value.noteId}, function (noteErr, note) {
       if (noteErr) {
         console.error(noteErr);
         return res.status(500).send(noteErr.message);
       }
-      var preValue = note.value;
-      if(req.body.value.value == preValue) {
-        return res.status(204).send('Nothing changed');
-      }
-      note.value = req.body.value.value;
-      note.preValue = preValue;
+      note.isPre = true;
       note.save(function (noteErr) {
         if (noteErr) {
           console.error(noteErr);
           return res.status(500).send(noteErr.message);
         }
-        return res.status(204).end();
+      });
+      // save a new note
+      var newnote = new TravelerNote({
+        traveler: doc._id,
+        name: note.name,
+        value: req.body.value.value,
+        inputBy: req.session.userid,
+        inputOn: Date.now(),
+        preId: req.body.value.noteId,
+      });
+      newnote.save(function (noteErr) {
+        if (noteErr) {
+          console.error(noteErr);
+          return res.status(500).send(noteErr.message);
+        }
+        doc.notes.push(newnote._id);
+        doc.manPower.addToSet({
+          _id: req.session.userid,
+          username: req.session.username
+        });
+        doc.updatedBy = req.session.userid;
+        doc.updatedOn = Date.now();
+        doc.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.status(500).send(saveErr.message);
+          }
+          return res.status(200).json(newnote._id);
+        });
       });
     });
+
+
+
   });
 
-  app.post('/travelers/:id/notes_findById/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['noteId']), reqUtils.hasAll('body', ['noteId']), reqUtils.sanitize('body', ['noteId']), function (req, res) {
-    // delete previous note
-    TravelerNote.findOne({_id: req.body.noteId}, function (noteErr, note) {
+  app.post('/travelers/:id/notes_findOrigin/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['noteId']), reqUtils.hasAll('body', ['noteId']), reqUtils.sanitize('body', ['noteId']), function (req, res) {
+
+    var findorigin = function (noteErr, note) {
       if (noteErr) {
         console.error(noteErr);
         return res.status(500).send(noteErr.message);
       }
-      return res.status(200).json(note);
+      if(note.preId) {
+        return TravelerNote.findOne({_id: note.preId}, function (newnoteErr, newnote) {
+          findorigin(newnoteErr, newnote);
+        });
+      }else {
+        return res.status(200).json(note);
+      }
+    };
+
+    TravelerNote.findOne({_id: req.body.noteId}, function (noteErr, note) {
+      findorigin(noteErr, note);
     });
+
   });
 
 
