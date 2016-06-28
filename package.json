@@ -24,6 +24,9 @@
     "underscore": "1.8.0"
   },
   "devDependencies": {
+    "eslint": "^1.9.0",
+    "eslint-config-defaults": "^7.1.1",
+    "eslint-plugin-filenames": "^0.1.2",
     "should": "~4.0.4",
     "mocha": "~1.20.1"
   }
