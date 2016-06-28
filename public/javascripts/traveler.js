@@ -47,6 +47,7 @@ function setPannel(author, time, content, noteId, istrack) {
         author + ' noted ' + time +
         '<button type="button" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>' +
         '<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-time" aria-hidden="true"></span></button>' +
+        '<button type="button" class="btn btn-default btn-xs pull-right list-note"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>' +
         '</div><div class="panel-body">' +
         content + '</div></div>';
   }else{
@@ -299,7 +300,10 @@ $(function () {
   var preValue; // the previous value edited
   $('#form').on('click', 'button.edit-note', function (e) {
     e.preventDefault();
-    if ($(this).parent().next().text().match('UpdateCacell')) {
+    // in history status
+    if ($(this).parent().next().find('.list-group').length > 0) {return;}
+    // in edit status
+    if ($(this).parent().next('.cacell-edit').length > 0) {
       return;
     }else {
       // cacell previous edited pannel
@@ -392,7 +396,50 @@ $(function () {
       });
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot find current note in DB: ' + jqXHR.responseText + '</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot find current note: ' + jqXHR.responseText + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    });
+  });
+
+// list edited note history
+  $('#form').on('click', 'button.list-note', function (e) {
+    e.preventDefault();
+    var $that = $(this);
+    var $pannel = $(this).parents('.panel');
+    var $pannelbody = $(this).parent().next();
+    var noteId = $pannel.attr('name');
+    if ($pannelbody.find('textarea').length > 0) {// in edit status
+      return;
+    }
+    if($pannelbody.find('.list-group').length > 0){ // in history status
+      var s = $pannelbody.find('.list-group-item').first().html();
+      s = s.replace(/<strong>(.*?)<\/strong>/g, '');
+      $pannelbody.html(s);
+      return;
+    }
+    if($pannelbody.find('span').length > 0) {// in diff status
+      return;
+    }
+    $.ajax({
+      url: './notes_track/',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        noteId: noteId
+      })
+    }).done(function (data) {
+      var s = '<ul class="list-group">';
+      for(var i = 0; i < data.length; i++){
+        s = s + '<li class="list-group-item">' +
+            '<strong>Edit on' + livespan(data[i].inputOn) + '</strong><br>' +
+            data[i].value + '</li>';
+      }
+      s = s + '</ul>';
+      $pannelbody.html(s);
+    }).fail(function (jqXHR) {
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot find history notes: ' + jqXHR.responseText + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     });

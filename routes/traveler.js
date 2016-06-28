@@ -781,11 +781,31 @@ module.exports = function (app) {
         return res.status(200).json(note);
       }
     };
-
     TravelerNote.findOne({_id: req.body.noteId}, function (noteErr, note) {
       findorigin(noteErr, note);
     });
+  });
 
+  app.post('/travelers/:id/notes_track/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['noteId']), reqUtils.hasAll('body', ['noteId']), reqUtils.sanitize('body', ['noteId']), function (req, res) {
+
+    var notes = [];
+    var findorigin = function (noteErr, note) {
+      if (noteErr) {
+        console.error(noteErr);
+        return res.status(500).send(noteErr.message);
+      }
+      notes.push(note);
+      if(note.preId) {
+        return TravelerNote.findOne({_id: note.preId}, function (newnoteErr, newnote) {
+          findorigin(newnoteErr, newnote);
+        });
+      }else {
+        return res.status(200).json(notes);
+      }
+    };
+    TravelerNote.findOne({_id: req.body.noteId}, function (noteErr, note) {
+      findorigin(noteErr, note);
+    });
   });
 
 
