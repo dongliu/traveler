@@ -716,13 +716,14 @@ module.exports = function (app) {
   });
 
   app.post('/travelers/:id/notes_update/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['name', 'value']), reqUtils.hasAll('body', ['name', 'value']), reqUtils.sanitize('body', ['name', 'value']), function (req, res) {
-    var doc = req[req.params.id];
-
     // update previous note status
     TravelerNote.findOne({_id: req.body.value.noteId}, function (noteErr, note) {
       if (noteErr) {
         console.error(noteErr);
         return res.status(500).send(noteErr.message);
+      }
+      if(req.session.userid != note.inputBy) {// none note's user has n permission.
+        return res.status(401).send('You are not authorized to update this note.');
       }
       note.isPre = true;
       note.save(function (noteErr) {
@@ -731,6 +732,7 @@ module.exports = function (app) {
           return res.status(500).send(noteErr.message);
         }
       });
+      var doc = req[req.params.id];
       // save a new note
       var newnote = new TravelerNote({
         traveler: doc._id,
@@ -738,7 +740,7 @@ module.exports = function (app) {
         value: req.body.value.value,
         inputBy: req.session.userid,
         inputOn: Date.now(),
-        preId: req.body.value.noteId,
+        preId: req.body.value.noteId
       });
       newnote.save(function (noteErr) {
         if (noteErr) {
@@ -761,9 +763,6 @@ module.exports = function (app) {
         });
       });
     });
-
-
-
   });
 
   app.post('/travelers/:id/notes_findOrigin/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['noteId']), reqUtils.hasAll('body', ['noteId']), reqUtils.sanitize('body', ['noteId']), function (req, res) {
