@@ -2,6 +2,8 @@
 this file include the common functions between traveler.jade and traveler-viewer.jade
 */
 
+/*global prefix*/
+
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 function livespan(stamp, live) {
   if (live) {
@@ -29,31 +31,39 @@ function fileHistory(found) {
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
-      output = output + '<li class="list-group-item">' +
+      if (i === 0) { // show the latest picture
+        output = output + '<li class="list-group-item">' +
+          '<strong><a href=' + link + ' target="_blank" class="a-img">' + found[i].value + '</a><br>' +
+          '<img src=' + link + ' class="img-thumbnail"><br>' +
+          '</strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) +
+          '</li>';
+      }else{
+        output = output + '<li class="list-group-item">' +
           '<strong><a href=' + link + ' target="_blank" class="a-img">' + found[i].value + '</a>' +
           '<img src=' + link + ' class="img-display img-thumbnail">' +
           '</strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) +
           '</li>';
+      }
     }
   }
   return output;
 }
 
 // set notes pannel string
-function setPannel(author, time, content, noteId, istrack) {
+function setPanel(author, time, content, noteId, istrack) {
   var pannel = '';
   if (istrack) {
     pannel = '<div class="panel panel-info" name="' + noteId + '"><div class="panel-heading">' +
         author + ' noted ' + time +
-        '<button type="button" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>' +
-        '<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-time" aria-hidden="true"></span></button>' +
-        '<button type="button" class="btn btn-default btn-xs pull-right list-note"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>' +
+        '<button type="button" title="Edit your note" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>' +
+        '<button type="button" title="Show changes between latest note and original note" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-import" aria-hidden="true"></span></button>' +
+        '<button type="button" title="Show history of all edited notes" class="btn btn-default btn-xs pull-right list-note"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>' +
         '</div><div class="panel-body">' +
         content + '</div></div>';
   }else{
     pannel = '<div class="panel panel-info" name="' + noteId + '"><div class="panel-heading">' +
         author + ' noted ' + time +
-        '<button type="button" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>' +
+        '<button type="button" itle="Edit your note" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>' +
         '</div><div class="panel-body">' +
         content + '</div></div>';
   }
@@ -65,7 +75,7 @@ function notes(found) {
   var output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + setPannel(found[i].inputBy, livespan(found[i].inputOn), found[i].value, found[i]._id, found[i].preId);
+      output = output + setPanel(found[i].inputBy, livespan(found[i].inputOn), found[i].value, found[i]._id, found[i].preId);
     }
   }
   return output;
@@ -162,6 +172,7 @@ function renderNotes() {
     }
   }).always();
 }
+var prePanel = []; // the previous value edited
 
 $(function () {
   createSideNav();
@@ -196,24 +207,16 @@ $(function () {
   // diff from current note to previous note
   $('#form').on('click', 'button.diff-note', function (e) {
     e.preventDefault();
-    var $pannel = $(this).parents('.panel');
+    // archive the current panel
+    var i = $(this).parents('.panel').index();
+    var p = {
+      value: $(this).parent().next().text(),
+      head: $(this).parent().html()
+    };
+    prePanel[i] = p;
     var $pannelbody = $(this).parent().next();
-    var curValue = $pannelbody.text();
-    var noteId = $pannel.attr('name');
-    if ($pannelbody.find('textarea').length !== 0) {// in edit status
-      return;
-    }
-    if ($(this).parent().next().find('.list-group').length > 0) {// in history status
-      return;
-    }
-    if($pannelbody.find('span').length !== 0) {// in diff status, remove diff tag
-      var s = $pannelbody.html();
-      s = s.replace(/<span class="str-remove">(.*?)<\/span>/g, '');
-      s = s.replace(/<span.*?>/, '');
-      s = s.replace(/<\/span>/, '');
-      $pannelbody.html(s);
-      return;
-    }
+    var $pannelhead = $(this).parent();
+    var noteId = $(this).parents('.panel').attr('name');
     $.ajax({
       url: './notes_findOrigin/',
       type: 'POST',
@@ -222,7 +225,7 @@ $(function () {
         noteId: noteId
       })
     }).done(function (data) {
-      var diff = JsDiff.diffChars(data.value, curValue);
+      var diff = JsDiff.diffChars(data.value, p.value);
       var diffstr = '';
       diff.forEach(function (part) {
         // green for additions, red for deletions, grey for common parts
@@ -234,6 +237,8 @@ $(function () {
           diffstr = diffstr + part.value;
         }
         $pannelbody.html(diffstr);
+        $pannelhead.children('button').remove();
+        $pannelhead.append('<button type="button" title="show the latest note" class="btn btn-default btn-xs pull-right recover-note"><span class="glyphicon glyphicon-export" aria-hidden="true"></span></button>');
       });
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
@@ -243,24 +248,20 @@ $(function () {
     });
   });
 
-// list edited note history
+  // list edited note history
   $('#form').on('click', 'button.list-note', function (e) {
     e.preventDefault();
+    // archive the current panel
+    var i = $(this).parents('.panel').index();
+    var p = {
+      value: $(this).parent().next().text(),
+      head: $(this).parent().html()
+    };
+    prePanel[i] = p;
     var $pannel = $(this).parents('.panel');
     var $pannelbody = $(this).parent().next();
+    var $pannelhead = $(this).parent();
     var noteId = $pannel.attr('name');
-    if ($pannelbody.find('textarea').length > 0) {// in edit status
-      return;
-    }
-    if($pannelbody.find('.list-group').length > 0){ // in history status
-      var s = $pannelbody.find('.list-group-item').first().html();
-      s = s.replace(/<strong>(.*?)<\/strong>/g, '');
-      $pannelbody.html(s);
-      return;
-    }
-    if($pannelbody.find('span').length > 0) {// in diff status
-      return;
-    }
     $.ajax({
       url: './notes_track/',
       type: 'POST',
@@ -269,7 +270,7 @@ $(function () {
         noteId: noteId
       })
     }).done(function (data) {
-      s = '<ul class="list-group">';
+      var s = '<ul class="list-group">';
       for(var i = 0; i < data.length; i++) {
         s = s + '<li class="list-group-item">' +
           '<strong>Edit on ' + livespan(data[i].inputOn) + '</strong><br>' +
@@ -277,12 +278,21 @@ $(function () {
       }
       s = s + '</ul>';
       $pannelbody.html(s);
+      $pannelhead.children('button').remove();
+      $pannelhead.append('<button type="button" title="show the latest note" class="btn btn-default btn-xs pull-right recover-note"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></button>');
+
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot find history notes: ' + jqXHR.responseText + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     });
+  });
+
+  $('#form').on('click', 'button.recover-note', function () {
+    var i = $(this).parents('.panel').index();
+    $(this).parent().next().html(prePanel[i].value);
+    $(this).parent().html(prePanel[i].head);
   });
 
   $('#form').on('click', 'a.notes-number', function (e) {

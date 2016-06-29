@@ -1,10 +1,11 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false, Modernizr: false*/
-/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix*/
+/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix */
+/*global prePanel:true, livespan, renderNotes, setPanel, fileHistory */
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
 // handle browsers not supporting date type input
+
 function dateSupport() {
   if (!Modernizr.inputtypes.date) {
     $('input[type="date"]').datepicker({
@@ -86,14 +87,14 @@ $(function () {
 
         // add new note
         if ($that.closest('.col-xs-offset-2').find('.input-notes').length) {
-          $that.closest('.col-xs-offset-2').find('.input-notes').prepend(setPannel('You', livespan(timestamp), value, data));
+          $that.closest('.col-xs-offset-2').find('.input-notes').prepend(setPanel('You', livespan(timestamp), value, data));
         } else {
           $that.closest('.col-xs-offset-2').append('<div class="input-notes">' +
-              setPannel('You', livespan(timestamp), value, data) +
+              setPanel('You', livespan(timestamp), value, data) +
               '</div>');
         }
-
-        // $.livestamp.resume();
+        // refresh prePanel
+        prePanel.unshift('');
       }).fail(function (jqXHR) {
         if (jqXHR.status !== 401) {
           $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
@@ -104,36 +105,33 @@ $(function () {
   });
 
   /*edit and update note */
-  var preValue; // the previous value edited
   $('#form').on('click', 'button.edit-note', function (e) {
     e.preventDefault();
-    // in history status
-    if ($(this).parent().next().find('.list-group').length > 0) {return;}
-    // in edit status
-    if ($(this).parent().next('.cacell-edit').length > 0) {
-      return;
-    }else {
-      // cacell previous edited pannel
-      if ($('textarea[name="note-content"]')) {
-        $('textarea[name="note-content"]').parent().html(preValue);
-      }
-      preValue = $(this).parent().next().text();
-      $(this).parent().next().html('<textarea name="note-content" style="width:100%">' + preValue + '</textarea>' +
+    var i = $(this).parents('.panel').index();
+    var p = {
+      value: $(this).parent().next().text(),
+      head: $(this).parent().html()
+    };
+    prePanel[i] = p;
+    $(this).parent().next().html('<textarea name="note-content" style="width:100%">' + p.value + '</textarea>' +
           '<div><button type="button" class="btn btn-primary pull-right update-note">Update</button>' +
           '<button type="button" class="btn btn-warning pull-right cacell-edit">Cacell</button><div>');
-    }
+    $(this).parent().children('button').remove();
   });
 
   $('#form').on('click', 'button.cacell-edit', function (e) {
     e.preventDefault();
-    $(this).parent().parent().html(preValue);
+    var i = $(this).parents('.panel').index();
+    $(this).parents('.panel-body').prev().html(prePanel[i].head);
+    $(this).parents('.panel-body').html(prePanel[i].value);
   });
 
   $('#form').on('click', 'button.update-note', function (e) {
     e.preventDefault();
     var $that = $(this);
     var value = $(this).parent().prev().val();
-    if(value === preValue) {
+    var i = $(this).parents('.panel').index();
+    if(value === prePanel[i].value) {
       $that.parents('.panel-body').html(value);
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Nothing changed on note </div>');
       return;
@@ -153,13 +151,10 @@ $(function () {
     }).done(function (data, status, jqXHR) {
       //update id
       $that.parents('.panel').attr('name', data);
-      //append button
-      if($that.parents('.panel').find('.diff-note').length === 0) {
-        $that.parents('.panel').find('.panel-heading').append('<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-time" aria-hidden="true"></span></button>');
-      }
-      if($that.parents('.panel').find('.list-note').length === 0) {
-        $that.parents('.panel').find('.panel-heading').append('<button type="button" class="btn btn-default btn-xs pull-right list-note"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>');
-      }
+      //append button{
+      $that.parents('.panel').find('.panel-heading').append('<button type="button" title="Edit your note" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>');
+      $that.parents('.panel').find('.panel-heading').append('<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-import" aria-hidden="true"></span></button>');
+      $that.parents('.panel').find('.panel-heading').append('<button type="button" class="btn btn-default btn-xs pull-right list-note"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>');
       // refresh note
       $that.parents('.panel-body').html(value);
       // load infomation
