@@ -93,8 +93,9 @@ $(function () {
               setPanel('You', livespan(timestamp), value, data) +
               '</div>');
         }
-        // refresh prePanel
-        prePanel.unshift('');
+        // refresh Panel in control-group-wrap
+        var k = $(this).parents('.control-group-wrap').index();
+        preWrap[k].unshift('');
       }).fail(function (jqXHR) {
         if (jqXHR.status !== 401) {
           $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
@@ -107,13 +108,24 @@ $(function () {
   /*edit and update note */
   $('#form').on('click', 'button.edit-note', function (e) {
     e.preventDefault();
+    // archive the current panel
     var i = $(this).parents('.panel').index();
-    var p = {
-      value: $(this).parent().next().text(),
-      head: $(this).parent().html()
-    };
-    prePanel[i] = p;
-    $(this).parent().next().html('<textarea name="note-content" style="width:100%">' + p.value + '</textarea>' +
+    var k = $(this).parents('.control-group-wrap').index();
+    var prePanel;
+    if(preWrap[k]) {
+      prePanel = preWrap[k];
+    }else{
+      prePanel = [];
+    }
+    if(prePanel[i] === undefined) {
+      var p = {
+        value: $(this).parent().next().text(),
+        head: $(this).parent().html()
+      };
+      prePanel[i] = p;
+      preWrap[k] = prePanel;
+    }
+    $(this).parent().next().html('<textarea name="note-content" style="width:100%">' + prePanel[i].value + '</textarea>' +
           '<div><button type="button" class="btn btn-primary pull-right update-note">Update</button>' +
           '<button type="button" class="btn btn-warning pull-right cacell-edit">Cacell</button><div>');
     $(this).parent().children('button').remove();
@@ -121,7 +133,9 @@ $(function () {
 
   $('#form').on('click', 'button.cacell-edit', function (e) {
     e.preventDefault();
+    var k = $(this).parents('.control-group-wrap').index();
     var i = $(this).parents('.panel').index();
+    var prePanel = preWrap[k];
     $(this).parents('.panel-body').prev().html(prePanel[i].head);
     $(this).parents('.panel-body').html(prePanel[i].value);
   });
@@ -131,6 +145,8 @@ $(function () {
     var $that = $(this);
     var value = $(this).parent().prev().val();
     var i = $(this).parents('.panel').index();
+    var k = $(this).parents('.control-group-wrap').index();
+    var prePanel = preWrap[k];
     if(value === prePanel[i].value) {
       $that.parents('.panel-body').html(value);
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Nothing changed on note </div>');
@@ -153,16 +169,18 @@ $(function () {
       $that.parents('.panel').attr('name', data);
       //append button{
       $that.parents('.panel').find('.panel-heading').append('<button type="button" title="Edit your note" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>');
-      $that.parents('.panel').find('.panel-heading').append('<button type="button" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-import" aria-hidden="true"></span></button>');
-      $that.parents('.panel').find('.panel-heading').append('<button type="button" class="btn btn-default btn-xs pull-right list-note"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>');
+      $that.parents('.panel').find('.panel-heading').append('<button type="button" title="Show changes between latest note and original note" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-import" aria-hidden="true"></span></button>');
+      $that.parents('.panel').find('.panel-heading').append('<button type="button" title="Show history of all edited notes" class="btn btn-default btn-xs pull-right list-note"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>');
       // refresh note
       $that.parents('.panel-body').html(value);
       // load infomation
       var timestamp = jqXHR.getResponseHeader('Date');
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note updated ' + livespan(timestamp) + '</div>');
     }).fail(function (jqXHR) {
-      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the note: ' + jqXHR.responseText + '</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the note: ' + jqXHR.responseText + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
     });
   });
 

@@ -172,7 +172,8 @@ function renderNotes() {
     }
   }).always();
 }
-var prePanel = []; // the previous value edited
+
+var preWrap = []; // the previous control-group-wrap edited
 
 $(function () {
   createSideNav();
@@ -209,11 +210,22 @@ $(function () {
     e.preventDefault();
     // archive the current panel
     var i = $(this).parents('.panel').index();
-    var p = {
-      value: $(this).parent().next().text(),
-      head: $(this).parent().html()
-    };
-    prePanel[i] = p;
+    var k = $(this).parents('.control-group-wrap').index();
+    var prePanel;
+    if(preWrap[k]) {
+      prePanel = preWrap[k];
+    }else{
+      prePanel = [];
+    }
+    var p;
+    if(prePanel[i] === undefined) {
+      var p = {
+        value: $(this).parent().next().text(),
+        head: $(this).parent().html()
+      };
+      prePanel[i] = p;
+      preWrap[k] = prePanel;
+    }
     var $pannelbody = $(this).parent().next();
     var $pannelhead = $(this).parent();
     var noteId = $(this).parents('.panel').attr('name');
@@ -225,7 +237,7 @@ $(function () {
         noteId: noteId
       })
     }).done(function (data) {
-      var diff = JsDiff.diffChars(data.value, p.value);
+      var diff = JsDiff.diffChars(data.value, prePanel[i].value);
       var diffstr = '';
       diff.forEach(function (part) {
         // green for additions, red for deletions, grey for common parts
@@ -253,11 +265,21 @@ $(function () {
     e.preventDefault();
     // archive the current panel
     var i = $(this).parents('.panel').index();
-    var p = {
-      value: $(this).parent().next().text(),
-      head: $(this).parent().html()
-    };
-    prePanel[i] = p;
+    var k = $(this).parents('.control-group-wrap').index();
+    var prePanel;
+    if(preWrap[k]) {
+      prePanel = preWrap[k];
+    }else{
+      prePanel = [];
+    }
+    if(prePanel[i] === undefined) {
+      var p = {
+        value: $(this).parent().next().text(),
+        head: $(this).parent().html()
+      };
+      prePanel[i] = p;
+      preWrap[k] = prePanel;
+    }
     var $pannel = $(this).parents('.panel');
     var $pannelbody = $(this).parent().next();
     var $pannelhead = $(this).parent();
@@ -273,7 +295,7 @@ $(function () {
       var s = '<ul class="list-group">';
       for(var i = 0; i < data.length; i++) {
         s = s + '<li class="list-group-item">' +
-          '<strong>Edit on ' + livespan(data[i].inputOn) + '</strong><br>' +
+          '<strong>Edited on ' + livespan(data[i].inputOn) + '</strong><br>' +
           data[i].value + '</li>';
       }
       s = s + '</ul>';
@@ -290,7 +312,9 @@ $(function () {
   });
 
   $('#form').on('click', 'button.recover-note', function () {
+    var k = $(this).parents('.control-group-wrap').index();
     var i = $(this).parents('.panel').index();
+    var prePanel = preWrap[k];
     $(this).parent().next().html(prePanel[i].value);
     $(this).parent().html(prePanel[i].head);
   });

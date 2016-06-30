@@ -723,13 +723,13 @@ module.exports = function (app) {
         return res.status(500).send(noteErr.message);
       }
       if(req.session.userid != note.inputBy) {// none note's user has n permission.
-        return res.status(401).send('You are not authorized to update this note.');
+        return res.status(403).send('You are not authorized to update this note.');
       }
       note.isPre = true;
-      note.save(function (noteErr) {
-        if (noteErr) {
-          console.error(noteErr);
-          return res.status(500).send(noteErr.message);
+      note.save(function (noteErr2) {
+        if (noteErr2) {
+          console.error(noteErr2);
+          return res.status(500).send(noteErr2.message);
         }
       });
       var doc = req[req.params.id];
@@ -742,10 +742,10 @@ module.exports = function (app) {
         inputOn: Date.now(),
         preId: req.body.value.noteId
       });
-      newnote.save(function (noteErr) {
-        if (noteErr) {
-          console.error(noteErr);
-          return res.status(500).send(noteErr.message);
+      newnote.save(function (noteErr3) {
+        if (noteErr3) {
+          console.error(noteErr3);
+          return res.status(500).send(noteErr3.message);
         }
         doc.notes.push(newnote._id);
         doc.manPower.addToSet({
@@ -766,7 +766,7 @@ module.exports = function (app) {
   });
 
   app.post('/travelers/:id/notes_findOrigin/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['noteId']), reqUtils.hasAll('body', ['noteId']), reqUtils.sanitize('body', ['noteId']), function (req, res) {
-
+    // find the original note in 'edited notes linklist'
     var findorigin = function (noteErr, note) {
       if (noteErr) {
         console.error(noteErr);
