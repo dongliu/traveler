@@ -407,7 +407,7 @@ module.exports = function (app) {
     shareLib.changeOwner(req, res, doc);
   });
 
-  app.get('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), function (req, res) {
+  app.get('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), function (req, res) {
     var doc = req[req.params.id];
     return res.render('traveler-config', {
       traveler: doc,
@@ -585,7 +585,7 @@ module.exports = function (app) {
   });
 
 
-  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newdevice']), reqUtils.sanitize('body', ['newdevice']), function (req, res) {
+  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newdevice']), reqUtils.sanitize('body', ['newdevice']), function (req, res) {
     var newdevice = req.body.newdevice;
     if (!newdevice) {
       return res.send(400, 'the new device name not accepted');
@@ -608,7 +608,7 @@ module.exports = function (app) {
     });
   });
 
-  app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), function (req, res) {
+  app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.status('id', [0, 1]), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
