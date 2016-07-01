@@ -10,6 +10,7 @@ In order to update the value of an input element, a user need to click on the in
 <div class="alert alert-success"><button class="close">x</button>Success</div>
 message on the top of the page. If something is wrong, then an 
 <div class="alert alert-error"><button class="close">x</button>Error</div>
+message will appear.
 
 In order to add a new note, click the <a class="new-note" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a> icon. Click the <span class="badge badge-info">n</span> icon to show/hide the notes. 
 

@@ -1,4 +1,7 @@
 ###  Traveler status
+
+**Audience: traveler owners and others with write permission**
+
 During the life cycle of a traveler, it can be in different statuses. The status decides the user's access of traveler artifacts. The transitions between different statuses, and allowed access are shown in the following diagram. 
 <img src="../images/traveler-status.png" alt="the statues of a traveler">
 
@@ -31,6 +34,5 @@ The details of the allowed actions to trigger status changes and user types are 
 | users with read permission | no action
 | users with write permission | submit
 | owner | all actions
-
 
 </br>
