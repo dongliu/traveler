@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title FRIB Admin
+  title FRIB All Table
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/datatables/media/css/dataTables.bootstrap.css')
@@ -12,55 +12,40 @@ block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
   .container-fluid
+    .btn-toolbar
+      .btn-group
+        button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+          i.fa.fa-user.fa-lg
+          |  Transfer ownership
     #message
     #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
       .modal-dialog
         .modal-content
           .modal-header
             h3#modalLabel
-          .modal-body(style='overflow-y: visible;')
+          .modal-body.modal-body-visible
           .modal-footer
-    br
     div
       ul.nav.nav-tabs(role='tablist')
         li.active
-          a(href='#users', data-toggle='tab') Users
+          a(href='#form', data-toggle='tab') All forms
         li
-          a(href='#groups', data-toggle='tab') Groups
+          a(href='#traveler', data-toggle='tab') All travelers
+        li
+          a(href='#binder', data-toggle='tab') All binders
+       br
       .tab-content
-        #users.tab-pane.active
-          .well
-            form.form-inline
-              input#username.input(type='text', placeholder='Last, First', name='name')
-              != ' '
-              label.checkbox-inline
-                input#manager(type='checkbox', value='manager')
-                | manager
-              != ' '
-              label.checkbox-inline
-                input#admin(type='checkbox', value='admin')
-                | admin
-              != ' '
-              button.btn.btn-primary#add(type='submit') Add
-          h3 User list
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info#user-modify
-                i.fa.fa-wrench.fa-lg
-                | &nbsp;Modify role
-            .btn-group
-              button.btn.btn-warning#user-update
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Update profile
-
-          table#users-table.table.table-bordered.table-hover
-        #groups.tab-pane
-
+        #form.tab-pane.active
+          table#all-form-table.table.table-bordered.table-hover
+        #traveler.tab-pane
+          table#all-traveler-table.table.table-bordered.table-hover
+        #binder.tab-pane
+          table#all-binder-table.table.table-bordered.table-hover
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/datatables/media/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/datatables/media/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
@@ -69,6 +54,7 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/users.js')
-
-
+  script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/forms.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/travelers.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/binders.js')

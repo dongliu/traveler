@@ -98,12 +98,44 @@ $(function () {
     bDeferRender: true,
     aoColumns: formAoColumns,
     aaSorting: [
+      [3, 'desc'],
+      [4, 'desc']
+    ],
+    sDom: sDomNoTools
+  });
+  fnAddFilterFoot('#form-table', formAoColumns);
+  /*form table ends*/
+
+  /*Owner's all form table starts*/
+  var allformAoColumns = [selectColumn, formLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var userid = this.URL.split('#')[0].split('\/')[5];
+  $('#all-form-table').dataTable({
+    sAjaxSource: '/allforms/' + userid,
+    sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: allformAoColumns,
+    aaSorting: [
       [4, 'desc'],
       [5, 'desc']
     ],
     sDom: sDomNoTools
   });
-  fnAddFilterFoot('#form-table', formAoColumns);
+  fnAddFilterFoot('#all-form-table', allformAoColumns);
   /*form table ends*/
 
   /*transferred form table starts*/

@@ -86,7 +86,7 @@ $(function () {
     source: travelerGlobal.usernames
   });
 
-  var userColumns = [selectColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn];
+  var userColumns = [selectColumn, listAllColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn];
 
   var userTable = $('#users-table').dataTable({
     sAjaxSource: '/users/json',

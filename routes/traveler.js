@@ -152,6 +152,26 @@ module.exports = function (app) {
     });
   });
 
+  /*Owner's all traveler table*/
+  app.get('/alltravelers/:id', auth.ensureAuthenticated, function (req, res) {
+    Traveler.find({
+      archived: {
+        $ne: true
+      },
+      $or: [
+        {createdBy: req.params.id, owner: {$exists: false} },
+        {owner: req.params.id}
+      ]
+    }, 'title description status devices sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      return res.status(200).json(docs);
+    });
+  });
+
+
   app.get('/transferredtravelers/json', auth.ensureAuthenticated, function (req, res) {
     Traveler.find({
       owner: req.session.userid,

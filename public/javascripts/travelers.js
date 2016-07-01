@@ -103,6 +103,37 @@ $(function () {
     sDom: sDomNoTools
   });
 
+  /*Owner's all traveler table*/
+  var alltravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
+  fnAddFilterFoot('#all-traveler-table', alltravelerAoColumns);
+  var userid = this.URL.split('#')[0].split('\/')[5];
+  $('#all-traveler-table').dataTable({
+    sAjaxSource: '/alltravelers/' + userid,
+    sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: alltravelerAoColumns,
+    aaSorting: [
+      [7, 'desc'],
+      [10, 'desc']
+    ],
+    sDom: sDomNoTools
+  });
+
   /*transferred traveler table starts*/
   var transferredTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   var transferredTravelerTable = $('#transferred-traveler-table').dataTable({

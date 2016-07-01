@@ -7,4 +7,9 @@ module.exports = function (app) {
     }
     return res.render('admin');
   });
+
+  app.get('/admin/users/:id', auth.ensureAuthenticated, function (req, res) {
+    return res.render('all-table');
+  });
+
 };

@@ -43,6 +43,32 @@ $(function () {
     sDom: sDomNoTools
   });
 
+  /* all binders */
+  var allbinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
+  fnAddFilterFoot('#binder-table', binderAoColumns);
+  var userid = this.URL.split('#')[0].split('\/')[5];
+  $('#all-binder-table').dataTable({
+    sAjaxSource: '/allbinders/' + userid,
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: allbinderAoColumns,
+    aaSorting: [
+      [8, 'desc'],
+      [6, 'desc']
+    ],
+    sDom: sDomNoTools
+  });
+
   var transferredBinderAoColumns = [selectColumn, binderConfigLinkColumn, binderShareLinkColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
   fnAddFilterFoot('#transferred-binder-table', transferredBinderAoColumns);
   var transferredBinderTable = $('#transferred-binder-table').dataTable({

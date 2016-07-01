@@ -37,6 +37,25 @@ module.exports = function (app) {
     });
   });
 
+  /* all binders */
+  app.get('/allbinders/:id', auth.ensureAuthenticated, function (req, res) {
+    Binder.find({
+      archived: {
+        $ne: true
+      },
+      $or: [
+        {createdBy: req.params.id, owner: {$exists: false} },
+        {owner: req.params.id}
+      ]
+    }).exec(function (err, docs) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      return res.status(200).json(docs);
+    });
+  });
+
   app.get('/binders/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), function (req, res) {
     return res.render('binder-config', {
       binder: req[req.params.id]

@@ -826,6 +826,15 @@ var rolesColumn = {
 
 var lastVisitedOnColumn = dateColumn('Last visited', 'lastVisitedOn');
 
+var listAllColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function (data) {
+    return '<a href="' + prefix + '/admin/users/' + data + '" target="_blank" data-toggle="tooltip" title="show all forms, travelers and binders"><i class="fa fa-list fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
 /*device columns*/
 
 var serialColumn = {
