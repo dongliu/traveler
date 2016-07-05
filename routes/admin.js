@@ -9,7 +9,15 @@ module.exports = function (app) {
   });
 
   app.get('/admin/users/:id', auth.ensureAuthenticated, function (req, res) {
-    return res.render('all-table');
+    var id = req.params.id;
+    var type = 'user';
+    if(id.match('lab.frib.')) {
+      type = 'group';
+    }
+    res.render('all-table', {
+      id: id,
+      type: type
+    });
   });
 
 };

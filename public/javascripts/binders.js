@@ -46,9 +46,15 @@ $(function () {
   /* all binders */
   var allbinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
   fnAddFilterFoot('#binder-table', binderAoColumns);
-  var userid = this.URL.split('#')[0].split('\/')[5];
+  var userid = $('.urltype').attr('id');
+  var surl; // check Owner's or group's to get url
+  if($('.urltype').attr('name') == 'group') {
+    surl = '/group-allbinders/' + userid;
+  }else{
+    surl = '/allbinders/' + userid;
+  }
   $('#all-binder-table').dataTable({
-    sAjaxSource: '/allbinders/' + userid,
+    sAjaxSource: surl,
     sAjaxDataProp: '',
     bAutoWidth: false,
     bProcessing: true,

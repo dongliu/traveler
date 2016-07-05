@@ -58,6 +58,26 @@ module.exports = function (app) {
     });
   });
 
+  // get all group forms
+  app.get('/group-allforms/:id', auth.ensureAuthenticated, function (req, res) {
+    Group.findOne({
+      _id: req.params.id
+    }, 'forms').exec(function (err, formsid) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      Form.find({
+        '_id': { $in: formsid.forms}
+      }, 'title createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (formErr, forms) {
+        if (formErr) {
+          console.error(formErr);
+          return res.status(500).send(formErr.message);
+        }
+        res.status(200).json(forms);
+      });
+    });
+  });
 
   app.get('/transferredforms/json', auth.ensureAuthenticated, function (req, res) {
     Form.find({

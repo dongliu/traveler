@@ -4,6 +4,7 @@ var ldapClient = require('../lib/ldap-client');
 
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
+var Group = mongoose.model('Group');
 
 var auth = require('../lib/auth');
 var authConfig = require('../config/config').auth;
@@ -220,6 +221,21 @@ module.exports = function (app) {
     });
   });
 
+  /* load all groups*/
+  app.get('/groups/json', auth.ensureAuthenticated, function (req, res) {
+    if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
+      return res.status(403).send('You are not authorized to access this resource. ');
+    }
+    Group.find().exec(function (err, groups) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({
+          error: err.message
+        });
+      }
+      res.json(groups);
+    });
+  });
 
   app.get('/users/:id', auth.ensureAuthenticated, function (req, res) {
     User.findOne({

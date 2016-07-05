@@ -108,9 +108,15 @@ $(function () {
 
   /*Owner's all form table starts*/
   var allformAoColumns = [selectColumn, formLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
-  var userid = this.URL.split('#')[0].split('\/')[5];
+  var userid = $('.urltype').attr('id');
+  var surl; // check Owner's or group's to get url
+  if($('.urltype').attr('name') == 'group') {
+    surl = '/group-allforms/' + userid;
+  }else{
+    surl = '/allforms/' + userid;
+  }
   $('#all-form-table').dataTable({
-    sAjaxSource: '/allforms/' + userid,
+    sAjaxSource: surl,
     sAjaxDataProp: '',
     fnInitComplete: function () {
       Holder.run({

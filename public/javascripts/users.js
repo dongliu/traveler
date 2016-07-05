@@ -108,11 +108,38 @@ $(function () {
     bDeferRender: true,
     aoColumns: userColumns,
     aaSorting: [
-      [4, 'desc']
+      [5, 'desc']
     ],
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#users-table', userColumns);
+  selectEvent();
+  filterEvent();
+
+  var groupColumns = [selectColumn, listAllColumn, fullNameNoLinkColumn];
+
+  var groupTable = $('#groups-table').dataTable({
+    sAjaxSource: '/groups/json',
+    sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
+    bAutoWidth: false,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: groupColumns,
+    sDom: sDomNoTools
+  });
+  fnAddFilterFoot('#groups-table', groupColumns);
   selectEvent();
   filterEvent();
 

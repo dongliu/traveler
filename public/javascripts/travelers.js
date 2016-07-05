@@ -106,9 +106,15 @@ $(function () {
   /*Owner's all traveler table*/
   var alltravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   fnAddFilterFoot('#all-traveler-table', alltravelerAoColumns);
-  var userid = this.URL.split('#')[0].split('\/')[5];
+  var userid = $('.urltype').attr('id');
+  var surl; // check Owner's or group's to get url
+  if($('.urltype').attr('name') == 'group') {
+    surl = '/group-alltravelers/' + userid;
+  }else{
+    surl = '/alltravelers/' + userid;
+  }
   $('#all-traveler-table').dataTable({
-    sAjaxSource: '/alltravelers/' + userid,
+    sAjaxSource: surl,
     sAjaxDataProp: '',
     fnInitComplete: function () {
       Holder.run({

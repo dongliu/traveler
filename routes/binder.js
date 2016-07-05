@@ -56,6 +56,27 @@ module.exports = function (app) {
     });
   });
 
+  // get all group binders
+  app.get('/group-allbinders/:id', auth.ensureAuthenticated, function (req, res) {
+    Group.findOne({
+      _id: req.params.id
+    }, 'binders').exec(function (err, binderid) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      Binder.find({
+        '_id': { $in: binderid.binders}
+      }).exec(function (binderErr, binders) {
+        if (binderErr) {
+          console.error(binderErr);
+          return res.status(500).send(binderErr.message);
+        }
+        res.status(200).json(binders);
+      });
+    });
+  });
+
   app.get('/binders/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), function (req, res) {
     return res.render('binder-config', {
       binder: req[req.params.id]
