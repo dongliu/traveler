@@ -985,17 +985,17 @@ var oTableTools = {
     'copy',
     'print', {
       'sExtends': 'collection',
-      'sButtonText': 'Save <span class="caret" />',
+      'sButtonText': 'Save <col-md- class="caret" />',
       'aButtons': ['csv', 'xls', 'pdf']
     }
   ]
 };
 
-var sDom = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDom2i = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDom2i1p = "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span3'r><'span3'f>>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDomNoTools = "<'row-fluid'<'span4'l><'span4'<'text-center'r>><'span4'f>>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDomNoTNoR = "t<'row-fluid'<'span6'i><'span6'p>>";
+var sDom = "<'row'<'col-md-6'<'control-group'T>>><'row'<'col-md-6'l><'col-md-6'f>r>t<'row'<'col-md-6'i><'col-md-6'p>>";
+var sDom2i = "<'row'<'col-md-6'<'control-group'T>>><'row'<'col-md-3'l><'col-md-3'i><'col-md-6'f>r>t<'row'<'col-md-6'i><'col-md-6'p>>";
+var sDom2i1p = "<'row'<'col-md-6'<'control-group'T>>><'row'<'col-md-3'l><'col-md-3'i><'col-md-3'r><'col-md-3'f>>t<'row'<'col-md-6'i><'col-md-6'p>>";
+var sDomNoTools = "<'row'<'col-md-4'l><'col-md-4'<'text-center'r>><'col-md-4'f>>t<'row'<'col-md-6'i><'col-md-6'p>>";
+var sDomNoTNoR = "t<'row'<'col-md-6'i><'col-md-6'p>>";
 var sDomClean = "t";
-var sDomPage = "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>";
+var sDomPage = "<'row'r>t<'row'<'col-md-6'i><'col-md-6'p>>";
 
