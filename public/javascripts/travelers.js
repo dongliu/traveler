@@ -172,7 +172,7 @@ $(function () {
   fnAddFilterFoot('#transferred-traveler-table', transferredTravelerAoColumns);
   /*transferred traveler table ends*/
 
-  var sharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
+  var sharedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
   var sharedTravelerTable = $('#shared-traveler-table').dataTable({
     sAjaxSource: '/sharedtravelers/json',
@@ -195,12 +195,12 @@ $(function () {
     bDeferRender: true,
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
-      [12, 'desc'],
-      [9, 'desc']
+      [11, 'desc'],
+      [8, 'desc']
     ],
     sDom: sDomNoTools
   });
-  var groupSharedTravelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
+  var groupSharedTravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   fnAddFilterFoot('#group-shared-traveler-table', sharedTravelerAoColumns);
   var groupSharedTravelerTable = $('#group-shared-traveler-table').dataTable({
     sAjaxSource: '/groupsharedtravelers/json',
@@ -223,8 +223,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: groupSharedTravelerAoColumns,
     aaSorting: [
-      [12, 'desc'],
-      [9, 'desc']
+      [11, 'desc'],
+      [8, 'desc']
     ],
     sDom: sDomNoTools
   });

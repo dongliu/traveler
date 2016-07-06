@@ -1,5 +1,5 @@
 ### Ownership and access control
-The traveler application has three types of important entities: forms, travelers, and binders. Every such an entity has a owner. The owner is the user who create the entity at the beginning. The ownership can be transferred to a different user by current owner. A transferred  The owner has full privilege of an entity. 
+The traveler application has three types of important entities: forms, travelers, and binders. Every such an entity has a owner. The owner is the user who create the entity at the beginning. The ownership can be transferred to a different user by current owner. The owner has full privileges of an entity. The owner of an entity is responsible to **design**, **develop**, and **deliver** it.  
 
 There are three levels of access control for an entity that its owner can configure. The first level is **public access**. An entity can be publicly no access, readable, or writable. It an entity is publicly readable, then any user who can log into the traveler application will be able to view the entity's details. 
 
