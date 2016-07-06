@@ -42,6 +42,13 @@ html
                   i.fa.fa-user.fa-3x
                 li
                   a(href='#{prefix}/login') Log in
+    .container-fluid
+      .alert.alert-info
+        button.close(type='button', data-dismiss='alert')
+          |&times;
+        | The previous Traveler v2.4 is available at
+        != ' '
+        a(href='http://traveler:3011', target='_blank') http://traveler:3011
     block content
     .container-fluid
       h6.text-right
