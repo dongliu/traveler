@@ -1,5 +1,12 @@
+release v3.0.1
+date: July 06, 2016
+- enforce traveler status check
+- rename upload folder for easy deployment
+- update access control rule for traveler configuration
+- update user manual
+
 release v3.0.0
-data: June 22, 2016
+date: June 22, 2016
 - add a new main page with log in and feature highlights
 - separate form list page and traveler list page
 - add binder features
