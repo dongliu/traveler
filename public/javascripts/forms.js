@@ -110,7 +110,7 @@ $(function () {
   var allformAoColumns = [selectColumn, formLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var userid = $('.urltype').attr('id');
   var surl; // check Owner's or group's to get url
-  if($('.urltype').attr('name') == 'group') {
+  if($('.urltype').attr('name') === 'group') {
     surl = '/group-allforms/' + userid;
   }else{
     surl = '/allforms/' + userid;
@@ -324,7 +324,7 @@ $(function () {
     }
   });
 
-  $('button.transfer').click(function () {
+  $('button.transfer-form').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {

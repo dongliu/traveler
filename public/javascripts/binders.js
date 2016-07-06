@@ -45,10 +45,10 @@ $(function () {
 
   /* all binders */
   var allbinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
-  fnAddFilterFoot('#binder-table', binderAoColumns);
+  fnAddFilterFoot('#all-binder-table', allbinderAoColumns);
   var userid = $('.urltype').attr('id');
   var surl; // check Owner's or group's to get url
-  if($('.urltype').attr('name') == 'group') {
+  if($('.urltype').attr('name') === 'group') {
     surl = '/group-allbinders/' + userid;
   }else{
     surl = '/allbinders/' + userid;
@@ -199,7 +199,7 @@ $(function () {
     archivedBinderTable.api().ajax.reload();
   });
 
-  $('button.transfer').click(function () {
+  $('button.transfer-binder').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     modalScroll(false);

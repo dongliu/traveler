@@ -12,11 +12,8 @@ block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
   .container-fluid
-    .btn-toolbar
-      .btn-group
-        button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
-          i.fa.fa-user.fa-lg
-          |  Transfer ownership
+    h3.urltype(id="#{id}" name="#{type}")
+      | #{id}
     #message
     #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
       .modal-dialog
@@ -33,13 +30,27 @@ block content
           a(href='#traveler', data-toggle='tab') All travelers
         li
           a(href='#binder', data-toggle='tab') All binders
-       br.urltype(id="#{id}" name="#{type}")
       .tab-content
         #form.tab-pane.active
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning.transfer-form(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                i.fa.fa-user.fa-lg
+                |  Transfer ownership
           table#all-form-table.table.table-bordered.table-hover
         #traveler.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning.transfer-traveler(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                i.fa.fa-user.fa-lg
+                |  Transfer ownership
           table#all-traveler-table.table.table-bordered.table-hover
         #binder.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning.transfer-binder(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                i.fa.fa-user.fa-lg
+                |  Transfer ownership
           table#all-binder-table.table.table-bordered.table-hover
 
 block js

@@ -108,7 +108,7 @@ $(function () {
   fnAddFilterFoot('#all-traveler-table', alltravelerAoColumns);
   var userid = $('.urltype').attr('id');
   var surl; // check Owner's or group's to get url
-  if($('.urltype').attr('name') == 'group') {
+  if($('.urltype').attr('name') === 'group') {
     surl = '/group-alltravelers/' + userid;
   }else{
     surl = '/alltravelers/' + userid;
@@ -382,7 +382,7 @@ $(function () {
     }
   });
 
-  $('button.transfer').click(function () {
+  $('button.transfer-traveler').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     modalScroll(false);
