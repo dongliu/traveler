@@ -18,7 +18,7 @@ Sometimes, you might find one of the previously used forms is better than the cu
 After switching, the active form and used forms table will be adjusted accordingly. The traveler update will be seen when it is loaded or refreshed.
 
 ### Set the alias of a form
-Every form that has been used by the traveler has an alias. When a form was first used by the traveler, the alias is the same as the form's title. You can update it by selecting it and click the <div class="btn-group"><button id="set-alias" class="btn btn-warning"><i class="fa fa-edit fa-lg"></i> <span>Set alias</span></button></div> button. The alias can help to distinguish forms.
+Every form that has been used by the traveler has an alias. When a form was first used by the traveler, the alias is the same as the form's title. You can update it by selecting it and click the <button id="set-alias" class="btn btn-warning"><i class="fa fa-edit fa-lg"></i> <span>Set alias</span></button> button. The alias can help to distinguish forms.
 
 ### The impact on the estimated traveler progress
 The traveler progress is estimated by (number of finished inputs / total number of inputs). When the traveler form is changed, the total number of inputs will also be updated. However, the traveler updates the number of finished inputs only when the traveler is loaded with the collected data after the change. It is recommended that you load the traveler in a new browser window right after the form change in order to verify the change and also update the progress estimation.
