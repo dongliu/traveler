@@ -50,27 +50,27 @@ $(function () {
 
   // do action and set hash
   $('#hide-completed').on('click', function () {
-    worksTable.dataTable().fnFilter('active', 5);
+    worksTable.DataTable().column(5).search('[^completed]', true, true).draw();
     window.history.pushState(null, null, this.baseURI + $(this).attr('href'));
   });
 
   $('#show-completed').on('click', function () {
-    worksTable.dataTable().fnFilter('', 5);
+    worksTable.DataTable().column(5).search('').draw();
     window.history.pushState(null, '', this.baseURI + $(this).attr('href'));
   });
 
   // back and foward button
   window.onhashchange = function () {
     if (window.location.hash === '#hide-completed') {
-      worksTable.dataTable().fnFilter('active', 5);
+      worksTable.DataTable().column(5).search('[^completed]', true, true).draw();
     }else if(window.location.hash === '#show-completed' || window.location.hash === '') {
-      worksTable.dataTable().fnFilter('', 5);
+      worksTable.DataTable().column(5).search('').draw();
     }
   };
 
   // show content by hash url
   if (window.location.hash === '#hide-completed') {
-    worksTable.dataTable().fnFilter('active', 5);
+    worksTable.DataTable().column(5).search('[^completed]', true, true).draw();
   }
 
 });
