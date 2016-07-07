@@ -98,8 +98,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: formAoColumns,
     aaSorting: [
-      [3, 'desc'],
-      [4, 'desc']
+      [4, 'desc'],
+      [5, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -136,8 +136,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: allformAoColumns,
     aaSorting: [
-      [4, 'desc'],
-      [5, 'desc']
+      [3, 'desc'],
+      [4, 'desc']
     ],
     sDom: sDomNoTools
   });
