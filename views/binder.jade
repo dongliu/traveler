@@ -22,6 +22,10 @@ block content
         button.btn.btn-info#sort
           i.fa.fa-sort-numeric-asc.fa-large
           | &nbsp;Default sorting
+       != ' '
+      .btn-group(data-toggle='buttons-radio')
+        button.btn.btn-info#show-completed.active(href = '#show-completed') Show
+        button.btn.btn-info#hide-completed(href = '#hide-completed') Hide completed
     h4 #{binder.description}
     #details.collapse.out
       h4 Owner: #{binder.owner || binder.createdBy}

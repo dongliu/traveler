@@ -4,12 +4,13 @@
 /*global sColumn, pColumn, vColumn, cColumn, travelerLinkColumn, aliasColumn, workProgressColumn, ownerColumn, deviceTagColumn, manPowerColumn, sDomNoTools*/
 /*global ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, Holder*/
 
+
 $(function () {
   updateAjaxURL(prefix);
   ajax401(prefix);
   disableAjaxCache();
 
-  var workAoColumns = [travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, aliasColumn, ownerColumn, deviceTagColumn, manPowerColumn, workProgressColumn];
+  var workAoColumns = [travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, statusColumn,aliasColumn, ownerColumn, deviceTagColumn, manPowerColumn, workProgressColumn];
 
   var worksTable = $('#work-table').dataTable({
     sAjaxSource: './works/json',
@@ -37,6 +38,8 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
+  fnAddFilterFoot('#work-table', workAoColumns);
+  filterEvent();
 
   $('#sort').click(function () {
     worksTable.fnSort([
@@ -44,4 +47,30 @@ $(function () {
       [2, 'asc']
     ]);
   });
+
+  // do action and set hash
+  $('#hide-completed').on('click', function () {
+    worksTable.dataTable().fnFilter('active', 5);
+    window.history.pushState(null, null, this.baseURI + $(this).attr('href'));
+  });
+
+  $('#show-completed').on('click', function () {
+    worksTable.dataTable().fnFilter('', 5);
+    window.history.pushState(null, '', this.baseURI + $(this).attr('href'));
+  });
+
+  // back and foward button
+  window.onhashchange = function () {
+    if (window.location.hash === '#hide-completed') {
+      worksTable.dataTable().fnFilter('active', 5);
+    }else if(window.location.hash === '#show-completed' || window.location.hash === '') {
+      worksTable.dataTable().fnFilter('', 5);
+    }
+  };
+
+  // show content by hash url
+  if (window.location.hash === '#hide-completed') {
+    worksTable.dataTable().fnFilter('active', 5);
+  }
+
 });
