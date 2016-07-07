@@ -2,11 +2,11 @@
 
 **Audience: traveler users**
 
-If you know the traveler's URL, you can directly load the traveler by input it. A traveler's URL is like `/travelers/longstringid/`. If you have only read permission of the traveler, the browser will redirect to `/travelers/longstringid/view` automatically. 
+If you know the traveler's URL, you can directly load the traveler in browser. A traveler's URL is like `/travelers/longstringid/`. If you have only read permission of the traveler, the browser will redirect to `/travelers/longstringid/view` automatically. 
 
 You can also locate the traveler in your tabs, and then click on the <a data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a> icon to go to the traveler page. 
 
-In a traveler page, the top line is the traveler's title. Below the title is the traveler status, and progress. The progress tells the number of inputs finished out of the total inputs. The numbers represent only rough progress **estimation** of the traveler. A traveler can be complete when some inputs have not be updated.  
+In a traveler page, the top line is the traveler's title. Below the title is the traveler status, and progress. The progress tells the number of inputs updated out of the total inputs. The numbers represent only rough progress **estimation** of the traveler. A traveler can be complete when some inputs have not be updated.  
 
 The <button class="btn btn-info collapsed">Details</button> button shows/hides some detailed information of the traveler including the description, creation user/time and last update user/time. The details information is hidden by default. 
 

@@ -1,5 +1,7 @@
 ## FAQ
 
+**Audience: all users**
+
 _Q: Why I cannot save the updates I made in a traveler that I have the write permission?_
 
 A: If you see warning messages on the top of the traveler page when you made updates, then the warning message will give you a hint. If your session is timed out, then you can log in in a new browser tab or windows to continue your work. If you do not see the warning messages and you are working in IE, please try Firefox or Chrome.  
@@ -10,7 +12,7 @@ A: You can access the application at [https://intra-gw.nscl.msu.edu/traveler/](h
 
 _Q: How to remove or delete a form, a traveler or a binder?_
 
-A: You **cannot** delete an item (a form, a traveler, or a binder) in the traveler application once it is created. If you think the item is not relevant, and you want it to disappear from other users' personal views, and also your tabs, you can **archive** them. You can always **de-archive** an item from your "archived" tab, to work on them again. 
+A: You **cannot** delete an entity (a form, a traveler, or a binder) in the traveler application once it is created. If you think the entity is not relevant, and you want it to disappear from other users' personal views, and also your tabs, you can **archive** them. You can always **de-archive** an entity from your "archived" tab, to work on them again. 
 
 _Q: How to correct what I input in a traveler? Can I revise it?_
 
