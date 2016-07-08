@@ -62,9 +62,9 @@ block content
     ul#locations
       each location in traveler.locations
         li
-          span.location #{location}
+          span #{location}
           = ' '
-          button.btn.btn-sm.btn-warning.removeLocation
+          button.btn.btn-sm.btn-warning.remove-tag(name = 'locations')
             i.fa.fa-trash-o.fa-lg
     h4 Tags
     ul#devices
@@ -79,7 +79,7 @@ block content
       button.btn.btn-primary#add Add tags
     != ' '
     .btn-group
-      button.btn.btn-primary#add-location Add lactions
+      button.btn.btn-primary.add-tag(name='locations') Add lactions
     if (locals.isOwner != undefined && locals.isOwner)
       != ' '
       .btn-group

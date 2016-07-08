@@ -648,15 +648,17 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/travelers/:id/locations/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newlocation']), reqUtils.sanitize('body', ['newlocation']), function (req, res) {
-    var newlocation = req.body.newlocation;
-    if (!newlocation) {
-      return res.status(400).send('the new location name not accepted');
+  app.post('/travelers/:id/tags/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newtag', 'tagName']), reqUtils.sanitize('body', ['newtag', 'tagName']), function (req, res) {
+    var newtag = req.body.newtag;
+    var tagName = req.body.tagName;
+    if (!newtag) {
+      return res.status(400).send('the new ' + tagName + ' name not accepted');
     }
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
-    var added = doc.locations.addToSet(newlocation);
+    var tagobj = eval('doc.' + tagName);
+    var added = tagobj.addToSet(newtag);
     if (added.length === 0) {
       return res.status(204).end();
     }
@@ -666,7 +668,7 @@ module.exports = function (app) {
         return res.status(500).send(saveErr.message);
       }
       return res.status(200).json({
-        location: newlocation
+        tag: newtag
       });
     });
   });
@@ -685,11 +687,12 @@ module.exports = function (app) {
     });
   });
 
-  app.delete('/travelers/:id/locations/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), function (req, res) {
+  app.delete('/travelers/:id/:tags/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
-    doc.locations.pull(req.params.number);
+    var tagobj = eval('doc.' + req.params.tags);
+    tagobj.pull(req.params.number);
     doc.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);

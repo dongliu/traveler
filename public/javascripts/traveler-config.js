@@ -196,45 +196,6 @@ $(function () {
     });
   });
 
-  $('#add-location').click(function (e) {
-    e.preventDefault();
-    // add an input and a button add
-    $('#add-location').attr('disabled', true);
-    $('#locations').append('<li><form class="form-inline"><input id="newLocation" type="text"> <button id="confirm" class="btn btn-primary">Confirm</button> <button id="cancel" class="btn">Cancel</button></form></li>');
-    $('#cancel').click(function (cancelE) {
-      cancelE.preventDefault();
-      cleanLocationForm();
-    });
-
-    $('#confirm').click(function (confirmE) {
-      confirmE.preventDefault();
-      if ($('#newLocation').val().trim()) {
-        $.ajax({
-          url: './locations/',
-          type: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify({
-            newlocation: $('#newLocation').val().trim()
-          })
-        }).done(function (data, textStatus, jqXHR) {
-          if (jqXHR.status === 204) {
-            return;
-          }
-          if (jqXHR.status === 200) {
-            $('#locations').append('<li><span class="location">' + data.location + '</span> <button class="btn btn-small btn-warning removeLocation"><i class="fa fa-trash-o fa-lg"></i></button></li>');
-          }
-        }).fail(function (jqXHR) {
-          if (jqXHR.status !== 401) {
-            $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot add the location</div>');
-            $(window).scrollTop($('#message div:last-child').offset().top - 40);
-          }
-        }).always(function () {
-          cleanLocationForm();
-        });
-      }
-    });
-  });
-
   $('#devices').on('click', '.removeDevice', function (e) {
     e.preventDefault();
     var $that = $(this);
@@ -246,22 +207,6 @@ $(function () {
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>');
-        $(window).scrollTop($('#message div:last-child').offset().top - 40);
-      }
-    }).always();
-  });
-
-  $('#locations').on('click', '.removeLocation', function (e) {
-    e.preventDefault();
-    var $that = $(this);
-    $.ajax({
-      url: './locations/' + encodeURIComponent($that.siblings('span.location').text()),
-      type: 'DELETE'
-    }).done(function () {
-      $that.closest('li').remove();
-    }).fail(function (jqXHR) {
-      if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot remove the location</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always();
@@ -290,6 +235,75 @@ $(function () {
   $('#more').click(function (e) {
     e.preventDefault();
     setStatus(1);
+  });
+
+
+
+
+
+  /* A general way to add and remove tag, tag include deveice and location */
+  function cleanTagForm() {
+    $('#newTag').closest('li').remove();
+    $('.add-tag').removeAttr('disabled');
+  }
+
+  $('.remove-tag').click(function (e) {
+    e.preventDefault();
+    var $that = $(this);
+    var tagName = $(this).attr('name');
+    $.ajax({
+      url: './' + tagName + '/' + encodeURIComponent($that.siblings('span').text()),
+      type: 'DELETE'
+    }).done(function () {
+      $that.closest('li').remove();
+    }).fail(function (jqXHR) {
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot remove the ' + tagName + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    }).always();
+  });
+
+  $('.add-tag').click(function (e) {
+    e.preventDefault();
+    // add an input and a button add
+    $(this).attr('disabled', true);
+    var tagName = $(this).attr('name');
+    $('#' + tagName).append('<li><form class="form-inline"><input id="newTag" type="text"> <button id="confirm" class="btn btn-primary">Confirm</button> <button id="cancel" class="btn">Cancel</button></form></li>');
+    $('#cancel').click(function (cancelE) {
+      cancelE.preventDefault();
+      cleanTagForm();
+    });
+
+    $('#confirm').click(function (confirmE) {
+      confirmE.preventDefault();
+      var content = $(this).prev().val().trim();
+      if (content) {
+        $.ajax({
+          url: './tags/',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            newtag: content,
+            tagName: tagName
+          })
+        }).done(function (data, textStatus, jqXHR) {
+          if (jqXHR.status === 204) {
+            return;
+          }
+          if (jqXHR.status === 200) {
+            $('#' + tagName).append('<li><span>' + data.tag + '</span> <button class="btn btn-small btn-warning remove-tag" name="' + tagName + '"><i class="fa fa-trash-o fa-lg"></i></button></li>');
+          }
+        }).fail(function (jqXHR) {
+          if (jqXHR.status !== 401) {
+            $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot add the ' + tagName + '</div>');
+            $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          }
+        }).always(function () {
+          cleanTagForm();
+        });
+      }
+    });
   });
 
 });
