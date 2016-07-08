@@ -147,6 +147,9 @@ $(function () {
     var i = $(this).parents('.panel').index();
     var k = $(this).parents('.control-group-wrap').index();
     var prePanel = preWrap[k];
+    if(!value) {
+      return;
+    }
     if(value === prePanel[i].value) {
       $that.parents('.panel-body').html(value);
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Nothing changed on note </div>');

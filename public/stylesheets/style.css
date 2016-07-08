@@ -1,6 +1,6 @@
 body {
   position: relative;
-  padding-top: 40px;
+  padding-top: 50px;
 }
 .a-color {
   color: #0088cc;
@@ -382,3 +382,8 @@ figcaption {
   width: 1200px;
   margin: auto;
 }*/
+
+/* styles for navbar-default */
+.navbar-default{
+  border-bottom: 1px solid rgb(194, 194, 194);
+}

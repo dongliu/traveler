@@ -208,13 +208,13 @@ $(function () {
 
     $('#confirm').click(function (confirmE) {
       confirmE.preventDefault();
-      if ($('#newLocation').val()) {
+      if ($('#newLocation').val().trim()) {
         $.ajax({
           url: './locations/',
           type: 'POST',
           contentType: 'application/json',
           data: JSON.stringify({
-            newlocation: $('#newLocation').val()
+            newlocation: $('#newLocation').val().trim()
           })
         }).done(function (data, textStatus, jqXHR) {
           if (jqXHR.status === 204) {
