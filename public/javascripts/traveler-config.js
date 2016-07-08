@@ -6,6 +6,11 @@ function cleanDeviceForm() {
   $('#add').removeAttr('disabled');
 }
 
+function cleanLocationForm() {
+  $('#newLocation').closest('li').remove();
+  $('#add-location').removeAttr('disabled');
+}
+
 function setStatus(s) {
   $.ajax({
     url: './status',
@@ -191,6 +196,45 @@ $(function () {
     });
   });
 
+  $('#add-location').click(function (e) {
+    e.preventDefault();
+    // add an input and a button add
+    $('#add-location').attr('disabled', true);
+    $('#locations').append('<li><form class="form-inline"><input id="newLocation" type="text"> <button id="confirm" class="btn btn-primary">Confirm</button> <button id="cancel" class="btn">Cancel</button></form></li>');
+    $('#cancel').click(function (cancelE) {
+      cancelE.preventDefault();
+      cleanLocationForm();
+    });
+
+    $('#confirm').click(function (confirmE) {
+      confirmE.preventDefault();
+      if ($('#newLocation').val()) {
+        $.ajax({
+          url: './locations/',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            newlocation: $('#newLocation').val()
+          })
+        }).done(function (data, textStatus, jqXHR) {
+          if (jqXHR.status === 204) {
+            return;
+          }
+          if (jqXHR.status === 200) {
+            $('#locations').append('<li><span class="location">' + data.location + '</span> <button class="btn btn-small btn-warning removeLocation"><i class="fa fa-trash-o fa-lg"></i></button></li>');
+          }
+        }).fail(function (jqXHR) {
+          if (jqXHR.status !== 401) {
+            $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot add the location</div>');
+            $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          }
+        }).always(function () {
+          cleanLocationForm();
+        });
+      }
+    });
+  });
+
   $('#devices').on('click', '.removeDevice', function (e) {
     e.preventDefault();
     var $that = $(this);
@@ -202,6 +246,22 @@ $(function () {
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    }).always();
+  });
+
+  $('#locations').on('click', '.removeLocation', function (e) {
+    e.preventDefault();
+    var $that = $(this);
+    $.ajax({
+      url: './locations/' + encodeURIComponent($that.siblings('span.location').text()),
+      type: 'DELETE'
+    }).done(function () {
+      $that.closest('li').remove();
+    }).fail(function (jqXHR) {
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot remove the location</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always();

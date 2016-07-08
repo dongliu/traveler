@@ -648,11 +648,48 @@ module.exports = function (app) {
     });
   });
 
+  app.post('/travelers/:id/locations/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newlocation']), reqUtils.sanitize('body', ['newlocation']), function (req, res) {
+    var newlocation = req.body.newlocation;
+    if (!newlocation) {
+      return res.status(400).send('the new location name not accepted');
+    }
+    var doc = req[req.params.id];
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    var added = doc.locations.addToSet(newlocation);
+    if (added.length === 0) {
+      return res.status(204).end();
+    }
+    doc.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.status(500).send(saveErr.message);
+      }
+      return res.status(200).json({
+        location: newlocation
+      });
+    });
+  });
+
   app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
     doc.devices.pull(req.params.number);
+    doc.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.status(500).send(saveErr.message);
+      }
+      return res.status(204).end();
+    });
+  });
+
+  app.delete('/travelers/:id/locations/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), function (req, res) {
+    var doc = req[req.params.id];
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.locations.pull(req.params.number);
     doc.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);

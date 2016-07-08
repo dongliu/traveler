@@ -58,8 +58,8 @@ block content
           | completed
         when 3
           | frozen
-    //- h4 Locations
-    //- ul#locations
+    h4 Locations
+    ul#locations
       each location in traveler.locations
         li
           span.location #{location}
@@ -77,6 +77,9 @@ block content
     br
     .btn-group
       button.btn.btn-primary#add Add tags
+    != ' '
+    .btn-group
+      button.btn.btn-primary#add-location Add lactions
     if (locals.isOwner != undefined && locals.isOwner)
       != ' '
       .btn-group
