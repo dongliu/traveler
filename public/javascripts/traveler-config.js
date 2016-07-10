@@ -1,14 +1,9 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, ajax401: false, Modernizr: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, Bloodhound: false*/
 
-function cleanDeviceForm() {
-  $('#newDevice').closest('li').remove();
-  $('#add').removeAttr('disabled');
-}
-
-function cleanLocationForm() {
-  $('#newLocation').closest('li').remove();
-  $('#add-location').removeAttr('disabled');
+function cleanTagForm() {
+  $('#newTag').closest('li').remove();
+  $('.add-tag').removeAttr('disabled');
 }
 
 function setStatus(s) {
@@ -127,91 +122,6 @@ $(function () {
     $this.parent().remove();
   });
 
-  var devices;
-
-  $('#add').click(function (e) {
-    e.preventDefault();
-    // add an input and a button add
-    $('#add').attr('disabled', true);
-    $('#devices').append('<li><form class="form-inline"><input id="newDevice" type="text"> <button id="confirm" class="btn btn-primary">Confirm</button> <button id="cancel" class="btn">Cancel</button></form></li>');
-    $('#cancel').click(function (cancelE) {
-      cancelE.preventDefault();
-      cleanDeviceForm();
-    });
-
-    if (!devices) {
-      devices = new Bloodhound({
-        datumTokenizer: function (device) {
-          return Bloodhound.tokenizers.nonword(device.inventoryId);
-        },
-        queryTokenizer: Bloodhound.tokenizers.nonword,
-        identify: function (device) {
-          return device.inventoryId;
-        },
-        prefetch: {
-          url: prefix + '/devices/json',
-          cacheKey: 'devices'
-        }
-      });
-      devices.initialize();
-    }
-
-    $('#newDevice').typeahead({
-      minLength: 1,
-      highlight: true,
-      hint: true
-    }, {
-      name: 'devices',
-      limit: 20,
-      display: 'inventoryId',
-      source: devices
-    });
-
-    $('#confirm').click(function (confirmE) {
-      confirmE.preventDefault();
-      if ($('#newDevice').val().trim()) {
-        $.ajax({
-          url: './devices/',
-          type: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify({
-            newdevice: $('#newDevice').val().trim()
-          })
-        }).done(function (data, textStatus, jqXHR) {
-          if (jqXHR.status === 204) {
-            return;
-          }
-          if (jqXHR.status === 200) {
-            $('#devices').append('<li><span class="device">' + data.device + '</span> <button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button></li>');
-          }
-        }).fail(function (jqXHR) {
-          if (jqXHR.status !== 401) {
-            $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot add the device</div>');
-            $(window).scrollTop($('#message div:last-child').offset().top - 40);
-          }
-        }).always(function () {
-          cleanDeviceForm();
-        });
-      }
-    });
-  });
-
-  $('#devices').on('click', '.removeDevice', function (e) {
-    e.preventDefault();
-    var $that = $(this);
-    $.ajax({
-      url: './devices/' + encodeURIComponent($that.siblings('span.device').text()),
-      type: 'DELETE'
-    }).done(function () {
-      $that.closest('li').remove();
-    }).fail(function (jqXHR) {
-      if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>');
-        $(window).scrollTop($('#message div:last-child').offset().top - 40);
-      }
-    }).always();
-  });
-
   $('#work').click(function (e) {
     e.preventDefault();
     setStatus(1);
@@ -238,16 +148,10 @@ $(function () {
   });
 
 
-
-
-
   /* A general way to add and remove tag, tag include deveice and location */
-  function cleanTagForm() {
-    $('#newTag').closest('li').remove();
-    $('.add-tag').removeAttr('disabled');
-  }
-
-  $('.remove-tag').click(function (e) {
+  var devices;
+  // event delegation for ajax generated content
+  $('ul').on('click', '.remove-tag', function (e) {
     e.preventDefault();
     var $that = $(this);
     var tagName = $(this).attr('name');
@@ -266,44 +170,83 @@ $(function () {
 
   $('.add-tag').click(function (e) {
     e.preventDefault();
-    // add an input and a button add
+    // add an input text and a button
     $(this).attr('disabled', true);
     var tagName = $(this).attr('name');
-    $('#' + tagName).append('<li><form class="form-inline"><input id="newTag" type="text"> <button id="confirm" class="btn btn-primary">Confirm</button> <button id="cancel" class="btn">Cancel</button></form></li>');
-    $('#cancel').click(function (cancelE) {
-      cancelE.preventDefault();
-      cleanTagForm();
-    });
+    $('#' + tagName).append('<li><form class="form-inline"><input id="newTag" type="text" name="' + tagName + '"> ' +
+      '<button id="confirm" class="btn btn-primary" name="' + tagName + '">Confirm</button> ' +
+      '<button id="cancel" class="btn" name="' + tagName + '">Cancel</button></form></li>');
 
-    $('#confirm').click(function (confirmE) {
-      confirmE.preventDefault();
-      var content = $(this).prev().val().trim();
-      if (content) {
-        $.ajax({
-          url: './tags/',
-          type: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify({
-            newtag: content,
-            tagName: tagName
-          })
-        }).done(function (data, textStatus, jqXHR) {
-          if (jqXHR.status === 204) {
-            return;
+    // if the tag is for devices
+    if(tagName === 'devices') {
+      // load devices
+      if (!devices) {
+        devices = new Bloodhound({
+          datumTokenizer: function (device) {
+            return Bloodhound.tokenizers.nonword(device.inventoryId);
+          },
+          queryTokenizer: Bloodhound.tokenizers.nonword,
+          identify: function (device) {
+            return device.inventoryId;
+          },
+          prefetch: {
+            url: prefix + '/devices/json',
+            cacheKey: 'devices'
           }
-          if (jqXHR.status === 200) {
-            $('#' + tagName).append('<li><span>' + data.tag + '</span> <button class="btn btn-small btn-warning remove-tag" name="' + tagName + '"><i class="fa fa-trash-o fa-lg"></i></button></li>');
-          }
-        }).fail(function (jqXHR) {
-          if (jqXHR.status !== 401) {
-            $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot add the ' + tagName + '</div>');
-            $(window).scrollTop($('#message div:last-child').offset().top - 40);
-          }
-        }).always(function () {
-          cleanTagForm();
         });
+        devices.initialize();
       }
-    });
+      // autocomplete
+      $('#devices #newTag:first').typeahead({
+        minLength: 1,
+        highlight: true,
+        hint: true
+      }, {
+        name: 'devices',
+        limit: 20,
+        display: 'inventoryId',
+        source: devices
+      });
+    }
   });
 
+  $('ul').on('click', '#cancel', function (cancelE) {
+    cancelE.preventDefault();
+    $(this).closest('li').remove();
+    var tagName = $(this).attr('name');
+    $('.add-tag[name="' + tagName + '"]').removeAttr('disabled');
+  });
+
+  $('ul').on('click', '#confirm', function (confirmE) {
+    confirmE.preventDefault();
+    var tagName = $(this).attr('name');
+    var content = $('#newTag[name="' + tagName + '"]').val().trim();
+    var $that = $(this);
+    if (content) {
+      $.ajax({
+        url: './tags/',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          newtag: content,
+          tagName: tagName
+        })
+      }).done(function (data, textStatus, jqXHR) {
+        if (jqXHR.status === 204) {
+          return;
+        }
+        if (jqXHR.status === 200) {
+          $('#' + tagName).append('<li><span>' + data.tag + '</span> <button class="btn btn-sm btn-warning remove-tag" name="' + tagName + '"><i class="fa fa-trash-o fa-lg"></i></button></li>');
+        }
+      }).fail(function (jqXHR) {
+        if (jqXHR.status !== 401) {
+          $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot add the ' + tagName + '</div>');
+          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        }
+      }).always(function () {
+        $that.closest('li').remove();
+        $('.add-tag[name="' + tagName + '"]').removeAttr('disabled');
+      });
+    }
+  });
 });

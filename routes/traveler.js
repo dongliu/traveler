@@ -624,30 +624,6 @@ module.exports = function (app) {
     });
   });
 
-
-  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newdevice']), reqUtils.sanitize('body', ['newdevice']), function (req, res) {
-    var newdevice = req.body.newdevice;
-    if (!newdevice) {
-      return res.status(400).send('the new device name not accepted');
-    }
-    var doc = req[req.params.id];
-    doc.updatedBy = req.session.userid;
-    doc.updatedOn = Date.now();
-    var added = doc.devices.addToSet(newdevice);
-    if (added.length === 0) {
-      return res.status(204).end();
-    }
-    doc.save(function (saveErr) {
-      if (saveErr) {
-        console.error(saveErr);
-        return res.status(500).send(saveErr.message);
-      }
-      return res.status(200).json({
-        device: newdevice
-      });
-    });
-  });
-
   app.post('/travelers/:id/tags/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newtag', 'tagName']), reqUtils.sanitize('body', ['newtag', 'tagName']), function (req, res) {
     var newtag = req.body.newtag;
     var tagName = req.body.tagName;
@@ -670,20 +646,6 @@ module.exports = function (app) {
       return res.status(200).json({
         tag: newtag
       });
-    });
-  });
-
-  app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), function (req, res) {
-    var doc = req[req.params.id];
-    doc.updatedBy = req.session.userid;
-    doc.updatedOn = Date.now();
-    doc.devices.pull(req.params.number);
-    doc.save(function (saveErr) {
-      if (saveErr) {
-        console.error(saveErr);
-        return res.status(500).send(saveErr.message);
-      }
-      return res.status(204).end();
     });
   });
 

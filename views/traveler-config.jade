@@ -72,14 +72,14 @@ block content
         li
           span.device #{device}
           = ' '
-          button.btn.btn-sm.btn-warning.removeDevice
+          button.btn.btn-sm.btn-warning.remove-tag(name = 'devices')
             i.fa.fa-trash-o.fa-lg
     br
     .btn-group
-      button.btn.btn-primary#add Add tags
+      button.btn.btn-primary.add-tag(name='devices') add Add tags
     != ' '
     .btn-group
-      button.btn.btn-primary.add-tag(name='locations') Add lactions
+      button.btn.btn-primary.add-tag(name='locations') Add locations
     if (locals.isOwner != undefined && locals.isOwner)
       != ' '
       .btn-group
