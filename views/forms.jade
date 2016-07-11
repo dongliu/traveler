@@ -3,10 +3,9 @@ extends layout
 block head
   title FRIB Forms
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/media/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
@@ -35,13 +34,15 @@ block content
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
     #message
-    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
-      .modal-header
-        h3#modalLabel
-      .modal-body.modal-body-visible
-      .modal-footer
+    #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h3#modalLabel
+          .modal-body.modal-body-visible
+          .modal-footer
     div
-      ul.nav.nav-tabs
+      ul.nav.nav-tabs(role='tablist')
         li.active
           a(href='#forms', data-toggle='tab') My forms
         li
@@ -64,7 +65,7 @@ block content
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
             .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
+              button.btn.btn-warning.transfer-form(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
                 i.fa.fa-user.fa-lg
                 | &nbsp;Transfer ownership
           table#form-table.table.table-bordered.table-hover
@@ -79,7 +80,7 @@ block content
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
             .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
+              button.btn.btn-warning.transfer-form(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
                 i.fa.fa-user.fa-lg
                 | &nbsp;Transfer ownership
           table#transferred-form-table.table.table-bordered.table-hover
@@ -111,12 +112,10 @@ block content
 
 
 block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
+  script(type='text/javascript', src='#{prefix}/datatables/media/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/media/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')

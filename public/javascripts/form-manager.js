@@ -25,7 +25,7 @@ function setAlias(fid, alias, updateTd) {
     // update local table data
     updateTd();
   }).fail(function (jqXHR) {
-    $('#modal .modal-body').append('<div class="text-error">Something was wrong: ' + jqXHR.responseText + '</div>');
+    $('#modal .modal-body').append('<div class="text-danger">Something was wrong: ' + jqXHR.responseText + '</div>');
   });
 }
 
@@ -41,7 +41,7 @@ function addForm(form, cb) {
     $('#modal .modal-body').append('<div class="text-success">The selected form is active now.</div>');
     cb(json);
   }).fail(function (jqXHR) {
-    $('#modal .modal-body').append('<div class="text-error">Something was wrong: ' + jqXHR.responseText + '</div>');
+    $('#modal .modal-body').append('<div class="text-danger">Something was wrong: ' + jqXHR.responseText + '</div>');
   });
 }
 
@@ -59,7 +59,7 @@ function setActive(fid, cb) {
     $('#modal .modal-body').append('<div class="text-success">The selected form is active now.</div>');
     cb(json);
   }).fail(function (jqXHR) {
-    $('#modal .modal-body').append('<div class="text-error">Something was wrong: ' + jqXHR.responseText + '</div>');
+    $('#modal .modal-body').append('<div class="text-danger">Something was wrong: ' + jqXHR.responseText + '</div>');
   });
 }
 
@@ -157,7 +157,7 @@ $(function () {
   }
 
   if (!form) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>HTTP request failed.</div>');
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>HTTP request failed.</div>');
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   }
   loadForm(form.html);

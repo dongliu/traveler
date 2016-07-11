@@ -30,15 +30,15 @@ function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerT
     }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
         $('#return').prop('disabled', false);
         if (success) {
-          travelerTable.fnReloadAjax();
-          sharedTravelerTable.fnReloadAjax();
-          groupSharedTravelerTable.fnReloadAjax();
+          travelerTable.api().ajax.reload();
+          sharedTravelerTable.api().ajax.reload();
+          groupSharedTravelerTable.api().ajax.reload();
         }
       }
     });
@@ -99,6 +99,43 @@ $(function () {
     aaSorting: [
       [9, 'desc'],
       [12, 'desc']
+    ],
+    sDom: sDomNoTools
+  });
+
+  /*Owner's all traveler table*/
+  var alltravelerAoColumns = [selectColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
+  fnAddFilterFoot('#all-traveler-table', alltravelerAoColumns);
+  var userid = $('.urltype').attr('id');
+  var surl; // check Owner's or group's to get url
+  if($('.urltype').attr('name') === 'group') {
+    surl = '/group-alltravelers/' + userid;
+  }else{
+    surl = '/alltravelers/' + userid;
+  }
+  $('#all-traveler-table').dataTable({
+    sAjaxSource: surl,
+    sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: alltravelerAoColumns,
+    aaSorting: [
+      [7, 'desc'],
+      [10, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -345,7 +382,7 @@ $(function () {
     }
   });
 
-  $('button.transfer').click(function () {
+  $('button.transfer-traveler').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     modalScroll(false);
@@ -407,11 +444,11 @@ $(function () {
   });
 
   $('#reload').click(function () {
-    travelerTable.fnReloadAjax();
-    transferredTravelerTable.fnReloadAjax();
-    sharedTravelerTable.fnReloadAjax();
-    groupSharedTravelerTable.fnReloadAjax();
-    archivedTravelerTable.fnReloadAjax();
+    travelerTable.api().ajax.reload();
+    transferredTravelerTable.api().ajax.reload();
+    sharedTravelerTable.api().ajax.reload();
+    groupSharedTravelerTable.api().ajax.reload();
+    archivedTravelerTable.api().ajax.reload();
   });
   // binding events
   selectEvent();

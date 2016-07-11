@@ -4,10 +4,9 @@ block head
   meta(charset='urf-8')
   title FRIB - binder - #{binder.title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/media/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
@@ -18,10 +17,15 @@ block content
       != ' '
       .btn-group
         button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
+      != ' '
       .btn-group
         button.btn.btn-info#sort
           i.fa.fa-sort-numeric-asc.fa-large
           | &nbsp;Default sorting
+       != ' '
+      .btn-group(data-toggle='buttons-radio')
+        button.btn.btn-info#show-completed.active(href = '#show-completed') Show
+        button.btn.btn-info#hide-completed(href = '#hide-completed') Hide completed
     h4 #{binder.description}
     #details.collapse.out
       h4 Owner: #{binder.owner || binder.createdBy}
@@ -41,20 +45,18 @@ block content
             span.tag #{tag}
     h4 total value: #{binder.totalValue}; finished value: #{binder.finishedValue}; in-progress value: #{binder.inProgressValue};
     .progress(class=binder.status === 1 ? "active progress-striped" : undefined)
-      .bar.bar-success(style="width: #{binder.finishedValue/binder.totalValue*100}%;")
-      .bar.bar-info(style="width: #{binder.inProgressValue/binder.totalValue*100}%;")
+      .progress-bar.progress-bar-success(style="width: #{binder.finishedValue/binder.totalValue*100}%;")
+      .progress-bar.progress-bar-info(style="width: #{binder.inProgressValue/binder.totalValue*100}%;")
       .progress-value #{binder.finishedValue} + #{binder.inProgressValue} / #{binder.totalValue}
     br
     table#work-table.table.table-bordered.table-hover
 
 
 block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
+  script(type='text/javascript', src='#{prefix}/datatables/media/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/media/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')

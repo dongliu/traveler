@@ -116,9 +116,11 @@ var travelerNote = new Schema({
   name: String,
   value: String,
   inputBy: String,
-  inputOn: Date
+  inputOn: Date,
+  // track first changes
+  preId: ObjectId,
+  isPre: Boolean
 });
-
 
 var Traveler = mongoose.model('Traveler', traveler);
 var TravelerData = mongoose.model('TravelerData', travelerData);

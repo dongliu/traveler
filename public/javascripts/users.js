@@ -25,7 +25,7 @@ function updateFromModal(cb) {
       $(that).addClass('text-success');
     }).fail(function (jqXHR) {
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
@@ -58,7 +58,7 @@ function modifyFromModal(cb) {
       $(that).addClass('text-success');
     }).fail(function (jqXHR) {
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
@@ -86,7 +86,7 @@ $(function () {
     source: travelerGlobal.usernames
   });
 
-  var userColumns = [selectColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn];
+  var userColumns = [selectColumn, listAllColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn];
 
   var userTable = $('#users-table').dataTable({
     sAjaxSource: '/users/json',
@@ -108,11 +108,38 @@ $(function () {
     bDeferRender: true,
     aoColumns: userColumns,
     aaSorting: [
-      [4, 'desc']
+      [5, 'desc']
     ],
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#users-table', userColumns);
+  selectEvent();
+  filterEvent();
+
+  var groupColumns = [selectColumn, listAllColumn, fullNameNoLinkColumn];
+
+  var groupTable = $('#groups-table').dataTable({
+    sAjaxSource: '/groups/json',
+    sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
+    bAutoWidth: false,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: groupColumns,
+    sDom: sDomNoTools
+  });
+  fnAddFilterFoot('#groups-table', groupColumns);
   selectEvent();
   filterEvent();
 
@@ -134,10 +161,10 @@ $(function () {
         }),
         success: function (data, status, jqXHR) {
           $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
-          userTable.fnReloadAjax();
+          userTable.api().ajax.reload();
         },
         error: function (jqXHR) {
-          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
+          $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
         }
       });
     }
@@ -158,7 +185,7 @@ $(function () {
         e.preventDefault();
         $('#update').prop('disabled', true);
         updateFromModal(function () {
-          userTable.fnReloadAjax();
+          userTable.api().ajax.reload();
         });
       });
       $('#modal').modal('show');
@@ -185,7 +212,7 @@ $(function () {
         e.preventDefault();
         $('#modify').prop('disabled', true);
         modifyFromModal(function () {
-          userTable.fnReloadAjax();
+          userTable.api().ajax.reload();
         });
       });
       $('#modal').modal('show');

@@ -43,6 +43,38 @@ $(function () {
     sDom: sDomNoTools
   });
 
+  /* all binders */
+  var allbinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
+  fnAddFilterFoot('#all-binder-table', allbinderAoColumns);
+  var userid = $('.urltype').attr('id');
+  var surl; // check Owner's or group's to get url
+  if($('.urltype').attr('name') === 'group') {
+    surl = '/group-allbinders/' + userid;
+  }else{
+    surl = '/allbinders/' + userid;
+  }
+  $('#all-binder-table').dataTable({
+    sAjaxSource: surl,
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: allbinderAoColumns,
+    aaSorting: [
+      [8, 'desc'],
+      [6, 'desc']
+    ],
+    sDom: sDomNoTools
+  });
+
   var transferredBinderAoColumns = [selectColumn, binderConfigLinkColumn, binderShareLinkColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
   fnAddFilterFoot('#transferred-binder-table', transferredBinderAoColumns);
   var transferredBinderTable = $('#transferred-binder-table').dataTable({
@@ -160,14 +192,14 @@ $(function () {
 
 
   $('#reload').click(function () {
-    binderTable.fnReloadAjax();
-    transferredBinderTable.fnReloadAjax();
-    sharedBinderTable.fnReloadAjax();
-    groupSharedBinderTable.fnReloadAjax();
-    archivedBinderTable.fnReloadAjax();
+    binderTable.api().ajax.reload();
+    transferredBinderTable.api().ajax.reload();
+    sharedBinderTable.api().ajax.reload();
+    groupSharedBinderTable.api().ajax.reload();
+    archivedBinderTable.api().ajax.reload();
   });
 
-  $('button.transfer').click(function () {
+  $('button.transfer-binder').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     modalScroll(false);

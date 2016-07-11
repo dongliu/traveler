@@ -12,7 +12,7 @@ function addData(oTable, url) {
     oTable.fnDraw();
   }).fail(function (jqXHR, status, error) {
     if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   }).always();
@@ -91,7 +91,7 @@ function addExternalData(oTable, url) {
     oTable.fnDraw();
   }).fail(function (jqXHR, status, error) {
     if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   }).always();

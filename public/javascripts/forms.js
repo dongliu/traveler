@@ -23,7 +23,7 @@ function travelFromModal() {
     }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
@@ -50,12 +50,12 @@ function cloneFromModal(formTable) {
     }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0 && success) {
         $('#return').prop('disabled', false);
-        formTable.fnReloadAjax();
+        formTable.api().ajax.reload();
       }
     });
   });
@@ -104,6 +104,44 @@ $(function () {
     sDom: sDomNoTools
   });
   fnAddFilterFoot('#form-table', formAoColumns);
+  /*form table ends*/
+
+  /*Owner's all form table starts*/
+  var allformAoColumns = [selectColumn, formLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var userid = $('.urltype').attr('id');
+  var surl; // check Owner's or group's to get url
+  if($('.urltype').attr('name') === 'group') {
+    surl = '/group-allforms/' + userid;
+  }else{
+    surl = '/allforms/' + userid;
+  }
+  $('#all-form-table').dataTable({
+    sAjaxSource: surl,
+    sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: allformAoColumns,
+    aaSorting: [
+      [3, 'desc'],
+      [4, 'desc']
+    ],
+    sDom: sDomNoTools
+  });
+  fnAddFilterFoot('#all-form-table', allformAoColumns);
   /*form table ends*/
 
   /*transferred form table starts*/
@@ -286,7 +324,7 @@ $(function () {
     }
   });
 
-  $('button.transfer').click(function () {
+  $('button.transfer-form').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -369,11 +407,11 @@ $(function () {
   });
 
   $('#reload').click(function () {
-    formTable.fnReloadAjax();
-    transferredFormTable.fnReloadAjax();
-    sharedFormTable.fnReloadAjax();
-    groupSharedFormTable.fnReloadAjax();
-    archivedFormTable.fnReloadAjax();
+    formTable.api().ajax.reload();
+    transferredFormTable.api().ajax.reload();
+    sharedFormTable.api().ajax.reload();
+    groupSharedFormTable.api().ajax.reload();
+    archivedFormTable.api().ajax.reload();
   });
   // binding events
   selectEvent();

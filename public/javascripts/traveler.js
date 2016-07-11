@@ -1,59 +1,11 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false, Modernizr: false*/
-/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix*/
+/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix */
+/*global prePanel:true, livespan, renderNotes, setPanel, fileHistory */
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
-function livespan(stamp, live) {
-  if (live) {
-    return '<span data-livestamp="' + stamp + '"></span>';
-  } else {
-    return '<span>' + moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') + '</span>';
-  }
-}
-
-function history(found) {
-  var i;
-  var output = '';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
-    }
-  }
-  return output;
-}
-
-function fileHistory(found) {
-  var i;
-  var output = '';
-  var link;
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      link = prefix + '/data/' + found[i]._id;
-      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
-    }
-  }
-  return output;
-}
-
-function notes(found) {
-  var i;
-  var output = '<dl>';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
-      output = output + '<dd>' + found[i].value + '</dd>';
-    }
-  }
-  return output + '</dl>';
-}
-
-
-// temparary solution for the dirty forms
-function cleanForm() {
-  $('.control-group-buttons').remove();
-}
 
 // handle browsers not supporting date type input
+
 function dateSupport() {
   if (!Modernizr.inputtypes.date) {
     $('input[type="date"]').datepicker({
@@ -74,24 +26,10 @@ function setStatus(s) {
     document.location.href = window.location.pathname;
   }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   });
-}
-
-function createSideNav() {
-  var $legend = $('legend');
-  var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
-  var i;
-  if ($legend.length > 1) {
-    for (i = 0; i < $legend.length; i += 1) {
-      $affix.append('<li><a href="#' + $legend[i].id + '">' + $legend[i].textContent + '</a></li>');
-    }
-    $('.sidebar').append($('<div id="affixlist"></div>').append($affix));
-    $('body').attr('data-spy', 'scroll');
-    $('body').attr('data-target', '#affixlist');
-  }
 }
 
 function updateFinished(num) {
@@ -106,132 +44,27 @@ function updateFinished(num) {
     })
   }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update finished input number</div>');
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update finished input number</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   }).always();
-}
-
-function validation_message(form) {
-  var i = 0;
-  var output = $('<div>');
-  var p;
-  var value;
-  var input;
-  var label;
-  var span;
-  for (i = 0; i < form.elements.length; i += 1) {
-    input = form.elements[i];
-    p = $('<p>');
-    span = $('<span class="validation">');
-    if (input.checkValidity()) {
-      p.css('color', '#468847');
-      span.css('color', '#468847');
-    } else {
-      p.css('color', '#b94a48');
-      span.css('color', '#b94a48');
-    }
-    if (input.type === 'checkbox') {
-      value = input.checked ? 'checked' : 'not checked';
-    } else if (input.value === '') {
-      value = 'no input from user';
-    } else {
-      value = input.value;
-    }
-    label = $(input).closest('.control-group').children('.control-label').text();
-    if (label === '' && input.type === 'checkbox') {
-      label = $(input).next().text();
-    }
-    if (input.checkValidity()) {
-      p.html('<b>' + label + '</b>: ' + value);
-      span.text('validation passed');
-    } else {
-      p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
-      span.text(input.validationMessage);
-    }
-    $(input).closest('.controls').append(span);
-    output.append(p);
-  }
-  return output;
 }
 
 $(function () {
 
   ajax401(prefix);
 
-  createSideNav();
-
-  cleanForm();
-
-  // update every 30 seconds
-  // $.livestamp.interval(30 * 1000);
-
-  // update img
-  $('#form').find('img').each(function () {
-    var $this = $(this);
-    if ($this.attr('name')) {
-      if ($this.attr('src') === undefined) {
-        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
-        return;
-      }
-      if ($this.attr('src').indexOf('http') === 0) {
-        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
-        return;
-      }
-      if (prefix && $this.attr('src').indexOf(prefix) !== 0) {
-        $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
-        return;
-      }
-    }
-  });
-
   $(document).bind('drop dragover', function (e) {
     e.preventDefault();
   });
 
-  $('span.time').each(function () {
-    $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
-  });
-
   dateSupport();
-
-  var binder = new Binder.FormBinder(document.forms[0]);
-
-  function renderNotes() {
-    $.ajax({
-      url: './notes/',
-      type: 'GET',
-      dataType: 'json'
-    }).done(function (data) {
-      $('#form input,textarea').each(function (index, element) {
-        var found = data.filter(function (e) {
-          return e.name === element.name;
-        });
-        $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
-        if (found.length) {
-          found.sort(function (a, b) {
-            if (a.inputOn > b.inputOn) {
-              return -1;
-            }
-            return 1;
-          });
-          $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
-        }
-      });
-
-    }).fail(function (jqXHR) {
-      if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
-        $(window).scrollTop($('#message div:last-child').offset().top - 40);
-      }
-    }).always();
-  }
 
   $('#form').on('click', 'a.new-note', function (e) {
     e.preventDefault();
     var $that = $(this);
     $('#modalLabel').html('Add new note');
-    $('#modal .modal-body').html('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Note: </label><div class="controls"><textarea name="note-content" rows=5></textarea><input type="hidden" name="inputname" value="' + $(this).closest('.controls').find('input, textarea').prop('name') + '"></div></div></form>');
+    $('#modal .modal-body').html('<form class="form-horizontal" id="modalform"><div class="form-group"><label class="col-sm-4 control-label">Note: </label><div class="col-sm-6"><textarea name="note-content" rows=5></textarea><input type="hidden" name="inputname" value="' + $(this).closest('.col-xs-offset-2').find('input, textarea').prop('name') + '"></div></div></form>');
     $('#modal .modal-footer').html('<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
     $('#modal button[value="submit"]').click(function () {
@@ -249,38 +82,107 @@ $(function () {
       }).done(function (data, status, jqXHR) {
         var timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' + livespan(timestamp) + '</div>');
-        var $notes_number = $that.closest('.controls').find('a.notes-number span.badge');
+        var $notes_number = $that.closest('.col-xs-offset-2').find('a.notes-number span.badge');
         $notes_number.text(parseInt($notes_number.text(), 10) + 1);
-
         // add new note
-        if ($that.closest('.controls').find('.input-notes').length) {
-          $that.closest('.controls').find('.input-notes dl').prepend('<dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd>');
+        if ($that.closest('.col-xs-offset-2').find('.input-notes').length) {
+          $that.closest('.col-xs-offset-2').find('.input-notes').prepend(setPanel('You', livespan(timestamp), value, data));
         } else {
-          $that.closest('.controls').append('<div class="input-notes"><dl><dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd></dl></div>');
+          $that.closest('.col-xs-offset-2').append('<div class="input-notes">' +
+              setPanel('You', livespan(timestamp), value, data) +
+              '</div>');
         }
-
-        // $.livestamp.resume();
-
+        // refresh Panel in control-group-wrap
+        var k = $that.parents('.control-group-wrap').index();
+        if(preWrap[k]) {
+          preWrap[k].unshift('');
+        }
       }).fail(function (jqXHR) {
         if (jqXHR.status !== 401) {
-          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
+          $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
           $(window).scrollTop($('#message div:last-child').offset().top - 40);
         }
       });
     });
   });
 
-  $('#form').on('click', 'a.notes-number', function (e) {
+  /*edit and update note */
+  $('#form').on('click', 'button.edit-note', function (e) {
     e.preventDefault();
-    var $input_notes = $(this).closest('.controls').find('.input-notes');
-    if ($input_notes.is(':visible')) {
-      $input_notes.hide();
-    } else {
-      $input_notes.show();
+    // archive the current panel
+    var i = $(this).parents('.panel').index();
+    var k = $(this).parents('.control-group-wrap').index();
+    var prePanel=[];
+    var p = {
+      value: $(this).parent().next().text(),
+      head: $(this).parent().html()
+    };
+    prePanel[i] = p;
+    preWrap[k] = prePanel;
+    $(this).parent().next().html('<textarea name="note-content" style="width:100%">' + prePanel[i].value + '</textarea>' +
+          '<div><button type="button" class="btn btn-primary pull-right update-note">Update</button>' +
+          '<button type="button" class="btn btn-warning pull-right cacell-edit">Cacell</button><div>');
+    $(this).parent().children('button').remove();
+  });
+
+  $('#form').on('click', 'button.cacell-edit', function (e) {
+    e.preventDefault();
+    var k = $(this).parents('.control-group-wrap').index();
+    var i = $(this).parents('.panel').index();
+    var prePanel = preWrap[k];
+    $(this).parents('.panel-body').prev().html(prePanel[i].head);
+    $(this).parents('.panel-body').html(prePanel[i].value);
+  });
+
+  $('#form').on('click', 'button.update-note', function (e) {
+    e.preventDefault();
+    var $that = $(this);
+    var value = $(this).parent().prev().val();
+    var i = $(this).parents('.panel').index();
+    var k = $(this).parents('.control-group-wrap').index();
+    var prePanel = preWrap[k];
+    if(!value) {
+      return;
     }
+    if(value === prePanel[i].value) {
+      $that.parents('.panel-body').html(value);
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Nothing changed on note </div>');
+      return;
+    }
+    var noteId = $(this).parents('.panel').attr('name');
+    $.ajax({
+      url: './notes_update/',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        name: '',
+        value: {
+          value: value,
+          noteId: noteId
+        }
+      })
+    }).done(function (data, status, jqXHR) {
+      //update id
+      $that.parents('.panel').attr('name', data);
+      //append button
+      $that.parents('.panel').find('.panel-heading').append('<button type="button" title="Edit your note" class="btn btn-default btn-xs pull-right edit-note"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button>');
+      $that.parents('.panel').find('.panel-heading').append('<button type="button" title="Show changes between latest note and original note" class="btn btn-default btn-xs pull-right diff-note"><span class="glyphicon glyphicon-import" aria-hidden="true"></span></button>');
+      $that.parents('.panel').find('.panel-heading').append('<button type="button" title="Show history of all edited notes" class="btn btn-default btn-xs pull-right list-note"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>');
+      // refresh note
+      $that.parents('.panel-body').html(value);
+      // load infomation
+      var timestamp = jqXHR.getResponseHeader('Date');
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note updated ' + livespan(timestamp) + '</div>');
+    }).fail(function (jqXHR) {
+      if (jqXHR.status !== 401) {
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot update the note: ' + jqXHR.responseText + '</div>');
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    });
   });
 
   var realFinishedInput = 0;
+  var binder = new Binder.FormBinder(document.forms[0]);
 
   $.ajax({
     url: './data/',
@@ -300,11 +202,11 @@ $(function () {
           return 1;
         });
         if (this.type === 'file') {
-          $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<b>history:</b><div class="input-history list-group">' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + history(found) + '</div>');
+          $(element).closest('.col-xs-offset-2').append('<b>history:</b><div class="input-history list-group">' + history(found) + '</div>');
         }
       }
     });
@@ -324,7 +226,7 @@ $(function () {
 
   }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
   }).always();
@@ -397,14 +299,14 @@ $(function () {
         if (finishedInput !== realFinishedInput) {
           updateFinished(realFinishedInput);
         }
-        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
+        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.col-xs-offset-2'));
       }
       $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by you ' + livespan(timestamp) + '; ' + $history.html());
       // $.livestamp.resume();
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the value: ' + jqXHR.responseText + '</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot change the value: ' + jqXHR.responseText + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always(function () {
@@ -449,15 +351,15 @@ $(function () {
     if ($validation.length) {
       $validation = $($validation[0]);
     } else {
-      $validation = $('<div class="validation"></div>').appendTo($cgw.find('.controls'));
+      $validation = $('<div class="validation"></div>').appendTo($cgw.find('.col-xs-offset-2'));
     }
     if (!(/^(image|text)\//i.test(file.type) || file.type === 'application/pdf' || file.type === 'application/vnd.ms-excel' || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-xpsdocument' || file.type === 'application/oxps')) {
-      $validation.html('<p class="text-error">' + file.type + ' is not allowed to upload</p>');
+      $validation.html('<p class="text-danger">' + file.type + ' is not allowed to upload</p>');
       $cgw.children('.control-group-buttons').remove();
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      $validation.html('<p class="text-error">' + file.size + ' is too large to upload</p>');
+      $validation.html('<p class="text-danger">' + file.size + ' is too large to upload</p>');
       $cgw.children('.control-group-buttons').remove();
       return;
     }
@@ -498,14 +400,16 @@ $(function () {
         if (finishedInput !== realFinishedInput) {
           updateFinished(realFinishedInput);
         }
-        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
+        $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.col-xs-offset-2'));
       }
-      $history.html('<strong><a href=' + json.location + ' target="_blank">' + input.files[0].name + '</a></strong> uploaded by you ' + livespan(timestamp) + '; ' + $history.html());
+      $history.html('<li class="list-group-item"><strong><a href=' + json.location + ' target="_blank" class="a-img">' + input.files[0].name + '</a>' +
+          '<img src=' + json.location + ' class="img-display img-thumbnail">' +
+          '</strong> uploaded by you ' + livespan(timestamp) + '</li>' + $history.html());
       // $.livestamp.resume();
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always(function () {
@@ -546,32 +450,6 @@ $(function () {
   $('#more').click(function (e) {
     e.preventDefault();
     setStatus(1);
-  });
-
-  $('#show-notes').click(function () {
-    $('.input-notes').show();
-  });
-
-  $('#hide-notes').click(function () {
-    $('.input-notes').hide();
-  });
-
-  $('#show-validation').click(function () {
-    if ($('.control-group-buttons').length) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('Please finish the input before validating the form.');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-      return;
-    }
-    $('.validation').remove();
-    $('#validation').html('<h3>Summary</h3>' + validation_message(document.getElementById('form')).html());
-    $('#validation').show();
-  });
-
-  $('#hide-validation').click(function () {
-    $('#validation').hide();
-    $('.validation').hide();
   });
 
   $('#update-progress').click(function () {

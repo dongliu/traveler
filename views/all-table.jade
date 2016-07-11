@@ -1,0 +1,71 @@
+extends layout
+
+block head
+  title FRIB All Table
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/dist/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/media/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script(type='text/javascript').
+    var prefix = '!{prefix}';
+  .container-fluid
+    h3.urltype(id="#{id}" name="#{type}")
+      | #{id}
+    #message
+    #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h3#modalLabel
+          .modal-body.modal-body-visible
+          .modal-footer
+    div
+      ul.nav.nav-tabs(role='tablist')
+        li.active
+          a(href='#form', data-toggle='tab') All forms
+        li
+          a(href='#traveler', data-toggle='tab') All travelers
+        li
+          a(href='#binder', data-toggle='tab') All binders
+      .tab-content
+        #form.tab-pane.active
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning.transfer-form(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                i.fa.fa-user.fa-lg
+                |  Transfer ownership
+          table#all-form-table.table.table-bordered.table-hover
+        #traveler.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning.transfer-traveler(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                i.fa.fa-user.fa-lg
+                |  Transfer ownership
+          table#all-traveler-table.table.table-bordered.table-hover
+        #binder.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning.transfer-binder(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                i.fa.fa-user.fa-lg
+                |  Transfer ownership
+          table#all-binder-table.table.table-bordered.table-hover
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery.js')
+  script(type='text/javascript', src='#{prefix}/datatables/media/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/dist/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/media/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/forms.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/travelers.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/binders.js')

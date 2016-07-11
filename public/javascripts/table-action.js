@@ -27,15 +27,15 @@ function archiveFromModal(archive, type, fromTable, toTable, otherTable) {
     }).fail(function (jqXHR) {
       $(that).prepend('<i class="icon-question"></i>');
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
         $('#return').prop('disabled', false);
-        fromTable.fnReloadAjax();
-        toTable.fnReloadAjax();
+        fromTable.api().ajax.reload();
+        toTable.api().ajax.reload();
         if (otherTable) {
-          otherTable.fnReloadAjax();
+          otherTable.api().ajax.reload();
         }
       }
     });
@@ -62,12 +62,12 @@ function transferFromModal(newOwnerName, type, table) {
     }).fail(function (jqXHR) {
       $(that).prepend('<i class="fa fa-exclamation"></i>');
       $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
+      $(that).addClass('text-danger');
     }).always(function () {
       number = number - 1;
       if (number === 0) {
         $('#return').prop('disabled', false);
-        table.fnReloadAjax();
+        table.api().ajax.reload();
       }
     });
   });
@@ -75,5 +75,5 @@ function transferFromModal(newOwnerName, type, table) {
 
 $('button.reload').click(function () {
   var activeTable = $('.tab-pane.active table').dataTable();
-  activeTable.fnReloadAjax();
+  activeTable.api().ajax.reload();
 });

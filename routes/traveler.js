@@ -52,12 +52,12 @@ function createTraveler(form, req, res) {
   traveler.save(function (err, doc) {
     if (err) {
       console.error(err);
-      return res.send(500, err.message);
+      return res.status(500).send(err.message);
     }
     console.log('new traveler ' + doc.id + ' created');
     var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
     res.set('Location', url);
-    return res.json(201, {
+    return res.status(201).json({
       location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
     });
   });
@@ -87,7 +87,7 @@ function cloneTraveler(source, req, res) {
   traveler.save(function (err, doc) {
     if (err) {
       console.error(err);
-      return res.send(500, err.message);
+      return res.status(500).send(err.message);
     }
     console.log('new traveler ' + doc.id + ' created');
     doc.sharedWith.forEach(function (e) {
@@ -122,7 +122,7 @@ function cloneTraveler(source, req, res) {
 
     var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
     res.set('Location', url);
-    return res.json(201, {
+    return res.status(201).json({
       location: url
     });
   });
@@ -146,9 +146,49 @@ module.exports = function (app) {
     }, 'title description status devices sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      return res.json(200, docs);
+      return res.status(200).json(docs);
+    });
+  });
+
+  /*Owner's all traveler table*/
+  app.get('/alltravelers/:id', auth.ensureAuthenticated, function (req, res) {
+    Traveler.find({
+      archived: {
+        $ne: true
+      },
+      $or: [
+        {createdBy: req.params.id, owner: {$exists: false} },
+        {owner: req.params.id}
+      ]
+    }, 'title description status devices sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      return res.status(200).json(docs);
+    });
+  });
+
+  // get all group travelers
+  app.get('/group-alltravelers/:id', auth.ensureAuthenticated, function (req, res) {
+    Group.findOne({
+      _id: req.params.id
+    }, 'travelers').exec(function (err, travelerid) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      Traveler.find({
+        '_id': { $in: travelerid.travelers}
+      }, 'title description status devices sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').exec(function (travelerErr, travelers) {
+        if (travelerErr) {
+          console.error(travelerErr);
+          return res.status(500).send(travelerErr.message);
+        }
+        res.status(200).json(travelers);
+      });
     });
   });
 
@@ -161,9 +201,9 @@ module.exports = function (app) {
     }, 'title description status devices sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      res.json(200, travelers);
+      res.status(200).json(travelers);
     });
   });
 
@@ -173,10 +213,10 @@ module.exports = function (app) {
     }, 'travelers').exec(function (err, me) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       if (!me) {
-        return res.send(400, 'cannot identify the current user');
+        return res.status(400).send('cannot identify the current user');
       }
       Traveler.find({
         _id: {
@@ -188,9 +228,9 @@ module.exports = function (app) {
       }, 'title description status devices locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput').lean().exec(function (tErr, travelers) {
         if (tErr) {
           console.error(tErr);
-          return res.send(500, tErr.message);
+          return res.status(500).send(tErr.message);
         }
-        return res.json(200, travelers);
+        return res.status(200).json(travelers);
       });
     });
   });
@@ -203,7 +243,7 @@ module.exports = function (app) {
     }, 'travelers').exec(function (err, groups) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       var travelerIds = [];
       var i;
@@ -223,9 +263,9 @@ module.exports = function (app) {
       }, 'title description status devices locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput').lean().exec(function (tErr, travelers) {
         if (tErr) {
           console.error(tErr);
-          return res.send(500, tErr.message);
+          return res.status(500).send(tErr.message);
         }
-        res.json(200, travelers);
+        res.status(200).json(travelers);
       });
     });
   });
@@ -245,9 +285,9 @@ module.exports = function (app) {
     }).exec(function (err, travelers) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      res.json(200, travelers);
+      res.status(200).json(travelers);
     });
   });
 
@@ -266,9 +306,9 @@ module.exports = function (app) {
       Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        return res.json(200, travelers);
+        return res.status(200).json(travelers);
       });
     });
 
@@ -307,9 +347,9 @@ module.exports = function (app) {
     Traveler.find(search, 'title description status devices locations archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      return res.json(200, travelers);
+      return res.status(200).json(travelers);
     });
   });
 
@@ -318,12 +358,12 @@ module.exports = function (app) {
       Form.findById(req.body.form, function (err, form) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
         if (form) {
           createTraveler(form, req, res);
         } else {
-          return res.send(400, 'cannot find the form ' + req.body.form);
+          return res.status(400).send('cannot find the form ' + req.body.form);
         }
       });
     }
@@ -331,19 +371,19 @@ module.exports = function (app) {
       Traveler.findById(req.body.source, function (err, traveler) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
         if (traveler) {
           // if (traveler.status === 0) {
-          //   return res.send(400, 'You cannot clone an initialized traveler.');
+          //   return res.status(400).send('You cannot clone an initialized traveler.');
           // }
           if (reqUtils.canRead(req, traveler)) {
             cloneTraveler(traveler, req, res);
           } else {
-            return res.send(400, 'You cannot clone a traveler that you cannot read.');
+            return res.status(400).send('You cannot clone a traveler that you cannot read.');
           }
         } else {
-          return res.send(400, 'cannot find the traveler ' + req.body.source);
+          return res.status(400).send('cannot find the traveler ' + req.body.source);
         }
       });
     }
@@ -367,7 +407,7 @@ module.exports = function (app) {
       return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
     }
 
-    return res.send(403, 'You are not authorized to access this resource');
+    return res.status(403).send('You are not authorized to access this resource');
   });
 
   app.get('/travelers/:id/view', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), function (req, res) {
@@ -377,13 +417,13 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
-    return res.json(200, req[req.params.id]);
+    return res.status(200).json(req[req.params.id]);
   });
 
   app.put('/travelers/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
     var doc = req[req.params.id];
     if (doc.archived === req.body.archived) {
-      return res.send(204);
+      return res.status(204).end();
     }
 
     doc.archived = req.body.archived;
@@ -395,9 +435,9 @@ module.exports = function (app) {
     doc.save(function (saveErr, newDoc) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(200, 'traveler ' + req.params.id + ' archived state set to ' + newDoc.archived);
+      return res.status(200).send('traveler ' + req.params.id + ' archived state set to ' + newDoc.archived);
     });
 
   });
@@ -425,7 +465,7 @@ module.exports = function (app) {
   app.post('/travelers/:id/forms/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['html', '_id', 'title']), reqUtils.hasAll('body', ['html', '_id', 'title']), reqUtils.sanitize('body', ['html', 'title']), function addForm(req, res) {
     var doc = req[req.params.id];
     if (doc.status > 1 || doc.archived) {
-      return res.send(400, 'cannot update form because of current traveler state');
+      return res.status(400).send('cannot update form because of current traveler state');
     }
     var form = {
       html: req.body.html,
@@ -442,9 +482,9 @@ module.exports = function (app) {
     doc.save(function saveDoc(e, newDoc) {
       if (e) {
         console.error(e);
-        return res.send(500, e.message);
+        return res.status(500).send(e.message);
       }
-      return res.json(200, newDoc);
+      return res.status(200).json(newDoc);
     });
   });
 
@@ -452,17 +492,17 @@ module.exports = function (app) {
   app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), function putActiveForm(req, res) {
     var doc = req[req.params.id];
     if (doc.status > 1 || doc.archived) {
-      return res.send(400, 'cannot update form because of current traveler state');
+      return res.status(400).send('cannot update form because of current traveler state');
     }
     var formid = req.body.formid;
     if (!formid) {
-      return res.send(400, 'form id unknown');
+      return res.status(400).send('form id unknown');
     }
 
     var form = doc.forms.id(formid);
 
     if (!form) {
-      return res.send(410, 'form ' + req.body.formid + ' gone');
+      return res.status(410).send('form ' + req.body.formid + ' gone');
     }
 
     doc.activeForm = form._id;
@@ -473,9 +513,9 @@ module.exports = function (app) {
     doc.save(function saveDoc(e, newDoc) {
       if (e) {
         console.error(e);
-        return res.send(500, e.message);
+        return res.status(500).send(e.message);
       }
-      return res.json(200, newDoc);
+      return res.status(200).json(newDoc);
     });
   });
 
@@ -483,11 +523,11 @@ module.exports = function (app) {
   app.put('/travelers/:id/forms/:fid/alias', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['value']), reqUtils.sanitize('body', ['value']), function putFormAlias(req, res) {
     var doc = req[req.params.id];
     if (doc.status > 1 || doc.archived) {
-      return res.send(400, 'cannot update form because of current traveler state');
+      return res.status(400).send('cannot update form because of current traveler state');
     }
     var form = doc.forms.id(req.params.fid);
     if (!form) {
-      return res.send(410, 'from ' + req.params.fid + ' not found.');
+      return res.status(410).send('from ' + req.params.fid + ' not found.');
     }
 
     form.alias = req.body.value;
@@ -495,9 +535,9 @@ module.exports = function (app) {
     doc.save(function saveDoc(e) {
       if (e) {
         console.error(e);
-        return res.send(500, e.message);
+        return res.status(500).send(e.message);
       }
-      return res.send(204);
+      return res.status(204).end();
     });
   });
 
@@ -514,7 +554,7 @@ module.exports = function (app) {
     doc.save(function (saveErr, newDoc) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
       var out = {};
       for (k in req.body) {
@@ -522,7 +562,7 @@ module.exports = function (app) {
           out[k] = newDoc.get(k);
         }
       }
-      return res.json(200, out);
+      return res.status(200).json(out);
     });
   });
 
@@ -530,22 +570,22 @@ module.exports = function (app) {
     var doc = req[req.params.id];
 
     if ([1, 1.5, 2, 3].indexOf(req.body.status) === -1) {
-      return res.send(400, 'invalid status');
+      return res.status(400).send('invalid status');
     }
 
     if (doc.status === req.body.status) {
-      return res.send(204);
+      return res.status(204).end();
     }
 
     if (req.body.status !== 1.5 && !reqUtils.isOwner(req, doc)) {
-      return res.send(403, 'You are not authorized to change the status. ');
+      return res.status(403).send('You are not authorized to change the status. ');
     }
 
     if (req.body.status === 1) {
       if ([0, 1.5, 3].indexOf(doc.status) !== -1) {
         doc.status = 1;
       } else {
-        return res.send(400, 'cannot start to work from the current status. ');
+        return res.status(400).send('cannot start to work from the current status. ');
       }
     }
 
@@ -553,7 +593,7 @@ module.exports = function (app) {
       if ([1].indexOf(doc.status) !== -1) {
         doc.status = 1.5;
       } else {
-        return res.send(400, 'cannot complete from the current status. ');
+        return res.status(400).send('cannot complete from the current status. ');
       }
     }
 
@@ -561,7 +601,7 @@ module.exports = function (app) {
       if ([1.5].indexOf(doc.status) !== -1) {
         doc.status = 2;
       } else {
-        return res.send(400, 'cannot complete from the current status. ');
+        return res.status(400).send('cannot complete from the current status. ');
       }
     }
 
@@ -569,7 +609,7 @@ module.exports = function (app) {
       if ([1].indexOf(doc.status) !== -1) {
         doc.status = 3;
       } else {
-        return res.send(400, 'cannot freeze from the current status. ');
+        return res.status(400).send('cannot freeze from the current status. ');
       }
     }
 
@@ -578,47 +618,49 @@ module.exports = function (app) {
     doc.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(200, 'status updated to ' + req.body.status);
+      return res.status(200).send('status updated to ' + req.body.status);
     });
   });
 
-
-  app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newdevice']), reqUtils.sanitize('body', ['newdevice']), function (req, res) {
-    var newdevice = req.body.newdevice;
-    if (!newdevice) {
-      return res.send(400, 'the new device name not accepted');
+  app.post('/travelers/:id/tags/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newtag', 'tagName']), reqUtils.sanitize('body', ['newtag', 'tagName']), function (req, res) {
+    var newtag = req.body.newtag;
+    var tagName = req.body.tagName;
+    if (!newtag) {
+      return res.status(400).send('the new ' + tagName + ' name not accepted');
     }
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
-    var added = doc.devices.addToSet(newdevice);
+    var tagobj = eval('doc.' + tagName);
+    var added = tagobj.addToSet(newtag);
     if (added.length === 0) {
-      return res.send(204);
+      return res.status(204).end();
     }
     doc.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.json(200, {
-        device: newdevice
+      return res.status(200).json({
+        tag: newtag
       });
     });
   });
 
-  app.delete('/travelers/:id/devices/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), function (req, res) {
+  app.delete('/travelers/:id/:tags/:number', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), function (req, res) {
     var doc = req[req.params.id];
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
-    doc.devices.pull(req.params.number);
+    var tagobj = eval('doc.' + req.params.tags);
+    tagobj.pull(req.params.number);
     doc.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(204);
+      return res.status(204).end();
     });
   });
 
@@ -628,12 +670,12 @@ module.exports = function (app) {
       _id: {
         $in: doc.data
       }
-    }, 'name value inputType inputBy inputOn').exec(function (dataErr, docs) {
+    }).exec(function (dataErr, docs) {
       if (dataErr) {
         console.error(dataErr);
-        return res.send(500, dataErr.message);
+        return res.status(500).send(dataErr.message);
       }
-      return res.json(200, docs);
+      return res.status(200).json(docs);
     });
   });
 
@@ -650,7 +692,7 @@ module.exports = function (app) {
     data.save(function (dataErr) {
       if (dataErr) {
         console.error(dataErr);
-        return res.send(500, dataErr.message);
+        return res.status(500).send(dataErr.message);
       }
       doc.data.push(data._id);
       doc.manPower.addToSet({
@@ -662,9 +704,9 @@ module.exports = function (app) {
       doc.save(function (saveErr) {
         if (saveErr) {
           console.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
-        return res.send(204);
+        return res.status(204).end();
       });
     });
   });
@@ -675,12 +717,12 @@ module.exports = function (app) {
       _id: {
         $in: doc.notes
       }
-    }, 'name value inputBy inputOn').exec(function (noteErr, docs) {
+    }).exec(function (noteErr, docs) {
       if (noteErr) {
         console.error(noteErr);
-        return res.send(500, noteErr.message);
+        return res.status(500).send(noteErr.message);
       }
-      return res.json(200, docs);
+      return res.status(200).json(docs);
     });
   });
 
@@ -696,7 +738,7 @@ module.exports = function (app) {
     note.save(function (noteErr) {
       if (noteErr) {
         console.error(noteErr);
-        return res.send(500, noteErr.message);
+        return res.status(500).send(noteErr.message);
       }
       doc.notes.push(note._id);
       doc.manPower.addToSet({
@@ -708,12 +750,105 @@ module.exports = function (app) {
       doc.save(function (saveErr) {
         if (saveErr) {
           console.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
-        return res.send(204);
+        return res.status(200).json(note._id);
       });
     });
   });
+
+  app.post('/travelers/:id/notes_update/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['name', 'value']), reqUtils.hasAll('body', ['name', 'value']), reqUtils.sanitize('body', ['name', 'value']), function (req, res) {
+    // update previous note status
+    TravelerNote.findOne({_id: req.body.value.noteId}, function (noteErr, note) {
+      if (noteErr) {
+        console.error(noteErr);
+        return res.status(500).send(noteErr.message);
+      }
+      if(req.session.userid != note.inputBy) {// none note's user has n permission.
+        return res.status(403).send('You are not authorized to update this note.');
+      }
+      note.isPre = true;
+      note.save(function (noteErr2) {
+        if (noteErr2) {
+          console.error(noteErr2);
+          return res.status(500).send(noteErr2.message);
+        }
+      });
+      var doc = req[req.params.id];
+      // save a new note
+      var newnote = new TravelerNote({
+        traveler: doc._id,
+        name: note.name,
+        value: req.body.value.value,
+        inputBy: req.session.userid,
+        inputOn: Date.now(),
+        preId: req.body.value.noteId
+      });
+      newnote.save(function (noteErr3) {
+        if (noteErr3) {
+          console.error(noteErr3);
+          return res.status(500).send(noteErr3.message);
+        }
+        doc.notes.push(newnote._id);
+        doc.manPower.addToSet({
+          _id: req.session.userid,
+          username: req.session.username
+        });
+        doc.updatedBy = req.session.userid;
+        doc.updatedOn = Date.now();
+        doc.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.status(500).send(saveErr.message);
+          }
+          return res.status(200).json(newnote._id);
+        });
+      });
+    });
+  });
+
+  app.post('/travelers/:id/notes_findOrigin/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['noteId']), reqUtils.hasAll('body', ['noteId']), reqUtils.sanitize('body', ['noteId']), function (req, res) {
+    // find the original note in 'edited notes linklist'
+    var findorigin = function (noteErr, note) {
+      if (noteErr) {
+        console.error(noteErr);
+        return res.status(500).send(noteErr.message);
+      }
+      if(note.preId) {
+        return TravelerNote.findOne({_id: note.preId}, function (newnoteErr, newnote) {
+          findorigin(newnoteErr, newnote);
+        });
+      }else {
+        return res.status(200).json(note);
+      }
+    };
+    TravelerNote.findOne({_id: req.body.noteId}, function (noteErr, note) {
+      findorigin(noteErr, note);
+    });
+  });
+
+  app.post('/travelers/:id/notes_track/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.filter('body', ['noteId']), reqUtils.hasAll('body', ['noteId']), reqUtils.sanitize('body', ['noteId']), function (req, res) {
+
+    var notes = [];
+    var findorigin = function (noteErr, note) {
+      if (noteErr) {
+        console.error(noteErr);
+        return res.status(500).send(noteErr.message);
+      }
+      notes.push(note);
+      if(note.preId) {
+        return TravelerNote.findOne({_id: note.preId}, function (newnoteErr, newnote) {
+          findorigin(newnoteErr, newnote);
+        });
+      }else {
+        return res.status(200).json(notes);
+      }
+    };
+    TravelerNote.findOne({_id: req.body.noteId}, function (noteErr, note) {
+      findorigin(noteErr, note);
+    });
+  });
+
 
   app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [1, 1.5, 2]), reqUtils.filter('body', ['finishedInput']), function (req, res) {
     var doc = req[req.params.id];
@@ -722,9 +857,9 @@ module.exports = function (app) {
     }, function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(204);
+      return res.status(204).end();
     });
   });
 
@@ -732,7 +867,7 @@ module.exports = function (app) {
     var doc = req[req.params.id];
 
     if (underscore.isEmpty(req.files)) {
-      return res.send(400, 'Expecte One uploaded file');
+      return res.status(400).send('Expecte One uploaded file');
     }
 
     var data = new TravelerData({
@@ -752,7 +887,7 @@ module.exports = function (app) {
     data.save(function (dataErr) {
       if (dataErr) {
         console.error(dataErr);
-        return res.send(500, dataErr.message);
+        return res.status(500).send(dataErr.message);
       }
       doc.data.push(data._id);
       doc.updatedBy = req.session.userid;
@@ -760,11 +895,11 @@ module.exports = function (app) {
       doc.save(function (saveErr) {
         if (saveErr) {
           console.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
         var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/data/' + data._id;
         res.set('Location', url);
-        return res.json(201, {
+        return res.status(201).json({
           location: url
         });
       });
@@ -776,12 +911,12 @@ module.exports = function (app) {
     if (data.inputType === 'file') {
       fs.exists(data.file.path, function (exists) {
         if (exists) {
-          return res.sendfile(data.file.path);
+          return res.sendFile(data.file.path);
         }
-        return res.send(410, 'gone');
+        return res.status(410).send('gone');
       });
     } else {
-      res.json(200, data);
+      res.status(200).json(data);
     }
   });
 
@@ -800,31 +935,31 @@ module.exports = function (app) {
     // change the access
     var access = req.body.access;
     if (['-1', '0', '1'].indexOf(access) === -1) {
-      return res.send(400, 'not valid value');
+      return res.status(400).send('not valid value');
     }
     access = Number(access);
     if (traveler.publicAccess === access) {
-      return res.send(204);
+      return res.status(204).end();
     }
     traveler.publicAccess = access;
     traveler.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(200, 'public access is set to ' + req.body.access);
+      return res.status(200).send('public access is set to ' + req.body.access);
     });
   });
 
   app.get('/travelers/:id/share/:list/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), function (req, res) {
     var traveler = req[req.params.id];
     if (req.params.list === 'users') {
-      return res.json(200, traveler.sharedWith || []);
+      return res.status(200).json(traveler.sharedWith || []);
     }
     if (req.params.list === 'groups') {
-      return res.json(200, traveler.sharedGroup || []);
+      return res.status(200).json(traveler.sharedGroup || []);
     }
-    return res.send(400, 'unknown share list.');
+    return res.status(400).send('unknown share list.');
   });
 
   app.post('/travelers/:id/share/:list/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), function (req, res) {
@@ -834,23 +969,23 @@ module.exports = function (app) {
       if (req.body.name) {
         share = reqUtils.getSharedWith(traveler.sharedWith, req.body.name);
       } else {
-        return res.send(400, 'user name is empty.');
+        return res.status(400).send('user name is empty.');
       }
     }
     if (req.params.list === 'groups') {
       if (req.body.id) {
         share = reqUtils.getSharedGroup(traveler.sharedGroup, req.body.id);
       } else {
-        return res.send(400, 'group id is empty.');
+        return res.status(400).send('group id is empty.');
       }
     }
 
     if (share === -2) {
-      return res.send(400, 'unknown share list.');
+      return res.status(400).send('unknown share list.');
     }
 
     if (share >= 0) {
-      return res.send(400, req.body.name || req.body.id + ' is already in the ' + req.params.list + ' list.');
+      return res.status(400).send(req.body.name || req.body.id + ' is already in the ' + req.params.list + ' list.');
     }
 
     if (share === -1) {
@@ -869,7 +1004,7 @@ module.exports = function (app) {
       share = traveler.sharedGroup.id(req.params.shareid);
     }
     if (!share) {
-      return res.send(400, 'cannot find ' + req.params.shareid + ' in the list.');
+      return res.status(400).send('cannot find ' + req.params.shareid + ' in the list.');
     }
     // change the access
     if (req.body.access && req.body.access === 'write') {
@@ -880,7 +1015,7 @@ module.exports = function (app) {
     traveler.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
       // check consistency of user's traveler list
       var Target;
@@ -902,7 +1037,7 @@ module.exports = function (app) {
           console.error('The user/group ' + req.params.userid + ' is not in the db');
         }
       });
-      return res.json(200, share);
+      return res.status(200).json(share);
     });
   });
 

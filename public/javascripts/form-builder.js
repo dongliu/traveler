@@ -61,7 +61,7 @@ function sendRequest(data, cb, saveas) {
   }).fail(function (jqXHR) {
     $('form#output').fadeTo('slow', 1);
     if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The save request failed. You might need to try again or contact the admin.</div>');
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>The save request failed. You might need to try again or contact the admin.</div>');
     }
   }).always(function () {});
 }
@@ -258,17 +258,17 @@ function figure_edit($cgr) {
     if ($validation.length) {
       $validation = $($validation[0]);
     } else {
-      $validation = $('<div class="validation"></div>').appendTo($file.find('.controls'));
+      $validation = $('<div class="validation"></div>').appendTo($file.find('.col-xs-offset-2'));
     }
 
     if (!/image\/(gif|jpe?g|png)$/i.test(file.type)) {
-      $validation.html('<p class="text-error">' + file.type + ' is not allowed to upload</p>');
+      $validation.html('<p class="text-danger">' + file.type + ' is not allowed to upload</p>');
       $file.children('.file-upload-buttons').remove();
       return;
     }
 
     if (file.size > 5000000) {
-      $validation.html('<p class="text-error">' + file.size + ' is too large to upload</p>');
+      $validation.html('<p class="text-danger">' + file.size + ' is too large to upload</p>');
       $file.children('.file-upload-buttons').remove();
       return;
     }
@@ -329,7 +329,7 @@ function figure_edit($cgr) {
 
     }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
-        $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always(function () {});
@@ -853,6 +853,7 @@ function binding_events() {
     $('#modalLabel').html('Save the form as (a new one)');
     $('#modal .modal-body').empty();
     $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
+    // fix form $('#modal .modal-body').append('<form class="form-horizontal"><div class="form-group"> <label class="col-sm-2 control-label">Form title</label><div class="col-sm-3"> <input class="form-control" type="text" name="title" required=""></div> </div></div>');
     $('#modal .modal-footer').html('<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
     $('#modal button[value="confirm"]').click(function () {
