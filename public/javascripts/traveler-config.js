@@ -1,11 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, ajax401: false, Modernizr: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, Bloodhound: false*/
 
-function cleanTagForm() {
-  $('#newTag').closest('li').remove();
-  $('.add-tag').removeAttr('disabled');
-}
-
 function setStatus(s) {
   $.ajax({
     url: './status',
@@ -173,9 +168,9 @@ $(function () {
     // add an input text and a button
     $(this).attr('disabled', true);
     var tagName = $(this).attr('name');
-    $('#' + tagName).append('<li><form class="form-inline"><input id="newTag" type="text" name="' + tagName + '"> ' +
-      '<button id="confirm" class="btn btn-primary" name="' + tagName + '">Confirm</button> ' +
-      '<button id="cancel" class="btn" name="' + tagName + '">Cancel</button></form></li>');
+    $('#' + tagName).append('<li><form class="form-inline"><input class="newTag" type="text" name="' + tagName + '"> ' +
+      '<button class="btn btn-primary confirm" name="' + tagName + '">Confirm</button> ' +
+      '<button class="btn cancel" name="' + tagName + '">Cancel</button></form></li>');
 
     // if the tag is for devices
     if(tagName === 'devices') {
@@ -197,7 +192,7 @@ $(function () {
         devices.initialize();
       }
       // autocomplete
-      $('#devices #newTag:first').typeahead({
+      $('#devices .newTag:first').typeahead({
         minLength: 1,
         highlight: true,
         hint: true
@@ -210,17 +205,17 @@ $(function () {
     }
   });
 
-  $('ul').on('click', '#cancel', function (cancelE) {
+  $('ul').on('click', '.cancel', function (cancelE) {
     cancelE.preventDefault();
     $(this).closest('li').remove();
     var tagName = $(this).attr('name');
     $('.add-tag[name="' + tagName + '"]').removeAttr('disabled');
   });
 
-  $('ul').on('click', '#confirm', function (confirmE) {
+  $('ul').on('click', '.confirm', function (confirmE) {
     confirmE.preventDefault();
     var tagName = $(this).attr('name');
-    var content = $('#newTag[name="' + tagName + '"]').val().trim();
+    var content = $('.newTag[name="' + tagName + '"]').val().trim();
     var $that = $(this);
     if (content) {
       $.ajax({
