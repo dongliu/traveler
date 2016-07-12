@@ -60,7 +60,7 @@ function personColumn(title, key) {
       if (type === 'sort' || type === 'filter') {
         return data;
       } else if (data) {
-        return '<img class="user" data-src="holder.js/27x40?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/adusers/' + data + '/photo" title="' + data + '">';
+        return '<img class="user" data-src="holder.js/27x40?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + data + '/photo" title="' + data + '">';
       } else {
         return '';
       }
@@ -361,7 +361,7 @@ var ownerColumn = {
     if (type === 'sort' || type === 'filter') {
       return owner;
     } else if (owner) {
-      return '<a target="_blank" href="/users/' + owner + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + owner.substr(0, 1).toUpperCase() + '" src="/adusers/' + owner + '/photo" title="' + owner + '"></a>';
+      return '<a target="_blank" href="/users/' + owner + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + owner.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + owner + '/photo" title="' + owner + '"></a>';
     } else {
       return '';
     }
@@ -643,7 +643,7 @@ function usersColumn(title, prop) {
           if (type === 'filter' || type === 'sort') {
             return u.username;
           } else {
-            return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
+            return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
           }
         });
         if (type === 'filter' || type === 'sort') {
@@ -673,7 +673,7 @@ function usersFilteredColumn(title, filter) {
         if (type === 'filter' || type === 'sort') {
           return u.username;
         } else {
-          return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
+          return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
         }
       });
       if (type === 'filter' || type === 'sort') {
