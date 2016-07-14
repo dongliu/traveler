@@ -181,7 +181,7 @@ $(function () {
           }
         }).fail(function (jqXHR) {
           if (jqXHR.status !== 401) {
-            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot add the device</div>');
+            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot add the tag</div>');
             $(window).scrollTop($('#message div:last-child').offset().top - 40);
           }
         }).always(function () {
