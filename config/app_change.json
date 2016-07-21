@@ -2,7 +2,7 @@
   "port": "3001",
   "ssl_key": "./node.key",
   "ssl_cert": "./node.pem",
-  "upload_dir" : "../traveler_uploads/",
+  "upload_dir" : "../uploads/",
   "log_dir" : "../logs/",
   "cookie_sec": "traveler",
   "cookie_life": 28800000,
