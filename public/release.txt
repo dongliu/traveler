@@ -1,3 +1,7 @@
+release APS-0.2.2
+date October 03, 2016
+- Update CDB utility to support the new revision of CDB. 
+
 release APS-0.2.1
 date May 26, 2016
 - Fix the bug that would crash the application when checking for additional permission on travelers that allow users to contribute to any traveler.
