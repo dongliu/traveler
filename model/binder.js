@@ -93,7 +93,7 @@ var binder = new Schema({
   deadline: Date,
   publicAccess: {
     type: Number,
-    default: -1
+    default: 0
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
