@@ -705,4 +705,25 @@ module.exports = function (app) {
 
   });
 
+  app.get('/publicbinders/', auth.ensureAuthenticated, function (req, res) {
+    res.render('public-binders');
+  });
+
+  app.get('/publicbinders/json', auth.ensureAuthenticated, function (req, res) {
+    Binder.find({
+      publicAccess: {
+        $in: [0, 1]
+      },
+      archived: {
+        $ne: true
+      }
+    }).exec(function (err, binders) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, binders);
+    });
+  });
+
 };
