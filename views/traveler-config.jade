@@ -1,0 +1,114 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title FRIB - traveler - #{traveler._id} - config
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap-datepicker/css/datepicker.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script(type='text/javascript').
+    var prefix = '!{prefix}';
+  .container
+    #message
+    h3 Title:
+      = ' '
+      if (locals.traveler.title == undefined)
+        span#title.editable No title
+      else
+        span#title.editable #{traveler.title}
+      = ' '
+      button.btn.btn-primary.editable Edit
+    h4 Description:
+      = ' '
+      if (locals.traveler.description == undefined)
+        span#description.editable No description
+      else
+        span#description.editable #{traveler.description}
+      = ' '
+      button.btn.btn-primary.editable Edit
+    h4 Deadline:
+      = ' '
+      span.form-inline
+        if (locals.traveler.deadline == undefined)
+          input#deadline(type='date')
+        else
+          input#deadline(type='date', value='#{traveler.deadline}')
+        = ' '
+    p Created on
+      = ' '
+      span.time #{traveler.createdOn}
+    if (locals.traveler.updatedOn != undefined)
+      p Updated by #{traveler.updatedBy} on
+        = ' '
+        span.time #{traveler.updatedOn}
+    h4 Status:
+      = ' '
+      case traveler.status
+        when 0
+          | initialized
+        when 1
+          | active
+        when 1.5
+          | submitted for completion
+        when 2
+          | completed
+        when 3
+          | frozen
+    //- h4 Locations
+    //- ul#locations
+      each location in traveler.locations
+        li
+          span.location #{location}
+          = ' '
+          button.btn.btn-small.btn-warning.removeLocation
+            i.fa.fa-trash-o.fa-lg
+    h4 Tags
+    ul#devices
+      each device in traveler.devices
+        li
+          span.device #{device}
+          = ' '
+          button.btn.btn-small.btn-warning.removeDevice
+            i.fa.fa-trash-o.fa-lg
+    br
+    .btn-group
+      button.btn.btn-primary#add Add tags
+    if (locals.isOwner != undefined && locals.isOwner)
+      .btn-group
+        a.btn.btn-primary#manage(href='./formmanager', target='_blank') Manage forms
+      case traveler.status
+        when 0
+          .btn-group
+            button.btn.btn-primary#work Start to work
+        when 1
+          .btn-group
+            button.btn.btn-warning#freeze Freeze
+          .btn-group
+            button.btn.btn-primary#complete Submit for completion
+        when 1.5
+          .btn-group
+            button.btn.btn-primary#approve Approve completion
+          .btn-group
+            button.btn.btn-warning#more More work
+        //- when 2
+        when 3
+          .btn-group
+            button.btn.btn-primary#resume Resume
+    .btn-group
+        a.btn.btn-info(href='#{prefix}/devices/', target='_blank') Browse devices
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery.jeditable.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/traveler-config.js')

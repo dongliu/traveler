@@ -11,327 +11,47 @@ var authConfig = config.auth;
 var mongoose = require('mongoose');
 var path = require('path');
 var sanitize = require('sanitize-caja');
-var util = require('util');
 var underscore = require('underscore');
 var routesUtilities = require('../utilities/routes.js');
+var reqUtils = require('../lib/req-utils');
+var shareLib = require('../lib/share');
 
 var Form = mongoose.model('Form');
 var FormFile = mongoose.model('FormFile');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 
-function addUserFromAD(req, res, form) {
-  var name = req.body.name;
-  var nameFilter = ad.nameFilter.replace('_name', name);
-  var opts = {
-    filter: nameFilter,
-    attributes: ad.objAttributes,
-    scope: 'sub'
-  };
-
-  ldapClient.search(ad.searchBase, opts, false, function (err, result) {
-    if (err) {
-      console.error(err.name + ' : ' + err.message);
-      return res.json(500, err);
-    }
-
-    if (result.length === 0) {
-      return res.send(400, name + ' is not found in AD!');
-    }
-
-    if (result.length > 1) {
-      return res.send(400, name + ' is not unique!');
-    }
-
-    var id = result[0].sAMAccountName.toLowerCase();
-    var access = 0;
-    if (req.body.access && req.body.access === 'write') {
-      access = 1;
-    }
-    form.sharedWith.addToSet({
-      _id: id,
-      username: name,
-      access: access
-    });
-    form.save(function (err) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      var user = new User({
-        _id: result[0].sAMAccountName.toLowerCase(),
-        name: result[0].displayName,
-        email: result[0].mail,
-        office: result[0].physicalDeliveryOfficeName,
-        phone: result[0].telephoneNumber,
-        mobile: result[0].mobile,
-        forms: [form._id]
-      });
-      user.save(function (err) {
-        if (err) {
-          console.error(err);
-        }
-      });
-      return res.send(201, 'The user named ' + name + ' was added to the share list.');
-    });
-  });
-}
-
-function addGroupFromAD(req, res, form) {
-  var id = req.body.id.toLowerCase();
-  var filter = ad.groupSearchFilter.replace('_id', id);
-  var opts = {
-    filter: filter,
-    attributes: ad.groupAttributes,
-    scope: 'sub'
-  };
-
-  ldapClient.search(ad.groupSearchBase, opts, false, function (err, result) {
-    if (err) {
-      console.error(err);
-      return res.send(500, err.message);
-    }
-
-    if (result.length === 0) {
-      return res.send(400, id + ' is not found in AD!');
-    }
-
-    if (result.length > 1) {
-      return res.send(400, id + ' is not unique!');
-    }
-
-    var name = result[0].displayName;
-    var access = 0;
-    if (req.body.access && req.body.access === 'write') {
-      access = 1;
-    }
-    form.sharedGroup.addToSet({
-      _id: id,
-      groupname: name,
-      access: access
-    });
-    form.save(function (err) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      var group = new Group({
-        _id: result[0].sAMAccountName.toLowerCase(),
-        name: result[0].displayName,
-        email: result[0].mail,
-        forms: [form._id]
-      });
-      group.save(function (err) {
-        if (err) {
-          console.error(err);
-        }
-      });
-      return res.send(201, 'The group ' + id + ' was added to the share list.');
-    });
-  });
-}
-
-
-function canWrite(req, doc) {
-  if (doc.createdBy === req.session.userid) {
-    return true;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid) && doc.sharedWith.id(req.session.userid).access === 1) {
-    return true;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function canRead(req, doc) {
-  if (doc.createdBy === req.session.userid) {
-    return true;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
-    return true;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i])) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-/*****
-access := -1 // no access
-        | 0  // read
-        | 1  // write
-*****/
-function getAccess(req, doc) {
-  if (doc.createdBy === req.session.userid) {
-    return 1;
-  }
-  if (doc.sharedWith && doc.sharedWith.id(req.session.userid)) {
-    return doc.sharedWith.id(req.session.userid).access;
-  }
-  var i;
-  if (doc.sharedGroup) {
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i]) && doc.sharedGroup.id(req.session.memberOf[i]).access === 1) {
-        return 1;
-      }
-    }
-    for (i = 0; i < req.session.memberOf.length; i += 1) {
-      if (doc.sharedGroup.id(req.session.memberOf[i])) {
-        return 0;
-      }
-    }
-  }
-  if (routesUtilities.checkUserRole(req, 'read_all_forms')) {
-    return 0;
-  }
-  return -1;
-}
-
-function getSharedWith(sharedWith, name) {
-  var i;
-  if (sharedWith.length === 0) {
-    return -1;
-  }
-  for (i = 0; i < sharedWith.length; i += 1) {
-    if (sharedWith[i].username === name) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-
-function getSharedGroup(sharedGroup, id) {
-  var i;
-  if (sharedGroup.length === 0) {
-    return -1;
-  }
-  for (i = 0; i < sharedGroup.length; i += 1) {
-    if (sharedGroup[i]._id === id) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-
-function addUser(req, res, form) {
-  var name = req.body.name;
-  // check local db first then try ad
-  User.findOne({
-    name: name
-  }, function (err, user) {
-    if (err) {
-      console.error(err);
-      return res.send(500, err.message);
-    }
-    if (user) {
-      var access = 0;
-      if (req.body.access && req.body.access === 'write') {
-        access = 1;
-      }
-      form.sharedWith.addToSet({
-        _id: user._id,
-        username: name,
-        access: access
-      });
-      form.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
-        }
-        return res.send(201, 'The user named ' + name + ' was added to the share list.');
-      });
-      user.update({
-        $addToSet: {
-          forms: form._id
-        }
-      }, function (err) {
-        if (err) {
-          console.error(err);
-        }
-      });
-    } else {
-      addUserFromAD(req, res, form);
-    }
-  });
-
-}
-
-function addGroup(req, res, form) {
-  var id = req.body.id.toLowerCase();
-  // check local db first then try ad
-  Group.findOne({
-    _id: id
-  }, function (err, group) {
-    if (err) {
-      console.error(err);
-      return res.send(500, err.message);
-    }
-    if (group) {
-      var access = 0;
-      if (req.body.access && req.body.access === 'write') {
-        access = 1;
-      }
-      form.sharedGroup.addToSet({
-        _id: id,
-        groupname: group.name,
-        access: access
-      });
-      form.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
-        }
-        return res.send(201, 'The group ' + id + ' was added to the share list.');
-      });
-      group.update({
-        $addToSet: {
-          forms: form._id
-        }
-      }, function (err) {
-        if (err) {
-          console.error(err);
-        }
-      });
-    } else {
-      addGroupFromAD(req, res, form);
-    }
-  });
-
-}
-
-function addShare(req, res, form) {
-
-  if (req.params.list === 'users') {
-    addUser(req, res, form);
-  }
-
-  if (req.params.list === 'groups') {
-    addGroup(req, res, form);
-  }
-
-}
-
-
 module.exports = function (app) {
+
+  app.get('/forms/', auth.ensureAuthenticated, function (req, res) {
+    res.render('forms', routesUtilities.getRenderObject(req));
+  });
 
   app.get('/forms/json', auth.ensureAuthenticated, function (req, res) {
     Form.find({
-      createdBy: req.session.userid
-    }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+      createdBy: req.session.userid,
+      archived: {
+        $ne: true
+      },
+      owner: {
+        $exists: false
+      }
+    }, 'title createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, forms);
+    });
+  });
+
+  app.get('/transferredforms/json', auth.ensureAuthenticated, function (req, res) {
+    Form.find({
+      owner: req.session.userid,
+      archived: {
+        $ne: true
+      }
+    }, 'title createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -357,7 +77,7 @@ module.exports = function (app) {
   app.get('/sharedforms/json', auth.ensureAuthenticated, function (req, res) {
     User.findOne({
       _id: req.session.userid
-    }, 'forms').lean().exec(function (err, me) {
+    }, 'forms').exec(function (err, me) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -368,11 +88,14 @@ module.exports = function (app) {
       Form.find({
         _id: {
           $in: me.forms
+        },
+        archived: {
+          $ne: true
         }
-      }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }, 'title owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
+        if (fErr) {
+          console.error(fErr);
+          return res.send(500, fErr.message);
         }
         res.json(200, forms);
       });
@@ -384,13 +107,14 @@ module.exports = function (app) {
       _id: {
         $in: req.session.memberOf
       }
-    }, 'forms').lean().exec(function (err, groups) {
+    }, 'forms').exec(function (err, groups) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
       }
       var formids = [];
-      var i, j;
+      var i;
+      var j;
       // merge the forms arrays
       for (i = 0; i < groups.length; i += 1) {
         for (j = 0; j < groups[i].forms.length; j += 1) {
@@ -402,352 +126,272 @@ module.exports = function (app) {
       Form.find({
         _id: {
           $in: formids
+        },
+        archived: {
+          $ne: true
         }
-      }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
+      }, 'title owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
+        if (fErr) {
+          console.error(fErr);
+          return res.send(500, fErr.message);
         }
         res.json(200, forms);
       });
     });
   });
 
+  app.get('/archivedforms/json', auth.ensureAuthenticated, function (req, res) {
+    Form.find({
+      createdBy: req.session.userid,
+      archived: true
+    }, 'title archivedOn sharedWith sharedGroup').exec(function (err, forms) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, forms);
+    });
+  });
+
+  app.get('/publicforms/', auth.ensureAuthenticated, function (req, res) {
+    res.render('public-forms');
+  });
+
+  app.get('/publicforms/json', auth.ensureAuthenticated, function (req, res) {
+    Form.find({
+      publicAccess: {
+        $in: [0, 1]
+      },
+      archived: {
+        $ne: true
+      }
+    }).exec(function (err, forms) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, forms);
+    });
+  });
+
   app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
-    return res.render('newform', routesUtilities.getRenderObject(req));
+    return res.render('form-new', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id, function (err, form) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!form) {
-        return res.send(410, 'gone');
-      }
+  app.get('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), function (req, res) {
+    var form = req[req.params.id];
+    var access = reqUtils.getAccess(req, form);
 
-      var access = getAccess(req, form);
+    if (access === -1) {
+      return res.send(403, 'you are not authorized to access this resource');
+    }
 
-      if (access === -1) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-
-      if (access === 1) {
-        return res.render('builder', routesUtilities.getRenderObject(req, {
-          id: req.params.id,
-          title: form.title,
-          html: form.html
-        }));
-      }
-
+    if (form.archived) {
       return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + req.params.id + '/preview');
-    });
-  });
+    }
 
-  app.get('/forms/:id/json', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id, function (err, form) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!form) {
-        return res.send(410, 'gone');
-      }
-
-      var access = getAccess(req, form);
-
-      if (access === -1) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-
-      return res.json(200, form);
-    });
-  });
-
-  app.post('/forms/:id/uploads/', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!doc) {
-        return res.send(410, 'gone');
-      }
-      if (!canWrite(req, doc)) {
-        return res.send(403, 'You are not authorized to access this resource.');
-      }
-
-      if (underscore.isEmpty(req.files)) {
-        return res.send(400, 'Expecte One uploaded file');
-      }
-
-      if (!req.body.name) {
-        return res.send(400, 'Expecte input name');
-      }
-
-      var file = new FormFile({
-        form: doc._id,
-        value: req.files[req.body.name].originalname,
-        file: {
-          path: req.files[req.body.name].path,
-          encoding: req.files[req.body.name].encoding,
-          mimetype: req.files[req.body.name].mimetype
-        },
-        inputType: req.body.type,
-        uploadedBy: req.session.userid,
-        uploadedOn: Date.now()
-      });
-
-      // console.dir(data);
-      file.save(function (err, newfile) {
-        if (err) {
-          console.error(err);
-          return res.send(500, err.message);
-        }
-        var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/formfiles/' + newfile.id;
-        res.set('Location', url);
-        return res.send(201, 'The uploaded file is at <a target="_blank" href="' + url + '">' + url + '</a>');
-      });
-    });
-  });
-
-  app.get('/formfiles/:id', auth.ensureAuthenticated, function (req, res) {
-    FormFile.findById(req.params.id).lean().exec(function (err, data) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!data) {
-        return res.send(410, 'gone');
-      }
-      if (data.inputType === 'file') {
-        res.sendfile(path.resolve(data.file.path));
-      } else {
-        res.send(500, 'it is not a file');
-      }
-    });
-  });
-
-  app.get('/forms/:id/preview', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id, function (err, form) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!form) {
-        return res.send(410, 'gone');
-      }
-
-      var access = getAccess(req, form);
-
-      if (access === -1) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-
-      return res.render('viewer', routesUtilities.getRenderObject(req, {
+    if (access === 1) {
+      return res.render('form-builder', routesUtilities.getRenderObject(req, {
         id: req.params.id,
         title: form.title,
-        html: form.html
+        html: form.html,
+        status: form.status,
+        prefix: req.proxied ? req.proxied_prefix : ''
       }));
+    }
+
+    return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + req.params.id + '/preview');
+  });
+
+  app.get('/forms/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
+    return res.json(200, req[req.params.id]);
+  });
+
+  app.post('/forms/:id/uploads/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+    if (underscore.isEmpty(req.files)) {
+      return res.send(400, 'Expecte One uploaded file');
+    }
+
+    if (!req.body.name) {
+      return res.send(400, 'Expecte input name');
+    }
+
+    var file = new FormFile({
+      form: doc._id,
+      value: req.files[req.body.name].originalname,
+      file: {
+        path: req.files[req.body.name].path,
+        encoding: req.files[req.body.name].encoding,
+        mimetype: req.files[req.body.name].mimetype
+      },
+      inputType: req.body.type,
+      uploadedBy: req.session.userid,
+      uploadedOn: Date.now()
+    });
+
+    file.save(function (saveErr, newfile) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
+      }
+      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/formfiles/' + newfile.id;
+      res.set('Location', url);
+      return res.send(201, 'The uploaded file is at <a target="_blank" href="' + url + '">' + url + '</a>');
     });
   });
 
-  app.get('/forms/:id/share/', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id).lean().exec(function (err, form) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!form) {
-        return res.send(410, 'gone');
-      }
-      if (form.createdBy !== req.session.userid) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      return res.render('share', routesUtilities.getRenderObject(req, {
-        type: 'Form',
-        id: req.params.id,
-        title: form.title
-      }));
+  app.get('/formfiles/:id', auth.ensureAuthenticated, reqUtils.exist('id', FormFile), function (req, res) {
+    var data = req[req.params.id];
+    if (data.inputType === 'file') {
+      return res.sendfile(data.file.path);
+    }
+    return res.send(500, 'it is not a file');
+  });
+
+  app.get('/forms/:id/preview', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
+    var form = req[req.params.id];
+    return res.render('form-viewer', {
+      id: req.params.id,
+      title: form.title,
+      html: form.html,
+      prefix: req.proxied ? req.proxied_prefix : ''
     });
   });
 
-  app.get('/forms/:id/share/:list/json', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id).lean().exec(function (err, form) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.get('/forms/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), function (req, res) {
+    var form = req[req.params.id];
+    return res.render('share', {
+      type: 'form',
+      id: req.params.id,
+      title: form.title,
+      access: String(form.publicAccess)
+    });
+  });
+
+  app.put('/forms/:id/share/public', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['access']), function (req, res) {
+    var form = req[req.params.id];
+    // change the access
+    var access = req.body.access;
+    if (['-1', '0', '1'].indexOf(access) === -1) {
+      return res.send(400, 'not valid value');
+    }
+    access = Number(access);
+    if (form.publicAccess === access) {
+      return res.send(204);
+    }
+    form.publicAccess = access;
+    form.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!form) {
-        return res.send(410, 'gone');
+      return res.send(200, 'public access is set to ' + req.body.access);
+    });
+  });
+
+  app.get('/forms/:id/share/:list/json', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), function (req, res) {
+    var form = req[req.params.id];
+    if (req.params.list === 'users') {
+      return res.json(200, form.sharedWith || []);
+    }
+    if (req.params.list === 'groups') {
+      return res.json(200, form.sharedGroup || []);
+    }
+    return res.send(400, 'unknown share list.');
+  });
+
+  app.post('/forms/:id/share/:list/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), function (req, res) {
+    var form = req[req.params.id];
+    var share = -2;
+    if (req.params.list === 'users') {
+      if (req.body.name) {
+        share = reqUtils.getSharedWith(form.sharedWith, req.body.name);
+      } else {
+        return res.send(400, 'user name is empty.');
       }
-      if (form.createdBy !== req.session.userid) {
-        return res.send(403, 'you are not authorized to access this resource');
+    }
+    if (req.params.list === 'groups') {
+      if (req.body.id) {
+        share = reqUtils.getSharedGroup(form.sharedGroup, req.body.id);
+      } else {
+        return res.send(400, 'group id is empty.');
       }
-      if (req.params.list === 'users') {
-        return res.json(200, form.sharedWith || []);
-      }
-      if (req.params.list === 'groups') {
-        return res.json(200, form.sharedGroup || []);
-      }
+    }
+
+    if (share === -2) {
       return res.send(400, 'unknown share list.');
-    });
+    }
+
+    if (share >= 0) {
+      return res.send(400, req.body.name || req.body.id + ' is already in the ' + req.params.list + ' list.');
+    }
+
+    if (share === -1) {
+      // new user
+      shareLib.addShare(req, res, form);
+    }
   });
 
-  app.post('/forms/:id/share/:list/', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id, function (err, form) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
+  app.put('/forms/:id/share/:list/:shareid', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['access']), function (req, res) {
+    var form = req[req.params.id];
+    var share;
+    if (req.params.list === 'users') {
+      share = form.sharedWith.id(req.params.shareid);
+    }
+    if (req.params.list === 'groups') {
+      share = form.sharedGroup.id(req.params.shareid);
+    }
+    if (!share) {
+      return res.send(400, 'cannot find ' + req.params.shareid + ' in the list.');
+    }
+    // change the access
+    if (req.body.access === 'write') {
+      share.access = 1;
+    } else if (req.body.access === 'read') {
+      share.access = 0;
+    } else {
+      return res.send(400, 'cannot take the access ' + req.body.access);
+    }
+    form.save(function (saveErr) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (!form) {
-        return res.send(410, 'gone');
-      }
-      if (form.createdBy !== req.session.userid) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      var share = -2;
+      // check consistency of user's form list
+      var Target;
       if (req.params.list === 'users') {
-        share = getSharedWith(form.sharedWith, req.body.name);
+        Target = User;
       }
       if (req.params.list === 'groups') {
-        share = getSharedGroup(form.sharedGroup, req.body.id);
+        Target = Group;
       }
-
-      if (share === -2) {
-        return res.send(400, 'unknown share list.');
-      }
-
-      if (share >= 0) {
-        return res.send(400, req.body.name || req.body.id + ' is already in the ' + req.params.list + ' list.');
-      }
-
-      if (share === -1) {
-        // new user
-        addShare(req, res, form);
-      }
-    });
-  });
-
-  app.put('/forms/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id, function (err, form) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!form) {
-        return res.send(410, 'gone');
-      }
-      if (form.createdBy !== req.session.userid) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      var share;
-      if (req.params.list === 'users') {
-        share = form.sharedWith.id(req.params.shareid);
-      }
-      if (req.params.list === 'groups') {
-        share = form.sharedGroup.id(req.params.shareid);
-      }
-      if (share) {
-        // change the access
-        if (req.body.access && req.body.access === 'write') {
-          share.access = 1;
-        } else {
-          share.access = 0;
+      Target.findByIdAndUpdate(req.params.shareid, {
+        $addToSet: {
+          forms: form._id
         }
-        form.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
-          }
-          // check consistency of user's form list
-          var Target;
-          if (req.params.list === 'users') {
-            Target = User;
-          }
-          if (req.params.list === 'groups') {
-            Target = Group;
-          }
-          Target.findByIdAndUpdate(req.params.shareid, {
-            $addToSet: {
-              forms: form._id
-            }
-          }, function (err, target) {
-            if (err) {
-              console.error(err);
-            }
-            if (!target) {
-              console.error('The user/group ' + req.params.userid + ' is not in the db');
-            }
-          });
-          return res.send(204);
-        });
-      } else {
-        // the user should in the list
-        return res.send(400, 'cannot find ' + req.params.shareid + ' in the list.');
-      }
+      }, function (updateErr, target) {
+        if (updateErr) {
+          console.error(updateErr);
+        }
+        if (!target) {
+          console.error('The user/group ' + req.params.userid + ' is not in the db');
+        }
+      });
+      return res.json(200, share);
     });
   });
 
-  app.delete('/forms/:id/share/:list/:shareid', auth.ensureAuthenticated, function (req, res) {
-    Form.findById(req.params.id, function (err, form) {
-      if (err) {
-        console.error(err);
-        return res.send(500, err.message);
-      }
-      if (!form) {
-        return res.send(410, 'gone');
-      }
-      if (form.createdBy !== req.session.userid) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      var share;
-      if (req.params.list === 'users') {
-        share = form.sharedWith.id(req.params.shareid);
-      }
-      if (req.params.list === 'groups') {
-        share = form.sharedGroup.id(req.params.shareid);
-      }
-      if (share) {
-        share.remove();
-        form.save(function (err) {
-          if (err) {
-            console.error(err);
-            return res.send(500, err.message);
-          }
-          // keep the consistency of user's form list
-          var Target;
-          if (req.params.list === 'users') {
-            Target = User;
-          }
-          if (req.params.list === 'groups') {
-            Target = Group;
-          }
-          Target.findByIdAndUpdate(req.params.shareid, {
-            $pull: {
-              forms: form._id
-            }
-          }, function (err, target) {
-            if (err) {
-              console.error(err);
-            }
-            if (!target) {
-              console.error('The user/group ' + req.params.shareid + ' is not in the db');
-            }
-          });
-          return res.send(204);
-        });
-      } else {
-        return res.send(400, 'cannot find ' + req.params.shareid + ' in list.');
-      }
-    });
+  app.delete('/forms/:id/share/:list/:shareid', reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), auth.ensureAuthenticated, function (req, res) {
+    var form = req[req.params.id];
+    shareLib.removeShare(req, res, form);
   });
 
-  app.post('/forms/', auth.ensureAuthenticated, function (req, res) {
-    var html;
-    if (!!req.body.html) {
-      html = sanitize(req.body.html);
+  app.post('/forms/', auth.ensureAuthenticated, reqUtils.sanitize('body', ['html']), function (req, res) {
+    var form = {};
+    if (req.body.html) {
+      form.html = req.body.html;
+      form.clonedFrom = req.body.id;
     } else {
       html = '';
     }
@@ -798,43 +442,131 @@ module.exports = function (app) {
     });
   });
 
-  app.put('/forms/:id/', auth.ensureAuthenticated, function (req, res) {
+  app.post('/forms/:id/clone', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
+    var doc = req[req.params.id];
+    var form = {};
+    form.html = sanitize(doc.html);
+    form.title = sanitize(doc.title) + ' clone';
+    form.createdBy = req.session.userid;
+    form.createdOn = Date.now();
+    form.clonedFrom = doc._id;
+    form.sharedWith = [];
+
+    (new Form(form)).save(function (saveErr, newform) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
+      }
+      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/forms/' + newform.id + '/';
+      res.set('Location', url);
+      return res.send(201, 'You can see the new form at <a href="' + url + '">' + url + '</a>');
+    });
+  });
+
+  app.put('/forms/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
+    var doc = req[req.params.id];
+    if (doc.archived === req.body.archived) {
+      return res.send(204);
+    }
+
+    doc.archived = req.body.archived;
+    if (doc.archived) {
+      doc.archivedOn = Date.now();
+    }
+
+    doc.save(function (saveErr, newDoc) {
+      if (saveErr) {
+        console.error(saveErr);
+        return res.send(500, saveErr.message);
+      }
+      return res.send(200, 'Form ' + req.params.id + ' archived state set to ' + newDoc.archived);
+    });
+  });
+
+  app.put('/forms/:id/owner', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['name']), function (req, res) {
+    var doc = req[req.params.id];
+    shareLib.changeOwner(req, res, doc);
+  });
+
+  app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canWriteMw('id'), reqUtils.status('id', [0]), reqUtils.filter('body', ['html', 'title']), reqUtils.sanitize('body', ['html', 'title']), function (req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
-    var form = {};
+    var doc = req[req.params.id];
     if (req.body.hasOwnProperty('html')) {
-      form.html = sanitize(req.body.html);
+      doc.html = req.body.html;
     }
     if (req.body.hasOwnProperty('title')) {
-      form.title = req.body.title;
+      if (reqUtils.isOwner(req, doc)) {
+        doc.title = req.body.title;
+      } else {
+        req.send(403, 'not authorized to access this resource');
+      }
     }
 
-    if (form.hasOwnProperty('html') || form.hasOwnProperty('title')) {
-      form.updatedBy = req.session.userid;
-      form.updatedOn = Date.now();
-    } else {
-      return res.send('400', 'no update details found');
-    }
-
-    Form.findById(req.params.id, function (err, doc) {
-      if (err) {
-        console.dir(err);
-        return res.send(500, err.message || err.errmsg);
+    doc.updatedBy = req.session.userid;
+    doc.updatedOn = Date.now();
+    doc.save(function (saveErr, newDoc) {
+      if (saveErr) {
+        console.dir(saveErr);
+        return res.send(500, saveErr.message);
       }
-      if (getAccess(req, doc) !== 1) {
-        return res.send(403, 'you are not authorized to access this resource');
-      }
-      doc.update(form, function (err, old) {
-        if (err) {
-          console.dir(err);
-          return res.send(500, err.message || err.errmsg);
-        }
-        if (old) {
-          return res.send(204);
-        }
-        return res.send(410, 'cannot find form ' + req.params.id);
-      });
+      return res.json(newDoc);
     });
+  });
+
+  app.put('/forms/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
+    var f = req[req.params.id];
+    var s = req.body.status;
+
+    if ([0, 0.5, 1, 2].indexOf(s) === -1) {
+      return res.send(400, 'invalid status');
+    }
+
+    // no change
+    if (f.status === s) {
+      return res.send(204);
+    }
+
+    if (s === 0) {
+      if ([0.5].indexOf(f.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        f.status = s;
+      }
+    }
+
+    if (s === 0.5) {
+      if ([0].indexOf(f.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        f.status = s;
+      }
+    }
+
+    if (s === 1) {
+      if ([0.5].indexOf(f.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        f.status = s;
+      }
+    }
+
+    if (s === 2) {
+      if ([1].indexOf(f.status) === -1) {
+        return res.send(400, 'invalid status change');
+      } else {
+        f.status = s;
+      }
+    }
+
+    f.save(function (err) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      return res.send(200, 'status updated to ' + s);
+    });
+
   });
 };
