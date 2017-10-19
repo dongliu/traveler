@@ -251,12 +251,11 @@ module.exports = function (app) {
 
   app.get('/forms/:id/preview', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
     var form = req[req.params.id];
-    return res.render('form-viewer', {
+    return res.render('form-viewer', routesUtilities.getRenderObject(req, {
       id: req.params.id,
       title: form.title,
-      html: form.html,
-      prefix: req.proxied ? req.proxied_prefix : ''
-    });
+      html: form.html
+    }));
   });
 
   app.get('/forms/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), function (req, res) {
