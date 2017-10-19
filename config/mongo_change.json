@@ -3,5 +3,8 @@
  "server_port": "27017",
  "traveler_db": "traveler",
  "username": "OPTIONAL REMOVABLE VARIABLE",
- "password": "OPTIONAL REMOVABLE VARIABLE"
+ "password": "OPTIONAL REMOVABLE VARIABLE",
+ "auth": {
+  "authdb": "admin"
+ }
 }

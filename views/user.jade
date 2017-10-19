@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB Cable :: user profile
+  title FRIB Cable - user profile
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -10,7 +10,7 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  script.
+  script(type='text/javascript').
     var roles = !{JSON.stringify(user.roles)};
     var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
@@ -31,8 +31,8 @@ block content
         dd #{user.mobile}
         dt Last visited on
         dd #{user.lastVisitedOn}
-        dt Notice subscribed
-        dd #{user.subscribe}
+        //- dt Notice subscribed
+        //- dd #{user.subscribe}
         dt Roles
         dd#roles
           label.checkbox.inline
@@ -50,5 +50,5 @@ block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/user.js')

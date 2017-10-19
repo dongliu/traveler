@@ -58,12 +58,6 @@ module.exports.load = function () {
     module.exports.configPath = getPath('../etc/traveler-config', 'config');
   }
 
-  if (process.env.TRAVELER_UPLOAD_REL_PATH) {
-    module.exports.uploadPath = process.env.TRAVELER_UPLOAD_REL_PATH;
-  } else {
-    module.exports.uploadPath = getPath('../data/traveler-uploads', 'uploads');
-  }
-
   // Load configuration files
   var configPath = this.configPath;
   module.exports.ad = require('../' + configPath + '/ad.json');

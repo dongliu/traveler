@@ -12,5 +12,10 @@
       "url": "https://controls.frib.msu.edu/controlshelp/"
     }
   ],
-  "deployment_name": "development"
+  "deployment_name": "development",
+  "upload_dir" : "../traveler_uploads/",
+  "log_dir" : "../logs/",
+  "cookie_sec": "traveler",
+  "cookie_life": 28800000,
+  "upload_size" : 5
 }

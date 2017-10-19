@@ -1,6 +1,6 @@
-/*global selectColumn: false, useridColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDom: false, oTableTools: false*/
-/*global updateAjaxURL: false, prefix: false*/
-/*global Bloodhound: false, travelerGlobal: false*/
+/*global selectColumn: false, useridColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, fnAddFilterFoot: false*/
+/*global updateAjaxURL: false, prefix: false, Holder: false*/
+/*global travelerGlobal: false*/
 
 function inArray(name, ao) {
   var i;
@@ -12,32 +12,18 @@ function inArray(name, ao) {
   return false;
 }
 
-function initTable(oTable) {
-  $.ajax({
-    url: '/users/json',
-    type: 'GET',
-    dataType: 'json'
-  }).done(function (json) {
-    oTable.fnClearTable();
-    oTable.fnAddData(json);
-    oTable.fnDraw();
-  }).fail(function (jqXHR, status, error) {
-    $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for users information.</div>');
-  }).always();
-}
-
 function updateFromModal(cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
+  $('#modal .modal-body div').each(function () {
     var that = this;
     $.ajax({
       url: '/users/' + that.id + '/refresh',
       type: 'GET'
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
     }).always(function () {
@@ -58,7 +44,7 @@ function modifyFromModal(cb) {
   $('#modal-roles input:checked').each(function () {
     roles.push($(this).val());
   });
-  $('#modal .modal-body div').each(function (index) {
+  $('#modal .modal-body div').each(function () {
     var that = this;
     $.ajax({
       url: '/users/' + that.id,
@@ -68,9 +54,9 @@ function modifyFromModal(cb) {
         roles: roles
       })
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
     }).always(function () {
@@ -100,17 +86,33 @@ $(function () {
     source: travelerGlobal.usernames
   });
 
-  var userTable = $('#users').dataTable({
-    aaData: [],
-    // bAutoWidth: false,
-    aoColumns: [selectColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn],
-    aaSorting: [
-      [4, 'desc'],
-      [1, 'asc']
+  var userColumns = [selectColumn, useridColumn, fullNameNoLinkColumn, rolesColumn, lastVisitedOnColumn];
+
+  var userTable = $('#users-table').dataTable({
+    sAjaxSource: '/users/json',
+    sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
+    bAutoWidth: false,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
     ],
-    sDom: sDom,
-    oTableTools: oTableTools
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...'
+    },
+    bDeferRender: true,
+    aoColumns: userColumns,
+    aaSorting: [
+      [4, 'desc']
+    ],
+    sDom: sDomNoTools
   });
+  fnAddFilterFoot('#users-table', userColumns);
   selectEvent();
   filterEvent();
 
@@ -134,9 +136,9 @@ $(function () {
         }),
         success: function (data, status, jqXHR) {
           $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
-          initTable(userTable);
+          userTable.fnReloadAjax();
         },
-        error: function (jqXHR, status, error) {
+        error: function (jqXHR) {
           $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' + jqXHR.responseText + '</div>');
         }
       });
@@ -144,7 +146,7 @@ $(function () {
     document.forms[0].reset();
   });
 
-  $('#user-update').click(function (e) {
+  $('#user-update').click(function () {
     var selected = fnGetSelected(userTable, 'row-selected');
     if (selected.length) {
       $('#modalLabel').html('Update the following ' + selected.length + ' users from the application? ');
@@ -158,7 +160,7 @@ $(function () {
         e.preventDefault();
         $('#update').prop('disabled', true);
         updateFromModal(function () {
-          initTable(userTable);
+          userTable.fnReloadAjax();
         });
       });
       $('#modal').modal('show');
@@ -170,7 +172,7 @@ $(function () {
     }
   });
 
-  $('#user-modify').click(function (e) {
+  $('#user-modify').click(function () {
     var selected = fnGetSelected(userTable, 'row-selected');
     if (selected.length) {
       $('#modalLabel').html('Modify the following ' + selected.length + ' users\' role? ');
@@ -191,7 +193,7 @@ $(function () {
         e.preventDefault();
         $('#modify').prop('disabled', true);
         modifyFromModal(function () {
-          initTable(userTable);
+          userTable.fnReloadAjax();
         });
       });
       $('#modal').modal('show');
@@ -202,7 +204,4 @@ $(function () {
       $('#modal').modal('show');
     }
   });
-
-
-  initTable(userTable);
 });
