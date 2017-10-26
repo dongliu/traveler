@@ -44,6 +44,9 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#forms', data-toggle='tab') My forms
+        if (locals.roles !== undefined && locals.roles.indexOf('read_all_forms') !== -1)
+          li
+            a(href="#allforms", data-toggle='tab') All #{viewConfig.terminology.form}s
         li
           a(href='#transferredforms', data-toggle='tab') Transferred forms
         li
@@ -83,6 +86,9 @@ block content
                 i.fa.fa-user.fa-lg
                 | &nbsp;Transfer ownership
           table#transferred-form-table.table.table-bordered.table-hover
+        if (locals.roles !== undefined && locals.roles.indexOf('read_all_forms') !== -1)
+          #allforms.tab-pane
+            table#all-form-table.table.table-bordered.table-hover
         #sharedfroms.tab-pane
           .btn-toolbar
             .btn-group
