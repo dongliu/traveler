@@ -80,7 +80,7 @@ block content
       button.btn.btn-primary#add Add tags
     if (locals.isOwner != undefined && locals.isOwner)
       .btn-group
-        a.btn.btn-primary#manage(href='./formmanager', target='_blank') Manage forms
+        a.btn.btn-primary#manage(href='./formmanager', target='#{viewConfig.linkTarget}') Manage forms
       case traveler.status
         when 0
           .btn-group
@@ -99,8 +99,9 @@ block content
         when 3
           .btn-group
             button.btn.btn-primary#resume Resume
-    .btn-group
-        a.btn.btn-info(href='#{prefix}/devices/', target='_blank') Browse devices
+    if (viewConfig.showCCDB)
+      .btn-group
+          a.btn.btn-info(href='#{prefix}/devices/', target='#{viewConfig.linkTarget}') Browse devices
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

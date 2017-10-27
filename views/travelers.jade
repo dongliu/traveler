@@ -27,17 +27,18 @@ block content
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
       .btn-group
-        a.btn.btn-info#all-travelers(href='#{prefix}/publictravelers/', target='_blank', data-toggle='tooltip', title='see all public travelers')
+        a.btn.btn-info#all-travelers(href='#{prefix}/publictravelers/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public travelers')
           i.fa.fa-institution.fa-lg
           | &nbsp;All public travelers
-      .btn-group.dropdown
-        a#ref.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
-          i.fa.fa-gears.fa-lg
-          | &nbsp;References
-          span.caret
-        ul.dropdown-menu
-          li#devices
-            a(href='#{prefix}/devices/', target='_blank') Devices in CCDB
+      if (viewConfig.showCCDB)
+        .btn-group.dropdown
+          a#ref.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
+            i.fa.fa-gears.fa-lg
+            | &nbsp;References
+            span.caret
+          ul.dropdown-menu
+            li#devices
+              a(href='#{prefix}/devices/', target='#{viewConfig.linkTarget}') Devices in CCDB
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -48,12 +49,15 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#travelers', data-toggle='tab') My travelers
-        li
-          a(href='#transferredtravelers', data-toggle='tab') Transferred travelers
-        li
-          a(href='#sharedtravelers', data-toggle='tab') Shared travelers
-        li
-          a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
+        if (viewConfig.transferOwnership)
+          li
+            a(href='#transferredtravelers', data-toggle='tab') Transferred travelers
+        if (viewConfig.shareUsers)
+          li
+            a(href='#sharedtravelers', data-toggle='tab') Shared travelers
+        if (viewConfig.shareGroups)
+          li
+            a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
         li
           a(href='#archivedtravelers', data-toggle='tab') Archived travelers
 
@@ -68,40 +72,44 @@ block content
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
-            .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
-                i.fa.fa-user.fa-lg
-                | &nbsp;Transfer ownership
+            if (viewConfig.transferOwnership)
+              .btn-group
+                button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                  i.fa.fa-user.fa-lg
+                  | &nbsp;Transfer ownership
           table#traveler-table.table.table-bordered.table-hover
-        #transferredtravelers.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-            .btn-group
-              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
-                i.fa.fa-archive.fa-lg
-                | &nbsp;Archive
-            .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
-                i.fa.fa-user.fa-lg
-                | &nbsp;Transfer ownership
-          table#transferred-traveler-table.table.table-bordered.table-hover
-        #sharedtravelers.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#shared-traveler-table.table.table-bordered.table-hover
-        #groupsharedtravelers.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#group-shared-traveler-table.table.table-bordered.table-hover
+        if (viewConfig.transferOwnership)
+          #transferredtravelers.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+              .btn-group
+                button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
+                  i.fa.fa-archive.fa-lg
+                  | &nbsp;Archive
+              .btn-group
+                button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+                  i.fa.fa-user.fa-lg
+                  | &nbsp;Transfer ownership
+            table#transferred-traveler-table.table.table-bordered.table-hover
+        if (viewConfig.shareUsers)
+          #sharedtravelers.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+            table#shared-traveler-table.table.table-bordered.table-hover
+        if (viewConfig.shareGroups)
+          #groupsharedtravelers.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+            table#group-shared-traveler-table.table.table-bordered.table-hover
         #archivedtravelers.tab-pane
           .btn-toolbar
             .btn-group

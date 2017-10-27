@@ -4,8 +4,13 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
   body
-    script.
+    script(type='text/javascript').
       var terminology = !{JSON.stringify(viewConfig.terminology)};
+      var shareUsers = !{viewConfig.shareUsers};
+      var shareGroups = !{viewConfig.shareGroups};
+      var linkTarget = '!{viewConfig.linkTarget}';
+      var showCCDB = !{viewConfig.showCCDB};
+
     .navbar.navbar-fixed-top
       .navbar-inner
         .container-fluid
@@ -31,10 +36,10 @@ html
               li
                 a(href='#{prefix}/binders/') Binders
               li
-                a(href='#{prefix}/docs/', target='_blank') Documents
+                a(href='#{prefix}/docs/', target='#{viewConfig.linkTarget}') Documents
               if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
                 li
-                  a(href='#{prefix}/admin/', target='_blank') Admin
+                  a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
             ul.nav.pull-right
               if (locals.session && locals.session.userid)
                 li
@@ -45,7 +50,7 @@ html
                     b.caret
                   ul.dropdown-menu
                     li
-                      a(href='#{prefix}/profile', target='_blank') Profile
+                      a(href='#{prefix}/profile', target='#{viewConfig.linkTarget}') Profile
                     li
                       a(href='#{prefix}/logout') Log out
               else
@@ -53,13 +58,6 @@ html
                   i.fa.fa-user.fa-3x
                 li
                   a(href='#{prefix}/login') Log in
-    .container-fluid
-      .alert.alert-info
-        button.close(type='button', data-dismiss='alert')
-          |&times;
-        | The previous Traveler v2.4 is available at
-        != ' '
-        a(href='http://traveler:3011', target='_blank') http://traveler:3011
     block content
     .container-fluid
       h6.text-right

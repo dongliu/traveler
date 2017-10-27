@@ -15,7 +15,7 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/binders/new', target='_blank', data-toggle='tooltip', title='create a new binder')
+        a.btn.btn-primary#new(href='#{prefix}/binders/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create a new binder')
           i.fa.fa-paperclip.fa-lg
           | &nbsp;New Binder
       //- .btn-group
@@ -27,7 +27,7 @@ block content
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
       .btn-group
-        a.btn.btn-info#all-binders(href='#{prefix}/publicbinders/', target='_blank', data-toggle='tooltip', title='see all public binders')
+        a.btn.btn-info#all-binders(href='#{prefix}/publicbinders/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public binders')
           i.fa.fa-institution.fa-lg
           | &nbsp;All public binders
     #message
@@ -40,12 +40,15 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#mybinders', data-toggle='tab') My binders
-        li
-          a(href='#transferredbinders', data-toggle='tab') Transferred binders
-        li
-          a(href='#sharedbinders', data-toggle='tab') Shared binders
-        li
-          a(href='#groupsharedbinders', data-toggle='tab') Group shared binders
+        if (viewConfig.transferOwnership)
+          li
+            a(href='#transferredbinders', data-toggle='tab') Transferred binders
+        if (viewConfig.shareUsers)
+          li
+            a(href='#sharedbinders', data-toggle='tab') Shared binders
+        if (viewConfig.shareGroups)
+          li
+            a(href='#groupsharedbinders', data-toggle='tab') Group shared binders
         li
           a(href='#archivedbinders', data-toggle='tab') Archived binders
       .tab-content
@@ -59,40 +62,44 @@ block content
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected binders, only you can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
-            .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected binders to a coworker')
-                i.fa.fa-user.fa-lg
-                | &nbsp;Transfer ownership
+            if (viewConfig.transferOwnership)
+              .btn-group
+                button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected binders to a coworker')
+                  i.fa.fa-user.fa-lg
+                  | &nbsp;Transfer ownership
           table#binder-table.table.table-bordered.table-hover
-        #transferredbinders.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-            .btn-group
-              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected binders, only you can see them after archived.')
-                i.fa.fa-archive.fa-lg
-                | &nbsp;Archive
-            .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected binders to a coworker')
-                i.fa.fa-user.fa-lg
-                | &nbsp;Transfer ownership
-          table#transferred-binder-table.table.table-bordered.table-hover
-        #sharedbinders.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#shared-binder-table.table.table-bordered.table-hover
-        #groupsharedbinders.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#group-shared-binder-table.table.table-bordered.table-hover
+          if (viewConfig.transferOwnership)
+            #transferredbinders.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+              .btn-group
+                button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected binders, only you can see them after archived.')
+                  i.fa.fa-archive.fa-lg
+                  | &nbsp;Archive
+              .btn-group
+                button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected binders to a coworker')
+                  i.fa.fa-user.fa-lg
+                  | &nbsp;Transfer ownership
+            table#transferred-binder-table.table.table-bordered.table-hover
+        if (viewConfig.shareUsers)
+          #sharedbinders.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+              table#shared-binder-table.table.table-bordered.table-hover
+        if (viewConfig.shareGroups)
+          #groupsharedbinders.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+            table#group-shared-binder-table.table.table-bordered.table-hover
         #archivedbinders.tab-pane
           .btn-toolbar
             .btn-group
