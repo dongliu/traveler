@@ -134,21 +134,25 @@ $(function () {
       cleanDeviceForm();
     });
 
-    if (!devices) {
-      devices = new Bloodhound({
-        datumTokenizer: function (device) {
-          return Bloodhound.tokenizers.nonword(device.inventoryId);
-        },
-        queryTokenizer: Bloodhound.tokenizers.nonword,
-        identify: function (device) {
-          return device.inventoryId;
-        },
-        prefetch: {
-          url: prefix + '/devices/json',
-          cacheKey: 'devices'
+    if (showCCDB) {
+        if (!devices) {
+            devices = new Bloodhound({
+                datumTokenizer: function (device) {
+                    return Bloodhound.tokenizers.nonword(device.inventoryId);
+                },
+                queryTokenizer: Bloodhound.tokenizers.nonword,
+                identify: function (device) {
+                    return device.inventoryId;
+                },
+                prefetch: {
+                    url: prefix + '/devices/json',
+                    cacheKey: 'devices'
+                }
+            });
+            devices.initialize();
         }
-      });
-      devices.initialize();
+    } else if (!devices) {
+      devices = [];
     }
 
     $('#newDevice').typeahead({
