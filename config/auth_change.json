@@ -10,6 +10,6 @@
 
   "default_roles": [
     "OPTIONAL: Please remove if no default role is desired. Role will only be assigned to new users.",
-    "Currently Allowed Roles are:  'manager', 'admin', 'read_all_forms', 'write_active_travelers'"
+    "Currently Allowed Roles are:  'manager', 'admin', 'read_all_forms', 'write_public_travelers'"
   ]
 }

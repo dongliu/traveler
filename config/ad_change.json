@@ -23,5 +23,8 @@
     "telephoneNumber": "telephoneNumber"
   },
 
-  "ldapsCA": "OPTIONAL CA file for accepting SSL Connections"
+  "ldapsCA": "OPTIONAL CA file for accepting SSL Connections",
+  "shareUsers": true,
+  "shareGroups": true,
+  "transferOwnership": true
 }
