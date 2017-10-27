@@ -15,21 +15,21 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='_blank', data-toggle='tooltip', title='create new empty forms')
+        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create new empty #{viewConfig.terminology.form}s')
           i.fa.fa-file-o.fa-lg
-          | &nbsp;New Form
+          | &nbsp;New #{viewConfig.terminology.form}
       .btn-group
-        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected forms')
+        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
       .btn-group
-        button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected forms')
+        button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
           i.fa.fa-plane.fa-lg
           | &nbsp;Travel
       .btn-group
-        a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='_blank', data-toggle='tooltip', title='see all public forms')
+        a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
           i.fa.fa-institution.fa-lg
-          | &nbsp;All public forms
+          | &nbsp;All public #{viewConfig.terminology.form}s
       .btn-group
         button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
@@ -43,18 +43,18 @@ block content
     div
       ul.nav.nav-tabs
         li.active
-          a(href='#forms', data-toggle='tab') My forms
-        if (locals.roles !== undefined && locals.roles.indexOf('read_all_forms') !== -1)
+          a(href='#forms', data-toggle='tab') My #{viewConfig.terminology.form}s
+        if (viewConfig.transferOwnership)
           li
-            a(href="#allforms", data-toggle='tab') All #{viewConfig.terminology.form}s
+            a(href='#transferredforms', data-toggle='tab') Transferred #{viewConfig.terminology.form}s
+        if (viewConfig.shareUsers)
+          li
+            a(href='#sharedfroms', data-toggle='tab') Shared #{viewConfig.terminology.form}s
+        if (viewConfig.shareGroups)
+          li
+            a(href='#groupsharedfroms', data-toggle='tab') Group shared #{viewConfig.terminology.form}s
         li
-          a(href='#transferredforms', data-toggle='tab') Transferred forms
-        li
-          a(href='#sharedfroms', data-toggle='tab') Shared forms
-        li
-          a(href='#groupsharedfroms', data-toggle='tab') Group shared forms
-        li
-          a(href='#archivedforms', data-toggle='tab') Archived forms
+          a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
@@ -66,12 +66,14 @@ block content
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected forms, only you can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
-            .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
-                i.fa.fa-user.fa-lg
-                | &nbsp;Transfer ownership
+            if (viewConfig.transferOwnership)
+              .btn-group
+                button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
+                  i.fa.fa-user.fa-lg
+                  | &nbsp;Transfer ownership
           table#form-table.table.table-bordered.table-hover
         #transferredforms.tab-pane
+        if (viewConfig.transferOwnership)
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
@@ -86,23 +88,22 @@ block content
                 i.fa.fa-user.fa-lg
                 | &nbsp;Transfer ownership
           table#transferred-form-table.table.table-bordered.table-hover
-        if (locals.roles !== undefined && locals.roles.indexOf('read_all_forms') !== -1)
-          #allforms.tab-pane
-            table#all-form-table.table.table-bordered.table-hover
-        #sharedfroms.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#shared-form-table.table.table-bordered.table-hover
-        #groupsharedfroms.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#group-shared-form-table.table.table-bordered.table-hover
+        if (viewConfig.shareUsers)
+          #sharedfroms.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+            table#shared-form-table.table.table-bordered.table-hover
+        if (viewConfig.shareGroups)
+          #groupsharedfroms.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+            table#group-shared-form-table.table.table-bordered.table-hover
         #archivedforms.tab-pane
           .btn-toolbar
             .btn-group

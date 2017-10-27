@@ -17,42 +17,47 @@ block content
       h1#h1m Collaboration
       p.main-byline With forms, travelers, and binders.
         | &nbsp;
-        a(href='#{prefix}/docs/', target='_blank') Need help?
+        a(href='#{prefix}/docs/', target='#{viewConfig.linkTarget}') Need help?
       hr.soften
       .row-fluid
         .span4
           h1
-            a(href='#{prefix}/forms/', target='_blank')
+            a(href='#{prefix}/forms/', target='#{viewConfig.linkTarget}')
               i.fa.fa-list-ol.fa-4x
           h2 Design forms
         .span4
           h1
-            a(href='#{prefix}/travelers/', target='_blank')
+            a(href='#{prefix}/travelers/', target='#{viewConfig.linkTarget}')
               i.fa.fa-check-square-o.fa-4x
           h2 Carry out
         .span4
           h1
-            a(href='#{prefix}/binders/', target='_blank')
+            a(href='#{prefix}/binders/', target='#{viewConfig.linkTarget}')
               i.fa.fa-briefcase.fa-4x
           h2 Organize works
-      hr.soften
-      h2 Ownership
-      .row-fluid
-        .span4
-          h2.text-info
-            i.fa.fa-user.fa-4x
-          h3 Take Responsibility
-          p.main-byline The owner is responsible to take part in and oversee the process from plan to delivery. The ownership is transferable.
-        .span4
-          h2.text-info
-            i.fa.fa-user-plus.fa-4x
-          h3 Share for Collaboration
-          p.main-byline The owner shares items with colleagues and groups of colleagues in the organization. Sharing brings connection, transparency, and attention.
-        .span4
-          h2.text-info
-            i.fa.fa-users.fa-4x
-          h3 Powered by Co-workers
-          p.main-byline Accomplished works are recorded and traceable. Co-workers are acknowledged.
+          //var shareUsers = !{viewConfig.shareUsers};
+                var shareGroups = !{viewConfig.shareGroups};
+      if (! (!viewConfig.shareUsers && !viewConfig.shareGroups && !viewConfig.transferOwnership))
+        hr.soften
+        h2 Ownership
+        .row-fluid
+          if (viewConfig.transferOwnership)
+            .span4
+              h2.text-info
+                i.fa.fa-user.fa-4x
+              h3 Take Responsibility
+              p.main-byline The owner is responsible to take part in and oversee the process from plan to delivery. The ownership is transferable.
+          if (viewConfig.shareGroups && viewConfig.shareUsers)
+            .span4
+              h2.text-info
+                i.fa.fa-user-plus.fa-4x
+              h3 Share for Collaboration
+              p.main-byline The owner shares items with colleagues and groups of colleagues in the organization. Sharing brings connection, transparency, and attention.
+          .span4
+            h2.text-info
+              i.fa.fa-users.fa-4x
+            h3 Powered by Co-workers
+            p.main-byline Accomplished works are recorded and traceable. Co-workers are acknowledged.
       hr.soften
       h2 Performance
       .row-fluid

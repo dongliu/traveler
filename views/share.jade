@@ -14,6 +14,7 @@ block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
     var access = !{access};
+
   .container(style="margin-top: 10px")
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -31,51 +32,53 @@ block content
         option(value='1') write
       = ' '
       button.btn.btn-primary(type='submit', disabled)#update Update
-    h3 Shared user list for #{type}
-      = ' '
-      span.text-info #{title}
-    //- .well
-    form.form-inline(name='user')
-      input#username.input(type='text', placeholder='Last, First', name='name')
-      != ' '
-      label.checkbox
-        input#access(type='checkbox', name='access', value='write')
-        | Write
-      != ' '
-      button.btn.btn-primary#add(type='submit', disabled) Add to share
-    .btn-toolbar
-      .btn-group
-        button.btn.btn-info#share-modify
-          i.fa.fa-wrench.fa-lg
-          | &nbsp;Modify
-      .btn-group
-        button.btn.btn-warning#share-remove
-          i.fa.fa-trash-o.fa-lg
-          | &nbsp;Remove
-    table#share-table.table.table-bordered.table-hover
-    h3 Shared group list for #{type}
-      = ' '
-      span.text-info #{title}
-    //- .well
-    form.form-inline(name='group')
-      input#groupid.input.input-xlarge(type='text', placeholder='LAB.FRIB.DIV.Department.Group', name='group')
-      != ' '
-      label.checkbox
-        input#groupaccess(type='checkbox', name='access', value='write')
-        | Write
-      != ' '
-      button.btn.btn-primary#addgroup(type='submit', disabled) Add to share
-    .btn-toolbar
-      .btn-group
-        button.btn.btn-info#groupshare-modify
-          i.fa.fa-wrench.fa-lg
-          | &nbsp;Modify
-      .btn-group
-        button.btn.btn-warning#groupshare-remove
-          i.fa.fa-trash-o.fa-lg
-          | &nbsp;Remove
+    if (viewConfig.shareUsers)
+      h3 Shared user list for #{type}
+        = ' '
+        span.text-info #{title}
+      //- .well
+      form.form-inline(name='user')
+        input#username.input(type='text', placeholder='Last, First', name='name')
+        != ' '
+        label.checkbox
+          input#access(type='checkbox', name='access', value='write')
+          | Write
+        != ' '
+        button.btn.btn-primary#add(type='submit', disabled) Add to share
+      .btn-toolbar
+        .btn-group
+          button.btn.btn-info#share-modify
+            i.fa.fa-wrench.fa-lg
+            | &nbsp;Modify
+        .btn-group
+          button.btn.btn-warning#share-remove
+            i.fa.fa-trash-o.fa-lg
+            | &nbsp;Remove
+      table#share-table.table.table-bordered.table-hover
+    if (viewConfig.shareGroups)
+      h3 Shared group list for #{type}
+        = ' '
+        span.text-info #{title}
+      //- .well
+      form.form-inline(name='group')
+        input#groupid.input.input-xlarge(type='text', placeholder='LAB.FRIB.DIV.Department.Group', name='group')
+        != ' '
+        label.checkbox
+          input#groupaccess(type='checkbox', name='access', value='write')
+          | Write
+        != ' '
+        button.btn.btn-primary#addgroup(type='submit', disabled) Add to share
+      .btn-toolbar
+        .btn-group
+          button.btn.btn-info#groupshare-modify
+            i.fa.fa-wrench.fa-lg
+            | &nbsp;Modify
+        .btn-group
+          button.btn.btn-warning#groupshare-remove
+            i.fa.fa-trash-o.fa-lg
+            | &nbsp;Remove
 
-    table#groupshare-table.table.table-bordered.table-hover
+      table#groupshare-table.table.table-bordered.table-hover
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
