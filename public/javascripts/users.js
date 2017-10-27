@@ -130,9 +130,7 @@ $(function () {
         data: JSON.stringify({
           name: name,
           manager: $('#manager').prop('checked'),
-          admin: $('#admin').prop('checked'),
-          read_all_forms: $('#read_all_forms').prop('checked'),
-          write_active_travelers: $('#write_active_travelers').prop('checked')
+          admin: $('#admin').prop('checked')
         }),
         success: function (data, status, jqXHR) {
           $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
