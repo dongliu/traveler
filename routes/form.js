@@ -154,7 +154,7 @@ module.exports = function (app) {
   });
 
   app.get('/publicforms/', auth.ensureAuthenticated, function (req, res) {
-    res.render('public-forms');
+    res.render('public-forms', routesUtilities.getRenderObject(req));
   });
 
   app.get('/publicforms/json', auth.ensureAuthenticated, function (req, res) {
@@ -260,12 +260,12 @@ module.exports = function (app) {
 
   app.get('/forms/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), function (req, res) {
     var form = req[req.params.id];
-    return res.render('share', {
+    return res.render('share', routesUtilities.getRenderObject(req, {
       type: 'form',
       id: req.params.id,
       title: form.title,
       access: String(form.publicAccess)
-    });
+    }));
   });
 
   app.put('/forms/:id/share/public', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['access']), function (req, res) {
