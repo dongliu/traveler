@@ -234,7 +234,7 @@ module.exports = function (app) {
   });
 
   app.get('/publictravelers/', auth.ensureAuthenticated, function (req, res) {
-    res.render('public-travelers');
+    res.render('public-travelers', routesUtilities.getRenderObject(req));
   });
 
   app.get('/publictravelers/json', auth.ensureAuthenticated, function (req, res) {
@@ -418,9 +418,9 @@ module.exports = function (app) {
   });
 
   app.get('/travelers/:id/formmanager', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), function formviewer(req, res) {
-    res.render('form-manager', {
+    res.render('form-manager', routesUtilities.getRenderObject(req, {
       traveler: req[req.params.id]
-    });
+    }));
   });
 
   // use the form in the request as the active form
@@ -790,12 +790,12 @@ module.exports = function (app) {
 
   app.get('/travelers/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), function (req, res) {
     var traveler = req[req.params.id];
-    return res.render('share', {
+    return res.render('share', routesUtilities.getRenderObject(req, {
       type: 'Traveler',
       id: req.params.id,
       title: traveler.title,
       access: String(traveler.publicAccess)
-    });
+    }));
   });
 
   app.put('/travelers/:id/share/public', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.filter('body', ['access']), function (req, res) {
