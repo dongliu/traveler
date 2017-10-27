@@ -75,7 +75,7 @@ function personNameColumn(title, key) {
     mData: key,
     sDefaultContent: '',
     mRender: function (data, type, full) {
-      return '<a href = "/usernames/' + data + '" target="_blank">' + data + '</a>';
+      return '<a href = "/usernames/' + data + '" target="" + linkTarget>' + data + '</a>';
     },
     bFilter: true
   };
@@ -293,7 +293,7 @@ var referenceFormLinkColumn = {
   sTitle: 'Reference',
   mData: 'reference',
   mRender: function (data) {
-    return '<a href="' + prefix + '/forms/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
+    return '<a href="' + prefix + '/forms/' + data + '/" target="" + linkTarget data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -302,7 +302,7 @@ var formColumn = {
   sTitle: 'Link',
   mData: '_id',
   mRender: function (data) {
-    return '<a href="' + prefix + '/forms/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
+    return '<a href="' + prefix + '/forms/' + data + '/" target="" + linkTarget data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -335,18 +335,40 @@ var formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function (data) {
-    return '<a href="' + prefix + '/forms/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
+    return '<a href="' + prefix + '/forms/' + data + '/" target="' + linkTarget + '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>';
   },
   bSortable: false
+};
+
+function cloneForm(id) {
+    $.ajax({
+        url: '/forms/' + id + '/clone',
+        type: 'POST'
+    }).done(function (d) {
+        $('#message').append('<div class="alert alert-success">' +
+            '<button class="close" data-dismiss="alert">x</button>The form was cloned. ' + d + '</div>');
+    }).fail(function (jqXHR) {
+        $('#message').append('<div class="alert alert-error">' +
+            '<button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText +'.</div>');
+    });
+}
+
+var formCloneColumn = {
+    sTitle: 'Clone',
+    mData: '_id',
+    mRender: function (data) {
+        return '<a href="#" onclick="cloneForm(\'' + data + '\');" data-toggle="tooltip" title="clone the form"><i class="fa fa-copy fa-lg"></i></a>'
+    },
+    bSortable: false
 };
 
 var formShareLinkColumn = {
   sTitle: '',
   mData: function (source) {
     if (source.publicAccess >= 0) {
-      return '<a href="' + prefix + '/forms/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+      return '<a href="' + prefix + '/forms/' + source._id + '/share/" target="' + linkTarget + '" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
     }
-    return '<a href="' + prefix + '/forms/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/forms/' + source._id + '/share/" target="' + linkTarget + '" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -361,7 +383,7 @@ var ownerColumn = {
     if (type === 'sort' || type === 'filter') {
       return owner;
     } else if (owner) {
-      return '<a target="_blank" href="/users/' + owner + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + owner.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + owner + '/photo" title="' + owner + '"></a>';
+      return '<a target="' + linkTarget + '" href="/users/' + owner + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + owner.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + owner + '/photo" title="' + owner + '"></a>';
     } else {
       return '';
     }
@@ -434,9 +456,9 @@ var travelerShareLinkColumn = {
   sTitle: '',
   mData: function (source) {
     if (source.publicAccess >= 0) {
-      return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+      return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="' + linkTarget + '" data-toggle="tooltip" title="share the traveler" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
     }
-    return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/travelers/' + source._id + '/share/" target="' + linkTarget + '" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -445,10 +467,10 @@ var binderLinkColumn = {
   sTitle: '',
   mData: function (source, type, val) {
     if (source.hasOwnProperty('url')) {
-      return '<a href="' + source.url + '" target="_blank" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>';
+      return '<a href="' + source.url + '" target="' + linkTarget + '" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>';
     }
     if (source.hasOwnProperty('_id')) {
-      return '<a href="' + prefix + '/binders/' + source._id + '/" target="_blank" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>';
+      return '<a href="' + prefix + '/binders/' + source._id + '/" target="' + linkTarget + '" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>';
     }
     return 'unknown';
   },
@@ -459,7 +481,7 @@ var binderConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function (data, type, full) {
-    return '<a href="' + prefix + '/binders/' + data + '/config" target="_blank" data-toggle="tooltip" title="config the binder"><i class="fa fa-gear fa-lg"></i></a>';
+    return '<a href="' + prefix + '/binders/' + data + '/config" target="' + linkTarget + '" data-toggle="tooltip" title="config the binder"><i class="fa fa-gear fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -468,9 +490,9 @@ var binderShareLinkColumn = {
   sTitle: '',
   mData: function (source) {
     if (source.publicAccess >= 0) {
-      return '<a href="' + prefix + '/binders/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the binder" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
+      return '<a href="' + prefix + '/binders/' + source._id + '/share/" target="' + linkTarget + '" data-toggle="tooltip" title="share the binder" class="text-success"><i class="fa fa-users fa-lg"></i></a>';
     }
-    return '<a href="' + prefix + '/binders/' + source._id + '/share/" target="_blank" data-toggle="tooltip" title="share the binder"><i class="fa fa-users fa-lg"></i></a>';
+    return '<a href="' + prefix + '/binders/' + source._id + '/share/" target="' + linkTarget + '" data-toggle="tooltip" title="share the binder"><i class="fa fa-users fa-lg"></i></a>';
   },
   bSortable: false
 };
@@ -643,7 +665,7 @@ function usersColumn(title, prop) {
           if (type === 'filter' || type === 'sort') {
             return u.username;
           } else {
-            return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
+            return '<a target="' + linkTarget + '" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
           }
         });
         if (type === 'filter' || type === 'sort') {
@@ -673,7 +695,7 @@ function usersFilteredColumn(title, filter) {
         if (type === 'filter' || type === 'sort') {
           return u.username;
         } else {
-          return '<a target="_blank" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
+          return '<a target="' + linkTarget + '" href="/users/' + u._id + '"><img class="user" data-src="holder.js/27x40?size=20&text=' + u._id.substr(0, 1).toUpperCase() + '" src="' + prefix + '/adusers/' + u._id + '/photo" title="' + u.username + '"></a>';
         }
       });
       if (type === 'filter' || type === 'sort') {
