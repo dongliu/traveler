@@ -6,7 +6,7 @@ $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
-  var publicFormsAoColumns = [formLinkColumn, titleColumn, createdByColumn, createdOnColumn, ownerColumn, sharedWithColumn, sharedGroupColumn];
+  var publicFormsAoColumns = [formLinkColumn, formCloneColumn, titleColumn, createdByColumn, createdOnColumn, ownerColumn, sharedWithColumn, sharedGroupColumn];
   fnAddFilterFoot('#public-forms-table', publicFormsAoColumns);
   $('#public-forms-table').dataTable({
     sAjaxSource: '/publicforms/json',
