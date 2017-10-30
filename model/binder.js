@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var appConfig = require('../config/config').app;
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
@@ -93,7 +94,7 @@ var binder = new Schema({
   deadline: Date,
   publicAccess: {
     type: Number,
-    default: 0
+    default: appConfig.default_binder_public_access
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],

@@ -1,6 +1,7 @@
 /*jslint es5: true*/
 
 var mongoose = require('mongoose');
+var appConfig = require('../config/config').app;
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
@@ -64,7 +65,7 @@ var traveler = new Schema({
   deadline: Date,
   publicAccess: {
     type: Number,
-    default: 0
+    default: appConfig.default_traveler_public_access
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
