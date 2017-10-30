@@ -94,12 +94,12 @@ module.exports = function (app) {
 
   app.get('/binders/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), function (req, res) {
     var binder = req[req.params.id];
-    return res.render('share', {
+    return res.render('share', routesUtilities.getRenderObject(req, {
       type: 'Binder',
       id: req.params.id,
       title: binder.title,
       access: String(binder.publicAccess)
-    });
+    }));
   });
 
   app.put('/binders/:id/share/public', auth.ensureAuthenticated, reqUtils.filter('body', ['access']), reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), function (req, res) {
