@@ -1,6 +1,7 @@
 /*jslint es5: true*/
 
 var mongoose = require('mongoose');
+var appConfig = require('../config/config').app;
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
@@ -39,7 +40,7 @@ var form = new Schema({
   },
   publicAccess: {
     type: Number,
-    default: -1
+    default: appConfig.default_form_public_access
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
