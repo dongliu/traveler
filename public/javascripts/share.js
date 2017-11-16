@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false, prefix: false, Bloodhound: false*/
-/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupNameColumn: false, accessColumn: false, sDom: false, oTableTools: false, fnGetSelected: false, selectEvent: false, filterEvent: false*/
+/*global prefix: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, access: false, travelerGlobal: false*/
+/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupNameColumn: false, accessColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false*/
 
 
 var path = window.location.pathname;
@@ -15,7 +15,7 @@ function initTable(list, oTable) {
     oTable.fnClearTable();
     oTable.fnAddData(json);
     oTable.fnDraw();
-  }).fail(function (jqXHR, status, error) {
+  }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for sharing information.</div>');
     }
@@ -24,27 +24,31 @@ function initTable(list, oTable) {
 
 
 function removeFromModal(list, cb) {
-  $('#remove').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
-    var that = this;
-    $.ajax({
-      url: path + list + '/' + that.id,
-      type: 'DELETE'
-    }).done(function () {
-      $(that).wrap('<del></del>');
-      $(that).addClass('text-success');
-    }).fail(function (jqXHR, status, error) {
-      $(that).append(' : ' + jqXHR.responseText);
-      $(that).addClass('text-error');
-    }).always(function () {
-      number = number - 1;
-      if (number === 0) {
-        if (cb) {
-          cb();
-        }
+  var ids = [];
+  $('#modal .modal-body .target').each(function () {
+    ids.push(this.id);
+  });
+  $.ajax({
+    url: path + list + '/' + ids.join(),
+    type: 'DELETE',
+    dataType: 'json'
+  }).done(function (json) {
+    json.forEach(function (id) {
+      var item;
+      if (list === 'users') {
+        item = $('#' + id);
+      } else if (list === 'groups') {
+        item = $('[title="' + encodeURIComponent(id) + '"]');
+      } else {
+        return;
       }
+      item.wrap('<del></del>');
+      item.addClass('text-success');
     });
+  }).fail(function (jqXHR) {
+    $('.modal-body').append('Error : ' + jqXHR.responseText);
+  }).always(function () {
+    cb();
   });
 }
 
@@ -56,10 +60,10 @@ function remove(list, oTable) {
     selected.forEach(function (row) {
       var data = oTable.fnGetData(row);
       if (list === 'users') {
-        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.username + '</div>');
+        $('#modal .modal-body').append('<div class="target" id="' + data._id + '">' + data.username + '</div>');
       }
       if (list === 'groups') {
-        $('#modal .modal-body').append('<div id="' + data._id + '"">' + data.groupname + '</div>');
+        $('#modal .modal-body').append('<div class="target" id="' + encodeURIComponent(data._id) + '" title="' + encodeURIComponent(data._id) + '">' + data.groupname + '</div>');
       }
     });
     $('#modal .modal-footer').html('<button id="remove" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
@@ -80,9 +84,8 @@ function remove(list, oTable) {
 }
 
 function modifyFromModal(list, cb) {
-  $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
-  $('#modal .modal-body div').each(function (index) {
+  $('#modal .modal-body div').each(function () {
     var that = this;
     $.ajax({
       url: path + list + '/' + that.id,
@@ -93,9 +96,9 @@ function modifyFromModal(list, cb) {
         access: $('#modal-access').prop('checked') ? 'write' : 'read'
       })
     }).done(function () {
-      $(that).prepend('<i class="icon-check"></i>');
+      $(that).prepend('<i class="fa fa-check"></i>');
       $(that).addClass('text-success');
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       $(that).append(' : ' + jqXHR.responseText);
       $(that).addClass('text-error');
     }).always(function () {
@@ -122,7 +125,7 @@ function modify(list, oTable) {
       }
 
       if (list === 'groups') {
-        $('#modal .modal-body').append('<div id="' + data._id + '">' + data.groupname + '</div>');
+        $('#modal .modal-body').append('<div id="' + encodeURIComponent(data._id) + '">' + data.groupname + '</div>');
       }
     });
     $('#modal .modal-footer').html('<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
@@ -163,26 +166,30 @@ function inArray(name, ao) {
 
 
 function addto(data, table, list) {
-  if (inArray(data.name || data.id, table.fnGetData())) {
-    //show message
-    $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button><strong>' + name + '</strong> is already in the ' + list + ' share list. </div>');
-  } else {
-    $.ajax({
-      url: path + list + '/',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify(data),
-      processData: false,
-      success: function (res, status, jqXHR) {
-        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
-        initTable(list, table);
-      },
-      error: function (jqXHR, status, error) {
-        if (jqXHR.status !== 401) {
-          $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ' + list + ' share list : ' + jqXHR.responseText + '</div>');
+  if (!!data.name || !!data.id) {
+    if (inArray(data.name || data.id, table.fnGetData())) {
+      //show message
+      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button><strong>' + name + '</strong> is already in the ' + list + ' share list. </div>');
+    } else {
+      $.ajax({
+        url: path + list + '/',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        processData: false,
+        success: function (res, status, jqXHR) {
+          $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
+          initTable(list, table);
+        },
+        error: function (jqXHR) {
+          if (jqXHR.status !== 401) {
+            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ' + list + ' share list : ' + jqXHR.responseText + '</div>');
+          }
         }
-      }
-    });
+      });
+    }
+  } else {
+    $('#message').append('<div class="alert"><button class="close" data-dismiss="alert">x</button>' + list + ' name is empty. </div>');
   }
 }
 
@@ -190,9 +197,52 @@ function addto(data, table, list) {
 $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
+  disableAjaxCache();
+
+  if (typeof access !== 'undefined') {
+    $('select[name="public"]').val(access);
+  }
+  var initAccess = $('select[name="public"]').val();
+
+  $('select[name="public"]').click(function () {
+    if ($('select[name="public"]').val() !== initAccess) {
+      $('#update').attr('disabled', false);
+    } else {
+      $('#update').attr('disabled', true);
+    }
+  });
+
+
+  $('#update').click(function (e) {
+    e.preventDefault();
+    var value = $('select[name="public"]').val();
+    if (initAccess === value) {
+      $('#message').append('<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The setting is not changed.</div>');
+    } else {
+      $.ajax({
+        url: path + 'public',
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          access: value
+        }),
+        processData: false,
+        success: function (res, status, jqXHR) {
+          $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
+          initAccess = value;
+          $('#update').attr('disabled', true);
+        },
+        error: function (jqXHR) {
+          if (jqXHR.status !== 401) {
+            $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the public access setting : ' + jqXHR.responseText + '</div>');
+          }
+        }
+      });
+    }
+  });
+
 
   travelerGlobal.usernames.initialize();
-
   $('#username').typeahead({
     minLength: 1,
     highlight: true,
@@ -203,6 +253,11 @@ $(function () {
     limit: 20,
     source: travelerGlobal.usernames
   });
+
+  $('#username').on('typeahead:select', function () {
+    $('#add').attr('disabled', false);
+  });
+
 
   travelerGlobal.groupids.initialize();
 
@@ -215,6 +270,10 @@ $(function () {
     displayKey: 'sAMAccountName',
     limit: 20,
     source: travelerGlobal.groupids
+  });
+
+  $('#groupid').on('typeahead:select', function () {
+    $('#addgroup').attr('disabled', false);
   });
 
   var shareAoColumns = [selectColumn, useridColumn, userNameNoLinkColumn, accessColumn];
@@ -248,7 +307,8 @@ $(function () {
     data.name = $('#username').val();
     data.access = $('#access').prop('checked') ? 'write' : 'read';
     addto(data, shareTable, 'users');
-    document.forms[0].reset();
+    // document.forms[0].reset();
+    $('form[name="user"]')[0].reset();
   });
 
   $('#addgroup').click(function (e) {
@@ -257,22 +317,23 @@ $(function () {
     data.id = $('#groupid').val().toLowerCase();
     data.access = $('#groupaccess').prop('checked') ? 'write' : 'read';
     addto(data, groupShareTable, 'groups');
-    document.forms[1].reset();
+    // document.forms[1].reset();
+    $('form[name="group"]')[0].reset();
   });
 
-  $('#share-remove').click(function (e) {
+  $('#share-remove').click(function () {
     remove('users', shareTable);
   });
 
-  $('#groupshare-remove').click(function (e) {
+  $('#groupshare-remove').click(function () {
     remove('groups', groupShareTable);
   });
 
-  $('#share-modify').click(function (e) {
+  $('#share-modify').click(function () {
     modify('users', shareTable);
   });
 
-  $('#groupshare-modify').click(function (e) {
+  $('#groupshare-modify').click(function () {
     modify('groups', groupShareTable);
   });
 
