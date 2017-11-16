@@ -53,7 +53,7 @@ function addTravelers(travelers, binders) {
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
-        travelers: travelers
+        travelerIds: travelers
       })
     }).always(function () {
       number -= 1;

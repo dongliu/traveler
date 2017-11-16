@@ -196,6 +196,7 @@ api.configure(function () {
   api.use(express.logger('dev'));
 
   // api.use(express.logger({stream: access_logfile}));
+  api.use(express.json());
   api.use(express.urlencoded());
   api.use(auth.basicAuth);
   api.use(express.compress());
