@@ -4,16 +4,20 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
   body
-    script.
+    script(type='text/javascript').
       var terminology = !{JSON.stringify(viewConfig.terminology)};
-    .navbar.navbar-inverse.navbar-fixed-top
+      var shareUsers = !{viewConfig.shareUsers};
+      var shareGroups = !{viewConfig.shareGroups};
+      var linkTarget = '!{viewConfig.linkTarget}';
+      var showCCDB = !{viewConfig.showCCDB};
+
+    .navbar.navbar-fixed-top
       .navbar-inner
         .container-fluid
           button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
             span.icon-bar
             span.icon-bar
             span.icon-bar
-          a.brand(href='http://www.frib.msu.edu/', target='_blank') FRIB
           .nav-collapse.collapse
             ul.nav
               li.active
@@ -26,7 +30,34 @@ html
                   li
                     a(href=url.url, target='_blank') #{url.text}
               li
-                a(href='#{prefix}/logout') Logout
+                a(href='#{prefix}/forms/') Forms
+              li
+                a(href='#{prefix}/travelers/') Travelers
+              li
+                a(href='#{prefix}/binders/') Binders
+              li
+                a(href='#{prefix}/docs/', target='#{viewConfig.linkTarget}') Documents
+              if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
+                li
+                  a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
+            ul.nav.pull-right
+              if (locals.session && locals.session.userid)
+                li
+                  .user
+                    img(src='#{prefix}/adusers/#{session.userid}/photo', title='#{session.username}')
+                li.dropdown
+                  a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
+                    b.caret
+                  ul.dropdown-menu
+                    li
+                      a(href='#{prefix}/profile', target='#{viewConfig.linkTarget}') Profile
+                    li
+                      a(href='#{prefix}/logout') Log out
+              else
+                li
+                  i.fa.fa-user.fa-3x
+                li
+                  a(href='#{prefix}/login') Log in
     block content
     .container-fluid
       h6.text-right

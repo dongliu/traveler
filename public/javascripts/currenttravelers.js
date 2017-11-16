@@ -109,15 +109,15 @@ $(function () {
   }
 
   ajax401();
-  var currentTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var currentTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
   fnAddFilterFoot('#current-traveler-table', currentTravelerAoColumns);
   var currentTravelerTable = $('#current-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: currentTravelerAoColumns,
     aaSorting: [
-      [6, 'desc'],
-      [8, 'desc']
+      [7, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDom,
     oTableTools: oTableTools

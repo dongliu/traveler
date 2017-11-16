@@ -1,7 +1,8 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, Binder: false, Modernizr: false*/
-/*global travelerStatus: true, finishedInput: true, ajax401: false*/
+/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix*/
 
+/*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 function livespan(stamp, live) {
   if (live) {
     return '<span data-livestamp="' + stamp + '"></span>';
@@ -11,7 +12,8 @@ function livespan(stamp, live) {
 }
 
 function history(found) {
-  var i, output = '';
+  var i;
+  var output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
@@ -21,20 +23,21 @@ function history(found) {
 }
 
 function fileHistory(found) {
-  var i,
-    output = '',
-    link;
+  var i;
+  var output = '';
+  var link;
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
-      output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
+      output = output + '<strong><a href=' + link + ' target="' + linkTarget + '">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
     }
   }
   return output;
 }
 
 function notes(found) {
-  var i, output = '<dl>';
+  var i;
+  var output = '<dl>';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       output = output + '<dt><b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
@@ -67,14 +70,14 @@ function setStatus(s) {
     data: JSON.stringify({
       status: s
     })
-  }).done(function (data, status, jqXHR) {
+  }).done(function () {
     document.location.href = window.location.pathname;
-  }).fail(function (jqXHR, status, error) {
+  }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
     }
-  }).always();
+  });
 }
 
 function createSideNav() {
@@ -92,6 +95,8 @@ function createSideNav() {
 }
 
 function updateFinished(num) {
+  finishedInput = num;
+  $('#finished-input').text(num);
   $.ajax({
     url: './finishedinput',
     type: 'PUT',
@@ -99,7 +104,7 @@ function updateFinished(num) {
     data: JSON.stringify({
       finishedInput: num
     })
-  }).done(function (data, status, jqXHR) {}).fail(function (jqXHR, status, error) {
+  }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update finished input number</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -108,13 +113,13 @@ function updateFinished(num) {
 }
 
 function validation_message(form) {
-  var i = 0,
-    output = $('<div>'),
-    p,
-    value,
-    input,
-    label,
-    span;
+  var i = 0;
+  var output = $('<div>');
+  var p;
+  var value;
+  var input;
+  var label;
+  var span;
   for (i = 0; i < form.elements.length; i += 1) {
     input = form.elements[i];
     p = $('<p>');
@@ -128,12 +133,10 @@ function validation_message(form) {
     }
     if (input.type === 'checkbox') {
       value = input.checked ? 'checked' : 'not checked';
+    } else if (input.value === '') {
+      value = 'no input from user';
     } else {
-      if (input.value === '') {
-        value = 'no input from user';
-      } else {
-        value = input.value;
-      }
+      value = input.value;
     }
     label = $(input).closest('.control-group').children('.control-label').text();
     if (label === '' && input.type === 'checkbox') {
@@ -161,10 +164,10 @@ $(function () {
   cleanForm();
 
   // update every 30 seconds
-  $.livestamp.interval(30 * 1000);
+  // $.livestamp.interval(30 * 1000);
 
   // update img
-  $('#form').find('img').each(function (index) {
+  $('#form').find('img').each(function () {
     var $this = $(this);
     if ($this.attr('name')) {
       if ($this.attr('src') === undefined) {
@@ -199,7 +202,7 @@ $(function () {
       url: './notes/',
       type: 'GET',
       dataType: 'json'
-    }).done(function (data, status, jqXHR) {
+    }).done(function (data) {
       $('#form input,textarea').each(function (index, element) {
         var found = data.filter(function (e) {
           return e.name === element.name;
@@ -216,7 +219,7 @@ $(function () {
         }
       });
 
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -231,7 +234,7 @@ $(function () {
     $('#modal .modal-body').html('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Note: </label><div class="controls"><textarea name="note-content" rows=5></textarea><input type="hidden" name="inputname" value="' + $(this).closest('.controls').find('input, textarea').prop('name') + '"></div></div></form>');
     $('#modal .modal-footer').html('<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
     $('#modal').modal('show');
-    $('#modal button[value="submit"]').click(function (e) {
+    $('#modal button[value="submit"]').click(function () {
       var name = $('#modal input[name="inputname"]').val();
       var value = $('#modal textarea[name="note-content"]').val();
       e.preventDefault();
@@ -256,14 +259,14 @@ $(function () {
           $that.closest('.controls').append('<div class="input-notes"><dl><dt><b>You noted ' + livespan(timestamp) + '</b>: </dt><dd>' + value + '</dd></dl></div>');
         }
 
-        $.livestamp.resume();
+        // $.livestamp.resume();
 
-      }).fail(function (jqXHR, status, error) {
+      }).fail(function (jqXHR) {
         if (jqXHR.status !== 401) {
           $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' + jqXHR.responseText + '</div>');
           $(window).scrollTop($('#message div:last-child').offset().top - 40);
         }
-      }).always(function () {});
+      });
     });
   });
 
@@ -283,7 +286,7 @@ $(function () {
     url: './data/',
     type: 'GET',
     dataType: 'json'
-  }).done(function (data, status, jqXHR) {
+  }).done(function (data) {
     $('#form input,textarea').each(function (index, element) {
       var found = data.filter(function (e) {
         return e.name === element.name;
@@ -313,14 +316,13 @@ $(function () {
 
     // update finished input number
     if (realFinishedInput !== finishedInput) {
-      finishedInput = realFinishedInput;
-      updateFinished(finishedInput);
+      updateFinished(realFinishedInput);
     }
 
     // load the notes here
     renderNotes();
 
-  }).fail(function (jqXHR, status, error) {
+  }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -347,7 +349,7 @@ $(function () {
     }
   });
 
-  $('#form input:not([type="file"], [type="checkbox"]),textarea').on('input', function (e) {
+  $('#form input:not([type="file"], [type="checkbox"]),textarea').on('input', function () {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
     $('#form input,textarea').not($this).attr('disabled', true);
@@ -357,7 +359,7 @@ $(function () {
     }
   });
 
-  $('#form input:not([type="file"])').change(function (e) {
+  $('#form input:not([type="file"])').change(function () {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
     $('#form input,textarea').not($this).attr('disabled', true);
@@ -387,18 +389,20 @@ $(function () {
       var timestamp = jqXHR.getResponseHeader('Date');
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved ' + livespan(timestamp) + '</div>');
       var $history = $this.closest('.control-group-wrap').find('.input-history');
-      if ($history.length) {
+      if ($history.length > 0) {
         $history = $($history[0]);
       } else {
         // add an input-history div
-        finishedInput += 1;
-        updateFinished(finishedInput);
+        realFinishedInput += 1;
+        if (finishedInput !== realFinishedInput) {
+          updateFinished(realFinishedInput);
+        }
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
       $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by you ' + livespan(timestamp) + '; ' + $history.html());
-      $.livestamp.resume();
+      // $.livestamp.resume();
       $this.closest('.control-group-buttons').remove();
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the value: ' + jqXHR.responseText + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -482,19 +486,24 @@ $(function () {
       contentType: false, // important for jqXHR
       data: data,
       dataType: 'json'
-    }).done(function (data, status, jqXHR) {
+    }).done(function (json, status, jqXHR) {
       var timestamp = jqXHR.getResponseHeader('Date');
       $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' + livespan(timestamp) + '</div>');
       var $history = $this.closest('.control-group-wrap').find('.input-history');
-      if ($history.length) {
+      if ($history.length > 0) {
         $history = $($history[0]);
       } else {
+        // add an input-history div
+        realFinishedInput += 1;
+        if (finishedInput !== realFinishedInput) {
+          updateFinished(realFinishedInput);
+        }
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
-      $history.html('<strong><a href=' + data.location + ' target="_blank">' + input.files[0].name + '</a></strong> uploaded by you ' + livespan(timestamp) + '; ' + $history.html());
-      $.livestamp.resume();
+      $history.html('<strong><a href=' + json.location + ' target="' + linkTarget + '">' + input.files[0].name + '</a></strong> uploaded by you ' + livespan(timestamp) + '; ' + $history.html());
+      // $.livestamp.resume();
       $this.closest('.control-group-buttons').remove();
-    }).fail(function (jqXHR, status, error) {
+    }).fail(function (jqXHR) {
       if (jqXHR.status !== 401) {
         $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' + (jqXHR.responseText || 'unknown') + '</div>');
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -514,15 +523,40 @@ $(function () {
     $(this).closest('.control-group-buttons').remove();
   });
 
-  $('#show-notes').click(function (e) {
+  $('#work').click(function (e) {
+    e.preventDefault();
+    setStatus(1);
+  });
+
+  $('#freeze').click(function (e) {
+    e.preventDefault();
+    setStatus(3);
+  });
+
+  $('#resume').click(function (e) {
+    e.preventDefault();
+    setStatus(1);
+  });
+
+  $('#approve').click(function (e) {
+    e.preventDefault();
+    setStatus(2);
+  });
+
+  $('#more').click(function (e) {
+    e.preventDefault();
+    setStatus(1);
+  });
+
+  $('#show-notes').click(function () {
     $('.input-notes').show();
   });
 
-  $('#hide-notes').click(function (e) {
+  $('#hide-notes').click(function () {
     $('.input-notes').hide();
   });
 
-  $('#show-validation').click(function (e) {
+  $('#show-validation').click(function () {
     if ($('.control-group-buttons').length) {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('Please finish the input before validating the form.');
@@ -535,9 +569,15 @@ $(function () {
     $('#validation').show();
   });
 
-  $('#hide-validation').click(function (e) {
+  $('#hide-validation').click(function () {
     $('#validation').hide();
     $('.validation').hide();
+  });
+
+  $('#update-progress').click(function () {
+    if (realFinishedInput !== finishedInput) {
+      updateFinished(realFinishedInput);
+    }
   });
 
 });

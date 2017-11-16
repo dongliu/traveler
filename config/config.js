@@ -58,12 +58,6 @@ module.exports.load = function () {
     module.exports.configPath = getPath('../etc/traveler-config', 'config');
   }
 
-  if (process.env.TRAVELER_UPLOAD_REL_PATH) {
-    module.exports.uploadPath = process.env.TRAVELER_UPLOAD_REL_PATH;
-  } else {
-    module.exports.uploadPath = getPath('../data/traveler-uploads', 'uploads');
-  }
-
   // Load configuration files
   var configPath = this.configPath;
   module.exports.ad = require('../' + configPath + '/ad.json');
@@ -79,16 +73,33 @@ module.exports.load = function () {
 
   // Load view configuration
   var viewConfig = {};
+  viewConfig.showDevice = false;
+  viewConfig.shareUsers = true;
+  viewConfig.shareGroups = true;
+  viewConfig.transferOwnership = true;
+  viewConfig.linkTarget = '_blank';
+  viewConfig.showCCDB = (this.service.device_application === 'devices');
+
   if (this.service.device !== undefined) {
     viewConfig.showDevice = true;
-  } else {
-    viewConfig.showDevice = false;
+  }
+  if (this.ad.shareUsers !== undefined) {
+    viewConfig.shareUsers = this.ad.shareUsers
+  }
+  if (this.ad.shareGroups !== undefined) {
+    viewConfig.shareGroups = this.ad.shareGroups
+  }
+  if (this.ad.transferOwnership !== undefined) {
+      viewConfig.transferOwnership = this.ad.transferOwnership;
   }
   if (this.app.top_bar_urls) {
     viewConfig.topBarUrls = this.app.top_bar_urls;
   }
   if (this.app.deployment_name) {
     viewConfig.deploymentName = this.app.deployment_name;
+  }
+  if (this.app.link_target) {
+    viewConfig.linkTarget = this.app.link_target
   }
   if (this.travelerPackageFile.repository && this.travelerPackageFile.repository.release) {
     viewConfig.appVersion = this.travelerPackageFile.repository.release;
