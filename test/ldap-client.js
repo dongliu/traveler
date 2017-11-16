@@ -1,9 +1,9 @@
-/*global describe, it, before, beforeEach, after, afterEach */
+/*global describe, it*/
+/*eslint max-nested-callbacks: [2, 4]*/
 
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
-var assert = require('assert');
-var should = require('should');
+require('should');
 
 describe('ldap-client', function () {
   describe('#search()', function () {
@@ -39,8 +39,8 @@ describe('ldap-client', function () {
         if (err) {
           console.log(err);
         }
-        console.log(result.length);
-        console.log(result);
+        console.log('found ' + result.length + ' LAB.FRIB.* groups');
+        // console.log(result);
         done();
       });
     });

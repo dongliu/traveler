@@ -8,7 +8,7 @@
   "groupSearchBase": "ou=...,dc=...",
   "groupSearchFilter": "(&(objectClass=group)(sAMAccountName=_id))",
   "objAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName"],
-  "memberAttributes": ["displayName", "memberOf"],
+  "memberAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName", "memberOf"],
   "groupAttributes": ["sAMAccountName","displayName","mail"],
   "rawAttributes": ["thumbnailPhoto"],
   "defaultKeys": {
@@ -23,5 +23,8 @@
     "telephoneNumber": "telephoneNumber"
   },
 
-  "ldapsCA": "OPTIONAL CA file for accepting SSL Connections"
+  "ldapsCA": "OPTIONAL CA file for accepting SSL Connections",
+  "shareUsers": true,
+  "shareGroups": true,
+  "transferOwnership": true
 }

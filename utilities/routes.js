@@ -77,6 +77,7 @@ function getRenderObject(req, extraAttributes) {
   var renderObject = {
     prefix: req.proxied ? req.proxied_prefix : '',
     viewConfig: config.viewConfig,
+    roles: req.session.roles,
     helper: {
       upperCaseFirstLetter: function (text) {
         return text.charAt(0).toUpperCase() + text.slice(1);

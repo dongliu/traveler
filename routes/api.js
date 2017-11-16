@@ -64,7 +64,7 @@ function performMongoResponse(err, data, res, successCB){
  * @param contentEntityKeys The keys that will be fetched from the db of the contnet entity
  * @param res Response object
  */
-function performFindEntityReferencedContnetsByParentEntityId(parentEntity, parentEntityId, parentEntityKey, contentEntity, contentEntityKeys, res) {
+function performFindEntityReferencedContentsByParentEntityId(parentEntity, parentEntityId, parentEntityKey, contentEntity, contentEntityKeys, res) {
   parentEntity.findById(parentEntityId, function (parentErr, parentObj) {
     performMongoResponse(parentErr, parentObj, res, function () {
       contentEntity.find({
@@ -116,13 +116,13 @@ module.exports = function (app) {
   app.get('/apis/travelers/:id/data/', function (req, res) {
     var travelerId = req.params.id;
     var travelerDataKeys = 'name value inputType inputBy inputOn';
-    performFindEntityReferencedContnetsByParentEntityId(Traveler, travelerId, 'data', TravelerData, travelerDataKeys, res);
+    performFindEntityReferencedContentsByParentEntityId(Traveler, travelerId, 'data', TravelerData, travelerDataKeys, res);
   });
 
   app.get('/apis/travelers/:id/notes/', function (req, res) {
     var travelerId = req.params.id;
     var noteDataKeys = 'name value inputBy inputOn';
-    performFindEntityReferencedContnetsByParentEntityId(Traveler, travelerId, 'notes', TravelerNote, noteDataKeys, res);
+    performFindEntityReferencedContentsByParentEntityId(Traveler, travelerId, 'notes', TravelerNote, noteDataKeys, res);
   });
 
   app.get('/apis/data/:id/', function (req, res) {

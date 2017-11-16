@@ -17,15 +17,16 @@
     "express": "3.1.0",
     "express-slash": "1.0.0",
     "file-stream-rotator": "0.0.5",
-    "jade": "1.2.0",
+    "jade": "1.10.0",
+    "jstransformer-marked": "1.0.1",
     "ldapjs": "1.0.0",
-    "mongoose": "4.0",
+    "mongoose": "4.4.3",
     "multer": "0.1.0",
     "pause": "0.0.1",
     "request": "2.34.0",
     "sanitize-caja": "0.1.2",
     "templatizer": "0.2.10",
-    "underscore": "1.6.0"
+    "underscore": "1.8.0"
   },
   "devDependencies": {
     "eslint": "^1.9.0",
