@@ -22,7 +22,7 @@ exports['radiogroup'] = function tmpl_radiogroup() {
 };
 
 exports['radio_button_control'] = function radio_button() {
-    return '<div><input type="radio" rv-value="model.radio_text" disabled="disabled" rv-name="model.radio_group_name" rv-required="model.required">{ model.radio_text }</input><br/></div>';
+    return '<div><input type="radio" rv-value="model.radio_text" disabled="disabled" rv-name="model.radio_group_name" rv-required="model.required"> { model.radio_text }</input><br/></div>';
 };
 
 // figure.jade compiled template
