@@ -29,7 +29,20 @@ var TravelerNote = mongoose.model('TravelerNote');
 function createTraveler(form, req, res) {
   // update the total input number and finished input number
   var $ = cheer.load(form.html);
-  var num = $('input, textarea').length;
+  var inputs = $('input, textarea');
+  var num = 0;
+  // Determine accurate number of inputs. Radio buttons consist of many inputs but represent one.
+  var last_input_name = "";
+  for (var i = 0; i < inputs.length; i++) {
+    var input = inputs[i];
+    var input_name = input.attribs['name'];
+    if (last_input_name === input_name) {
+      continue;
+    }
+    last_input_name = input_name;
+    num++;
+  }
+
   var traveler = new Traveler({
     title: form.title,
     description: '',
