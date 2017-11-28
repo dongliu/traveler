@@ -120,7 +120,16 @@ function validation_message(form) {
   var input;
   var label;
   var span;
+  var last_input_name = "";
   for (i = 0; i < form.elements.length; i += 1) {
+    input = form.elements[i];
+
+    var input_name = input.name;
+    if (input_name === last_input_name) {
+        continue;
+    }
+    last_input_name = input_name;
+
     input = form.elements[i];
     p = $('<p>');
     span = $('<span class="validation">');
@@ -133,6 +142,23 @@ function validation_message(form) {
     }
     if (input.type === 'checkbox') {
       value = input.checked ? 'checked' : 'not checked';
+    } else if (input.type === 'radio') {
+        var radio_ittr = i;
+        var ittr_input = input;
+        value = "";
+        while (ittr_input !== undefined && input_name === ittr_input.name) {
+          if (value !== "") {
+            value += " / ";
+          }
+          if (ittr_input.checked) {
+              value = ittr_input.value;
+              break;
+          }
+          value += ittr_input.value;
+
+          radio_ittr++;
+          ittr_input = form.elements[radio_ittr];
+        }
     } else if (input.value === '') {
       value = 'no input from user';
     } else {
@@ -203,19 +229,23 @@ $(function () {
       type: 'GET',
       dataType: 'json'
     }).done(function (data) {
-      $('#form input,textarea').each(function (index, element) {
-        var found = data.filter(function (e) {
-          return e.name === element.name;
-        });
-        $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
-        if (found.length) {
-          found.sort(function (a, b) {
-            if (a.inputOn > b.inputOn) {
-              return -1;
-            }
-            return 1;
+      $('#form .controls').each(function (index, controlsElement) {
+        var inputElements = $(controlsElement).find('input,textarea');
+        if (inputElements.length) {
+          var element = inputElements[0];
+          var found = data.filter(function (e) {
+              return e.name === element.name;
           });
-          $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
+          $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
+          if (found.length) {
+              found.sort(function (a, b) {
+                  if (a.inputOn > b.inputOn) {
+                      return -1;
+                  }
+                  return 1;
+              });
+              $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
+          }
         }
       });
 
@@ -287,24 +317,39 @@ $(function () {
     type: 'GET',
     dataType: 'json'
   }).done(function (data) {
-    $('#form input,textarea').each(function (index, element) {
-      var found = data.filter(function (e) {
-        return e.name === element.name;
-      });
-      if (found.length) {
-        realFinishedInput += 1;
-        found.sort(function (a, b) {
-          if (a.inputOn > b.inputOn) {
-            return -1;
-          }
-          return 1;
+    $('#form .controls').each(function (index, controlsElement) {
+      var inputElements = $(controlsElement).find('input,textarea');
+      if (inputElements.length) {
+        var element = inputElements[0];
+        var found = data.filter(function (e) {
+          return e.name === element.name;
         });
-        if (this.type === 'file') {
-          $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
-        } else {
-          binder.deserializeFieldFromValue(element, found[0].value);
-          binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + history(found) + '</div>');
+        if (found.length) {
+          realFinishedInput += 1;
+          found.sort(function (a, b) {
+              if (a.inputOn > b.inputOn) {
+                  return -1;
+              }
+              return 1;
+          });
+          if (this.type === 'file') {
+              $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
+          } else {
+            var currentValue = found[0].value;
+            if (found[0].inputType === 'radio'){
+              // Update element to match the value
+              for (var i = 0; i < inputElements.size(); i++) {
+                var ittrInput = inputElements[i];
+                if (ittrInput.value === currentValue) {
+                  element = ittrInput;
+                  break;
+                }
+              }
+            }
+            binder.deserializeFieldFromValue(element, currentValue);
+            binder.accessor.set(element.name, currentValue);
+            $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + history(found) + '</div>');
+          }
         }
       }
     });
@@ -374,7 +419,18 @@ $(function () {
     e.preventDefault();
     // ajax to save the current value
     var $this = $(this);
-    var input = $this.closest('.control-group-wrap').find('input,textarea')[0];
+    var inputs = $this.closest('.control-group-wrap').find('input,textarea');
+    var input = inputs[0];
+    if (inputs[0].type === "radio") {
+      for (var i = 0; i< inputs.size(); i++) {
+        var ittr_input = inputs[i];
+        if (ittr_input.checked) {
+          input = ittr_input;
+          break;
+        }
+      }
+    }
+
     binder.serializeField(input);
     $.ajax({
       url: './data/',
