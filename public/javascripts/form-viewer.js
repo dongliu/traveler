@@ -18,8 +18,16 @@ function validation_message(form) {
   var i = 0;
   var output = $('<div>');
   var p, value, input, label, span;
+  var last_input_name = "";
   for (i = 0; i < form.elements.length; i += 1) {
     input = form.elements[i];
+
+    var input_name = input.name;
+    if (input_name === last_input_name) {
+      continue;
+    }
+    last_input_name = input_name;
+
     p = $('<p>');
     span = $('<span class="validation">');
     if (input.checkValidity()) {
@@ -31,6 +39,18 @@ function validation_message(form) {
     }
     if (input.type === 'checkbox') {
       value = input.checked ? 'checked' : 'not checked';
+    } else if (input.type === 'radio') {
+      var radio_ittr = i;
+      var ittr_input = input;
+      while (ittr_input !== undefined && input_name === ittr_input.name) {
+        if (ittr_input.checked) {
+            value = ittr_input.value;
+            break;
+        }
+
+        radio_ittr++;
+        ittr_input = form.elements[radio_ittr];
+      }
     } else {
       if (input.value === '') {
         value = 'no input from user';
