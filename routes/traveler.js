@@ -371,24 +371,29 @@ module.exports = function (app) {
     }
 
     if (reqUtils.canWrite(req, doc)) {
-      return res.render('traveler',  routesUtilities.getRenderObject(req, {
-        isOwner: reqUtils.isOwner(req, doc),
-        traveler: doc,
-        formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html
-      }));
-    }
-
-    if (reqUtils.canRead(req, doc)) {
+      routesUtilities.getDeviceValue(doc.devices).then(function (value) {
+          doc.devices = value;
+          return res.render('traveler',  routesUtilities.getRenderObject(req, {
+              isOwner: reqUtils.isOwner(req, doc),
+              traveler: doc,
+              formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html
+          }));
+      });
+    } else if (reqUtils.canRead(req, doc)) {
       return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
+    } else {
+      return res.send(403, 'You are not authorized to access this resource');
     }
-
-    return res.send(403, 'You are not authorized to access this resource');
   });
 
   app.get('/travelers/:id/view', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), function (req, res) {
-    return res.render('traveler-viewer', routesUtilities.getRenderObject(req, {
-      traveler: req[req.params.id]
-    }));
+    var doc = req[req.params.id];
+    routesUtilities.getDeviceValue(doc.devices).then(function (value) {
+      res.devices = value;
+      return res.render('traveler-viewer', routesUtilities.getRenderObject(req, {
+          traveler: req[req.params.id]
+      }))
+    });
   });
 
 
