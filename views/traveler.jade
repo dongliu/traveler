@@ -53,7 +53,7 @@ block content
               = ' inputs'
 
         if (locals.traveler.devices && traveler.devices.length > 0)
-          h4 Tags: #{traveler.devices}
+          h4 Tags: !{traveler.devices}
         if (locals.traveler.status !== undefined)
           if (locals.isOwner != undefined && locals.isOwner)
             case locals.traveler.status
