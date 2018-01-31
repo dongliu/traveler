@@ -17,6 +17,14 @@ exports["checkbox_text"] = function tmpl_checkbox_text() {
     return '<div class="control-group"><div class="control-label">Text</div><div class="controls"><input type="text" name="checkbox_text"/></div></div>';
 };
 
+exports["generic_text_input"] = function tmpl_generic_text_input(label) {
+    return '<div class="control-group"><div class="control-label">' + label + '</div><div class="controls"><input type="text" name="radio_text"/></div></div>';
+};
+
+exports["add_radio_button"] = function tmpl_add_radio_button() {
+    return '<div class="control-group"><div class="control-label">Add Radio Button</div><div class="controls"><button class="btn btn-primary" value="add-radio-button">+</button></div></div>'
+};
+
 // done.jade compiled template
 exports["done"] = function tmpl_done() {
     return '<div class="control-group"><div class="controls"><button type="submit" class="btn btn-primary">Done</button></div></div>';
