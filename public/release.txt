@@ -1,3 +1,10 @@
+release APS-1.0.0
+date January 31, 2018
+- Merged in the latest revision of traveler with APS branch (new look & binders)
+- Improvements to the latest revision that restore the APS functionality. 
+- General APS usability improvements
+- Users may create radio buttons in templates
+
 release APS-0.2.2
 date October 03, 2016
 - Update CDB utility to support the new revision of CDB. 
