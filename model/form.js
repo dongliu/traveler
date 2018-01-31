@@ -1,34 +1,49 @@
-/*global ObjectId:false*/
+/*jslint es5: true*/
 
 var mongoose = require('mongoose');
+var appConfig = require('../config/config').app;
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
-/******
-access := 0 // for read or
-        | 1 // for write
-******/
-var sharedWithUser = new Schema({
-  _id: String,
-  username: String,
-  access: Number
-});
+var share = require('./share.js');
 
-var sharedWithGroup = new Schema({
-  _id: String,
-  groupname: String,
-  access: Number
-});
+/******
+publicAccess := 0 // for read or
+        | 1 // for write or
+        | -1 // no access
+******/
+/******
+status := 0 // editable
+        | 0.5 // ready to publish
+        | 1 // published
+        | 2 // obsoleted
+******/
+
 
 var form = new Schema({
   title: String,
   createdBy: String,
   createdOn: Date,
+  clonedFrom: ObjectId,
   updatedBy: String,
   updatedOn: Date,
-  clonedFrom: ObjectId,
-  sharedWith: [sharedWithUser],
-  sharedGroup: [sharedWithGroup],
+  owner: String,
+  status: {
+    type: Number,
+    default: 0
+  },
+  transferredOn: Date,
+  archivedOn: Date,
+  archived: {
+    type: Boolean,
+    default: false
+  },
+  publicAccess: {
+    type: Number,
+    default: appConfig.default_form_public_access
+  },
+  sharedWith: [share.user],
+  sharedGroup: [share.group],
   html: String
 });
 
@@ -44,8 +59,6 @@ var formFile = new Schema({
   uploadedBy: String,
   uploadedOn: Date
 });
-
-
 
 var Form = mongoose.model('Form', form);
 var FormFile = mongoose.model('FormFile', formFile);
