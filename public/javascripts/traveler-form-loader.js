@@ -40,7 +40,7 @@ var FormLoader = (function (parent, $) {
     if (found.length > 0) {
       for (i = 0; i < found.length; i += 1) {
         link = prefix + '/data/' + found[i]._id;
-        output = output + '<strong><a href=' + link + ' target="_blank">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+        output = output + '<strong><a href=' + link + ' target="' +linkTarget + '">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
       }
     }
     return output;

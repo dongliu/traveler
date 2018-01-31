@@ -1,29 +1,21 @@
+/*jslint es5: true*/
+
 var mongoose = require('mongoose');
+var appConfig = require('../config/config').app;
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
-
-/******
-access := 0 // for read or
-        | 1 // for write
-******/
-var sharedWithUser = new Schema({
-  _id: String,
-  username: String,
-  access: Number
-});
-
-var sharedWithGroup = new Schema({
-  _id: String,
-  groupname: String,
-  access: Number
-});
+var share = require('./share.js');
 
 
-// A form can become active, inactive, and reactive
-// The form's activated date and the form's updated data can tell if the form has been updated since it is used by the traveler.
-// activatedOn: the dates when this form starts to be active
-// alias : a name for convenience to distinguish forms.
+/**
+ * A form can become active, inactive, and reactive. The form's activated date
+ *   and the form's updated data can tell if the form has been updated since
+ *   it is used by the traveler.
+ * activatedOn: the dates when this form starts to be active
+ * alias : a name for convenience to distinguish forms.
+ */
+
 var form = new Schema({
   html: String,
   activatedOn: [Date],
@@ -32,47 +24,79 @@ var form = new Schema({
 });
 
 
-/*******
-status := 0 // new
-        | 1 // active
-        | 1.5 // complete request
-        | 2 // completed
-        | 3 // frozen
-*******/
+var user = new Schema({
+  _id: String,
+  username: String
+});
+
+/**
+ * status := 0 // new
+ *         | 1 // active
+ *         | 1.5 // complete request
+ *         | 2 // completed
+ *         | 3 // frozen
+ */
+
+/**
+ * publicAccess := 0 // for read or
+ *               | 1 // for write or
+ *               | -1 // no access
+ */
 
 var traveler = new Schema({
   title: String,
   description: String,
   devices: [String],
-  status: Number,
+  locations: [String],
+  manPower: [user],
+  status: {
+    type: Number,
+    default: 0
+  },
   createdBy: String,
   createdOn: Date,
   clonedBy: String,
   clonedFrom: ObjectId,
   updatedBy: String,
   updatedOn: Date,
+  archivedOn: Date,
+  owner: String,
+  transferredOn: Date,
   deadline: Date,
-  sharedWith: [sharedWithUser],
-  sharedGroup: [sharedWithGroup],
+  publicAccess: {
+    type: Number,
+    default: appConfig.default_traveler_public_access
+  },
+  sharedWith: [share.user],
+  sharedGroup: [share.group],
   referenceForm: ObjectId,
   forms: [form],
   activeForm: String,
   data: [ObjectId],
   notes: [ObjectId],
-  totalInput: Number,
-  finishedInput: Number,
+  totalInput: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  finishedInput: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   archived: {
     type: Boolean,
     default: false
   }
 });
 
-/*******
-type := 'file'
-      | 'text'
-      | 'textarea'
-      | 'number'
-*******/
+
+/**
+ * type := 'file'
+ *       | 'text'
+ *       | 'textarea'
+ *       | 'number'
+ */
 
 var travelerData = new Schema({
   traveler: ObjectId,

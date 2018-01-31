@@ -10,11 +10,7 @@
  * "device_application": "cdb",
  * "cdb" : {
  *  "web_portal_url": "URL to home page of CDB",
- *  "web_service_url": "URL to the CDB web services",
- *  "component_path": "/views/component/view.xhtml?id=REPLACE_ID",
- *  "component_instance_path": "/views/componentInstance/view.xhtml?id=REPLACE_ID",
- *  "design_path": "/views/design/view.xhtml?id=REPLACE_ID",
- *  "design_element_path": "/views/designElement/view?id=REPLACE_ID"
+ *  "web_service_url": "URL to the CDB web services"
  * }
  */
 
@@ -23,6 +19,12 @@ var request = require('request');
 
 var webServiceUrl = config.service.cdb.web_service_url;
 var webPortalUrl = config.service.cdb.web_portal_url;
+
+const PORTAL_PATH_FOR_ITEM = "/views/item/view.xhtml?id=REPLACE_ID";
+const PORTAL_PATH_FOR_ITEM_ELEMENT = "/views/itemElement/view.xhtml?id=REPLACE_ID";
+
+const ITEM_INVENTORY_DOMAIN_NAME = "Inventory";
+const ITEM_CATALOG_DOMAIN_NAME = "Catalog";
 
 /**
  * Performs a request to an external service and calls the call back function when the request is complete/incomplete.
@@ -33,66 +35,38 @@ var webPortalUrl = config.service.cdb.web_portal_url;
 function performServiceRequest(fullUrl, cb) {
   console.log('Performing API Request: ' + fullUrl);
   request({
-    strictSSL: false,
-    url: fullUrl
-  },
-      function (error, response) {
-        if (response !== undefined) {
-          try {
-            response = JSON.parse(response.body);
-          } catch (e) {
-            error = 'Response from server could not be parsed.';
-          }
+      strictSSL: false,
+      url: fullUrl
+    },
+    function (error, response) {
+      if (response !== undefined) {
+        try {
+          response = JSON.parse(response.body);
+        } catch (e) {
+          error = 'Response from server could not be parsed.';
         }
-        if (error !== undefined) {
-          console.error(error);
-        }
-        cb(response, error);
-      });
+      }
+      if (error !== null && error !== undefined) {
+        console.error(error);
+      }
+      cb(response, error);
+    });
 }
 
 /**
- * Generates service url for entity type of component. Performs a request using the url.
+ * Generates service url for entity type of item. Performs a request using the url.
  * @param {int} id - Unique identifier of the entity
- * @param {requestCallback} cb - The function to be executed upon successful/unsuccessful completion of the request.
+ * @param {requestCallback} cb(resonse, error) - The function to be executed upon successful/unsuccessful completion of the request.
  * @returns {void}
  */
-function getComponentById(id, cb) {
-  var fullUrl = webServiceUrl + '/componentById/' + id;
+function getItemById(id, cb) {
+  var fullUrl = webServiceUrl + '/items/' + id;
   performServiceRequest(fullUrl, cb);
 }
 
-/**
- * Generates service url for entity type of component instance. Performs a request using the url.
- * @param {int} id - Unique identifier of the entity
- * @param {requestCallback} cb - The function to be executed upon successful/unsuccessful completion of the request.
- * @returns {void}
- */
-function getComponentInstanceById(id, cb) {
-  var fullUrl = webServiceUrl + '/componentInstanceById/' + id;
-  performServiceRequest(fullUrl, cb);
-}
-
-/**
- * Generates service url for entity type of design. Performs a request using the url.
- * @param {int} id - Unique identifier of the entity
- * @param {requestCallback} cb - The function to be executed upon successful/unsuccessful completion of the request.
- * @returns {void}
- */
-function getDesignById(id, cb) {
-  var fullUrl = webServiceUrl + '/designs/' + id;
-  performServiceRequest(fullUrl, cb);
-}
-
-/**
- * Generates service url for entity type of design element. Performs a request using the url.
- * @param {int} id - Unique identifier of the entity
- * @param {requestCallback} cb - The function to be executed upon successful/unsuccessful completion of the request.
- * @returns {void}
- */
-function getDesignElementById(id, cb) {
-  var fullUrl = webServiceUrl + '/designElements/' + id;
-  performServiceRequest(fullUrl, cb);
+function getItemElementById(id, cb) {
+  var fullUrl = webServiceUrl + "/itemElements/" + id;
+  performServiceRequest(fullUrl, cb)
 }
 
 /**
@@ -145,83 +119,80 @@ function getCDBEntityReference(valueOrig, cb) {
   }
 
   /**
-   * Function processes the response for a component entity type from CDB.
+   * Function processes the response for a item entity type from CDB.
    * @param {Object} data - response data from web service, may include error message.
    * @param {Object} error - An error that occurred on the local application server during the request.
    * @returns {void}
    */
-  function processComponentResponse(data, error) {
+  function processItemResponse(data, error) {
     performErrorChecking(data, error).then(function (displayValue) {
       if (displayValue === undefined) {
-        displayValue = 'Component: ' + data.name;
+        switch (data.domain.name){
+          case ITEM_CATALOG_DOMAIN_NAME:
+            displayValue = "Catalog Item: " + data.name;
+            finishItemResponse(displayValue);
+            break;
+          case ITEM_INVENTORY_DOMAIN_NAME:
+            finishInventoryItemResponse(data);
+            break;
+          default:
+            displayValue = 'Item: ' + data.name;
+        }
+      } else {
+        finishItemResponse(displayValue);
       }
-      constructFinalUrl(config.service.cdb.component_path, displayValue);
     });
   }
 
-  /**
-   * Function processes the response for a component instance entity type from CDB.
-   * @param {Object} data - response data from web service, may include error message.
-   * @param {Object} error - An error that occurred on the local application server during the request.
-   * @returns {void}
-   */
-  function processComponentInstanceResponse(data, error) {
+  function finishInventoryItemResponse(inventoryItem){
+    function addCatalogItemInformation(data, error) {
+      performErrorChecking(data, error).then(function (displayValue) {
+        if (displayValue === undefined) {
+          catalogItem = data;
+          displayValue = catalogItem.name + " [" + inventoryItem.name + "]";
+        } else {
+          displayValue = displayValue + " Inventory Item: " + inventoryItem.name;
+        }
+
+        if (inventoryItem.qr_id) {
+          displayValue += ' (QRID: ' + inventoryItem.qr_id + ')';
+        }
+        finishItemResponse(displayValue);
+      });
+    }
+    catalogItemId = inventoryItem.derived_from_item_id;
+    getItemById(catalogItemId, addCatalogItemInformation);
+  }
+
+  function finishItemResponse(displayValue) {
+    constructFinalUrl(PORTAL_PATH_FOR_ITEM, displayValue);
+  }
+
+  function processItemElementResponse(data, error) {
     performErrorChecking(data, error).then(function (displayValue) {
       if (displayValue === undefined) {
-        displayValue = 'Component Instance: ' + data.component.name;
-        if (data.qrId) {
-          displayValue += ' (QRID: ' + data.qrId + ')';
+        displayValue = "Element";
+        if (data.parentItem) {
+          displayValue += " of " + data.parentItem.name
+        }
+        if (data.name) {
+          displayValue += ": " + data.name;
         }
       }
-      constructFinalUrl(config.service.cdb.component_instance_path, displayValue);
-    });
-  }
 
-  /**
-   * Function processes the response for a design entity type from CDB.
-   * @param {Object} data - response data from web service, may include error message.
-   * @param {Object} error - An error that occurred on the local application server during the request.
-   * @returns {void}
-   */
-  function processDesignResponse(data, error) {
-    performErrorChecking(data, error).then(function (displayValue) {
-      if (displayValue === undefined) {
-        displayValue = 'Design: ' + data.name;
-      }
-      constructFinalUrl(config.service.cdb.design_path, displayValue);
-    });
-  }
-
-  /**
-   * Function processes the response for a design element entity type from CDB.
-   * @param {Object} data - response data from web service, may include error message.
-   * @param {Object} error - An error that occurred on the local application server during the request.
-   * @returns {void}
-   */
-  function processDesignElementResponse(data, error) {
-    performErrorChecking(data, error).then(function (displayValue) {
-      if (displayValue === undefined) {
-        displayValue = 'Design Element: ' + data.name;
-      }
-      constructFinalUrl(config.service.cdb.design_element_path, displayValue);
+      constructFinalUrl(PORTAL_PATH_FOR_ITEM_ELEMENT, displayValue)
     });
   }
 
   switch (entityType) {
-  case 'component':
-    getComponentById(id, processComponentResponse);
-    break;
-  case 'componentInstance':
-    getComponentInstanceById(id, processComponentInstanceResponse);
-    break;
-  case 'design':
-    getDesignById(id, processDesignResponse);
-    break;
-  case 'designElement':
-    getDesignElementById(id, processDesignElementResponse);
-    break;
-  default:
-    cb(valueOrig);
+    case 'item':
+      getItemById(id, processItemResponse);
+      break;
+    case 'itemElement':
+      getItemElementById(id, processItemElementResponse);
+      break;
+    default:
+      cb(valueOrig);
   }
 }
 

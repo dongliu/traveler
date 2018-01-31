@@ -2,13 +2,16 @@
 
 var config = require('./config/config.js');
 config.load();
+
 var express = require('express');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
 var multer = require('multer');
 var path = require('path');
+
 var rotator = require('file-stream-rotator');
+
 var mongoose = require('mongoose');
 
 var configPath = config.configPath;
@@ -20,14 +23,16 @@ var appSettings = config.app;
 mongoose.connection.close();
 // Load MongoDB models
 require('./model/user.js');
-require('./model/user.js');
 require('./model/form.js');
 require('./model/traveler.js');
-require('./model/traveler.js');
-require('./model/traveler.js');
+require('./model/binder.js');
 
 //Connect to mongo database
-var mongoAddress = mongoConfig.server_address + ':' + mongoConfig.server_port + '/' + mongoConfig.traveler_db;
+var mongoAddress = 'mongodb://'
+mongoAddress += (mongoConfig.server_address || 'localhost' )
+mongoAddress += ':' + (mongoConfig.server_port || '27017')
+mongoAddress += '/' + (mongoConfig.traveler_db || 'traveler')
+
 var mongoOptions = {
   db: {
     native_parser: true
@@ -46,6 +51,9 @@ if (mongoConfig.username !== undefined) {
   mongoOptions.user = mongoConfig.username;
   mongoOptions.pass = mongoConfig.password;
 }
+if (mongoConfig.auth) {
+  mongoOptions.auth = config.mongo.auth;
+}
 
 mongoose.connect(mongoAddress, mongoOptions);
 mongoose.connection.on('connected', function () {
@@ -62,11 +70,18 @@ mongoose.connection.on('disconnected', function () {
 
 // LDAP client
 var adClient = require('./lib/ldap-client').client;
+adClient.on('connect', function () {
+  console.log('ldap client connected');
+});
+adClient.on('timeout', function (message) {
+  console.error(message);
+});
+adClient.on('error', function (error) {
+  console.error(error);
+});
 
 // CAS client
 var auth = require('./lib/auth');
-
-var uploadDir = './' + config.uploadPath + '/';
 
 // api and web app
 var api = express();
@@ -76,13 +91,13 @@ var app = express();
 app.enable('strict routing');
 if (app.get('env') === 'production') {
   var access_logfile = rotator.getStream({
-    filename: __dirname + '/logs/access.log',
+    filename: path.resolve(appSettings.log_dir, 'access.log'),
     frequency: 'daily'
   });
 }
 
 app.configure(function () {
-  app.set('port', process.env.PORT || 3001);
+  app.set('port', process.env.PORT || appSettings.app_port);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   if (app.get('env') === 'production') {
@@ -101,21 +116,22 @@ app.configure(function () {
   app.use(express.methodOverride());
   app.use(express.cookieParser());
   app.use(express.session({
-    secret: 'traveler_secret',
+    secret: appSettings.cookie_sec || 'traveler_secret',
     cookie: {
-      maxAge: 28800000
+      maxAge: appSettings.cookie_life || 28800000
     }
   }));
   app.use(multer({
-    dest: uploadDir,
+    dest: (process.env.TRAVELER_UPLOAD_REL_PATH || appSettings.upload_dir),
     limits: {
       files: 1,
-      fileSize: 10 * 1024 * 1024
+      fileSize: (config.app.upload_size || 10) * 1024 * 1024
     }
   }));
   app.use(express.json());
   app.use(express.urlencoded());
   app.use(auth.proxied);
+  app.use(auth.sessionLocals);
   app.use(app.router);
 });
 
@@ -126,11 +142,13 @@ var routes = require('./routes');
 
 require('./routes/form')(app);
 require('./routes/traveler')(app);
+require('./routes/binder')(app);
+require('./routes/admin')(app);
 require('./routes/user')(app);
 require('./routes/profile')(app);
 require('./routes/device')(app);
 require('./routes/ldaplogin')(app);
-require('./routes/about')(app);
+require('./routes/doc')(app);
 
 app.get('/api', function (req, res) {
   res.render('api', {
@@ -178,6 +196,7 @@ api.configure(function () {
   api.use(express.logger('dev'));
 
   // api.use(express.logger({stream: access_logfile}));
+  api.use(express.json());
   api.use(express.urlencoded());
   api.use(auth.basicAuth);
   api.use(express.compress());

@@ -5,6 +5,7 @@ var routesUtilities = require('../utilities/routes.js');
 
 var Form = mongoose.model('Form');
 var Traveler = mongoose.model('Traveler');
+var Binder = mongoose.model('Binder');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
@@ -64,7 +65,7 @@ function performMongoResponse(err, data, res, successCB){
  * @param contentEntityKeys The keys that will be fetched from the db of the contnet entity
  * @param res Response object
  */
-function performFindEntityReferencedContnetsByParentEntityId(parentEntity, parentEntityId, parentEntityKey, contentEntity, contentEntityKeys, res) {
+function performFindEntityReferencedContentsByParentEntityId(parentEntity, parentEntityId, parentEntityKey, contentEntity, contentEntityKeys, res) {
   parentEntity.findById(parentEntityId, function (parentErr, parentObj) {
     performMongoResponse(parentErr, parentObj, res, function () {
       contentEntity.find({
@@ -107,6 +108,39 @@ module.exports = function (app) {
     });
   });
 
+  app.get('/apis/binders/', function (req, res){
+      Binder.find({}, function(err, binders){
+          performMongoResponse(err,binders, res);
+      });
+  });
+
+  app.get('/apis/binders/:id/', function (req, res){
+      Binder.findById(req.params.id, function(err, binder){
+          performMongoResponse(err,binder, res);
+      });
+  });
+
+  app.post('/apis/create/binders/', routesUtilities.filterBody(['binderTitle', 'description', 'userName'], true), checkWritePermissions, function (req, res) {
+      var binderTitle = req.body.binderTitle;
+      var userName = req.body.userName;
+      var description = req.body.description;
+
+      routesUtilities.binder.createBinder(binderTitle, description, userName, function (err, newBinder) {
+          performMongoResponse(err, newBinder, res, function(){
+              return res.json(201, newBinder);
+          });
+      });
+  });
+
+  app.post('/apis/addWork/binders/:id/', routesUtilities.filterBody(['travelerIds', 'userName'], true), checkWritePermissions, function (req, res) {
+      Binder.findById(req.params.id, function(err, binder){
+          performMongoResponse(err,binder, res, function () {
+            userName = req.body.userName;
+            routesUtilities.binder.addWork(binder, userName, req, res);
+          });
+      });
+  });
+
   app.get('/apis/travelers/:id/', function (req, res) {
     Traveler.findById(req.params.id, function(travelerErr, traveler){
       performMongoResponse(travelerErr, traveler, res);
@@ -116,13 +150,13 @@ module.exports = function (app) {
   app.get('/apis/travelers/:id/data/', function (req, res) {
     var travelerId = req.params.id;
     var travelerDataKeys = 'name value inputType inputBy inputOn';
-    performFindEntityReferencedContnetsByParentEntityId(Traveler, travelerId, 'data', TravelerData, travelerDataKeys, res);
+    performFindEntityReferencedContentsByParentEntityId(Traveler, travelerId, 'data', TravelerData, travelerDataKeys, res);
   });
 
   app.get('/apis/travelers/:id/notes/', function (req, res) {
     var travelerId = req.params.id;
     var noteDataKeys = 'name value inputBy inputOn';
-    performFindEntityReferencedContnetsByParentEntityId(Traveler, travelerId, 'notes', TravelerNote, noteDataKeys, res);
+    performFindEntityReferencedContentsByParentEntityId(Traveler, travelerId, 'notes', TravelerNote, noteDataKeys, res);
   });
 
   app.get('/apis/data/:id/', function (req, res) {

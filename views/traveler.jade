@@ -2,17 +2,18 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB Traveler :: traveler :: #{traveler._id}
+  title FRIB - traveler - #{traveler._id}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
-  link(rel='stylesheet', href='#{prefix}/font-awesome-4.0.3/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  script.
+  script(type='text/javascript').
     var travelerStatus = !{JSON.stringify(traveler.status)};
     var finishedInput = !{JSON.stringify(traveler.finishedInput)};
+    var totalInput = !{JSON.stringify(traveler.totalInput)};
     var prefix = '!{prefix}';
   .container
     #message
@@ -42,19 +43,45 @@ block content
               when 0
                 = ' '
                 span initialized
-              default
-                = ' '
+            if (locals.traveler.status > 0)
+              = '; '
+              span
+                em#finished-input #{traveler.finishedInput}
+              = ' inputs finished out of '
+              span
+                em #{traveler.totalInput}
+              = ' inputs'
+
         if (locals.traveler.devices && traveler.devices.length > 0)
-          h4 Devices: !{traveler.devices}
-        if (locals.traveler.status !== undefined && locals.traveler.status == 1)
-          .btn-group
-            button.btn.btn-primary#complete Submit for completion
+          h4 Tags: !{traveler.devices}
+        if (locals.traveler.status !== undefined)
+          if (locals.isOwner != undefined && locals.isOwner)
+            case locals.traveler.status
+              when 0
+                  .btn-group
+                    button.btn.btn-primary#work Start to work
+              when 1
+                .btn-group
+                  button.btn.btn-warning#freeze Freeze
+              when 1.5
+                  .btn-group
+                    button.btn.btn-primary#approve Approve completion
+                  .btn-group
+                    button.btn.btn-warning#more More work
+              when 3
+                  .btn-group
+                    button.btn.btn-primary#resume Resume
+          if (locals.traveler.status === 1)
+            .btn-group
+              button.btn.btn-primary#complete Submit for completion
         if (locals.traveler.status !== undefined && locals.traveler.status > 0)
+          .btn-group
+            button.btn.btn-info#update-progress Update progress
           .btn-group(data-toggle='buttons-radio')
-            button.btn.btn-info#show-validation Show validation
+            button.btn.btn-info#show-validation Show
             button.btn.btn-info#hide-validation.active Hide validation
           .btn-group(data-toggle='buttons-radio')
-            button.btn.btn-info#show-notes Show notes
+            button.btn.btn-info#show-notes Show
             button.btn.btn-info#hide-notes.active Hide notes
         .btn-group
           button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
@@ -96,5 +123,5 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
   script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/proxiedajax.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler.js')
