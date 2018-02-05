@@ -70,6 +70,13 @@ module.exports.load = function () {
   module.exports.ui = require('../' + configPath + '/ui.json');
   module.exports.travelerPackageFile = require('../package.json');
 
+  if (process.env.TRAVELER_UPLOAD_REL_PATH) {
+    module.exports.uploadPath = process.env.TRAVELER_UPLOAD_REL_PATH;
+  } else if (module.exports.app.upload_dir) {
+    module.exports.uploadPath = module.exports.app.upload_dir;
+  } else {
+    module.exports.uploadPath = getPath('../data/traveler-uploads', 'uploads');
+  }
 
   // Load view configuration
   var viewConfig = {};
