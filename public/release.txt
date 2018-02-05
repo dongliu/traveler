@@ -1,3 +1,7 @@
+release APS-1.0.1
+date February 05, 2018
+- Resolve the upload directory issue and the download issue
+
 release APS-1.0.0
 date January 31, 2018
 - Merged in the latest revision of traveler with APS branch (new look & binders)
