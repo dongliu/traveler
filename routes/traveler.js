@@ -797,7 +797,7 @@ module.exports = function (app) {
     if (data.inputType === 'file') {
       fs.exists(data.file.path, function (exists) {
         if (exists) {
-          return res.sendfile(data.file.path);
+          return res.sendfile(path.resolve(data.file.path));
         }
         return res.send(410, 'gone');
       });

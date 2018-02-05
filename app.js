@@ -122,7 +122,7 @@ app.configure(function () {
     }
   }));
   app.use(multer({
-    dest: (process.env.TRAVELER_UPLOAD_REL_PATH || appSettings.upload_dir),
+    dest: config.uploadPath,
     limits: {
       files: 1,
       fileSize: (config.app.upload_size || 10) * 1024 * 1024
