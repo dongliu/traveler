@@ -29,7 +29,7 @@ function fileHistory(found) {
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
-      output = output + '<strong><a href=' + link + ' target="' + linkTarget + '">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
+      output = output + '<strong><a href=' + link + ' target="' + linkTarget + '" download=' + found[i].value + '>' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
     }
   }
   return output;
