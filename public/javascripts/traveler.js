@@ -332,7 +332,7 @@ $(function () {
               }
               return 1;
           });
-          if (this.type === 'file') {
+          if (element.type === 'file') {
               $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
           } else {
             var currentValue = found[0].value;
