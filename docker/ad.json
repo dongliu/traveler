@@ -1,0 +1,27 @@
+{
+  "url": "ldap://ldap-service",
+  "adminDn": "cn=admin,dc=example,dc=org",
+  "adminPassword": "admin",
+  "searchBase": "dc=example,dc=org",
+  "searchFilter": "(&(objectClass=inetOrgPerson)(uid=_id))",
+  "nameFilter": "(&(objectClass=inetOrgPerson)(displayName=_name)(company=Engineering))",
+  "groupSearchBase": "dc=example",
+  "groupSearchFilter": "(&(objectClass=group)(uid=_id))",
+  "objAttributes": ["uid", "displayName", "ou", "mail", "homephone"],
+  "memberAttributes": ["uid", "displayName", "ou", "mail", "homephone", "memberOf"],
+  "groupAttributes": ["uid","displayName","mail"],
+  "rawAttributes": ["jpegPhoto"],
+  "defaultKeys": {
+    "displayName": "displayName",
+    "memberOf": "memberOf",
+    "mail": "mail",
+    "company": "o",
+    "thumbnailPhoto": "jpegPhoto",
+    "uid": "uid",
+    "telephoneNumber": "homephone"
+  },
+
+  "shareUsers": true,
+  "shareGroups": false,
+  "transferOwnership": false
+}
