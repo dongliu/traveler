@@ -1,0 +1,19 @@
+version: "3"
+networks:
+  default:
+    external:
+      name: traveler-dev
+services:
+  web:
+    build: .
+    volumes:
+      - ./lib:/app/lib
+      - ./routes:/app/routes
+      - ./model:/app/model
+      - ./views:/app/views
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    environment:
+      - TRAVELER_CONFIG_REL_PATH=docker
+
