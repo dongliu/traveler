@@ -20,8 +20,8 @@
     "uid": "uid",
     "telephoneNumber": "homephone"
   },
-
   "shareUsers": true,
   "shareGroups": false,
-  "transferOwnership": false
+  "transferOwnership": false,
+  "singleConnection": false
 }
