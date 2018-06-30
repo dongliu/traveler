@@ -10,7 +10,7 @@ module.exports = function(app){
         res.render('ldaplogin', routesUtilities.getRenderObject(req));
     });
 
-    app.post('/ldaplogin/', auth.ensureAuthenticated,function(req,res){
+    app.post('/ldaplogin/', auth.ensureAuthenticated, function(req,res){
         res.render('ldaplogin',routesUtilities.getRenderObject(req,{
             errorMessage: res.locals.error
         }));

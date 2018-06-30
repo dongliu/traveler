@@ -1,5 +1,3 @@
-/* jslint es5: true */
-
 var config = require('./config/config.js');
 config.load();
 
@@ -28,10 +26,10 @@ require('./model/traveler.js');
 require('./model/binder.js');
 
 //Connect to mongo database
-var mongoAddress = 'mongodb://'
-mongoAddress += (mongoConfig.server_address || 'localhost' )
-mongoAddress += ':' + (mongoConfig.server_port || '27017')
-mongoAddress += '/' + (mongoConfig.traveler_db || 'traveler')
+var mongoAddress = 'mongodb://';
+mongoAddress += mongoConfig.server_address || 'localhost';
+mongoAddress += ':' + (mongoConfig.server_port || '27017');
+mongoAddress += '/' + (mongoConfig.traveler_db || 'traveler');
 
 var mongoOptions = {
   db: {
@@ -69,16 +67,27 @@ mongoose.connection.on('disconnected', function () {
 });
 
 // LDAP client
-var adClient = require('./lib/ldap-client').client;
-adClient.on('connect', function () {
-  console.log('ldap client connected');
-});
-adClient.on('timeout', function (message) {
-  console.error(message);
-});
-adClient.on('error', function (error) {
-  console.error(error);
-});
+// var adClient = require('./lib/ldap-client').client;
+// adClient.on('connect', function () {
+//   console.log('ldap client connected');
+// });
+// adClient.on('timeout', function (message) {
+//   console.error(message);
+// });
+// adClient.on('error', function (error) {
+//   console.error('adClient error: ' + error);
+// });
+
+// var bindClient = require('./lib/ldap-client').bindClient;
+// bindClient.on('connect', function () {
+//   console.log('ldap client connected');
+// });
+// bindClient.on('timeout', function (message) {
+//   console.error(message);
+// });
+// bindClient.on('error', function (error) {
+//   console.error('ldap client error: ' + error);
+// });
 
 // CAS client
 var auth = require('./lib/auth');
