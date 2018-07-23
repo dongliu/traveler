@@ -17,14 +17,6 @@ exports["checkbox"] = function tmpl_checkbox() {
     return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-required="model.required"/><span>{ model.checkbox_text }</span></label></div></div>';
 };
 
-exports['radiogroup'] = function tmpl_radiogroup() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"></div></div>';
-};
-
-exports['radio_button_control'] = function radio_button() {
-    return '<div><input type="radio" rv-value="model.radio_text" disabled="disabled" rv-name="model.radio_group_name" rv-required="model.required"> { model.radio_text }</input><br/></div>';
-};
-
 // figure.jade compiled template
 exports["figure"] = function tmpl_figure() {
     return '<div class="control-group output-control-group"><div class="controls"><figure><img src="" rv-alt="model.alt" rv-height="model.height" rv-width="model.width"/><figcaption>{ model.figcaption }</figcaption></figure></div></div>';
@@ -62,7 +54,7 @@ exports["section"] = function tmpl_section() {
 
 // text.jade compiled template
 exports["text"] = function tmpl_text() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required"/><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey"/><span class="help-block">{ model.help }</span></div></div>';
 };
 
 // textarea.jade compiled template
