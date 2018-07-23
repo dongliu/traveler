@@ -17,14 +17,6 @@ exports["checkbox_text"] = function tmpl_checkbox_text() {
     return '<div class="control-group"><div class="control-label">Text</div><div class="controls"><input type="text" name="checkbox_text"/></div></div>';
 };
 
-exports["generic_text_input"] = function tmpl_generic_text_input(label) {
-    return '<div class="control-group"><div class="control-label">' + label + '</div><div class="controls"><input type="text" name="radio_text"/></div></div>';
-};
-
-exports["add_radio_button"] = function tmpl_add_radio_button() {
-    return '<div class="control-group"><div class="control-label">Add Radio Button</div><div class="controls"><button class="btn btn-primary" value="add-radio-button">+</button></div></div>'
-};
-
 // done.jade compiled template
 exports["done"] = function tmpl_done() {
     return '<div class="control-group"><div class="controls"><button type="submit" class="btn btn-primary">Done</button></div></div>';
@@ -108,6 +100,11 @@ exports["type"] = function tmpl_type() {
 // unit.jade compiled template
 exports["unit"] = function tmpl_unit() {
     return '<div class="control-group"><div class="control-label">Unit</div><div class="controls"><input type="text" name="unit"/></div></div>';
+};
+
+// userkey.jade compiled template
+exports["userkey"] = function tmpl_userkey() {
+    return '<div class="control-group"><div class="control-label">User defined key</div><div class="controls"><input type="text" name="userkey"/><span class="help-inline"> Keep the key brief and unique (letter, number, _ allowed)</span></div></div>';
 };
 
 // width.jade compiled template
