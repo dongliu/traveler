@@ -1,16 +1,10 @@
-/*global FormFile: false, TravelerData: false*/
-/*jslint es5: true*/
-
 var config = require('../config/config.js');
-var ad = config.ad;
-var ldapClient = require('../lib/ldap-client');
-
 var auth = require('../lib/auth');
 var authConfig = config.auth;
 
 var mongoose = require('mongoose');
 var path = require('path');
-var sanitize = require('sanitize-caja');
+var sanitize = require('google-caja-sanitizer').sanitize;
 var underscore = require('underscore');
 var routesUtilities = require('../utilities/routes.js');
 var reqUtils = require('../lib/req-utils');
