@@ -104,7 +104,7 @@ exports["unit"] = function tmpl_unit() {
 
 // userkey.jade compiled template
 exports["userkey"] = function tmpl_userkey() {
-    return '<div class="control-group"><div class="control-label">User defined key</div><div class="controls"><input type="text" name="userkey"/><span class="help-inline"> Keep the key brief and unique (letter, number, _ allowed)</span></div></div>';
+    return '<div class="control-group"><div class="control-label">User defined key</div><div class="controls"><input type="text" name="userkey" pattern="[a-z_0-9]{1,30}"/><span class="help-inline"> Keep the key brief and unique (letter, number, _ allowed)</span></div></div>';
 };
 
 // width.jade compiled template

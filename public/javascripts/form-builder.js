@@ -306,7 +306,7 @@ function checkbox_edit($cgr) {
 function text_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
-  var userkey = 'test';
+  var userkey = '';
   var placeholder = '';
   var help = '';
   var required = false;
