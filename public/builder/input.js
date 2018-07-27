@@ -42,6 +42,16 @@ exports["other"] = function tmpl_other() {
     return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input rv-type="model.type" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required"/><span class="help-block">{ model.help }</span></div></div>';
 };
 
+// radio_button.jade compiled template
+exports["radio_button"] = function tmpl_radio_button() {
+    return '<label class="radio"><input type="radio" rv-value="model.radio_text" disabled="disabled" rv-name="model.radio_group_name" rv-required="model.required"/>{ model.radio_text }</label>';
+};
+
+// radiogroup.jade compiled template
+exports["radiogroup"] = function tmpl_radiogroup() {
+    return '<div class="control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"></div></div>';
+};
+
 // rich.jade compiled template
 exports["rich"] = function tmpl_rich() {
     return '<div class="control-group output-control-group"><div class="tinymce"></div></div>';
