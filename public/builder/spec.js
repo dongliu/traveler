@@ -7,6 +7,11 @@ var jade = exports.jade=function(exports){Array.isArray||(Array.isArray=function
 
 // create our folder objects
 
+// add_radio_button.jade compiled template
+exports["add_radio_button"] = function tmpl_add_radio_button() {
+    return '<div class="control-group"><div class="control-label">Add Radio Button</div><div class="controls"><button value="add_radio_button" class="btn btn-primary">+</button></div></div>';
+};
+
 // alt.jade compiled template
 exports["alt"] = function tmpl_alt() {
     return '<div class="control-group"><div class="control-label">Image alternate text</div><div class="controls"><input type="text" disabled="disabled" name="alt"/></div></div>';
@@ -25,6 +30,14 @@ exports["done"] = function tmpl_done() {
 // figcaption.jade compiled template
 exports["figcaption"] = function tmpl_figcaption() {
     return '<div class="control-group"><div class="control-label">Figure caption</div><div class="controls"><input type="text" disabled="disabled" name="figcaption"/></div></div>';
+};
+
+// generic_text_input.jade compiled template
+exports["generic_text_input"] = function tmpl_generic_text_input(locals) {
+    var buf = [];
+    var locals_ = locals || {}, label = locals_.label;
+    buf.push('<div class="control-group"><div class="control-label">' + jade.escape((jade.interp = label) == null ? '' : jade.interp) + '</div><div class="controls"><input type="text" name="radio_text"/></div></div>');
+    return buf.join('');
 };
 
 // height.jade compiled template

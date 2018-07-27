@@ -154,11 +154,11 @@ function add_radio_button($placeholder, $radio_group, $done, radio_group_name, c
   }
 
   // Add radio button text configuration screen
-  var $radio_text = $(spec.generic_text_input("Radio button " + ++count + " value"));
+  var $radio_text = $(spec.generic_text_input({label: 'Radio button ' + ++count + ' value'}));
   $($placeholder).append($radio_text);
 
   // Add radio button input control
-  var $radio_button_control = $(input.radio_button_control());
+  var $radio_button_control = $(input.radio_button());
   $($radio_group).find('.controls').append($radio_button_control);
 
   // Add button to remove radio button
@@ -231,8 +231,10 @@ function radio_edit($cgr) {
     radio_group_name = inputs[0].name;
   }
 
+  $add_radio_button.unbind('click');
+
   // Add functionality for adding and removing radio buttons in the group
-  $add_radio_button.on('click', 'button[value="add-radio-button"]', function (e) {
+  $add_radio_button.on('click', 'button', function (e) {
     e.preventDefault();
     add_radio_button($placeholder, $radio_group, $done, radio_group_name, radio_button_count);
     radio_button_count++;
