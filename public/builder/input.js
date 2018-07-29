@@ -14,7 +14,7 @@ exports["button"] = function tmpl_button() {
 
 // checkbox.jade compiled template
 exports["checkbox"] = function tmpl_checkbox() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-required="model.required"/><span>{ model.checkbox_text }</span></label></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-required="model.required" rv-data-userkey="model.userkey"/><span>{ model.checkbox_text }</span></label></div></div>';
 };
 
 // figure.jade compiled template
@@ -29,7 +29,7 @@ exports["hold"] = function tmpl_hold() {
 
 // number.jade compiled template
 exports["number"] = function tmpl_number() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-min="model.min" rv-max="model.max" step="any"/><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey" rv-min="model.min" rv-max="model.max" step="any"/><span class="help-block">{ model.help }</span></div></div>';
 };
 
 // numberunit.jade compiled template
@@ -39,12 +39,12 @@ exports["numberunit"] = function tmpl_numberunit() {
 
 // other.jade compiled template
 exports["other"] = function tmpl_other() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input rv-type="model.type" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required"/><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input rv-type="model.type" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey"/><span class="help-block">{ model.help }</span></div></div>';
 };
 
 // radio_button.jade compiled template
 exports["radio_button"] = function tmpl_radio_button() {
-    return '<label class="radio"><input type="radio" rv-value="model.radio_text" disabled="disabled" rv-name="model.radio_group_name" rv-required="model.required"/>{ model.radio_text }</label>';
+    return '<label class="radio"><input type="radio" rv-value="model.radio_text" disabled="disabled" rv-name="model.radio_group_name" rv-required="model.required" rv-data-userkey="model.userkey"/>{ model.radio_text }</label>';
 };
 
 // radiogroup.jade compiled template
@@ -69,12 +69,12 @@ exports["text"] = function tmpl_text() {
 
 // textarea.jade compiled template
 exports["textarea"] = function tmpl_textarea() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows" rv-required="model.required"></textarea><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows" rv-required="model.required" rv-data-userkey="model.userkey"></textarea><span class="help-block">{ model.help }</span></div></div>';
 };
 
 // upload.jade compiled template
 exports["upload"] = function tmpl_upload() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="file" disabled="disabled"/><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="file" rv-data-userkey="model.userkey" disabled="disabled"/><span class="help-block">{ model.help }</span></div></div>';
 };
 
 
