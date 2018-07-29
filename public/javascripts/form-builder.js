@@ -126,7 +126,7 @@ function binding($edit, $out, model, $done) {
   $done.click(done_button(view, $out));
 }
 
-function add_radio_button($placeholder, $radio_group, $done, radio_group_name, count, add_required_spec, include_remove_button, default_text, default_required) {
+function add_radio_button($placeholder, $radio_group, $done, radio_group_name, userkey, count, add_required_spec, include_remove_button, default_text, default_required) {
   // Set defaults
   if (include_remove_button === undefined) {
     include_remove_button = true;
@@ -186,13 +186,14 @@ function add_radio_button($placeholder, $radio_group, $done, radio_group_name, c
   var radio_text;
 
   if (default_text === undefined) {
-    radio_text = "Radio Button Label";
+    radio_text = 'Radio Button Label';
   } else {
     radio_text = default_text;
   }
 
   radio_button_model.radio_text = radio_text;
   radio_button_model.radio_group_name = radio_group_name;
+  radio_button_model.userkey = userkey;
 
   $('input', $radio_text).val(radio_text);
   if (add_required_spec) {
@@ -212,12 +213,14 @@ function radio_edit($cgr) {
   // Add default global values
   var label = 'label';
 
+  var userkey = '';
   // get all input components
   var $radio_group = $(input.radiogroup());
   var $buttons = $(input.button());
 
   // get configuration (spec) view components
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
 
   var $add_radio_button = $(spec.add_radio_button());
   var $placeholder = $('<div></div>');
@@ -229,6 +232,7 @@ function radio_edit($cgr) {
     label = $('.control-label span', $cgr).text();
     var inputs = $cgr.find('.controls').find('input');
     radio_group_name = inputs[0].name;
+    userkey = $(inputs[0]).data('userkey');
   }
 
   $add_radio_button.unbind('click');
@@ -236,12 +240,12 @@ function radio_edit($cgr) {
   // Add functionality for adding and removing radio buttons in the group
   $add_radio_button.on('click', 'button', function (e) {
     e.preventDefault();
-    add_radio_button($placeholder, $radio_group, $done, radio_group_name, radio_button_count);
+    add_radio_button($placeholder, $radio_group, $done, radio_group_name, userkey, radio_button_count);
     radio_button_count++;
   });
 
   // Assign components to the configure view
-  var $edit = $('<div class="well spec"></div>').append($label, $add_radio_button, $placeholder, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $add_radio_button, $placeholder, $done);
 
   var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">radio</span></div>').append($radio_group);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
@@ -249,7 +253,6 @@ function radio_edit($cgr) {
     label: label
   };
   $('input', $label).val(label);
-
 
   binding($edit, $radio_group, model, $done);
   if ($cgr) {
@@ -260,16 +263,16 @@ function radio_edit($cgr) {
     if (radio_buttons[0].hasAttribute('required')) {
       required = radio_buttons[0].required;
     }
-    add_radio_button($placeholder, $radio_group, $done, radio_group_name, radio_button_count, true, false, value, required);
+    add_radio_button($placeholder, $radio_group, $done, radio_group_name, userkey, radio_button_count, true, false, value, required);
     radio_button_count++;
     for (var i = 1; i < radio_buttons.size(); i++) {
       value = radio_buttons[i].value;
-      add_radio_button($placeholder, $radio_group, $done, radio_group_name, radio_button_count, false, true, value);
+      add_radio_button($placeholder, $radio_group, $done, radio_group_name, userkey, radio_button_count, false, true, value);
       radio_button_count++;
     }
   } else {
     // Add initial radio button
-    add_radio_button($placeholder, $radio_group, $done, radio_group_name, radio_button_count, true, false);
+    add_radio_button($placeholder, $radio_group, $done, radio_group_name, userkey, radio_button_count, true, false);
     radio_button_count++;
   }
 }
@@ -277,28 +280,33 @@ function radio_edit($cgr) {
 function checkbox_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var checkbox_text = 'checkbox text';
   var required = false;
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     checkbox_text = $('.controls label span', $cgr).text();
     required = $('input', $cgr).prop('required');
   }
   var $checkbox = $(input.checkbox());
   var $buttons = $(input.button());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $checkbox_text = $(spec.checkbox_text());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $checkbox_text, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $checkbox_text, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">checkbox</span></div>').append($checkbox);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
   var model = {
     label: label,
+    userkey: userkey,
     checkbox_text: checkbox_text,
     required: required
   };
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('input', $checkbox_text).val(checkbox_text);
   $('input', $required).prop('checked', required);
 
@@ -497,12 +505,14 @@ function figure_edit($cgr) {
 function other_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var placeholder = '';
   var help = '';
   var type = 'text';
   var required = false;
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
     type = $('.controls input', $cgr).attr('type');
     help = $('.controls span.help-block', $cgr).text();
@@ -511,23 +521,26 @@ function other_edit($cgr) {
   var $other = $(input.other());
   var $buttons = $(input.button());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $placeholder = $(spec.placeholder());
   var $type = $(spec.type());
   var $help = $(spec.help());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($type, $label, $placeholder, $help, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($type, $label, $userkey, $placeholder, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">other</span></div>').append($other);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
     label: label,
+    userkey: userkey,
     placeholder: placeholder,
     type: type,
     help: help,
     required: required
   };
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('select', $type).val(type);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
@@ -539,6 +552,7 @@ function other_edit($cgr) {
 function textarea_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var placeholder = '';
   var rows = 3;
   var help = '';
@@ -546,6 +560,7 @@ function textarea_edit($cgr) {
 
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls textarea', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     rows = $('.controls textarea', $cgr).attr('rows');
@@ -555,17 +570,19 @@ function textarea_edit($cgr) {
   var $textarea = $(input.textarea());
   var $buttons = $(input.button());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $placeholder = $(spec.placeholder());
   var $rows = $(spec.rows());
   var $help = $(spec.help());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $rows, $help, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $placeholder, $rows, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">textarea</span></div>').append($textarea);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
     label: label,
+    userkey: userkey,
     placeholder: placeholder,
     rows: rows,
     help: help,
@@ -573,6 +590,7 @@ function textarea_edit($cgr) {
   };
 
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
   $('input', $rows).val(rows);
@@ -584,6 +602,7 @@ function textarea_edit($cgr) {
 function number_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var placeholder = '';
   var help = '';
   var required = false;
@@ -591,6 +610,7 @@ function number_edit($cgr) {
   var max = '';
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     required = $('input', $cgr).prop('required');
@@ -601,18 +621,20 @@ function number_edit($cgr) {
   var $number = $(input.number());
   var $buttons = $(input.button());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $placeholder = $(spec.placeholder());
   var $help = $(spec.help());
   var $min = $(spec.min());
   var $max = $(spec.max());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $min, $max, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $placeholder, $help, $min, $max, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">number</span></div>').append($number);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
     label: label,
+    userkey: userkey,
     placeholder: placeholder,
     help: help,
     required: required,
@@ -621,6 +643,7 @@ function number_edit($cgr) {
   };
 
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
   $('input', $required).prop('checked', required);
@@ -633,17 +656,20 @@ function number_edit($cgr) {
 function file_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var help = '';
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     help = $('.controls span.help-block', $cgr).text();
   }
 
   var $upload = $(input.upload());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $help = $(spec.help());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $help, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $help, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">file</span></div>').append($upload);
   if ($cgr) {
     $cgr.replaceWith($new_cgr);
@@ -654,11 +680,13 @@ function file_edit($cgr) {
   }
 
   var model = {
-    label: 'label',
-    help: ''
+    label: label,
+    userkey: userkey,
+    help: help
   };
 
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
