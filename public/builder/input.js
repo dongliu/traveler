@@ -44,12 +44,12 @@ exports["other"] = function tmpl_other() {
 
 // radio_button.jade compiled template
 exports["radio_button"] = function tmpl_radio_button() {
-    return '<label class="radio"><input type="radio" rv-value="model.radio_text" disabled="disabled" rv-name="model.radio_group_name" rv-required="model.required" rv-data-userkey="model.userkey"/>{ model.radio_text }</label>';
+    return '<label class="radio"><input type="radio" rv-value="model.radio_text" disabled="disabled" rv-name="model.name" rv-required="model.required" rv-data-userkey="model.userkey"/><span class="radio_text">{ model.radio_text }</span></label>';
 };
 
 // radiogroup.jade compiled template
 exports["radiogroup"] = function tmpl_radiogroup() {
-    return '<div class="control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"></div></div>';
+    return '<div rv-data-required="model.required" rv-data-userkey="model.userkey" class="control-group radio-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"></div></div>';
 };
 
 // rich.jade compiled template
