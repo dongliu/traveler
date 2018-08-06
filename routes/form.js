@@ -382,6 +382,7 @@ module.exports = function (app) {
 
   app.post('/forms/', auth.ensureAuthenticated, reqUtils.sanitize('body', ['html']), function (req, res) {
     var form = {};
+    var html;
     if (req.body.html) {
       form.html = req.body.html;
       form.clonedFrom = req.body.id;
@@ -402,8 +403,8 @@ module.exports = function (app) {
 
   app.post('/forms/clone/', auth.ensureAuthenticated, routesUtilities.filterBody('form'), function (req, res) {
     Form.findById(req.body.form, function (err, form) {
-      var access = getAccess(req, form);
-      if ( access !== -1 ) {
+      var access = reqUtils.getAccess(req, form);
+      if (access !== -1) {
         var clonedForm = new Form({
           title: form.title,
           createdBy: req.session.userid,
@@ -414,9 +415,9 @@ module.exports = function (app) {
           html: form.html
         });
 
-        clonedForm.save(function (err, createdForm) {
-          if (err) {
-            console.error(err);
+        clonedForm.save(function (saveErr, createdForm) {
+          if (saveErr) {
+            console.error(saveErr);
             return res.send(500, err.message);
           }
 

@@ -28,6 +28,7 @@ var form = new Schema({
   updatedBy: String,
   updatedOn: Date,
   owner: String,
+  tags: [String],
   status: {
     type: Number,
     default: 0

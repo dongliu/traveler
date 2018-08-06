@@ -14,10 +14,12 @@ var share = require('./share.js');
  *   it is used by the traveler.
  * activatedOn: the dates when this form starts to be active
  * alias : a name for convenience to distinguish forms.
+ * mapping : name -> {user-key, label}
  */
 
 var form = new Schema({
   html: String,
+  mapping: Schema.Types.Mixed,
   activatedOn: [Date],
   reference: ObjectId,
   alias: String
@@ -61,6 +63,7 @@ var traveler = new Schema({
   updatedOn: Date,
   archivedOn: Date,
   owner: String,
+  tags: [String],
   transferredOn: Date,
   deadline: Date,
   publicAccess: {
