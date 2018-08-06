@@ -3,10 +3,6 @@ var config = require('../config/config.js');
 
 var routesUtilities = require('../utilities/routes.js');
 
-var ad = config.ad;
-var serviceConfig = config.service;
-var ldapClient = require('../lib/ldap-client');
-
 var fs = require('fs');
 var auth = require('../lib/auth');
 var authConfig = config.auth;
@@ -24,25 +20,31 @@ var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
-// var request = require('request');
 
-function createTraveler(form, req, res) {
+function inputNumber(form) {
   // update the total input number and finished input number
   var $ = cheer.load(form.html);
   var inputs = $('input, textarea');
   var num = 0;
   // Determine accurate number of inputs. Radio buttons consist of many inputs but represent one.
-  var last_input_name = "";
-  for (var i = 0; i < inputs.length; i++) {
-    var input = inputs[i];
-    var input_name = input.attribs['name'];
+  var last_input_name = '';
+  var i;
+  var input;
+  var input_name;
+  for (i = 0; i < inputs.length; i += 1) {
+    input = inputs[i];
+    input_name = input.attribs.name;
     if (last_input_name === input_name) {
       continue;
     }
     last_input_name = input_name;
-    num++;
+    num += 1;
   }
+  return num;
+}
 
+function createTraveler(form, req, res) {
+  var num = inputNumber(form);
   var traveler = new Traveler({
     title: form.title,
     description: '',
@@ -372,12 +374,12 @@ module.exports = function (app) {
 
     if (reqUtils.canWrite(req, doc)) {
       routesUtilities.getDeviceValue(doc.devices).then(function (value) {
-          doc.devices = value;
-          return res.render('traveler',  routesUtilities.getRenderObject(req, {
-              isOwner: reqUtils.isOwner(req, doc),
-              traveler: doc,
-              formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html
-          }));
+        doc.devices = value;
+        return res.render('traveler', routesUtilities.getRenderObject(req, {
+          isOwner: reqUtils.isOwner(req, doc),
+          traveler: doc,
+          formHTML: doc.forms.length === 1 ? doc.forms[0].html : doc.forms.id(doc.activeForm).html
+        }));
       });
     } else if (reqUtils.canRead(req, doc)) {
       return res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + req.params.id + '/view');
@@ -391,8 +393,8 @@ module.exports = function (app) {
     routesUtilities.getDeviceValue(doc.devices).then(function (value) {
       res.devices = value;
       return res.render('traveler-viewer', routesUtilities.getRenderObject(req, {
-          traveler: req[req.params.id]
-      }))
+        traveler: req[req.params.id]
+      }));
     });
   });
 
@@ -429,7 +431,7 @@ module.exports = function (app) {
 
   app.get('/travelers/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), function (req, res) {
     var doc = req[req.params.id];
-    return res.render('traveler-config', routesUtilities.getRenderObject(req,{
+    return res.render('traveler-config', routesUtilities.getRenderObject(req, {
       traveler: doc,
       isOwner: reqUtils.isOwner(req, doc)
     }));
@@ -454,8 +456,7 @@ module.exports = function (app) {
       alias: req.body.title
     };
 
-    var $ = cheer.load(form.html);
-    var num = $('input, textarea').length;
+    var num = inputNumber(form);
     doc.forms.push(form);
     doc.activeForm = doc.forms[doc.forms.length - 1]._id;
     doc.totalInput = num;
