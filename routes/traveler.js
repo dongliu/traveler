@@ -20,13 +20,15 @@ var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
-
+/**
+ * get the total input number in the form
+ * @param  {Form} form the form object
+ * @return {int}      the total number of inputs
+ */
 function inputNumber(form) {
-  // update the total input number and finished input number
   var $ = cheer.load(form.html);
   var inputs = $('input, textarea');
   var num = 0;
-  // Determine accurate number of inputs. Radio buttons consist of many inputs but represent one.
   var last_input_name = '';
   var i;
   var input;
@@ -34,6 +36,7 @@ function inputNumber(form) {
   for (i = 0; i < inputs.length; i += 1) {
     input = inputs[i];
     input_name = input.attribs.name;
+    // Determine accurate number of inputs. Radio buttons consist of many inputs but represent one.
     if (last_input_name === input_name) {
       continue;
     }
