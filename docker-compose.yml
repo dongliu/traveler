@@ -7,6 +7,7 @@ services:
   web:
     build: .
     volumes:
+      - ./app.js:/app/app.js
       - ./lib:/app/lib
       - ./routes:/app/routes
       - ./model:/app/model
