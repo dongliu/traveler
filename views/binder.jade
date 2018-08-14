@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB - binder - #{binder.title}
+  title #{orgName} - binder - #{binder.title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -56,7 +56,6 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/binder-viewer.js')
