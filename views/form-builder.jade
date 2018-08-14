@@ -3,9 +3,9 @@ extends layout
 block head
   meta(charset='urf-8')
   if (typeof id == 'undefined')
-    title FRIB - new form
+    title #{orgName} - new form
   else
-    title FRIB - forms - #{title}
+    title #{orgName} - forms - #{title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
