@@ -16,7 +16,7 @@ exports.logout = function (req, res) {
       }
     });
   }
-  if(authConfig.type === 'cas') {
+  if (authConfig.type === 'cas') {
     if (res.proxied) {
       res.redirect(authConfig.proxied_cas + '/logout');
     } else {
@@ -24,6 +24,6 @@ exports.logout = function (req, res) {
     }
   } else {
     //ldap
-    res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/ldaplogin/')
+    res.redirect((req.proxied ? authConfig.proxied_service : authConfig.service) + '/ldaplogin/');
   }
 };
