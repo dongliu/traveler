@@ -28,10 +28,10 @@ require('./model/traveler.js');
 require('./model/binder.js');
 
 //Connect to mongo database
-var mongoAddress = 'mongodb://'
-mongoAddress += (mongoConfig.server_address || 'localhost' )
-mongoAddress += ':' + (mongoConfig.server_port || '27017')
-mongoAddress += '/' + (mongoConfig.traveler_db || 'traveler')
+var mongoAddress = 'mongodb://';
+mongoAddress += mongoConfig.server_address || 'localhost';
+mongoAddress += ':' + (mongoConfig.server_port || '27017');
+mongoAddress += '/' + (mongoConfig.traveler_db || 'traveler');
 
 var mongoOptions = {
   db: {
@@ -88,6 +88,9 @@ var api = express();
 var app = express();
 
 /* Configure Web Application */
+app.locals.orgName = appSettings.org_name;
+
+
 app.enable('strict routing');
 if (app.get('env') === 'production') {
   var access_logfile = rotator.getStream({
@@ -140,6 +143,7 @@ app.configure('development', function () {
 });
 var routes = require('./routes');
 
+require('./routes/main')(app);
 require('./routes/form')(app);
 require('./routes/traveler')(app);
 require('./routes/binder')(app);
@@ -156,7 +160,7 @@ app.get('/api', function (req, res) {
   });
 });
 
-app.get('/', auth.ensureAuthenticated, routes.main);
+// app.get('/', auth.ensureAuthenticated, routes.main);
 app.get('/login', auth.ensureAuthenticated, function (req, res) {
   if (req.session.userid) {
     return res.redirect(req.proxied ? auth.proxied_service : '/');
