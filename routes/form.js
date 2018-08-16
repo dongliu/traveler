@@ -9,6 +9,7 @@ var underscore = require('underscore');
 var routesUtilities = require('../utilities/routes.js');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
+var tag = require('../lib/tag');
 
 var Form = mongoose.model('Form');
 var FormFile = mongoose.model('FormFile');
@@ -251,6 +252,15 @@ module.exports = function (app) {
       html: form.html
     }));
   });
+
+  app.get('/forms/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), function (req, res) {
+    var doc = req[req.params.id];
+    return res.render('form-config', routesUtilities.getRenderObject(req, {
+      form: doc,
+      isOwner: reqUtils.isOwner(req, doc)
+    }));
+  });
+
 
   app.get('/forms/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), function (req, res) {
     var form = req[req.params.id];
@@ -508,6 +518,10 @@ module.exports = function (app) {
       return res.json(newDoc);
     });
   });
+
+  // add tag routines
+  tag.addTag(app, '/forms/:id/tags/', Form);
+  tag.removeTag(app, '/forms/:id/tags/', Form);
 
   app.put('/forms/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
     var f = req[req.params.id];

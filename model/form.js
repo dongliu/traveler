@@ -22,6 +22,7 @@ status := 0 // editable
 
 var form = new Schema({
   title: String,
+  description: String,
   createdBy: String,
   createdOn: Date,
   clonedFrom: ObjectId,
