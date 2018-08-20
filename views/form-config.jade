@@ -23,11 +23,11 @@ block content
     h3 Title:
       = ' '
       span#title.editable #{form.title}
-      button.btn-primary.editable Edit
+      button.btn.btn-primary.editable Edit
     h4 Description:
       = ' '
       span#description.editable #{form.description}
-      button.btn-primary.editable Edit
+      button.btn.btn-small.btn-primary.editable Edit
     p Created on
       = ' '
       span.time #{form.createdOn}
@@ -38,7 +38,7 @@ block content
     h4 Tags
     ul#tags
       each tag in form.tags
-        li
+        li.tag-list
           span.tag #{tag}
           = ' '
           button.btn.btn-small.btn-warning.remove-tag
@@ -54,10 +54,6 @@ block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.jeditable.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  // script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
-  // script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
-  // script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
-  // script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
