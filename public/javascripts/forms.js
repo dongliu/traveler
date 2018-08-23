@@ -76,7 +76,7 @@ $(function () {
   updateAjaxURL(prefix);
   disableAjaxCache();
   /*form table starts*/
-  var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var formAoColumns = [selectColumn, formLinkColumn, formConfigLinkColumn, formShareLinkColumn, titleColumn, tagsColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var formTable = $('#form-table').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
@@ -98,8 +98,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: formAoColumns,
     aaSorting: [
-      [4, 'desc'],
-      [5, 'desc']
+      [6, 'desc'],
+      [7, 'desc']
     ],
     sDom: sDomNoTools
   });
