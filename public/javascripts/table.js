@@ -340,6 +340,15 @@ var formLinkColumn = {
   bSortable: false
 };
 
+var formConfigLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function (data, type, full) {
+    return '<a href="' + prefix + '/forms/' + data + '/config" data-toggle="tooltip" title="config the form"><i class="fa fa-gear fa-lg"></i></a>';
+  },
+  bSortable: false
+};
+
 function cloneForm(id) {
     $.ajax({
         url: '/forms/' + id + '/clone',

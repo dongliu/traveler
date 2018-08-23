@@ -31,7 +31,7 @@ module.exports = function (app) {
       owner: {
         $exists: false
       }
-    }, 'title createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
+    }, 'title tags createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -46,7 +46,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }, 'title createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
+    }, 'title tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -57,7 +57,7 @@ module.exports = function (app) {
 
   app.get('/allforms/json', auth.ensureAuthenticated, function (req, res) {
     if (routesUtilities.checkUserRole(req, 'read_all_forms')) {
-      Form.find({ }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+      Form.find({ }, 'title tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -87,7 +87,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
+      }, 'title tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
         if (fErr) {
           console.error(fErr);
           return res.send(500, fErr.message);
@@ -125,7 +125,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
+      }, 'title tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
         if (fErr) {
           console.error(fErr);
           return res.send(500, fErr.message);
@@ -139,7 +139,7 @@ module.exports = function (app) {
     Form.find({
       createdBy: req.session.userid,
       archived: true
-    }, 'title archivedOn sharedWith sharedGroup').exec(function (err, forms) {
+    }, 'title tags archivedOn sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
