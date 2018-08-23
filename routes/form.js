@@ -521,7 +521,7 @@ module.exports = function (app) {
 
   // add tag routines
   tag.addTag(app, '/forms/:id/tags/', Form);
-  tag.removeTag(app, '/forms/:id/tags/', Form);
+  tag.removeTag(app, '/forms/:id/tags/:tag', Form);
 
   app.put('/forms/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
     var f = req[req.params.id];
