@@ -36,9 +36,9 @@ block content
         = ' '
         span.time #{form.updatedOn}
     h4 Tags
-    ul#tags
+    ul#tags.tag-list
       each tag in form.tags
-        li.tag-list
+        li
           span.tag #{tag}
           = ' '
           button.btn.btn-small.btn-warning.remove-tag
