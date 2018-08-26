@@ -203,17 +203,6 @@ module.exports = function (app) {
     return res.json(200, req[req.params.id]);
   });
 
-  /**
-   * get the name->userkey mapping
-   */
-  app.get('/forms/:id/mapping',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Form),
-    reqUtils.canReadMw('id'),
-    function (req, res) {
-
-  });
-
   app.post('/forms/:id/uploads/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
     var doc = req[req.params.id];
     if (underscore.isEmpty(req.files)) {
