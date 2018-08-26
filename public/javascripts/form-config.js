@@ -28,7 +28,7 @@ $(function () {
     var data = {};
     data[that.id] = value;
     $.ajax({
-      url: './config',
+      url: '.',
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify(data),
