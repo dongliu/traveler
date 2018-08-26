@@ -107,7 +107,7 @@ $(function () {
   /*form table ends*/
 
   /*transferred form table starts*/
-  var transferredFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, tagsColumn, createdByColumn, createdOnColumn, transferredOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var transferredFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, tagsColumn, keysColumn, createdByColumn, createdOnColumn, transferredOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var transferredFormTable = $('#transferred-form-table').dataTable({
     sAjaxSource: '/transferredforms/json',
     sAjaxDataProp: '',
@@ -129,8 +129,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
     aaSorting: [
-      [7, 'desc'],
-      [8, 'desc']
+      [8, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -138,7 +138,7 @@ $(function () {
   /*transferred form table ends*/
 
   /*shared form table starts*/
-  var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, tagsColumn, ownerColumn, updatedByColumn, updatedOnColumn, sharedWithColumn, sharedGroupColumn];
+  var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, tagsColumn, keysColumn, ownerColumn, updatedByColumn, updatedOnColumn, sharedWithColumn, sharedGroupColumn];
   var sharedFormTable = $('#shared-form-table').dataTable({
     sAjaxSource: '/sharedforms/json',
     sAjaxDataProp: '',
@@ -160,7 +160,7 @@ $(function () {
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
     aaSorting: [
-      [6, 'desc']
+      [7, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -190,7 +190,7 @@ $(function () {
     bDeferRender: true,
     aoColumns: groupSharedFormAoColumns,
     aaSorting: [
-      [6, 'desc']
+      [7, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -198,7 +198,7 @@ $(function () {
   /*group shared form table ends*/
 
   /*archieved form table starts*/
-  var archivedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, tagsColumn, archivedOnColumn, sharedWithColumn, sharedGroupColumn];
+  var archivedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, tagsColumn, keysColumn, archivedOnColumn, sharedWithColumn, sharedGroupColumn];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
     sAjaxDataProp: '',
@@ -220,7 +220,7 @@ $(function () {
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
     aaSorting: [
-      [4, 'desc']
+      [5, 'desc']
     ],
     sDom: sDomNoTools
   });
