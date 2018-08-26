@@ -985,34 +985,6 @@ function binding_events() {
     }
   });
 
-  $('#rename').click(function (e) {
-    e.preventDefault();
-    if ($('#output .well.spec').length) {
-      modalAlert();
-      return;
-    }
-    cleanBeforeSave();
-    var html = $('#output').html();
-    if (html !== initHtml) {
-      e.preventDefault();
-      modalAlert('Save changes first', 'The form has been changed. Please save it before this action.');
-      return;
-    }
-    $('#modalLabel').html('Rename the form');
-    $('#modal .modal-body').empty();
-    $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">New form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
-    $('#modal .modal-footer').html('<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
-    $('#modal').modal('show');
-    $('#modal button[value="confirm"]').click(function () {
-      var newTitle = $('#title').val();
-      sendRequest({
-        title: newTitle
-      }, function () {
-        $('#formtitle').text(newTitle);
-      });
-    });
-  });
-
   $('#saveas').click(function (e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
