@@ -13,7 +13,7 @@
   "dependencies": {
     "basic-auth": "1.0.0",
     "cas.js": "0.1.0",
-    "cheerio": "0.13.1",
+    "cheerio": "0.22.0",
     "express": "3.1.0",
     "express-slash": "1.0.0",
     "file-stream-rotator": "0.0.5",

@@ -10,6 +10,7 @@ var routesUtilities = require('../utilities/routes.js');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
 var tag = require('../lib/tag');
+var FormError = require('../lib/error').FormError;
 
 var Form = mongoose.model('Form');
 var FormFile = mongoose.model('FormFile');
@@ -200,6 +201,17 @@ module.exports = function (app) {
 
   app.get('/forms/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
     return res.json(200, req[req.params.id]);
+  });
+
+  /**
+   * get the name->userkey mapping
+   */
+  app.get('/forms/:id/mapping',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Form),
+    reqUtils.canReadMw('id'),
+    function (req, res) {
+
   });
 
   app.post('/forms/:id/uploads/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
@@ -492,7 +504,7 @@ module.exports = function (app) {
     shareLib.changeOwner(req, res, doc);
   });
 
-  app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canWriteMw('id'), reqUtils.status('id', [0]), reqUtils.filter('body', ['html', 'title']), reqUtils.sanitize('body', ['html', 'title']), function (req, res) {
+  app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canWriteMw('id'), reqUtils.status('id', [0]), reqUtils.filter('body', ['html', 'title', 'description']), reqUtils.sanitize('body', ['html', 'title', 'description']), function (req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
@@ -508,11 +520,22 @@ module.exports = function (app) {
       }
     }
 
+    if (req.body.hasOwnProperty('description')) {
+      if (reqUtils.isOwner(req, doc)) {
+        doc.description = req.body.description;
+      } else {
+        req.send(403, 'not authorized to access this resource');
+      }
+    }
+
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
     doc.save(function (saveErr, newDoc) {
       if (saveErr) {
-        console.dir(saveErr);
+        console.log(saveErr.message);
+        if (saveErr instanceof FormError) {
+          return res.send(saveErr.status, saveErr.message);
+        }
         return res.send(500, saveErr.message);
       }
       return res.json(newDoc);
