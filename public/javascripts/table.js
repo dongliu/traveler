@@ -423,6 +423,18 @@ var tagsColumn = {
   bFilter: true
 };
 
+var keysColumn = {
+  sTitle: 'User defined keys',
+  sDefaultContent: '',
+  mData: function (source, type, val) {
+    if (source.mapping) {
+      return Object.keys(source.mapping).join();
+    }
+    return '';
+  },
+  bFilter: true
+};
+
 
 var commentsColumn = {
   sTitle: 'Comments',
