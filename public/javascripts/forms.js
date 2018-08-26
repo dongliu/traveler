@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false, updateAjaxURL: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
+/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false, titleColumn: false, tagsColumn: false, keysColumn:false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
 /*global archiveFromModal, transferFromModal*/
 
 function travelFromModal() {
@@ -76,7 +76,7 @@ $(function () {
   updateAjaxURL(prefix);
   disableAjaxCache();
   /*form table starts*/
-  var formAoColumns = [selectColumn, formLinkColumn, formConfigLinkColumn, formShareLinkColumn, titleColumn, tagsColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var formAoColumns = [selectColumn, formLinkColumn, formConfigLinkColumn, formShareLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var formTable = $('#form-table').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
@@ -98,8 +98,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: formAoColumns,
     aaSorting: [
-      [6, 'desc'],
-      [7, 'desc']
+      [7, 'desc'],
+      [8, 'desc']
     ],
     sDom: sDomNoTools
   });

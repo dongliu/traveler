@@ -32,7 +32,7 @@ module.exports = function (app) {
       owner: {
         $exists: false
       }
-    }, 'title tags createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
+    }, 'title tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
