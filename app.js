@@ -66,29 +66,6 @@ mongoose.connection.on('disconnected', function () {
   console.log('Mongoose default connection disconnected');
 });
 
-// LDAP client
-// var adClient = require('./lib/ldap-client').client;
-// adClient.on('connect', function () {
-//   console.log('ldap client connected');
-// });
-// adClient.on('timeout', function (message) {
-//   console.error(message);
-// });
-// adClient.on('error', function (error) {
-//   console.error('adClient error: ' + error);
-// });
-
-// var bindClient = require('./lib/ldap-client').bindClient;
-// bindClient.on('connect', function () {
-//   console.log('ldap client connected');
-// });
-// bindClient.on('timeout', function (message) {
-//   console.error(message);
-// });
-// bindClient.on('error', function (error) {
-//   console.error('ldap client error: ' + error);
-// });
-
 // CAS client
 var auth = require('./lib/auth');
 
