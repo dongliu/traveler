@@ -67,6 +67,13 @@ form.pre('save', function (next) {
       let input = $(inputs[i]);
       inputName = input.attr('name');
       userkey = input.data('userkey');
+      if (userkey && inputName) {
+        userkey = userkey.trim();
+        inputName = inputName.trim();
+      }
+      if (!userkey || !inputName) {
+        continue;
+      }
       if (lastInputName === inputName) {
         if (input.attr('type') === 'radio') {
           // consistent name -> userkey
