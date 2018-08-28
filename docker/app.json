@@ -1,15 +1,12 @@
 {
+  "org_name": "Lab",
   "app_port": "3001",
   "ssl_key": "server.key",
   "ssl_cert": "server.crt",
   "top_bar_urls" : [
     {
-      "text": "Controls",
-      "url": "https://controls.frib.msu.edu/"
-    },
-    {
-      "text": "Report a problem",
-      "url": "https://controls.frib.msu.edu/controlshelp/"
+      "text": "Link",
+      "url": "https://your.link.here"
     }
   ],
   "link_target": "_self",

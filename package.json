@@ -13,10 +13,11 @@
   "dependencies": {
     "basic-auth": "1.0.0",
     "cas.js": "0.1.0",
-    "cheerio": "0.13.1",
+    "cheerio": "0.22.0",
     "express": "3.1.0",
     "express-slash": "1.0.0",
     "file-stream-rotator": "0.0.5",
+    "google-caja-sanitizer": "1.0.4",
     "jade": "1.10.0",
     "jstransformer-marked": "1.0.1",
     "ldapjs": "1.0.0",
@@ -24,7 +25,6 @@
     "multer": "0.1.0",
     "pause": "0.0.1",
     "request": "2.34.0",
-    "sanitize-caja": "0.1.2",
     "templatizer": "0.2.10",
     "underscore": "1.8.0"
   },

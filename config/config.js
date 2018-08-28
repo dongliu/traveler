@@ -97,7 +97,7 @@ module.exports.load = function () {
     viewConfig.shareGroups = this.ad.shareGroups
   }
   if (this.ad.transferOwnership !== undefined) {
-      viewConfig.transferOwnership = this.ad.transferOwnership;
+    viewConfig.transferOwnership = this.ad.transferOwnership;
   }
   if (this.app.top_bar_urls) {
     viewConfig.topBarUrls = this.app.top_bar_urls;

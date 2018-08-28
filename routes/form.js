@@ -1,20 +1,16 @@
-/*global FormFile: false, TravelerData: false*/
-/*jslint es5: true*/
-
 var config = require('../config/config.js');
-var ad = config.ad;
-var ldapClient = require('../lib/ldap-client');
-
 var auth = require('../lib/auth');
 var authConfig = config.auth;
 
 var mongoose = require('mongoose');
 var path = require('path');
-var sanitize = require('sanitize-caja');
+var sanitize = require('google-caja-sanitizer').sanitize;
 var underscore = require('underscore');
 var routesUtilities = require('../utilities/routes.js');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
+var tag = require('../lib/tag');
+var FormError = require('../lib/error').FormError;
 
 var Form = mongoose.model('Form');
 var FormFile = mongoose.model('FormFile');
@@ -36,7 +32,7 @@ module.exports = function (app) {
       owner: {
         $exists: false
       }
-    }, 'title createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
+    }, 'title tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -51,7 +47,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }, 'title createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
+    }, 'title tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -62,7 +58,7 @@ module.exports = function (app) {
 
   app.get('/allforms/json', auth.ensureAuthenticated, function (req, res) {
     if (routesUtilities.checkUserRole(req, 'read_all_forms')) {
-      Form.find({ }, 'title createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
+      Form.find({ }, 'title tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup').lean().exec(function (err, forms) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -92,7 +88,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
+      }, 'title tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
         if (fErr) {
           console.error(fErr);
           return res.send(500, fErr.message);
@@ -130,7 +126,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
+      }, 'title tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
         if (fErr) {
           console.error(fErr);
           return res.send(500, fErr.message);
@@ -144,7 +140,7 @@ module.exports = function (app) {
     Form.find({
       createdBy: req.session.userid,
       archived: true
-    }, 'title archivedOn sharedWith sharedGroup').exec(function (err, forms) {
+    }, 'title tags archivedOn sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -257,6 +253,15 @@ module.exports = function (app) {
       html: form.html
     }));
   });
+
+  app.get('/forms/:id/config', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), function (req, res) {
+    var doc = req[req.params.id];
+    return res.render('form-config', routesUtilities.getRenderObject(req, {
+      form: doc,
+      isOwner: reqUtils.isOwner(req, doc)
+    }));
+  });
+
 
   app.get('/forms/:id/share/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), function (req, res) {
     var form = req[req.params.id];
@@ -388,6 +393,7 @@ module.exports = function (app) {
 
   app.post('/forms/', auth.ensureAuthenticated, reqUtils.sanitize('body', ['html']), function (req, res) {
     var form = {};
+    var html;
     if (req.body.html) {
       form.html = req.body.html;
       form.clonedFrom = req.body.id;
@@ -408,8 +414,8 @@ module.exports = function (app) {
 
   app.post('/forms/clone/', auth.ensureAuthenticated, routesUtilities.filterBody('form'), function (req, res) {
     Form.findById(req.body.form, function (err, form) {
-      var access = getAccess(req, form);
-      if ( access !== -1 ) {
+      var access = reqUtils.getAccess(req, form);
+      if (access !== -1) {
         var clonedForm = new Form({
           title: form.title,
           createdBy: req.session.userid,
@@ -420,9 +426,9 @@ module.exports = function (app) {
           html: form.html
         });
 
-        clonedForm.save(function (err, createdForm) {
-          if (err) {
-            console.error(err);
+        clonedForm.save(function (saveErr, createdForm) {
+          if (saveErr) {
+            console.error(saveErr);
             return res.send(500, err.message);
           }
 
@@ -487,7 +493,7 @@ module.exports = function (app) {
     shareLib.changeOwner(req, res, doc);
   });
 
-  app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canWriteMw('id'), reqUtils.status('id', [0]), reqUtils.filter('body', ['html', 'title']), reqUtils.sanitize('body', ['html', 'title']), function (req, res) {
+  app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canWriteMw('id'), reqUtils.status('id', [0]), reqUtils.filter('body', ['html', 'title', 'description']), reqUtils.sanitize('body', ['html', 'title', 'description']), function (req, res) {
     if (!req.is('json')) {
       return res.send(415, 'json request expected');
     }
@@ -503,16 +509,31 @@ module.exports = function (app) {
       }
     }
 
+    if (req.body.hasOwnProperty('description')) {
+      if (reqUtils.isOwner(req, doc)) {
+        doc.description = req.body.description;
+      } else {
+        req.send(403, 'not authorized to access this resource');
+      }
+    }
+
     doc.updatedBy = req.session.userid;
     doc.updatedOn = Date.now();
     doc.save(function (saveErr, newDoc) {
       if (saveErr) {
-        console.dir(saveErr);
+        console.log(saveErr.message);
+        if (saveErr instanceof FormError) {
+          return res.send(saveErr.status, saveErr.message);
+        }
         return res.send(500, saveErr.message);
       }
       return res.json(newDoc);
     });
   });
+
+  // add tag routines
+  tag.addTag(app, '/forms/:id/tags/', Form);
+  tag.removeTag(app, '/forms/:id/tags/:tag', Form);
 
   app.put('/forms/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
     var f = req[req.params.id];

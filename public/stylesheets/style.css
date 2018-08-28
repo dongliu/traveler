@@ -344,6 +344,18 @@ figcaption {
 }
 
 /**
+ * config page
+ */
+
+.tag-list li {
+  padding-top: 10px;
+}
+
+button.editable {
+  margin-left: 10px;
+}
+
+/**
  * Responsive
  */
 
