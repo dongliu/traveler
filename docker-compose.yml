@@ -7,13 +7,15 @@ services:
   web:
     build: .
     volumes:
+      - ./app.js:/app/app.js
       - ./lib:/app/lib
       - ./routes:/app/routes
       - ./model:/app/model
       - ./views:/app/views
+      - ./public:/app/public
     ports:
       - "3001:3001"
+      - "3443:3443"
     restart: unless-stopped
     environment:
       - TRAVELER_CONFIG_REL_PATH=docker
-

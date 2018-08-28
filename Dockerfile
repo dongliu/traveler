@@ -7,8 +7,11 @@ ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
-
+# web port
 EXPOSE 3001
+# api port
+EXPOSE 3443
+
 COPY . /app
 # create the certification file for ssl
 WORKDIR /app/docker

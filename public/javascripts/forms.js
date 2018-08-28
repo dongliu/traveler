@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false, updateAjaxURL: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, formLinkColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
+/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false, titleColumn: false, tagsColumn: false, keysColumn:false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
 /*global archiveFromModal, transferFromModal*/
 
 function travelFromModal() {
@@ -76,7 +76,7 @@ $(function () {
   updateAjaxURL(prefix);
   disableAjaxCache();
   /*form table starts*/
-  var formAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var formAoColumns = [selectColumn, formLinkColumn, formConfigLinkColumn, formShareLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var formTable = $('#form-table').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
@@ -98,8 +98,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: formAoColumns,
     aaSorting: [
-      [4, 'desc'],
-      [5, 'desc']
+      [7, 'desc'],
+      [8, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -107,7 +107,7 @@ $(function () {
   /*form table ends*/
 
   /*transferred form table starts*/
-  var transferredFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, createdByColumn, createdOnColumn, transferredOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
+  var transferredFormAoColumns = [selectColumn, formLinkColumn, formShareLinkColumn, titleColumn, tagsColumn, keysColumn, createdByColumn, createdOnColumn, transferredOnColumn, updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn];
   var transferredFormTable = $('#transferred-form-table').dataTable({
     sAjaxSource: '/transferredforms/json',
     sAjaxDataProp: '',
@@ -129,8 +129,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
     aaSorting: [
-      [6, 'desc'],
-      [7, 'desc']
+      [8, 'desc'],
+      [9, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -138,7 +138,7 @@ $(function () {
   /*transferred form table ends*/
 
   /*shared form table starts*/
-  var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, ownerColumn, updatedByColumn, updatedOnColumn, sharedWithColumn, sharedGroupColumn];
+  var sharedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, tagsColumn, keysColumn, ownerColumn, updatedByColumn, updatedOnColumn, sharedWithColumn, sharedGroupColumn];
   var sharedFormTable = $('#shared-form-table').dataTable({
     sAjaxSource: '/sharedforms/json',
     sAjaxDataProp: '',
@@ -160,7 +160,7 @@ $(function () {
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
     aaSorting: [
-      [5, 'desc']
+      [7, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -190,7 +190,7 @@ $(function () {
     bDeferRender: true,
     aoColumns: groupSharedFormAoColumns,
     aaSorting: [
-      [5, 'desc']
+      [7, 'desc']
     ],
     sDom: sDomNoTools
   });
@@ -198,7 +198,7 @@ $(function () {
   /*group shared form table ends*/
 
   /*archieved form table starts*/
-  var archivedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, archivedOnColumn, sharedWithColumn, sharedGroupColumn];
+  var archivedFormAoColumns = [selectColumn, formLinkColumn, titleColumn, tagsColumn, keysColumn, archivedOnColumn, sharedWithColumn, sharedGroupColumn];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
     sAjaxDataProp: '',
@@ -220,7 +220,7 @@ $(function () {
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
     aaSorting: [
-      [3, 'desc']
+      [5, 'desc']
     ],
     sDom: sDomNoTools
   });

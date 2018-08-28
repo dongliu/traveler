@@ -252,10 +252,10 @@ var FormLoader = (function (parent, $) {
     });
   }
 
-/**
- * @param  {String} fid The form id to retrieve.
- * @return {undefined}
- */
+  /**
+   * @param  {String} fid The form id to retrieve.
+   * @return {undefined}
+   */
   function retrieveForm(fid, cb) {
     $.ajax({
       url: '/forms/' + fid + '/json',

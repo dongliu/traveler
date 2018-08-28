@@ -1,4 +1,4 @@
-/* global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
+/* global formStatus: false, clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 
 /* global tinymce: false, rivets: false, UID: false, input: false, spec: false, ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false */
 
@@ -32,7 +32,6 @@ function sendRequest(data, cb, saveas) {
   if (saveas) {
     url = prefix + '/forms/';
     type = 'POST';
-    data.id = id;
   } else {
     url = path;
     type = 'PUT';
@@ -88,8 +87,10 @@ function done_button(view, $out) {
 function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
   $new_cgr.prepend($buttons.hide());
   if ($cgr) {
-    // reserve important attributes that are not covered but rivet model binding like unique name
-    $('input, textarea, img', $new_cgr).attr('name', $('input, textarea, img', $cgr).attr('name'));
+    if ($('span.fe-type', $cgr).text() !== 'radio') {
+      // reserve important attributes that are not covered but rivet model binding like unique name
+      $('input, textarea, img', $new_cgr).attr('name', $('input, textarea, img', $cgr).attr('name'));
+    }
     // reserve legend id
     $('legend', $new_cgr).attr('id', $('legend', $cgr).attr('id'));
 
@@ -122,178 +123,175 @@ function binding($edit, $out, model, $done) {
     model: model
   });
 
-  // remove click handler first
+  // clean all click handlers to the $done button first
   $done.unbind('click');
   $done.click(done_button(view, $out));
+
+  return view;
 }
 
-function add_radio_button($placeholder, $radio_group, $done, radio_group_name, count, add_required_spec, include_remove_button, default_text, default_required) {
-  // Set defaults
-  if (include_remove_button === undefined) {
-      include_remove_button = true;
-  }
-  if (add_required_spec === undefined) {
-    add_required_spec = false;
-  }
-
-  var radio_button_model = {};
-
-  if (add_required_spec) {
-    if (default_required === undefined) {
-      var required = false;
-    } else {
-      var required = default_required;
-    }
-
-    var $required = $(spec.required());
-
-    $($placeholder).append($required);
-    radio_button_model.required = required;
-
-    $('input', $required).prop('checked', required);
-  }
-
+/**
+ * add the count th radio button in the model to the $raido_group with spec in the #radio_value_spec
+ * @param {$} $radio_group      the radio group object
+ * @param {$} $radio_value_spec the radio value/text spec object
+ * @param {$} $done             the done button object
+ * @param {int} count           the number of radio to add
+ * @param {object} model        the model
+ *
+ * @return {undefined}
+ */
+function add_radio($radio_group, $radio_value_spec, $done, count, model) {
   // Add radio button text configuration screen
-  var $radio_text = $(spec.generic_text_input("Radio button " + ++count + " value"));
-  $($placeholder).append($radio_text);
+  var $radio_text = $(spec.generic_text_input({label: 'Radio button ' + count + ' value'}));
+  $('input', $radio_text).attr('name', 'radio_text_' + count);
+  $($radio_value_spec).append($radio_text);
 
   // Add radio button input control
-  var $radio_button_control = $(input.radio_button_control());
-  $($radio_group).find('.controls').append($radio_button_control);
+  var $radio_button_control = $(input.radio_button());
+  $('input', $radio_button_control).attr('rv-value', 'model.radio_text_' + count);
+  $('span.radio_text', $radio_button_control).text('{ model.radio_text_' + count + '}');
+  $radio_group.find('.controls').append($radio_button_control);
 
-  // Add button to remove radio button
-  if (include_remove_button) {
-    $($radio_text).find('.controls').append('<button value="remove-radio-button" class="btn btn-warning">-</button>');
-    $radio_text.on('click', 'button[value="remove-radio-button"]', function (e) {
-        e.preventDefault();
+  // Add button and handler to remove radio button
+  $($radio_text).find('.controls').append('<button value="remove-radio-button" class="btn btn-warning">-</button>');
+  $radio_text.on('click', 'button[value="remove-radio-button"]', function (e) {
+    e.preventDefault();
 
-        var radio_text_input_label = e.delegateTarget.children[0].innerHTML;
+    var value = $(e.delegateTarget).find('input').val();
+    var name = $(e.delegateTarget).find('input').prop('name');
+    var radio = $radio_group.find('input[type="radio"][value="' + value + '"]').parent();
+    model[name] = undefined;
+    radio.remove();
+    e.delegateTarget.remove();
 
-        var radio_group_controls = $($radio_group).find('.controls')[0];
+  });
 
-        for (var i = 1; i < $placeholder[0].children.length; i++) {
-            var ittr_radio_text_input_label = $placeholder[0].children[i].children[0].innerHTML;
-            if (ittr_radio_text_input_label === radio_text_input_label) {
-                //$placeholder[0].removeChild($placeholder[0].children[i]);
-                $placeholder[0].children[i].remove();
-                radio_group_controls.children[i - 1].remove();
-                break;
-            }
-        }
-    });
+  var radio_text = 'update me';
+
+  if (model['radio_text_' + count]) {
+    radio_text = model['radio_text_' + count];
   }
-  if (default_text === undefined) {
-    var radio_text = "Radio Button Label";
-  } else {
-    var radio_text = default_text;
-  }
-
-  radio_button_model.radio_text = radio_text;
-  radio_button_model.radio_group_name = radio_group_name;
 
   $('input', $radio_text).val(radio_text);
-  if (add_required_spec) {
-    binding($placeholder, $radio_button_control, radio_button_model, $done);
-  } else {
-    binding($radio_text, $radio_button_control, radio_button_model, $done);
-  }
-
 }
 
 function radio_edit($cgr) {
-    $('#output .well.spec').remove();
+  $('#output .well.spec').remove();
 
-    // Generate a unique identifier for the group
-    var radio_group_name = UID.generateShort();
+  var radio_group_name;
 
-    // Add default global values
-    var label = 'label';
+  var label = 'label';
+  var userkey = '';
+  var required = false;
+  // get all input components
+  var $radio_group = $(input.radiogroup());
+  var $buttons = $(input.button());
 
-    // get all input components
-    var $radio_group = $(input.radiogroup());
-    var $buttons = $(input.button());
+  // get configuration (spec) view components
+  var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
+  var $required = $(spec.required());
 
-    // get configuration (spec) view components
-    var $label = $(spec.label());
+  var $add_radio_button = $(spec.add_radio_button());
+  var $radio_value_spec = $('<div class="radio-value-spec"></div>');
+  var $done = $(spec.done());
 
-    var $add_radio_button = $(spec.add_radio_button());
-    var $placeholder = $('<div></div>');
-    var $done = $(spec.done());
+  var radio_button_count = 0;
 
-    var radio_button_count = 0;
+  if ($cgr) {
+    label = $('.control-label span', $cgr).text();
+    var inputs = $cgr.find('.controls').find('input');
+    radio_group_name = inputs[0].name;
+    userkey = $(inputs[0]).data('userkey');
+    required = $(inputs[0]).prop('required');
+  }
 
-    if ($cgr) {
-        label = $('.control-label span', $cgr).text();
-        var inputs = $cgr.find('.controls').find('input');
-        radio_group_name = inputs[0].name;
-    }
+  if (!radio_group_name) {
+    radio_group_name = UID.generateShort();
+  }
 
-    // Add functionality for adding and removing radio buttons in the group
-    $add_radio_button.on('click', 'button[value="add-radio-button"]', function (e) {
-        e.preventDefault();
-        add_radio_button($placeholder, $radio_group, $done, radio_group_name, radio_button_count);
-        radio_button_count++;
+  // Assign components to the configure view
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $required, $add_radio_button, $radio_value_spec, $done);
+
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">radio</span></div>').append($radio_group);
+  add_new_cgr($cgr, $new_cgr, $buttons, $edit);
+  var model = {
+    label: label,
+    userkey: userkey,
+    required: required,
+    name: radio_group_name
+  };
+  $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
+  $('input', $required).prop('checked', required);
+
+  // add all the radio buttons
+  if ($cgr) {
+    // load the radio buttons for edit mode
+    var radio_buttons = $cgr.find('.controls').find('input');
+    $.map(radio_buttons, function (button, i) {
+      model['radio_text_' + i] = $(button).prop('value');
     });
-
-    // Assign components to the configure view
-    var $edit = $('<div class="well spec"></div>').append($label, $add_radio_button, $placeholder, $done);
-
-    var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">radio</span></div>').append($radio_group);
-    add_new_cgr($cgr, $new_cgr, $buttons, $edit);
-    var model = {
-        label: label
-    };
-    $('input', $label).val(label);
-
-
-    binding($edit, $radio_group, model, $done);
-    if ($cgr) {
-      // load the radio buttons for edit mode
-      var radio_buttons = $cgr.find('.controls').find('input');
-      var required = false;
-      var value = radio_buttons[0].value;
-      if (radio_buttons[0].hasAttribute('required')) {
-        required = radio_buttons[0].required;
-      }
-      add_radio_button($placeholder, $radio_group, $done, radio_group_name, radio_button_count, true, false, value, required);
-      radio_button_count++;
-      for (var i = 1; i < radio_buttons.size(); i++) {
-        var value = radio_buttons[i].value;
-        add_radio_button($placeholder, $radio_group, $done, radio_group_name, radio_button_count, false, true, value);
-        radio_button_count++;
-      }
-    } else {
-      // Add initial radio button
-      add_radio_button($placeholder, $radio_group, $done, radio_group_name, radio_button_count, true, false);
-      radio_button_count++;
+    var length = radio_buttons.size();
+    for (var i = 0; i < length; i++) {
+      add_radio($radio_group, $radio_value_spec, $done, radio_button_count, model);
+      radio_button_count += 1;
     }
+  } else {
+    // Add initial radio button
+    model['radio_text_' + radio_button_count] = 'update me';
+    add_radio($radio_group, $radio_value_spec, $done, radio_button_count, model);
+    radio_button_count += 1;
+  }
+
+  var radio_group_view = binding($edit, $radio_group, model, $done);
+
+  $add_radio_button.unbind('click');
+
+  // Add functionality for adding and removing radio buttons in the group
+  $add_radio_button.on('click', 'button', function (e) {
+    e.preventDefault();
+    model['radio_text_' + radio_button_count] = 'update me';
+    add_radio($radio_group, $radio_value_spec, $done, radio_button_count, model);
+
+    radio_button_count += 1;
+
+    // we need unbind the $radio_group view and bind again
+    radio_group_view.unbind();
+    radio_group_view = binding($edit, $radio_group, model, $done);
+  });
 }
 
 function checkbox_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var checkbox_text = 'checkbox text';
   var required = false;
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     checkbox_text = $('.controls label span', $cgr).text();
     required = $('input', $cgr).prop('required');
   }
   var $checkbox = $(input.checkbox());
   var $buttons = $(input.button());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $checkbox_text = $(spec.checkbox_text());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $checkbox_text, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $checkbox_text, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">checkbox</span></div>').append($checkbox);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
   var model = {
     label: label,
+    userkey: userkey,
     checkbox_text: checkbox_text,
     required: required
   };
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('input', $checkbox_text).val(checkbox_text);
   $('input', $required).prop('checked', required);
 
@@ -303,11 +301,13 @@ function checkbox_edit($cgr) {
 function text_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var placeholder = '';
   var help = '';
   var required = false;
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     required = $('.controls input', $cgr).prop('required');
@@ -315,20 +315,23 @@ function text_edit($cgr) {
   var $text = $(input.text());
   var $buttons = $(input.button());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $placeholder = $(spec.placeholder());
   var $help = $(spec.help());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $placeholder, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">text</span></div>').append($text);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
   var model = {
     label: label,
+    userkey: userkey,
     placeholder: placeholder,
     help: help,
     required: required
   };
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
   $('input', $required).prop('checked', required);
@@ -487,12 +490,14 @@ function figure_edit($cgr) {
 function other_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var placeholder = '';
   var help = '';
   var type = 'text';
   var required = false;
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
     type = $('.controls input', $cgr).attr('type');
     help = $('.controls span.help-block', $cgr).text();
@@ -501,23 +506,26 @@ function other_edit($cgr) {
   var $other = $(input.other());
   var $buttons = $(input.button());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $placeholder = $(spec.placeholder());
   var $type = $(spec.type());
   var $help = $(spec.help());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($type, $label, $placeholder, $help, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($type, $label, $userkey, $placeholder, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">other</span></div>').append($other);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
     label: label,
+    userkey: userkey,
     placeholder: placeholder,
     type: type,
     help: help,
     required: required
   };
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('select', $type).val(type);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
@@ -529,6 +537,7 @@ function other_edit($cgr) {
 function textarea_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var placeholder = '';
   var rows = 3;
   var help = '';
@@ -536,6 +545,7 @@ function textarea_edit($cgr) {
 
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls textarea', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     rows = $('.controls textarea', $cgr).attr('rows');
@@ -545,17 +555,19 @@ function textarea_edit($cgr) {
   var $textarea = $(input.textarea());
   var $buttons = $(input.button());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $placeholder = $(spec.placeholder());
   var $rows = $(spec.rows());
   var $help = $(spec.help());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $rows, $help, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $placeholder, $rows, $help, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">textarea</span></div>').append($textarea);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
     label: label,
+    userkey: userkey,
     placeholder: placeholder,
     rows: rows,
     help: help,
@@ -563,6 +575,7 @@ function textarea_edit($cgr) {
   };
 
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
   $('input', $rows).val(rows);
@@ -574,6 +587,7 @@ function textarea_edit($cgr) {
 function number_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var placeholder = '';
   var help = '';
   var required = false;
@@ -581,6 +595,7 @@ function number_edit($cgr) {
   var max = '';
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     required = $('input', $cgr).prop('required');
@@ -591,18 +606,20 @@ function number_edit($cgr) {
   var $number = $(input.number());
   var $buttons = $(input.button());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $placeholder = $(spec.placeholder());
   var $help = $(spec.help());
   var $min = $(spec.min());
   var $max = $(spec.max());
   var $required = $(spec.required());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $placeholder, $help, $min, $max, $required, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $placeholder, $help, $min, $max, $required, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">number</span></div>').append($number);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
     label: label,
+    userkey: userkey,
     placeholder: placeholder,
     help: help,
     required: required,
@@ -611,6 +628,7 @@ function number_edit($cgr) {
   };
 
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
   $('input', $required).prop('checked', required);
@@ -623,17 +641,20 @@ function number_edit($cgr) {
 function file_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var userkey = '';
   var help = '';
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
+    userkey = $('.controls input', $cgr).data('userkey');
     help = $('.controls span.help-block', $cgr).text();
   }
 
   var $upload = $(input.upload());
   var $label = $(spec.label());
+  var $userkey = $(spec.userkey());
   var $help = $(spec.help());
   var $done = $(spec.done());
-  var $edit = $('<div class="well spec"></div>').append($label, $help, $done);
+  var $edit = $('<div class="well spec"></div>').append($label, $userkey, $help, $done);
   var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">file</span></div>').append($upload);
   if ($cgr) {
     $cgr.replaceWith($new_cgr);
@@ -644,11 +665,13 @@ function file_edit($cgr) {
   }
 
   var model = {
-    label: 'label',
-    help: ''
+    label: label,
+    userkey: userkey,
+    help: help
   };
 
   $('input', $label).val(label);
+  $('input', $userkey).val(userkey);
   $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
@@ -750,7 +773,7 @@ function working() {
     checkbox_edit();
   });
 
-  $('#add-radio').click(function(e) {
+  $('#add-radio').click(function (e) {
     e.preventDefault();
     radio_edit();
   });
@@ -960,34 +983,6 @@ function binding_events() {
       modalAlert('Save changes first', 'The form has been changed. Please save it before this action.');
       return;
     }
-  });
-
-  $('#rename').click(function (e) {
-    e.preventDefault();
-    if ($('#output .well.spec').length) {
-      modalAlert();
-      return;
-    }
-    cleanBeforeSave();
-    var html = $('#output').html();
-    if (html !== initHtml) {
-      e.preventDefault();
-      modalAlert('Save changes first', 'The form has been changed. Please save it before this action.');
-      return;
-    }
-    $('#modalLabel').html('Rename the form');
-    $('#modal .modal-body').empty();
-    $('#modal .modal-body').append('<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">New form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>');
-    $('#modal .modal-footer').html('<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>');
-    $('#modal').modal('show');
-    $('#modal button[value="confirm"]').click(function () {
-      var newTitle = $('#title').val();
-      sendRequest({
-        title: newTitle
-      }, function () {
-        $('#formtitle').text(newTitle);
-      });
-    });
   });
 
   $('#saveas').click(function (e) {
