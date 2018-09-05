@@ -68,13 +68,24 @@ function sendRequest(data, cb, saveas) {
 function done_button(view, $out) {
   return function (e) {
     e.preventDefault();
+    // validate the userkey according to current form
+    var userkey = $('.well.spec input[name="userkey"]').val().trim();
+    if (userkey.length > 0) {
+      if ($('.control-group-wrap:not(.control-focus) input[data-userkey="' + userkey + '"]').length >= 1) {
+        console.log('dup userkey found');
+        $(this).closest('.spec').find('input[name="userkey"]').closest('.controls').append('<div class="validation text-error">dup userkey found</div>').closest('.control-group').addClass('error');
+        return;
+      }
+    }
     view.unbind();
     $(this).closest('.spec').remove();
+    // assign unique name if not yet
     $('input, textarea', $out).each(function () {
       if (!$(this).attr('name')) {
         $(this).attr('name', UID.generateShort());
       }
     });
+    // assign id to legent, id is used for side nav
     $('legend', $out).each(function () {
       if (!$(this).attr('id')) {
         $(this).attr('id', UID.generateShort());
@@ -104,7 +115,13 @@ function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
 
 function binding($edit, $out, model, $done) {
   $('input:text', $edit).keyup(function () {
-    model[$(this).attr('name')] = $(this).val();
+    model[$(this).attr('name')] = $(this).val().trim();
+    if ($(this).attr('name') === 'userkey') {
+      // remove validation message if any
+      if ($(this).closest('.control-group').hasClass('error')) {
+        $(this).closest('.control-group').removeClass('error').find('.validation').remove();
+      }
+    }
   });
 
   $('input[type="number"]', $edit).on('input', function () {
