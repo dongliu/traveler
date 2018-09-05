@@ -60,7 +60,7 @@ function sendRequest(data, cb, saveas) {
   }).fail(function (jqXHR) {
     $('form#output').fadeTo('slow', 1);
     if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The save request failed. You might need to try again or contact the admin.</div>');
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The save request failed. Reason: ' + jqXHR.responseText + '</div>');
     }
   }).always(function () {});
 }
