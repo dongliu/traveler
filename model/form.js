@@ -80,15 +80,15 @@ form.pre('save', function (next) {
           if (userkey === lastUserkey) {
             continue;
           } else {
-            return next(new FormError('inconsistent usekey found for the same input name', 400));
+            return next(new FormError('inconsistent usekey "' + userkey + '"found for the same input name', 400));
           }
         } else {
-          return next(new FormError('duplicated input name', 400));
+          return next(new FormError('duplicated input name "' + inputName + '"', 400));
         }
       } else {
         // add the mapping
         if (mapping.hasOwnProperty(userkey)) {
-          return next(new FormError('duplicated input userkey', 400));
+          return next(new FormError('duplicated input userkey "' + userkey + '"', 400));
         }
         mapping[userkey] = inputName;
       }
