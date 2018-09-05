@@ -66,7 +66,7 @@ form.pre('save', function (next) {
     for (let i = 0; i < inputs.length; i += 1) {
       let input = $(inputs[i]);
       inputName = input.attr('name');
-      userkey = input.data('userkey');
+      userkey = input.attr('data-userkey');
       if (userkey && inputName) {
         userkey = userkey.trim();
         inputName = inputName.trim();
