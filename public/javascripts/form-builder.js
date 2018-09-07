@@ -71,9 +71,10 @@ function done_button(view, $out) {
     // validate the userkey according to current form
     var userkey = $('.well.spec input[name="userkey"]').val().trim();
     if (userkey.length > 0) {
-      if ($('.control-group-wrap:not(.control-focus) input[data-userkey="' + userkey + '"]').length >= 1) {
-        console.log('dup userkey found');
-        $(this).closest('.spec').find('input[name="userkey"]').closest('.controls').append('<div class="validation text-error">dup userkey found</div>').closest('.control-group').addClass('error');
+      if ($('.control-group-wrap:not([data-status="editting"]) input[data-userkey="' + userkey + '"]').length >= 1) {
+        if (!$(this).closest('.spec').find('input[name="userkey"]').closest('.control-group').hasClass('error')) {
+          $(this).closest('.spec').find('input[name="userkey"]').closest('.controls').append('<div class="validation text-error">duplicated userkey found</div>').closest('.control-group').addClass('error');
+        }
         return;
       }
     }
@@ -917,6 +918,7 @@ function binding_events() {
     $('.control-group-buttons', $(cloned)).remove();
     $(cloned).removeClass('control-focus');
     $('input, textarea', $(cloned)).attr('name', UID.generateShort());
+    $('input, textarea', $(cloned)).removeAttr('data-userkey');
     $('legend', $(cloned)).attr('id', UID.generateShort());
     $(that).closest('.control-group-wrap').after(cloned);
   });
