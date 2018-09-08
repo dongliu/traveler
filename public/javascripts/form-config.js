@@ -99,6 +99,7 @@ $(function () {
           }
         }).always(function () {
           cleanTagForm();
+          $('#add-tag').removeAttr('disabled');
         });
       }
     });
