@@ -167,7 +167,7 @@ function add_radio($radio_group, $radio_value_spec, $done, count, model) {
   // Add radio button input control
   var $radio_button_control = $(input.radio_button());
   $('input', $radio_button_control).attr('rv-value', 'model.radio_text_' + count);
-  $('span.radio_text', $radio_button_control).text('{ model.radio_text_' + count + '}');
+  $('span.radio_text', $radio_button_control).attr('rv-text', 'model.radio_text_' + count);
   $radio_group.find('.controls').append($radio_button_control);
 
   // Add button and handler to remove radio button
