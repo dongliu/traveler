@@ -219,9 +219,11 @@ function radio_edit($cgr) {
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
     var inputs = $cgr.find('.controls').find('input');
-    radio_group_name = inputs[0].name;
-    userkey = $(inputs[0]).data('userkey');
-    required = $(inputs[0]).prop('required');
+    if (inputs.length > 0) {
+      radio_group_name = inputs[0].name;
+      userkey = $(inputs[0]).data('userkey');
+      required = $(inputs[0]).prop('required');
+    }
   }
 
   if (!radio_group_name) {
