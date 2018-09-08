@@ -184,7 +184,7 @@ function add_radio($radio_group, $radio_value_spec, $done, count, model) {
 
   });
 
-  var radio_text = 'update me';
+  var radio_text = 'radio_text_' + count;
 
   if (model['radio_text_' + count]) {
     radio_text = model['radio_text_' + count];
@@ -257,7 +257,7 @@ function radio_edit($cgr) {
     }
   } else {
     // Add initial radio button
-    model['radio_text_' + radio_button_count] = 'update me';
+    model['radio_text_' + radio_button_count] = 'radio_text_' + radio_button_count;
     add_radio($radio_group, $radio_value_spec, $done, radio_button_count, model);
     radio_button_count += 1;
   }
@@ -269,7 +269,7 @@ function radio_edit($cgr) {
   // Add functionality for adding and removing radio buttons in the group
   $add_radio_button.on('click', 'button', function (e) {
     e.preventDefault();
-    model['radio_text_' + radio_button_count] = 'update me';
+    model['radio_text_' + radio_button_count] = 'radio_text_' + radio_button_count;
     add_radio($radio_group, $radio_value_spec, $done, radio_button_count, model);
 
     radio_button_count += 1;
