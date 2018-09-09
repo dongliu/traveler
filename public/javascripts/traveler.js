@@ -474,7 +474,8 @@ $(function () {
   $('#form').on('click', 'button[value="reset"]', function (e) {
     e.preventDefault();
     var $this = $(this);
-    var input = $this.closest('.control-group-wrap').find('input,textarea')[0];
+    var inputs = $this.closest('.control-group-wrap').find('input,textarea');
+    var input = inputs[0];
     if (binder.accessor.target[input.name] === undefined) {
       if ($(input).is(':checkbox')) {
         $(input).prop('checked', false);
@@ -483,6 +484,13 @@ $(function () {
       }
     } else {
       binder.deserializeField(input);
+    }
+    var i;
+    // need to reset all the radios
+    if (input.type === 'radio' && inputs.length > 1) {
+      for (i = 1; i < inputs.length; i += 1) {
+        binder.deserializeField(inputs[i]);
+      }
     }
     $('#form input,textarea').removeAttr('disabled');
     $('#complete').removeAttr('disabled');
