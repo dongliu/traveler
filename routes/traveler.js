@@ -12,6 +12,7 @@ var underscore = require('underscore');
 var cheer = require('cheerio');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
+var tag = require('../lib/tag');
 
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
@@ -610,6 +611,9 @@ module.exports = function (app) {
     });
   });
 
+  // add tag routines
+  tag.addTag(app, '/travelers/:id/tags/', Traveler);
+  tag.removeTag(app, '/travelers/:id/tags/:tag', Traveler);
 
   app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newdevice']), reqUtils.sanitize('body', ['newdevice']), function (req, res) {
     var newdevice = req.body.newdevice;
