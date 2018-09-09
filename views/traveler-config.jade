@@ -91,6 +91,8 @@ block content
       button.btn.btn-primary#add-tag
         i.fa.fa-tag.fa-lg
         | &nbsp;Add tag
+    br
+    br
     if (locals.isOwner != undefined && locals.isOwner)
       .btn-group
         a.btn.btn-primary#manage(href='./formmanager', target='#{viewConfig.linkTarget}') Manage forms
