@@ -71,7 +71,7 @@ function done_button(view, $out) {
     // validate the userkey according to current form
     var userkey = $('.well.spec input[name="userkey"]').val().trim();
     if (userkey.length > 0) {
-      if ($('.control-group-wrap:not([data-status="editting"]) input[data-userkey="' + userkey + '"]').length >= 1) {
+      if ($('.control-group-wrap[data-status!="editing"] input[data-userkey="' + userkey + '"]').length >= 1) {
         if (!$(this).closest('.spec').find('input[name="userkey"]').closest('.control-group').hasClass('error')) {
           $(this).closest('.spec').find('input[name="userkey"]').closest('.controls').append('<div class="validation text-error">duplicated userkey found</div>').closest('.control-group').addClass('error');
         }
@@ -167,7 +167,7 @@ function add_radio($radio_group, $radio_value_spec, $done, count, model) {
   // Add radio button input control
   var $radio_button_control = $(input.radio_button());
   $('input', $radio_button_control).attr('rv-value', 'model.radio_text_' + count);
-  $('span.radio_text', $radio_button_control).text('{ model.radio_text_' + count + '}');
+  $('span.radio_text', $radio_button_control).attr('rv-text', 'model.radio_text_' + count);
   $radio_group.find('.controls').append($radio_button_control);
 
   // Add button and handler to remove radio button
@@ -184,7 +184,7 @@ function add_radio($radio_group, $radio_value_spec, $done, count, model) {
 
   });
 
-  var radio_text = 'update me';
+  var radio_text = 'radio_text_' + count;
 
   if (model['radio_text_' + count]) {
     radio_text = model['radio_text_' + count];
@@ -219,9 +219,11 @@ function radio_edit($cgr) {
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
     var inputs = $cgr.find('.controls').find('input');
-    radio_group_name = inputs[0].name;
-    userkey = $(inputs[0]).data('userkey');
-    required = $(inputs[0]).prop('required');
+    if (inputs.length > 0) {
+      radio_group_name = inputs[0].name;
+      userkey = $(inputs[0]).data('userkey');
+      required = $(inputs[0]).prop('required');
+    }
   }
 
   if (!radio_group_name) {
@@ -257,7 +259,7 @@ function radio_edit($cgr) {
     }
   } else {
     // Add initial radio button
-    model['radio_text_' + radio_button_count] = 'update me';
+    model['radio_text_' + radio_button_count] = 'radio_text_' + radio_button_count;
     add_radio($radio_group, $radio_value_spec, $done, radio_button_count, model);
     radio_button_count += 1;
   }
@@ -269,7 +271,7 @@ function radio_edit($cgr) {
   // Add functionality for adding and removing radio buttons in the group
   $add_radio_button.on('click', 'button', function (e) {
     e.preventDefault();
-    model['radio_text_' + radio_button_count] = 'update me';
+    model['radio_text_' + radio_button_count] = 'radio_text_' + radio_button_count;
     add_radio($radio_group, $radio_value_spec, $done, radio_button_count, model);
 
     radio_button_count += 1;
@@ -300,7 +302,7 @@ function checkbox_edit($cgr) {
   var $required = $(spec.required());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $userkey, $checkbox_text, $required, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">checkbox</span></div>').append($checkbox);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">checkbox</span></div>').append($checkbox);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
   var model = {
     label: label,
@@ -339,7 +341,7 @@ function text_edit($cgr) {
   var $required = $(spec.required());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $userkey, $placeholder, $help, $required, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">text</span></div>').append($text);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">text</span></div>').append($text);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
   var model = {
     label: label,
@@ -376,7 +378,7 @@ function figure_edit($cgr) {
   var $width = $(spec.width());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($file, $alt, $width, $figcaption, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">figure</span></div>').append($figure);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">figure</span></div>').append($figure);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   // need a handler here for the $done button if no image exist or updated
@@ -531,7 +533,7 @@ function other_edit($cgr) {
   var $required = $(spec.required());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($type, $label, $userkey, $placeholder, $help, $required, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">other</span></div>').append($other);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">other</span></div>').append($other);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
@@ -580,7 +582,7 @@ function textarea_edit($cgr) {
   var $required = $(spec.required());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $userkey, $placeholder, $rows, $help, $required, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">textarea</span></div>').append($textarea);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">textarea</span></div>').append($textarea);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
@@ -632,7 +634,7 @@ function number_edit($cgr) {
   var $required = $(spec.required());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $userkey, $placeholder, $help, $min, $max, $required, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">number</span></div>').append($number);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">number</span></div>').append($number);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   var model = {
@@ -673,7 +675,7 @@ function file_edit($cgr) {
   var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($label, $userkey, $help, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">file</span></div>').append($upload);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">file</span></div>').append($upload);
   if ($cgr) {
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
@@ -705,7 +707,7 @@ function section_edit($cgr) {
   var $legend = $(spec.legend());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($legend, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">section</span></div>').append($section);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">section</span></div>').append($section);
   if ($cgr) {
     $cgr.replaceWith($new_cgr);
     $new_cgr.after($edit);
@@ -732,7 +734,7 @@ function rich_edit($cgr) {
   var $rich_textarea = $(spec.rich_textarea());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append($rich_textarea, $done);
-  var $new_cgr = $('<div class="control-group-wrap" data-status="editting"><span class="fe-type">rich</span></div>').append($rich);
+  var $new_cgr = $('<div class="control-group-wrap" data-status="editing"><span class="fe-type">rich</span></div>').append($rich);
   if ($cgr) {
     $('.tinymce', $rich).html(html);
     $cgr.replaceWith($new_cgr);
@@ -899,8 +901,8 @@ function binding_events() {
   $('#output').on('click', '.control-focus a.btn.btn-warning[title="remove"]', function (e) {
     e.preventDefault();
     var $cgr = $(this).closest('.control-group-wrap');
-    if ($('.control-group-wrap[data-status="editting"]').length) {
-      modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
+    if ($('.control-group-wrap[data-status="editing"]').length) {
+      modalAlert('Finish editing first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
     }
     $cgr.closest('.control-group-wrap').remove();
@@ -910,8 +912,8 @@ function binding_events() {
     e.preventDefault();
     var that = this;
     var $cgr = $(this).closest('.control-group-wrap');
-    if ($('.control-group-wrap[data-status="editting"]').length) {
-      modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
+    if ($('.control-group-wrap[data-status="editing"]').length) {
+      modalAlert('Finish editing first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
     }
     var cloned = $cgr.clone();
@@ -926,12 +928,12 @@ function binding_events() {
   $('#output').on('click', '.control-focus a.btn[title="edit"]', function (e) {
     e.preventDefault();
     var $cgr = $(this).closest('.control-group-wrap');
-    if ($('.control-group-wrap[data-status="editting"]').length && $cgr.attr('data-status') !== 'editting') {
-      modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
+    if ($('.control-group-wrap[data-status="editing"]').length && $cgr.attr('data-status') !== 'editing') {
+      modalAlert('Finish editing first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
     }
-    if ($cgr.attr('data-status') === 'editting') {
-      // modalAlert('You are still editting it', '');
+    if ($cgr.attr('data-status') === 'editing') {
+      // modalAlert('You are still editing it', '');
       return;
     }
     var type = $('span.fe-type', $cgr).text();
@@ -974,7 +976,7 @@ function binding_events() {
   $('#save').click(function (e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
-      modalAlert('Finish editting first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
+      modalAlert('Finish editing first', 'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.');
       return;
     }
     cleanBeforeSave();
