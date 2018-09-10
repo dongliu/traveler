@@ -12,6 +12,7 @@ var underscore = require('underscore');
 var cheer = require('cheerio');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
+var tag = require('../lib/tag');
 
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
@@ -69,6 +70,7 @@ function createTraveler(form, req, res) {
     reference: form._id,
     alias: form.title
   });
+  traveler.tags = form.tags;
   traveler.activeForm = traveler.forms[0]._id;
   traveler.save(function (err, doc) {
     if (err) {
@@ -89,6 +91,7 @@ function cloneTraveler(source, req, res) {
     title: source.title + ' clone',
     description: source.description,
     devices: [],
+    tags: source.tags,
     status: 1,
     createdBy: req.session.userid,
     createdOn: Date.now(),
@@ -164,7 +167,7 @@ module.exports = function (app) {
       owner: {
         $exists: false
       }
-    }, 'title description status devices sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
+    }, 'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -179,7 +182,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }, 'title description status devices sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, travelers) {
+    }, 'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, travelers) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -206,7 +209,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title description status devices locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput').lean().exec(function (tErr, travelers) {
+      }, 'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput').lean().exec(function (tErr, travelers) {
         if (tErr) {
           console.error(tErr);
           return res.send(500, tErr.message);
@@ -241,7 +244,7 @@ module.exports = function (app) {
         _id: {
           $in: travelerIds
         }
-      }, 'title description status devices locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput').lean().exec(function (tErr, travelers) {
+      }, 'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput').lean().exec(function (tErr, travelers) {
         if (tErr) {
           console.error(tErr);
           return res.send(500, tErr.message);
@@ -608,6 +611,9 @@ module.exports = function (app) {
     });
   });
 
+  // add tag routines
+  tag.addTag(app, '/travelers/:id/tags/', Traveler);
+  tag.removeTag(app, '/travelers/:id/tags/:tag', Traveler);
 
   app.post('/travelers/:id/devices/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['newdevice']), reqUtils.sanitize('body', ['newdevice']), function (req, res) {
     var newdevice = req.body.newdevice;

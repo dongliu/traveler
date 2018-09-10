@@ -9,7 +9,7 @@ $(function () {
 
   function cleanTagForm() {
     $('#new-tag').closest('li').remove();
-    $('#add').removeAttr('disabled');
+    $('#add-tag').removeAttr('disabled');
   }
 
   $('span.time').each(function () {
