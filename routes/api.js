@@ -113,6 +113,11 @@ module.exports = function (app) {
         $in: [req.query.tag]
       };
     }
+    if (req.query.hasOwnProperty('userkey')) {
+      search['mapping.' + req.query.userkey] = {
+        $exists: true
+      };
+    }
     Form.find(search, function (err, forms) {
       performMongoResponse(err, forms, res);
     });
