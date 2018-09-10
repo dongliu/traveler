@@ -67,7 +67,7 @@ block content
           = ' '
           button.btn.btn-small.btn-warning.removeLocation
             i.fa.fa-trash-o.fa-lg
-    h4 Tags
+    h4 Devices
     ul#devices
       each device in traveler.devices
         li
@@ -77,7 +77,22 @@ block content
             i.fa.fa-trash-o.fa-lg
     br
     .btn-group
-      button.btn.btn-primary#add Add tags
+      button.btn.btn-primary#add Add device
+    h4 Tags
+    ul#tags.tag-list
+      each tag in traveler.tags
+        li
+          span.tag #{tag}
+          = ' '
+          button.btn.btn-small.btn-warning.remove-tag
+            i.fa.fa-trash-o.fa-lg
+    br
+    .btn-group
+      button.btn.btn-primary#add-tag
+        i.fa.fa-tag.fa-lg
+        | &nbsp;Add tag
+    br
+    br
     if (locals.isOwner != undefined && locals.isOwner)
       .btn-group
         a.btn.btn-primary#manage(href='./formmanager', target='#{viewConfig.linkTarget}') Manage forms

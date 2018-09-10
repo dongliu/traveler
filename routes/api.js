@@ -14,20 +14,20 @@ var WRITE_API_USER = 'api_write';
 /**
  * Checks if the api user who is logged in has write access.
  *
- * @param req - Request object
- * @param res - Response object
- * @param next - Callback to be called when successful
+ * @param {Request} req  - Request object
+ * @param {Response} res  - Response object
+ * @param {function} next  - Callback to be called when successful
  * @returns {*|ServerResponse} error when no permissions exist for writing
  */
-function checkWritePermissions(req, res, next){
-    var credentials = basic(req);
-    if (credentials.name !== WRITE_API_USER) {
-      return res.json(401, {
-        error: 'Write permissions are needed to create a form'
-      });
-    } else {
-      next();
-    }
+function checkWritePermissions(req, res, next) {
+  var credentials = basic(req);
+  if (credentials.name !== WRITE_API_USER) {
+    return res.json(401, {
+      error: 'Write permissions are needed to create a form'
+    });
+  } else {
+    next();
+  }
 }
 
 /**
@@ -40,7 +40,7 @@ function checkWritePermissions(req, res, next){
  * @param successCB - Optional call back variable will be executed when specified.
  * @returns {*} Error object or data object. Nothing when callback is performed
  */
-function performMongoResponse(err, data, res, successCB){
+function performMongoResponse(err, data, res, successCB) {
   if (err) {
     console.error(err);
     return res.send(500, err.message);
@@ -91,58 +91,79 @@ module.exports = function (app) {
         $in: [req.query.device]
       };
     }
-    Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+
+    if (req.query.hasOwnProperty('tag')) {
+      search.tags = {
+        $in: [req.query.tag]
+      };
+    }
+    Traveler.find(search, 'title status devices tags createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       performMongoResponse(err, travelers, res);
     });
   });
 
-  app.get('/apis/forms/', function (req, res){
-    Form.find({}, function(err, forms){
-      performMongoResponse(err,forms, res);
+  app.get('/apis/forms/', function (req, res) {
+    var search = {
+      archived: {
+        $ne: true
+      }
+    };
+    if (req.query.hasOwnProperty('tag')) {
+      search.tags = {
+        $in: [req.query.tag]
+      };
+    }
+    if (req.query.hasOwnProperty('userkey')) {
+      search['mapping.' + req.query.userkey] = {
+        $exists: true
+      };
+    }
+    Form.find(search, function (err, forms) {
+      performMongoResponse(err, forms, res);
     });
   });
 
-  app.get('/apis/forms/:id/', function (req, res){
-    Form.findById(req.params.id, function(err, forms){
-      performMongoResponse(err,forms, res);
+  app.get('/apis/forms/:id/', function (req, res) {
+    Form.findById(req.params.id, function (err, forms) {
+      performMongoResponse(err, forms, res);
     });
   });
 
-  app.get('/apis/binders/', function (req, res){
-      Binder.find({}, function(err, binders){
-          performMongoResponse(err,binders, res);
-      });
+  app.get('/apis/binders/', function (req, res) {
+    Binder.find({}, function (err, binders) {
+      performMongoResponse(err, binders, res);
+    });
   });
 
-  app.get('/apis/binders/:id/', function (req, res){
-      Binder.findById(req.params.id, function(err, binder){
-          performMongoResponse(err,binder, res);
-      });
+  app.get('/apis/binders/:id/', function (req, res) {
+    Binder.findById(req.params.id, function (err, binder) {
+      performMongoResponse(err, binder, res);
+    });
   });
 
   app.post('/apis/create/binders/', routesUtilities.filterBody(['binderTitle', 'description', 'userName'], true), checkWritePermissions, function (req, res) {
-      var binderTitle = req.body.binderTitle;
-      var userName = req.body.userName;
-      var description = req.body.description;
+    var binderTitle = req.body.binderTitle;
+    var userName = req.body.userName;
+    var description = req.body.description;
 
-      routesUtilities.binder.createBinder(binderTitle, description, userName, function (err, newBinder) {
-          performMongoResponse(err, newBinder, res, function(){
-              return res.json(201, newBinder);
-          });
-      });
+    routesUtilities.binder.createBinder(binderTitle, description, userName, function (err, newBinder) {
+      performMongoResponse(err, newBinder, res, function () {
+          return res.json(201, newBinder);
+        });
+    });
   });
 
   app.post('/apis/addWork/binders/:id/', routesUtilities.filterBody(['travelerIds', 'userName'], true), checkWritePermissions, function (req, res) {
-      Binder.findById(req.params.id, function(err, binder){
-          performMongoResponse(err,binder, res, function () {
-            userName = req.body.userName;
-            routesUtilities.binder.addWork(binder, userName, req, res);
-          });
-      });
+    Binder.findById(req.params.id, function (err, binder) {
+      performMongoResponse(err, binder, res, function () {
+          userName = req.body.userName;
+          routesUtilities.binder.addWork(binder, userName, req, res);
+        });
+    });
   });
 
   app.get('/apis/travelers/:id/', function (req, res) {
-    Traveler.findById(req.params.id, function(travelerErr, traveler){
+    Traveler.findById(req.params.id, function (travelerErr, traveler) {
       performMongoResponse(travelerErr, traveler, res);
     });
   });
@@ -161,7 +182,7 @@ module.exports = function (app) {
 
   app.get('/apis/data/:id/', function (req, res) {
     TravelerData.findById(req.params.id).lean().exec(function (err, data) {
-      performMongoResponse(err, data, res, function(){
+      performMongoResponse(err, data, res, function () {
         if (data.inputType === 'file') {
           fs.exists(data.file.path, function (exists) {
             if (exists) {
@@ -181,7 +202,7 @@ module.exports = function (app) {
     var userName = req.body.userName;
     var html = req.body.html;
     routesUtilities.form.createForm(formName, userName, html, function (err, newForm) {
-      performMongoResponse(err, newForm, res, function(){
+      performMongoResponse(err, newForm, res, function () {
         return res.json(201, newForm);
       });
     });
@@ -191,14 +212,14 @@ module.exports = function (app) {
     try {
       var status = parseFloat(req.body.status);
     } catch (ex) {
-      return res.json(400, {error: "Status provided was of invalid type. Expected: Float."});
+      return res.json(400, {error: 'Status provided was of invalid type. Expected: Float.'});
     }
 
-    Traveler.findById(req.params.id, function(travelerErr, traveler){
+    Traveler.findById(req.params.id, function (travelerErr, traveler) {
       performMongoResponse(travelerErr, traveler, res, function () {
-        routesUtilities.traveler.updateTravelerStatus(req, res, traveler, status, false, function() {
+        routesUtilities.traveler.updateTravelerStatus(req, res, traveler, status, false, function () {
           var deadline = req.body.deadline;
-          if (deadline == "") {
+          if (deadline === '') {
             traveler.deadline = undefined;
           } else {
             traveler.deadline = deadline;
@@ -207,10 +228,10 @@ module.exports = function (app) {
           traveler.description = req.body.description;
           traveler.updatedBy = req.body.userName;
           traveler.updatedOn = Date.now();
-          traveler.save(function(err) {
-            performMongoResponse(err, traveler, res, function() {
+          traveler.save(function (err) {
+            performMongoResponse(err, traveler, res, function () {
               return res.json(200, traveler);
-            })
+            });
           });
         });
       });
@@ -218,12 +239,12 @@ module.exports = function (app) {
   });
 
   app.post('/apis/create/traveler/', routesUtilities.filterBody(['formId', 'title', 'userName', 'devices'], true), checkWritePermissions, function (req, res) {
-    Form.findById(req.body.formId, function(formErr, form){
-      performMongoResponse(formErr,form,res, function () {
+    Form.findById(req.body.formId, function (formErr, form) {
+      performMongoResponse(formErr, form, res, function () {
         var title = req.body.title;
         var userName = req.body.userName;
         var devices = req.body.devices;
-        routesUtilities.traveler.createTraveler(form, title, userName, devices, function(newTravelerErr, newTraveler){
+        routesUtilities.traveler.createTraveler(form, title, userName, devices, function (newTravelerErr, newTraveler) {
           performMongoResponse(newTravelerErr, newTraveler, res, function () {
             return res.json(201, newTraveler);
           });
