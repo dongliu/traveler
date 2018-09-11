@@ -115,7 +115,7 @@ function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
 }
 
 function binding($edit, $out, model, $done) {
-  $('input:text', $edit).keyup(function () {
+  $('input:text', $edit).on('input', function () {
     model[$(this).attr('name')] = $(this).val().trim();
     if ($(this).attr('name') === 'userkey') {
       // remove validation message if any
