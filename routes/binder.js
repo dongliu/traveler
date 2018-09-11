@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var underscore = require('underscore');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
-var routesUtilities = require('../utilities/routes')
+var routesUtilities = require('../utilities/routes');
 
 require('../model/binder.js');
 var User = mongoose.model('User');
@@ -522,7 +522,7 @@ module.exports = function (app) {
     }
   });
 
-  app.post('/binders/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['travelers', 'binders']), function (req, res) {
+  app.post('/binders/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['travelerIds', 'binders']), function (req, res) {
     routesUtilities.binder.addWork(req[req.params.id], req.session.userid, req, res);
   });
 
