@@ -1,7 +1,7 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, moment: false, travelerGlobal: false*/
 /*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, archivedOnColumn: false, binderConfigLinkColumn: false, binderShareLinkColumn: false, binderLinkColumn: false, tagsColumn: false, binderProgressColumn: false, transferredOnColumn: false, ownerColumn: false*/
-/*global archiveFromModal, transferFromModal, modalScroll*/
+/*global archiveFromModal, transferFromModal, modalScroll, Holder*/
 
 
 function formatItemUpdate(data) {
@@ -24,6 +24,11 @@ $(function () {
   var binderTable = $('#binder-table').dataTable({
     sAjaxSource: '/binders/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
@@ -48,6 +53,11 @@ $(function () {
   var transferredBinderTable = $('#transferred-binder-table').dataTable({
     sAjaxSource: '/transferredbinders/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
@@ -74,6 +84,11 @@ $(function () {
   var sharedBinderTable = $('#shared-binder-table').dataTable({
     sAjaxSource: '/sharedbinders/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
@@ -99,6 +114,11 @@ $(function () {
   var groupSharedBinderTable = $('#group-shared-binder-table').dataTable({
     sAjaxSource: '/groupsharedbinders/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
@@ -124,6 +144,11 @@ $(function () {
   var archivedBinderTable = $('#archived-binder-table').dataTable({
     sAjaxSource: '/archivedbinders/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
