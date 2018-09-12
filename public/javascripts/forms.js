@@ -80,7 +80,7 @@ $(function () {
   var formTable = $('#form-table').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -111,7 +111,7 @@ $(function () {
   var transferredFormTable = $('#transferred-form-table').dataTable({
     sAjaxSource: '/transferredforms/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -142,7 +142,7 @@ $(function () {
   var sharedFormTable = $('#shared-form-table').dataTable({
     sAjaxSource: '/sharedforms/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -172,7 +172,7 @@ $(function () {
   var groupSharedFormTable = $('#group-shared-form-table').dataTable({
     sAjaxSource: '/groupsharedforms/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -202,7 +202,7 @@ $(function () {
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
