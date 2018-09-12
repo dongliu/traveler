@@ -24,7 +24,7 @@ $(function () {
   var binderTable = $('#binder-table').dataTable({
     sAjaxSource: '/binders/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -53,7 +53,7 @@ $(function () {
   var transferredBinderTable = $('#transferred-binder-table').dataTable({
     sAjaxSource: '/transferredbinders/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -84,7 +84,7 @@ $(function () {
   var sharedBinderTable = $('#shared-binder-table').dataTable({
     sAjaxSource: '/sharedbinders/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -114,7 +114,7 @@ $(function () {
   var groupSharedBinderTable = $('#group-shared-binder-table').dataTable({
     sAjaxSource: '/groupsharedbinders/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -144,7 +144,7 @@ $(function () {
   var archivedBinderTable = $('#archived-binder-table').dataTable({
     sAjaxSource: '/archivedbinders/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });

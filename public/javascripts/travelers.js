@@ -79,7 +79,7 @@ $(function () {
   var travelerTable = $('#traveler-table').dataTable({
     sAjaxSource: '/travelers/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -108,7 +108,7 @@ $(function () {
   var transferredTravelerTable = $('#transferred-traveler-table').dataTable({
     sAjaxSource: '/transferredtravelers/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -140,7 +140,7 @@ $(function () {
   var sharedTravelerTable = $('#shared-traveler-table').dataTable({
     sAjaxSource: '/sharedtravelers/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -168,7 +168,7 @@ $(function () {
   var groupSharedTravelerTable = $('#group-shared-traveler-table').dataTable({
     sAjaxSource: '/groupsharedtravelers/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -196,7 +196,7 @@ $(function () {
   var archivedTravelerTable = $('#archived-traveler-table').dataTable({
     sAjaxSource: '/archivedtravelers/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
