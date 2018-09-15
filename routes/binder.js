@@ -486,7 +486,7 @@ module.exports = function (app) {
         _id: {
           $in: tids
         }
-      }, 'devices locations manPower status createdBy owner sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+      }, 'devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
