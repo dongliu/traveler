@@ -96,24 +96,6 @@ block content
     if (locals.isOwner != undefined && locals.isOwner)
       .btn-group
         a.btn.btn-primary#manage(href='./formmanager', target='#{viewConfig.linkTarget}') Manage forms
-      case traveler.status
-        when 0
-          .btn-group
-            button.btn.btn-primary#work Start to work
-        when 1
-          .btn-group
-            button.btn.btn-warning#freeze Freeze
-          .btn-group
-            button.btn.btn-primary#complete Submit for completion
-        when 1.5
-          .btn-group
-            button.btn.btn-primary#approve Approve completion
-          .btn-group
-            button.btn.btn-warning#more More work
-        //- when 2
-        when 3
-          .btn-group
-            button.btn.btn-primary#resume Resume
     if (viewConfig.showCCDB)
       .btn-group
           a.btn.btn-info(href='#{prefix}/devices/', target='#{viewConfig.linkTarget}') Browse devices
