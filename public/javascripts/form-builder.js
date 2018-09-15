@@ -782,6 +782,17 @@ function init() {
 
   // update every 30 seconds
   $.livestamp.interval(30 * 1000);
+
+  rivets.binders['required'] = function (el, value) {
+    var attrToSet = 'required';
+
+    if (value) {
+      el.setAttribute(attrToSet, value);
+    } else {
+      // we have to do this for a boolean attribute
+      el.removeAttribute(attrToSet);
+    }
+  };
 }
 
 function working() {
