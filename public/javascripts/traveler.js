@@ -102,17 +102,6 @@ function createSideNav() {
 function incrementFinished() {
   finishedInput += 1;
   $('#finished-input').text(finishedInput);
-  // $.ajax({
-  //   url: './finishedinput',
-  //   type: 'PUT',
-  //   contentType: 'application/json',
-  //   data: JSON.stringify({
-  //     finishedInput: num
-  //   if (jqXHR.status !== 401) {
-  //     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update finished input number</div>');
-  //     $(window).scrollTop($('#message div:last-child').offset().top - 40);
-  //   }
-  // }).always();
 }
 
 function showConfirmation(action) {
@@ -265,8 +254,6 @@ $(function () {
     }
   });
 
-  // var realFinishedInput = 0;
-
   $.ajax({
     url: './data/',
     type: 'GET',
@@ -280,7 +267,6 @@ $(function () {
           return e.name === element.name;
         });
         if (found.length) {
-          // realFinishedInput += 1;
           found.sort(function (a, b) {
             if (a.inputOn > b.inputOn) {
               return -1;
@@ -313,11 +299,6 @@ $(function () {
     if (travelerStatus === 1) {
       $('input,textarea', form).prop('disabled', false);
     }
-
-    // update finished input number
-    // if (realFinishedInput !== finishedInput) {
-    //   updateFinished(realFinishedInput);
-    // }
 
     // load the notes here
     renderNotes();
@@ -406,11 +387,7 @@ $(function () {
       if ($history.length > 0) {
         $history = $($history[0]);
       } else {
-        // add an input-history div
-        // realFinishedInput += 1;
-        // if (finishedInput !== realFinishedInput) {
         incrementFinished();
-        // }
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
       $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by you ' + livespan(timestamp) + '; ' + $history.html());
@@ -516,10 +493,6 @@ $(function () {
         $history = $($history[0]);
       } else {
         // add an input-history div
-        // realFinishedInput += 1;
-        // if (finishedInput !== realFinishedInput) {
-        //   updateFinished(realFinishedInput);
-        // }
         incrementFinished();
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
@@ -585,11 +558,5 @@ $(function () {
     $('#validation').hide();
     $('.validation').hide();
   });
-
-  // $('#update-progress').click(function () {
-  //   if (realFinishedInput !== finishedInput) {
-  //     updateFinished(realFinishedInput);
-  //   }
-  // });
 
 });
