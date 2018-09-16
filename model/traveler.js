@@ -15,11 +15,16 @@ var share = require('./share.js');
  * activatedOn: the dates when this form starts to be active
  * alias : a name for convenience to distinguish forms.
  * mapping : name -> {user-key, label}
+ * inputs : list of input names in the form
+ * mapping and inputs are decided by the form snapshot when a traveler is created from it.
+ * they are within form because they will be never changed like the html once created.
  */
 
 var form = new Schema({
   html: String,
   mapping: Schema.Types.Mixed,
+  // list of input names in the current active form
+  inputs: [String],
   activatedOn: [Date],
   reference: ObjectId,
   alias: String
@@ -77,16 +82,23 @@ var traveler = new Schema({
   activeForm: String,
   data: [ObjectId],
   notes: [ObjectId],
+  // decided by the active form input list
+  // update with active form
   totalInput: {
     type: Number,
     default: 0,
     min: 0
   },
+  // decided by the touched inputs
+  // keep for compatibility with previous versions
   finishedInput: {
     type: Number,
     default: 0,
     min: 0
   },
+  // list of inputs that have been touched accoring to the active form
+  // update with traveler data and active form
+  touchedInputs: [String],
   archived: {
     type: Boolean,
     default: false
