@@ -129,19 +129,23 @@ var FormLoader = (function (parent, $) {
    * @return {undefined}
    */
   function renderNotes() {
-    $('#form input,textarea').each(function (index, element) {
-      var found = notes.filter(function (e) {
-        return e.name === element.name;
-      });
-      $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a></div>');
-      if (found.length) {
-        found.sort(function (a, b) {
-          if (a.inputOn > b.inputOn) {
-            return -1;
-          }
-          return 1;
+    $('#form .controls').each(function (index, controlsElement) {
+      var inputElements = $(controlsElement).find('input,textarea');
+      if (inputElements.length) {
+        var element = inputElements[0];
+        var found = notes.filter(function (e) {
+          return e.name === element.name;
         });
-        $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + generateNotes(found) + '</div>');
+        $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
+        if (found.length) {
+          found.sort(function (a, b) {
+            if (a.inputOn > b.inputOn) {
+              return -1;
+            }
+            return 1;
+          });
+          $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + generateNotes(found) + '</div>');
+        }
       }
     });
   }
@@ -209,8 +213,8 @@ var FormLoader = (function (parent, $) {
    */
   function bindData(binder) {
     $('#form input,textarea').each(function (index, element) {
-      var found = data.filter(function (e) {
-        return e.name === element.name;
+      var found = data.filter(function (d) {
+        return d.name === element.name;
       });
       if (found.length) {
         found.sort(function (a, b) {
@@ -219,11 +223,17 @@ var FormLoader = (function (parent, $) {
           }
           return 1;
         });
-        if (this.type === 'file') {
+        if (element.type === 'file') {
           $(element).closest('.controls').append('<div class="input-history">' + fileHistory(found) + '</div>');
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
+          // history only once for radio
+          if (element.type === 'radio') {
+            if (element.value !== found[0].value) {
+              return false;
+            }
+          }
           $(element).closest('.controls').append('<div class="input-history">' + history(found) + '</div>');
         }
       }
