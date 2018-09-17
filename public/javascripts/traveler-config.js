@@ -11,25 +11,6 @@ function cleanTagForm() {
   $('#add-tag').removeAttr('disabled');
 }
 
-function setStatus(s) {
-  $.ajax({
-    url: './status',
-    type: 'PUT',
-    contentType: 'application/json',
-    data: JSON.stringify({
-      status: s
-    })
-  }).done(function () {
-    // TODO: avoid refresh the whole page
-    document.location.href = window.location.pathname;
-  }).fail(function (jqXHR) {
-    if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' + jqXHR.responseText + '</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }
-  }).always();
-}
-
 $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
@@ -275,31 +256,6 @@ $(function () {
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always();
-  });
-
-  $('#work').click(function (e) {
-    e.preventDefault();
-    setStatus(1);
-  });
-
-  $('#freeze').click(function (e) {
-    e.preventDefault();
-    setStatus(3);
-  });
-
-  $('#resume').click(function (e) {
-    e.preventDefault();
-    setStatus(1);
-  });
-
-  $('#approve').click(function (e) {
-    e.preventDefault();
-    setStatus(2);
-  });
-
-  $('#more').click(function (e) {
-    e.preventDefault();
-    setStatus(1);
   });
 
 });
