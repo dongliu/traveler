@@ -80,6 +80,11 @@ function setStatus(s) {
   });
 }
 
+function complete() {
+  $('input,textarea', form).prop('disabled', true);
+  setStatus(1.5);
+}
+
 function createSideNav() {
   var $legend = $('legend');
   var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
@@ -112,73 +117,25 @@ function updateFinished(num) {
   }).always();
 }
 
-function validation_message(form) {
-  var i = 0;
-  var output = $('<div>');
-  var p;
-  var value;
-  var input;
-  var label;
-  var span;
-  var last_input_name = "";
-  for (i = 0; i < form.elements.length; i += 1) {
-    input = form.elements[i];
+function showConfirmation(action) {
+  $('#modalLabel').html('Please review before action');
+  $('#modal .modal-body').html(validationMessage(document.getElementById('form')));
+  $('#modal .modal-footer').html('<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  $('#modal').modal('show');
+  $('#modal button[value="submit"]').click(action);
+}
 
-    var input_name = input.name;
-    if (input_name === last_input_name) {
-        continue;
-    }
-    last_input_name = input_name;
-
-    input = form.elements[i];
-    p = $('<p>');
-    span = $('<span class="validation">');
-    if (input.checkValidity()) {
-      p.css('color', '#468847');
-      span.css('color', '#468847');
-    } else {
-      p.css('color', '#b94a48');
-      span.css('color', '#b94a48');
-    }
-    if (input.type === 'checkbox') {
-      value = input.checked ? 'checked' : 'not checked';
-    } else if (input.type === 'radio') {
-        var radio_ittr = i;
-        var ittr_input = input;
-        value = "";
-        while (ittr_input !== undefined && input_name === ittr_input.name) {
-          if (value !== "") {
-            value += " / ";
-          }
-          if (ittr_input.checked) {
-              value = ittr_input.value;
-              break;
-          }
-          value += ittr_input.value;
-
-          radio_ittr++;
-          ittr_input = form.elements[radio_ittr];
-        }
-    } else if (input.value === '') {
-      value = 'no input from user';
-    } else {
-      value = input.value;
-    }
-    label = $(input).closest('.control-group').children('.control-label').text();
-    if (label === '' && input.type === 'checkbox') {
-      label = $(input).next().text();
-    }
-    if (input.checkValidity()) {
-      p.html('<b>' + label + '</b>: ' + value);
-      span.text('validation passed');
-    } else {
-      p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
-      span.text(input.validationMessage);
-    }
-    $(input).closest('.controls').append(span);
-    output.append(p);
+function showValidation() {
+  if ($('.control-group-buttons').length) {
+    $('#modalLabel').html('Alert');
+    $('#modal .modal-body').html('Please finish the input before validating the form.');
+    $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+    $('#modal').modal('show');
+    return;
   }
-  return output;
+  $('.validation').remove();
+  $('#validation').html('<h3>Summary</h3>' + validationMessage(document.getElementById('form')));
+  $('#validation').show();
 }
 
 $(function () {
@@ -234,17 +191,17 @@ $(function () {
         if (inputElements.length) {
           var element = inputElements[0];
           var found = data.filter(function (e) {
-              return e.name === element.name;
+            return e.name === element.name;
           });
           $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
           if (found.length) {
-              found.sort(function (a, b) {
-                  if (a.inputOn > b.inputOn) {
-                      return -1;
-                  }
-                  return 1;
-              });
-              $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
+            found.sort(function (a, b) {
+              if (a.inputOn > b.inputOn) {
+                return -1;
+              }
+              return 1;
+            });
+            $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
           }
         }
       });
@@ -327,16 +284,16 @@ $(function () {
         if (found.length) {
           realFinishedInput += 1;
           found.sort(function (a, b) {
-              if (a.inputOn > b.inputOn) {
-                  return -1;
-              }
-              return 1;
+            if (a.inputOn > b.inputOn) {
+              return -1;
+            }
+            return 1;
           });
           if (element.type === 'file') {
-              $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
+            $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
           } else {
             var currentValue = found[0].value;
-            if (found[0].inputType === 'radio'){
+            if (found[0].inputType === 'radio') {
               // Update element to match the value
               for (var i = 0; i < inputElements.size(); i++) {
                 var ittrInput = inputElements[i];
@@ -356,7 +313,7 @@ $(function () {
 
     // check if active here
     if (travelerStatus === 1) {
-      $('#form input,textarea').removeAttr('disabled');
+      $('input,textarea', form).prop('disabled', false);
     }
 
     // update finished input number
@@ -376,8 +333,11 @@ $(function () {
 
   $('#complete').click(function (e) {
     e.preventDefault();
-    $('#form input,textarea').attr('disabled', true);
-    setStatus(1.5);
+    if ($('#validation').css('display') === 'none' && !isValid(document.getElementById('form'))) {
+      showConfirmation(complete);
+    } else {
+      complete();
+    }
   });
 
   // deserialize the values here
@@ -397,8 +357,8 @@ $(function () {
   $('#form input:not([type="file"], [type="checkbox"]),textarea').on('input', function () {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
-    $('#form input,textarea').not($this).attr('disabled', true);
-    $('#completed').attr('disabled', true);
+    $('input,textarea', form).not($this).prop('disabled', true);
+    $('#complete').prop('disabled', true);
     if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
     }
@@ -407,8 +367,8 @@ $(function () {
   $('#form input:not([type="file"])').change(function () {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
-    $('#form input,textarea').not($this).attr('disabled', true);
-    $('#completed').attr('disabled', true);
+    $('input,textarea', form).not($this).prop('disabled', true);
+    $('#complete').prop('disabled', true);
     if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
     }
@@ -421,8 +381,8 @@ $(function () {
     var $this = $(this);
     var inputs = $this.closest('.control-group-wrap').find('input,textarea');
     var input = inputs[0];
-    if (inputs[0].type === "radio") {
-      for (var i = 0; i< inputs.size(); i++) {
+    if (inputs[0].type === 'radio') {
+      for (var i = 0; i < inputs.size(); i++) {
         var ittr_input = inputs[i];
         if (ittr_input.checked) {
           input = ittr_input;
@@ -464,8 +424,8 @@ $(function () {
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always(function () {
-      $('#form input,textarea').removeAttr('disabled');
-      $('#complete').removeAttr('disabled');
+      $('input,textarea', form).prop('disabled', false);
+      $('#complete').prop('disabled', false);
     });
 
   });
@@ -492,8 +452,8 @@ $(function () {
         binder.deserializeField(inputs[i]);
       }
     }
-    $('#form input,textarea').removeAttr('disabled');
-    $('#complete').removeAttr('disabled');
+    $('input,textarea', form).prop('disabled', false);
+    $('#complete').prop('disabled', false);
     $(this).closest('.control-group-buttons').remove();
   });
 
@@ -501,8 +461,8 @@ $(function () {
     e.preventDefault();
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
-    $('#form input,textarea').not($this).attr('disabled', true);
-    $('#completed').attr('disabled', true);
+    $('input,textarea', form).not($this).prop('disabled', true);
+    $('#complete').prop('disabled', true);
     var file = this.files[0];
     if (file === undefined) {
       $cgw.children('.control-group-buttons').remove();
@@ -537,7 +497,7 @@ $(function () {
     e.preventDefault();
     // ajax to save the current value
     var $this = $(this);
-    $this.attr('disabled', true);
+    $this.prop('disabled', true);
     var input = $this.closest('.control-group-wrap').find('input')[0];
     var data = new FormData();
     data.append('name', input.name);
@@ -573,8 +533,8 @@ $(function () {
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always(function () {
-      $('#form input,textarea').removeAttr('disabled');
-      $('#complete').removeAttr('disabled');
+      $('input,textarea', form).prop('disabled', false);
+      $('#complete').prop('disabled', false);
     });
 
   });
@@ -582,8 +542,8 @@ $(function () {
   $('#form').on('click', 'button[value="cancel"]', function (e) {
     e.preventDefault();
     // cannot reset the file input value
-    $('#form input,textarea').removeAttr('disabled');
-    $('#complete').removeAttr('disabled');
+    $('input,textarea', form).prop('disabled', false);
+    $('#complete').prop('disabled', false);
     $(this).closest('.control-group-buttons').remove();
   });
 
@@ -620,18 +580,7 @@ $(function () {
     $('.input-notes').hide();
   });
 
-  $('#show-validation').click(function () {
-    if ($('.control-group-buttons').length) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('Please finish the input before validating the form.');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
-      return;
-    }
-    $('.validation').remove();
-    $('#validation').html('<h3>Summary</h3>' + validation_message(document.getElementById('form')).html());
-    $('#validation').show();
-  });
+  $('#show-validation').click(showValidation);
 
   $('#hide-validation').click(function () {
     $('#validation').hide();
