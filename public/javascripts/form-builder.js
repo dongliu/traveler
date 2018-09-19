@@ -73,8 +73,9 @@ function done_button(view, $out) {
     e.preventDefault();
     // validate the userkey according to current form
     var userKeyInput = $('.well.spec input[name="userkey"]');
-    var userkey = userKeyInput.val().trim();
-    if (userkey.length > 0) {
+    var userkey = userKeyInput.val();
+    if (typeof userkey !== 'undefined') {
+      userkey = userkey.trim();
       if (!userKeyInput[0].validity.valid) {
         userkey_error(userKeyInput, 'Invalid userkey format');
         return;
