@@ -11,6 +11,11 @@ $(function () {
   $('#public-forms-table').dataTable({
     sAjaxSource: '/publicforms/json',
     sAjaxDataProp: '',
+    fnInitComplete: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     bAutoWidth: false,
     iDisplayLength: 10,
     aLengthMenu: [
