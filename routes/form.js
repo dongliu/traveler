@@ -423,7 +423,8 @@ module.exports = function (app) {
           clonedFrom: form._id,
           sharedWith: [],
           sharedGroup: [],
-          html: form.html
+          html: form.html,
+          tags: form.tags
         });
 
         clonedForm.save(function (saveErr, createdForm) {
@@ -456,6 +457,7 @@ module.exports = function (app) {
     form.createdOn = Date.now();
     form.clonedFrom = doc._id;
     form.sharedWith = [];
+    form.tags = doc.tags;
 
     (new Form(form)).save(function (saveErr, newform) {
       if (saveErr) {
