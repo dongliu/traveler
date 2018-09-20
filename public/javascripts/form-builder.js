@@ -62,16 +62,26 @@ function sendRequest(data, cb, saveas) {
   }).always(function () {});
 }
 
+function userkey_error($userkey, msg){
+  if (!$userkey.closest('.control-group').hasClass('error')) {
+    $userkey.closest('.controls').append('<div class="validation text-error">'+msg+'</div>').closest('.control-group').addClass('error');
+  }
+}
+
 function done_button(view, $out) {
   return function (e) {
     e.preventDefault();
     // validate the userkey according to current form
-    var userkey = $('.well.spec input[name="userkey"]').val().trim();
-    if (userkey.length > 0) {
+    var userKeyInput = $('.well.spec input[name="userkey"]');
+    var userkey = userKeyInput.val();
+    if (typeof userkey !== 'undefined') {
+      userkey = userkey.trim();
+      if (!userKeyInput[0].validity.valid) {
+        userkey_error(userKeyInput, 'Invalid userkey format');
+        return;
+      }
       if ($('.control-group-wrap[data-status!="editing"] input[data-userkey="' + userkey + '"]').length >= 1) {
-        if (!$(this).closest('.spec').find('input[name="userkey"]').closest('.control-group').hasClass('error')) {
-          $(this).closest('.spec').find('input[name="userkey"]').closest('.controls').append('<div class="validation text-error">duplicated userkey found</div>').closest('.control-group').addClass('error');
-        }
+        userkey_error(userKeyInput, 'duplicated userkey found');
         return;
       }
     }
