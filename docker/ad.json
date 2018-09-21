@@ -4,7 +4,7 @@
   "adminPassword": "admin",
   "searchBase": "dc=example,dc=org",
   "searchFilter": "(&(objectClass=inetOrgPerson)(uid=_id))",
-  "nameFilter": "(&(objectClass=inetOrgPerson)(displayName=_name)(company=Engineering))",
+  "nameFilter": "(&(objectClass=inetOrgPerson)(displayName=_name))",
   "groupSearchBase": "dc=example",
   "groupSearchFilter": "(&(objectClass=group)(uid=_id))",
   "objAttributes": ["uid", "displayName", "ou", "mail", "homephone"],
