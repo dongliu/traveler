@@ -241,8 +241,10 @@ $(function () {
     }
   });
 
+  if ($('#usernames').length) {
+    travelerGlobal.usernames.initialize();
+  }
 
-  travelerGlobal.usernames.initialize();
   $('#username').typeahead({
     minLength: 1,
     highlight: true,
@@ -258,8 +260,9 @@ $(function () {
     $('#add').attr('disabled', false);
   });
 
-
-  travelerGlobal.groupids.initialize();
+  if ($('#groupid').length) {
+    travelerGlobal.groupids.initialize();
+  }
 
   $('#groupid').typeahead({
     minLength: 1,
@@ -337,7 +340,11 @@ $(function () {
     modify('groups', groupShareTable);
   });
 
-  initTable('users', shareTable);
-  initTable('groups', groupShareTable);
+  if ($('#usernames').length) {
+    initTable('users', shareTable);
+  }
+  if ($('#groupid').length) {
+    initTable('groups', groupShareTable);
+  }
 
 });
