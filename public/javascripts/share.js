@@ -241,7 +241,7 @@ $(function () {
     }
   });
 
-  if ($('#usernames').length) {
+  if ($('#username').length) {
     travelerGlobal.usernames.initialize();
   }
 
@@ -340,7 +340,7 @@ $(function () {
     modify('groups', groupShareTable);
   });
 
-  if ($('#usernames').length) {
+  if ($('#username').length) {
     initTable('users', shareTable);
   }
   if ($('#groupid').length) {
