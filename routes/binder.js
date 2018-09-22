@@ -7,6 +7,9 @@ var underscore = require('underscore');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
 var routesUtilities = require('../utilities/routes');
+var jade = require('jade');
+var valueProgressHtml = jade.compileFile(__dirname + '/../views/binder-value-progress.jade');
+var inputProgressHtml = jade.compileFile(__dirname + '/../views/binder-input-progress.jade');
 
 require('../model/binder.js');
 var User = mongoose.model('User');
@@ -445,7 +448,11 @@ module.exports = function (app) {
       if (binder.isModified()) {
         binder.updateProgress();
       }
-      res.json(200, merged);
+      res.json(200, {
+        works: merged,
+        inputProgress: inputProgressHtml({binder: binder}),
+        valueProgress: valueProgressHtml({binder: binder})
+      });
     }
   }
 
