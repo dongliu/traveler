@@ -510,7 +510,7 @@ module.exports = function (app) {
         _id: {
           $in: pids
         }
-      }, 'tags status createdBy owner finishedValue inProgressValue totalValue').lean().exec(function (err, binders) {
+      }, 'tags status createdBy owner finishedValue inProgressValue totalValue finishedInput totalInput').lean().exec(function (err, binders) {
         binders.forEach(function (p) {
           binder.updateWorkProgress(p);
           underscore.extend(p, works.id(p._id).toJSON());

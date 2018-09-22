@@ -10,6 +10,9 @@ var share = require('./share.js');
  * inProgress is the percentage of value that is still in progress.
  * If status === 2, then finished = 100, and inProgress = 0;
  * If status === 0, then finished = 0, and inProgress = 0;
+ * finished and inProgress are cached status.
+ * totalSteps and finishedteps are cached status.
+ * They should be updated when the reference traveler is loaed.
  */
 
 var work = new Schema({
@@ -28,6 +31,16 @@ var work = new Schema({
     min: 0
   },
   inProgress: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  finishedInput: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  totalInput: {
     type: Number,
     default: 0,
     min: 0
@@ -99,6 +112,18 @@ var binder = new Schema({
   sharedWith: [share.user],
   sharedGroup: [share.group],
   works: [work],
+  finishedInput: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  totalInput: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  // the date that the progress was updated
+  progressUpdatedOn: Date,
   finishedValue: {
     type: Number,
     default: 0,
@@ -120,36 +145,46 @@ var binder = new Schema({
   }
 });
 
+function updateInputProgress(w, spec) {
+  w.totalInput = spec.totalInput;
+  w.finishedInput = spec.finishedInput;
+}
+
 binder.methods.updateWorkProgress = function (spec) {
   var w = this.works.id(spec._id);
   if (!w) {
     return;
   }
+  updateInputProgress(w, spec);
   if (w.status !== spec.status) {
     w.status = spec.status;
   }
   if (spec.status === 2) {
     w.finished = 1;
     w.inProgress = 0;
-  } else if (spec.status === 0) {
+    return;
+  }
+
+  if (spec.status === 0) {
     w.finished = 0;
     w.inProgress = 0;
-  } else {
-    if (w.refType === 'traveler') {
-      work.finished = 0;
-      if (spec.totalInput === 0) {
-        w.inProgress = 1;
-      } else {
-        w.inProgress = spec.finishedInput / spec.totalInput;
-      }
+    return;
+  }
+  if (w.refType === 'traveler') {
+    work.finished = 0;
+    if (spec.totalInput === 0) {
+      w.inProgress = 1;
     } else {
-      if (spec.totalValue === 0) {
-        w.finished = 0;
-        w.inProgress = 1;
-      } else {
-        w.finished = spec.finishedValue / spec.totalValue;
-        w.inProgress = spec.inProgressValue / spec.totalValue;
-      }
+      w.inProgress = spec.finishedInput / spec.totalInput;
+    }
+  } else {
+    //  the binder
+    if (spec.totalValue === 0) {
+      w.finished = 0;
+      w.inProgress = 1;
+    } else {
+      w.finished = spec.finishedValue / spec.totalValue;
+      w.inProgress = spec.inProgressValue / spec.totalValue;
     }
   }
 };
@@ -160,23 +195,29 @@ binder.methods.updateProgress = function (cb) {
   var totalValue = 0;
   var finishedValue = 0;
   var inProgressValue = 0;
+  var totalInput = 0;
+  var finishedInput = 0;
   works.forEach(function (w) {
-    totalValue = totalValue + w.value;
-    finishedValue = finishedValue + w.value * w.finished;
-    inProgressValue = inProgressValue + w.value * w.inProgress;
+    totalInput += w.totalInput;
+    finishedInput += w.finishedInput;
+    totalValue += w.value;
+    finishedValue += w.value * w.finished;
+    inProgressValue += w.value * w.inProgress;
   });
 
+  this.totalInput = totalInput;
+  this.finishedInput = finishedInput;
   this.totalValue = totalValue;
   this.finishedValue = finishedValue;
   this.inProgressValue = inProgressValue;
   if (this.isModified()) {
+    this.progressUpdatedOn = Date.now();
     this.save(function (err, newBinder) {
       if (cb) {
-        cb(err, newBinder);
-      } else {
-        if (err) {
-          console.error(err);
-        }
+        return cb(err, newBinder);
+      }
+      if (err) {
+        console.error(err);
       }
     });
   }

@@ -174,7 +174,7 @@ $(function () {
   // add state for tab changes
   $('.nav-tabs a').on('click', function () {
     if (!$(this).parent().hasClass('active')) {
-      window.history.pushState(null, 'FRIB traveler :: ' + this.text, this.href);
+      window.history.pushState(null, 'Traveler :: ' + this.text, this.href);
     }
   });
 
