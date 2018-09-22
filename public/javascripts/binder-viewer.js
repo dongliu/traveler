@@ -10,7 +10,7 @@ $(function () {
   ajax401(prefix);
   disableAjaxCache();
 
-  var workAoColumns = [travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, aliasColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, workProgressColumn];
+  var workAoColumns = [travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, aliasColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, travelerProgressColumn];
 
   var worksTable = $('#work-table').dataTable({
     bAutoWidth: false,
