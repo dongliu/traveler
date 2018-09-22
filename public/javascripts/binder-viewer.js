@@ -4,6 +4,7 @@
 /*global sColumn, pColumn, vColumn, cColumn, travelerLinkColumn, aliasColumn, workProgressColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, sDomNoTools*/
 /*global ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, Holder*/
 
+
 $(function () {
   updateAjaxURL(prefix);
   ajax401(prefix);
@@ -12,8 +13,6 @@ $(function () {
   var workAoColumns = [travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, aliasColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, workProgressColumn];
 
   var worksTable = $('#work-table').dataTable({
-    sAjaxSource: './works/json',
-    sAjaxDataProp: '',
     bAutoWidth: false,
     bPaginate: false,
     iDisplayLength: 10,
@@ -26,7 +25,7 @@ $(function () {
     },
     bDeferRender: true,
     aoColumns: workAoColumns,
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
@@ -37,6 +36,17 @@ $(function () {
     ],
     sDom: sDomNoTools
   });
+
+  $.ajax({
+    url: './works/json',
+    type: 'GET',
+    dataType: 'json'
+  }).done(function (data) {
+    worksTable.fnAddData(data.works);
+    worksTable.fnDraw();
+    $('#value-progress').html(data.valueProgress);
+    $('#input-progress').html(data.inputProgress);
+  }).always();
 
   $('#sort').click(function () {
     worksTable.fnSort([
