@@ -284,6 +284,11 @@ $(function () {
     aaData: [],
     // 'bAutoWidth': false,
     aoColumns: shareAoColumns,
+    fnDrawCallback: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     aaSorting: [
       [1, 'desc']
     ],
@@ -295,6 +300,11 @@ $(function () {
     aaData: [],
     // 'bAutoWidth': false,
     aoColumns: groupShareAoColumns,
+    fnDrawCallback: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     aaSorting: [
       [1, 'desc']
     ],
