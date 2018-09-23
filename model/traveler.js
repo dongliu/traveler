@@ -79,6 +79,7 @@ var traveler = new Schema({
   sharedGroup: [share.group],
   referenceForm: ObjectId,
   forms: [form],
+  mapping: Schema.Types.Mixed,
   activeForm: String,
   data: [ObjectId],
   notes: [ObjectId],
