@@ -22,6 +22,10 @@ block content
         button.btn.btn-info#sort
           i.fa.fa-sort-numeric-asc.fa-large
           | &nbsp;Default sorting
+      .btn-group
+        button.btn.btn-primary#report
+          i.fa.fa-table.fa-large
+          | &nbsp;Generate report
     h4 #{binder.description}
     #details.collapse.out
       h4 Owner: #{binder.owner || binder.createdBy}
@@ -39,11 +43,14 @@ block content
         each tag in binder.tags
           li
             span.tag #{tag}
+      h4 created on&nbsp;
+        span.time #{binder.createdOn}
+      h4 updated on&nbsp;
+        span.time #{binder.updatedOn}
     #value-progress
     #input-progress
 
     table#work-table.table.table-bordered.table-hover
-
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

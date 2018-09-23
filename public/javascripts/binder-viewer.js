@@ -10,7 +10,7 @@ $(function () {
   ajax401(prefix);
   disableAjaxCache();
 
-  var workAoColumns = [travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, aliasColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, travelerProgressColumn];
+  var workAoColumns = [selectColumn, travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, aliasColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, travelerProgressColumn];
 
   var worksTable = $('#work-table').dataTable({
     bAutoWidth: false,
@@ -31,8 +31,8 @@ $(function () {
       });
     },
     aaSorting: [
-      [1, 'asc'],
-      [2, 'asc']
+      [2, 'asc'],
+      [3, 'asc']
     ],
     sDom: sDomNoTools
   });
@@ -54,4 +54,10 @@ $(function () {
       [2, 'asc']
     ]);
   });
+
+  $('span.time').each(function () {
+    $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
+  });
+
+  selectEvent();
 });

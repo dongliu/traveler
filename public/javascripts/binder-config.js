@@ -217,7 +217,7 @@ $(function () {
 
   var worksTable = $('#work-table').dataTable({
     sAjaxSource: './works/json',
-    sAjaxDataProp: '',
+    sAjaxDataProp: 'works',
     bAutoWidth: false,
     bPaginate: false,
     iDisplayLength: 10,
