@@ -126,6 +126,7 @@ function createTraveler(form, req, res) {
     inputs: list
   });
   traveler.activeForm = traveler.forms[0]._id;
+  traveler.mapping = form.mapping;
   traveler.save(function (err, doc) {
     if (err) {
       console.error(err);
@@ -156,6 +157,7 @@ function cloneTraveler(source, req, res) {
     referenceForm: source.referenceForm,
     forms: source.forms,
     activeForm: source.activeForm,
+    mapping: source.mapping,
     data: [],
     comments: [],
     totalInput: source.totalInput,
@@ -220,8 +222,11 @@ module.exports = function (app) {
       },
       owner: {
         $exists: false
+      },
+      froms: {
+
       }
-    }, 'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
+    }, 'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping').lean().exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -517,6 +522,7 @@ module.exports = function (app) {
     var num = form.inputs.length;
     doc.forms.push(form);
     doc.activeForm = doc.forms[doc.forms.length - 1]._id;
+    doc.mapping = form.mapping;
     doc.totalInput = num;
     // reset touched input list
     resetTouched(doc, function () {
@@ -541,6 +547,7 @@ module.exports = function (app) {
     }
 
     doc.activeForm = form._id;
+    doc.mapping = form.mapping;
     if (form.inputs.length === 0) {
       form.inputs = inputNames(form.html);
     }

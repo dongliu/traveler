@@ -435,7 +435,6 @@ var keysColumn = {
   bFilter: true
 };
 
-
 var commentsColumn = {
   sTitle: 'Comments',
   sDefaultContent: '',
