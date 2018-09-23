@@ -428,10 +428,12 @@ var keysColumn = {
   sDefaultContent: '',
   mData: function (source, type, val) {
     if (source.mapping) {
-      return Object.keys(source.mapping).join();
+      return Object.keys(source.mapping).join(', ');
     }
     return '';
   },
+  bAutoWidth: false,
+  sWidth: '210px',
   bFilter: true
 };
 
