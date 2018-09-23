@@ -222,9 +222,6 @@ module.exports = function (app) {
       },
       owner: {
         $exists: false
-      },
-      froms: {
-
       }
     }, 'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping').lean().exec(function (err, docs) {
       if (err) {
