@@ -241,7 +241,7 @@ $(function () {
     }
   });
 
-  if ($('#usernames').length) {
+  if ($('#username').length) {
     travelerGlobal.usernames.initialize();
   }
 
@@ -284,6 +284,11 @@ $(function () {
     aaData: [],
     // 'bAutoWidth': false,
     aoColumns: shareAoColumns,
+    fnDrawCallback: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     aaSorting: [
       [1, 'desc']
     ],
@@ -295,6 +300,11 @@ $(function () {
     aaData: [],
     // 'bAutoWidth': false,
     aoColumns: groupShareAoColumns,
+    fnDrawCallback: function () {
+      Holder.run({
+        images: 'img.user'
+      });
+    },
     aaSorting: [
       [1, 'desc']
     ],
@@ -340,7 +350,7 @@ $(function () {
     modify('groups', groupShareTable);
   });
 
-  if ($('#usernames').length) {
+  if ($('#username').length) {
     initTable('users', shareTable);
   }
   if ($('#groupid').length) {
