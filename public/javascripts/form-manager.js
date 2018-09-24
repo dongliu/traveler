@@ -52,7 +52,7 @@ function setActive(fid, cb) {
     contentType: 'application/json',
     dataType: 'json',
     data: JSON.stringify({
-      formid: fid
+      formId: fid
     }),
     processData: false
   }).done(function (json) {
@@ -256,9 +256,7 @@ $(function () {
         // add the new form to the traveler forms list and set it active
         $('#submit').prop('disabled', true);
         newform = {
-          html: availableForms[fid].html,
-          _id: availableForms[fid]._id,
-          title: availableForms[fid].title
+          formId: availableForms[fid]._id
         };
         addForm(newform, function (json) {
           traveler = json;

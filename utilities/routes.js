@@ -245,31 +245,32 @@ var binder = {
 };
 
 var traveler = {
+    // TODO: need to refactor with the same function in routes/traveler.js
     // Parameters for newTravelerCallBack are (err, traveler)
-    createTraveler: function (form, title, userName, devices, newTravelerCallBack) {
-        // update the total input number and finished input number
-        var $ = cheer.load(form.html);
-        var num = $('input, textarea').length;
-        // console.log('total input number is ' + num);
-        var traveler = new Traveler({
-            title: title,
-            description: '',
-            devices: devices,
-            status: 0,
-            createdBy: userName,
-            createdOn: Date.now(),
-            sharedWith: [],
-            referenceForm: form._id,
-            forms: [{
-                html: form.html
-            }],
-            data: [],
-            comments: [],
-            totalInput: num,
-            finishedInput: 0
-        });
-        traveler.save(newTravelerCallBack);
-    },
+    // createTraveler: function (form, title, userName, devices, newTravelerCallBack) {
+    //     // update the total input number and finished input number
+    //     var $ = cheer.load(form.html);
+    //     var num = $('input, textarea').length;
+    //     // console.log('total input number is ' + num);
+    //     var traveler = new Traveler({
+    //         title: title,
+    //         description: '',
+    //         devices: devices,
+    //         status: 0,
+    //         createdBy: userName,
+    //         createdOn: Date.now(),
+    //         sharedWith: [],
+    //         referenceForm: form._id,
+    //         forms: [{
+    //             html: form.html
+    //         }],
+    //         data: [],
+    //         comments: [],
+    //         totalInput: num,
+    //         finishedInput: 0
+    //     });
+    //     traveler.save(newTravelerCallBack);
+    // },
     updateTravelerStatus: function (req, res, travelerDoc, status, isSession, onSuccess) {
         if (isSession) {
             if (status === 1.5) {

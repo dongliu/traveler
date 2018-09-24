@@ -7,6 +7,9 @@ var underscore = require('underscore');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
 var routesUtilities = require('../utilities/routes');
+var jade = require('jade');
+var valueProgressHtml = jade.compileFile(__dirname + '/../views/binder-value-progress.jade');
+var inputProgressHtml = jade.compileFile(__dirname + '/../views/binder-input-progress.jade');
 
 require('../model/binder.js');
 var User = mongoose.model('User');
@@ -445,7 +448,11 @@ module.exports = function (app) {
       if (binder.isModified()) {
         binder.updateProgress();
       }
-      res.json(200, merged);
+      res.json(200, {
+        works: merged,
+        inputProgress: inputProgressHtml({binder: binder}),
+        valueProgress: valueProgressHtml({binder: binder})
+      });
     }
   }
 
@@ -486,7 +493,7 @@ module.exports = function (app) {
         _id: {
           $in: tids
         }
-      }, 'devices locations manPower status createdBy owner sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+      }, 'devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
           console.error(err);
           return res.send(500, err.message);
@@ -510,7 +517,7 @@ module.exports = function (app) {
         _id: {
           $in: pids
         }
-      }, 'tags status createdBy owner finishedValue inProgressValue totalValue').lean().exec(function (err, binders) {
+      }, 'tags status createdBy owner finishedValue inProgressValue totalValue finishedInput totalInput').lean().exec(function (err, binders) {
         binders.forEach(function (p) {
           binder.updateWorkProgress(p);
           underscore.extend(p, works.id(p._id).toJSON());
