@@ -147,6 +147,7 @@ require('./routes/main')(app);
 require('./routes/form')(app);
 require('./routes/traveler')(app);
 require('./routes/binder')(app);
+require('./routes/report')(app);
 require('./routes/admin')(app);
 require('./routes/user')(app);
 require('./routes/profile')(app);

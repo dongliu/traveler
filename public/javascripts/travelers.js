@@ -74,7 +74,7 @@ $(function () {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
-  var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
+  var travelerAoColumns = [selectColumn, travelerConfigLinkColumn, travelerShareLinkColumn, travelerLinkColumn, titleColumn, statusColumn, deviceColumn, tagsColumn, keysColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, deadlineColumn, filledByColumn, updatedOnColumn, travelerProgressColumn];
   fnAddFilterFoot('#traveler-table', travelerAoColumns);
   var travelerTable = $('#traveler-table').dataTable({
     sAjaxSource: '/travelers/json',
@@ -97,8 +97,8 @@ $(function () {
     bDeferRender: true,
     aoColumns: travelerAoColumns,
     aaSorting: [
-      [10, 'desc'],
-      [13, 'desc']
+      [11, 'desc'],
+      [14, 'desc']
     ],
     sDom: sDomNoTools
   });

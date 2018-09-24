@@ -22,18 +22,18 @@ var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
 /**
- * get the total input number in the form
- * @param  {Form} form the form object
- * @return {int}      the total number of inputs
+ * get the list of input names in the form
+ * @param  {String} html form html
+ * @return {Array}     the list of input names
  */
-function inputNumber(form) {
-  var $ = cheer.load(form.html);
+function inputNames(html) {
+  var $ = cheer.load(html);
   var inputs = $('input, textarea');
-  var num = 0;
   var last_input_name = '';
   var i;
   var input;
   var input_name;
+  var list = [];
   for (i = 0; i < inputs.length; i += 1) {
     input = inputs[i];
     input_name = input.attribs.name;
@@ -41,18 +41,70 @@ function inputNumber(form) {
     if (last_input_name === input_name) {
       continue;
     }
+    list.push(input_name);
     last_input_name = input_name;
-    num += 1;
   }
-  return num;
+  return list;
+}
+
+function addInputName(name, list) {
+  if (list.indexOf(name) === -1) {
+    list.push(name);
+  }
+}
+
+function resetTouched(doc, cb) {
+  TravelerData.find({
+    _id: {
+      $in: doc.data
+    }
+  }, 'name').exec(function (dataErr, data) {
+    if (dataErr) {
+      console.error(dataErr);
+      return cb(dataErr);
+    }
+    // reset the touched input name list and the finished input number
+    console.info('reset the touched inputs for traveler ' + doc._id);
+    // the active input list
+    var inputs = [];
+    if (doc.forms.length === 1) {
+      inputs = doc.forms[0].inputs.length ? doc.forms[0].inputs : inputNames(doc.forms[0].html);
+    } else {
+      inputs = doc.forms.id(doc.activeForm).inputs.length ? doc.forms.id(doc.activeForm).inputs : inputNames(doc.forms.id(doc.activeForm).html);
+    }
+    // empty the current touched input list
+    doc.touchedInputs = [];
+    data.forEach(function (d) {
+      // check if the data is for the active form
+      if (inputs.indexOf(d.name) >= 0) {
+        addInputName(d.name, doc.touchedInputs);
+      }
+    });
+    // finished input
+    doc.finishedInput = doc.touchedInputs.length;
+    cb();
+  });
+}
+
+function updateFinished(doc, cb) {
+  var beforeUpdate = doc.finishedInput;
+  var touched = doc.touchedInputs.length;
+  if (touched === beforeUpdate + 1) {
+    doc.finishedInput = touched;
+    return cb();
+  }
+  // need a reset
+  resetTouched(doc, cb);
 }
 
 function createTraveler(form, req, res) {
-  var num = inputNumber(form);
+  var list = inputNames(form.html);
+  var num = list.length;
   var traveler = new Traveler({
     title: form.title,
     description: '',
     devices: [],
+    tags: form.tags,
     status: 0,
     createdBy: req.session.userid,
     createdOn: Date.now(),
@@ -62,16 +114,19 @@ function createTraveler(form, req, res) {
     data: [],
     comments: [],
     totalInput: num,
-    finishedInput: 0
+    finishedInput: 0,
+    touchedInputs: []
   });
   traveler.forms.push({
     html: form.html,
     activatedOn: [Date.now()],
     reference: form._id,
-    alias: form.title
+    alias: form.title,
+    mapping: form.mapping,
+    inputs: list
   });
-  traveler.tags = form.tags;
   traveler.activeForm = traveler.forms[0]._id;
+  traveler.mapping = form.mapping;
   traveler.save(function (err, doc) {
     if (err) {
       console.error(err);
@@ -102,6 +157,7 @@ function cloneTraveler(source, req, res) {
     referenceForm: source.referenceForm,
     forms: source.forms,
     activeForm: source.activeForm,
+    mapping: source.mapping,
     data: [],
     comments: [],
     totalInput: source.totalInput,
@@ -167,7 +223,7 @@ module.exports = function (app) {
       owner: {
         $exists: false
       }
-    }, 'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput').lean().exec(function (err, docs) {
+    }, 'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping').lean().exec(function (err, docs) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -406,7 +462,7 @@ module.exports = function (app) {
 
 
   app.get('/travelers/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
-    return res.json(200, req[req.params.id]);
+    return res.json(200, underscore.pick(req[req.params.id], 'id', 'title', 'status', 'tags', 'devices', 'mapping'));
   });
 
   app.put('/travelers/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
@@ -450,59 +506,59 @@ module.exports = function (app) {
   });
 
   // use the form in the request as the active form
-  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['html', '_id', 'title']), reqUtils.hasAll('body', ['html', '_id', 'title']), reqUtils.sanitize('body', ['html', 'title']), function addForm(req, res) {
+  app.post('/travelers/:id/forms/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['formId']), reqUtils.hasAll('body', ['formId']), reqUtils.existSource('formId', 'body', Form), function addForm(req, res) {
     var doc = req[req.params.id];
-    if (doc.status > 1 || doc.archived) {
-      return res.send(400, 'cannot update form because of current traveler state');
-    }
     var form = {
-      html: req.body.html,
+      html: req[req.body.formId].html,
+      mapping: req[req.body.formId].mapping,
+      inputs: inputNames(req[req.body.formId].html),
       activatedOn: [Date.now()],
-      reference: req.body._id,
-      alias: req.body.title
+      reference: req.body.formId,
+      alias: req[req.body.formId].title
     };
-
-    var num = inputNumber(form);
+    var num = form.inputs.length;
     doc.forms.push(form);
     doc.activeForm = doc.forms[doc.forms.length - 1]._id;
+    doc.mapping = form.mapping;
     doc.totalInput = num;
-    doc.save(function saveDoc(e, newDoc) {
-      if (e) {
-        console.error(e);
-        return res.send(500, e.message);
-      }
-      return res.json(200, newDoc);
+    // reset touched input list
+    resetTouched(doc, function () {
+      doc.save(function saveDoc(e, newDoc) {
+        if (e) {
+          console.error(e);
+          return res.send(500, e.message);
+        }
+        return res.json(200, newDoc);
+      });
     });
   });
 
   // set active form
-  app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), function putActiveForm(req, res) {
+  app.put('/travelers/:id/forms/active', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.archived('id', false), reqUtils.status('id', [0, 1]), reqUtils.filter('body', ['formId']), reqUtils.hasAll('body', ['formId']), function putActiveForm(req, res) {
     var doc = req[req.params.id];
-    if (doc.status > 1 || doc.archived) {
-      return res.send(400, 'cannot update form because of current traveler state');
-    }
-    var formid = req.body.formid;
-    if (!formid) {
-      return res.send(400, 'form id unknown');
-    }
-
-    var form = doc.forms.id(formid);
+    var formId = req.body.formId;
+    var form = doc.forms.id(formId);
 
     if (!form) {
-      return res.send(410, 'form ' + req.body.formid + ' gone');
+      return res.send(410, 'Cannot find form ' + req.body.formId + ' in traveler ' + req[req.params.id]);
     }
 
     doc.activeForm = form._id;
-    var $ = cheer.load(form.html);
-    var num = $('input, textarea').length;
+    doc.mapping = form.mapping;
+    if (form.inputs.length === 0) {
+      form.inputs = inputNames(form.html);
+    }
+    doc.totalInput = form.inputs.length;
     form.activatedOn.push(Date.now());
-    doc.totalInput = num;
-    doc.save(function saveDoc(e, newDoc) {
-      if (e) {
-        console.error(e);
-        return res.send(500, e.message);
-      }
-      return res.json(200, newDoc);
+    // reset touched input list
+    resetTouched(doc, function () {
+      doc.save(function saveDoc(e, newDoc) {
+        if (e) {
+          console.error(e);
+          return res.send(500, e.message);
+        }
+        return res.json(200, newDoc);
+      });
     });
   });
 
@@ -682,19 +738,25 @@ module.exports = function (app) {
         console.error(dataErr);
         return res.send(500, dataErr.message);
       }
-      doc.data.push(data._id);
       doc.manPower.addToSet({
         _id: req.session.userid,
         username: req.session.username
       });
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      doc.save(function (saveErr) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.send(500, saveErr.message);
-        }
-        return res.send(204);
+      doc.data.push(data._id);
+      // update touched input, and finished input here
+      addInputName(data.name, doc.touchedInputs);
+      // update the finishe input number
+      updateFinished(doc, function () {
+        // save doc anyway
+        doc.save(function (saveErr) {
+          if (saveErr) {
+            console.error(saveErr);
+            return res.send(500, saveErr.message);
+          }
+          return res.send(204);
+        });
       });
     });
   });
@@ -742,20 +804,6 @@ module.exports = function (app) {
         }
         return res.send(204);
       });
-    });
-  });
-
-
-  app.put('/travelers/:id/finishedinput', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [1, 1.5, 2]), reqUtils.filter('body', ['finishedInput']), function (req, res) {
-    var doc = req[req.params.id];
-    doc.update({
-      finishedInput: req.body.finishedInput
-    }, function (saveErr) {
-      if (saveErr) {
-        console.error(saveErr);
-        return res.send(500, saveErr.message);
-      }
-      return res.send(204);
     });
   });
 
