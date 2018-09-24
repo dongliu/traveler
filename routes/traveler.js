@@ -462,7 +462,7 @@ module.exports = function (app) {
 
 
   app.get('/travelers/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
-    return res.json(200, underscore.pick(req[req.params.id], 'id', 'title', 'status', 'tags', 'devices', 'mapping', 'data'));
+    return res.json(200, underscore.pick(req[req.params.id], 'id', 'title', 'status', 'tags', 'devices', 'mapping'));
   });
 
   app.put('/travelers/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
