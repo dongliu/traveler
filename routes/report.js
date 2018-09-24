@@ -19,7 +19,7 @@ var TravelerData = mongoose.model('TravelerData');
  * @param  {Binder} binder [description]
  * @return {[String]}       traveler id list
  */
-function tid(binder) {
+function getTid(binder) {
   var tid = [];
   binder.works.forEach(function (w) {
     if (w.refType === 'traveler') {
@@ -31,9 +31,9 @@ function tid(binder) {
 
 module.exports = function (app) {
 
-  app.get('/reports/binders/:bid/', auth.ensureAuthenticated, reqUtils.exist('bid', Binder), reqUtils.canReadMw('bid'), function (req, res) {
+  app.get('/binders/:bid/report', auth.ensureAuthenticated, reqUtils.exist('bid', Binder), reqUtils.canReadMw('bid'), function (req, res) {
     var binder = req[req.params.bid];
-    return res.render('report-binder', routesUtilities.getRenderObject(req, {binder: binder, tid: tid(binder)}));
+    return res.render('report-binder', routesUtilities.getRenderObject(req, {binder: binder, tid: getTid(binder)}));
   });
 
 };

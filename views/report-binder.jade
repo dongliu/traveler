@@ -15,11 +15,10 @@ block content
     var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
     h3 Traveler data report for binder
-      != ' '
-      i #{binder.title}
+    h4 #{binder.title}
     h4 Report generated on
       != ' '
-      span.time #{Date.now()}
+      span.time #{new Date().toUTCString()}
 
     table#report-table.table.table-bordered.table-hover(data-travelers='#{JSON.stringify(tid)}')
 
@@ -31,5 +30,7 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/report-binder.js')

@@ -69,6 +69,15 @@ function personColumn(title, key) {
   };
 }
 
+function keyValueColumn(key) {
+  return {
+    sTitle: key,
+    mData: key,
+    sDefaultContent: '',
+    bFilter: true
+  };
+}
+
 function personNameColumn(title, key) {
   return {
     sTitle: title,
@@ -416,7 +425,7 @@ var tagsColumn = {
   sDefaultContent: '',
   mData: function (source, type, val) {
     if (source.tags) {
-      return source.tags.join();
+      return source.tags.join('; ');
     }
     return '';
   },
@@ -428,7 +437,7 @@ var keysColumn = {
   sDefaultContent: '',
   mData: function (source, type, val) {
     if (source.mapping) {
-      return Object.keys(source.mapping).join(', ');
+      return Object.keys(source.mapping).join('; ');
     }
     return '';
   },
