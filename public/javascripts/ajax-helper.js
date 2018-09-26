@@ -27,11 +27,7 @@ function ajax401(prefix) {
 }
 
 function disableAjaxCache() {
-  var ua = window.navigator.userAgent;
-  var msie = ua.indexOf("MSIE ");
-  if (msie > 0) {
-    $.ajaxSetup({
-      cache: false
-    });
-  }
+  $.ajaxSetup({
+    cache: false
+  });
 }
