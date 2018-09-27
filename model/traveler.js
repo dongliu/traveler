@@ -7,6 +7,8 @@ var ObjectId = Schema.Types.ObjectId;
 
 var share = require('./share.js');
 
+require('./binder');
+var Binder = mongoose.model('Binder');
 
 /**
  * A form can become active, inactive, and reactive. The form's activated date
@@ -103,6 +105,46 @@ var traveler = new Schema({
   archived: {
     type: Boolean,
     default: false
+  }
+});
+
+/**
+ * update the progress of binders that inlude this traveler document
+ * @param  {Traveler} travelerDoc the traveler document
+ * @return {undefined}
+ */
+function updateBinderProgress(travelerDoc) {
+  Binder.find({
+    archived: {
+      $ne: true
+    },
+    works: {
+      $elemMatch: {
+        _id: travelerDoc._id
+      }
+    }
+  }).exec(function (err, binders) {
+    if (err) {
+      return console.error('cannot find binders for traveler ' + travelerDoc._id + ', error: ' + err.message);
+    }
+    binders.forEach(function (binder) {
+      binder.updateWorkProgress(travelerDoc);
+      binder.updateProgress();
+    });
+  });
+}
+
+traveler.pre('save', function (next) {
+  var modifiedPaths = this.modifiedPaths();
+  // keep it so that we can refer at post save
+  this.wasModifiedPaths = modifiedPaths;
+  next();
+});
+
+traveler.post('save', function (obj) {
+  var modifiedPaths = this.wasModifiedPaths;
+  if (modifiedPaths.indexOf('totalInput') !== -1 || modifiedPaths.indexOf('finishedInput') !== -1 || modifiedPaths.indexOf('status') !== -1) {
+    updateBinderProgress(obj);
   }
 });
 
