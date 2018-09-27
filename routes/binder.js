@@ -11,7 +11,6 @@ var jade = require('jade');
 var valueProgressHtml = jade.compileFile(__dirname + '/../views/binder-value-progress.jade');
 var inputProgressHtml = jade.compileFile(__dirname + '/../views/binder-input-progress.jade');
 
-require('../model/binder.js');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 var Binder = mongoose.model('Binder');
