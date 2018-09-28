@@ -652,7 +652,7 @@ var binderProgressColumn = {
       return finished + inProgress;
     }
 
-    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(source.finishedValue) + ' + ' + Math.round(source.inProgressValue) + ' / ' + Math.round(source.totalValue));
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(source.finishedValue) + ' + ' + Math.round(source.finishedInput) + ' / ' + Math.round(source.totalInput));
   }
 };
 
