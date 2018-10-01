@@ -1,4 +1,4 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
+/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, linkTarget, validationMessage, isValid */
 /*global moment: false, Binder: false, Modernizr: false*/
 /*global travelerStatus: true, finishedInput: true, ajax401: false, prefix*/
 
@@ -81,7 +81,7 @@ function setStatus(s) {
 }
 
 function complete() {
-  $('input,textarea', form).prop('disabled', true);
+  $('#form input,textarea').prop('disabled', true);
   setStatus(1.5);
 }
 
@@ -297,7 +297,7 @@ $(function () {
 
     // check if active here
     if (travelerStatus === 1) {
-      $('input,textarea', form).prop('disabled', false);
+      $('#form input,textarea').prop('disabled', false);
     }
 
     // load the notes here
@@ -336,7 +336,7 @@ $(function () {
   $('#form input:not([type="file"], [type="checkbox"]),textarea').on('input', function () {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
-    $('input,textarea', form).not($this).prop('disabled', true);
+    $('#form input,textarea').not($this).prop('disabled', true);
     $('#complete').prop('disabled', true);
     if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
@@ -346,7 +346,7 @@ $(function () {
   $('#form input:not([type="file"])').change(function () {
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
-    $('input,textarea', form).not($this).prop('disabled', true);
+    $('#form input,textarea').not($this).prop('disabled', true);
     $('#complete').prop('disabled', true);
     if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
@@ -399,7 +399,7 @@ $(function () {
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always(function () {
-      $('input,textarea', form).prop('disabled', false);
+      $('#form input,textarea').prop('disabled', false);
       $('#complete').prop('disabled', false);
     });
 
@@ -427,7 +427,7 @@ $(function () {
         binder.deserializeField(inputs[i]);
       }
     }
-    $('input,textarea', form).prop('disabled', false);
+    $('#form input,textarea').prop('disabled', false);
     $('#complete').prop('disabled', false);
     $(this).closest('.control-group-buttons').remove();
   });
@@ -436,7 +436,7 @@ $(function () {
     e.preventDefault();
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
-    $('input,textarea', form).not($this).prop('disabled', true);
+    $('#form input,textarea').not($this).prop('disabled', true);
     $('#complete').prop('disabled', true);
     var file = this.files[0];
     if (file === undefined) {
@@ -505,7 +505,7 @@ $(function () {
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     }).always(function () {
-      $('input,textarea', form).prop('disabled', false);
+      $('#form input,textarea').prop('disabled', false);
       $('#complete').prop('disabled', false);
     });
 
@@ -514,7 +514,7 @@ $(function () {
   $('#form').on('click', 'button[value="cancel"]', function (e) {
     e.preventDefault();
     // cannot reset the file input value
-    $('input,textarea', form).prop('disabled', false);
+    $('#form input,textarea').prop('disabled', false);
     $('#complete').prop('disabled', false);
     $(this).closest('.control-group-buttons').remove();
   });
