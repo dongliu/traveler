@@ -49,6 +49,7 @@ block content
         h3#modalLabel
       .modal-body.modal-body-visible
       .modal-footer
+    form#report-form.hidden(action='/travelers/report/', method='post')
     div
       ul.nav.nav-tabs
         li.active
@@ -73,9 +74,13 @@ block content
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
             .btn-group
-              button.btn.btn-info#select-all(data-toggle='tooltip', title='select all the items in the current view')
+              button.btn.btn-info.select-all(data-toggle='tooltip', title='select all the rows in the current view')
                 i.fa.fa-list.fa-lg
                 | &nbsp;Select all
+            .btn-group
+              button.btn.btn-info.deselect-all(data-toggle='tooltip', title='deselect all the rows')
+                i.fa.fa-list.fa-lg
+                | &nbsp;Select none
             .btn-group
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
                 i.fa.fa-archive.fa-lg

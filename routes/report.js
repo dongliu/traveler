@@ -36,4 +36,8 @@ module.exports = function (app) {
     return res.render('report-binder', routesUtilities.getRenderObject(req, {binder: binder, tid: getTid(binder)}));
   });
 
+  app.post('/travelers/report/', auth.ensureAuthenticated, function (req, res) {
+    return res.render('report-travelers', routesUtilities.getRenderObject(req, {tid: req.body.travelers}));
+  });
+
 };
