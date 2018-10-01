@@ -1,3 +1,5 @@
+/*eslint max-nested-callbacks: [1, 4], complexity: [2, 20]*/
+
 var fs = require('fs');
 var mongoose = require('mongoose');
 var basic = require('basic-auth');
@@ -91,13 +93,17 @@ module.exports = function (app) {
         $in: [req.query.device]
       };
     }
-
     if (req.query.hasOwnProperty('tag')) {
       search.tags = {
         $in: [req.query.tag]
       };
     }
-    Traveler.find(search, 'title status devices tags createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
+    if (req.query.hasOwnProperty('userkey')) {
+      search['mapping.' + req.query.userkey] = {
+        $exists: true
+      };
+    }
+    Traveler.find(search, 'title status devices tags mapping createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       performMongoResponse(err, travelers, res);
     });
   });
@@ -148,17 +154,17 @@ module.exports = function (app) {
 
     routesUtilities.binder.createBinder(binderTitle, description, userName, function (err, newBinder) {
       performMongoResponse(err, newBinder, res, function () {
-          return res.json(201, newBinder);
-        });
+        return res.json(201, newBinder);
+      });
     });
   });
 
   app.post('/apis/addWork/binders/:id/', routesUtilities.filterBody(['travelerIds', 'userName'], true), checkWritePermissions, function (req, res) {
     Binder.findById(req.params.id, function (err, binder) {
       performMongoResponse(err, binder, res, function () {
-          userName = req.body.userName;
-          routesUtilities.binder.addWork(binder, userName, req, res);
-        });
+        var userName = req.body.userName;
+        routesUtilities.binder.addWork(binder, userName, req, res);
+      });
     });
   });
 
