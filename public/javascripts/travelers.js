@@ -9,6 +9,13 @@ function formatItemUpdate(data) {
   return '<div class="target" id="' + data._id + '"><b>' + data.title + '</b>, created ' + moment(data.createdOn).fromNow() + (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') + '</div>';
 }
 
+function noneSelectedModal() {
+  $('#modalLabel').html('Alert');
+  $('#modal .modal-body').html('No traveler has been selected!');
+  $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  $('#modal').modal('show');
+}
+
 function cloneFromModal(travelerTable, sharedTravelerTable, groupSharedTravelerTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
@@ -235,15 +242,22 @@ $(function () {
     showHash();
   };
 
+  $('button.select-all').click(function () {
+    var activeTable = $('.tab-pane.active table').dataTable();
+    fnSelectAll(activeTable, 'row-selected', 'select-row', true);
+  });
+
+  $('button.deselect-all').click(function () {
+    var activeTable = $('.tab-pane.active table').dataTable();
+    fnDeselect(activeTable, 'row-selected', 'select-row');
+  });
+
   $('button.archive').click(function () {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
     modalScroll(false);
     if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
-      $('#modal').modal('show');
+      noneSelectedModal();
     } else {
       $('#modalLabel').html('Archive the following ' + selected.length + ' travelers? ');
       $('#modal .modal-body').empty();
@@ -257,6 +271,23 @@ $(function () {
         archiveFromModal(true, 'travelers', activeTable, archivedTravelerTable);
       });
     }
+  });
+
+  $('#report').click(function () {
+    var activeTable = $('.tab-pane.active table').dataTable();
+    var selected = fnGetSelected(activeTable, 'row-selected');
+    if (selected.length === 0) {
+      noneSelectedModal();
+      return;
+    }
+    selected.forEach(function (row) {
+      var data = activeTable.fnGetData(row);
+      $('#report-form').append($('<input type="hidden"/>').attr({
+        name: 'travelers[]',
+        value: data._id
+      }));
+    });
+    $('#report-form').submit();
   });
 
   $('#clone').click(function () {
