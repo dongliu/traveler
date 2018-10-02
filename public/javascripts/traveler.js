@@ -300,6 +300,8 @@ $(function () {
       $('#form input,textarea').prop('disabled', false);
     }
 
+    markFormValidity(document.getElementById('form'));
+
     // load the notes here
     renderNotes();
 
@@ -334,6 +336,8 @@ $(function () {
   });
 
   $('#form input:not([type="file"]),textarea').on('input', function () {
+    // set validity
+    markValidity(this);
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
     $('#form input,textarea').not($this).prop('disabled', true);
@@ -409,6 +413,8 @@ $(function () {
     } else {
       binder.deserializeField(input);
     }
+    // set validity
+    markValidity(input);
     var i;
     // need to reset all the radios
     if (input.type === 'radio' && inputs.length > 1) {
@@ -419,6 +425,8 @@ $(function () {
           binder.deserializeField(inputs[i]);
         }
       }
+      // set validity
+      markValidity(inputs[i]);
     }
     $('#form input,textarea').prop('disabled', false);
     $('#complete').prop('disabled', false);
