@@ -13,7 +13,8 @@ block content
   .container(style="margin-top: 10px")
     #message
     #profile.well
-      img(src="#{prefix}/adusers/#{user._id}/photo")
+      //- img(src="#{prefix}/adusers/#{user._id}/photo", data-src='holder.js/27x40?size=20&text=#{user._id.substr(0, 1).toUpperCase()}')
+      //- img(src="#{prefix}/adusers/#{user._id}/photo")
       dl
         dt Name
         dd #{user.name}
