@@ -4,6 +4,12 @@
 /*global sColumn, pColumn, vColumn, cColumn, travelerLinkColumn, aliasColumn, travelerProgressColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, sDomNoTools*/
 /*global ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, Holder*/
 
+function noneSelectedModal() {
+  $('#modalLabel').html('Alert');
+  $('#modal .modal-body').html('No traveler has been selected!');
+  $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+  $('#modal').modal('show');
+}
 
 $(function () {
   updateAjaxURL(prefix);
@@ -57,6 +63,33 @@ $(function () {
 
   $('span.time').each(function () {
     $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
+  });
+
+  $('button.select-all').click(function () {
+    var activeTable = worksTable;
+    fnSelectAll(activeTable, 'row-selected', 'select-row', true);
+  });
+
+  $('button.deselect-all').click(function () {
+    var activeTable = worksTable;
+    fnDeselect(activeTable, 'row-selected', 'select-row');
+  });
+
+  $('#report').click(function () {
+    var activeTable = worksTable;
+    var selected = fnGetSelected(activeTable, 'row-selected');
+    if (selected.length === 0) {
+      noneSelectedModal();
+      return;
+    }
+    selected.forEach(function (row) {
+      var data = activeTable.fnGetData(row);
+      $('#report-form').append($('<input type="hidden"/>').attr({
+        name: 'travelers[]',
+        value: data._id
+      }));
+    });
+    $('#report-form').submit();
   });
 
   selectEvent();

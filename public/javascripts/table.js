@@ -120,8 +120,8 @@ function fnGetSelected(oTableLocal, selectedClass) {
 }
 
 function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
-  var aTrs = oTableLocal.fnGetNodes(),
-    i;
+  var aTrs = oTableLocal.fnGetNodes();
+  var i;
 
   for (i = 0; i < aTrs.length; i++) {
     if ($(aTrs[i]).hasClass(selectedClass)) {
@@ -131,12 +131,15 @@ function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
   }
 }
 
-function fnSelectAll(oTableLocal, selectedClass, checkboxClass, filtered) {
+function fnSelectAll(oTableLocal, selectedClass, checkboxClass, current) {
   fnDeselect(oTableLocal, selectedClass, checkboxClass);
-  var rows, i;
-  if (filtered) {
+  var rows;
+  var i;
+  if (current) {
     rows = oTableLocal.$('tr', {
-      "filter": "applied"
+      page: 'current'
+      // When page is 'current', the following two options are forced:
+      // 'filter':'applied' and 'order':'current'
     });
   } else {
     rows = oTableLocal.$('tr');

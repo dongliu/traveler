@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title #{orgName} - report - binder - #{binder.title}
+  title #{orgName} - report - travelers
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -15,7 +15,6 @@ block content
     var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
     h3 Traveler data report for binder
-    h4 #{binder.title}
     h4 Report generated on
       != ' '
       span.time #{new Date().toUTCString()}
@@ -33,4 +32,4 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/report-binder.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/report.js')

@@ -23,7 +23,15 @@ block content
           i.fa.fa-sort-numeric-asc.fa-large
           | &nbsp;Default sorting
       .btn-group
-        a.btn.btn-primary#report(href='./report')
+        button.btn.btn-info.select-all(data-toggle='tooltip', title='select all the rows in the current view')
+          i.fa.fa-list.fa-lg
+          | &nbsp;Select all
+      .btn-group
+        button.btn.btn-info.deselect-all(data-toggle='tooltip', title='deselect all the rows')
+          i.fa.fa-list-alt.fa-lg
+          | &nbsp;Select none
+      .btn-group
+        button.btn.btn-primary#report
           i.fa.fa-table.fa-large
           | &nbsp;Generate report
     h4 #{binder.description}
@@ -47,6 +55,13 @@ block content
         span.time #{binder.createdOn}
       h4 updated on&nbsp;
         span.time #{binder.updatedOn}
+    #message
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body.modal-body-visible
+      .modal-footer
+    form#report-form.hidden(action='/travelers/report/', method='post')
     #value-progress
     #input-progress
 
