@@ -26,6 +26,28 @@ function isValid(form) {
   return true;
 }
 
+function markValidity(element) {
+  if (element.checkValidity()) {
+    $(element).removeClass('invalid');
+  } else {
+    $(element).addClass('invalid');
+  }
+}
+
+function markFormValidity(form) {
+  // set validity
+  $('input:not([type="file"]),textarea', form).each(function () {
+    var disabled = $(this).prop('disabled');
+    if (disabled) {
+      $(this).prop('disabled', false);
+    }
+    markValidity(this);
+    if (disabled) {
+      $(this).prop('disabled', true);
+    }
+  });
+}
+
 function validationMessage(form) {
   var disabled = $('input,textarea', form).first().prop('disabled');
   if (disabled) {
