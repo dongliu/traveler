@@ -31,9 +31,8 @@ function getTid(binder) {
 
 module.exports = function (app) {
 
-  app.get('/binders/:bid/report', auth.ensureAuthenticated, reqUtils.exist('bid', Binder), reqUtils.canReadMw('bid'), function (req, res) {
-    var binder = req[req.params.bid];
-    return res.render('report-binder', routesUtilities.getRenderObject(req, {binder: binder, tid: getTid(binder)}));
+  app.post('/travelers/report/', auth.ensureAuthenticated, function (req, res) {
+    return res.render('report-travelers', routesUtilities.getRenderObject(req, {tid: req.body.travelers}));
   });
 
 };
