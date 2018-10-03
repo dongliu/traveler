@@ -440,9 +440,16 @@ var keysColumn = {
   sDefaultContent: '',
   mData: function (source, type, val) {
     if (source.mapping) {
-      return Object.keys(source.mapping).join('; ');
+      return Object.keys(source.mapping);
     }
-    return '';
+    return [];
+  },
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data.join(' ');
+    } else {
+      return data.join('; ');
+    }
   },
   bAutoWidth: false,
   sWidth: '210px',
