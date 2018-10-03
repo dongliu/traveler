@@ -427,10 +427,14 @@ var tagsColumn = {
   sTitle: 'Tags',
   sDefaultContent: '',
   mData: function (source, type, val) {
-    if (source.tags) {
-      return source.tags.join('; ');
+    return source.tags || [];
+  },
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data.join(' ');
+    } else {
+      return data.join('; ');
     }
-    return '';
   },
   bFilter: true
 };
@@ -440,9 +444,16 @@ var keysColumn = {
   sDefaultContent: '',
   mData: function (source, type, val) {
     if (source.mapping) {
-      return Object.keys(source.mapping).join('; ');
+      return Object.keys(source.mapping);
     }
-    return '';
+    return [];
+  },
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data.join(' ');
+    } else {
+      return data.join('; ');
+    }
   },
   bAutoWidth: false,
   sWidth: '210px',
@@ -662,24 +673,14 @@ var binderProgressColumn = {
 var deviceColumn = {
   sTitle: 'Devices',
   mData: function (source, type, val) {
-    if (source.devices) {
-      return source.devices.join('; ');
-    }
-    return '';
+    return source.devices || [];
   },
-  bFilter: true
-};
-
-var deviceTagColumn = {
-  sTitle: 'Tags',
-  sDefaultContent: '',
-  mData: function (source, type, val) {
-    if (source.tags) {
-      return source.tags.join();
-    } else if (source.devices) {
-      return source.devices.join('; ');
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data.join(' ');
+    } else {
+      return data.join('; ');
     }
-    return '';
   },
   bFilter: true
 };
