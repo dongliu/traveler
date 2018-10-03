@@ -427,10 +427,14 @@ var tagsColumn = {
   sTitle: 'Tags',
   sDefaultContent: '',
   mData: function (source, type, val) {
-    if (source.tags) {
-      return source.tags.join('; ');
+    return source.tags || [];
+  },
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data.join(' ');
+    } else {
+      return data.join('; ');
     }
-    return '';
   },
   bFilter: true
 };
