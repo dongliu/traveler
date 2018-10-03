@@ -673,10 +673,14 @@ var binderProgressColumn = {
 var deviceColumn = {
   sTitle: 'Devices',
   mData: function (source, type, val) {
-    if (source.devices) {
-      return source.devices.join('; ');
+    return source.devices || [];
+  },
+  mRender: function (data, type) {
+    if (type === 'sort' || type === 'filter') {
+      return data.join(' ');
+    } else {
+      return data.join('; ');
     }
-    return '';
   },
   bFilter: true
 };
