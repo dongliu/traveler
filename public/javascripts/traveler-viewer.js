@@ -1,5 +1,5 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false, Modernizr: false, prefix: false*/
+/*global moment: false, Binder: false, prefix: false*/
 
 // temparary solution for the dirty forms
 function cleanForm() {
@@ -15,7 +15,8 @@ function livespan(stamp, live) {
 }
 
 function history(found) {
-  var i, output = '';
+  var i;
+  var output = '';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
@@ -25,9 +26,9 @@ function history(found) {
 }
 
 function fileHistory(found) {
-  var i,
-    output = '',
-    link;
+  var i;
+  var output = '';
+  var link;
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
@@ -38,7 +39,8 @@ function fileHistory(found) {
 }
 
 function notes(found) {
-  var i, output = '<dl>';
+  var i;
+  var output = '<dl>';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       output = output + '<dt><b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
@@ -67,24 +69,28 @@ function renderNotes() {
     url: './notes/',
     type: 'GET',
     dataType: 'json'
-  }).done(function (data, status, jqXHR) {
-    $('#form input,textarea').each(function (index, element) {
-      var found = data.filter(function (e) {
-        return e.name === element.name;
-      });
-      $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a></div>');
-      if (found.length) {
-        found.sort(function (a, b) {
-          if (a.inputOn > b.inputOn) {
-            return -1;
-          }
-          return 1;
+  }).done(function (data) {
+    $('#form .controls').each(function (index, controlsElement) {
+      var inputElements = $(controlsElement).find('input,textarea');
+      if (inputElements.length) {
+        var element = inputElements[0];
+        var found = data.filter(function (e) {
+          return e.name === element.name;
         });
-        $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
+        $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
+        if (found.length) {
+          found.sort(function (a, b) {
+            if (a.inputOn > b.inputOn) {
+              return -1;
+            }
+            return 1;
+          });
+          $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + notes(found) + '</div>');
+        }
       }
     });
 
-  }).fail(function (jqXHR, status, error) {
+  }).fail(function (jqXHR) {
     if (jqXHR.status !== 401) {
       $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
       $(window).scrollTop($('#message div:last-child').offset().top - 40);
@@ -101,7 +107,7 @@ $(function () {
   });
 
   // update img
-  $('#form').find('img').each(function (index) {
+  $('#form').find('img').each(function () {
     var $this = $(this);
     if ($this.attr('name')) {
       if ($this.attr('src') === undefined) {
@@ -124,31 +130,48 @@ $(function () {
     url: './data/',
     type: 'GET',
     dataType: 'json'
-  }).done(function (data, status, jqXHR) {
-    $('#form input,textarea').each(function (index, element) {
-      var found = data.filter(function (e) {
-        return e.name === element.name;
-      });
-      if (found.length) {
-        found.sort(function (a, b) {
-          if (a.inputOn > b.inputOn) {
-            return -1;
-          }
-          return 1;
+  }).done(function (data) {
+    $('#form .controls').each(function (index, controlsElement) {
+      var inputElements = $(controlsElement).find('input,textarea');
+      if (inputElements.length) {
+        var element = inputElements[0];
+        var found = data.filter(function (e) {
+          return e.name === element.name;
         });
-        if (this.type === 'file') {
-          $(element).closest('.controls').append('<div class="input-history">' + fileHistory(found) + '</div>');
-        } else {
-          binder.deserializeFieldFromValue(element, found[0].value);
-          binder.accessor.set(element.name, found[0].value);
-          $(element).closest('.controls').append('<div class="input-history">' + history(found) + '</div>');
+        if (found.length) {
+          found.sort(function (a, b) {
+            if (a.inputOn > b.inputOn) {
+              return -1;
+            }
+            return 1;
+          });
+          if (element.type === 'file') {
+            $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + fileHistory(found) + '</div>');
+          } else {
+            var currentValue = found[0].value;
+            if (found[0].inputType === 'radio') {
+              // Update element to match the value
+              for (var i = 0; i < inputElements.size(); i++) {
+                var ittrInput = inputElements[i];
+                if (ittrInput.value === currentValue) {
+                  element = ittrInput;
+                  break;
+                }
+              }
+            }
+            binder.deserializeFieldFromValue(element, currentValue);
+            binder.accessor.set(element.name, currentValue);
+            $(element).closest('.controls').append('<div class="input-history"><b>history</b>: ' + history(found) + '</div>');
+          }
         }
       }
     });
 
+    markFormValidity(document.getElementById('form'));
+
     // load the notes here
     renderNotes();
-  }).fail(function (jqXHR, status, error) {
+  }).fail(function () {
     $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>');
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   }).always();
@@ -163,22 +186,22 @@ $(function () {
     }
   });
 
-  $('#show-validation').click(function (e) {
+  $('#show-validation').click(function () {
     $('.validation').remove();
     $('#validation').html('<h3>Summary</h3>' + validationMessage(document.getElementById('form')));
     $('#validation').show();
   });
 
-  $('#hide-validation').click(function (e) {
+  $('#hide-validation').click(function () {
     $('#validation').hide();
     $('.validation').hide();
   });
 
-  $('#show-notes').click(function (e) {
+  $('#show-notes').click(function () {
     $('.input-notes').show();
   });
 
-  $('#hide-notes').click(function (e) {
+  $('#hide-notes').click(function () {
     $('.input-notes').hide();
   });
 

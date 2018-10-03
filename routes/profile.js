@@ -14,7 +14,7 @@ module.exports = function (app) {
         console.error(err);
         return res.send(500, 'something is wrong with the DB.');
       }
-      return res.render('profile', routesUtilities.getRenderObject(req,{
+      return res.render('profile', routesUtilities.getRenderObject(req, {
         user: user
       }));
     });
