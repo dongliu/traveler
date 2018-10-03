@@ -300,6 +300,8 @@ $(function () {
       $('#form input,textarea').prop('disabled', false);
     }
 
+    markFormValidity(document.getElementById('form'));
+
     // load the notes here
     renderNotes();
 
@@ -333,7 +335,9 @@ $(function () {
     }
   });
 
-  $('#form input:not([type="file"], [type="checkbox"]),textarea').on('input', function () {
+  $('#form input:not([type="file"]),textarea').on('input', function () {
+    // set validity
+    markValidity(this);
     var $this = $(this);
     var $cgw = $this.closest('.control-group-wrap');
     $('#form input,textarea').not($this).prop('disabled', true);
@@ -342,17 +346,6 @@ $(function () {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
     }
   });
-
-  $('#form input:not([type="file"])').change(function () {
-    var $this = $(this);
-    var $cgw = $this.closest('.control-group-wrap');
-    $('#form input,textarea').not($this).prop('disabled', true);
-    $('#complete').prop('disabled', true);
-    if ($cgw.children('.control-group-buttons').length === 0) {
-      $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
-    }
-  });
-
 
   $('#form').on('click', 'button[value="save"]', function (e) {
     e.preventDefault();
@@ -412,7 +405,7 @@ $(function () {
     var inputs = $this.closest('.control-group-wrap').find('input,textarea');
     var input = inputs[0];
     if (binder.accessor.target[input.name] === undefined) {
-      if ($(input).is(':checkbox')) {
+      if ($(input).is(':checkbox') || $(input).is(':radio')) {
         $(input).prop('checked', false);
       } else {
         $(input).val('');
@@ -420,12 +413,20 @@ $(function () {
     } else {
       binder.deserializeField(input);
     }
+    // set validity
+    markValidity(input);
     var i;
     // need to reset all the radios
     if (input.type === 'radio' && inputs.length > 1) {
       for (i = 1; i < inputs.length; i += 1) {
-        binder.deserializeField(inputs[i]);
+        if (binder.accessor.target[inputs[i].name] === undefined) {
+          $(input[i]).prop('checked', false);
+        } else {
+          binder.deserializeField(inputs[i]);
+        }
       }
+      // set validity
+      markValidity(inputs[i]);
     }
     $('#form input,textarea').prop('disabled', false);
     $('#complete').prop('disabled', false);
