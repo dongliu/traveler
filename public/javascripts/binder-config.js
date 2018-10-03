@@ -1,7 +1,7 @@
 /*eslint max-nested-callbacks: [2, 4]*/
 
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global removeColumn, sequenceColumn, colorColumn, priorityColumn, valueColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceTagColumn, sharedWithColumn, sharedGroupColumn, sDomNoTools*/
+/*global removeColumn, sequenceColumn, colorColumn, priorityColumn, valueColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, sDomNoTools*/
 /*global moment: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, Holder*/
 
 function livespan(stamp) {
@@ -211,7 +211,7 @@ $(function () {
     description: $('#description').text()
   };
 
-  var workAoColumns = [removeColumn, sequenceColumn, priorityColumn, valueColumn, colorColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceTagColumn, sharedWithColumn, sharedGroupColumn];
+  var workAoColumns = [removeColumn, sequenceColumn, priorityColumn, valueColumn, colorColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceColumn, tagsColumn, sharedWithColumn, sharedGroupColumn];
 
   var works;
 
