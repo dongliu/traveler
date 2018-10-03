@@ -681,20 +681,6 @@ var deviceColumn = {
   bFilter: true
 };
 
-var deviceTagColumn = {
-  sTitle: 'Tags',
-  sDefaultContent: '',
-  mData: function (source, type, val) {
-    if (source.tags) {
-      return source.tags.join();
-    } else if (source.devices) {
-      return source.devices.join('; ');
-    }
-    return '';
-  },
-  bFilter: true
-};
-
 function usersColumn(title, prop) {
   return {
     sTitle: title,
