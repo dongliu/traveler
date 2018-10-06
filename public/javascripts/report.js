@@ -40,11 +40,18 @@ $(function () {
       rows.push(travelers[id]);
     }
 
+    // construct the column map
+
     // draw the table
     table = $('#report-table').dataTable({
       aaData: rows,
       aoColumns: columns,
       oTableTools: oTableTools,
+      iDisplayLength: -1,
+      aLengthMenu: [
+        [10, 50, 100, -1],
+        [10, 50, 100, 'All']
+      ],
       sDom: sDom
     });
   }
@@ -62,6 +69,12 @@ $(function () {
         constructTable(reportTable);
       }
     });
+  });
+
+  $('input.group').on('input', function () {
+    var value = $(this).prop('checked');
+    var target = $(this).data('toggle');
+    $(target + ' input[type="checkbox"]').prop('checked', value);
   });
 
   $('span.time').each(function () {

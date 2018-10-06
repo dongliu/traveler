@@ -19,6 +19,46 @@ block content
       != ' '
       span.time #{new Date().toUTCString()}
 
+    h4 report format control
+    table.table.table-bordered.table-striped
+      col(width="30%")
+      col(width="70%")
+      thead
+        tr
+          td
+            label.checkbox
+              input.group(type="checkbox", data-toggle="#system-keys")
+              | system defined keys
+          td
+            label.checkbox
+              input.group(type="checkbox", data-toggle="#user-keys")
+              | user defined keys
+      tbody
+        tr
+          td#system-keys
+            label.checkbox.inline-checkbox
+              input(type="checkbox")
+              | first
+            label.checkbox.inline-checkbox
+              input(type="checkbox")
+              | second
+            label.checkbox.inline-checkbox
+              input(type="checkbox")
+              | first
+            label.checkbox.inline-checkbox
+              input(type="checkbox")
+              | second
+            label.checkbox.inline-checkbox
+              input(type="checkbox")
+              | first
+            label.checkbox.inline-checkbox
+              input(type="checkbox")
+              | second
+          td#user-keys
+            label.checkbox
+              input(type="checkbox")
+              | first
+
     table#report-table.table.table-bordered.table-hover(data-travelers='#{JSON.stringify(tid)}')
 
 block js
