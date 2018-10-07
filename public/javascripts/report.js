@@ -10,7 +10,7 @@
  * @return {String}     a checkbox input
  */
 function colControl(col) {
-  return '<label class="checkbox inline-checkbox"><input type="checkbox" data-toggle="' + col.mData + '">' + col.sTitle || col.mData + '</label>';
+  return '<label class="checkbox inline-checkbox"><input type="checkbox" checked data-toggle="' + (col.sTitle || col.mData) + '">' + (col.sTitle || col.mData) + '</label>';
 }
 
 /**
@@ -40,7 +40,7 @@ function constructTable(table, systemColumns, userColumns, travelers, staticProp
     if (staticProperty.indexOf(key) === -1) {
       col = keyValueColumn(key);
       userColumns.push(col);
-      colMap[col.mData] = systemColumns.length + userColumns.length - 1;
+      colMap[col.sTitle || col.mData] = systemColumns.length + userColumns.length - 1;
     }
   });
   // get all the data
@@ -79,7 +79,7 @@ $(function () {
   var userColumns = [];
   var colMap = {};
   systemColumns.forEach(function (col, index) {
-    colMap[col.mData] = index;
+    colMap[col.sTitle || col.mData] = index;
   });
   var finishedT = 0;
 
@@ -97,10 +97,13 @@ $(function () {
     }).always(function () {
       finishedT += 1;
       if (finishedT >= rowN) {
-        constructTable('#report-table', systemColumns, userColumns, travelers, staticProperty, colMap);
+        var report = constructTable('#report-table', systemColumns, userColumns, travelers, staticProperty, colMap);
         constructControl('#system-keys', systemColumns, colMap);
         constructControl('#user-keys', userColumns, colMap);
         // register event handler
+        $('.inline-checkbox input[type="checkbox"]').on('input', function () {
+          report.fnSetColumnVis(colMap[$(this).data('toggle')], $(this).prop('checked'));
+        });
       }
     });
   });
@@ -108,7 +111,7 @@ $(function () {
   $('input.group').on('input', function () {
     var value = $(this).prop('checked');
     var target = $(this).data('toggle');
-    $(target + ' input[type="checkbox"]').prop('checked', value);
+    $(target + ' input[type="checkbox"]').prop('checked', value).trigger('input');
   });
 
   $('span.time').each(function () {
