@@ -17,7 +17,7 @@ $(function () {
   disableAjaxCache();
 
   var workAoColumns = [selectColumn, travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, aliasColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, travelerProgressColumn];
-
+  fnAddFilterFoot('#work-table', workAoColumns);
   var worksTable = $('#work-table').dataTable({
     bAutoWidth: false,
     bPaginate: false,
@@ -93,4 +93,5 @@ $(function () {
   });
 
   selectEvent();
+  filterEvent();
 });
