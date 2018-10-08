@@ -278,6 +278,10 @@ figcaption {
   padding-top: 40px;
 }
 
+.inline-checkbox {
+  display: inline-block;
+  padding-right: 10px;
+}
 
 /**
  * Sidenav for sections
