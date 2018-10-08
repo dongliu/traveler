@@ -1027,14 +1027,31 @@ var cColumn = {
   }
 };
 
+/**
+ * get a button config that exports only the visible, default all
+ * @param  {Sting} tool the tool name to extend
+ * @return {Object}     tool defination
+ */
+function exportVisible(tool) {
+  return {
+    sExtends: tool,
+    mColumns: 'visible'
+  };
+}
+
 var oTableTools = {
   sSwfPath: prefix ? prefix + '/datatables/swf/copy_csv_xls_pdf.swf' : '/datatables/swf/copy_csv_xls_pdf.swf',
   aButtons: [
-    'copy',
-    'print', {
+    exportVisible('copy'),
+    'print',
+    {
       'sExtends': 'collection',
       'sButtonText': 'Save <span class="caret" />',
-      'aButtons': ['csv', 'xls', 'pdf']
+      'aButtons': [
+        exportVisible('csv'),
+        exportVisible('xls'),
+        exportVisible('pdf')
+      ]
     }
   ]
 };

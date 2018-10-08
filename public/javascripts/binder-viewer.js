@@ -1,7 +1,7 @@
 /*eslint max-nested-callbacks: [2, 4]*/
 
-/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global sColumn, pColumn, vColumn, cColumn, travelerLinkColumn, aliasColumn, travelerProgressColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, sDomNoTools*/
+/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, moment */
+/*global sColumn, pColumn, vColumn, cColumn, travelerLinkColumn, aliasColumn, travelerProgressColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, sDomNoTools, fnAddFilterFoot, selectColumn, fnSelectAll, fnDeselect, fnGetSelected, selectEvent, filterEvent, keysColumn*/
 /*global ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, Holder*/
 
 function noneSelectedModal() {
@@ -16,8 +16,8 @@ $(function () {
   ajax401(prefix);
   disableAjaxCache();
 
-  var workAoColumns = [selectColumn, travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, aliasColumn, ownerColumn, deviceColumn, tagsColumn, manPowerColumn, travelerProgressColumn];
-
+  var workAoColumns = [selectColumn, travelerLinkColumn, sColumn, pColumn, vColumn, cColumn, aliasColumn, ownerColumn, deviceColumn, tagsColumn, keysColumn, manPowerColumn, travelerProgressColumn];
+  fnAddFilterFoot('#work-table', workAoColumns);
   var worksTable = $('#work-table').dataTable({
     bAutoWidth: false,
     bPaginate: false,
@@ -93,4 +93,5 @@ $(function () {
   });
 
   selectEvent();
+  filterEvent();
 });

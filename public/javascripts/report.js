@@ -4,6 +4,68 @@
 /* global deviceColumn, titleColumn, statusColumn, sDom, keyValueColumn, oTableTools */
 /* global ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, _, moment */
 
+/**
+ * generate the control checkbox to show/hide the column
+ * @param  {Object} col report table column defination
+ * @return {String}     a checkbox input
+ */
+function colControl(col) {
+  return '<label class="checkbox inline-checkbox"><input type="checkbox" checked data-toggle="' + (col.sTitle || col.mData) + '">' + (col.sTitle || col.mData) + '</label>';
+}
+
+/**
+ * append the checkbox controls for the report table into target
+ * @param  {String} target  Selector of the target
+ * @param  {Array} columns defination of the columns to control
+ * @return {undefined}
+ */
+function constructControl(target, columns) {
+  columns.forEach(function (col) {
+    $(target).append(colControl(col));
+  });
+}
+
+
+function constructTable(table, systemColumns, userColumns, travelers, staticProperty, colMap) {
+  var keys = [];
+  var rows = [];
+  var id;
+  var col;
+  // get all user defined keys
+  for (id in travelers) {
+    keys = _.union(keys, _.keys(travelers[id])).sort();
+  }
+  // add user defined keys to userColumns and colMap
+  _.forEach(keys, function (key) {
+    if (staticProperty.indexOf(key) === -1) {
+      col = keyValueColumn(key);
+      userColumns.push(col);
+      colMap[col.sTitle || col.mData] = systemColumns.length + userColumns.length - 1;
+    }
+  });
+  // get all the data
+  for (id in travelers) {
+    rows.push(travelers[id]);
+  }
+
+  // construct the column map
+
+  // draw the table
+  table = $('#report-table').dataTable({
+    aaData: rows,
+    aoColumns: systemColumns.concat(userColumns),
+    oTableTools: oTableTools,
+    iDisplayLength: -1,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    sDom: sDom
+  });
+
+  return table;
+}
+
 
 $(function () {
   updateAjaxURL(prefix);
@@ -13,41 +75,17 @@ $(function () {
   var tid = $('#report-table').data('travelers');
   var rowN = tid.length;
   var travelers = {};
-  var keys = [];
-  var columns = [titleColumn, deviceColumn, statusColumn];
-  var rows = [];
-
+  var systemColumns = [titleColumn, deviceColumn, statusColumn];
+  var userColumns = [];
+  var colMap = {};
+  systemColumns.forEach(function (col, index) {
+    colMap[col.sTitle || col.mData] = index;
+  });
   var finishedT = 0;
 
-  var reportTable = null;
+  // var reportTable = null;
 
   var staticProperty = ['title', 'devices', 'status', 'id', 'tags'];
-
-  function constructTable(table) {
-    var id;
-    // get all user defined keys
-    for (id in travelers) {
-      keys = _.union(keys, _.keys(travelers[id])).sort();
-    }
-    // add user defined keys to columns
-    _.forEach(keys, function (key) {
-      if (staticProperty.indexOf(key) == -1) {
-        columns.push(keyValueColumn(key));
-      }
-    });
-    // get all the data
-    for (id in travelers) {
-      rows.push(travelers[id]);
-    }
-
-    // draw the table
-    table = $('#report-table').dataTable({
-      aaData: rows,
-      aoColumns: columns,
-      oTableTools: oTableTools,
-      sDom: sDom
-    });
-  }
 
   $.each(tid, function (index, t) {
     $.ajax({
@@ -59,9 +97,21 @@ $(function () {
     }).always(function () {
       finishedT += 1;
       if (finishedT >= rowN) {
-        constructTable(reportTable);
+        var report = constructTable('#report-table', systemColumns, userColumns, travelers, staticProperty, colMap);
+        constructControl('#system-keys', systemColumns, colMap);
+        constructControl('#user-keys', userColumns, colMap);
+        // register event handler
+        $('.inline-checkbox input[type="checkbox"]').on('input', function () {
+          report.fnSetColumnVis(colMap[$(this).data('toggle')], $(this).prop('checked'));
+        });
       }
     });
+  });
+
+  $('input.group').on('input', function () {
+    var value = $(this).prop('checked');
+    var target = $(this).data('toggle');
+    $(target + ' input[type="checkbox"]').prop('checked', value).trigger('input');
   });
 
   $('span.time').each(function () {
