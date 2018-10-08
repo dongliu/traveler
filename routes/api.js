@@ -4,6 +4,7 @@ var fs = require('fs');
 var mongoose = require('mongoose');
 var basic = require('basic-auth');
 var routesUtilities = require('../utilities/routes.js');
+var underscore = require('underscore');
 
 var Form = mongoose.model('Form');
 var Traveler = mongoose.model('Traveler');
@@ -105,6 +106,54 @@ module.exports = function (app) {
     }
     Traveler.find(search, 'title status devices tags mapping createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
       performMongoResponse(err, travelers, res);
+    });
+  });
+
+  app.get('/apis/tags/travelers/', function (req, res) {
+    var search = {
+      archived: {
+        $ne: true
+      }
+    };
+    if (req.query.hasOwnProperty('device')) {
+      search.devices = {
+        $in: [req.query.device]
+      };
+    }
+    Traveler.find(search, 'tags').lean().exec(function (err, travelers) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      var output = [];
+      travelers.forEach(function (t) {
+        output = underscore.union(output, t.tags);
+      });
+      res.json(200, output);
+    });
+  });
+
+  app.get('/apis/keys/travelers/', function (req, res) {
+    var search = {
+      archived: {
+        $ne: true
+      }
+    };
+    if (req.query.hasOwnProperty('device')) {
+      search.devices = {
+        $in: [req.query.device]
+      };
+    }
+    Traveler.find(search, 'mapping').lean().exec(function (err, travelers) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      var output = [];
+      travelers.forEach(function (t) {
+        output = underscore.union(output, underscore.keys(t.mapping));
+      });
+      res.json(200, output);
     });
   });
 
