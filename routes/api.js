@@ -223,6 +223,75 @@ module.exports = function (app) {
     });
   });
 
+  /**
+   * get the latest value for the given name from the data list
+   * @param  {String} name input name
+   * @param  {Array} data an arrya of TravelerData
+   * @return {Number|String|null}      the value for the given name
+   */
+  function dataForName(name, data) {
+    if (!name) {
+      return null;
+    }
+    if (underscore.isEmpty(data)) {
+      return null;
+    }
+
+    var found = data.filter(function (d) {
+      return d.name === name;
+    });
+    // get the latest value from history
+    if (found.length) {
+      found.sort(function (a, b) {
+        if (a.inputOn > b.inputOn) {
+          return -1;
+        }
+        return 1;
+      });
+      return found[0].value;
+    }
+    return null;
+  }
+  /**
+   * retrieve the json representation of the traveler including the properties
+   * in the give list, and the key-value's in the mapping
+   * @param  {Traveler} traveler the traveler mongoose object
+   * @param  {Array} props    the list of properties to be included
+   * @param  {Function} cb    callback function
+   * @return {Object}         the json representation
+   */
+  function retrieveKeyvalue(traveler, props, cb) {
+    var output = {};
+    props.forEach(function (p) {
+      output[p] = traveler[p];
+    });
+    var mapping = traveler.mapping;
+    TravelerData.find({
+      _id: {
+        $in: traveler.data
+      }
+    }, 'name value inputOn inputType').exec(function (dataErr, docs) {
+      if (dataErr) {
+        return cb(dataErr);
+      }
+      underscore.mapObject(mapping, function (name, key) {
+        output[key] = dataForName(name, docs);
+      });
+      return cb(null, output);
+    });
+  }
+
+  app.get('/apis/travelers/:id/keyvalue/', function (req, res) {
+    Traveler.findById(req.params.id, function (travelerErr, traveler) {
+      retrieveKeyvalue(traveler, ['id', 'title', 'status', 'tags', 'devices'], function (err, output) {
+        if (err) {
+          return res.send(500, err.message);
+        }
+        return res.json(200, output);
+      });
+    });
+  });
+
   app.get('/apis/travelers/:id/data/', function (req, res) {
     var travelerId = req.params.id;
     var travelerDataKeys = 'name value inputType inputBy inputOn';
