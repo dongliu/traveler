@@ -280,6 +280,7 @@ $(function () {
       noneSelectedModal();
       return;
     }
+    $('#report-form').empty();
     selected.forEach(function (row) {
       var data = activeTable.fnGetData(row);
       $('#report-form').append($('<input type="hidden"/>').attr({
