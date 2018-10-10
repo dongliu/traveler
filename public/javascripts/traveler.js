@@ -424,9 +424,9 @@ $(function () {
         } else {
           binder.deserializeField(inputs[i]);
         }
+        // set validity
+        markValidity(inputs[i]);
       }
-      // set validity
-      markValidity(inputs[i]);
     }
     $('#form input,textarea').prop('disabled', false);
     $('#complete').prop('disabled', false);
