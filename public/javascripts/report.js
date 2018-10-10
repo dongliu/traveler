@@ -33,15 +33,13 @@ function constructTable(table, systemColumns, userColumns, travelers, staticProp
   var col;
   // get all user defined keys
   for (id in travelers) {
-    keys = _.union(keys, _.keys(travelers[id])).sort();
+    keys = _.union(keys, _.keys(travelers[id].user_defined)).sort();
   }
   // add user defined keys to userColumns and colMap
   _.forEach(keys, function (key) {
-    if (staticProperty.indexOf(key) === -1) {
-      col = keyValueColumn(key);
-      userColumns.push(col);
-      colMap[col.sTitle || col.mData] = systemColumns.length + userColumns.length - 1;
-    }
+    col = keyValueColumn(key);
+    userColumns.push(col);
+    colMap[col.sTitle || col.mData] = systemColumns.length + userColumns.length - 1;
   });
   // get all the data
   for (id in travelers) {
