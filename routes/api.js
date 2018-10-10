@@ -274,9 +274,11 @@ module.exports = function (app) {
       if (dataErr) {
         return cb(dataErr);
       }
+      var userDefined = {};
       underscore.mapObject(mapping, function (name, key) {
-        output[key] = dataForName(name, docs);
+        userDefined[key] = dataForName(name, docs);
       });
+      output.user_defined = userDefined;
       return cb(null, output);
     });
   }
