@@ -72,7 +72,7 @@ function personColumn(title, key) {
 function keyValueColumn(key) {
   return {
     sTitle: key,
-    mData: key,
+    mData: 'user_defined.' + key,
     sDefaultContent: '',
     bFilter: true
   };
