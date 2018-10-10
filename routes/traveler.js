@@ -514,12 +514,11 @@ module.exports = function (app) {
         $in: traveler.data
       }
     }, 'name value inputOn inputType').exec(function (dataErr, docs) {
-      if (dataErr) {
-        return cb(dataErr);
-      }
+      var userDefined = {};
       underscore.mapObject(mapping, function (name, key) {
-        output[key] = dataForName(name, docs);
+        userDefined[key] = dataForName(name, docs);
       });
+      output.user_defined = userDefined;
       return cb(null, output);
     });
   }
