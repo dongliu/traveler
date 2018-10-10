@@ -336,11 +336,16 @@ $(function () {
   });
 
   $('#form input:not([type="file"]),textarea').on('input', function () {
-    // set validity
-    markValidity(this);
     var $this = $(this);
+    var inputs = $this.closest('.control-group-wrap').find('input,textarea');
+    var i;
+    for (i = 0; i < inputs.length; i += 1) {
+      markValidity(inputs[i]);
+    }
+
     var $cgw = $this.closest('.control-group-wrap');
-    $('#form input,textarea').not($this).prop('disabled', true);
+    $('#form input,textarea').prop('disabled', true);
+    $(inputs).prop('disabled', false);
     $('#complete').prop('disabled', true);
     if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
@@ -403,31 +408,23 @@ $(function () {
     e.preventDefault();
     var $this = $(this);
     var inputs = $this.closest('.control-group-wrap').find('input,textarea');
-    var input = inputs[0];
-    if (binder.accessor.target[input.name] === undefined) {
-      if ($(input).is(':checkbox') || $(input).is(':radio')) {
-        $(input).prop('checked', false);
-      } else {
-        $(input).val('');
-      }
-    } else {
-      binder.deserializeField(input);
-    }
-    // set validity
-    markValidity(input);
     var i;
-    // need to reset all the radios
-    if (input.type === 'radio' && inputs.length > 1) {
-      for (i = 1; i < inputs.length; i += 1) {
-        if (binder.accessor.target[inputs[i].name] === undefined) {
-          $(input[i]).prop('checked', false);
+    for (i = 0; i < inputs.length; i += 1) {
+      if (binder.accessor.target[inputs[i].name] === undefined) {
+        if ($(inputs[i]).is(':checkbox') || $(inputs[i]).is(':radio')) {
+          $(inputs[i]).prop('checked', false);
         } else {
-          binder.deserializeField(inputs[i]);
+          $(inputs[i]).val('');
         }
-        // set validity
-        markValidity(inputs[i]);
+      } else {
+        binder.deserializeField(inputs[i]);
       }
     }
+
+    for (i = 0; i < inputs.length; i += 1) {
+      markValidity(inputs[i]);
+    }
+
     $('#form input,textarea').prop('disabled', false);
     $('#complete').prop('disabled', false);
     $(this).closest('.control-group-buttons').remove();
