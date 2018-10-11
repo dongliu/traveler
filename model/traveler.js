@@ -6,6 +6,7 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
 var share = require('./share.js');
+var DataError = require('../lib/error').DataError;
 
 require('./binder');
 var Binder = mongoose.model('Binder');
@@ -168,6 +169,15 @@ var travelerData = new Schema({
   inputType: String,
   inputBy: String,
   inputOn: Date
+});
+
+travelerData.pre('save', function validateNumber(next) {
+  if (this.inputType === 'number') {
+    if (typeof this.value !== this.inputType) {
+      return next(new DataError('value is not a number: ' + this.value, 400));
+    }
+  }
+  next();
 });
 
 var travelerNote = new Schema({
