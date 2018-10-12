@@ -174,7 +174,7 @@ var travelerData = new Schema({
 travelerData.pre('save', function validateNumber(next) {
   if (this.inputType === 'number') {
     if (typeof this.value !== this.inputType) {
-      return next(new DataError('value is not a number: ' + this.value, 400));
+      return next(new DataError('value "' + this.value + '" is not a number', 400));
     }
   }
   next();
