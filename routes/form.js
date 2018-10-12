@@ -523,7 +523,7 @@ module.exports = function (app) {
     doc.updatedOn = Date.now();
     doc.save(function (saveErr, newDoc) {
       if (saveErr) {
-        console.log(saveErr.message);
+        console.error(saveErr.message);
         if (saveErr instanceof FormError) {
           return res.send(saveErr.status, saveErr.message);
         }

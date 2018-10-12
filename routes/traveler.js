@@ -13,6 +13,8 @@ var cheer = require('cheerio');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
 var tag = require('../lib/tag');
+var DataError = require('../lib/error').DataError;
+
 
 var Form = mongoose.model('Form');
 var User = mongoose.model('User');
@@ -784,6 +786,9 @@ module.exports = function (app) {
     }, 'name value inputType inputBy inputOn').exec(function (dataErr, docs) {
       if (dataErr) {
         console.error(dataErr);
+        if (dataErr instanceof FormError) {
+          return res.send(saveErr.status, saveErr.message);
+        }
         return res.send(500, dataErr.message);
       }
       return res.json(200, docs);
@@ -802,7 +807,10 @@ module.exports = function (app) {
     });
     data.save(function (dataErr) {
       if (dataErr) {
-        console.error(dataErr);
+        console.error(dataErr.message);
+        if (dataErr instanceof DataError) {
+          return res.send(dataErr.status, dataErr.message);
+        }
         return res.send(500, dataErr.message);
       }
       doc.manPower.addToSet({
