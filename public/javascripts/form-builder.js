@@ -133,7 +133,15 @@ function binding($edit, $out, model, $done) {
   });
 
   $('input[type="number"]', $edit).on('input', function () {
-    model[$(this).attr('name')] = $(this).val();
+    var val = $(this).val().trim();
+    if (val === '') {
+      model[$(this).attr('name')] = null;
+    } else {
+      model[$(this).attr('name')] = Number($(this).val());
+    }
+    if ($(this).attr('name') === 'min' || $(this).attr('name') === 'max') {
+      model.range = rangeText(model.min, model.max);
+    }
   });
 
   $('select', $edit).change(function () {
@@ -611,6 +619,17 @@ function textarea_edit($cgr) {
   binding($edit, $textarea, model, $done);
 }
 
+function rangeText(min, max) {
+  var output = [];
+  if (typeof min === 'number') {
+    output.push('min: ' + min);
+  }
+  if (typeof max === 'number') {
+    output.push('max: ' + max);
+  }
+  return output.join(', ') || null;
+}
+
 function number_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
@@ -618,16 +637,18 @@ function number_edit($cgr) {
   var placeholder = '';
   var help = '';
   var required = false;
-  var min = '';
-  var max = '';
+  var min = null;
+  var max = null;
+  var range = null;
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
     userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     required = $('input', $cgr).prop('required');
-    min = $('input', $cgr).prop('min');
-    max = $('input', $cgr).prop('max');
+    min = Number($('input', $cgr).prop('min'));
+    max = Number($('input', $cgr).prop('max'));
+    range = rangeText(min, max);
   }
 
   var $number = $(input.number());
@@ -651,7 +672,8 @@ function number_edit($cgr) {
     help: help,
     required: required,
     min: min,
-    max: max
+    max: max,
+    range: range
   };
 
   $('input', $label).val(label);
