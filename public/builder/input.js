@@ -29,7 +29,7 @@ exports["hold"] = function tmpl_hold() {
 
 // number.jade compiled template
 exports["number"] = function tmpl_number() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey" rv-min="model.min" rv-max="model.max" step="any"/><span class="help-block">{ model.help }</span></div></div>';
+    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey" rv-min="model.min" rv-max="model.max" step="any"/><span rv-if="model.range" class="help-inline">{ model.range }</span><span class="help-block">{ model.help }</span></div></div>';
 };
 
 // numberunit.jade compiled template
