@@ -369,6 +369,12 @@ $(function () {
     }
 
     binder.serializeField(input);
+
+    if (input.type === 'number' && typeof binder.accessor.target[input.name] !== 'number') {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The input value is not a number!</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      return;
+    }
     $.ajax({
       url: './data/',
       type: 'POST',
