@@ -17,7 +17,8 @@ var Binder = mongoose.model('Binder');
  *   it is used by the traveler.
  * activatedOn: the dates when this form starts to be active
  * alias : a name for convenience to distinguish forms.
- * mapping : name -> {user-key, label}
+ * mapping : user-key -> name
+ * labels: name -> label
  * inputs : list of input names in the form
  * mapping and inputs are decided by the form snapshot when a traveler is created from it.
  * they are within form because they will be never changed like the html once created.
@@ -26,8 +27,10 @@ var Binder = mongoose.model('Binder');
 var form = new Schema({
   html: String,
   mapping: Schema.Types.Mixed,
+  labels: Schema.Types.Mixed,
   // list of input names in the current active form
-  inputs: [String],
+  // do not need this because of labels
+  // inputs: [String],
   activatedOn: [Date],
   reference: ObjectId,
   alias: String
@@ -83,6 +86,7 @@ var traveler = new Schema({
   referenceForm: ObjectId,
   forms: [form],
   mapping: Schema.Types.Mixed,
+  labels: Schema.Types.Mixed,
   activeForm: String,
   data: [ObjectId],
   notes: [ObjectId],
