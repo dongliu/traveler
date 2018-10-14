@@ -24,32 +24,6 @@ var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
 /**
- * get the list of input names in the form
- * @param  {String} html form html
- * @return {Array}     the list of input names
- */
-function inputNames(html) {
-  var $ = cheer.load(html);
-  var inputs = $('input, textarea');
-  var last_input_name = '';
-  var i;
-  var input;
-  var input_name;
-  var list = [];
-  for (i = 0; i < inputs.length; i += 1) {
-    input = inputs[i];
-    input_name = input.attribs.name;
-    // Determine accurate number of inputs. Radio buttons consist of many inputs but represent one.
-    if (last_input_name === input_name) {
-      continue;
-    }
-    list.push(input_name);
-    last_input_name = input_name;
-  }
-  return list;
-}
-
-/**
  * get the map of input name -> label in the form
  * @param  {String} html form html
  * @return {Object}     the map of input name -> label
@@ -102,8 +76,6 @@ function resetTouched(doc, cb) {
     }
     // reset the touched input name list and the finished input number
     console.info('reset the touched inputs for traveler ' + doc._id);
-    // the active input list
-    // var inputs = [];
     var labels = {};
     var activeForm;
     if (doc.forms.length === 1) {
@@ -142,8 +114,6 @@ function updateFinished(doc, cb) {
 }
 
 function createTraveler(form, req, res) {
-  // var list = inputNames(form.html);
-  // var num = list.length;
   var traveler = new Traveler({
     title: form.title,
     description: '',
@@ -157,7 +127,6 @@ function createTraveler(form, req, res) {
     forms: [],
     data: [],
     comments: [],
-    // totalInput: num,
     finishedInput: 0,
     touchedInputs: []
   });
@@ -174,7 +143,6 @@ function createTraveler(form, req, res) {
     alias: form.title,
     mapping: form.mapping,
     labels: form.labels
-    // inputs: list
   });
   traveler.activeForm = traveler.forms[0]._id;
   traveler.mapping = form.mapping;
@@ -632,7 +600,6 @@ module.exports = function (app) {
     var form = {
       html: req[req.body.formId].html,
       mapping: req[req.body.formId].mapping,
-      // inputs: inputNames(req[req.body.formId].html),
       labels: req[req.body.formId].labels,
       activatedOn: [Date.now()],
       reference: req.body.formId,
@@ -644,7 +611,6 @@ module.exports = function (app) {
       form.labels = inputLabels(form.html);
     }
 
-    // var num = form.inputs.length;
     var num = _.size(form.labels);
     doc.forms.push(form);
     doc.activeForm = doc.forms[doc.forms.length - 1]._id;
@@ -680,9 +646,6 @@ module.exports = function (app) {
       form.labels = inputLabels(form.html);
     }
     doc.labels = form.labels;
-    // if (form.inputs.length === 0) {
-    //   form.inputs = inputNames(form.html);
-    // }
     doc.totalInput = _.size(form.labels);
     form.activatedOn.push(Date.now());
     // reset touched input list
