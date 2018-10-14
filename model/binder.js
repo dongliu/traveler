@@ -139,6 +139,21 @@ var binder = new Schema({
     default: 0,
     min: 0
   },
+  finishedWork: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  inProgressWork: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  totalWork: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   archived: {
     type: Boolean,
     default: false
@@ -195,21 +210,35 @@ binder.methods.updateProgress = function (cb) {
   var totalValue = 0;
   var finishedValue = 0;
   var inProgressValue = 0;
+  var totalWork = 0;
+  var finishedWork = 0;
+  var inProgressWork = 0;
   var totalInput = 0;
   var finishedInput = 0;
   works.forEach(function (w) {
     totalInput += w.totalInput;
     finishedInput += w.finishedInput;
+
     totalValue += w.value;
     finishedValue += w.value * w.finished;
     inProgressValue += w.value * w.inProgress;
+
+    totalWork += 1;
+    finishedWork += w.finished;
+    inProgressWork += w.inProgress;
   });
 
   this.totalInput = totalInput;
   this.finishedInput = finishedInput;
+
   this.totalValue = totalValue;
   this.finishedValue = finishedValue;
   this.inProgressValue = inProgressValue;
+
+  this.totalWork = totalWork;
+  this.finishedWork = finishedWork;
+  this.inProgressWork = inProgressWork;
+
   if (this.isModified()) {
     this.progressUpdatedOn = Date.now();
     this.save(function (err, newBinder) {
