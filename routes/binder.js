@@ -9,6 +9,7 @@ var shareLib = require('../lib/share');
 var routesUtilities = require('../utilities/routes');
 var jade = require('jade');
 var valueProgressHtml = jade.compileFile(__dirname + '/../views/binder-value-progress.jade');
+var travelerProgressHtml = jade.compileFile(__dirname + '/../views/binder-traveler-progress.jade');
 var inputProgressHtml = jade.compileFile(__dirname + '/../views/binder-input-progress.jade');
 
 var User = mongoose.model('User');
@@ -450,6 +451,7 @@ module.exports = function (app) {
       res.json(200, {
         works: merged,
         inputProgress: inputProgressHtml({binder: binder}),
+        travelerProgress: travelerProgressHtml({binder: binder}),
         valueProgress: valueProgressHtml({binder: binder})
       });
     }
