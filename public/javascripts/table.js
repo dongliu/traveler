@@ -666,7 +666,7 @@ var binderWorkProgressColumn = {
       return finished + inProgress;
     }
 
-    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + source.finishedWork + ' + ' + source.inProgressWork.toFixed(1) + ' / ' + source.totalWork);
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + source.finishedWork  + ' / ' + source.totalWork + ' + ' + source.finishedInput + ' / ' + source.totalInput);
   }
 };
 
