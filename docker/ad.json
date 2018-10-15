@@ -23,5 +23,5 @@
 
   "shareUsers": true,
   "shareGroups": false,
-  "transferOwnership": false
+  "transferOwnership": true
 }
