@@ -72,22 +72,22 @@ block content
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
           table#form-table.table.table-bordered.table-hover
-        #transferredforms.tab-pane
         if (viewConfig.transferOwnership)
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-            .btn-group
-              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected forms, only you can see them after archived.')
-                i.fa.fa-archive.fa-lg
-                | &nbsp;Archive
-            .btn-group
-              button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
-                i.fa.fa-user.fa-lg
-                | &nbsp;Transfer ownership
-          table#transferred-form-table.table.table-bordered.table-hover
+          #transferredforms.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+              .btn-group
+                button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected forms, only you can see them after archived.')
+                  i.fa.fa-archive.fa-lg
+                  | &nbsp;Archive
+              .btn-group
+                button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
+                  i.fa.fa-user.fa-lg
+                  | &nbsp;Transfer ownership
+            table#transferred-form-table.table.table-bordered.table-hover
         if (viewConfig.shareUsers)
           #sharedfroms.tab-pane
             .btn-toolbar
