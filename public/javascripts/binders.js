@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, moment: false, travelerGlobal: false*/
-/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, archivedOnColumn: false, binderConfigLinkColumn: false, binderShareLinkColumn: false, binderLinkColumn: false, tagsColumn: false, binderProgressColumn: false, transferredOnColumn: false, ownerColumn: false*/
+/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, archivedOnColumn: false, binderConfigLinkColumn: false, binderShareLinkColumn: false, binderLinkColumn: false, tagsColumn: false, binderWorkProgressColumn: false, transferredOnColumn: false, ownerColumn: false*/
 /*global archiveFromModal, transferFromModal, modalScroll, Holder*/
 
 
@@ -19,7 +19,7 @@ $(function () {
   updateAjaxURL(prefix);
   disableAjaxCache();
 
-  var binderAoColumns = [selectColumn, binderConfigLinkColumn, binderShareLinkColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
+  var binderAoColumns = [selectColumn, binderConfigLinkColumn, binderShareLinkColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderWorkProgressColumn];
   fnAddFilterFoot('#binder-table', binderAoColumns);
   var binderTable = $('#binder-table').dataTable({
     sAjaxSource: '/binders/json',
@@ -48,7 +48,7 @@ $(function () {
     sDom: sDomNoTools
   });
 
-  var transferredBinderAoColumns = [selectColumn, binderConfigLinkColumn, binderShareLinkColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
+  var transferredBinderAoColumns = [selectColumn, binderConfigLinkColumn, binderShareLinkColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, transferredOnColumn, updatedByColumn, updatedOnColumn, binderWorkProgressColumn];
   fnAddFilterFoot('#transferred-binder-table', transferredBinderAoColumns);
   var transferredBinderTable = $('#transferred-binder-table').dataTable({
     sAjaxSource: '/transferredbinders/json',
@@ -79,7 +79,7 @@ $(function () {
   });
 
 
-  var sharedBinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
+  var sharedBinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, ownerColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderWorkProgressColumn];
   fnAddFilterFoot('#shared-binder-table', sharedBinderAoColumns);
   var sharedBinderTable = $('#shared-binder-table').dataTable({
     sAjaxSource: '/sharedbinders/json',
@@ -109,7 +109,7 @@ $(function () {
   });
 
 
-  var groupSharedBinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
+  var groupSharedBinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, clonedByColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderWorkProgressColumn];
   fnAddFilterFoot('#group-shared-binder-table', groupSharedBinderAoColumns);
   var groupSharedBinderTable = $('#group-shared-binder-table').dataTable({
     sAjaxSource: '/groupsharedbinders/json',
@@ -139,7 +139,7 @@ $(function () {
   });
 
 
-  var archivedBinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, archivedOnColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderProgressColumn];
+  var archivedBinderAoColumns = [selectColumn, binderLinkColumn, titleColumn, archivedOnColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, createdOnColumn, updatedByColumn, updatedOnColumn, binderWorkProgressColumn];
   fnAddFilterFoot('#archived-binder-table', archivedBinderAoColumns);
   var archivedBinderTable = $('#archived-binder-table').dataTable({
     sAjaxSource: '/archivedbinders/json',
