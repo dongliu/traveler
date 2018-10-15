@@ -51,6 +51,7 @@ $(function () {
     worksTable.fnAddData(data.works);
     worksTable.fnDraw();
     $('#value-progress').html(data.valueProgress);
+    $('#traveler-progress').html(data.travelerProgress);
     $('#input-progress').html(data.inputProgress);
   }).always();
 
