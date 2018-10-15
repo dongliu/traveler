@@ -536,6 +536,9 @@ module.exports = function (app) {
         $in: traveler.data
       }
     }, 'name value inputOn inputType').exec(function (dataErr, docs) {
+      if (dataErr) {
+        return cb(dataErr);
+      }
       var userDefined = {};
       _.mapObject(mapping, function (name, key) {
         userDefined[key] = dataForName(name, docs);
@@ -545,8 +548,53 @@ module.exports = function (app) {
     });
   }
 
+  /**
+   * retrieve the json representation of the traveler including the properties
+   * in the give list, and the {key, label, value}'s in the mapping
+   * @param  {Traveler} traveler the traveler mongoose object
+   * @param  {Array} props    the list of properties to be included
+   * @param  {Function} cb    callback function
+   * @return {Object}         the json representation
+   */
+  function retrieveKeyLableValue(traveler, props, cb) {
+    var output = {};
+    props.forEach(function (p) {
+      output[p] = traveler[p];
+    });
+    var mapping = traveler.mapping;
+    var labels = traveler.labels;
+    TravelerData.find({
+      _id: {
+        $in: traveler.data
+      }
+    }, 'name value inputOn inputType').exec(function (dataErr, docs) {
+      if (dataErr) {
+        return cb(dataErr);
+      }
+      var userDefined = {};
+      _.mapObject(mapping, function (name, key) {
+        userDefined[key] = {};
+        userDefined[key].value = dataForName(name, docs);
+        if (_.isObject(labels)) {
+          userDefined[key].label = labels[name];
+        }
+      });
+      output.user_defined = userDefined;
+      return cb(null, output);
+    });
+  }
+
   app.get('/travelers/:id/keyvalue/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
     retrieveKeyvalue(req[req.params.id], ['id', 'title', 'status', 'tags', 'devices'], function (err, output) {
+      if (err) {
+        return res.send(500, err.message);
+      }
+      return res.json(200, output);
+    });
+  });
+
+  app.get('/travelers/:id/keylabelvalue/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
+    retrieveKeyLableValue(req[req.params.id], ['id', 'title', 'status', 'tags', 'devices'], function (err, output) {
       if (err) {
         return res.send(500, err.message);
       }
