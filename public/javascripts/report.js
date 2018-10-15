@@ -25,6 +25,13 @@ function constructControl(target, columns) {
   });
 }
 
+function rowArrayData(aoColumns, obj){
+  var out = [];
+  aoColumns.forEach(function(col) {
+    out.push(obj[col.mData]);
+  });
+  return out;
+}
 
 function constructTable(table, systemColumns, userColumns, travelers, staticProperty, colMap) {
   var keys = [];
@@ -37,16 +44,24 @@ function constructTable(table, systemColumns, userColumns, travelers, staticProp
   }
   // add user defined keys to userColumns and colMap
   _.forEach(keys, function (key) {
-    col = keyValueColumn(key);
+    // col = keyLableColumn(key);
+    // userColumns.push(col);
+    // colMap[col.sTitle || col.mData] = systemColumns.length + userColumns.length - 1;
+    col = keyValueLableColumn(key);
     userColumns.push(col);
     colMap[col.sTitle || col.mData] = systemColumns.length + userColumns.length - 1;
   });
+  // var aoColumns = systemColumns.concat(userColumns);
+
   // get all the data
   for (id in travelers) {
     rows.push(travelers[id]);
+    // rows.push(rowArrayData(aoColumns, travelers[id]));
   }
 
   // construct the column map
+
+  // var aoColumns = systemColumns.concat(userColumns);
 
   // draw the table
   table = $('#report-table').dataTable({
@@ -87,7 +102,8 @@ $(function () {
 
   $.each(tid, function (index, t) {
     $.ajax({
-      url: '/travelers/' + t + '/keyvalue/json',
+      // url: '/travelers/' + t + '/keyvalue/json',
+      url: '/travelers/' + t + '/keylabelvalue/json',
       type: 'GET',
       dataType: 'json'
     }).done(function (data) {
@@ -110,6 +126,16 @@ $(function () {
     var value = $(this).prop('checked');
     var target = $(this).data('toggle');
     $(target + ' input[type="checkbox"]').prop('checked', value).trigger('input');
+  });
+
+  $('input.span').on('input', function () {
+    var value = $(this).prop('checked');
+    var target = $(this).data('toggle');
+    if (value) {
+      $('span' + target).show();
+    } else {
+      $('span' + target).hide();
+    }
   });
 
   $('span.time').each(function () {
