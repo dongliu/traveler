@@ -71,7 +71,7 @@ function personColumn(title, key) {
 
 function keyValueColumn(key) {
   return {
-    sTitle: key + '_value',
+    sTitle: key + '_v',
     mData: 'user_defined.' + key + '.value',
     sDefaultContent: '',
     bFilter: true
@@ -80,7 +80,7 @@ function keyValueColumn(key) {
 
 function keyLabelColumn(key) {
   return {
-    sTitle: key + '_label',
+    sTitle: key + '_l',
     mData: 'user_defined.' + key + '.label',
     sDefaultContent: '',
     bFilter: true
