@@ -124,16 +124,6 @@ $(function () {
     $(target + ' input[type="checkbox"]').prop('checked', value).trigger('input');
   });
 
-  // $('input.span').on('input', function () {
-  //   var value = $(this).prop('checked');
-  //   var target = $(this).data('toggle');
-  //   if (value) {
-  //     $('span' + target).show();
-  //   } else {
-  //     $('span' + target).hide();
-  //   }
-  // });
-
   $('span.time').each(function () {
     $(this).text(moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a'));
   });
