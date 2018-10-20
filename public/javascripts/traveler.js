@@ -342,10 +342,8 @@ $(function () {
     for (i = 0; i < inputs.length; i += 1) {
       markValidity(inputs[i]);
     }
-
     var $cgw = $this.closest('.control-group-wrap');
-    $('#form input,textarea').prop('disabled', true);
-    $(inputs).prop('disabled', false);
+    $('#form input,textarea').not($(inputs)).prop('disabled', true);
     $('#complete').prop('disabled', true);
     if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
@@ -369,6 +367,12 @@ $(function () {
     }
 
     binder.serializeField(input);
+
+    if (input.type === 'number' && typeof binder.accessor.target[input.name] !== 'number') {
+      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>The input value is not a number!</div>');
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      return;
+    }
     $.ajax({
       url: './data/',
       type: 'POST',
