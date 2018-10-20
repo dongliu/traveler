@@ -25,14 +25,6 @@ function constructControl(target, columns) {
   });
 }
 
-// function rowArrayData(aoColumns, obj){
-//   var out = [];
-//   aoColumns.forEach(function(col) {
-//     out.push(obj[col.mData]);
-//   });
-//   return out;
-// }
-
 function constructTable(table, travelers, colMap) {
   var systemColumns = [titleColumn, deviceColumn, statusColumn];
   var userColumns = [];
@@ -43,7 +35,6 @@ function constructTable(table, travelers, colMap) {
   var keys = [];
   var rows = [];
   var id;
-  // var col;
   // get all user defined keys
   for (id in travelers) {
     keys = _.union(keys, _.keys(travelers[id].user_defined)).sort();
@@ -109,11 +100,8 @@ $(function () {
   var travelers = {};
   var finishedT = 0;
 
-  // var staticProperty = ['title', 'devices', 'status', 'id', 'tags'];
-
   $.each(tid, function (index, t) {
     $.ajax({
-      // url: '/travelers/' + t + '/keyvalue/json',
       url: '/travelers/' + t + '/keylabelvalue/json',
       type: 'GET',
       dataType: 'json'
