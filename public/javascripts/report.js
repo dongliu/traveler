@@ -1,4 +1,4 @@
-/*eslint max-nested-callbacks: [2, 4]*/
+/*eslint max-nested-callbacks: [2, 5]*/
 
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /* global deviceColumn, titleColumn, statusColumn, sDom, keyValueColumn, keyLabelColumn, oTableTools */
@@ -10,7 +10,7 @@
  * @return {String}     a checkbox input
  */
 function colControl(col) {
-  return '<label class="checkbox inline-checkbox"><input type="checkbox" checked data-toggle="' + (col.sTitle || col.mData || col) + '">' + (col.sTitle || col.mData || col) + '</label>';
+  return '<label class="checkbox inline-checkbox"><input type="checkbox" class="userkey" checked data-toggle="' + (col.sTitle || col.mData || col) + '">' + (col.sTitle || col.mData || col) + '</label>';
 }
 
 /**
@@ -65,7 +65,7 @@ function constructTable(table, travelers, colMap) {
   constructControl('#user-keys', keys);
 
   // draw the table
-  table = $('#report-table').dataTable({
+  var report = $(table).dataTable({
     aaData: rows,
     aoColumns: systemColumns.concat(userColumns),
     oTableTools: oTableTools,
@@ -77,7 +77,23 @@ function constructTable(table, travelers, colMap) {
     sDom: sDom
   });
 
-  return table;
+  // register column event handler
+  $('.inline-checkbox input.userkey').on('input', function () {
+    var show = $(this).prop('checked');
+    colMap[$(this).data('toggle')].forEach(function (c) {
+      report.fnSetColumnVis(c, show);
+    });
+  });
+
+  // register lable event hander
+  $('.inline-checkbox input.labels').on('input', function () {
+    var show = $(this).prop('checked');
+    labelColIndex.forEach(function (c) {
+      report.fnSetColumnVis(c, show);
+    });
+  });
+
+  return report;
 }
 
 
@@ -106,14 +122,7 @@ $(function () {
     }).always(function () {
       finishedT += 1;
       if (finishedT >= rowN) {
-        var report = constructTable('#report-table', travelers, colMap);
-        // register event handler
-        $('.inline-checkbox input[type="checkbox"]').on('input', function () {
-          var show = $(this).prop('checked');
-          colMap[$(this).data('toggle')].forEach(function (c) {
-            report.fnSetColumnVis(c, show);
-          });
-        });
+        constructTable('#report-table', travelers, colMap);
       }
     });
   });
