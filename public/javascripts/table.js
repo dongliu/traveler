@@ -676,8 +676,40 @@ var workProgressColumn = {
 
 };
 
-var binderProgressColumn = {
-  sTitle: 'Estimated progress',
+var binderWorkProgressColumn = {
+  sTitle: 'Work progress',
+  bSortable: true,
+  sType: 'numeric',
+  bAutoWidth: false,
+  sWidth: '105px',
+  mData: function (source, type, val) {
+    if (source.status === 2) {
+      if (type === 'sort') {
+        return 1;
+      }
+      return progressBar(false, 100, 0);
+    }
+
+    if (source.totalWork === 0) {
+      if (type === 'sort') {
+        return 0;
+      }
+      return progressBar(false, 0, 0);
+    }
+
+    var inProgress = source.inProgressWork / source.totalWork;
+    var finished = source.finishedWork / source.totalWork;
+
+    if (type === 'sort') {
+      return finished + inProgress;
+    }
+
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + source.finishedWork  + ' / ' + source.totalWork + ' + ' + source.finishedInput + ' / ' + source.totalInput);
+  }
+};
+
+var binderValueProgressColumn = {
+  sTitle: 'Value progress',
   bSortable: true,
   sType: 'numeric',
   bAutoWidth: false,
@@ -694,7 +726,7 @@ var binderProgressColumn = {
       if (type === 'sort') {
         return 0;
       }
-      return progressBar(source.status === 1, 0, 0);
+      return progressBar(false, 0, 0);
     }
 
     var inProgress = source.inProgressValue / source.totalValue;
@@ -704,7 +736,7 @@ var binderProgressColumn = {
       return finished + inProgress;
     }
 
-    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(source.finishedValue) + ' + ' + Math.round(source.finishedInput) + ' / ' + Math.round(source.totalInput));
+    return progressBar(source.status === 1, finished * 100, inProgress * 100, '' + Math.round(source.finishedValue) + ' + ' + Math.round(source.inProgressValue) + ' / ' + Math.round(source.totalValue));
   }
 };
 
