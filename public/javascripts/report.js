@@ -1,7 +1,7 @@
-/*eslint max-nested-callbacks: [2, 4]*/
+/*eslint max-nested-callbacks: [2, 5]*/
 
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/* global deviceColumn, titleColumn, statusColumn, sDom, keyValueColumn, oTableTools */
+/* global deviceColumn, titleColumn, statusColumn, sDom, keyValueColumn, keyLabelColumn, oTableTools */
 /* global ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, _, moment */
 
 /**
@@ -10,7 +10,7 @@
  * @return {String}     a checkbox input
  */
 function colControl(col) {
-  return '<label class="checkbox inline-checkbox"><input type="checkbox" checked data-toggle="' + (col.sTitle || col.mData) + '">' + (col.sTitle || col.mData) + '</label>';
+  return '<label class="checkbox inline-checkbox"><input type="checkbox" class="userkey" checked data-toggle="' + (col.sTitle || col.mData || col) + '">' + (col.sTitle || col.mData || col) + '</label>';
 }
 
 /**
@@ -25,31 +25,38 @@ function constructControl(target, columns) {
   });
 }
 
-
-function constructTable(table, systemColumns, userColumns, travelers, staticProperty, colMap) {
+function constructTable(table, travelers, colMap) {
+  var systemColumns = [titleColumn, deviceColumn, statusColumn];
+  var userColumns = [];
+  var labelColIndex = [];
+  systemColumns.forEach(function (col, index) {
+    colMap[col.sTitle || col.mData] = [index];
+  });
   var keys = [];
   var rows = [];
   var id;
-  var col;
   // get all user defined keys
   for (id in travelers) {
     keys = _.union(keys, _.keys(travelers[id].user_defined)).sort();
   }
   // add user defined keys to userColumns and colMap
-  _.forEach(keys, function (key) {
-    col = keyValueColumn(key);
-    userColumns.push(col);
-    colMap[col.sTitle || col.mData] = systemColumns.length + userColumns.length - 1;
+  keys.forEach(function (key, index) {
+    userColumns.push(keyLabelColumn(key));
+    userColumns.push(keyValueColumn(key));
+    colMap[key] = [systemColumns.length + 2 * index, systemColumns.length + 2 * index + 1];
+    labelColIndex.push(systemColumns.length + 2 * index);
   });
+
   // get all the data
   for (id in travelers) {
     rows.push(travelers[id]);
   }
 
-  // construct the column map
+  constructControl('#system-keys', systemColumns);
+  constructControl('#user-keys', keys);
 
   // draw the table
-  table = $('#report-table').dataTable({
+  var report = $(table).dataTable({
     aaData: rows,
     aoColumns: systemColumns.concat(userColumns),
     oTableTools: oTableTools,
@@ -61,7 +68,23 @@ function constructTable(table, systemColumns, userColumns, travelers, staticProp
     sDom: sDom
   });
 
-  return table;
+  // register column event handler
+  $('.inline-checkbox input.userkey').on('input', function () {
+    var show = $(this).prop('checked');
+    colMap[$(this).data('toggle')].forEach(function (c) {
+      report.fnSetColumnVis(c, show);
+    });
+  });
+
+  // register lable event hander
+  $('.inline-checkbox input.labels').on('input', function () {
+    var show = $(this).prop('checked');
+    labelColIndex.forEach(function (c) {
+      report.fnSetColumnVis(c, show);
+    });
+  });
+
+  return report;
 }
 
 
@@ -70,24 +93,16 @@ $(function () {
   ajax401(prefix);
   disableAjaxCache();
 
+  var colMap = {};
+
   var tid = $('#report-table').data('travelers');
   var rowN = tid.length;
   var travelers = {};
-  var systemColumns = [titleColumn, deviceColumn, statusColumn];
-  var userColumns = [];
-  var colMap = {};
-  systemColumns.forEach(function (col, index) {
-    colMap[col.sTitle || col.mData] = index;
-  });
   var finishedT = 0;
-
-  // var reportTable = null;
-
-  var staticProperty = ['title', 'devices', 'status', 'id', 'tags'];
 
   $.each(tid, function (index, t) {
     $.ajax({
-      url: '/travelers/' + t + '/keyvalue/json',
+      url: '/travelers/' + t + '/keylabelvalue/json',
       type: 'GET',
       dataType: 'json'
     }).done(function (data) {
@@ -95,13 +110,7 @@ $(function () {
     }).always(function () {
       finishedT += 1;
       if (finishedT >= rowN) {
-        var report = constructTable('#report-table', systemColumns, userColumns, travelers, staticProperty, colMap);
-        constructControl('#system-keys', systemColumns, colMap);
-        constructControl('#user-keys', userColumns, colMap);
-        // register event handler
-        $('.inline-checkbox input[type="checkbox"]').on('input', function () {
-          report.fnSetColumnVis(colMap[$(this).data('toggle')], $(this).prop('checked'));
-        });
+        constructTable('#report-table', travelers, colMap);
       }
     });
   });

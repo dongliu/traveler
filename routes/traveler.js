@@ -8,7 +8,7 @@ var auth = require('../lib/auth');
 var authConfig = config.auth;
 var mongoose = require('mongoose');
 var path = require('path');
-var underscore = require('underscore');
+var _ = require('underscore');
 var cheer = require('cheerio');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
@@ -24,29 +24,38 @@ var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
 /**
- * get the list of input names in the form
+ * get the map of input name -> label in the form
  * @param  {String} html form html
- * @return {Array}     the list of input names
+ * @return {Object}     the map of input name -> label
  */
-function inputNames(html) {
+function inputLabels(html) {
   var $ = cheer.load(html);
   var inputs = $('input, textarea');
-  var last_input_name = '';
+  var lastInputName = '';
   var i;
   var input;
-  var input_name;
-  var list = [];
+  var inputName = '';
+  var label = '';
+  var map = {};
   for (i = 0; i < inputs.length; i += 1) {
-    input = inputs[i];
-    input_name = input.attribs.name;
-    // Determine accurate number of inputs. Radio buttons consist of many inputs but represent one.
-    if (last_input_name === input_name) {
+    input = $(inputs[i]);
+    inputName = input.attr('name');
+    label = input.closest('.control-group').children('.control-label').children('span').text();
+    if (inputName) {
+      inputName = inputName.trim();
+    }
+    if (label) {
+      label = label.trim();
+    }
+    if (!inputName) {
       continue;
     }
-    list.push(input_name);
-    last_input_name = input_name;
+    if (lastInputName !== inputName) {
+      map[inputName] = label;
+    }
+    lastInputName = inputName;
   }
-  return list;
+  return map;
 }
 
 function addInputName(name, list) {
@@ -67,18 +76,23 @@ function resetTouched(doc, cb) {
     }
     // reset the touched input name list and the finished input number
     console.info('reset the touched inputs for traveler ' + doc._id);
-    // the active input list
-    var inputs = [];
+    var labels = {};
+    var activeForm;
     if (doc.forms.length === 1) {
-      inputs = doc.forms[0].inputs.length ? doc.forms[0].inputs : inputNames(doc.forms[0].html);
+      activeForm = doc.forms[0];
     } else {
-      inputs = doc.forms.id(doc.activeForm).inputs.length ? doc.forms.id(doc.activeForm).inputs : inputNames(doc.forms.id(doc.activeForm).html);
+      activeForm = doc.forms.id(doc.activeForm);
     }
+
+    if (!(activeForm.labels && _.size(activeForm.labels) > 0)) {
+      activeForm.labels = inputLabels(activeForm.html);
+    }
+    labels = activeForm.labels;
     // empty the current touched input list
     doc.touchedInputs = [];
     data.forEach(function (d) {
       // check if the data is for the active form
-      if (inputs.indexOf(d.name) >= 0) {
+      if (labels.hasOwnProperty(d.name)) {
         addInputName(d.name, doc.touchedInputs);
       }
     });
@@ -100,8 +114,6 @@ function updateFinished(doc, cb) {
 }
 
 function createTraveler(form, req, res) {
-  var list = inputNames(form.html);
-  var num = list.length;
   var traveler = new Traveler({
     title: form.title,
     description: '',
@@ -115,20 +127,28 @@ function createTraveler(form, req, res) {
     forms: [],
     data: [],
     comments: [],
-    totalInput: num,
     finishedInput: 0,
     touchedInputs: []
   });
+
+  // for old forms without lables
+  if (!(_.isObject(form.labels) && _.size(form.labels) > 0)) {
+    form.labels = inputLabels(form.html);
+  }
+
   traveler.forms.push({
     html: form.html,
     activatedOn: [Date.now()],
     reference: form._id,
     alias: form.title,
     mapping: form.mapping,
-    inputs: list
+    labels: form.labels
   });
   traveler.activeForm = traveler.forms[0]._id;
   traveler.mapping = form.mapping;
+  traveler.labels = form.labels;
+  traveler.totalInput = _.size(traveler.labels);
+
   traveler.save(function (err, doc) {
     if (err) {
       console.error(err);
@@ -464,7 +484,7 @@ module.exports = function (app) {
 
 
   app.get('/travelers/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
-    return res.json(200, underscore.pick(req[req.params.id], 'id', 'title', 'status', 'tags', 'devices', 'mapping', 'data'));
+    return res.json(200, _.pick(req[req.params.id], 'id', 'title', 'status', 'tags', 'devices', 'mapping', 'data'));
   });
 
   /**
@@ -477,7 +497,7 @@ module.exports = function (app) {
     if (!name) {
       return null;
     }
-    if (underscore.isEmpty(data)) {
+    if (_.isEmpty(data)) {
       return null;
     }
 
@@ -516,9 +536,48 @@ module.exports = function (app) {
         $in: traveler.data
       }
     }, 'name value inputOn inputType').exec(function (dataErr, docs) {
+      if (dataErr) {
+        return cb(dataErr);
+      }
       var userDefined = {};
-      underscore.mapObject(mapping, function (name, key) {
+      _.mapObject(mapping, function (name, key) {
         userDefined[key] = dataForName(name, docs);
+      });
+      output.user_defined = userDefined;
+      return cb(null, output);
+    });
+  }
+
+  /**
+   * retrieve the json representation of the traveler including the properties
+   * in the give list, and the {key, label, value}'s in the mapping
+   * @param  {Traveler} traveler the traveler mongoose object
+   * @param  {Array} props    the list of properties to be included
+   * @param  {Function} cb    callback function
+   * @return {Object}         the json representation
+   */
+  function retrieveKeyLableValue(traveler, props, cb) {
+    var output = {};
+    props.forEach(function (p) {
+      output[p] = traveler[p];
+    });
+    var mapping = traveler.mapping;
+    var labels = traveler.labels;
+    TravelerData.find({
+      _id: {
+        $in: traveler.data
+      }
+    }, 'name value inputOn inputType').exec(function (dataErr, docs) {
+      if (dataErr) {
+        return cb(dataErr);
+      }
+      var userDefined = {};
+      _.mapObject(mapping, function (name, key) {
+        userDefined[key] = {};
+        userDefined[key].value = dataForName(name, docs);
+        if (_.isObject(labels)) {
+          userDefined[key].label = labels[name];
+        }
       });
       output.user_defined = userDefined;
       return cb(null, output);
@@ -527,6 +586,15 @@ module.exports = function (app) {
 
   app.get('/travelers/:id/keyvalue/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
     retrieveKeyvalue(req[req.params.id], ['id', 'title', 'status', 'tags', 'devices'], function (err, output) {
+      if (err) {
+        return res.send(500, err.message);
+      }
+      return res.json(200, output);
+    });
+  });
+
+  app.get('/travelers/:id/keylabelvalue/json', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), function (req, res) {
+    retrieveKeyLableValue(req[req.params.id], ['id', 'title', 'status', 'tags', 'devices'], function (err, output) {
       if (err) {
         return res.send(500, err.message);
       }
@@ -580,15 +648,22 @@ module.exports = function (app) {
     var form = {
       html: req[req.body.formId].html,
       mapping: req[req.body.formId].mapping,
-      inputs: inputNames(req[req.body.formId].html),
+      labels: req[req.body.formId].labels,
       activatedOn: [Date.now()],
       reference: req.body.formId,
       alias: req[req.body.formId].title
     };
-    var num = form.inputs.length;
+
+    // for old forms without lables
+    if (!(typeof form.labels === 'object' && _.size(form.labels) > 0)) {
+      form.labels = inputLabels(form.html);
+    }
+
+    var num = _.size(form.labels);
     doc.forms.push(form);
     doc.activeForm = doc.forms[doc.forms.length - 1]._id;
     doc.mapping = form.mapping;
+    doc.labels = form.labels;
     doc.totalInput = num;
     // reset touched input list
     resetTouched(doc, function () {
@@ -614,10 +689,12 @@ module.exports = function (app) {
 
     doc.activeForm = form._id;
     doc.mapping = form.mapping;
-    if (form.inputs.length === 0) {
-      form.inputs = inputNames(form.html);
+    // for old forms without lables
+    if (!(typeof form.labels === 'object' && _.size(form.labels) > 0)) {
+      form.labels = inputLabels(form.html);
     }
-    doc.totalInput = form.inputs.length;
+    doc.labels = form.labels;
+    doc.totalInput = _.size(form.labels);
     form.activatedOn.push(Date.now());
     // reset touched input list
     resetTouched(doc, function () {
@@ -786,9 +863,6 @@ module.exports = function (app) {
     }, 'name value inputType inputBy inputOn').exec(function (dataErr, docs) {
       if (dataErr) {
         console.error(dataErr);
-        if (dataErr instanceof FormError) {
-          return res.send(saveErr.status, saveErr.message);
-        }
         return res.send(500, dataErr.message);
       }
       return res.json(200, docs);
@@ -885,7 +959,7 @@ module.exports = function (app) {
   app.post('/travelers/:id/uploads/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canWriteMw('id'), reqUtils.status('id', [1]), function (req, res) {
     var doc = req[req.params.id];
 
-    if (underscore.isEmpty(req.files)) {
+    if (_.isEmpty(req.files)) {
       return res.send(400, 'Expecte One uploaded file');
     }
 

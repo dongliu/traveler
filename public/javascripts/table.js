@@ -72,8 +72,46 @@ function personColumn(title, key) {
 function keyValueColumn(key) {
   return {
     sTitle: key,
+    mData: 'user_defined.' + key + '.value',
+    sDefaultContent: '',
+    bFilter: true
+  };
+}
+
+function keyLabelColumn(key) {
+  return {
+    sTitle: 'label',
+    mData: 'user_defined.' + key + '.label',
+    sDefaultContent: '',
+    bFilter: true
+  };
+}
+
+function valueLabel(data) {
+  var output = '';
+  if (data.value) {
+    output += '<span class="input-value">' + data.value + '</span>';
+    if (data.label) {
+      output += '<span class="input-label"> (' + data.label + ')</span>';
+    }
+  }
+  return output;
+}
+
+function keyValueLableColumn(key) {
+  return {
+    sTitle: key,
     mData: 'user_defined.' + key,
     sDefaultContent: '',
+    mRender: function (data, type) {
+      if (type === 'sort' || type === 'filter') {
+        return data.value;
+      } else if (data) {
+        return valueLabel(data);
+      } else {
+        return '';
+      }
+    },
     bFilter: true
   };
 }

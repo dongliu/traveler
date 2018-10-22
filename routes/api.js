@@ -4,7 +4,7 @@ var fs = require('fs');
 var mongoose = require('mongoose');
 var basic = require('basic-auth');
 var routesUtilities = require('../utilities/routes.js');
-var underscore = require('underscore');
+var _ = require('underscore');
 
 var Form = mongoose.model('Form');
 var Traveler = mongoose.model('Traveler');
@@ -127,7 +127,7 @@ module.exports = function (app) {
       }
       var output = [];
       travelers.forEach(function (t) {
-        output = underscore.union(output, t.tags);
+        output = _.union(output, t.tags);
       });
       res.json(200, output);
     });
@@ -151,7 +151,7 @@ module.exports = function (app) {
       }
       var output = [];
       travelers.forEach(function (t) {
-        output = underscore.union(output, underscore.keys(t.mapping));
+        output = _.union(output, _.keys(t.mapping));
       });
       res.json(200, output);
     });
@@ -233,7 +233,7 @@ module.exports = function (app) {
     if (!name) {
       return null;
     }
-    if (underscore.isEmpty(data)) {
+    if (_.isEmpty(data)) {
       return null;
     }
 
@@ -252,6 +252,7 @@ module.exports = function (app) {
     }
     return null;
   }
+
   /**
    * retrieve the json representation of the traveler including the properties
    * in the give list, and the key-value's in the mapping
@@ -275,7 +276,7 @@ module.exports = function (app) {
         return cb(dataErr);
       }
       var userDefined = {};
-      underscore.mapObject(mapping, function (name, key) {
+      _.mapObject(mapping, function (name, key) {
         userDefined[key] = dataForName(name, docs);
       });
       output.user_defined = userDefined;
@@ -283,9 +284,57 @@ module.exports = function (app) {
     });
   }
 
+  /**
+   * retrieve the json representation of the traveler including the properties
+   * in the give list, and the {key, label, value}'s in the mapping
+   * @param  {Traveler} traveler the traveler mongoose object
+   * @param  {Array} props    the list of properties to be included
+   * @param  {Function} cb    callback function
+   * @return {Object}         the json representation
+   */
+  function retrieveKeyLableValue(traveler, props, cb) {
+    var output = {};
+    props.forEach(function (p) {
+      output[p] = traveler[p];
+    });
+    var mapping = traveler.mapping;
+    var labels = traveler.labels;
+    TravelerData.find({
+      _id: {
+        $in: traveler.data
+      }
+    }, 'name value inputOn inputType').exec(function (dataErr, docs) {
+      if (dataErr) {
+        return cb(dataErr);
+      }
+      var userDefined = {};
+      _.mapObject(mapping, function (name, key) {
+        userDefined[key] = {};
+        userDefined[key].value = dataForName(name, docs);
+        if (_.isObject(labels)) {
+          userDefined[key].label = labels[name];
+        }
+      });
+      output.user_defined = userDefined;
+      return cb(null, output);
+    });
+  }
+
+
   app.get('/apis/travelers/:id/keyvalue/', function (req, res) {
     Traveler.findById(req.params.id, function (travelerErr, traveler) {
       retrieveKeyvalue(traveler, ['id', 'title', 'status', 'tags', 'devices'], function (err, output) {
+        if (err) {
+          return res.send(500, err.message);
+        }
+        return res.json(200, output);
+      });
+    });
+  });
+
+  app.get('/apis/travelers/:id/keylabelvalue/', function (req, res) {
+    Traveler.findById(req.params.id, function (travelerErr, traveler) {
+      retrieveKeyLableValue(traveler, ['id', 'title', 'status', 'tags', 'devices'], function (err, output) {
         if (err) {
           return res.send(500, err.message);
         }

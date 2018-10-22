@@ -138,7 +138,7 @@ Binder.PropertyAccessor.bindTo = function(obj) {
 Binder.TypeRegistry = {
   'string': {
     format: function(value) {
-      return value ? String(value) : '';
+      return  value == null ? '' : String(value);
     },
     parse: function(value) {
       return value ? value : null;
@@ -154,7 +154,7 @@ Binder.TypeRegistry = {
   },
   'number': {
     format: function(value) {
-      return value ? String(value) : '';
+      return value == null ? '' : String(value);
     },
     parse: function(value) {
       return value ? Number(value) : null;
@@ -197,6 +197,11 @@ Binder.FormBinder.prototype = {
     }
   },
   _getType: function(element) {
+    // handle known types
+    var type = element.type;
+    if (type === "number") {
+      return "number";
+    }
     if (element.className) {
       var m = element.className.match(this.type_regexp);
       if (m && m[1]) {
