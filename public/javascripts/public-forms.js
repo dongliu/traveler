@@ -11,7 +11,7 @@ $(function () {
   $('#public-forms-table').dataTable({
     sAjaxSource: '/publicforms/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });

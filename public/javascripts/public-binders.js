@@ -12,7 +12,7 @@ $(function () {
   $('#public-binders-table').dataTable({
     sAjaxSource: '/publicbinders/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
