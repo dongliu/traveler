@@ -1,14 +1,14 @@
 {
   "name": "traveler-aps",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "start": "node app"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dongliu/traveler.git#APS",
-    "release": "APS-1.0.1"
+    "url": "https://github.com/AdvancedPhotonSource/traveler.git",
+    "release": "APS-1.1.0-RC"
   },
   "dependencies": {
     "basic-auth": "1.0.0",
