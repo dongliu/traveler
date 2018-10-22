@@ -67,16 +67,16 @@ block content
     .btn-group
       a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
     .btn-group
-      button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
-    if (locals.status === 0)
-      .btn-group
-        button.btn.btn-primary#ready(data-toggle='tooltip', title='ready to publish form') Ready to publish
-    if (locals.status === 0.5)
-      .btn-group
-        button.btn.btn-primary#publish(data-toggle='tooltip', title='publish the form') Publish
-    if (locals.status === 1)
-      .btn-group
-        button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
+      button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as   
+    //if (locals.status === 0)
+    //  .btn-group
+    //    button.btn.btn-primary#ready(data-toggle='tooltip', title='ready to publish form') Ready to publish
+    //if (locals.status === 0.5)
+    //  .btn-group
+    //    button.btn.btn-primary#publish(data-toggle='tooltip', title='publish the form') Publish
+    //if (locals.status === 1)
+    //  .btn-group
+    //    button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
   br
   br
   br
