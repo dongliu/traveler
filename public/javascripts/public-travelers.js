@@ -11,7 +11,7 @@ $(function () {
   $('#public-travelers-table').dataTable({
     sAjaxSource: '/publictravelers/json',
     sAjaxDataProp: '',
-    fnInitComplete: function () {
+    fnDrawCallback: function () {
       Holder.run({
         images: 'img.user'
       });
