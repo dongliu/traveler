@@ -18,6 +18,7 @@ status := 0 // editable
         | 2 // obsoleted
 ******/
 // mapping : user-key -> name
+// labels : name -> label
 
 var form = new Schema({
   title: String,
@@ -46,6 +47,7 @@ var form = new Schema({
   sharedWith: [share.user],
   sharedGroup: [share.group],
   mapping: Schema.Types.Mixed,
+  labels: Schema.Types.Mixed,
   html: String
 });
 
@@ -57,24 +59,35 @@ form.pre('save', function (next) {
   var doc = this;
   if (doc.isNew || doc.isModified('html')) {
     let mapping = {};
+    let labels = {};
     let $ = cheerio.load(doc.html);
     let inputs = $('input, textarea');
     let lastInputName = '';
     let lastUserkey = '';
     let inputName = '';
+    let label = '';
     let userkey = '';
     for (let i = 0; i < inputs.length; i += 1) {
       let input = $(inputs[i]);
       inputName = input.attr('name');
+      label = input.closest('.control-group').children('.control-label').children('span').text();
       userkey = input.attr('data-userkey');
-      if (userkey && inputName) {
-        userkey = userkey.trim();
+      if (inputName) {
         inputName = inputName.trim();
       }
-      if (!userkey || !inputName) {
+      if (label) {
+        label = label.trim();
+      }
+      if (userkey) {
+        userkey = userkey.trim();
+      }
+
+      if (!inputName) {
         continue;
       }
+      // seen the same input name already
       if (lastInputName === inputName) {
+        // only radio inputs share the same input name
         if (input.attr('type') === 'radio') {
           // consistent name -> userkey
           if (userkey === lastUserkey) {
@@ -86,16 +99,20 @@ form.pre('save', function (next) {
           return next(new FormError('duplicated input name "' + inputName + '"', 400));
         }
       } else {
-        // add the mapping
-        if (mapping.hasOwnProperty(userkey)) {
-          return next(new FormError('duplicated input userkey "' + userkey + '"', 400));
+        labels[inputName] = label;
+        // add user key mapping if userkey is not null or empty
+        if (!!userkey) {
+          if (mapping.hasOwnProperty(userkey)) {
+            return next(new FormError('duplicated input userkey "' + userkey + '"', 400));
+          }
+          mapping[userkey] = inputName;
         }
-        mapping[userkey] = inputName;
       }
       lastInputName = inputName;
       lastUserkey = userkey;
     }
     this.mapping = mapping;
+    this.labels = labels;
   }
   next();
 });

@@ -30,9 +30,12 @@ block content
               input.group(type="checkbox", data-toggle="#system-keys", checked)
               | system defined keys
           td
-            label.checkbox
+            label.checkbox.inline-checkbox
               input.group(type="checkbox", data-toggle="#user-keys", checked)
               | user defined keys
+            label.checkbox.inline-checkbox
+              input.labels(type="checkbox", checked)
+              | input labels
       tbody
         tr
           td#system-keys
