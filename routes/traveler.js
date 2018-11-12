@@ -9,7 +9,6 @@ var authConfig = config.auth;
 var mongoose = require('mongoose');
 var path = require('path');
 var _ = require('underscore');
-var cheer = require('cheerio');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
 var tag = require('../lib/tag');
@@ -22,41 +21,6 @@ var Group = mongoose.model('Group');
 var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
-
-/**
- * get the map of input name -> label in the form
- * @param  {String} html form html
- * @return {Object}     the map of input name -> label
- */
-function inputLabels(html) {
-  var $ = cheer.load(html);
-  var inputs = $('input, textarea');
-  var lastInputName = '';
-  var i;
-  var input;
-  var inputName = '';
-  var label = '';
-  var map = {};
-  for (i = 0; i < inputs.length; i += 1) {
-    input = $(inputs[i]);
-    inputName = input.attr('name');
-    label = input.closest('.control-group').children('.control-label').children('span').text();
-    if (inputName) {
-      inputName = inputName.trim();
-    }
-    if (label) {
-      label = label.trim();
-    }
-    if (!inputName) {
-      continue;
-    }
-    if (lastInputName !== inputName) {
-      map[inputName] = label;
-    }
-    lastInputName = inputName;
-  }
-  return map;
-}
 
 function addInputName(name, list) {
   if (list.indexOf(name) === -1) {
@@ -85,7 +49,7 @@ function resetTouched(doc, cb) {
     }
 
     if (!(activeForm.labels && _.size(activeForm.labels) > 0)) {
-      activeForm.labels = inputLabels(activeForm.html);
+      activeForm.labels = routesUtilities.traveler.inputLabels(activeForm.html);
     }
     labels = activeForm.labels;
     // empty the current touched input list
@@ -114,52 +78,18 @@ function updateFinished(doc, cb) {
 }
 
 function createTraveler(form, req, res) {
-  var traveler = new Traveler({
-    title: form.title,
-    description: '',
-    devices: [],
-    tags: form.tags,
-    status: 0,
-    createdBy: req.session.userid,
-    createdOn: Date.now(),
-    sharedWith: [],
-    referenceForm: form._id,
-    forms: [],
-    data: [],
-    comments: [],
-    finishedInput: 0,
-    touchedInputs: []
-  });
 
-  // for old forms without lables
-  if (!(_.isObject(form.labels) && _.size(form.labels) > 0)) {
-    form.labels = inputLabels(form.html);
-  }
-
-  traveler.forms.push({
-    html: form.html,
-    activatedOn: [Date.now()],
-    reference: form._id,
-    alias: form.title,
-    mapping: form.mapping,
-    labels: form.labels
-  });
-  traveler.activeForm = traveler.forms[0]._id;
-  traveler.mapping = form.mapping;
-  traveler.labels = form.labels;
-  traveler.totalInput = _.size(traveler.labels);
-
-  traveler.save(function (err, doc) {
-    if (err) {
-      console.error(err);
-      return res.send(500, err.message);
-    }
-    console.log('new traveler ' + doc.id + ' created');
-    var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
-    res.set('Location', url);
-    return res.json(201, {
-      location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
-    });
+  routesUtilities.traveler.createTraveler(form, form.title, req.session.userid, [], function (err, doc) {
+      if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+      }
+      console.log('new traveler ' + doc.id + ' created');
+      var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/travelers/' + doc.id + '/';
+      res.set('Location', url);
+      return res.json(201, {
+          location: (req.proxied ? req.proxied_prefix : '') + '/travelers/' + doc.id + '/'
+      })
   });
 }
 
@@ -656,7 +586,7 @@ module.exports = function (app) {
 
     // for old forms without lables
     if (!(typeof form.labels === 'object' && _.size(form.labels) > 0)) {
-      form.labels = inputLabels(form.html);
+      form.labels = routesUtilities.traveler.inputLabels(form.html);
     }
 
     var num = _.size(form.labels);
@@ -691,7 +621,7 @@ module.exports = function (app) {
     doc.mapping = form.mapping;
     // for old forms without lables
     if (!(typeof form.labels === 'object' && _.size(form.labels) > 0)) {
-      form.labels = inputLabels(form.html);
+      form.labels = routesUtilities.traveler.inputLabels(form.html);
     }
     doc.labels = form.labels;
     doc.totalInput = _.size(form.labels);

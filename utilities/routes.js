@@ -10,6 +10,7 @@ var mongoose = require('mongoose');
 var Form = mongoose.model('Form');
 var Traveler = mongoose.model('Traveler');
 var Binder = mongoose.model("Binder");
+var _ = require('underscore');
 var cheer = require('cheerio');
 
 var devices = require('./devices/default.js');
@@ -245,32 +246,79 @@ var binder = {
 };
 
 var traveler = {
-    // TODO: need to refactor with the same function in routes/traveler.js
-    // Parameters for newTravelerCallBack are (err, traveler)
-    // createTraveler: function (form, title, userName, devices, newTravelerCallBack) {
-    //     // update the total input number and finished input number
-    //     var $ = cheer.load(form.html);
-    //     var num = $('input, textarea').length;
-    //     // console.log('total input number is ' + num);
-    //     var traveler = new Traveler({
-    //         title: title,
-    //         description: '',
-    //         devices: devices,
-    //         status: 0,
-    //         createdBy: userName,
-    //         createdOn: Date.now(),
-    //         sharedWith: [],
-    //         referenceForm: form._id,
-    //         forms: [{
-    //             html: form.html
-    //         }],
-    //         data: [],
-    //         comments: [],
-    //         totalInput: num,
-    //         finishedInput: 0
-    //     });
-    //     traveler.save(newTravelerCallBack);
-    // },
+
+    /**
+     * get the map of input name -> label in the form
+     * @param  {String} html form html
+     * @return {Object}     the map of input name -> label
+     */
+    inputLabels: function(html) {
+        var $ = cheer.load(html);
+        var inputs = $('input, textarea');
+        var lastInputName = '';
+        var i;
+        var input;
+        var inputName = '';
+        var label = '';
+        var map = {};
+        for (i = 0; i < inputs.length; i += 1) {
+            input = $(inputs[i]);
+            inputName = input.attr('name');
+            label = input.closest('.control-group').children('.control-label').children('span').text();
+            if (inputName) {
+                inputName = inputName.trim();
+            }
+            if (label) {
+                label = label.trim();
+            }
+            if (!inputName) {
+                continue;
+            }
+            if (lastInputName !== inputName) {
+                map[inputName] = label;
+            }
+            lastInputName = inputName;
+        }
+        return map;
+    },
+    createTraveler: function (form, title, userName, devices, newTravelerCallBack) {
+        var traveler = new Traveler({
+            title: title,
+            description: '',
+            devices: devices,
+            tags: form.tags,
+            status: 0,
+            createdBy: userName,
+            createdOn: Date.now(),
+            sharedWith: [],
+            referenceForm: form._id,
+            forms: [],
+            data: [],
+            comments: [],
+            finishedInput: 0,
+            touchedInputs: []
+        });
+
+        // for old forms without lables
+        if (!(_.isObject(form.labels) && _.size(form.labels) > 0)) {
+            form.labels = this.inputLabels(form.html);
+        }
+
+        traveler.forms.push({
+            html: form.html,
+            activatedOn: [Date.now()],
+            reference: form._id,
+            alias: form.title,
+            mapping: form.mapping,
+            labels: form.labels
+        });
+        traveler.activeForm = traveler.forms[0]._id;
+        traveler.mapping = form.mapping;
+        traveler.labels = form.labels;
+        traveler.totalInput = _.size(traveler.labels);
+
+        traveler.save(newTravelerCallBack);
+    },
     updateTravelerStatus: function (req, res, travelerDoc, status, isSession, onSuccess) {
         if (isSession) {
             if (status === 1.5) {
