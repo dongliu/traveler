@@ -1,3 +1,53 @@
+
+APS-1.1.0 Release Changelog
+October 24, 2018
+- User Defined Keys
+    Add support for eTraveler templates to contain user-defined keys for input field
+    Uniqueness is enforced on the user defined keys
+    Formatting rules are enforced when defining a key
+    Traveler inherits all keys of the template at time of traveler creation
+    Keys are searchable
+    Only authorized users can define keys;
+- User Defined Tags
+    Add support for eTraveler templates to contain user-defined tags to categorize travelers (e.g. Receiving Inspection Traveler, Calibration Traveler, Discrepancy Traveler, ...)
+    Traveler inherits all tags of the template at time of traveler creation
+    Tags are searchable
+    Traveler instances could have their own tags
+    Only authorized users can define tags;
+- Reporting
+    Report selected data fields in html/Excel/PDF format for individual travelers crossing traveler system
+        User selected key(s)
+        User selected tag(s)
+        User selected key(s) and tag(s) combination
+    Report selected data fields in html/Excel/PDF format for individual travelers for travelers in binder
+        User selected key(s)
+        User selected tag(s)
+        User selected key(s) and tag(s) combination
+- Progress Summary Improvement
+    Count a grouped input (e.g. multi-selection radio button) as one input
+    Eliminate the need to refresh the browser multiple times to obtain the correct progress status
+    Enhance the summary reporting of binder
+        Report finished steps over total for traveler
+        Report finished traveler over total traveler + finished steps over total steps for binder
+    Resolve issues in the binder progress to show the correct number of inputs for each traveler in the binder
+    Reflect the overall progress appropriately in the binder by adding the total inputs and completed inputs
+- Numerical Fields
+    Automatic range checking
+        For out of range numerical inputs on traveler instances, add a visual indication that it is out of range, e.g. a red highlight around the input box that is always shown.
+    Show range next to input field as a hint to end user
+    Enforce input to be a numeric number
+- API Improvement
+    API to return all user defined keys
+    API to return all keys
+    API to return keys with value and labels for given traveler
+- Minor Changes
+    Traveler sharing function improvement
+    Resolve issue when user picture cannot be fetched with placeholder image
+    Resolve the issue that prevented user from adding travelers to binder
+    Implementation and other improvements to the radio button functionality
+    Improve traveler submission to warn the user when required field hasn't been entered
+    Enhance the way travelers with unfinished required inputs are displayed
+
 release APS-1.0.1
 date February 05, 2018
 - Resolve the upload directory issue and the download issue
@@ -5,13 +55,13 @@ date February 05, 2018
 release APS-1.0.0
 date January 31, 2018
 - Merged in the latest revision of traveler with APS branch (new look & binders)
-- Improvements to the latest revision that restore the APS functionality. 
+- Improvements to the latest revision that restore the APS functionality.
 - General APS usability improvements
 - Users may create radio buttons in templates
 
 release APS-0.2.2
 date October 03, 2016
-- Update CDB utility to support the new revision of CDB. 
+- Update CDB utility to support the new revision of CDB.
 
 release APS-0.2.1
 date May 26, 2016
@@ -180,4 +230,3 @@ release v2.0.0
 date: Mar. 4, 2014
 - ready for first production deployment
 - form builder
-
