@@ -3,7 +3,16 @@
 # Traveler setup script for Bourne-type shells
 # This file is typically sourced in user's .bashrc file
 
-myDir=`dirname $BASH_SOURCE`
+if [ -n "$BASH_SOURCE" ]; then
+   input_param=$BASH_SOURCE
+elif [ -n "$ZSH_VERSION" ]; then
+   setopt function_argzero
+   input_param=$0
+else
+   echo 1>&2 "Unsupported shell. Please use bash or zsh."
+   exit 2
+fi
+myDir=`dirname $input_param`
 currentDir=`pwd` && cd $myDir
 
 # TRAVELER_ROOT_DIR is not empty and the different from current directory
@@ -74,7 +83,7 @@ if [ ! -d $TRAVELER_CONFIG_DIR ]; then
 fi
 
 # SET PATH variable 
-HOST_ARCH=`uname | tr [A-Z] [a-z]`-`uname -m`
+HOST_ARCH="`uname | tr '[:upper:]' '[:lower:]'`-`uname -m`"
 
 # Add to path only if directory exists.
 prependPathIfDirExists() {
