@@ -478,7 +478,7 @@ var tagsColumn = {
 };
 
 var keysColumn = {
-  sTitle: 'User defined keys',
+  sTitle: 'Reporting IDs',
   sDefaultContent: '',
   mData: function (source, type, val) {
     if (source.mapping) {
