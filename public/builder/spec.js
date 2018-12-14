@@ -117,7 +117,7 @@ exports["unit"] = function tmpl_unit() {
 
 // userkey.jade compiled template
 exports["userkey"] = function tmpl_userkey() {
-    return '<div class="control-group"><div class="control-label">User defined key</div><div class="controls"><input type="text" name="userkey" pattern="[a-zA-Z_0-9]{1,30}"/><span class="help-inline">Only letter, number, and "_" allowed (Example: MagMeas_1)</span></div></div>';
+    return '<div class="control-group"><div class="control-label">Reporting ID</div><div class="controls"><input type="text" name="userkey" pattern="[a-zA-Z_0-9]{1,30}"/><span class="help-inline">Only letter, number, and "_" allowed (Example: MagMeas_1)</span></div></div>';
 };
 
 // width.jade compiled template
