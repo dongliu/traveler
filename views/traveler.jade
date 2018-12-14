@@ -54,6 +54,9 @@ block content
 
         if (locals.traveler.devices && traveler.devices.length > 0)
           h4 Tags: !{traveler.devices}
+        if (locals.traveler.referenceForm)
+          h4
+            a(href='#{prefix}/forms/#{locals.traveler.referenceForm}/', target='#{viewConfig.linkTarget}') #{viewConfig.terminology.form}
         if (locals.traveler.status !== undefined)
           if (locals.isOwner != undefined && locals.isOwner)
             case locals.traveler.status
