@@ -5,6 +5,6 @@
  "username": "traveler",
  "password": "travelerpassword",
  "auth": {
-  "authdb": "traveler"
+  "authdb": "admin"
  }
 }
