@@ -4,6 +4,8 @@
 
 See <https://docs.docker.com/install/> for instructions.
 
+You will alos need to install docker compose if it does not come with docker, see <https://docs.docker.com/compose/install/#install-compose>.
+
 ## create development network
 
 The traveler application and its dependencies will be running in the same network named `traveler-dev`. Run the following to create the network.
