@@ -24,6 +24,7 @@
   },
 
   "ldapsCA": "OPTIONAL CA file for accepting SSL Connections",
+  "ldapsRejectUnauthorized": true,
   "shareUsers": true,
   "shareGroups": true,
   "transferOwnership": true
