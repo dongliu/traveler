@@ -17,6 +17,7 @@
     "max-len": 0,
     "max-params": [2, 10],
     "operator-assignment": 0,
-    "consistent-this": 0
+    "consistent-this": 0,
+    "no-unused-expressions": 1
   }
 }
