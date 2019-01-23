@@ -32,7 +32,7 @@ module.exports = function (app) {
       owner: {
         $exists: false
       }
-    }, 'title tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
+    }, 'title status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -47,7 +47,7 @@ module.exports = function (app) {
       archived: {
         $ne: true
       }
-    }, 'title tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
+    }, 'title status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup').exec(function (err, forms) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -88,7 +88,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
+      }, 'title status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
         if (fErr) {
           console.error(fErr);
           return res.send(500, fErr.message);
@@ -126,7 +126,7 @@ module.exports = function (app) {
         archived: {
           $ne: true
         }
-      }, 'title tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
+      }, 'title status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup').exec(function (fErr, forms) {
         if (fErr) {
           console.error(fErr);
           return res.send(500, fErr.message);
@@ -541,7 +541,7 @@ module.exports = function (app) {
     var f = req[req.params.id];
     var s = req.body.status;
 
-    if ([0, 0.5, 1, 2].indexOf(s) === -1) {
+    if ([0.5, 1, 2].indexOf(s) === -1) {
       return res.send(400, 'invalid status');
     }
 
@@ -550,37 +550,17 @@ module.exports = function (app) {
       return res.send(204);
     }
 
-    if (s === 0) {
-      if ([0.5].indexOf(f.status) === -1) {
-        return res.send(400, 'invalid status change');
-      } else {
-        f.status = s;
-      }
+    var stateTransition = require('../model/form').stateTransition;
+
+    var target = underscore.find(stateTransition, function (t) {
+      return t.from === f.status;
+    });
+
+    if (target.indexOf(s) === -1) {
+      return res.send(400, 'invalid status change');
     }
 
-    if (s === 0.5) {
-      if ([0].indexOf(f.status) === -1) {
-        return res.send(400, 'invalid status change');
-      } else {
-        f.status = s;
-      }
-    }
-
-    if (s === 1) {
-      if ([0.5].indexOf(f.status) === -1) {
-        return res.send(400, 'invalid status change');
-      } else {
-        f.status = s;
-      }
-    }
-
-    if (s === 2) {
-      if ([1].indexOf(f.status) === -1) {
-        return res.send(400, 'invalid status change');
-      } else {
-        f.status = s;
-      }
-    }
+    f.status = s;
 
     f.save(function (err) {
       if (err) {
