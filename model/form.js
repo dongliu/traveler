@@ -15,10 +15,26 @@ publicAccess := 0 // for read or
 status := 0 // editable
         | 0.5 // ready to publish
         | 1 // published
-        | 2 // obsoleted
+        | 2 // inactive
 ******/
 // mapping : user-key -> name
 // labels : name -> label
+
+
+var stateTransition = [
+  {
+    from: 0,
+    to: [0.5, 2]
+  },
+  {
+    from: 0.5,
+    to: [1, 2]
+  },
+  {
+    from: 1,
+    to: [2]
+  }
+];
 
 var form = new Schema({
   title: String,
@@ -135,5 +151,6 @@ var FormFile = mongoose.model('FormFile', formFile);
 
 module.exports = {
   Form: Form,
-  FormFile: FormFile
+  FormFile: FormFile,
+  stateTransition: stateTransition
 };
