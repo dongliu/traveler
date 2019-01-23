@@ -1,9 +1,8 @@
 /*global describe, it*/
 /*eslint max-nested-callbacks: [2, 4]*/
-
-var ad = require('../config/ad.json');
-var ldapClient = require('../lib/ldap-client');
-require('should');
+var ad = require('../../config/ad.json');
+var ldapClient = require('../../lib/ldap-client');
+require('chai').should();
 
 describe('ldap-client', function () {
   describe('#search()', function () {
