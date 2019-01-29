@@ -335,7 +335,12 @@ $(function () {
     }
   });
 
-  $('#form input:not([type="file"]),textarea').on('input', function () {
+  // Safari web browser will not recognize input event for radio and checkbox. 
+  $('#form input[type="radio"], input[type="checkbox"]').on('click', formInputMade);
+
+  $('#form input:not([type="file"]):not([type="radio"]):not([type="checkbox"]),textarea').on('input', formInputMade);
+
+  function formInputMade() {
     var $this = $(this);
     var inputs = $this.closest('.control-group-wrap').find('input,textarea');
     var i;
@@ -348,7 +353,7 @@ $(function () {
     if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
     }
-  });
+  };
 
   $('#form').on('click', 'button[value="save"]', function (e) {
     e.preventDefault();
