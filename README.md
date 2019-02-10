@@ -1,6 +1,7 @@
 # Traveler
 
 # Instalation
+
 For detailed deployment instructions please see https://confluence.aps.anl.gov/display/APSUCMS/Developer+Guide+for+the+Traveler+Module
 
 **Deployment of the traveler module:**
@@ -33,7 +34,9 @@ For detailed deployment instructions please see https://confluence.aps.anl.gov/d
     ./etc/init.d/traveler-webapp status
 
 # Lint
+
 Recommend to use [ESLint](http://eslint.org/) to lint the code before committing. The ESLint configuration file is `.eslintrc`. [JSFormat](https://github.com/jdc0589/JsFormat) or other beautifiers may help. The JSformat user configuration file is `jsformat.json`.
 
 # License
+
 [MIT](https://github.com/dongliu/traveler/blob/master/LICENSE.md)

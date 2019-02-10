@@ -10,11 +10,11 @@
  * In order to implement special functionality for application, "device"; device.js must be specified in the same directory as this file.
  */
 
-function getDeviceValue(value, cb){
-    cb(value);
+function getDeviceValue(value, cb) {
+  cb(value);
 }
 
 module.exports = {
-    getDeviceValue: getDeviceValue,
-    devicesRemovalAllowed: true
+  getDeviceValue: getDeviceValue,
+  devicesRemovalAllowed: true,
 };
