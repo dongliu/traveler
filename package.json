@@ -45,7 +45,7 @@
   },
   "lint-staged": {
     "*.{js,json,css,md}": [
-      "prettier --write",
+      "./node_modules/prettier/bin-prettier.js --config ./prettier.config.js --write",
       "git add"
     ]
   }
