@@ -20,11 +20,12 @@ var request = require('request');
 var webServiceUrl = config.service.cdb.web_service_url;
 var webPortalUrl = config.service.cdb.web_portal_url;
 
-const PORTAL_PATH_FOR_ITEM = "/views/item/view.xhtml?id=REPLACE_ID";
-const PORTAL_PATH_FOR_ITEM_ELEMENT = "/views/itemElement/view.xhtml?id=REPLACE_ID";
+const PORTAL_PATH_FOR_ITEM = '/views/item/view.xhtml?id=REPLACE_ID';
+const PORTAL_PATH_FOR_ITEM_ELEMENT =
+  '/views/itemElement/view.xhtml?id=REPLACE_ID';
 
-const ITEM_INVENTORY_DOMAIN_NAME = "Inventory";
-const ITEM_CATALOG_DOMAIN_NAME = "Catalog";
+const ITEM_INVENTORY_DOMAIN_NAME = 'Inventory';
+const ITEM_CATALOG_DOMAIN_NAME = 'Catalog';
 
 /**
  * Performs a request to an external service and calls the call back function when the request is complete/incomplete.
@@ -34,11 +35,12 @@ const ITEM_CATALOG_DOMAIN_NAME = "Catalog";
  */
 function performServiceRequest(fullUrl, cb) {
   console.log('Performing API Request: ' + fullUrl);
-  request({
+  request(
+    {
       strictSSL: false,
-      url: fullUrl
+      url: fullUrl,
     },
-    function (error, response) {
+    function(error, response) {
       if (response !== undefined) {
         try {
           response = JSON.parse(response.body);
@@ -50,7 +52,8 @@ function performServiceRequest(fullUrl, cb) {
         console.error(error);
       }
       cb(response, error);
-    });
+    }
+  );
 }
 
 /**
@@ -65,8 +68,8 @@ function getItemById(id, cb) {
 }
 
 function getItemElementById(id, cb) {
-  var fullUrl = webServiceUrl + "/itemElements/" + id;
-  performServiceRequest(fullUrl, cb)
+  var fullUrl = webServiceUrl + '/itemElements/' + id;
+  performServiceRequest(fullUrl, cb);
 }
 
 /**
@@ -91,7 +94,7 @@ function getCDBEntityReference(valueOrig, cb) {
    * @returns {Promise} - promise is returned once error checking is complete and display value is generated.
    */
   function performErrorChecking(data, error) {
-    return new Promise(function (resolve) {
+    return new Promise(function(resolve) {
       var displayValue;
       if (error) {
         displayValue = valueOrig;
@@ -125,11 +128,11 @@ function getCDBEntityReference(valueOrig, cb) {
    * @returns {void}
    */
   function processItemResponse(data, error) {
-    performErrorChecking(data, error).then(function (displayValue) {
+    performErrorChecking(data, error).then(function(displayValue) {
       if (displayValue === undefined) {
-        switch (data.domain.name){
+        switch (data.domain.name) {
           case ITEM_CATALOG_DOMAIN_NAME:
-            displayValue = "Catalog Item: " + data.name;
+            displayValue = 'Catalog Item: ' + data.name;
             finishItemResponse(displayValue);
             break;
           case ITEM_INVENTORY_DOMAIN_NAME:
@@ -144,14 +147,15 @@ function getCDBEntityReference(valueOrig, cb) {
     });
   }
 
-  function finishInventoryItemResponse(inventoryItem){
+  function finishInventoryItemResponse(inventoryItem) {
     function addCatalogItemInformation(data, error) {
-      performErrorChecking(data, error).then(function (displayValue) {
+      performErrorChecking(data, error).then(function(displayValue) {
         if (displayValue === undefined) {
           catalogItem = data;
-          displayValue = catalogItem.name + " [" + inventoryItem.name + "]";
+          displayValue = catalogItem.name + ' [' + inventoryItem.name + ']';
         } else {
-          displayValue = displayValue + " Inventory Item: " + inventoryItem.name;
+          displayValue =
+            displayValue + ' Inventory Item: ' + inventoryItem.name;
         }
 
         if (inventoryItem.qr_id) {
@@ -169,18 +173,18 @@ function getCDBEntityReference(valueOrig, cb) {
   }
 
   function processItemElementResponse(data, error) {
-    performErrorChecking(data, error).then(function (displayValue) {
+    performErrorChecking(data, error).then(function(displayValue) {
       if (displayValue === undefined) {
-        displayValue = "Element";
+        displayValue = 'Element';
         if (data.parentItem) {
-          displayValue += " of " + data.parentItem.name
+          displayValue += ' of ' + data.parentItem.name;
         }
         if (data.name) {
-          displayValue += ": " + data.name;
+          displayValue += ': ' + data.name;
         }
       }
 
-      constructFinalUrl(PORTAL_PATH_FOR_ITEM_ELEMENT, displayValue)
+      constructFinalUrl(PORTAL_PATH_FOR_ITEM_ELEMENT, displayValue);
     });
   }
 
@@ -213,5 +217,5 @@ test()
 
 module.exports = {
   getDeviceValue: getCDBEntityReference,
-  devicesRemovalAllowed: false
+  devicesRemovalAllowed: false,
 };

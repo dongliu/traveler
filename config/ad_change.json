@@ -7,9 +7,26 @@
   "nameFilter": "(&(objectClass=user)(displayName=_name)(company=FRIB))",
   "groupSearchBase": "ou=...,dc=...",
   "groupSearchFilter": "(&(objectClass=group)(sAMAccountName=_id))",
-  "objAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName"],
-  "memberAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName", "memberOf"],
-  "groupAttributes": ["sAMAccountName","displayName","mail"],
+  "objAttributes": [
+    "sAMAccountName",
+    "displayName",
+    "company",
+    "mail",
+    "telephoneNumber",
+    "mobile",
+    "physicalDeliveryOfficeName"
+  ],
+  "memberAttributes": [
+    "sAMAccountName",
+    "displayName",
+    "company",
+    "mail",
+    "telephoneNumber",
+    "mobile",
+    "physicalDeliveryOfficeName",
+    "memberOf"
+  ],
+  "groupAttributes": ["sAMAccountName", "displayName", "mail"],
   "rawAttributes": ["thumbnailPhoto"],
   "defaultKeys": {
     "displayName": "displayName",
