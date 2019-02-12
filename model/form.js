@@ -15,10 +15,25 @@ publicAccess := 0 // for read or
 status := 0 // editable
         | 0.5 // ready to publish
         | 1 // published
-        | 2 // obsoleted
+        | 2 // inactive
 ******/
 // mapping : user-key -> name
 // labels : name -> label
+
+var stateTransition = [
+  {
+    from: 0,
+    to: [0.5, 2],
+  },
+  {
+    from: 0.5,
+    to: [1, 2],
+  },
+  {
+    from: 1,
+    to: [2],
+  },
+];
 
 var form = new Schema({
   title: String,
@@ -32,30 +47,30 @@ var form = new Schema({
   tags: [String],
   status: {
     type: Number,
-    default: 0
+    default: 0,
   },
   transferredOn: Date,
   archivedOn: Date,
   archived: {
     type: Boolean,
-    default: false
+    default: false,
   },
   publicAccess: {
     type: Number,
-    default: appConfig.default_form_public_access
+    default: appConfig.default_form_public_access,
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
-  html: String
+  html: String,
 });
 
 /**
  * pre save middleware to add or update the mapping
  * and validate unique input name and data-userkey
  */
-form.pre('save', function (next) {
+form.pre('save', function(next) {
   var doc = this;
   if (doc.isNew || doc.isModified('html')) {
     let mapping = {};
@@ -70,7 +85,11 @@ form.pre('save', function (next) {
     for (let i = 0; i < inputs.length; i += 1) {
       let input = $(inputs[i]);
       inputName = input.attr('name');
-      label = input.closest('.control-group').children('.control-label').children('span').text();
+      label = input
+        .closest('.control-group')
+        .children('.control-label')
+        .children('span')
+        .text();
       userkey = input.attr('data-userkey');
       if (inputName) {
         inputName = inputName.trim();
@@ -93,17 +112,28 @@ form.pre('save', function (next) {
           if (userkey === lastUserkey) {
             continue;
           } else {
-            return next(new FormError('inconsistent usekey "' + userkey + '"found for the same input name', 400));
+            return next(
+              new FormError(
+                'inconsistent usekey "' +
+                  userkey +
+                  '"found for the same input name',
+                400
+              )
+            );
           }
         } else {
-          return next(new FormError('duplicated input name "' + inputName + '"', 400));
+          return next(
+            new FormError('duplicated input name "' + inputName + '"', 400)
+          );
         }
       } else {
         labels[inputName] = label;
         // add user key mapping if userkey is not null or empty
         if (!!userkey) {
           if (mapping.hasOwnProperty(userkey)) {
-            return next(new FormError('duplicated input userkey "' + userkey + '"', 400));
+            return next(
+              new FormError('duplicated input userkey "' + userkey + '"', 400)
+            );
           }
           mapping[userkey] = inputName;
         }
@@ -124,10 +154,10 @@ var formFile = new Schema({
   file: {
     path: String,
     encoding: String,
-    mimetype: String
+    mimetype: String,
   },
   uploadedBy: String,
-  uploadedOn: Date
+  uploadedOn: Date,
 });
 
 var Form = mongoose.model('Form', form);
@@ -135,5 +165,6 @@ var FormFile = mongoose.model('FormFile', formFile);
 
 module.exports = {
   Form: Form,
-  FormFile: FormFile
+  FormFile: FormFile,
+  stateTransition: stateTransition,
 };

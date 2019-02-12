@@ -1,6 +1,7 @@
 # Traveler
 
 # Instalation
+
 For detailed deployment instructions please see https://confluence.aps.anl.gov/display/APSUCMS/Developer+Guide+for+the+Traveler+Module
 
 **Deployment of the traveler module:**
@@ -32,8 +33,13 @@ For detailed deployment instructions please see https://confluence.aps.anl.gov/d
     # Check progress of traveler-webapp
     ./etc/init.d/traveler-webapp status
 
-# Lint
-Recommend to use [ESLint](http://eslint.org/) to lint the code before committing. The ESLint configuration file is `.eslintrc`. [JSFormat](https://github.com/jdc0589/JsFormat) or other beautifiers may help. The JSformat user configuration file is `jsformat.json`.
+# Style and Lint
+
+[prettier](https://prettier.io/) is configured in `prettier.config.js` and `.prettierignore`, and hooked with git at `package.json`. The prettier will process for js, json, css, and md files when the hooked action is triggered via husky. The prettier can be run mannually as
+`./node_modules/prettier/bin-prettier.js --config ./prettier.config.js --write {.,config/**,lib/**,model/**,public/javascripts/**,public/stylesheets/**,routes/**,test/**,utilities/**}/*.{js,json,css,md}` .
+
+Recommend to use [ESLint](http://eslint.org/) to lint the code before committing. The ESLint configuration file is `.eslintrc`.
 
 # License
+
 [MIT](https://github.com/dongliu/traveler/blob/master/LICENSE.md)
