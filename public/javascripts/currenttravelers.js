@@ -6,16 +6,21 @@ function addData(oTable, url) {
   $.ajax({
     url: url,
     type: 'GET',
-    dataType: 'json'
-  }).done(function (json) {
-    oTable.fnAddData(json);
-    oTable.fnDraw();
-  }).fail(function (jqXHR, status, error) {
-    if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }
-  }).always();
+    dataType: 'json',
+  })
+    .done(function(json) {
+      oTable.fnAddData(json);
+      oTable.fnDraw();
+    })
+    .fail(function(jqXHR, status, error) {
+      if (jqXHR.status !== 401) {
+        $('#message').append(
+          '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>'
+        );
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    })
+    .always();
 }
 
 var legacyAssignedUrl;
@@ -25,38 +30,39 @@ var searchLegacy = false;
 
 var template = {
   title: {
-    path: "$.TravelerNumber",
-    defaultValue: "unknown"
+    path: '$.TravelerNumber',
+    defaultValue: 'unknown',
   },
   devices: {
-    path: "$.Device",
-    transform: function (data) {
+    path: '$.Device',
+    transform: function(data) {
       return [data];
-    }
+    },
   },
   createdBy: {
-    path: "$.Creator"
+    path: '$.Creator',
   },
   createdOn: {
-    path: "$.AssignedOn"
+    path: '$.AssignedOn',
   },
   status: {
-    path: "$.Completed",
-    transform: function (data) {
+    path: '$.Completed',
+    transform: function(data) {
       return data ? 2 : 1;
     },
-    defaultValue: -1
+    defaultValue: -1,
   },
   url: {
-    path: "$.ID",
-    transform: function (data) {
+    path: '$.ID',
+    transform: function(data) {
       return externalUrl + data;
-    }
-  }
+    },
+  },
 };
 
 function transform(json, template) {
-  var prop, output = {},
+  var prop,
+    output = {},
     valueFromPath;
   for (prop in template) {
     if (template.hasOwnProperty(prop)) {
@@ -83,25 +89,31 @@ function addExternalData(oTable, url) {
   $.ajax({
     url: url,
     type: 'GET',
-    dataType: 'json'
-  }).done(function (json) {
-    var transformed = [];
-    var i, size = json.length;
-    for (i = 0; i < size; i += 1) {
-      transformed[i] = transform(json[i], template);
-    }
-    oTable.fnAddData(transformed);
-    oTable.fnDraw();
-  }).fail(function (jqXHR, status, error) {
-    if (jqXHR.status !== 401) {
-      $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>');
-      $(window).scrollTop($('#message div:last-child').offset().top - 40);
-    }
-  }).always();
+    dataType: 'json',
+  })
+    .done(function(json) {
+      var transformed = [];
+      var i,
+        size = json.length;
+      for (i = 0; i < size; i += 1) {
+        transformed[i] = transform(json[i], template);
+      }
+      oTable.fnAddData(transformed);
+      oTable.fnDraw();
+    })
+    .fail(function(jqXHR, status, error) {
+      if (jqXHR.status !== 401) {
+        $('#message').append(
+          '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot reach the server for forms and travelers.</div>'
+        );
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    })
+    .always();
 }
 
-$(function () {
-  if(typeof legacyTraveler != 'undefined'){
+$(function() {
+  if (typeof legacyTraveler != 'undefined') {
     legacyTravelerApiUrl = legacyTraveler.api;
     legacyDevicesUrl = legacyTraveler.devices;
     legacyAssignedUrl = legacyTraveler.assigned;
@@ -109,28 +121,41 @@ $(function () {
   }
 
   ajax401();
-  var currentTravelerAoColumns = [travelerLinkColumn, titleColumn, statusColumn, deviceColumn, sharedWithColumn, sharedGroupColumn, createdByColumn, createdOnColumn, deadlineColumn, updatedByColumn, updatedOnColumn, progressColumn];
+  var currentTravelerAoColumns = [
+    travelerLinkColumn,
+    titleColumn,
+    statusColumn,
+    deviceColumn,
+    sharedWithColumn,
+    sharedGroupColumn,
+    createdByColumn,
+    createdOnColumn,
+    deadlineColumn,
+    updatedByColumn,
+    updatedOnColumn,
+    progressColumn,
+  ];
   fnAddFilterFoot('#current-traveler-table', currentTravelerAoColumns);
   var currentTravelerTable = $('#current-traveler-table').dataTable({
     aaData: [],
     // bAutoWidth: false,
     aoColumns: currentTravelerAoColumns,
-    aaSorting: [
-      [7, 'desc'],
-      [9, 'desc']
-    ],
+    aaSorting: [[7, 'desc'], [9, 'desc']],
     sDom: sDom,
-    oTableTools: oTableTools
+    oTableTools: oTableTools,
   });
   currentTravelerTable.fnClearTable();
   if (device) {
-    addData(currentTravelerTable, prefix + '/currenttravelers/json?device=' + device);
-    if (searchLegacy){
+    addData(
+      currentTravelerTable,
+      prefix + '/currenttravelers/json?device=' + device
+    );
+    if (searchLegacy) {
       addExternalData(currentTravelerTable, legacyDevicesUrl + device);
     }
   } else {
     addData(currentTravelerTable, prefix + '/currenttravelers/json');
-    if (searchLegacy){
+    if (searchLegacy) {
       addExternalData(currentTravelerTable, legacyTravelerApiUrl);
     }
   }
