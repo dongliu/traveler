@@ -35,9 +35,9 @@ module.exports = function (app) {
     }).exec(function (err, docs) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      return res.json(200, docs);
+      return res.status(200).json(docs);
     });
   });
 
@@ -55,9 +55,9 @@ module.exports = function (app) {
     doc.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(204);
+      return res.status(204);
     });
   });
 
@@ -69,9 +69,9 @@ module.exports = function (app) {
     doc.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(204);
+      return res.status(204);
     });
   });
 
@@ -88,9 +88,9 @@ module.exports = function (app) {
     doc.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(204);
+      return res.status(204);
     });
   });
 
@@ -109,31 +109,31 @@ module.exports = function (app) {
     var binder = req[req.params.id];
     var access = req.body.access;
     if (['-1', '0', '1'].indexOf(access) === -1) {
-      return res.send(400, 'not valid value');
+      return res.status(400).send('not valid value');
     }
     access = Number(access);
     if (binder.publicAccess === access) {
-      return res.send(204);
+      return res.status(204);
     }
     binder.publicAccess = access;
     binder.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(200, 'public access is set to ' + req.body.access);
+      return res.status(200).send('public access is set to ' + req.body.access);
     });
   });
 
   app.get('/binders/:id/share/:list/json', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canReadMw('id'), function (req, res) {
     var binder = req[req.params.id];
     if (req.params.list === 'users') {
-      return res.json(200, binder.sharedWith || []);
+      return res.status(200).json(binder.sharedWith || []);
     }
     if (req.params.list === 'groups') {
-      return res.json(200, binder.sharedGroup || []);
+      return res.status(200).json(binder.sharedGroup || []);
     }
-    return res.send(400, 'unknown share list.');
+    return res.status(400).send('unknown share list.');
   });
 
   app.post('/binders/:id/share/:list/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), function (req, res) {
@@ -143,23 +143,23 @@ module.exports = function (app) {
       if (req.body.name) {
         share = reqUtils.getSharedWith(binder.sharedWith, req.body.name);
       } else {
-        return res.send(400, 'user name is empty.');
+        return res.status(400).send('user name is empty.');
       }
     }
     if (req.params.list === 'groups') {
       if (req.body.id) {
         share = reqUtils.getSharedGroup(binder.sharedGroup, req.body.id);
       } else {
-        return res.send(400, 'group id is empty.');
+        return res.status(400).send('group id is empty.');
       }
     }
 
     if (share === -2) {
-      return res.send(400, 'unknown share list.');
+      return res.status(400).send('unknown share list.');
     }
 
     if (share >= 0) {
-      return res.send(400, req.body.name || req.body.id + ' is already in the ' + req.params.list + ' list.');
+      return res.status(400).send(req.body.name || req.body.id + ' is already in the ' + req.params.list + ' list.');
     }
 
     if (share === -1) {
@@ -180,7 +180,7 @@ module.exports = function (app) {
 
     if (!share) {
       // the user should in the list
-      return res.send(404, 'cannot find ' + req.params.shareid + ' in the list.');
+      return res.status(404).send('cannot find ' + req.params.shareid + ' in the list.');
     }
 
     // change the access
@@ -192,7 +192,7 @@ module.exports = function (app) {
     binder.save(function (saveErr) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
       // check consistency of user's traveler list
       var Target;
@@ -214,7 +214,7 @@ module.exports = function (app) {
           console.error('The user/group ' + req.params.userid + ' is not in the db');
         }
       });
-      return res.json(200, share);
+      return res.status(200).json(share);
     });
   });
 
@@ -244,12 +244,12 @@ module.exports = function (app) {
     (new Binder(binder)).save(function (err, newPackage) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       var url = (req.proxied ? authConfig.proxied_service : authConfig.service) + '/binders/' + newPackage.id + '/';
 
       res.set('Location', url);
-      return res.send(201, 'You can access the new binder at <a href="' + url + '">' + url + '</a>');
+      return res.status(201).send('You can access the new binder at <a href="' + url + '">' + url + '</a>');
     });
   });
 
@@ -262,9 +262,9 @@ module.exports = function (app) {
     }).exec(function (err, binders) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      res.json(200, binders);
+      res.status(200).json(binders);
     });
   });
 
@@ -286,9 +286,9 @@ module.exports = function (app) {
     Binder.find(search).lean().exec(function (err, binders) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      return res.json(200, binders);
+      return res.status(200).json(binders);
     });
   });
 
@@ -298,10 +298,10 @@ module.exports = function (app) {
     }, 'binders').exec(function (err, me) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       if (!me) {
-        return res.send(400, 'cannot identify the current user');
+        return res.status(400).send('cannot identify the current user');
       }
       Binder.find({
         _id: {
@@ -313,9 +313,9 @@ module.exports = function (app) {
       }).exec(function (pErr, binders) {
         if (pErr) {
           console.error(pErr);
-          return res.send(500, pErr.message);
+          return res.status(500).send(pErr.message);
         }
-        return res.json(200, binders);
+        return res.status(200).json(binders);
       });
     });
   });
@@ -328,7 +328,7 @@ module.exports = function (app) {
     }, 'binders').exec(function (err, groups) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       var binderIds = [];
       var i;
@@ -348,9 +348,9 @@ module.exports = function (app) {
       }).exec(function (pErr, binders) {
         if (pErr) {
           console.error(pErr);
-          return res.send(500, pErr.message);
+          return res.status(500).send(pErr.message);
         }
-        res.json(200, binders);
+        res.status(200).json(binders);
       });
     });
   });
@@ -362,16 +362,16 @@ module.exports = function (app) {
     }).exec(function (err, binders) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      return res.json(200, binders);
+      return res.status(200).json(binders);
     });
   });
 
   app.put('/binders/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
     var doc = req[req.params.id];
     if (doc.archived === req.body.archived) {
-      return res.send(204);
+      return res.status(204);
     }
 
     doc.archived = req.body.archived;
@@ -383,9 +383,9 @@ module.exports = function (app) {
     doc.save(function (saveErr, newDoc) {
       if (saveErr) {
         console.error(saveErr);
-        return res.send(500, saveErr.message);
+        return res.status(500).send(saveErr.message);
       }
-      return res.send(200, 'Binder ' + req.params.id + ' archived state set to ' + newDoc.archived);
+      return res.status(200).send('Binder ' + req.params.id + ' archived state set to ' + newDoc.archived);
     });
 
   });
@@ -402,7 +402,7 @@ module.exports = function (app) {
   });
 
   app.get('/binders/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canReadMw('id'), reqUtils.exist('id', Binder), function (req, res) {
-    res.json(200, req[req.params.id]);
+    res.status(200).json(req[req.params.id]);
   });
 
   app.put('/binders/:id/status', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['status']), reqUtils.hasAll('body', ['status']), function (req, res) {
@@ -410,16 +410,16 @@ module.exports = function (app) {
     var s = req.body.status;
 
     if ([1, 2].indexOf(s) === -1) {
-      return res.send(400, 'invalid status');
+      return res.status(400).send('invalid status');
     }
 
     if (p.status === s) {
-      return res.send(204);
+      return res.status(204);
     }
 
     if (s === 1) {
       if ([0, 2].indexOf(p.status) === -1) {
-        return res.send(400, 'invalid status change');
+        return res.status(400).send('invalid status change');
       } else {
         p.status = s;
       }
@@ -427,7 +427,7 @@ module.exports = function (app) {
 
     if (s === 2) {
       if ([1].indexOf(p.status) === -1) {
-        return res.send(400, 'invalid status change');
+        return res.status(400).send('invalid status change');
       } else {
         p.status = s;
       }
@@ -436,9 +436,9 @@ module.exports = function (app) {
     p.save(function (err) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      return res.send(200, 'status updated to ' + s);
+      return res.status(200).send('status updated to ' + s);
     });
 
   });
@@ -448,7 +448,7 @@ module.exports = function (app) {
       if (binder.isModified()) {
         binder.updateProgress();
       }
-      res.json(200, {
+      res.status(200).json({
         works: merged,
         inputProgress: inputProgressHtml({binder: binder}),
         travelerProgress: travelerProgressHtml({binder: binder}),
@@ -473,7 +473,7 @@ module.exports = function (app) {
     });
 
     if (tids.length + pids.length === 0) {
-      return res.json(200, []);
+      return res.status(200).json([]);
     }
 
     var merged = [];
@@ -497,7 +497,7 @@ module.exports = function (app) {
       }, 'mapping devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
         travelers.forEach(function (t) {
           binder.updateWorkProgress(t);
@@ -540,7 +540,7 @@ module.exports = function (app) {
     var work = p.works.id(req.params.wid);
 
     if (!work) {
-      return res.send(404, 'Work ' + req.params.wid + ' not found in the binder.');
+      return res.status(404).send('Work ' + req.params.wid + ' not found in the binder.');
     }
 
     work.remove();
@@ -550,7 +550,7 @@ module.exports = function (app) {
     p.updateProgress(function (err, newPackage) {
       if (err) {
         console.log(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       return res.json(newPackage);
     });
@@ -591,15 +591,15 @@ module.exports = function (app) {
     }
 
     if (!binder.isModified()) {
-      return res.send(204);
+      return res.status(204);
     }
 
     var cb = function (err, newWP) {
       if (err) {
         console.error(err);
-        return res.send(500, 'cannot save the updates to binder ' + binder._id);
+        return res.status(500).send('cannot save the updates to binder ' + binder._id);
       }
-      res.json(200, newWP.works);
+      res.status(200).json(newWP.works);
     };
 
     if (valueChanged) {
@@ -625,9 +625,9 @@ module.exports = function (app) {
     }).exec(function (err, binders) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      res.json(200, binders);
+      res.status(200).json(binders);
     });
   });
 
