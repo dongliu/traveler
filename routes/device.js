@@ -12,13 +12,13 @@ module.exports = function (app) {
     case 'cdb':
       return res.redirect(service.cdb.web_portal_url);
     default:
-      return res.send(404, 'No valid devices setting has been found');
+      return res.status(404).send('No valid devices setting has been found');
     }
   });
 
   app.get('/devices/json', auth.ensureAuthenticated, function (req, res) {
     if (!(service && service.device && service.device.url)) {
-      return res.send(500, 'do not know device service url');
+      return res.status(500).send('do not know device service url');
     }
     request({
       url: service.device.url,
@@ -30,7 +30,7 @@ module.exports = function (app) {
     }, function (err, response, resBody) {
       if (err) {
         console.log(err);
-        return res.send(503, 'cannot retrieve device list from' + service.device.url);
+        return res.status(503).send('cannot retrieve device list from' + service.device.url);
       }
       res.status(response.statusCode);
       if (response.statusCode === 200) {
