@@ -1,3 +1,10 @@
+APS-1.1.1 Release Changelog
+February 15, 2019
+- Bug Fixes
+    Resolve the issue with server restarting randomly due to ECONNRESET
+- General
+    Improve log output from server to include date and ip
+    Update express dependancy from 3.1.0 to 4.16.4
 
 APS-1.1.1 Release Changelog
 January 29, 2019
@@ -9,7 +16,7 @@ January 29, 2019
     Support ldap authentication with user lookup 
 - Permissions
     Admin role that can now update any template
-# Other
+- Other
     Script that allows updating of keys for existing traveler instances
     ZSH shell sourcing 
 
