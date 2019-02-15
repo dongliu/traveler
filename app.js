@@ -4,6 +4,14 @@ var config = require('./config/config.js');
 config.load();
 
 var express = require('express');
+var compression = require('compression');
+var favicon = require('serve-favicon');
+var morgan = require('morgan');
+var methodOverride = require('method-override');
+var expressSession = require('express-session');
+var cookieParser = require('cookie-parser');
+var errorHandler = require('errorhandler');
+
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
@@ -94,48 +102,48 @@ if (app.get('env') === 'production') {
   });
 }
 
-app.configure(function () {
-  app.set('port', process.env.PORT || appSettings.app_port);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  if (app.get('env') === 'production') {
-    app.use(express.logger({
-      stream: access_logfile
-    }));
-  }
+app.set('port', process.env.PORT || appSettings.app_port);
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+if (app.get('env') === 'production') {
+  app.use(morgan('common', {
+    stream: access_logfile
+  }));
+}
 
-  app.use(express.compress());
-  app.use(express.static(path.join(__dirname, 'public')));
-  app.use(express.favicon(__dirname + '/public/favicon.ico'));
-  if (app.get('env') === 'development') {
-    app.use(express.logger('dev'));
-  }
+app.use(compression());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(favicon(__dirname + '/public/favicon.ico'));
+if (app.get('env') === 'development') {
+  app.use(morgan('common'));
+}
 
-  app.use(express.methodOverride());
-  app.use(express.cookieParser());
-  app.use(express.session({
-    secret: appSettings.cookie_sec || 'traveler_secret',
-    cookie: {
+app.use(methodOverride());
+app.use(cookieParser());
+app.use(expressSession({
+  secret: appSettings.cookie_sec || 'traveler_secret',
+  resave: true,
+  saveUninitialized: false,
+  cookie: {
       maxAge: appSettings.cookie_life || 28800000
-    }
-  }));
-  app.use(multer({
-    dest: config.uploadPath,
-    limits: {
-      files: 1,
-      fileSize: (config.app.upload_size || 10) * 1024 * 1024
-    }
-  }));
-  app.use(express.json());
-  app.use(express.urlencoded());
-  app.use(auth.proxied);
-  app.use(auth.sessionLocals);
-  app.use(app.router);
-});
+  }
+}));
+app.use(multer({
+  dest: config.uploadPath,
+  limits: {
+    files: 1,
+    fileSize: (config.app.upload_size || 10) * 1024 * 1024
+  }
+}));
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(auth.proxied);
+app.use(auth.sessionLocals);
 
-app.configure('development', function () {
-  app.use(express.errorHandler());
-});
+if (app.get('env') === 'development') {
+  app.use(errorHandler());
+}
+
 var routes = require('./routes');
 
 require('./routes/main')(app);
@@ -191,17 +199,15 @@ if (appSettings.ssl_key !== undefined) {
 /* Configure REST API */
 var apiPort = apiSettings.app_port;
 api.enable('strict routing');
-api.configure(function () {
-  api.set('port', process.env.APIPORT || apiPort);
-  api.use(express.logger('dev'));
 
-  // api.use(express.logger({stream: access_logfile}));
-  api.use(express.json());
-  api.use(express.urlencoded());
-  api.use(auth.basicAuth);
-  api.use(express.compress());
-  api.use(api.router);
-});
+api.set('port', process.env.APIPORT || apiPort);
+api.use(morgan('common'));
+
+// api.use(express.logger({stream: access_logfile}));
+api.use(express.json());
+api.use(express.urlencoded({extended: true}));
+api.use(auth.basicAuth);
+api.use(compression());
 
 require('./routes/api')(api);
 
@@ -227,9 +233,6 @@ function cleanup() {
   server._connections = 0;
   apiserver._connections = 0;
   mongoose.connection.close();
-  adClient.unbind(function () {
-    console.log('ldap client stops.');
-  });
 
   server.close(function () {
     apiserver.close(function () {
