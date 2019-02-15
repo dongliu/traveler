@@ -69,15 +69,10 @@ mongoose.connection.on('disconnected', function () {
 });
 
 // LDAP client
-var adClient = require('./lib/ldap-client').client;
-adClient.on('connect', function () {
-  console.log('ldap client connected');
-});
-adClient.on('timeout', function (message) {
-  console.error(message);
-});
-adClient.on('error', function (error) {
-  console.error(error);
+var adClient = require('./lib/ldap-client');
+adClient.getDefaultClient(function (client, ldapClientCleanup) {
+  console.log('ldap connection successfully tested');
+  ldapClientCleanup();
 });
 
 // CAS client
