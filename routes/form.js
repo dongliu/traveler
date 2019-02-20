@@ -11,6 +11,7 @@ var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
 var tag = require('../lib/tag');
 var FormError = require('../lib/error').FormError;
+var formModel = require('../model/form');
 
 var Form = mongoose.model('Form');
 var FormFile = mongoose.model('FormFile');
@@ -542,20 +543,17 @@ module.exports = function(app) {
   app.post(
     '/forms/',
     auth.ensureAuthenticated,
+    reqUtils.hasAll('body', ['title', 'formType']),
     reqUtils.sanitize('body', ['html']),
     function(req, res) {
-      var form = {};
-      var html;
-      if (req.body.html) {
-        form.html = req.body.html;
-        form.clonedFrom = req.body.id;
-      } else {
-        html = '';
-      }
-      routesUtilities.form.createForm(
-        req.body.title,
-        req.session.userid,
-        html,
+      var html = req.body.html || '';
+      formModel.createForm(
+        {
+          title: req.body.title,
+          formType: req.body.formType,
+          createdBy: req.session.userid,
+          html: html,
+        },
         function(err, newform) {
           if (err) {
             console.error(err);

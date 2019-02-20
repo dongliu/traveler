@@ -7,7 +7,6 @@
 var config = require('../config/config.js');
 
 var mongoose = require('mongoose');
-var Form = mongoose.model('Form');
 var Traveler = mongoose.model('Traveler');
 var Binder = mongoose.model('Binder');
 var _ = require('underscore');
@@ -46,23 +45,6 @@ function filterBody(strings, findAll) {
       }
       return res.send(500, error);
     }
-  };
-}
-
-function filterBodyAll(strings) {
-  return function(req, res, next) {
-    var i;
-    var miss = false;
-    for (i = 0; i < strings.length; i += 1) {
-      if (!req.body.hasOwnProperty(strings[i])) {
-        miss = true;
-        break;
-      }
-    }
-    if (miss) {
-      return res.send(400, 'cannot find required information in body');
-    }
-    next();
   };
 }
 
@@ -118,19 +100,6 @@ function getDeviceValue(value) {
 function deviceRemovalAllowed() {
   return devices.devicesRemovalAllowed;
 }
-
-var form = {
-  //Parameters for newFormResultCallBack are (err, newForm)
-  createForm: function(title, createdBy, html, newFormResultCallBack) {
-    var formToCreate = {};
-    formToCreate.title = title;
-    formToCreate.createdBy = createdBy;
-    formToCreate.createdOn = Date.now();
-    formToCreate.html = html;
-    formToCreate.sharedWith = [];
-    new Form(formToCreate).save(newFormResultCallBack);
-  },
-};
 
 var binder = {
   createBinder: function(
@@ -442,12 +411,10 @@ var traveler = {
 
 module.exports = {
   filterBody: filterBody,
-  filterBodyAll: filterBodyAll,
   checkUserRole: checkUserRole,
   getRenderObject: getRenderObject,
   getDeviceValue: getDeviceValue,
   deviceRemovalAllowed: deviceRemovalAllowed,
-  form: form,
   traveler: traveler,
   binder: binder,
 };
