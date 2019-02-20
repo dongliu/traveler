@@ -16,6 +16,12 @@ block content
         .controls
           input(type='text', name='title', required)
       .control-group
+        .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} type
+        .controls
+          select(name='formType', required)
+            option(value='normal') normal
+            option(value='discrepency') discrepency
+      .control-group
         .controls
           .btn-group
             button.btn.btn-primary(type='submit') Confirm
