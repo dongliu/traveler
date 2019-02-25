@@ -24,5 +24,6 @@ RUN PASSWORD=$(openssl rand -hex 16) && \
     openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 WORKDIR /app
 RUN npm install
+RUN npm install -g nodemon@1.18.10
 # RUN bower install
 CMD ["node", "app.js"]

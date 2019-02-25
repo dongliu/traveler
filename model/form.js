@@ -64,6 +64,11 @@ var form = new Schema({
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
   html: String,
+  formType: {
+    type: String,
+    default: 'normal',
+    enum: ['normal', 'discrepency'],
+  },
 });
 
 /**
@@ -163,8 +168,20 @@ var formFile = new Schema({
 var Form = mongoose.model('Form', form);
 var FormFile = mongoose.model('FormFile', formFile);
 
+var createForm = function(json, newFormResultCallBack) {
+  var formToCreate = {};
+  formToCreate.title = json.title;
+  formToCreate.createdBy = json.createdBy;
+  formToCreate.createdOn = Date.now();
+  formToCreate.html = json.html || '';
+  formToCreate.formType = json.formType || 'normal';
+  formToCreate.sharedWith = [];
+  new Form(formToCreate).save(newFormResultCallBack);
+};
+
 module.exports = {
   Form: Form,
   FormFile: FormFile,
   stateTransition: stateTransition,
+  createForm: createForm,
 };

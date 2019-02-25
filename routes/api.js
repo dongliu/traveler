@@ -5,6 +5,7 @@ var mongoose = require('mongoose');
 var basic = require('basic-auth');
 var routesUtilities = require('../utilities/routes.js');
 var _ = require('underscore');
+var form = require('../model/form');
 
 var Form = mongoose.model('Form');
 var Traveler = mongoose.model('Traveler');
@@ -449,14 +450,20 @@ module.exports = function(app) {
       var formName = req.body.formName;
       var userName = req.body.userName;
       var html = req.body.html;
-      routesUtilities.form.createForm(formName, userName, html, function(
-        err,
-        newForm
-      ) {
-        performMongoResponse(err, newForm, res, function() {
-          return res.json(201, newForm);
-        });
-      });
+      var formType = req.body.formType;
+      form.createForm(
+        {
+          title: formName,
+          createdBy: userName,
+          html: html,
+          formType: formType,
+        },
+        function(err, newForm) {
+          performMongoResponse(err, newForm, res, function() {
+            return res.json(201, newForm);
+          });
+        }
+      );
     }
   );
 
