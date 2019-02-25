@@ -1,4 +1,5 @@
 var auth = require('../lib/auth');
+var routesUtilities = require('../utilities/routes.js');
 
 module.exports = function(app) {
   app.get('/admin/', auth.ensureAuthenticated, function(req, res) {
@@ -8,6 +9,6 @@ module.exports = function(app) {
     ) {
       return res.send(403, 'only admin allowed');
     }
-    return res.render('admin');
+    return res.render('admin', routesUtilities.getRenderObject(req));
   });
 };
