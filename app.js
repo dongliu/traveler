@@ -35,15 +35,15 @@ mongoAddress += '/' + (mongoConfig.traveler_db || 'traveler');
 
 var mongoOptions = {
   db: {
-    native_parser: true
+    native_parser: true,
   },
   server: {
     poolSize: 5,
     socketOptions: {
       connectTimeoutMS: 30000,
-      keepAlive: 1
-    }
-  }
+      keepAlive: 1,
+    },
+  },
 };
 
 // Set authentication options if specified
@@ -56,27 +56,27 @@ if (mongoConfig.auth) {
 }
 
 mongoose.connect(mongoAddress, mongoOptions);
-mongoose.connection.on('connected', function () {
+mongoose.connection.on('connected', function() {
   console.log('Mongoose default connection opened.');
 });
 
-mongoose.connection.on('error', function (err) {
+mongoose.connection.on('error', function(err) {
   console.log('Mongoose default connection error: ' + err);
 });
 
-mongoose.connection.on('disconnected', function () {
+mongoose.connection.on('disconnected', function() {
   console.log('Mongoose default connection disconnected');
 });
 
 // LDAP client
 var adClient = require('./lib/ldap-client').client;
-adClient.on('connect', function () {
+adClient.on('connect', function() {
   console.log('ldap client connected');
 });
-adClient.on('timeout', function (message) {
+adClient.on('timeout', function(message) {
   console.error(message);
 });
-adClient.on('error', function (error) {
+adClient.on('error', function(error) {
   console.error(error);
 });
 
@@ -90,23 +90,24 @@ var app = express();
 /* Configure Web Application */
 app.locals.orgName = appSettings.org_name;
 
-
 app.enable('strict routing');
 if (app.get('env') === 'production') {
   var access_logfile = rotator.getStream({
     filename: path.resolve(appSettings.log_dir, 'access.log'),
-    frequency: 'daily'
+    frequency: 'daily',
   });
 }
 
-app.configure(function () {
+app.configure(function() {
   app.set('port', process.env.PORT || appSettings.app_port);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   if (app.get('env') === 'production') {
-    app.use(express.logger({
-      stream: access_logfile
-    }));
+    app.use(
+      express.logger({
+        stream: access_logfile,
+      })
+    );
   }
 
   app.use(express.compress());
@@ -118,19 +119,23 @@ app.configure(function () {
 
   app.use(express.methodOverride());
   app.use(express.cookieParser());
-  app.use(express.session({
-    secret: appSettings.cookie_sec || 'traveler_secret',
-    cookie: {
-      maxAge: appSettings.cookie_life || 28800000
-    }
-  }));
-  app.use(multer({
-    dest: config.uploadPath,
-    limits: {
-      files: 1,
-      fileSize: (config.app.upload_size || 10) * 1024 * 1024
-    }
-  }));
+  app.use(
+    express.session({
+      secret: appSettings.cookie_sec || 'traveler_secret',
+      cookie: {
+        maxAge: appSettings.cookie_life || 28800000,
+      },
+    })
+  );
+  app.use(
+    multer({
+      dest: config.uploadPath,
+      limits: {
+        files: 1,
+        fileSize: (config.app.upload_size || 10) * 1024 * 1024,
+      },
+    })
+  );
   app.use(express.json());
   app.use(express.urlencoded());
   app.use(auth.proxied);
@@ -138,7 +143,7 @@ app.configure(function () {
   app.use(app.router);
 });
 
-app.configure('development', function () {
+app.configure('development', function() {
   app.use(express.errorHandler());
 });
 var routes = require('./routes');
@@ -155,14 +160,14 @@ require('./routes/device')(app);
 require('./routes/ldaplogin')(app);
 require('./routes/doc')(app);
 
-app.get('/api', function (req, res) {
+app.get('/api', function(req, res) {
   res.render('api', {
-    prefix: req.proxied ? req.proxied_prefix : ''
+    prefix: req.proxied ? req.proxied_prefix : '',
   });
 });
 
 // app.get('/', auth.ensureAuthenticated, routes.main);
-app.get('/login', auth.ensureAuthenticated, function (req, res) {
+app.get('/login', auth.ensureAuthenticated, function(req, res) {
   if (req.session.userid) {
     return res.redirect(req.proxied ? auth.proxied_service : '/');
   }
@@ -172,7 +177,7 @@ app.get('/login', auth.ensureAuthenticated, function (req, res) {
 });
 
 app.get('/logout', routes.logout);
-app.get('/apis', function (req, res) {
+app.get('/apis', function(req, res) {
   res.redirect('https://' + req.host + ':' + api.get('port') + req.originalUrl);
 });
 
@@ -182,13 +187,13 @@ var server;
 if (appSettings.ssl_key !== undefined) {
   var appCredentials = {
     key: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_key),
-    cert: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_cert)
+    cert: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_cert),
   };
-  server = https.createServer(appCredentials, app).listen(appPort, function () {
+  server = https.createServer(appCredentials, app).listen(appPort, function() {
     console.log('Express server listening on ssl port ' + appPort);
   });
 } else {
-  server = http.createServer(app).listen(app.get('port'), function () {
+  server = http.createServer(app).listen(app.get('port'), function() {
     console.log('Express server listening on port ' + app.get('port'));
   });
 }
@@ -196,7 +201,7 @@ if (appSettings.ssl_key !== undefined) {
 /* Configure REST API */
 var apiPort = apiSettings.app_port;
 api.enable('strict routing');
-api.configure(function () {
+api.configure(function() {
   api.set('port', process.env.APIPORT || apiPort);
   api.use(express.logger('dev'));
 
@@ -215,14 +220,16 @@ var apiserver;
 if (apiSettings.ssl_key !== undefined) {
   var apiCredentials = {
     key: fs.readFileSync('./' + configPath + '/' + apiSettings.ssl_key),
-    cert: fs.readFileSync('./' + configPath + '/' + apiSettings.ssl_cert)
+    cert: fs.readFileSync('./' + configPath + '/' + apiSettings.ssl_cert),
   };
 
-  apiserver = https.createServer(apiCredentials, api).listen(api.get('port'), function () {
-    console.log('API server listening on ssl port ' + api.get('port'));
-  });
+  apiserver = https
+    .createServer(apiCredentials, api)
+    .listen(api.get('port'), function() {
+      console.log('API server listening on ssl port ' + api.get('port'));
+    });
 } else {
-  apiserver = http.createServer(api).listen(api.get('port'), function () {
+  apiserver = http.createServer(api).listen(api.get('port'), function() {
     console.log('API server listening on port ' + api.get('port'));
   });
 }
@@ -232,12 +239,12 @@ function cleanup() {
   server._connections = 0;
   apiserver._connections = 0;
   mongoose.connection.close();
-  adClient.unbind(function () {
+  adClient.unbind(function() {
     console.log('ldap client stops.');
   });
 
-  server.close(function () {
-    apiserver.close(function () {
+  server.close(function() {
+    apiserver.close(function() {
       console.log('web and api servers close.');
 
       // Close db connections, other chores, etc.
@@ -245,7 +252,7 @@ function cleanup() {
     });
   });
 
-  setTimeout(function () {
+  setTimeout(function() {
     console.error('Could not close connections in time, forcing shut down');
     process.exit(1);
   }, 30 * 1000);

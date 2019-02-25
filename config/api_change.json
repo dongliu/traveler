@@ -1,9 +1,9 @@
 {
-  "api_users" : {
-      "api_read": "api_read_password",
-      "api_write": "api_write_password"
+  "api_users": {
+    "api_read": "api_read_password",
+    "api_write": "api_write_password"
   },
-  "app_port" : "3443",
+  "app_port": "3443",
   "ssl_key": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.key)",
   "ssl_cert": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.pem)"
 }
