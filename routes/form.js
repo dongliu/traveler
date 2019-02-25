@@ -34,7 +34,7 @@ module.exports = function(app) {
           $exists: false,
         },
       },
-      'title status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup'
+      'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -55,7 +55,7 @@ module.exports = function(app) {
           $ne: true,
         },
       },
-      'title status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup'
+      'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -69,7 +69,7 @@ module.exports = function(app) {
     if (routesUtilities.checkUserRole(req, 'read_all_forms')) {
       Form.find(
         {},
-        'title tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup'
+        'title formType tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup'
       )
         .lean()
         .exec(function(err, forms) {
@@ -107,7 +107,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
+        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
       ).exec(function(fErr, forms) {
         if (fErr) {
           console.error(fErr);
@@ -154,7 +154,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
+        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
       ).exec(function(fErr, forms) {
         if (fErr) {
           console.error(fErr);
@@ -171,7 +171,7 @@ module.exports = function(app) {
         createdBy: req.session.userid,
         archived: true,
       },
-      'title tags archivedOn sharedWith sharedGroup'
+      'title formType tags archivedOn sharedWith sharedGroup'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -543,7 +543,14 @@ module.exports = function(app) {
   app.post(
     '/forms/',
     auth.ensureAuthenticated,
-    reqUtils.hasAll('body', ['title', 'formType']),
+    reqUtils.filter('body', ['title', 'formType', 'html']),
+    reqUtils.hasAll('body', ['title']),
+    reqUtils.requireRoles(req => {
+      return (
+        req['body'].hasOwnProperty('formType') &&
+        req['body']['formType'] == 'discrepency'
+      );
+    }, 'admin'),
     reqUtils.sanitize('body', ['html']),
     function(req, res) {
       var html = req.body.html || '';
