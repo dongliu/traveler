@@ -5,7 +5,6 @@ var ObjectId = Schema.Types.ObjectId;
 var cheerio = require('cheerio');
 var share = require('./share.js');
 var FormError = require('../lib/error').FormError;
-// const updateVersioningPlugin = require('mongoose-update-versioning');
 
 /******
 publicAccess := 0 // for read or
@@ -71,8 +70,6 @@ var form = new Schema({
     enum: ['normal', 'discrepency'],
   },
 });
-
-// form.plugin(updateVersioningPlugin);
 
 /**
  * pre save middleware to add or update the mapping
