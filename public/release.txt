@@ -1,4 +1,18 @@
 
+APS-1.1.1 Release Changelog
+January 29, 2019
+- General
+    Resolve the issue that prevented user from being able to save radio and checkboxes on safari. 
+    Ability to jump to template from traveler instance 
+    Add tags and keys columns to public template list
+    Rename user defined keys to reporting id 
+    Support ldap authentication with user lookup 
+- Permissions
+    Admin role that can now update any template
+# Other
+    Script that allows updating of keys for existing traveler instances
+    ZSH shell sourcing 
+
 APS-1.1.0 Release Changelog
 October 24, 2018
 - User Defined Keys
