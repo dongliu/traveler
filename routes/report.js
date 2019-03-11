@@ -12,7 +12,7 @@ require('../model/binder.js');
  */
 function getTid(binder) {
   var tid = [];
-  binder.works.forEach(function (w) {
+  binder.works.forEach(function(w) {
     if (w.refType === 'traveler') {
       tid.push(w._id);
     }
@@ -20,10 +20,11 @@ function getTid(binder) {
   return tid;
 }
 
-module.exports = function (app) {
-
-  app.post('/travelers/report/', auth.ensureAuthenticated, function (req, res) {
-    return res.render('report-travelers', routesUtilities.getRenderObject(req, {tid: req.body.travelers}));
+module.exports = function(app) {
+  app.post('/travelers/report/', auth.ensureAuthenticated, function(req, res) {
+    return res.render(
+      'report-travelers',
+      routesUtilities.getRenderObject(req, { tid: req.body.travelers })
+    );
   });
-
 };

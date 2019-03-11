@@ -1,5 +1,7 @@
 function isValid(form) {
-  var disabled = $('input,textarea', form).first().prop('disabled');
+  var disabled = $('input,textarea', form)
+    .first()
+    .prop('disabled');
   if (disabled) {
     $('input,textarea', form).prop('disabled', false);
   }
@@ -36,7 +38,7 @@ function markValidity(element) {
 
 function markFormValidity(form) {
   // set validity
-  $('input:not([type="file"]),textarea', form).each(function () {
+  $('input:not([type="file"]),textarea', form).each(function() {
     var disabled = $(this).prop('disabled');
     if (disabled) {
       $(this).prop('disabled', false);
@@ -49,7 +51,9 @@ function markFormValidity(form) {
 }
 
 function validationMessage(form) {
-  var disabled = $('input,textarea', form).first().prop('disabled');
+  var disabled = $('input,textarea', form)
+    .first()
+    .prop('disabled');
   if (disabled) {
     $('input,textarea', form).prop('disabled', false);
   }
@@ -104,18 +108,32 @@ function validationMessage(form) {
     } else {
       value = input.value;
     }
-    label = $(input).closest('.control-group').children('.control-label').text();
+    label = $(input)
+      .closest('.control-group')
+      .children('.control-label')
+      .text();
     if (label === '' && input.type === 'checkbox') {
-      label = $(input).next().text();
+      label = $(input)
+        .next()
+        .text();
     }
     if (input.checkValidity()) {
       p.html('<b>' + label + '</b>: ' + value);
       span.text('validation passed');
     } else {
-      p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
+      p.html(
+        '<b>' +
+          label +
+          '</b>: ' +
+          value +
+          ' | Message: ' +
+          input.validationMessage
+      );
       span.text(input.validationMessage);
     }
-    $(input).closest('.controls').append(span);
+    $(input)
+      .closest('.controls')
+      .append(span);
     output.append(p);
   }
   if (disabled) {

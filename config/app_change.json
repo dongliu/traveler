@@ -3,7 +3,7 @@
   "app_port": "3001",
   "ssl_key": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.key)",
   "ssl_cert": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.pem)",
-  "top_bar_urls" : [
+  "top_bar_urls": [
     {
       "text": "Link",
       "url": "https://your.link.here"
@@ -11,12 +11,12 @@
   ],
   "link_target": "_self",
   "deployment_name": "development",
-  "upload_dir" : "../traveler_uploads/",
-  "log_dir" : "../logs/",
+  "upload_dir": "../traveler_uploads/",
+  "log_dir": "../logs/",
   "cookie_sec": "traveler",
   "cookie_life": 28800000,
-  "upload_size" : 5,
-  "default_form_public_access" : -1,
-  "default_traveler_public_access" : 0,
-  "default_binder_public_access" : 0
+  "upload_size": 5,
+  "default_form_public_access": -1,
+  "default_traveler_public_access": 0,
+  "default_binder_public_access": 0
 }
