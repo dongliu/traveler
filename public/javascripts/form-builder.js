@@ -80,7 +80,13 @@ function done_button(view, $out) {
         userkey_error(userKeyInput, 'Invalid userkey format');
         return;
       }
-      if ($('.control-group-wrap[data-status!="editing"] input[data-userkey="' + userkey + '"]').length >= 1) {
+      if (userkey &&
+        $(
+          '.control-group-wrap[data-status!="editing"] input[data-userkey="' +
+            userkey +
+            '"]'
+        ).length >= 1
+      ) {
         userkey_error(userKeyInput, 'duplicated userkey found');
         return;
       }

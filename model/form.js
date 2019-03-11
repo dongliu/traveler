@@ -5,6 +5,7 @@ var ObjectId = Schema.Types.ObjectId;
 var cheerio = require('cheerio');
 var share = require('./share.js');
 var FormError = require('../lib/error').FormError;
+// const updateVersioningPlugin = require('mongoose-update-versioning');
 
 /******
 publicAccess := 0 // for read or
@@ -67,6 +68,8 @@ var form = new Schema({
   html: String
 });
 
+// form.plugin(updateVersioningPlugin);
+
 /**
  * pre save middleware to add or update the mapping
  * and validate unique input name and data-userkey
@@ -117,7 +120,7 @@ form.pre('save', function (next) {
       } else {
         labels[inputName] = label;
         // add user key mapping if userkey is not null or empty
-        if (!!userkey) {
+        if (userkey) {
           if (mapping.hasOwnProperty(userkey)) {
             return next(new FormError('duplicated input userkey "' + userkey + '"', 400));
           }
@@ -127,8 +130,11 @@ form.pre('save', function (next) {
       lastInputName = inputName;
       lastUserkey = userkey;
     }
-    this.mapping = mapping;
-    this.labels = labels;
+    doc.mapping = mapping;
+    doc.labels = labels;
+  }
+  if (doc.isModified('html') || doc.isModified('title') || doc.isModified('description')) {
+    doc.increment();
   }
   next();
 });
