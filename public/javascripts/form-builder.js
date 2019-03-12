@@ -101,6 +101,7 @@ function done_button(view, $out) {
         return;
       }
       if (
+        userkey &&
         $(
           '.control-group-wrap[data-status!="editing"] input[data-userkey="' +
             userkey +
