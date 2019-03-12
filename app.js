@@ -34,16 +34,10 @@ mongoAddress += ':' + (mongoConfig.server_port || '27017');
 mongoAddress += '/' + (mongoConfig.traveler_db || 'traveler');
 
 var mongoOptions = {
-  db: {
-    native_parser: true,
-  },
-  server: {
-    poolSize: 5,
-    socketOptions: {
-      connectTimeoutMS: 30000,
-      keepAlive: 1,
-    },
-  },
+  native_parser: true,
+  poolSize: 5,
+  connectTimeoutMS: 30000,
+  keepAlive: 1,
 };
 
 // Set authentication options if specified
