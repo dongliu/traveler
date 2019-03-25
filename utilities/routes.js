@@ -9,7 +9,7 @@ var config = require('../config/config.js');
 var mongoose = require('mongoose');
 var Traveler = mongoose.model('Traveler');
 var Binder = mongoose.model('Binder');
-var _ = require('underscore');
+var _ = require('lodash');
 var cheer = require('cheerio');
 
 var devices = require('./devices/default.js');
