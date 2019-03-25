@@ -1,4 +1,3 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
 /*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false, updateAjaxURL: false, travelerGlobal: false, Holder: false*/
 /*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false, titleColumn: false, tagsColumn: false, keysColumn:false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
 /*global archiveFromModal, transferFromModal*/
@@ -267,7 +266,7 @@ $(function() {
 
   // add state for tab changes
   $('.nav-tabs a').on('click', function() {
-    window.history.pushState(null, 'FRIB forms :: ' + this.text, this.href);
+    window.history.pushState(null, 'forms :: ' + this.text, this.href);
   });
 
   // show the tab when back and forward
