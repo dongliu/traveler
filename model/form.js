@@ -5,6 +5,7 @@ var ObjectId = Schema.Types.ObjectId;
 var cheerio = require('cheerio');
 var share = require('./share.js');
 var FormError = require('../lib/error').FormError;
+var addHistory = require('./history').addHistory;
 
 /******
 publicAccess := 0 // for read or
@@ -12,10 +13,10 @@ publicAccess := 0 // for read or
         | -1 // no access
 ******/
 /******
-status := 0 // editable
-        | 0.5 // ready to publish
-        | 1 // published
-        | 2 // inactive
+status := 0 // editable draft
+        | 0.5 // ready to release
+        | 1 // released
+        | 2 // archived
 ******/
 // mapping : user-key -> name
 // labels : name -> label
@@ -157,6 +158,18 @@ form.pre('save', function(next) {
     doc.increment();
   }
   next();
+});
+
+form.plugin(addHistory, {
+  fieldsToWatch: [
+    'title',
+    'description',
+    'owner',
+    'status',
+    'createdBy',
+    'publicAccess',
+    'html',
+  ],
 });
 
 var formFile = new Schema({
