@@ -18,3 +18,4 @@ services:
     command: nodemon app.js
     environment:
       - TRAVELER_CONFIG_REL_PATH=docker
+      - DEBUG=traveler:*
