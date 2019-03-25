@@ -5,7 +5,7 @@ var authConfig = config.auth;
 var mongoose = require('mongoose');
 var path = require('path');
 var sanitize = require('google-caja-sanitizer').sanitize;
-var underscore = require('underscore');
+var _ = require('lodash');
 var routesUtilities = require('../utilities/routes.js');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
@@ -19,6 +19,8 @@ var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 
 module.exports = function(app) {
+  var logger = app.get('logger');
+
   app.get('/forms/', auth.ensureAuthenticated, function(req, res) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });
@@ -266,7 +268,7 @@ module.exports = function(app) {
     reqUtils.canReadMw('id'),
     function(req, res) {
       var doc = req[req.params.id];
-      if (underscore.isEmpty(req.files)) {
+      if (_.isEmpty(req.files)) {
         return res.send(400, 'Expecte One uploaded file');
       }
 
@@ -734,16 +736,20 @@ module.exports = function(app) {
 
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      doc.save(function(saveErr, newDoc) {
-        if (saveErr) {
-          console.error(saveErr.message);
-          if (saveErr instanceof FormError) {
-            return res.send(saveErr.status, saveErr.message);
+      doc
+        .saveWithHistory(req.session.userid)
+        .then(function(newDoc) {
+          return res.json(newDoc);
+        })
+        .catch(function(saveErr) {
+          if (saveErr) {
+            logger.error(saveErr.message);
+            if (saveErr instanceof FormError) {
+              return res.send(saveErr.status, saveErr.message);
+            }
+            return res.send(500, saveErr.message);
           }
-          return res.send(500, saveErr.message);
-        }
-        return res.json(newDoc);
-      });
+        });
     }
   );
 
@@ -773,7 +779,7 @@ module.exports = function(app) {
 
       var stateTransition = require('../model/form').stateTransition;
 
-      var target = underscore.find(stateTransition, function(t) {
+      var target = _.find(stateTransition, function(t) {
         return t.from === f.status;
       });
 
