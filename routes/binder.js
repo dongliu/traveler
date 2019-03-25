@@ -3,7 +3,7 @@
 var auth = require('../lib/auth');
 var authConfig = require('../config/config').auth;
 var mongoose = require('mongoose');
-var underscore = require('underscore');
+var _ = require('lodash');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
 var routesUtilities = require('../utilities/routes');
@@ -324,7 +324,7 @@ module.exports = function(app) {
     reqUtils.sanitize('body', ['title', 'description']),
     function(req, res) {
       var binder = {};
-      if (req.body.works && underscore.isArray(req.body.works)) {
+      if (req.body.works && _.isArray(req.body.works)) {
         binder.works = req.body.works;
       } else {
         binder.works = [];
@@ -684,7 +684,7 @@ module.exports = function(app) {
 
               // works has its own toJSON, therefore need to merge only the plain
               // object
-              underscore.extend(t, works.id(t._id).toJSON());
+              _.extend(t, works.id(t._id).toJSON());
               merged.push(t);
             });
             tFinished = true;
@@ -706,7 +706,7 @@ module.exports = function(app) {
           .exec(function(err, binders) {
             binders.forEach(function(p) {
               binder.updateWorkProgress(p);
-              underscore.extend(p, works.id(p._id).toJSON());
+              _.extend(p, works.id(p._id).toJSON());
               merged.push(p);
             });
             pFinished = true;
