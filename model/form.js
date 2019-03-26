@@ -6,6 +6,7 @@ var cheerio = require('cheerio');
 var share = require('./share.js');
 var FormError = require('../lib/error').FormError;
 var addHistory = require('./history').addHistory;
+var addVersion = require('./history').addVersion;
 
 /******
 publicAccess := 0 // for read or
@@ -150,14 +151,11 @@ form.pre('save', function(next) {
     doc.mapping = mapping;
     doc.labels = labels;
   }
-  if (
-    doc.isModified('html') ||
-    doc.isModified('title') ||
-    doc.isModified('description')
-  ) {
-    doc.increment();
-  }
   next();
+});
+
+form.plugin(addVersion, {
+  fieldsToVersion: ['title', 'description', 'html'],
 });
 
 form.plugin(addHistory, {
@@ -169,6 +167,7 @@ form.plugin(addHistory, {
     'createdBy',
     'publicAccess',
     'html',
+    '_v',
   ],
 });
 
