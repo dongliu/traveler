@@ -10,7 +10,7 @@ var fs = require('fs');
 var multer = require('multer');
 var path = require('path');
 
-const logger = require('./lib/loggers').get(process.env.NODE_ENV);
+const logger = require('./lib/loggers').getLogger();
 
 var rotator = require('file-stream-rotator');
 
