@@ -57,7 +57,7 @@ module.exports = function (app) {
         console.error(saveErr);
         return res.status(500).send(saveErr.message);
       }
-      return res.status(204);
+      return res.status(204).send();
     });
   });
 
@@ -71,7 +71,7 @@ module.exports = function (app) {
         console.error(saveErr);
         return res.status(500).send(saveErr.message);
       }
-      return res.status(204);
+      return res.status(204).send();
     });
   });
 
@@ -90,7 +90,7 @@ module.exports = function (app) {
         console.error(saveErr);
         return res.status(500).send(saveErr.message);
       }
-      return res.status(204);
+      return res.status(204).send();
     });
   });
 
@@ -113,7 +113,7 @@ module.exports = function (app) {
     }
     access = Number(access);
     if (binder.publicAccess === access) {
-      return res.status(204);
+      return res.status(204).send();
     }
     binder.publicAccess = access;
     binder.save(function (saveErr) {
@@ -371,7 +371,7 @@ module.exports = function (app) {
   app.put('/binders/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
     var doc = req[req.params.id];
     if (doc.archived === req.body.archived) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     doc.archived = req.body.archived;
@@ -414,7 +414,7 @@ module.exports = function (app) {
     }
 
     if (p.status === s) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     if (s === 1) {
@@ -591,7 +591,7 @@ module.exports = function (app) {
     }
 
     if (!binder.isModified()) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     var cb = function (err, newWP) {
