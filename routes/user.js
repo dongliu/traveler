@@ -103,7 +103,7 @@ function updateUserProfile(user, res) {
       if (err) {
         return res.status(500).json(err);
       }
-      return res.status(204);
+      return res.status(204).send();
     });
   });
 }
@@ -258,7 +258,7 @@ module.exports = function (app) {
           error: err.message
         });
       }
-      return res.status(204);
+      return res.status(204).send();
     });
   });
 

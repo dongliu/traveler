@@ -535,7 +535,7 @@ module.exports = function (app) {
   app.put('/travelers/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
     var doc = req[req.params.id];
     if (doc.archived === req.body.archived) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     doc.archived = req.body.archived;
@@ -656,7 +656,7 @@ module.exports = function (app) {
         console.error(e);
         return res.status(500).send(e.message);
       }
-      return res.status(204);
+      return res.status(204).send();
     });
   });
 
@@ -693,7 +693,7 @@ module.exports = function (app) {
     }
 
     if (doc.status === req.body.status) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     if (req.body.status !== 1.5 && !reqUtils.isOwner(req, doc)) {
@@ -757,7 +757,7 @@ module.exports = function (app) {
     doc.updatedOn = Date.now();
     var added = doc.devices.addToSet(newdevice);
     if (added.length === 0) {
-      return res.status(204);
+      return res.status(204).send();
     }
     doc.save(function (saveErr) {
       if (saveErr) {
@@ -780,7 +780,7 @@ module.exports = function (app) {
         console.error(saveErr);
         return res.status(500).send(saveErr.message);
       }
-      return res.status(204);
+      return res.status(204).send();
     });
   });
 
@@ -813,7 +813,7 @@ module.exports = function (app) {
       if (dataErr) {
         console.error(dataErr.message);
         if (dataErr instanceof DataError) {
-          return res.status(dataErr.status, dataErr.message);
+          return res.status(dataErr.status).send(dataErr.message);
         }
         return res.status(500).send(dataErr.message);
       }
@@ -834,7 +834,7 @@ module.exports = function (app) {
             console.error(saveErr);
             return res.status(500).send(saveErr.message);
           }
-          return res.status(204);
+          return res.status(204).send();
         });
       });
     });
@@ -881,7 +881,7 @@ module.exports = function (app) {
           console.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
-        return res.status(204);
+        return res.status(204).send();
       });
     });
   });
@@ -962,7 +962,7 @@ module.exports = function (app) {
     }
     access = Number(access);
     if (traveler.publicAccess === access) {
-      return res.status(204);
+      return res.status(204).send();
     }
     traveler.publicAccess = access;
     traveler.save(function (saveErr) {

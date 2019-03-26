@@ -282,7 +282,7 @@ module.exports = function (app) {
     }
     access = Number(access);
     if (form.publicAccess === access) {
-      return res.status(204);
+      return res.status(204).send();
     }
     form.publicAccess = access;
     form.save(function (saveErr) {
@@ -473,7 +473,7 @@ module.exports = function (app) {
   app.put('/forms/:id/archived', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.isOwnerMw('id'), reqUtils.filter('body', ['archived']), function (req, res) {
     var doc = req[req.params.id];
     if (doc.archived === req.body.archived) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     doc.archived = req.body.archived;
@@ -497,7 +497,7 @@ module.exports = function (app) {
 
   app.put('/forms/:id/', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canWriteMw('id'), reqUtils.status('id', [0]), reqUtils.filter('body', ['html', 'title', 'description']), reqUtils.sanitize('body', ['html', 'title', 'description']), function (req, res) {
     if (!req.is('json')) {
-      return res.status(415, 'json request expected');
+      return res.status(415).send('json request expected');
     }
     var doc = req[req.params.id];
     if (req.body.hasOwnProperty('html')) {
@@ -525,7 +525,7 @@ module.exports = function (app) {
       if (saveErr) {
         console.error(saveErr.message);
         if (saveErr instanceof FormError) {
-          return res.status(saveErr.status, saveErr.message);
+          return res.status(saveErr.status).send(saveErr.message);
         }
         return res.status(500).send(saveErr.message);
       }
@@ -547,7 +547,7 @@ module.exports = function (app) {
 
     // no change
     if (f.status === s) {
-      return res.status(204);
+      return res.status(204).send();
     }
 
     if (s === 0) {
