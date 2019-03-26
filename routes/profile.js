@@ -38,7 +38,7 @@ module.exports = function (app) {
           error: err.message
         });
       }
-      return res.status(204);
+      return res.status(204).send();
     });
   });
 };
