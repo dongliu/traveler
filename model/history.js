@@ -7,6 +7,8 @@ var assert = require('assert');
 var debug = require('debug')('traveler:history');
 var _ = require('lodash');
 
+const VERSION_KEY = '_v';
+
 /**********
  * p: the property/path of an object
  * v: the change-to value of the property
@@ -52,6 +54,39 @@ var history = new Schema({
 
 var History = mongoose.model('History', history);
 
+function addVersion(schema, options) {
+  options = options || {};
+  if (options.versionAll === true) {
+    options.fieldsToVersion = Object.keys(schema.paths);
+  }
+  options.fieldsToVersion = _.chain([])
+    .concat(options.fieldsToVersion)
+    .filter(function(field) {
+      return schema.path(field);
+    })
+    .reject(function(field) {
+      return _.includes(['__updates', '_id', '__v'], field);
+    })
+    .value();
+
+  schema.add({
+    _v: { type: Number, default: 0 },
+  });
+
+  schema.methods.incrementVersion = function() {
+    let doc = this;
+    let version = doc.get(VERSION_KEY) || 0;
+    debug(options.fieldsToVersion);
+    options.fieldsToVersion.forEach(function(field) {
+      debug(field + ' is modified ' + doc.isModified(field));
+      if ((doc.isNew && doc.get(field)) || doc.isModified(field)) {
+        doc.set(VERSION_KEY, version + 1);
+        return;
+      }
+    });
+  };
+}
+
 /**
  * add History plugin
  * @param {Schema} schema
@@ -64,8 +99,11 @@ function addHistory(schema, options) {
   }
   options.fieldsToWatch = _.chain([])
     .concat(options.fieldsToWatch)
+    .filter(function(field) {
+      return schema.path(field) || _.includes([VERSION_KEY], field);
+    })
     .reject(function(field) {
-      return !schema.path(field) || _.includes(['__updates', '_id'], field);
+      return _.includes(['__updates', '_id'], field);
     })
     .value();
 
@@ -107,7 +145,6 @@ function addHistory(schema, options) {
       if (!doc.isModified()) {
         return resolve();
       }
-      // if (doc.isModified()) {
       debug(options.fieldsToWatch);
       options.fieldsToWatch.forEach(function(field) {
         debug(field + ' is modified ' + doc.isModified(field));
@@ -118,7 +155,6 @@ function addHistory(schema, options) {
           });
         }
       });
-      debug(c);
       if (c.length === 0) {
         return resolve();
       }
@@ -148,4 +184,5 @@ function addHistory(schema, options) {
 module.exports = {
   History: History,
   addHistory: addHistory,
+  addVersion: addVersion,
 };

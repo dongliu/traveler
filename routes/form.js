@@ -736,6 +736,7 @@ module.exports = function(app) {
 
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
+      doc.incrementVersion();
       doc
         .saveWithHistory(req.session.userid)
         .then(function(newDoc) {
