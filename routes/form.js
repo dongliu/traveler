@@ -18,6 +18,8 @@ var FormFile = mongoose.model('FormFile');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 
+var debug = require('debug')('traveler:route:form');
+
 module.exports = function(app) {
   var logger = app.get('logger');
 
@@ -31,6 +33,9 @@ module.exports = function(app) {
         createdBy: req.session.userid,
         archived: {
           $ne: true,
+        },
+        status: {
+          $ne: 2,
         },
         owner: {
           $exists: false,
@@ -171,7 +176,7 @@ module.exports = function(app) {
     Form.find(
       {
         createdBy: req.session.userid,
-        archived: true,
+        status: 2,
       },
       'title formType tags archivedOn sharedWith sharedGroup'
     ).exec(function(err, forms) {
@@ -762,9 +767,27 @@ module.exports = function(app) {
     '/forms/:id/status',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
-    reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['status']),
     reqUtils.hasAll('body', ['status']),
+    reqUtils.requireRoles(
+      req => {
+        let s = req.body.status;
+        if (req[req.params.id].type === 'discrepency') {
+          if ([1, 2].indexOf(s) !== -1) {
+            return true;
+          }
+        }
+        if (req[req.params.id].type === 'normal') {
+          if ([1].indexOf(s) !== -1) {
+            return true;
+          }
+        }
+        return false;
+      },
+      'admin',
+      'manager'
+    ),
+    reqUtils.canWriteMw('id'),
     function(req, res) {
       var f = req[req.params.id];
       var s = req.body.status;
@@ -784,19 +807,22 @@ module.exports = function(app) {
         return t.from === f.status;
       });
 
-      if (target.indexOf(s) === -1) {
+      debug(target);
+      if (target.to.indexOf(s) === -1) {
         return res.send(400, 'invalid status change');
       }
 
       f.status = s;
-
-      f.save(function(err) {
-        if (err) {
-          console.error(err);
+      // check if we need to increment the version
+      // in this case, no
+      f.incrementVersion();
+      f.saveWithHistory(req.session.userid)
+        .then(function() {
+          return res.send(200, 'status updated to ' + s);
+        })
+        .catch(function(err) {
           return res.send(500, err.message);
-        }
-        return res.send(200, 'status updated to ' + s);
-      });
+        });
     }
   );
 };
