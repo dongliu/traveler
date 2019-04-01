@@ -56,7 +56,6 @@ $(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
-  /*form table starts*/
   var formAoColumns = [
     selectColumn,
     formLinkColumn,
@@ -67,8 +66,8 @@ $(function() {
     versionColumn,
     tagsColumn,
     keysColumn,
-    // submittedByColumn,
-    // submittedOnColumn
+    updatedByColumn,
+    updatedOnColumn,
   ];
   var formTable = $('#submitted-form-table').dataTable({
     sAjaxSource: '/submitted-forms/json',
@@ -87,22 +86,55 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[7, 'desc'], [8, 'desc']],
+    aaSorting: [[10, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#submitted-form-table', formAoColumns);
-  /*form table ends*/
 
-  /*archieved form table starts*/
+  var releasedFormAoColumns = [
+    selectColumn,
+    formLinkColumn,
+    formConfigLinkColumn,
+    formShareLinkColumn,
+    titleColumn,
+    formTypeColumn,
+    versionColumn,
+    tagsColumn,
+    keysColumn,
+    updatedByColumn,
+    updatedOnColumn,
+  ];
+  var releadeFormTable = $('#released-form-table').dataTable({
+    sAjaxSource: '/released-forms/json',
+    sAjaxDataProp: '',
+    fnDrawCallback: function() {
+      Holder.run({
+        images: 'img.user',
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: formAoColumns,
+    aaSorting: [[10, 'desc']],
+    sDom: sDomNoTools,
+  });
+  fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
+
   var archivedFormAoColumns = [
     selectColumn,
     formLinkColumn,
     titleColumn,
     tagsColumn,
     keysColumn,
-    archivedOnColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
+    versionColumn,
+    updatedByColumn,
+    updatedOnColumn,
   ];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
@@ -121,11 +153,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[5, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
-  /*archived form table ends*/
 
   // show the tab in hash
   showHash();
@@ -194,44 +225,6 @@ $(function() {
       $('#modal').modal('show');
       $('#submit').click(function() {
         cloneFromModal(formTable);
-      });
-    }
-  });
-
-  $('#dearchive').click(function() {
-    var selected = fnGetSelected(archivedFormTable, 'row-selected');
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No form has been selected!');
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html(
-        'De-archive the following ' + selected.length + ' forms? '
-      );
-      $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
-        var data = archivedFormTable.fnGetData(row);
-        $('#modal .modal-body').append(
-          '<div class="target" id="' +
-            data._id +
-            '"><b>' +
-            data.title +
-            '</b> created ' +
-            moment(data.createdOn).fromNow() +
-            ' archived ' +
-            moment(data.archivedOn).fromNow() +
-            '</div>'
-        );
-      });
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        archiveFromModal(false, 'forms', formTable, archivedFormTable);
       });
     }
   });

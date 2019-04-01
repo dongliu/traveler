@@ -26,13 +26,16 @@ var mce_content = {
 
 var initHtml = '';
 
-function sendRequest(data, cb, saveas) {
+function sendRequest(data, cb, saveas, status) {
   var path = window.location.pathname;
   var url;
   var type;
   if (saveas) {
     url = prefix + '/forms/';
     type = 'POST';
+  } else if (status) {
+    url = path + 'status';
+    type = 'PUT';
   } else {
     url = path;
     type = 'PUT';
@@ -1289,6 +1292,66 @@ function binding_events() {
         true
       );
     });
+  });
+
+  $('#submit').click(function(e) {
+    e.preventDefault();
+    if ($('#output .well.spec').length) {
+      modalAlert(
+        'Finish editing first',
+        'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.'
+      );
+      return;
+    }
+    cleanBeforeSave();
+    var html = $('#output').html();
+    // var path = window.location.pathname;
+    if (html !== initHtml) {
+      modalAlert(
+        'Save before submit',
+        'There are unsaved changes. Please save the changes if needed before submit.'
+      );
+      return;
+    }
+    sendRequest(
+      {
+        status: 0.5,
+        version: Number($('#version').text()),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      false,
+      true
+    );
+  });
+
+  $('#release').click(function() {
+    sendRequest(
+      {
+        status: 1,
+        version: Number($('#version').text()),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      false,
+      true
+    );
+  });
+
+  $('#obsolete').click(function() {
+    sendRequest(
+      {
+        status: 2,
+        version: Number($('#version').text()),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      false,
+      true
+    );
   });
 }
 

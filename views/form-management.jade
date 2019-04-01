@@ -37,7 +37,7 @@ block content
         li.active
           a(href='#submitted-forms', data-toggle='tab') Submitted #{viewConfig.terminology.form}s
         li
-          a(href='#approved-forms', data-toggle='tab')  Approved #{viewConfig.terminology.form}s
+          a(href='#released-forms', data-toggle='tab')  Released #{viewConfig.terminology.form}s
         li
           a(href='#archived-forms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
       .tab-content
@@ -52,7 +52,7 @@ block content
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
           table#submitted-form-table.table.table-bordered.table-hover
-        #approved-forms.tab-pane
+        #released-forms.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
@@ -62,17 +62,13 @@ block content
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected forms, only you can see them after archived.')
                 i.fa.fa-archive.fa-lg
                 | &nbsp;Archive
-          table#approved-form-table.table.table-bordered.table-hover
+          table#released-form-table.table.table-bordered.table-hover
         #archived-forms.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
-            .btn-group
-              button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
-                i.fa.fa-inbox.fa-lg
-                | &nbsp;De-archive
           table#archived-form-table.table.table-bordered.table-hover
 
 
