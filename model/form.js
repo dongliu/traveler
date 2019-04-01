@@ -37,6 +37,13 @@ var stateTransition = [
   },
 ];
 
+const statusMap = {
+  '0': 'draft',
+  '0.5': 'submitted for release',
+  '1': 'released',
+  '2': 'archived',
+};
+
 var form = new Schema({
   title: String,
   description: String,
@@ -202,5 +209,6 @@ module.exports = {
   Form: Form,
   FormFile: FormFile,
   stateTransition: stateTransition,
+  statusMap: statusMap,
   createForm: createForm,
 };
