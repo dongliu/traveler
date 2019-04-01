@@ -1,5 +1,10 @@
-/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false, updateAjaxURL: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false, titleColumn: false, tagsColumn: false, keysColumn:false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
+/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
+updateAjaxURL: false, Holder: false*/
+/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false,
+titleColumn: false, tagsColumn: false, keysColumn:false,  updatedOnColumn:
+false, updatedByColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
+fnGetSelected: false, selectEvent: false, filterEvent: false, formTypeColumn:
+false, versionColumn: false, formShareLinkColumn: false*/
 /*global archiveFromModal*/
 
 function cloneFromModal(formTable) {
@@ -104,7 +109,7 @@ $(function() {
     updatedByColumn,
     updatedOnColumn,
   ];
-  var releadeFormTable = $('#released-form-table').dataTable({
+  var releasedFormTable = $('#released-form-table').dataTable({
     sAjaxSource: '/released-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -231,6 +236,7 @@ $(function() {
 
   $('#reload').click(function() {
     formTable.fnReloadAjax();
+    releasedFormTable.fnReloadAjax();
     archivedFormTable.fnReloadAjax();
   });
   // binding events

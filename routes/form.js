@@ -795,7 +795,7 @@ module.exports = function(app) {
       var s = req.body.status;
       var v = req.body.version;
 
-      if ([0.5, 1, 2].indexOf(s) === -1) {
+      if ([0, 0.5, 1, 2].indexOf(s) === -1) {
         return res.send(400, 'invalid status');
       }
 
