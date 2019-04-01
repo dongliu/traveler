@@ -175,10 +175,9 @@ module.exports = function(app) {
   app.get('/archivedforms/json', auth.ensureAuthenticated, function(req, res) {
     Form.find(
       {
-        createdBy: req.session.userid,
-        status: 2,
+        $or: [{ status: 2 }, { archived: true }],
       },
-      'title formType tags archivedOn sharedWith sharedGroup'
+      'title formType tags archivedOn _v'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -217,7 +216,7 @@ module.exports = function(app) {
     '/forms/:id/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
-    function(req, res) {
+    function formBuilder(req, res) {
       var form = req[req.params.id];
       var access = reqUtils.getAccess(req, form);
 
@@ -242,6 +241,9 @@ module.exports = function(app) {
             title: form.title,
             html: form.html,
             status: form.status,
+            statusText: formModel.statusMap['' + form.status],
+            _v: form._v,
+            formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
           })
         );
@@ -767,8 +769,8 @@ module.exports = function(app) {
     '/forms/:id/status',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
-    reqUtils.filter('body', ['status']),
-    reqUtils.hasAll('body', ['status']),
+    reqUtils.filter('body', ['status', 'version']),
+    reqUtils.hasAll('body', ['status', 'version']),
     reqUtils.requireRoles(
       req => {
         let s = req.body.status;
@@ -788,12 +790,17 @@ module.exports = function(app) {
       'manager'
     ),
     reqUtils.canWriteMw('id'),
-    function(req, res) {
+    function updateStatus(req, res) {
       var f = req[req.params.id];
       var s = req.body.status;
+      var v = req.body.version;
 
       if ([0.5, 1, 2].indexOf(s) === -1) {
         return res.send(400, 'invalid status');
+      }
+
+      if (v !== f._v) {
+        return res.send(400, 'the current version is ' + f._v);
       }
 
       // no change
@@ -813,6 +820,8 @@ module.exports = function(app) {
       }
 
       f.status = s;
+      f.updatedBy = req.session.userid;
+      f.updatedOn = Date.now();
       // check if we need to increment the version
       // in this case, no
       f.incrementVersion();
