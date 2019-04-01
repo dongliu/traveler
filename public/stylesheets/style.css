@@ -394,6 +394,10 @@ button.editable {
   margin-left: 10px;
 }
 
+.btn-group {
+  margin-bottom: 5px;
+}
+
 /**
  * Responsive
  */

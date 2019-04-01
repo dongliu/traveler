@@ -1,6 +1,7 @@
-/* global formStatus: false, clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
+/* global formStatus: false, window: false, FormData: false*/
 
-/* global tinymce: false, rivets: false, UID: false, input: false, spec: false, ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false */
+/* global tinymce: false, rivets: false, UID: false, input: false, spec: false,
+ ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false*/
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
@@ -1330,6 +1331,20 @@ function binding_events() {
     sendRequest(
       {
         status: 1,
+        version: Number($('#version').text()),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      false,
+      true
+    );
+  });
+
+  $('#reject').click(function() {
+    sendRequest(
+      {
+        status: 0,
         version: Number($('#version').text()),
       },
       function() {
