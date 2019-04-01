@@ -21,6 +21,9 @@ var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
+var debug = require('debug')('traveler:route:traveler');
+var logger = require('../lib/loggers').getLogger();
+
 function addInputName(name, list) {
   if (list.indexOf(name) === -1) {
     list.push(name);
@@ -37,11 +40,11 @@ function resetTouched(doc, cb) {
     'name'
   ).exec(function(dataErr, data) {
     if (dataErr) {
-      console.error(dataErr);
+      logger.error(dataErr);
       return cb(dataErr);
     }
     // reset the touched input name list and the finished input number
-    console.info('reset the touched inputs for traveler ' + doc._id);
+    logger.info('reset the touched inputs for traveler ' + doc._id);
     var labels = {};
     var activeForm;
     if (doc.forms.length === 1) {
@@ -87,10 +90,10 @@ function createTraveler(form, req, res) {
     [],
     function(err, doc) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.send(500, err.message);
       }
-      console.log('new traveler ' + doc.id + ' created');
+      logger.info('new traveler ' + doc.id + ' created');
       var url =
         (req.proxied ? authConfig.proxied_service : authConfig.service) +
         '/travelers/' +
@@ -133,10 +136,10 @@ function cloneTraveler(source, req, res) {
 
   traveler.save(function(err, doc) {
     if (err) {
-      console.error(err);
+      logger.error(err);
       return res.send(500, err.message);
     }
-    console.log('new traveler ' + doc.id + ' created');
+    logger.info('new traveler ' + doc.id + ' created');
     doc.sharedWith.forEach(function(e) {
       User.findByIdAndUpdate(
         e._id,
@@ -147,10 +150,10 @@ function cloneTraveler(source, req, res) {
         },
         function(userErr, user) {
           if (userErr) {
-            console.error(userErr);
+            logger.error(userErr);
           }
           if (!user) {
-            console.error('The user ' + e._id + ' does not in the db');
+            logger.error('The user ' + e._id + ' does not in the db');
           }
         }
       );
@@ -166,10 +169,10 @@ function cloneTraveler(source, req, res) {
         },
         function(groupErr, user) {
           if (groupErr) {
-            console.error(groupErr);
+            logger.error(groupErr);
           }
           if (!user) {
-            console.error('The group ' + e._id + ' does not in the db');
+            logger.error('The group ' + e._id + ' does not in the db');
           }
         }
       );
@@ -208,7 +211,7 @@ module.exports = function(app) {
       .lean()
       .exec(function(err, docs) {
         if (err) {
-          console.error(err);
+          logger.error(err);
           return res.send(500, err.message);
         }
         return res.json(200, docs);
@@ -231,7 +234,7 @@ module.exports = function(app) {
       .lean()
       .exec(function(err, travelers) {
         if (err) {
-          console.error(err);
+          logger.error(err);
           return res.send(500, err.message);
         }
         res.json(200, travelers);
@@ -249,7 +252,7 @@ module.exports = function(app) {
       'travelers'
     ).exec(function(err, me) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.send(500, err.message);
       }
       if (!me) {
@@ -269,7 +272,7 @@ module.exports = function(app) {
         .lean()
         .exec(function(tErr, travelers) {
           if (tErr) {
-            console.error(tErr);
+            logger.error(tErr);
             return res.send(500, tErr.message);
           }
           return res.json(200, travelers);
@@ -290,7 +293,7 @@ module.exports = function(app) {
       'travelers'
     ).exec(function(err, groups) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.send(500, err.message);
       }
       var travelerIds = [];
@@ -315,7 +318,7 @@ module.exports = function(app) {
         .lean()
         .exec(function(tErr, travelers) {
           if (tErr) {
-            console.error(tErr);
+            logger.error(tErr);
             return res.send(500, tErr.message);
           }
           res.json(200, travelers);
@@ -340,7 +343,7 @@ module.exports = function(app) {
       },
     }).exec(function(err, travelers) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.send(500, err.message);
       }
       res.json(200, travelers);
@@ -360,7 +363,7 @@ module.exports = function(app) {
       }
       Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
-          console.error(err);
+          logger.error(err);
           return res.send(500, err.message);
         }
         return res.json(200, travelers);
@@ -415,7 +418,7 @@ module.exports = function(app) {
       .lean()
       .exec(function(err, travelers) {
         if (err) {
-          console.error(err);
+          logger.error(err);
           return res.send(500, err.message);
         }
         return res.json(200, travelers);
@@ -426,11 +429,11 @@ module.exports = function(app) {
     '/travelers/',
     auth.ensureAuthenticated,
     reqUtils.filter('body', ['form', 'source']),
-    function(req, res) {
+    function createOrCloneTraveler(req, res) {
       if (req.body.form) {
         Form.findById(req.body.form, function(err, form) {
           if (err) {
-            console.error(err);
+            logger.error(err);
             return res.send(500, err.message);
           }
           if (form) {
@@ -443,7 +446,7 @@ module.exports = function(app) {
       if (req.body.source) {
         Traveler.findById(req.body.source, function(err, traveler) {
           if (err) {
-            console.error(err);
+            logger.error(err);
             return res.send(500, err.message);
           }
           if (traveler) {
@@ -710,7 +713,7 @@ module.exports = function(app) {
 
       doc.save(function(saveErr, newDoc) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.send(
@@ -808,7 +811,7 @@ module.exports = function(app) {
       resetTouched(doc, function() {
         doc.save(function saveDoc(e, newDoc) {
           if (e) {
-            console.error(e);
+            logger.error(e);
             return res.send(500, e.message);
           }
           return res.json(200, newDoc);
@@ -855,7 +858,7 @@ module.exports = function(app) {
       resetTouched(doc, function() {
         doc.save(function saveDoc(e, newDoc) {
           if (e) {
-            console.error(e);
+            logger.error(e);
             return res.send(500, e.message);
           }
           return res.json(200, newDoc);
@@ -891,7 +894,7 @@ module.exports = function(app) {
 
       doc.save(function saveDoc(e) {
         if (e) {
-          console.error(e);
+          logger.error(e);
           return res.send(500, e.message);
         }
         return res.send(204);
@@ -920,7 +923,7 @@ module.exports = function(app) {
       doc.updatedOn = Date.now();
       doc.save(function(saveErr, newDoc) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         var out = {};
@@ -994,7 +997,7 @@ module.exports = function(app) {
       doc.updatedOn = Date.now();
       doc.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.send(200, 'status updated to ' + req.body.status);
@@ -1029,7 +1032,7 @@ module.exports = function(app) {
       }
       doc.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.json(200, {
@@ -1053,7 +1056,7 @@ module.exports = function(app) {
       doc.devices.pull(req.params.number);
       doc.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.send(204);
@@ -1077,7 +1080,7 @@ module.exports = function(app) {
         'name value inputType inputBy inputOn'
       ).exec(function(dataErr, docs) {
         if (dataErr) {
-          console.error(dataErr);
+          logger.error(dataErr);
           return res.send(500, dataErr.message);
         }
         return res.json(200, docs);
@@ -1107,7 +1110,7 @@ module.exports = function(app) {
       });
       data.save(function(dataErr) {
         if (dataErr) {
-          console.error(dataErr.message);
+          logger.error(dataErr.message);
           if (dataErr instanceof DataError) {
             return res.send(dataErr.status, dataErr.message);
           }
@@ -1127,7 +1130,7 @@ module.exports = function(app) {
           // save doc anyway
           doc.save(function(saveErr) {
             if (saveErr) {
-              console.error(saveErr);
+              logger.error(saveErr);
               return res.send(500, saveErr.message);
             }
             return res.send(204);
@@ -1153,7 +1156,7 @@ module.exports = function(app) {
         'name value inputBy inputOn'
       ).exec(function(noteErr, docs) {
         if (noteErr) {
-          console.error(noteErr);
+          logger.error(noteErr);
           return res.send(500, noteErr.message);
         }
         return res.json(200, docs);
@@ -1181,7 +1184,7 @@ module.exports = function(app) {
       });
       note.save(function(noteErr) {
         if (noteErr) {
-          console.error(noteErr);
+          logger.error(noteErr);
           return res.send(500, noteErr.message);
         }
         doc.notes.push(note._id);
@@ -1193,7 +1196,7 @@ module.exports = function(app) {
         doc.updatedOn = Date.now();
         doc.save(function(saveErr) {
           if (saveErr) {
-            console.error(saveErr);
+            logger.error(saveErr);
             return res.send(500, saveErr.message);
           }
           return res.send(204);
@@ -1231,7 +1234,7 @@ module.exports = function(app) {
 
       data.save(function(dataErr) {
         if (dataErr) {
-          console.error(dataErr);
+          logger.error(dataErr);
           return res.send(500, dataErr.message);
         }
         doc.data.push(data._id);
@@ -1239,7 +1242,7 @@ module.exports = function(app) {
         doc.updatedOn = Date.now();
         doc.save(function(saveErr) {
           if (saveErr) {
-            console.error(saveErr);
+            logger.error(saveErr);
             return res.send(500, saveErr.message);
           }
           var url =
@@ -1316,7 +1319,7 @@ module.exports = function(app) {
       traveler.publicAccess = access;
       traveler.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.send(200, 'public access is set to ' + req.body.access);
@@ -1413,7 +1416,7 @@ module.exports = function(app) {
       }
       traveler.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         // check consistency of user's traveler list
@@ -1433,10 +1436,10 @@ module.exports = function(app) {
           },
           function(updateErr, target) {
             if (updateErr) {
-              console.error(updateErr);
+              logger.error(updateErr);
             }
             if (!target) {
-              console.error(
+              logger.error(
                 'The user/group ' + req.params.userid + ' is not in the db'
               );
             }
