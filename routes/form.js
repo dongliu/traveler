@@ -19,10 +19,9 @@ var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 
 var debug = require('debug')('traveler:route:form');
+var logger = require('../lib/loggers').getLogger();
 
 module.exports = function(app) {
-  var logger = app.get('logger');
-
   app.get('/forms/', auth.ensureAuthenticated, function(req, res) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });

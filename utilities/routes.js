@@ -12,6 +12,8 @@ var Binder = mongoose.model('Binder');
 var _ = require('lodash');
 var cheer = require('cheerio');
 
+var TravelerError = require('../lib/error').TravelerError;
+
 var devices = require('./devices/default.js');
 // Override devices for a specific component system.
 if (config.service.device_application === 'cdb') {
@@ -268,6 +270,14 @@ var traveler = {
     devices,
     newTravelerCallBack
   ) {
+    if (form.formType && form.formType !== 'normal') {
+      return newTravelerCallBack(
+        new TravelerError(
+          `cannot create a traveler from ${form.id} of non normal type`,
+          400
+        )
+      );
+    }
     var traveler = new Traveler({
       title: title,
       description: '',
