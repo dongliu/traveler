@@ -21,6 +21,8 @@ var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
+var TravelerError = require('../lib/error').TravelerError;
+
 var debug = require('debug')('traveler:route:traveler');
 var logger = require('../lib/loggers').getLogger();
 
@@ -91,6 +93,9 @@ function createTraveler(form, req, res) {
     function(err, doc) {
       if (err) {
         logger.error(err);
+        if (err instanceof TravelerError) {
+          return res.send(err.status, err.message);
+        }
         return res.send(500, err.message);
       }
       logger.info('new traveler ' + doc.id + ' created');
