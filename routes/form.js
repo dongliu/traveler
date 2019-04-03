@@ -5,7 +5,7 @@ var authConfig = config.auth;
 var mongoose = require('mongoose');
 var path = require('path');
 var sanitize = require('google-caja-sanitizer').sanitize;
-var underscore = require('underscore');
+var _ = require('lodash');
 var routesUtilities = require('../utilities/routes.js');
 var reqUtils = require('../lib/req-utils');
 var shareLib = require('../lib/share');
@@ -18,7 +18,11 @@ var FormFile = mongoose.model('FormFile');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 
+var debug = require('debug')('traveler:route:form');
+
 module.exports = function(app) {
+  var logger = app.get('logger');
+
   app.get('/forms/', auth.ensureAuthenticated, function(req, res) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });
@@ -29,6 +33,9 @@ module.exports = function(app) {
         createdBy: req.session.userid,
         archived: {
           $ne: true,
+        },
+        status: {
+          $ne: 2,
         },
         owner: {
           $exists: false,
@@ -168,10 +175,9 @@ module.exports = function(app) {
   app.get('/archivedforms/json', auth.ensureAuthenticated, function(req, res) {
     Form.find(
       {
-        createdBy: req.session.userid,
-        archived: true,
+        $or: [{ status: 2 }, { archived: true }],
       },
-      'title formType tags archivedOn sharedWith sharedGroup'
+      'title formType tags archivedOn _v'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -210,7 +216,7 @@ module.exports = function(app) {
     '/forms/:id/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
-    function(req, res) {
+    function formBuilder(req, res) {
       var form = req[req.params.id];
       var access = reqUtils.getAccess(req, form);
 
@@ -235,6 +241,9 @@ module.exports = function(app) {
             title: form.title,
             html: form.html,
             status: form.status,
+            statusText: formModel.statusMap['' + form.status],
+            _v: form._v,
+            formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
           })
         );
@@ -266,7 +275,7 @@ module.exports = function(app) {
     reqUtils.canReadMw('id'),
     function(req, res) {
       var doc = req[req.params.id];
-      if (underscore.isEmpty(req.files)) {
+      if (_.isEmpty(req.files)) {
         return res.send(400, 'Expecte One uploaded file');
       }
 
@@ -734,16 +743,21 @@ module.exports = function(app) {
 
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      doc.save(function(saveErr, newDoc) {
-        if (saveErr) {
-          console.error(saveErr.message);
-          if (saveErr instanceof FormError) {
-            return res.send(saveErr.status, saveErr.message);
+      doc.incrementVersion();
+      doc
+        .saveWithHistory(req.session.userid)
+        .then(function(newDoc) {
+          return res.json(newDoc);
+        })
+        .catch(function(saveErr) {
+          if (saveErr) {
+            logger.error(saveErr.message);
+            if (saveErr instanceof FormError) {
+              return res.send(saveErr.status, saveErr.message);
+            }
+            return res.send(500, saveErr.message);
           }
-          return res.send(500, saveErr.message);
-        }
-        return res.json(newDoc);
-      });
+        });
     }
   );
 
@@ -755,15 +769,38 @@ module.exports = function(app) {
     '/forms/:id/status',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.filter('body', ['status']),
-    reqUtils.hasAll('body', ['status']),
-    function(req, res) {
+    reqUtils.filter('body', ['status', 'version']),
+    reqUtils.hasAll('body', ['status', 'version']),
+    reqUtils.requireRoles(
+      req => {
+        let s = req.body.status;
+        if (req[req.params.id].type === 'discrepency') {
+          if ([1, 2].indexOf(s) !== -1) {
+            return true;
+          }
+        }
+        if (req[req.params.id].type === 'normal') {
+          if ([1].indexOf(s) !== -1) {
+            return true;
+          }
+        }
+        return false;
+      },
+      'admin',
+      'manager'
+    ),
+    reqUtils.canWriteMw('id'),
+    function updateStatus(req, res) {
       var f = req[req.params.id];
       var s = req.body.status;
+      var v = req.body.version;
 
-      if ([0.5, 1, 2].indexOf(s) === -1) {
+      if ([0, 0.5, 1, 2].indexOf(s) === -1) {
         return res.send(400, 'invalid status');
+      }
+
+      if (v !== f._v) {
+        return res.send(400, 'the current version is ' + f._v);
       }
 
       // no change
@@ -773,23 +810,28 @@ module.exports = function(app) {
 
       var stateTransition = require('../model/form').stateTransition;
 
-      var target = underscore.find(stateTransition, function(t) {
+      var target = _.find(stateTransition, function(t) {
         return t.from === f.status;
       });
 
-      if (target.indexOf(s) === -1) {
+      debug(target);
+      if (target.to.indexOf(s) === -1) {
         return res.send(400, 'invalid status change');
       }
 
       f.status = s;
-
-      f.save(function(err) {
-        if (err) {
-          console.error(err);
+      f.updatedBy = req.session.userid;
+      f.updatedOn = Date.now();
+      // check if we need to increment the version
+      // in this case, no
+      f.incrementVersion();
+      f.saveWithHistory(req.session.userid)
+        .then(function() {
+          return res.send(200, 'status updated to ' + s);
+        })
+        .catch(function(err) {
           return res.send(500, err.message);
-        }
-        return res.send(200, 'status updated to ' + s);
-      });
+        });
     }
   );
 };

@@ -15,11 +15,11 @@ function archiveFromModal(archive, type, fromTable, toTable, otherTable) {
   $('#modal .modal-body div.target').each(function() {
     var that = this;
     $.ajax({
-      url: '/' + type + '/' + that.id + '/archived',
+      url: '/' + type + '/' + that.id + '/status',
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
-        archived: archive,
+        status: 2,
       }),
     })
       .done(function() {

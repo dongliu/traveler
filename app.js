@@ -10,6 +10,8 @@ var fs = require('fs');
 var multer = require('multer');
 var path = require('path');
 
+const logger = require('./lib/loggers').getLogger();
+
 var rotator = require('file-stream-rotator');
 
 var mongoose = require('mongoose');
@@ -26,6 +28,7 @@ require('./model/user.js');
 require('./model/form.js');
 require('./model/traveler.js');
 require('./model/binder.js');
+require('./model/history.js');
 
 //Connect to mongo database
 var mongoAddress = 'mongodb://';
@@ -51,27 +54,27 @@ if (mongoConfig.auth) {
 
 mongoose.connect(mongoAddress, mongoOptions);
 mongoose.connection.on('connected', function() {
-  console.log('Mongoose default connection opened.');
+  logger.info('Mongoose default connection opened.');
 });
 
 mongoose.connection.on('error', function(err) {
-  console.log('Mongoose default connection error: ' + err);
+  logger.info('Mongoose default connection error: ' + err);
 });
 
 mongoose.connection.on('disconnected', function() {
-  console.log('Mongoose default connection disconnected');
+  logger.info('Mongoose default connection disconnected');
 });
 
 // LDAP client
 var adClient = require('./lib/ldap-client').client;
 adClient.on('connect', function() {
-  console.log('ldap client connected');
+  logger.info('ldap client connected');
 });
 adClient.on('timeout', function(message) {
-  console.error(message);
+  logger.error(message);
 });
 adClient.on('error', function(error) {
-  console.error(error);
+  logger.error(error);
 });
 
 // CAS client
@@ -103,6 +106,8 @@ app.configure(function() {
       })
     );
   }
+
+  app.set('logger', logger);
 
   app.use(express.compress());
   app.use(express.static(path.join(__dirname, 'public')));
@@ -144,6 +149,7 @@ var routes = require('./routes');
 
 require('./routes/main')(app);
 require('./routes/form')(app);
+require('./routes/form-management')(app);
 require('./routes/traveler')(app);
 require('./routes/binder')(app);
 require('./routes/report')(app);
@@ -184,11 +190,11 @@ if (appSettings.ssl_key !== undefined) {
     cert: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_cert),
   };
   server = https.createServer(appCredentials, app).listen(appPort, function() {
-    console.log('Express server listening on ssl port ' + appPort);
+    logger.info('Express server listening on ssl port ' + appPort);
   });
 } else {
   server = http.createServer(app).listen(app.get('port'), function() {
-    console.log('Express server listening on port ' + app.get('port'));
+    logger.info('Express server listening on port ' + app.get('port'));
   });
 }
 
@@ -220,11 +226,11 @@ if (apiSettings.ssl_key !== undefined) {
   apiserver = https
     .createServer(apiCredentials, api)
     .listen(api.get('port'), function() {
-      console.log('API server listening on ssl port ' + api.get('port'));
+      logger.info('API server listening on ssl port ' + api.get('port'));
     });
 } else {
   apiserver = http.createServer(api).listen(api.get('port'), function() {
-    console.log('API server listening on port ' + api.get('port'));
+    logger.info('API server listening on port ' + api.get('port'));
   });
 }
 
@@ -234,12 +240,12 @@ function cleanup() {
   apiserver._connections = 0;
   mongoose.connection.close();
   adClient.unbind(function() {
-    console.log('ldap client stops.');
+    logger.info('ldap client stops.');
   });
 
   server.close(function() {
     apiserver.close(function() {
-      console.log('web and api servers close.');
+      logger.info('web and api servers close.');
 
       // Close db connections, other chores, etc.
       process.exit();
@@ -247,7 +253,7 @@ function cleanup() {
   });
 
   setTimeout(function() {
-    console.error('Could not close connections in time, forcing shut down');
+    logger.error('Could not close connections in time, forcing shut down');
     process.exit(1);
   }, 30 * 1000);
 }

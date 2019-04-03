@@ -4,7 +4,7 @@ var fs = require('fs');
 var mongoose = require('mongoose');
 var basic = require('basic-auth');
 var routesUtilities = require('../utilities/routes.js');
-var _ = require('underscore');
+var _ = require('lodash');
 var form = require('../model/form');
 
 var Form = mongoose.model('Form');
