@@ -726,7 +726,7 @@ function textarea_edit($cgr) {
 
   if ($cgr) {
     label = $('.control-label span', $cgr).text();
-    userkey = $('.controls input', $cgr).data('userkey');
+    userkey = $('.controls textarea', $cgr).data('userkey');
     placeholder = $('.controls textarea', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     rows = $('.controls textarea', $cgr).attr('rows');
