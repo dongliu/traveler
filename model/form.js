@@ -5,6 +5,8 @@ var ObjectId = Schema.Types.ObjectId;
 var cheerio = require('cheerio');
 var share = require('./share.js');
 var FormError = require('../lib/error').FormError;
+var addHistory = require('./history').addHistory;
+var addVersion = require('./history').addVersion;
 
 /******
 publicAccess := 0 // for read or
@@ -12,10 +14,10 @@ publicAccess := 0 // for read or
         | -1 // no access
 ******/
 /******
-status := 0 // editable
-        | 0.5 // ready to publish
-        | 1 // published
-        | 2 // inactive
+status := 0 // editable draft
+        | 0.5 // ready to release
+        | 1 // released
+        | 2 // archived
 ******/
 // mapping : user-key -> name
 // labels : name -> label
@@ -27,13 +29,20 @@ var stateTransition = [
   },
   {
     from: 0.5,
-    to: [1, 2],
+    to: [0, 1, 2],
   },
   {
     from: 1,
     to: [2],
   },
 ];
+
+const statusMap = {
+  '0': 'draft',
+  '0.5': 'submitted for release',
+  '1': 'released',
+  '2': 'archived',
+};
 
 var form = new Schema({
   title: String,
@@ -149,14 +158,24 @@ form.pre('save', function(next) {
     doc.mapping = mapping;
     doc.labels = labels;
   }
-  if (
-    doc.isModified('html') ||
-    doc.isModified('title') ||
-    doc.isModified('description')
-  ) {
-    doc.increment();
-  }
   next();
+});
+
+form.plugin(addVersion, {
+  fieldsToVersion: ['title', 'description', 'html'],
+});
+
+form.plugin(addHistory, {
+  fieldsToWatch: [
+    'title',
+    'description',
+    'owner',
+    'status',
+    'createdBy',
+    'publicAccess',
+    'html',
+    '_v',
+  ],
 });
 
 var formFile = new Schema({
@@ -190,5 +209,6 @@ module.exports = {
   Form: Form,
   FormFile: FormFile,
   stateTransition: stateTransition,
+  statusMap: statusMap,
   createForm: createForm,
 };

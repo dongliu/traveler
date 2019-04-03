@@ -626,6 +626,40 @@ var titleColumn = {
   bFilter: true,
 };
 
+var versionColumn = {
+  sTitle: 'Version',
+  mData: '_v',
+  bFilter: true,
+};
+
+var formTypeColumn = {
+  sTitle: 'Type',
+  mData: 'formType',
+  sDefaultContent: 'normal',
+  bFilter: true,
+};
+
+function formatFormStatus(s) {
+  var status = {
+    '0': 'draft',
+    '0.5': 'submitted',
+    '1': 'released',
+    '2': 'archived',
+  };
+  if (status[s.toString()]) {
+    return status[s.toString()];
+  }
+  return 'unknown';
+}
+
+var formStatusColumn = {
+  sTitle: 'Status',
+  mData: function(source, type, val) {
+    return formatFormStatus(source.status);
+  },
+  bFilter: true,
+};
+
 var travelerLinkColumn = {
   sTitle: '',
   mData: function(source, type, val) {

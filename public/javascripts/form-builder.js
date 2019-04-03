@@ -1,6 +1,7 @@
-/* global formStatus: false, clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
+/* global formStatus: false, window: false, FormData: false*/
 
-/* global tinymce: false, rivets: false, UID: false, input: false, spec: false, ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false */
+/* global tinymce: false, rivets: false, UID: false, input: false, spec: false,
+ ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false*/
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
@@ -26,13 +27,16 @@ var mce_content = {
 
 var initHtml = '';
 
-function sendRequest(data, cb, saveas) {
+function sendRequest(data, cb, saveas, status) {
   var path = window.location.pathname;
   var url;
   var type;
   if (saveas) {
     url = prefix + '/forms/';
     type = 'POST';
+  } else if (status) {
+    url = path + 'status';
+    type = 'PUT';
   } else {
     url = path;
     type = 'PUT';
@@ -1289,6 +1293,80 @@ function binding_events() {
         true
       );
     });
+  });
+
+  $('#submit').click(function(e) {
+    e.preventDefault();
+    if ($('#output .well.spec').length) {
+      modalAlert(
+        'Finish editing first',
+        'Please close all the opened edit area by clicking the "Done" button, and save the changes if needed.'
+      );
+      return;
+    }
+    cleanBeforeSave();
+    var html = $('#output').html();
+    // var path = window.location.pathname;
+    if (html !== initHtml) {
+      modalAlert(
+        'Save before submit',
+        'There are unsaved changes. Please save the changes if needed before submit.'
+      );
+      return;
+    }
+    sendRequest(
+      {
+        status: 0.5,
+        version: Number($('#version').text()),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      false,
+      true
+    );
+  });
+
+  $('#release').click(function() {
+    sendRequest(
+      {
+        status: 1,
+        version: Number($('#version').text()),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      false,
+      true
+    );
+  });
+
+  $('#reject').click(function() {
+    sendRequest(
+      {
+        status: 0,
+        version: Number($('#version').text()),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      false,
+      true
+    );
+  });
+
+  $('#obsolete').click(function() {
+    sendRequest(
+      {
+        status: 2,
+        version: Number($('#version').text()),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      false,
+      true
+    );
   });
 }
 
