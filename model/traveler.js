@@ -49,6 +49,38 @@ var user = new Schema({
  *         | 3 // frozen
  */
 
+const statusMap = {
+  '0': 'initialized',
+  '1': 'active',
+  '1.5': 'submitted for completion',
+  '2': 'completed',
+  '3': 'frozen',
+  '4': 'archived',
+};
+
+var stateTransition = [
+  {
+    from: 0,
+    to: [1, 4],
+  },
+  {
+    from: 1,
+    to: [1.5, 3, 4],
+  },
+  {
+    from: 1.5,
+    to: [1, 2],
+  },
+  {
+    from: 2,
+    to: [4],
+  },
+  {
+    from: 3,
+    to: [1],
+  },
+];
+
 /**
  * publicAccess := 0 // for read or
  *               | 1 // for write or
@@ -209,4 +241,6 @@ module.exports = {
   Traveler: Traveler,
   TravelerData: TravelerData,
   TravelerNote: TravelerNote,
+  statusMap: statusMap,
+  stateTransition: stateTransition,
 };
