@@ -809,6 +809,7 @@ module.exports = function(app) {
       var num = _.size(form.labels);
       doc.forms.push(form);
       doc.activeForm = doc.forms[doc.forms.length - 1]._id;
+      doc.referenceForm = form.reference;
       doc.mapping = form.mapping;
       doc.labels = form.labels;
       doc.totalInput = num;
@@ -851,6 +852,7 @@ module.exports = function(app) {
       }
 
       doc.activeForm = form._id;
+      doc.referenceForm = form.reference;
       doc.mapping = form.mapping;
       // for old forms without lables
       if (!(typeof form.labels === 'object' && _.size(form.labels) > 0)) {
