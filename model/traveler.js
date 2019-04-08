@@ -116,9 +116,11 @@ var traveler = new Schema({
   sharedGroup: [share.group],
   referenceForm: ObjectId,
   forms: [form],
+  discrepancyForm: [form],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
   activeForm: String,
+  activeDiscrepancyForm: String,
   data: [ObjectId],
   notes: [ObjectId],
   // decided by the active form input list
