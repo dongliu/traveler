@@ -114,12 +114,17 @@ var traveler = new Schema({
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
+  // global object id of the active form
   referenceForm: ObjectId,
+  // global object if of the discrepancy form
+  referenceDiscrepancyForm: ObjectId,
   forms: [form],
-  discrepancyForm: [form],
+  discrepancyForms: [form],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
+  // local id of active form in forms
   activeForm: String,
+  // local id of the active discrepancy form in discrepancyForms
   activeDiscrepancyForm: String,
   data: [ObjectId],
   notes: [ObjectId],
