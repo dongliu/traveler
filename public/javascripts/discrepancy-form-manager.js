@@ -102,6 +102,13 @@ function initUsedForms(traveler, activeTable, usedTable) {
   $('#active-form tbody tr:first-child').addClass('row-selected');
 }
 
+function loadForm(html) {
+  FormLoader.setFormHTML(html);
+  FormLoader.loadForm();
+  FormLoader.bind();
+  FormLoader.note();
+}
+
 $(function() {
   ajax401(prefix);
 
@@ -110,6 +117,7 @@ $(function() {
   var activeColumns = [
     previewColumn,
     activatedOnColumn,
+    versionColumn,
     referenceFormLinkColumn,
   ];
   var activeTable = $('#active-form').dataTable({
@@ -152,12 +160,10 @@ $(function() {
     sDom: sDomPage,
   });
 
-  function loadForm(html) {
-    FormLoader.setFormHTML(html);
-    FormLoader.loadForm();
-    FormLoader.bind();
-    FormLoader.note();
-  }
+  var discrepencyLegend =
+    '<div id="discrepency-legend" class="control-group"><legend>Discrepancy</legend></div>';
+  var travelerLegend =
+    '<div id="traveler-legend" class="control-group"><legend>Traveler</legend></div>';
 
   FormLoader.setTravelerId(traveler._id);
   var form;
@@ -167,16 +173,28 @@ $(function() {
     form = findById(traveler.forms, traveler.activeForm);
   }
 
+  var discrepencyForm;
+  if (traveler.activeDiscrepancyForm) {
+    discrepencyForm = findById(
+      traveler.discrepencyForms,
+      traveler.activeDiscrepancyForm
+    );
+  }
+
   if (!form) {
     $('#message').append(
       '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>HTTP request failed.</div>'
     );
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
+  } else {
+    let html = form.html;
+    // discrepency on the top
+    if (discrepencyForm) {
+      html =
+        discrepencyLegend + discrepencyForm.html + travelerLegend + form.html;
+    }
+    loadForm(html);
   }
-
-  // discrepency on the top
-
-  loadForm(form.html);
 
   // local cache of available forms
   var availableForms = {};
@@ -203,10 +221,20 @@ $(function() {
       FormLoader.retrieveForm(fid, function(json) {
         $('#form').fadeTo('slow', 1);
         availableForms[fid] = json;
-        loadForm(availableForms[fid].html);
+        let html =
+          discrepencyLegend +
+          availableForms[fid].html +
+          travelerLegend +
+          form.html;
+        loadForm(html);
       });
     } else {
       $('#form').fadeTo('slow', 1);
+      let html =
+        discrepencyLegend +
+        availableForms[fid].html +
+        travelerLegend +
+        form.html;
       loadForm(availableForms[fid].html);
     }
   });
