@@ -926,6 +926,55 @@ module.exports = function(app) {
     }
   );
 
+  // use the form in the request as the active discrepancy form
+  app.post(
+    '/travelers/:id/discrepency-forms/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.isOwnerMw('id'),
+    reqUtils.archived('id', false),
+    reqUtils.status('id', [0, 1]),
+    reqUtils.filter('body', ['formId']),
+    reqUtils.hasAll('body', ['formId']),
+    reqUtils.existSource('formId', 'body', Form),
+    function addDiscrepancyForm(req, res) {
+      if (req[req.body.formId].formType !== 'discrepency') {
+        return res.send(400, 'the form should be of discrepency type!');
+      }
+
+      if (req[req.body.formId].status !== 1) {
+        return res.send(400, 'the form should be released!');
+      }
+
+      var doc = req[req.params.id];
+      var form = {
+        html: req[req.body.formId].html,
+        mapping: req[req.body.formId].mapping,
+        labels: req[req.body.formId].labels,
+        activatedOn: [Date.now()],
+        reference: req.body.formId,
+        _v: req[req.body.formId]._v,
+        alias: req[req.body.formId].title,
+      };
+
+      // migrate traveler without discrepancyForms
+      if (!doc.discrepancyForms) {
+        doc.discrepancyForms = [];
+      }
+      doc.discrepancyForms.push(form);
+      doc.activeDiscrepancyForm =
+        doc.discrepancyForms[doc.discrepancyForms.length - 1]._id;
+      doc.referenceDiscrepancyForm = form.reference;
+      doc.save(function saveDoc(e, newDoc) {
+        if (e) {
+          logger.error(e);
+          return res.send(500, e.message);
+        }
+        return res.json(200, newDoc);
+      });
+    }
+  );
+
   app.put(
     '/travelers/:id/config',
     auth.ensureAuthenticated,
