@@ -779,6 +779,22 @@ module.exports = function(app) {
     }
   );
 
+  app.get(
+    '/travelers/:id/discrepancy-form-manager',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.isOwnerMw('id'),
+    reqUtils.archived('id', false),
+    function formviewer(req, res) {
+      res.render(
+        'discrepancy-form-manager',
+        routesUtilities.getRenderObject(req, {
+          traveler: req[req.params.id],
+        })
+      );
+    }
+  );
+
   // use the form in the request as the active form
   app.post(
     '/travelers/:id/forms/',
