@@ -27,7 +27,7 @@ function addForm(form, cb) {
   })
     .done(function(json) {
       $('#modal .modal-body').append(
-        '<div class="text-success">The selected form is active now.</div>'
+        '<div class="text-success">The selected discrepency form is active now.</div>'
       );
       cb(json);
     })
@@ -252,31 +252,16 @@ $(function() {
       );
       $('#modal').modal('show');
     } else if (tid === 'used-forms') {
-      $('#modalLabel').html('Use the following used form');
+      $('#modalLabel').html('Alert');
       $('#modal .modal-body').html(
-        '<b>' +
-          availableForms[fid].alias +
-          '</b> last activated on ' +
-          moment(
-            availableForms[fid].activatedOn[
-              availableForms[fid].activatedOn.length - 1
-            ]
-          ).format('YYYY-MM-DD HH:mm:ss')
+        'Only curent released discrepency can be used.'
       );
       $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
-      $('#submit').click(function() {
-        $('#submit').prop('disabled', true);
-        // set the active form id
-        setActive(fid, function(json) {
-          traveler = json;
-          initUsedForms(json, activeTable, usedTable);
-        });
-      });
     } else {
-      $('#modalLabel').html('Use the following selected form');
+      $('#modalLabel').html('Use the following selected discrepency form');
       $('#modal .modal-body').html(
         '<b>' +
           availableForms[fid].title +
