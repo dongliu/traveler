@@ -814,6 +814,7 @@ module.exports = function(app) {
         labels: req[req.body.formId].labels,
         activatedOn: [Date.now()],
         reference: req.body.formId,
+        _v: req[req.body.formId]._v,
         alias: req[req.body.formId].title,
       };
 
