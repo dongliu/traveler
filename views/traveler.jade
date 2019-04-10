@@ -112,6 +112,11 @@ block content
               span.time #{traveler.updatedOn}
         br
         form.form-horizontal#form
+          if (traveler.activeDiscrepancyForm)
+            div.control-group#discrepency-legend
+              legend Discrepancy
+            div.control-group#traveler-legend
+              legend Traveler
           if (traveler.forms.length === 1)
             != traveler.forms[0].html
           else if (traveler.forms.id(traveler.activeForm))
