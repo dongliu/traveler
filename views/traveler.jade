@@ -59,9 +59,6 @@ block content
         if (locals.traveler.referenceDiscrepancyForm)
           h4
             a(href='#{prefix}/forms/#{locals.traveler.referenceDiscrepancyForm}/', target='#{viewConfig.linkTarget}') Discrepancy #{viewConfig.terminology.form}
-        else
-          .btn-group
-            button.btn.btn-primary#discrepancy Add discrepancy #{viewConfig.terminology.form}
         if (locals.traveler.status !== undefined)
           if (locals.isOwner != undefined && locals.isOwner)
             case locals.traveler.status
