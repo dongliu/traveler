@@ -40,7 +40,7 @@ module.exports = function(app) {
           $exists: false,
         },
       },
-      'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup'
+      'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);

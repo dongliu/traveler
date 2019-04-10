@@ -134,6 +134,7 @@ $(function() {
     previewColumn,
     aliasColumn,
     activatedOnColumn,
+    versionColumn,
     referenceFormLinkColumn,
   ];
   var activeTable = $('#active-form').dataTable({
@@ -159,6 +160,7 @@ $(function() {
     previewColumn,
     titleColumn,
     updatedOnColumn,
+    versionColumn,
     formColumn,
   ];
   fnAddFilterFoot('#available-forms', availableColumns);
