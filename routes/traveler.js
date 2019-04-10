@@ -478,7 +478,7 @@ module.exports = function(app) {
     '/travelers/:id/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    function(req, res) {
+    function getTraveler(req, res) {
       var doc = req[req.params.id];
       if (doc.archived) {
         return res.redirect(
