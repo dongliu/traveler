@@ -384,7 +384,7 @@ var removeColumn = {
 };
 
 var referenceFormLinkColumn = {
-  sTitle: 'Reference',
+  sTitle: 'Ref',
   mData: 'reference',
   mRender: function(data) {
     return (
@@ -621,14 +621,15 @@ var commentsColumn = {
 
 var titleColumn = {
   sTitle: 'Title',
-  sDefaultContent: 'unknown',
+  sDefaultContent: '',
   mData: 'title',
   bFilter: true,
 };
 
 var versionColumn = {
-  sTitle: 'Version',
+  sTitle: 'Ver',
   mData: '_v',
+  sDefaultContent: '',
   bFilter: true,
 };
 
