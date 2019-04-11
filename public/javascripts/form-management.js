@@ -176,35 +176,6 @@ $(function() {
     showHash();
   };
 
-  $('button.archive').click(function() {
-    var activeTable = $('.tab-pane.active table').dataTable();
-    var selected = fnGetSelected(activeTable, 'row-selected');
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No form has been selected!');
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html(
-        'Archive the following ' + selected.length + ' forms? '
-      );
-      $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
-        var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
-      });
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        archiveFromModal(true, 'forms', activeTable, archivedFormTable);
-      });
-    }
-  });
-
   $('#clone').click(function() {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
