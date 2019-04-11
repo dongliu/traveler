@@ -59,13 +59,13 @@ module.exports = function(app) {
   });
 
   app.get(
-    '/released-forms/discrepency/json',
+    '/released-forms/discrepancy/json',
     auth.ensureAuthenticated,
     function(req, res) {
       Form.find(
         {
           status: 1,
-          formType: 'discrepency',
+          formType: 'discrepancy',
         },
         'title formType tags mapping _v updatedOn updatedBy'
       ).exec(function(err, forms) {

@@ -18,7 +18,7 @@ function findById(a, id) {
 
 function addForm(form, cb) {
   $.ajax({
-    url: './discrepency-forms/',
+    url: './discrepancy-forms/',
     type: 'POST',
     contentType: 'application/json',
     dataType: 'json',
@@ -27,7 +27,7 @@ function addForm(form, cb) {
   })
     .done(function(json) {
       $('#modal .modal-body').append(
-        '<div class="text-success">The selected discrepency form is active now.</div>'
+        '<div class="text-success">The selected discrepancy form is active now.</div>'
       );
       cb(json);
     })
@@ -42,7 +42,7 @@ function addForm(form, cb) {
 
 function setActive(fid, cb) {
   $.ajax({
-    url: './discrepency-forms/active',
+    url: './discrepancy-forms/active',
     type: 'PUT',
     contentType: 'application/json',
     dataType: 'json',
@@ -53,7 +53,7 @@ function setActive(fid, cb) {
   })
     .done(function(json) {
       $('#modal .modal-body').append(
-        '<div class="text-success">The selected discrepency form is active now.</div>'
+        '<div class="text-success">The selected discrepancy form is active now.</div>'
       );
       cb(json);
     })
@@ -68,10 +68,10 @@ function setActive(fid, cb) {
 
 function initUsedForms(traveler, activeTable, usedTable) {
   var form;
-  if (traveler.discrepencyForms && traveler.discrepencyForms.length === 1) {
-    form = traveler.discrepencyForms[0];
+  if (traveler.discrepancyForms && traveler.discrepancyForms.length === 1) {
+    form = traveler.discrepancyForms[0];
   } else {
-    form = findById(traveler.discrepencyForms, traveler.activeDiscrepancyForm);
+    form = findById(traveler.discrepancyForms, traveler.activeDiscrepancyForm);
   }
   if (form) {
     var active = {
@@ -85,8 +85,8 @@ function initUsedForms(traveler, activeTable, usedTable) {
     activeTable.fnAddData(active);
   }
   var used = [];
-  if (traveler.discrepencyForms.length > 1) {
-    traveler.discrepencyForms.forEach(function(value) {
+  if (traveler.discrepancyForms.length > 1) {
+    traveler.discrepancyForms.forEach(function(value) {
       if (value._id !== traveler.activeDiscrepancyForm) {
         value.activatedOn = value.activatedOn.length
           ? value.activatedOn
@@ -137,7 +137,7 @@ $(function() {
     sDom: sDomPage,
   });
 
-  if (traveler.discrepencyForms && traveler.discrepencyForms.length > 0) {
+  if (traveler.discrepancyForms && traveler.discrepancyForms.length > 0) {
     initUsedForms(traveler, activeTable, usedTable);
   }
 
@@ -149,7 +149,7 @@ $(function() {
   ];
   fnAddFilterFoot('#available-forms', availableColumns);
   var availableTable = $('#available-forms').dataTable({
-    sAjaxSource: '/released-forms/discrepency/json',
+    sAjaxSource: '/released-forms/discrepancy/json',
     sAjaxDataProp: '',
     bProcessing: true,
     oLanguage: {
@@ -160,8 +160,8 @@ $(function() {
     sDom: sDomPage,
   });
 
-  var discrepencyLegend =
-    '<div id="discrepency-legend" class="control-group"><legend>Discrepancy</legend></div>';
+  var discrepancyLegend =
+    '<div id="discrepancy-legend" class="control-group"><legend>Discrepancy</legend></div>';
   var travelerLegend =
     '<div id="traveler-legend" class="control-group"><legend>Traveler</legend></div>';
 
@@ -173,10 +173,10 @@ $(function() {
     form = findById(traveler.forms, traveler.activeForm);
   }
 
-  var discrepencyForm;
+  var discrepancyForm;
   if (traveler.activeDiscrepancyForm) {
-    discrepencyForm = findById(
-      traveler.discrepencyForms,
+    discrepancyForm = findById(
+      traveler.discrepancyForms,
       traveler.activeDiscrepancyForm
     );
   }
@@ -188,10 +188,10 @@ $(function() {
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   } else {
     let html = form.html;
-    // discrepency on the top
-    if (discrepencyForm) {
+    // discrepancy on the top
+    if (discrepancyForm) {
       html =
-        discrepencyLegend + discrepencyForm.html + travelerLegend + form.html;
+        discrepancyLegend + discrepancyForm.html + travelerLegend + form.html;
     }
     loadForm(html);
   }
@@ -222,7 +222,7 @@ $(function() {
         $('#form').fadeTo('slow', 1);
         availableForms[fid] = json;
         let html =
-          discrepencyLegend +
+          discrepancyLegend +
           availableForms[fid].html +
           travelerLegend +
           form.html;
@@ -231,7 +231,7 @@ $(function() {
     } else {
       $('#form').fadeTo('slow', 1);
       let html =
-        discrepencyLegend +
+        discrepancyLegend +
         availableForms[fid].html +
         travelerLegend +
         form.html;
@@ -254,14 +254,14 @@ $(function() {
     } else if (tid === 'used-forms') {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html(
-        'Only curent released discrepency can be used.'
+        'Only curent released discrepancy can be used.'
       );
       $('#modal .modal-footer').html(
         '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
     } else {
-      $('#modalLabel').html('Use the following selected discrepency form');
+      $('#modalLabel').html('Use the following selected discrepancy form');
       $('#modal .modal-body').html(
         '<b>' +
           availableForms[fid].title +
