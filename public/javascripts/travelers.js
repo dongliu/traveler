@@ -1,6 +1,19 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
-/*global moment: false, ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, filledByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, ownerColumn: false, deadlineColumn: false, travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false, tagsColumn: false, sDomNoTNoR: false*/
+/*global clearInterval: false, clearTimeout: false, document: false, event: false,
+frames: false, history: false, Image: false, location: false, name: false,
+navigator: false, Option: false, parent: false, screen: false, setInterval:
+false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false,
+History: false*/
+/*global moment: false, ajax401: false, prefix: false, updateAjaxURL: false,
+disableAjaxCache: false, travelerGlobal: false, Holder: false*/
+/*global selectColumn: false, titleColumn: false, createdOnColumn: false,
+updatedOnColumn: false, filledByColumn: false, sharedWithColumn: false,
+sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
+createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn:
+false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn:
+false, deviceColumn: false, fnGetSelected: false, selectEvent: false,
+filterEvent: false, ownerColumn: false, deadlineColumn: false,
+travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false,
+tagsColumn: false, sDomNoTNoR: false*/
 
 /*global archiveFromModal, transferFromModal, modalScroll*/
 
@@ -344,7 +357,12 @@ $(function() {
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        archiveFromModal(true, 'travelers', activeTable, archivedTravelerTable);
+        updateStatusFromModal(
+          { status: 4 },
+          'travelers',
+          activeTable,
+          archivedTravelerTable
+        );
       });
     }
   });
@@ -524,51 +542,6 @@ $(function() {
       );
       $('#submit').click(function() {
         transferFromModal($('#username').val(), 'travelers', activeTable);
-      });
-    }
-  });
-
-  $('#dearchive').click(function() {
-    var selected = fnGetSelected(archivedTravelerTable, 'row-selected');
-    modalScroll(false);
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html(
-        'De-archive the following ' + selected.length + ' travelers? '
-      );
-      $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
-        var data = archivedTravelerTable.fnGetData(row);
-        $('#modal .modal-body').append(
-          '<div class="target" id="' +
-            data._id +
-            '"><b>' +
-            data.title +
-            '</b> created ' +
-            moment(data.createdOn).fromNow() +
-            ' archived ' +
-            moment(data.archivedOn).fromNow() +
-            '</div>'
-        );
-      });
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        archiveFromModal(
-          false,
-          'travelers',
-          travelerTable,
-          archivedTravelerTable,
-          transferredTravelerTable
-        );
       });
     }
   });

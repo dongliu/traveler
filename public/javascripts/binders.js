@@ -1,6 +1,18 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false, History: false */
-/*global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, moment: false, travelerGlobal: false*/
-/*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, clonedByColumn: false, archivedOnColumn: false, binderConfigLinkColumn: false, binderShareLinkColumn: false, binderLinkColumn: false, tagsColumn: false, binderWorkProgressColumn: false, transferredOnColumn: false, ownerColumn: false*/
+/*global clearInterval: false, clearTimeout: false, document: false, event: false,
+frames: false, history: false, Image: false, location: false, name: false,
+navigator: false, Option: false, parent: false, screen: false, setInterval:
+false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false,
+History: false*/
+/*global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache:
+false, moment: false, travelerGlobal: false*/
+/*global selectColumn: false, titleColumn: false, createdOnColumn: false,
+updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false,
+sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
+createdByColumn: false, createdOnColumn: false, fnGetSelected: false,
+selectEvent: false, filterEvent: false, clonedByColumn: false, archivedOnColumn:
+false, binderConfigLinkColumn: false, binderShareLinkColumn: false,
+binderLinkColumn: false, tagsColumn: false, binderWorkProgressColumn: false,
+transferredOnColumn: false, ownerColumn: false*/
 /*global archiveFromModal, transferFromModal, modalScroll, Holder*/
 
 function formatItemUpdate(data) {
@@ -307,52 +319,7 @@ $(function() {
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        archiveFromModal(true, 'binders', activeTable, archivedBinderTable);
-      });
-    }
-  });
-
-  $('#dearchive').click(function() {
-    var selected = fnGetSelected(archivedBinderTable, 'row-selected');
-    modalScroll(false);
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html(
-        'De-archive the following ' + selected.length + ' travelers? '
-      );
-      $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
-        var data = archivedBinderTable.fnGetData(row);
-        $('#modal .modal-body').append(
-          '<div class="target" id="' +
-            data._id +
-            '"><b>' +
-            data.title +
-            '</b> created ' +
-            moment(data.createdOn).fromNow() +
-            ' archived ' +
-            moment(data.archivedOn).fromNow() +
-            '</div>'
-        );
-      });
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        archiveFromModal(
-          false,
-          'binders',
-          binderTable,
-          archivedBinderTable,
-          transferredBinderTable
-        );
+        updateStatusFromModal(3, 'binders', activeTable, archivedBinderTable);
       });
     }
   });
