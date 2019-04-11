@@ -172,12 +172,37 @@ module.exports = function(app) {
   });
 
   app.get('/archivedforms/json', auth.ensureAuthenticated, function(req, res) {
-    Form.find(
-      {
-        $or: [{ status: 2 }, { archived: true }],
-      },
-      'title formType tags archivedOn _v'
-    ).exec(function(err, forms) {
+    var search = {
+      $and: [
+        {
+          $or: [
+            {
+              createdBy: req.session.userid,
+              owner: {
+                $exists: false,
+              },
+            },
+            {
+              owner: req.session.userid,
+            },
+          ],
+        },
+        {
+          $or: [
+            {
+              archived: true,
+            },
+            {
+              status: 2,
+            },
+          ],
+        },
+      ],
+    };
+    Form.find(search, 'title formType tags archivedOn _v').exec(function(
+      err,
+      forms
+    ) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
