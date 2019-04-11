@@ -207,6 +207,9 @@ module.exports = function(app) {
         archived: {
           $ne: true,
         },
+        status: {
+          $ne: 4,
+        },
         owner: {
           $exists: false,
         },
@@ -412,7 +415,14 @@ module.exports = function(app) {
           ],
         },
         {
-          archived: true,
+          $or: [
+            {
+              archived: true,
+            },
+            {
+              status: 4,
+            },
+          ],
         },
       ],
     };
@@ -1019,7 +1029,7 @@ module.exports = function(app) {
     function(req, res) {
       var doc = req[req.params.id];
 
-      if ([1, 1.5, 2, 3].indexOf(req.body.status) === -1) {
+      if ([1, 1.5, 2, 3, 4].indexOf(req.body.status) === -1) {
         return res.send(400, 'invalid status');
       }
 
@@ -1031,41 +1041,18 @@ module.exports = function(app) {
         return res.send(403, 'You are not authorized to change the status. ');
       }
 
-      if (req.body.status === 1) {
-        if ([0, 1.5, 3].indexOf(doc.status) !== -1) {
-          doc.status = 1;
-        } else {
-          return res.send(
-            400,
-            'cannot start to work from the current status. '
-          );
-        }
+      var stateTransition = require('../model/traveler').stateTransition;
+
+      var target = _.find(stateTransition, function(t) {
+        return t.from === doc.status;
+      });
+
+      debug(target);
+      if (target.to.indexOf(req.body.status) === -1) {
+        return res.send(400, 'invalid status change');
       }
 
-      if (req.body.status === 1.5) {
-        if ([1].indexOf(doc.status) !== -1) {
-          doc.status = 1.5;
-        } else {
-          return res.send(400, 'cannot complete from the current status. ');
-        }
-      }
-
-      if (req.body.status === 2) {
-        if ([1.5].indexOf(doc.status) !== -1) {
-          doc.status = 2;
-        } else {
-          return res.send(400, 'cannot complete from the current status. ');
-        }
-      }
-
-      if (req.body.status === 3) {
-        if ([1].indexOf(doc.status) !== -1) {
-          doc.status = 3;
-        } else {
-          return res.send(400, 'cannot freeze from the current status. ');
-        }
-      }
-
+      doc.status = req.body.status;
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.save(function(saveErr) {
