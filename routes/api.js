@@ -320,7 +320,7 @@ module.exports = function(app) {
         return cb(dataErr);
       }
       var userDefined = {};
-      _.mapObject(mapping, function(name, key) {
+      _.mapKeys(mapping, function(name, key) {
         userDefined[key] = dataForName(name, docs);
       });
       output.user_defined = userDefined;
@@ -355,7 +355,7 @@ module.exports = function(app) {
         return cb(dataErr);
       }
       var userDefined = {};
-      _.mapObject(mapping, function(name, key) {
+      _.mapKeys(mapping, function(name, key) {
         userDefined[key] = {};
         userDefined[key].value = dataForName(name, docs);
         if (_.isObject(labels)) {
