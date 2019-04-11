@@ -113,8 +113,9 @@ block content
         br
         form.form-horizontal#form
           if (traveler.activeDiscrepancyForm)
-            div.control-group#discrepency-legend
+            div.control-group#discrepancy-legend
               legend Discrepancy
+            != traveler.discrepancyForms.id(traveler.activeDiscrepancyForm).html
             div.control-group#traveler-legend
               legend Traveler
           if (traveler.forms.length === 1)
