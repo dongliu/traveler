@@ -938,7 +938,7 @@ module.exports = function(app) {
 
   // use the form in the request as the active discrepancy form
   app.post(
-    '/travelers/:id/discrepency-forms/',
+    '/travelers/:id/discrepancy-forms/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     reqUtils.isOwnerMw('id'),
@@ -948,8 +948,8 @@ module.exports = function(app) {
     reqUtils.hasAll('body', ['formId']),
     reqUtils.existSource('formId', 'body', Form),
     function addDiscrepancyForm(req, res) {
-      if (req[req.body.formId].formType !== 'discrepency') {
-        return res.send(400, 'the form should be of discrepency type!');
+      if (req[req.body.formId].formType !== 'discrepancy') {
+        return res.send(400, 'the form should be of discrepancy type!');
       }
 
       if (req[req.body.formId].status !== 1) {
