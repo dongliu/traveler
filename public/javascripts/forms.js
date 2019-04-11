@@ -303,35 +303,6 @@ $(function() {
     }
   });
 
-  $('button.archive').click(function() {
-    var activeTable = $('.tab-pane.active table').dataTable();
-    var selected = fnGetSelected(activeTable, 'row-selected');
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No form has been selected!');
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html(
-        'Archive the following ' + selected.length + ' forms? '
-      );
-      $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
-        var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
-      });
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        archiveFromModal(true, 'forms', activeTable, archivedFormTable);
-      });
-    }
-  });
-
   $('button.transfer').click(function() {
     var activeTable = $('.tab-pane.active table').dataTable();
     var selected = fnGetSelected(activeTable, 'row-selected');
@@ -405,50 +376,6 @@ $(function() {
       $('#modal').modal('show');
       $('#submit').click(function() {
         cloneFromModal(formTable);
-      });
-    }
-  });
-
-  $('#dearchive').click(function() {
-    var selected = fnGetSelected(archivedFormTable, 'row-selected');
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No form has been selected!');
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html(
-        'De-archive the following ' + selected.length + ' forms? '
-      );
-      $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
-        var data = archivedFormTable.fnGetData(row);
-        $('#modal .modal-body').append(
-          '<div class="target" id="' +
-            data._id +
-            '"><b>' +
-            data.title +
-            '</b> created ' +
-            moment(data.createdOn).fromNow() +
-            ' archived ' +
-            moment(data.archivedOn).fromNow() +
-            '</div>'
-        );
-      });
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        archiveFromModal(
-          false,
-          'forms',
-          formTable,
-          archivedFormTable,
-          transferredFormTable
-        );
       });
     }
   });
