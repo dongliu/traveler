@@ -140,6 +140,25 @@ var binder = {
         (new Binder(binderToCreate)).save(newBinderResultCallback);
     },
 
+    deleteWork: function(binder, workId, userId, req, res) {
+        var work = binder.works.id(workId);
+
+        if (!work) {
+            return res.status(404).send('Work ' + req.params.wid + ' not found in the binder.');
+        }
+
+        work.remove();
+        binder.updatedBy = userId;
+        binder.updatedOn = Date.now();
+
+        binder.updateProgress(function (err, newPackage) {
+            if (err) {
+                console.log(err);
+                return res.status(500).send(err.message);
+            }
+            return res.json(newPackage);
+        });
+    },
     addWork: function (binder, userId, req, res) {
         var tids = req.body.travelerIds;
         var pids = req.body.binders;
@@ -318,6 +337,13 @@ var traveler = {
         traveler.totalInput = _.size(traveler.labels);
 
         traveler.save(newTravelerCallBack);
+    },
+    changeArchivedState: function (traveler, archived) {
+        traveler.archived = archived;
+
+        if (traveler.archived) {
+            traveler.archivedOn = Date.now();
+        }
     },
     updateTravelerStatus: function (req, res, travelerDoc, status, isSession, onSuccess) {
         if (isSession) {

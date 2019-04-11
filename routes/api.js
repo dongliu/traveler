@@ -217,6 +217,16 @@ module.exports = function (app) {
     });
   });
 
+  app.post('/apis/removeWork/binders/:id/', routesUtilities.filterBody(['workId','userName'], true), checkWritePermissions, function (req, res) {
+    Binder.findById(req.params.id, function (err, binder) {
+      performMongoResponse(err, binder, res, function () {
+        var userName = req.body.userName;
+        var workId = req.body.workId;
+        routesUtilities.binder.deleteWork(binder, workId, userName, req, res);
+      });
+    });
+  });
+
   app.get('/apis/travelers/:id/', function (req, res) {
     Traveler.findById(req.params.id, function (travelerErr, traveler) {
       performMongoResponse(travelerErr, traveler, res);
@@ -317,9 +327,8 @@ module.exports = function (app) {
       });
       output.user_defined = userDefined;
       return cb(null, output);
-    });
+    }); 
   }
-
 
   app.get('/apis/travelers/:id/keyvalue/', function (req, res) {
     Traveler.findById(req.params.id, function (travelerErr, traveler) {
@@ -379,6 +388,21 @@ module.exports = function (app) {
     routesUtilities.form.createForm(formName, userName, html, function (err, newForm) {
       performMongoResponse(err, newForm, res, function () {
         return res.status(201).json(newForm);
+      });
+    });
+  });
+
+  app.post('/apis/archived/traveler/:id/',routesUtilities.filterBody(['archived'], true), checkWritePermissions, function (req, res) {
+    var archivedStatus = req.body.archived;
+
+    Traveler.findById(req.params.id, function (travelerErr, traveler) {
+      performMongoResponse(travelerErr, traveler, res, function () {
+        routesUtilities.traveler.changeArchivedState(traveler, archivedStatus);
+        traveler.save(function (err) {
+          performMongoResponse(err, traveler, res, function () {
+            return res.status(200).json(traveler);
+          });
+        });
       });
     });
   });

@@ -536,25 +536,11 @@ module.exports = function (app) {
 
 
   app.delete('/binders/:id/works/:wid', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), function (req, res) {
-    var p = req[req.params.id];
-    var work = p.works.id(req.params.wid);
+    var binder = req[req.params.id];
+    var workId = req.params.wid;
+    var userId = req.session.userid;
 
-    if (!work) {
-      return res.status(404).send('Work ' + req.params.wid + ' not found in the binder.');
-    }
-
-    work.remove();
-    p.updatedBy = req.session.userid;
-    p.updatedOn = Date.now();
-
-    p.updateProgress(function (err, newPackage) {
-      if (err) {
-        console.log(err);
-        return res.status(500).send(err.message);
-      }
-      return res.json(newPackage);
-    });
-
+    routesUtilities.binder.deleteWork(binder, workId, userId, req, res);
   });
 
   app.put('/binders/:id/works/', auth.ensureAuthenticated, reqUtils.exist('id', Binder), reqUtils.canWriteMw('id'), reqUtils.status('id', [0, 1]), function (req, res) {
