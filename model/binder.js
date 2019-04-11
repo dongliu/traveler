@@ -85,6 +85,7 @@ var work = new Schema({
  * status := 0 // new
  *         | 1 // active
  *         | 2 // completed
+ *         | 3 // archived
  */
 
 var binder = new Schema({
