@@ -266,6 +266,7 @@ function formatTravelerStatus(s) {
     '1.5': 'submitted for completion',
     '2': 'completed',
     '3': 'frozen',
+    '4': 'archived',
     '0': 'initialized',
   };
   if (status[s.toString()]) {
