@@ -369,6 +369,7 @@ var previewColumn = {
       '"><i class="fa fa-eye fa-lg"></i></a>'
     );
   },
+  sWidth: '25px',
 };
 
 var removeColumn = {
@@ -397,6 +398,7 @@ var referenceFormLinkColumn = {
     );
   },
   bSortable: false,
+  sWidth: '45px',
 };
 
 var formColumn = {
@@ -412,6 +414,7 @@ var formColumn = {
     );
   },
   bSortable: false,
+  sWidth: '45px',
 };
 
 var aliasColumn = {
@@ -632,6 +635,7 @@ var versionColumn = {
   mData: '_v',
   sDefaultContent: '',
   bFilter: true,
+  sWidth: '45px',
 };
 
 var formTypeColumn = {
