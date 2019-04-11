@@ -581,7 +581,7 @@ module.exports = function(app) {
     reqUtils.requireRoles(req => {
       return (
         req['body'].hasOwnProperty('formType') &&
-        req['body']['formType'] == 'discrepency'
+        req['body']['formType'] == 'discrepancy'
       );
     }, 'admin'),
     reqUtils.sanitize('body', ['html']),
@@ -798,7 +798,7 @@ module.exports = function(app) {
     reqUtils.requireRoles(
       req => {
         let s = req.body.status;
-        if (req[req.params.id].type === 'discrepency') {
+        if (req[req.params.id].type === 'discrepancy') {
           if ([1, 2].indexOf(s) !== -1) {
             return true;
           }
