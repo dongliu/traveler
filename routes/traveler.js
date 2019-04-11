@@ -538,11 +538,7 @@ module.exports = function (app) {
       return res.status(204).send();
     }
 
-    doc.archived = req.body.archived;
-
-    if (doc.archived) {
-      doc.archivedOn = Date.now();
-    }
+    routesUtilities.traveler.changeArchivedState(doc, req.body.archived);
 
     doc.save(function (saveErr, newDoc) {
       if (saveErr) {
@@ -934,7 +930,7 @@ module.exports = function (app) {
     if (data.inputType === 'file') {
       fs.exists(data.file.path, function (exists) {
         if (exists) {
-          return res.sendfile(path.resolve(data.file.path));
+          return res.sendFile(path.resolve(data.file.path));
         }
         return res.status(410).send('gone');
       });
