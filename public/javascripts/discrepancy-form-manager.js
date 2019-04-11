@@ -75,14 +75,15 @@ function initUsedForms(traveler, activeTable, usedTable) {
   }
   if (form) {
     var active = {
-      activatedOn: form.activatedOn.length
-        ? form.activatedOn
-        : [traveler.createdOn],
+      alias: form.alias,
       _id: form._id,
+      _v: form._v,
       reference: form.reference || traveler.referenceForm,
     };
     activeTable.fnClearTable();
     activeTable.fnAddData(active);
+    $('tr').removeClass('row-selected');
+    $('#active-form tbody tr:first-child').addClass('row-selected');
   }
   var used = [];
   if (traveler.discrepancyForms.length > 1) {
@@ -98,8 +99,6 @@ function initUsedForms(traveler, activeTable, usedTable) {
   }
   usedTable.fnClearTable();
   usedTable.fnAddData(used);
-  $('tr').removeClass('row-selected');
-  $('#active-form tbody tr:first-child').addClass('row-selected');
 }
 
 function loadForm(html) {
@@ -116,7 +115,7 @@ $(function() {
 
   var activeColumns = [
     previewColumn,
-    activatedOnColumn,
+    aliasColumn,
     versionColumn,
     referenceFormLinkColumn,
   ];
@@ -129,12 +128,12 @@ $(function() {
 
   var usedColumns = activeColumns;
 
-  fnAddFilterFoot('#used-forms', usedColumns);
+  // fnAddFilterFoot('#used-forms', usedColumns);
   var usedTable = $('#used-forms').dataTable({
     aaData: [],
     bAutoWidth: true,
     aoColumns: usedColumns,
-    sDom: sDomPage,
+    sDom: sDomClean,
   });
 
   if (traveler.discrepancyForms && traveler.discrepancyForms.length > 0) {
@@ -144,7 +143,7 @@ $(function() {
   var availableColumns = [
     previewColumn,
     titleColumn,
-    updatedOnColumn,
+    versionColumn,
     formColumn,
   ];
   fnAddFilterFoot('#available-forms', availableColumns);
