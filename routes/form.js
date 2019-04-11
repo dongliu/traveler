@@ -4,7 +4,6 @@ var authConfig = config.auth;
 
 var mongoose = require('mongoose');
 var path = require('path');
-var sanitize = require('google-caja-sanitizer').sanitize;
 var underscore = require('underscore');
 var routesUtilities = require('../utilities/routes.js');
 var reqUtils = require('../lib/req-utils');
@@ -240,7 +239,7 @@ module.exports = function (app) {
   app.get('/formfiles/:id', auth.ensureAuthenticated, reqUtils.exist('id', FormFile), function (req, res) {
     var data = req[req.params.id];
     if (data.inputType === 'file') {
-      return res.sendfile(path.resolve(data.file.path));
+      return res.sendFile(path.resolve(data.file.path));
     }
     return res.status(500).send('it is not a file');
   });
@@ -451,8 +450,8 @@ module.exports = function (app) {
   app.post('/forms/:id/clone', auth.ensureAuthenticated, reqUtils.exist('id', Form), reqUtils.canReadMw('id'), function (req, res) {
     var doc = req[req.params.id];
     var form = {};
-    form.html = sanitize(doc.html);
-    form.title = sanitize(doc.title) + ' clone';
+    form.html = reqUtils.sanitizeText(doc.html);
+    form.title = reqUtils.sanitizeText(doc.title) + ' clone';
     form.createdBy = req.session.userid;
     form.createdOn = Date.now();
     form.clonedFrom = doc._id;
