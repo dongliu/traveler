@@ -307,6 +307,7 @@ var traveler = {
       alias: form.title,
       mapping: form.mapping,
       labels: form.labels,
+      _v: form._v,
     });
     traveler.activeForm = traveler.forms[0]._id;
     traveler.mapping = form.mapping;
