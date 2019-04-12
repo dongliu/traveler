@@ -1,19 +1,5 @@
 /*global prefix:false*/
 
-function createSideNav() {
-  var $legend = $('legend');
-  var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
-  var i;
-  if ($legend.length > 1) {
-    for (i = 0; i < $legend.length; i += 1) {
-      $affix.append('<li><a href="#' + $legend[i].id + '">' + $legend[i].textContent + '</a></li>');
-    }
-    $('.sidebar').append($('<div id="affixlist"></div>').append($affix));
-    $('body').attr('data-spy', 'scroll');
-    $('body').attr('data-target', '.sidebar');
-  }
-}
-
 $(function () {
   $('#output').find('img').each(function (index) {
     var $this = $(this);

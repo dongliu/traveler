@@ -12,6 +12,7 @@ block head
 block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
+    var title = '!{traveler.title}'
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -97,4 +98,5 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler-viewer.js')
