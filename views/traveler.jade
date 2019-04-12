@@ -14,6 +14,7 @@ block content
     var travelerStatus = !{JSON.stringify(traveler.status)};
     var finishedInput = !{JSON.stringify(traveler.finishedInput)};
     var totalInput = !{JSON.stringify(traveler.totalInput)};
+    var title = '!{traveler.title}'
     var prefix = '!{prefix}';
   .container
     #message
@@ -128,4 +129,5 @@ block js
   script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler.js')
