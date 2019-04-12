@@ -12,6 +12,7 @@ block head
 block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
+    var title = '!{title}'
   .container
     .row
       .span9
@@ -29,4 +30,5 @@ block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-viewer.js')

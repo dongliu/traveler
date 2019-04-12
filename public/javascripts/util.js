@@ -13,6 +13,22 @@ function json2List(json) {
   return output;
 }
 
+function createSideNav() {
+    $('.sidebar').empty();
+    var $legend = $('legend');
+    var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
+    var i;
+    if ($legend.length > 1) {
+        $affix.append('<li><h4>' + title + '</h4></li>');
+        for (i = 0; i < $legend.length; i += 1) {
+            $affix.append('<li><a href="#' + $legend[i].id + '">' + $legend[i].textContent + '</a></li>');
+        }
+        $('.sidebar').append($('<div id="affixlist"></div>').append($affix));
+        $('body').attr('data-spy', 'scroll');
+        $('body').attr('data-target', '#affixlist');
+    }
+}
+
 // function nameAuto(input, nameCache){
 //   return {
 //     minLength: 3,
