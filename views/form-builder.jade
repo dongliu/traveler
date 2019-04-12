@@ -72,7 +72,10 @@ block content
       a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
     .btn-group
       button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
-    if (formType === 'discrepency')
+    if (status === 0)
+      .btn-group
+        button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
+    if (formType === 'discrepancy')
       if (status === 0)
        .btn-group
          button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for Release') Submit

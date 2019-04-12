@@ -21,6 +21,11 @@ var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 
+var TravelerError = require('../lib/error').TravelerError;
+
+var debug = require('debug')('traveler:route:traveler');
+var logger = require('../lib/loggers').getLogger();
+
 function addInputName(name, list) {
   if (list.indexOf(name) === -1) {
     list.push(name);
@@ -37,11 +42,11 @@ function resetTouched(doc, cb) {
     'name'
   ).exec(function(dataErr, data) {
     if (dataErr) {
-      console.error(dataErr);
+      logger.error(dataErr);
       return cb(dataErr);
     }
     // reset the touched input name list and the finished input number
-    console.info('reset the touched inputs for traveler ' + doc._id);
+    logger.info('reset the touched inputs for traveler ' + doc._id);
     var labels = {};
     var activeForm;
     if (doc.forms.length === 1) {
@@ -87,10 +92,13 @@ function createTraveler(form, req, res) {
     [],
     function(err, doc) {
       if (err) {
-        console.error(err);
+        logger.error(err);
+        if (err instanceof TravelerError) {
+          return res.send(err.status, err.message);
+        }
         return res.send(500, err.message);
       }
-      console.log('new traveler ' + doc.id + ' created');
+      logger.info('new traveler ' + doc.id + ' created');
       var url =
         (req.proxied ? authConfig.proxied_service : authConfig.service) +
         '/travelers/' +
@@ -133,10 +141,10 @@ function cloneTraveler(source, req, res) {
 
   traveler.save(function(err, doc) {
     if (err) {
-      console.error(err);
+      logger.error(err);
       return res.send(500, err.message);
     }
-    console.log('new traveler ' + doc.id + ' created');
+    logger.info('new traveler ' + doc.id + ' created');
     doc.sharedWith.forEach(function(e) {
       User.findByIdAndUpdate(
         e._id,
@@ -147,10 +155,10 @@ function cloneTraveler(source, req, res) {
         },
         function(userErr, user) {
           if (userErr) {
-            console.error(userErr);
+            logger.error(userErr);
           }
           if (!user) {
-            console.error('The user ' + e._id + ' does not in the db');
+            logger.error('The user ' + e._id + ' does not in the db');
           }
         }
       );
@@ -166,10 +174,10 @@ function cloneTraveler(source, req, res) {
         },
         function(groupErr, user) {
           if (groupErr) {
-            console.error(groupErr);
+            logger.error(groupErr);
           }
           if (!user) {
-            console.error('The group ' + e._id + ' does not in the db');
+            logger.error('The group ' + e._id + ' does not in the db');
           }
         }
       );
@@ -199,6 +207,9 @@ module.exports = function(app) {
         archived: {
           $ne: true,
         },
+        status: {
+          $ne: 4,
+        },
         owner: {
           $exists: false,
         },
@@ -208,7 +219,7 @@ module.exports = function(app) {
       .lean()
       .exec(function(err, docs) {
         if (err) {
-          console.error(err);
+          logger.error(err);
           return res.send(500, err.message);
         }
         return res.json(200, docs);
@@ -231,7 +242,7 @@ module.exports = function(app) {
       .lean()
       .exec(function(err, travelers) {
         if (err) {
-          console.error(err);
+          logger.error(err);
           return res.send(500, err.message);
         }
         res.json(200, travelers);
@@ -249,7 +260,7 @@ module.exports = function(app) {
       'travelers'
     ).exec(function(err, me) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.send(500, err.message);
       }
       if (!me) {
@@ -269,7 +280,7 @@ module.exports = function(app) {
         .lean()
         .exec(function(tErr, travelers) {
           if (tErr) {
-            console.error(tErr);
+            logger.error(tErr);
             return res.send(500, tErr.message);
           }
           return res.json(200, travelers);
@@ -290,7 +301,7 @@ module.exports = function(app) {
       'travelers'
     ).exec(function(err, groups) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.send(500, err.message);
       }
       var travelerIds = [];
@@ -315,7 +326,7 @@ module.exports = function(app) {
         .lean()
         .exec(function(tErr, travelers) {
           if (tErr) {
-            console.error(tErr);
+            logger.error(tErr);
             return res.send(500, tErr.message);
           }
           res.json(200, travelers);
@@ -340,7 +351,7 @@ module.exports = function(app) {
       },
     }).exec(function(err, travelers) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.send(500, err.message);
       }
       res.json(200, travelers);
@@ -360,7 +371,7 @@ module.exports = function(app) {
       }
       Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
-          console.error(err);
+          logger.error(err);
           return res.send(500, err.message);
         }
         return res.json(200, travelers);
@@ -404,7 +415,14 @@ module.exports = function(app) {
           ],
         },
         {
-          archived: true,
+          $or: [
+            {
+              archived: true,
+            },
+            {
+              status: 4,
+            },
+          ],
         },
       ],
     };
@@ -415,7 +433,7 @@ module.exports = function(app) {
       .lean()
       .exec(function(err, travelers) {
         if (err) {
-          console.error(err);
+          logger.error(err);
           return res.send(500, err.message);
         }
         return res.json(200, travelers);
@@ -426,11 +444,11 @@ module.exports = function(app) {
     '/travelers/',
     auth.ensureAuthenticated,
     reqUtils.filter('body', ['form', 'source']),
-    function(req, res) {
+    function createOrCloneTraveler(req, res) {
       if (req.body.form) {
         Form.findById(req.body.form, function(err, form) {
           if (err) {
-            console.error(err);
+            logger.error(err);
             return res.send(500, err.message);
           }
           if (form) {
@@ -443,7 +461,7 @@ module.exports = function(app) {
       if (req.body.source) {
         Traveler.findById(req.body.source, function(err, traveler) {
           if (err) {
-            console.error(err);
+            logger.error(err);
             return res.send(500, err.message);
           }
           if (traveler) {
@@ -470,7 +488,7 @@ module.exports = function(app) {
     '/travelers/:id/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    function(req, res) {
+    function getTraveler(req, res) {
       var doc = req[req.params.id];
       if (doc.archived) {
         return res.redirect(
@@ -605,7 +623,7 @@ module.exports = function(app) {
         return cb(dataErr);
       }
       var userDefined = {};
-      _.mapObject(mapping, function(name, key) {
+      _.mapKeys(mapping, function(name, key) {
         userDefined[key] = dataForName(name, docs);
       });
       output.user_defined = userDefined;
@@ -640,7 +658,7 @@ module.exports = function(app) {
         return cb(dataErr);
       }
       var userDefined = {};
-      _.mapObject(mapping, function(name, key) {
+      _.mapKeys(mapping, function(name, key) {
         userDefined[key] = {};
         userDefined[key].value = dataForName(name, docs);
         if (_.isObject(labels)) {
@@ -710,7 +728,7 @@ module.exports = function(app) {
 
       doc.save(function(saveErr, newDoc) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.send(
@@ -771,6 +789,22 @@ module.exports = function(app) {
     }
   );
 
+  app.get(
+    '/travelers/:id/discrepancy-form-manager',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.isOwnerMw('id'),
+    reqUtils.archived('id', false),
+    function formviewer(req, res) {
+      res.render(
+        'discrepancy-form-manager',
+        routesUtilities.getRenderObject(req, {
+          traveler: req[req.params.id],
+        })
+      );
+    }
+  );
+
   // use the form in the request as the active form
   app.post(
     '/travelers/:id/forms/',
@@ -790,6 +824,7 @@ module.exports = function(app) {
         labels: req[req.body.formId].labels,
         activatedOn: [Date.now()],
         reference: req.body.formId,
+        _v: req[req.body.formId]._v,
         alias: req[req.body.formId].title,
       };
 
@@ -801,6 +836,7 @@ module.exports = function(app) {
       var num = _.size(form.labels);
       doc.forms.push(form);
       doc.activeForm = doc.forms[doc.forms.length - 1]._id;
+      doc.referenceForm = form.reference;
       doc.mapping = form.mapping;
       doc.labels = form.labels;
       doc.totalInput = num;
@@ -808,7 +844,7 @@ module.exports = function(app) {
       resetTouched(doc, function() {
         doc.save(function saveDoc(e, newDoc) {
           if (e) {
-            console.error(e);
+            logger.error(e);
             return res.send(500, e.message);
           }
           return res.json(200, newDoc);
@@ -843,6 +879,7 @@ module.exports = function(app) {
       }
 
       doc.activeForm = form._id;
+      doc.referenceForm = form.reference;
       doc.mapping = form.mapping;
       // for old forms without lables
       if (!(typeof form.labels === 'object' && _.size(form.labels) > 0)) {
@@ -855,7 +892,7 @@ module.exports = function(app) {
       resetTouched(doc, function() {
         doc.save(function saveDoc(e, newDoc) {
           if (e) {
-            console.error(e);
+            logger.error(e);
             return res.send(500, e.message);
           }
           return res.json(200, newDoc);
@@ -891,10 +928,59 @@ module.exports = function(app) {
 
       doc.save(function saveDoc(e) {
         if (e) {
-          console.error(e);
+          logger.error(e);
           return res.send(500, e.message);
         }
         return res.send(204);
+      });
+    }
+  );
+
+  // use the form in the request as the active discrepancy form
+  app.post(
+    '/travelers/:id/discrepancy-forms/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.isOwnerMw('id'),
+    reqUtils.archived('id', false),
+    reqUtils.status('id', [0, 1]),
+    reqUtils.filter('body', ['formId']),
+    reqUtils.hasAll('body', ['formId']),
+    reqUtils.existSource('formId', 'body', Form),
+    function addDiscrepancyForm(req, res) {
+      if (req[req.body.formId].formType !== 'discrepancy') {
+        return res.send(400, 'the form should be of discrepancy type!');
+      }
+
+      if (req[req.body.formId].status !== 1) {
+        return res.send(400, 'the form should be released!');
+      }
+
+      var doc = req[req.params.id];
+      var form = {
+        html: req[req.body.formId].html,
+        mapping: req[req.body.formId].mapping,
+        labels: req[req.body.formId].labels,
+        activatedOn: [Date.now()],
+        reference: req.body.formId,
+        _v: req[req.body.formId]._v,
+        alias: req[req.body.formId].title,
+      };
+
+      // migrate traveler without discrepancyForms
+      if (!doc.discrepancyForms) {
+        doc.discrepancyForms = [];
+      }
+      doc.discrepancyForms.push(form);
+      doc.activeDiscrepancyForm =
+        doc.discrepancyForms[doc.discrepancyForms.length - 1]._id;
+      doc.referenceDiscrepancyForm = form.reference;
+      doc.save(function saveDoc(e, newDoc) {
+        if (e) {
+          logger.error(e);
+          return res.send(500, e.message);
+        }
+        return res.json(200, newDoc);
       });
     }
   );
@@ -920,7 +1006,7 @@ module.exports = function(app) {
       doc.updatedOn = Date.now();
       doc.save(function(saveErr, newDoc) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         var out = {};
@@ -943,7 +1029,7 @@ module.exports = function(app) {
     function(req, res) {
       var doc = req[req.params.id];
 
-      if ([1, 1.5, 2, 3].indexOf(req.body.status) === -1) {
+      if ([1, 1.5, 2, 3, 4].indexOf(req.body.status) === -1) {
         return res.send(400, 'invalid status');
       }
 
@@ -955,46 +1041,23 @@ module.exports = function(app) {
         return res.send(403, 'You are not authorized to change the status. ');
       }
 
-      if (req.body.status === 1) {
-        if ([0, 1.5, 3].indexOf(doc.status) !== -1) {
-          doc.status = 1;
-        } else {
-          return res.send(
-            400,
-            'cannot start to work from the current status. '
-          );
-        }
+      var stateTransition = require('../model/traveler').stateTransition;
+
+      var target = _.find(stateTransition, function(t) {
+        return t.from === doc.status;
+      });
+
+      debug(target);
+      if (target.to.indexOf(req.body.status) === -1) {
+        return res.send(400, 'invalid status change');
       }
 
-      if (req.body.status === 1.5) {
-        if ([1].indexOf(doc.status) !== -1) {
-          doc.status = 1.5;
-        } else {
-          return res.send(400, 'cannot complete from the current status. ');
-        }
-      }
-
-      if (req.body.status === 2) {
-        if ([1.5].indexOf(doc.status) !== -1) {
-          doc.status = 2;
-        } else {
-          return res.send(400, 'cannot complete from the current status. ');
-        }
-      }
-
-      if (req.body.status === 3) {
-        if ([1].indexOf(doc.status) !== -1) {
-          doc.status = 3;
-        } else {
-          return res.send(400, 'cannot freeze from the current status. ');
-        }
-      }
-
+      doc.status = req.body.status;
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.send(200, 'status updated to ' + req.body.status);
@@ -1029,7 +1092,7 @@ module.exports = function(app) {
       }
       doc.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.json(200, {
@@ -1053,7 +1116,7 @@ module.exports = function(app) {
       doc.devices.pull(req.params.number);
       doc.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.send(204);
@@ -1077,7 +1140,7 @@ module.exports = function(app) {
         'name value inputType inputBy inputOn'
       ).exec(function(dataErr, docs) {
         if (dataErr) {
-          console.error(dataErr);
+          logger.error(dataErr);
           return res.send(500, dataErr.message);
         }
         return res.json(200, docs);
@@ -1107,7 +1170,7 @@ module.exports = function(app) {
       });
       data.save(function(dataErr) {
         if (dataErr) {
-          console.error(dataErr.message);
+          logger.error(dataErr.message);
           if (dataErr instanceof DataError) {
             return res.send(dataErr.status, dataErr.message);
           }
@@ -1127,7 +1190,7 @@ module.exports = function(app) {
           // save doc anyway
           doc.save(function(saveErr) {
             if (saveErr) {
-              console.error(saveErr);
+              logger.error(saveErr);
               return res.send(500, saveErr.message);
             }
             return res.send(204);
@@ -1153,7 +1216,7 @@ module.exports = function(app) {
         'name value inputBy inputOn'
       ).exec(function(noteErr, docs) {
         if (noteErr) {
-          console.error(noteErr);
+          logger.error(noteErr);
           return res.send(500, noteErr.message);
         }
         return res.json(200, docs);
@@ -1181,7 +1244,7 @@ module.exports = function(app) {
       });
       note.save(function(noteErr) {
         if (noteErr) {
-          console.error(noteErr);
+          logger.error(noteErr);
           return res.send(500, noteErr.message);
         }
         doc.notes.push(note._id);
@@ -1193,7 +1256,7 @@ module.exports = function(app) {
         doc.updatedOn = Date.now();
         doc.save(function(saveErr) {
           if (saveErr) {
-            console.error(saveErr);
+            logger.error(saveErr);
             return res.send(500, saveErr.message);
           }
           return res.send(204);
@@ -1231,7 +1294,7 @@ module.exports = function(app) {
 
       data.save(function(dataErr) {
         if (dataErr) {
-          console.error(dataErr);
+          logger.error(dataErr);
           return res.send(500, dataErr.message);
         }
         doc.data.push(data._id);
@@ -1239,7 +1302,7 @@ module.exports = function(app) {
         doc.updatedOn = Date.now();
         doc.save(function(saveErr) {
           if (saveErr) {
-            console.error(saveErr);
+            logger.error(saveErr);
             return res.send(500, saveErr.message);
           }
           var url =
@@ -1316,7 +1379,7 @@ module.exports = function(app) {
       traveler.publicAccess = access;
       traveler.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         return res.send(200, 'public access is set to ' + req.body.access);
@@ -1413,7 +1476,7 @@ module.exports = function(app) {
       }
       traveler.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.send(500, saveErr.message);
         }
         // check consistency of user's traveler list
@@ -1433,10 +1496,10 @@ module.exports = function(app) {
           },
           function(updateErr, target) {
             if (updateErr) {
-              console.error(updateErr);
+              logger.error(updateErr);
             }
             if (!target) {
-              console.error(
+              logger.error(
                 'The user/group ' + req.params.userid + ' is not in the db'
               );
             }

@@ -19,10 +19,9 @@ var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 
 var debug = require('debug')('traveler:route:form');
+var logger = require('../lib/loggers').getLogger();
 
 module.exports = function(app) {
-  var logger = app.get('logger');
-
   app.get('/forms/', auth.ensureAuthenticated, function(req, res) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });
@@ -41,7 +40,7 @@ module.exports = function(app) {
           $exists: false,
         },
       },
-      'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup'
+      'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -173,12 +172,37 @@ module.exports = function(app) {
   });
 
   app.get('/archivedforms/json', auth.ensureAuthenticated, function(req, res) {
-    Form.find(
-      {
-        $or: [{ status: 2 }, { archived: true }],
-      },
-      'title formType tags archivedOn _v'
-    ).exec(function(err, forms) {
+    var search = {
+      $and: [
+        {
+          $or: [
+            {
+              createdBy: req.session.userid,
+              owner: {
+                $exists: false,
+              },
+            },
+            {
+              owner: req.session.userid,
+            },
+          ],
+        },
+        {
+          $or: [
+            {
+              archived: true,
+            },
+            {
+              status: 2,
+            },
+          ],
+        },
+      ],
+    };
+    Form.find(search, 'title formType tags archivedOn _v').exec(function(
+      err,
+      forms
+    ) {
       if (err) {
         console.error(err);
         return res.send(500, err.message);
@@ -557,7 +581,7 @@ module.exports = function(app) {
     reqUtils.requireRoles(req => {
       return (
         req['body'].hasOwnProperty('formType') &&
-        req['body']['formType'] == 'discrepency'
+        req['body']['formType'] == 'discrepancy'
       );
     }, 'admin'),
     reqUtils.sanitize('body', ['html']),
@@ -774,7 +798,7 @@ module.exports = function(app) {
     reqUtils.requireRoles(
       req => {
         let s = req.body.status;
-        if (req[req.params.id].type === 'discrepency') {
+        if (req[req.params.id].type === 'discrepancy') {
           if ([1, 2].indexOf(s) !== -1) {
             return true;
           }

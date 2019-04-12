@@ -8,7 +8,7 @@ function modalScroll(scroll) {
   }
 }
 
-function archiveFromModal(archive, type, fromTable, toTable, otherTable) {
+function updateStatusFromModal(status, type, fromTable, toTable, otherTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
@@ -19,7 +19,7 @@ function archiveFromModal(archive, type, fromTable, toTable, otherTable) {
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
-        status: 2,
+        status: status,
       }),
     })
       .done(function() {
