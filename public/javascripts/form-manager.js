@@ -96,12 +96,10 @@ function initUsedForms(traveler, activeTable, usedTable) {
   }
   if (form) {
     var active = {
-      activatedOn: form.activatedOn.length
-        ? form.activatedOn
-        : [traveler.createdOn],
       _id: form._id,
       reference: form.reference || traveler.referenceForm,
       alias: form.alias || 'not set yet',
+      _v: form._v,
     };
     activeTable.fnClearTable();
     activeTable.fnAddData(active);
@@ -110,9 +108,6 @@ function initUsedForms(traveler, activeTable, usedTable) {
   if (traveler.forms.length > 1) {
     traveler.forms.forEach(function(value) {
       if (value._id !== traveler.activeForm) {
-        value.activatedOn = value.activatedOn.length
-          ? value.activatedOn
-          : [traveler.createdOn];
         value.reference = value.reference || traveler.referenceForm;
         value.alias = value.alias || 'not set yest';
         used.push(value);
@@ -133,7 +128,6 @@ $(function() {
   var activeColumns = [
     previewColumn,
     aliasColumn,
-    activatedOnColumn,
     versionColumn,
     referenceFormLinkColumn,
   ];
@@ -159,7 +153,6 @@ $(function() {
   var availableColumns = [
     previewColumn,
     titleColumn,
-    updatedOnColumn,
     versionColumn,
     formColumn,
   ];
