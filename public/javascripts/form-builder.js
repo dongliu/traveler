@@ -1355,7 +1355,7 @@ function binding_events() {
     );
   });
 
-  $('#obsolete').click(function() {
+  $('#obsolete, #archive').click(function() {
     sendRequest(
       {
         status: 2,

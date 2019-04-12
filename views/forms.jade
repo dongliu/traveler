@@ -67,10 +67,6 @@ block content
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
-            .btn-group
-              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected forms, only you can see them after archived.')
-                i.fa.fa-archive.fa-lg
-                | &nbsp;Archive
             if (viewConfig.transferOwnership)
               .btn-group
                 button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
@@ -84,10 +80,6 @@ block content
                 button.btn.btn-info.reload
                   i.fa.fa-refresh.fa-lg
                   | &nbsp;Reload table
-              .btn-group
-                button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected forms, only you can see them after archived.')
-                  i.fa.fa-archive.fa-lg
-                  | &nbsp;Archive
               .btn-group
                 button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
                   i.fa.fa-user.fa-lg
@@ -115,10 +107,6 @@ block content
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
-            .btn-group
-              button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
-                i.fa.fa-inbox.fa-lg
-                | &nbsp;De-archive
           table#archived-form-table.table.table-bordered.table-hover
 
 

@@ -76,7 +76,7 @@ var form = new Schema({
   formType: {
     type: String,
     default: 'normal',
-    enum: ['normal', 'discrepency'],
+    enum: ['normal', 'discrepancy'],
   },
 });
 

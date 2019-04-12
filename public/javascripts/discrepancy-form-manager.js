@@ -1,5 +1,9 @@
-/*global ajax401: false, prefix: false, updateAjaxURL: false, traveler: true, FormLoader: false, moment: false*/
-/*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false, activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn: false, formColumn: false, sDomPage: false, fnAddFilterFoot: false, filterEvent: false*/
+/*global ajax401: false, prefix: false, updateAjaxURL: false, traveler: true,
+FormLoader: false, moment: false*/
+/*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false,
+activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn:
+false, formColumn: false, sDomPage: false, fnAddFilterFoot: false, filterEvent:
+false*/
 /*eslint max-nested-callbacks: [2, 4]*/
 
 function findById(a, id) {
@@ -12,34 +16,9 @@ function findById(a, id) {
   return null;
 }
 
-function setAlias(fid, alias, updateTd) {
-  $.ajax({
-    url: './forms/' + fid + '/alias',
-    type: 'PUT',
-    contentType: 'application/json',
-    data: JSON.stringify({
-      value: alias,
-    }),
-  })
-    .done(function() {
-      $('#modal .modal-body').append(
-        '<div class="text-success">The new alias was set.</div>'
-      );
-      // update local table data
-      updateTd();
-    })
-    .fail(function(jqXHR) {
-      $('#modal .modal-body').append(
-        '<div class="text-error">Something was wrong: ' +
-          jqXHR.responseText +
-          '</div>'
-      );
-    });
-}
-
 function addForm(form, cb) {
   $.ajax({
-    url: './forms/',
+    url: './discrepancy-forms/',
     type: 'POST',
     contentType: 'application/json',
     dataType: 'json',
@@ -48,7 +27,7 @@ function addForm(form, cb) {
   })
     .done(function(json) {
       $('#modal .modal-body').append(
-        '<div class="text-success">The selected form is active now.</div>'
+        '<div class="text-success">The selected discrepancy form is active now.</div>'
       );
       cb(json);
     })
@@ -63,7 +42,7 @@ function addForm(form, cb) {
 
 function setActive(fid, cb) {
   $.ajax({
-    url: './forms/active',
+    url: './discrepancy-forms/active',
     type: 'PUT',
     contentType: 'application/json',
     dataType: 'json',
@@ -74,7 +53,7 @@ function setActive(fid, cb) {
   })
     .done(function(json) {
       $('#modal .modal-body').append(
-        '<div class="text-success">The selected form is active now.</div>'
+        '<div class="text-success">The selected discrepancy form is active now.</div>'
       );
       cb(json);
     })
@@ -89,40 +68,44 @@ function setActive(fid, cb) {
 
 function initUsedForms(traveler, activeTable, usedTable) {
   var form;
-  if (traveler.forms.length === 1) {
-    form = traveler.forms[0];
+  if (traveler.discrepancyForms && traveler.discrepancyForms.length === 1) {
+    form = traveler.discrepancyForms[0];
   } else {
-    form = findById(traveler.forms, traveler.activeForm);
+    form = findById(traveler.discrepancyForms, traveler.activeDiscrepancyForm);
   }
   if (form) {
     var active = {
-      activatedOn: form.activatedOn.length
-        ? form.activatedOn
-        : [traveler.createdOn],
+      alias: form.alias,
       _id: form._id,
+      _v: form._v,
       reference: form.reference || traveler.referenceForm,
-      alias: form.alias || 'not set yet',
     };
     activeTable.fnClearTable();
     activeTable.fnAddData(active);
+    $('tr').removeClass('row-selected');
+    $('#active-form tbody tr:first-child').addClass('row-selected');
   }
   var used = [];
-  if (traveler.forms.length > 1) {
-    traveler.forms.forEach(function(value) {
-      if (value._id !== traveler.activeForm) {
+  if (traveler.discrepancyForms.length > 1) {
+    traveler.discrepancyForms.forEach(function(value) {
+      if (value._id !== traveler.activeDiscrepancyForm) {
         value.activatedOn = value.activatedOn.length
           ? value.activatedOn
           : [traveler.createdOn];
         value.reference = value.reference || traveler.referenceForm;
-        value.alias = value.alias || 'not set yest';
         used.push(value);
       }
     });
   }
   usedTable.fnClearTable();
   usedTable.fnAddData(used);
-  $('tr').removeClass('row-selected');
-  $('#active-form tbody tr:first-child').addClass('row-selected');
+}
+
+function loadForm(html) {
+  FormLoader.setFormHTML(html);
+  FormLoader.loadForm();
+  FormLoader.bind();
+  FormLoader.note();
 }
 
 $(function() {
@@ -133,7 +116,6 @@ $(function() {
   var activeColumns = [
     previewColumn,
     aliasColumn,
-    activatedOnColumn,
     versionColumn,
     referenceFormLinkColumn,
   ];
@@ -146,26 +128,27 @@ $(function() {
 
   var usedColumns = activeColumns;
 
-  fnAddFilterFoot('#used-forms', usedColumns);
+  // fnAddFilterFoot('#used-forms', usedColumns);
   var usedTable = $('#used-forms').dataTable({
     aaData: [],
     bAutoWidth: true,
     aoColumns: usedColumns,
-    sDom: sDomPage,
+    sDom: sDomClean,
   });
 
-  initUsedForms(traveler, activeTable, usedTable);
+  if (traveler.discrepancyForms && traveler.discrepancyForms.length > 0) {
+    initUsedForms(traveler, activeTable, usedTable);
+  }
 
   var availableColumns = [
     previewColumn,
     titleColumn,
-    updatedOnColumn,
     versionColumn,
     formColumn,
   ];
   fnAddFilterFoot('#available-forms', availableColumns);
   var availableTable = $('#available-forms').dataTable({
-    sAjaxSource: '/forms/json',
+    sAjaxSource: '/released-forms/discrepancy/json',
     sAjaxDataProp: '',
     bProcessing: true,
     oLanguage: {
@@ -176,12 +159,10 @@ $(function() {
     sDom: sDomPage,
   });
 
-  function loadForm(html) {
-    FormLoader.setFormHTML(html);
-    FormLoader.loadForm();
-    FormLoader.bind();
-    FormLoader.note();
-  }
+  var discrepancyLegend =
+    '<div id="discrepancy-legend" class="control-group"><legend>Discrepancy</legend></div>';
+  var travelerLegend =
+    '<div id="traveler-legend" class="control-group"><legend>Traveler</legend></div>';
 
   FormLoader.setTravelerId(traveler._id);
   var form;
@@ -191,13 +172,28 @@ $(function() {
     form = findById(traveler.forms, traveler.activeForm);
   }
 
+  var discrepancyForm;
+  if (traveler.activeDiscrepancyForm) {
+    discrepancyForm = findById(
+      traveler.discrepancyForms,
+      traveler.activeDiscrepancyForm
+    );
+  }
+
   if (!form) {
     $('#message').append(
       '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>HTTP request failed.</div>'
     );
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
+  } else {
+    let html = form.html;
+    // discrepancy on the top
+    if (discrepancyForm) {
+      html =
+        discrepancyLegend + discrepancyForm.html + travelerLegend + form.html;
+    }
+    loadForm(html);
   }
-  loadForm(form.html);
 
   // local cache of available forms
   var availableForms = {};
@@ -224,47 +220,21 @@ $(function() {
       FormLoader.retrieveForm(fid, function(json) {
         $('#form').fadeTo('slow', 1);
         availableForms[fid] = json;
-        loadForm(availableForms[fid].html);
+        let html =
+          discrepancyLegend +
+          availableForms[fid].html +
+          travelerLegend +
+          form.html;
+        loadForm(html);
       });
     } else {
       $('#form').fadeTo('slow', 1);
+      let html =
+        discrepancyLegend +
+        availableForms[fid].html +
+        travelerLegend +
+        form.html;
       loadForm(availableForms[fid].html);
-    }
-  });
-
-  $('#set-alias').click(function() {
-    var selected = $('.row-selected');
-    var tid = selected.closest('table').prop('id');
-    if (tid === 'available-forms') {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html(
-        'Please select a form from either current form or used forms tables.'
-      );
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html('Set the alias to');
-      $('#modal .modal-body').empty();
-      $('#modal .modal-body').append(
-        '<div><input id="new-alias" type="text" placeholder="new alias"</div>'
-      );
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        $('#submit').prop('disabled', true);
-        var fid = $('a.preview', selected).prop('id');
-        var alias = $('#new-alias').val();
-        setAlias(fid, alias, function updateTd() {
-          var table = $('#' + tid).dataTable();
-          var data = table.fnGetData(selected[0]);
-          data.alias = alias;
-          table.fnUpdate(data, table.fnGetPosition(selected[0]));
-        });
-      });
     }
   });
 
@@ -281,31 +251,16 @@ $(function() {
       );
       $('#modal').modal('show');
     } else if (tid === 'used-forms') {
-      $('#modalLabel').html('Use the following used form');
+      $('#modalLabel').html('Alert');
       $('#modal .modal-body').html(
-        '<b>' +
-          availableForms[fid].alias +
-          '</b> last activated on ' +
-          moment(
-            availableForms[fid].activatedOn[
-              availableForms[fid].activatedOn.length - 1
-            ]
-          ).format('YYYY-MM-DD HH:mm:ss')
+        'Only curent released discrepancy can be used.'
       );
       $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
-      $('#submit').click(function() {
-        $('#submit').prop('disabled', true);
-        // set the active form id
-        setActive(fid, function(json) {
-          traveler = json;
-          initUsedForms(json, activeTable, usedTable);
-        });
-      });
     } else {
-      $('#modalLabel').html('Use the following selected form');
+      $('#modalLabel').html('Use the following selected discrepancy form');
       $('#modal .modal-body').html(
         '<b>' +
           availableForms[fid].title +

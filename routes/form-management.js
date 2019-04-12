@@ -43,14 +43,29 @@ module.exports = function(app) {
     }
   );
 
+  app.get('/released-forms/json', auth.ensureAuthenticated, function(req, res) {
+    Form.find(
+      {
+        status: 1,
+      },
+      'title formType tags mapping _v updatedOn updatedBy'
+    ).exec(function(err, forms) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, forms);
+    });
+  });
+
   app.get(
-    '/released-forms/json',
+    '/released-forms/discrepancy/json',
     auth.ensureAuthenticated,
-    auth.verifyRole(true, 'admin', 'manager'),
     function(req, res) {
       Form.find(
         {
           status: 1,
+          formType: 'discrepancy',
         },
         'title formType tags mapping _v updatedOn updatedBy'
       ).exec(function(err, forms) {

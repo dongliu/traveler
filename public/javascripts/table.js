@@ -266,6 +266,7 @@ function formatTravelerStatus(s) {
     '1.5': 'submitted for completion',
     '2': 'completed',
     '3': 'frozen',
+    '4': 'archived',
     '0': 'initialized',
   };
   if (status[s.toString()]) {
@@ -368,6 +369,7 @@ var previewColumn = {
       '"><i class="fa fa-eye fa-lg"></i></a>'
     );
   },
+  sWidth: '25px',
 };
 
 var removeColumn = {
@@ -384,7 +386,7 @@ var removeColumn = {
 };
 
 var referenceFormLinkColumn = {
-  sTitle: 'Reference',
+  sTitle: 'Ref',
   mData: 'reference',
   mRender: function(data) {
     return (
@@ -396,6 +398,7 @@ var referenceFormLinkColumn = {
     );
   },
   bSortable: false,
+  sWidth: '45px',
 };
 
 var formColumn = {
@@ -411,6 +414,7 @@ var formColumn = {
     );
   },
   bSortable: false,
+  sWidth: '45px',
 };
 
 var aliasColumn = {
@@ -621,15 +625,17 @@ var commentsColumn = {
 
 var titleColumn = {
   sTitle: 'Title',
-  sDefaultContent: 'unknown',
+  sDefaultContent: '',
   mData: 'title',
   bFilter: true,
 };
 
 var versionColumn = {
-  sTitle: 'Version',
+  sTitle: 'Ver',
   mData: '_v',
+  sDefaultContent: '',
   bFilter: true,
+  sWidth: '45px',
 };
 
 var formTypeColumn = {

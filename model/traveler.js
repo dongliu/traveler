@@ -33,6 +33,7 @@ var form = new Schema({
   // inputs: [String],
   activatedOn: [Date],
   reference: ObjectId,
+  _v: Number,
   alias: String,
 });
 
@@ -48,6 +49,38 @@ var user = new Schema({
  *         | 2 // completed
  *         | 3 // frozen
  */
+
+const statusMap = {
+  '0': 'initialized',
+  '1': 'active',
+  '1.5': 'submitted for completion',
+  '2': 'completed',
+  '3': 'frozen',
+  '4': 'archived',
+};
+
+var stateTransition = [
+  {
+    from: 0,
+    to: [1, 4],
+  },
+  {
+    from: 1,
+    to: [1.5, 3, 4],
+  },
+  {
+    from: 1.5,
+    to: [1, 2],
+  },
+  {
+    from: 2,
+    to: [4],
+  },
+  {
+    from: 3,
+    to: [1],
+  },
+];
 
 /**
  * publicAccess := 0 // for read or
@@ -82,11 +115,18 @@ var traveler = new Schema({
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
+  // global object id of the active form
   referenceForm: ObjectId,
+  // global object if of the discrepancy form
+  referenceDiscrepancyForm: ObjectId,
   forms: [form],
+  discrepancyForms: [form],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
+  // local id of active form in forms
   activeForm: String,
+  // local id of the active discrepancy form in discrepancyForms
+  activeDiscrepancyForm: String,
   data: [ObjectId],
   notes: [ObjectId],
   // decided by the active form input list
@@ -209,4 +249,6 @@ module.exports = {
   Traveler: Traveler,
   TravelerData: TravelerData,
   TravelerNote: TravelerNote,
+  statusMap: statusMap,
+  stateTransition: stateTransition,
 };
