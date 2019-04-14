@@ -1238,7 +1238,7 @@ function binding_events() {
           html: html,
         },
         function() {
-          initHtml = html;
+          window.location.reload(true);
         }
       );
     }
