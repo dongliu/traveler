@@ -158,7 +158,7 @@ $(function() {
   ];
   fnAddFilterFoot('#available-forms', availableColumns);
   var availableTable = $('#available-forms').dataTable({
-    sAjaxSource: '/forms/json',
+    sAjaxSource: '/released-forms/normal/json',
     sAjaxDataProp: '',
     bProcessing: true,
     oLanguage: {
