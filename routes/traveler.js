@@ -73,17 +73,6 @@ function resetTouched(doc, cb) {
   });
 }
 
-function updateFinished(doc, cb) {
-  var beforeUpdate = doc.finishedInput;
-  var touched = doc.touchedInputs.length;
-  if (touched === beforeUpdate + 1) {
-    doc.finishedInput = touched;
-    return cb();
-  }
-  // need a reset
-  resetTouched(doc, cb);
-}
-
 function createTraveler(form, req, res) {
   routesUtilities.traveler.createTraveler(
     form,
@@ -1183,10 +1172,8 @@ module.exports = function(app) {
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
         doc.data.push(data._id);
-        // update touched input, and finished input here
-        addInputName(data.name, doc.touchedInputs);
-        // update the finishe input number
-        updateFinished(doc, function() {
+        // update the finishe input number by reset
+        resetTouched(doc, function() {
           // save doc anyway
           doc.save(function(saveErr) {
             if (saveErr) {
