@@ -4,10 +4,6 @@
 /*global removeColumn, sequenceColumn, colorColumn, priorityColumn, valueColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, sDomNoTools*/
 /*global moment: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, Holder*/
 
-function livespan(stamp) {
-  return '<span data-livestamp="' + stamp + '"></span>';
-}
-
 function cleanTagForm() {
   $('#new-tag').closest('li').remove();
   $('#add-tag').prop('disabled', false);
@@ -161,7 +157,10 @@ function updateWorks(updates, cb) {
     data: JSON.stringify(updates)
   }).done(function (data, status, jqXHR) {
     var timestamp = jqXHR.getResponseHeader('Date');
-    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Works updated ' + livespan(timestamp) + '</div>');
+    timestamp = livespan(timestamp);
+    var updateMsg = '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Works updated ' + timestamp + '</div>';
+
+    $('#message').append(updateMsg);
     if (jqXHR.status !== 204) {
       cb(null, data);
     }
