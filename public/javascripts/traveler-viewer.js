@@ -6,25 +6,6 @@ function cleanForm() {
   $('.control-group-buttons').remove();
 }
 
-function livespan(stamp, live) {
-  if (live) {
-    return '<span data-livestamp="' + stamp + '"></span>';
-  } else {
-    return '<span>' + moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') + '</span>';
-  }
-}
-
-function history(found) {
-  var i;
-  var output = '';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
-    }
-  }
-  return output;
-}
-
 function fileHistory(found) {
   var i;
   var output = '';
