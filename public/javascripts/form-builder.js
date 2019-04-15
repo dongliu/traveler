@@ -4,10 +4,6 @@
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
-function livespan(stamp) {
-  return '<span data-livestamp="' + stamp + '"></span>';
-}
-
 var mce_content = {
   selector: 'textarea.tinymce',
   content_css: '/bootstrap/css/bootstrap.css',

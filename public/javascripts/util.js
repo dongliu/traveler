@@ -1,3 +1,5 @@
+/*global moment: false*/
+
 function json2List(json) {
   var output = '<dl>';
   for (var k in json) {
@@ -27,6 +29,39 @@ function createSideNav() {
         $('body').attr('data-spy', 'scroll');
         $('body').attr('data-target', '#affixlist');
     }
+}
+
+function history(found) {
+  var i;
+  var output = '';
+  if (found.length > 0) {
+    for (i = 0; i < found.length; i += 1) {
+      var inputType = found[i].inputType;
+      var historyValue = found[i].value;
+      var inputBy = found[i].inputBy;
+      var inputOn = found[i].inputOn;
+      output = output + generateHistoryRecordHtml(inputType, historyValue, inputBy, inputOn);
+    }
+  }
+  return output;
+}
+
+function generateHistoryRecordHtml(type, historyValue, inputBy, inputOn, live = false) {
+  if (type === 'url') {
+    if (historyValue.startsWith('http') === false) {
+      historyValue = 'http://' + historyValue;
+    }
+    historyValue = '<a target="_blank" href=' + historyValue + '>' + historyValue + '</a>';
+  }
+  return 'changed to <strong>' + historyValue + '</strong> by ' + inputBy + ' ' + livespan(inputOn, live) + '; ';
+}
+
+function livespan(stamp, live = true) {
+  if (live) {
+    return '<span data-livestamp="' + stamp + '"></span>';
+  } else {
+    return '<span>' + moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') + '</span>';
+  }
 }
 
 // function nameAuto(input, nameCache){
