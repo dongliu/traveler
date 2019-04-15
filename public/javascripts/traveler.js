@@ -3,24 +3,6 @@
 /*global travelerStatus: true, finishedInput: true, ajax401: false, prefix*/
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
-function livespan(stamp, live) {
-  if (live) {
-    return '<span data-livestamp="' + stamp + '"></span>';
-  } else {
-    return '<span>' + moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') + '</span>';
-  }
-}
-
-function history(found) {
-  var i;
-  var output = '';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
-    }
-  }
-  return output;
-}
 
 function fileHistory(found) {
   var i;
@@ -29,7 +11,7 @@ function fileHistory(found) {
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = prefix + '/data/' + found[i]._id;
-      output = output + '<strong><a href=' + link + ' target="' + linkTarget + '" download=' + found[i].value + '>' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn) + '; ';
+      output = output + '<strong><a href=' + link + ' target="' + linkTarget + '" download=' + found[i].value + '>' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + livespan(found[i].inputOn, false) + '; ';
     }
   }
   return output;
@@ -40,7 +22,7 @@ function notes(found) {
   var output = '<dl>';
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
-      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn) + '</b>: </dt>';
+      output = output + '<dt><b>' + found[i].inputBy + ' noted ' + livespan(found[i].inputOn, false) + '</b>: </dt>';
       output = output + '<dd>' + found[i].value + '</dd>';
     }
   }
@@ -321,7 +303,7 @@ $(function () {
     }
   });
 
-  // Safari web browser will not recognize input event for radio and checkbox. 
+  // Safari web browser will not recognize input event for radio and checkbox.
   $('#form input[type="radio"], input[type="checkbox"]').on('click', formInputMade);
 
   $('#form input:not([type="file"]):not([type="radio"]):not([type="checkbox"]),textarea').on('input', formInputMade);
@@ -339,7 +321,7 @@ $(function () {
     if ($cgw.children('.control-group-buttons').length === 0) {
       $cgw.prepend('<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>');
     }
-  };
+  }
 
   $('#form').on('click', 'button[value="save"]', function (e) {
     e.preventDefault();
@@ -383,7 +365,8 @@ $(function () {
         incrementFinished();
         $history = $('<div class="input-history"/>').appendTo($this.closest('.control-group-wrap').find('.controls'));
       }
-      $history.html('changed to <strong>' + binder.accessor.target[input.name] + '</strong> by you ' + livespan(timestamp) + '; ' + $history.html());
+      var historyRecord = generateHistoryRecordHtml(input.type, binder.accessor.target[input.name], 'you', timestamp, true);
+      $history.html(historyRecord + $history.html());
       // $.livestamp.resume();
       $this.closest('.control-group-buttons').remove();
     }).fail(function (jqXHR) {
