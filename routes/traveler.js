@@ -635,6 +635,16 @@ module.exports = function(app) {
     });
     var mapping = traveler.mapping;
     var labels = traveler.labels;
+    var discrepancyMapping = {};
+    var discrepancyLabels = {};
+    if (traveler.activeDiscrepancyForm) {
+      discrepancyMapping = traveler.discrepancyForms.id(
+        traveler.activeDiscrepancyForm
+      ).mapping;
+      discrepancyLabels = traveler.discrepancyForms.id(
+        traveler.activeDiscrepancyForm
+      ).labels;
+    }
     TravelerData.find(
       {
         _id: {
@@ -654,7 +664,16 @@ module.exports = function(app) {
           userDefined[key].label = labels[name];
         }
       });
+      var discrepancy = {};
+      _.mapKeys(discrepancyMapping, function(name, key) {
+        discrepancy[key] = {};
+        discrepancy[key].value = dataForName(name, docs);
+        if (_.isObject(discrepancyLabels)) {
+          discrepancy[key].label = discrepancyLabels[name];
+        }
+      });
       output.user_defined = userDefined;
+      output.discrepancy = discrepancy;
       return cb(null, output);
     });
   }
