@@ -1,8 +1,9 @@
 /*eslint max-nested-callbacks: [2, 5]*/
 
-/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/* global deviceColumn, titleColumn, statusColumn, sDom, keyValueColumn, keyLabelColumn, oTableTools */
-/* global ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, _, moment */
+/* global deviceColumn, titleColumn, statusColumn, sDom, keyValueColumn,
+ keyLabelColumn, oTableTools*/
+/* global ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix:
+ false, _, moment*/
 
 /**
  * generate the control checkbox to show/hide the column
@@ -33,27 +34,41 @@ function constructControl(target, columns) {
 
 function constructTable(table, travelers, colMap) {
   var systemColumns = [titleColumn, deviceColumn, statusColumn];
+  var discrepancyColumns = [];
   var userColumns = [];
   var labelColIndex = [];
   systemColumns.forEach(function(col, index) {
     colMap[col.sTitle || col.mData] = [index];
   });
-  var keys = [];
+  var userKeys = [];
+  var discrepancyKeys = [];
   var rows = [];
   var id;
   // get all user defined keys
   for (id in travelers) {
-    keys = _.union(keys, _.keys(travelers[id].user_defined)).sort();
+    userKeys = _.union(userKeys, _.keys(travelers[id].user_defined)).sort();
+    discrepancyKeys = _.union(
+      discrepancyKeys,
+      _.keys(travelers[id].discrepancy)
+    ).sort();
   }
+  // add discrepancy keys to discrepancyColumns and colMap
+  discrepancyKeys.forEach(function(key, index) {
+    discrepancyColumns.push(keyValueColumn('discrepancy', key));
+    colMap[key] = [systemColumns.length + index];
+  });
+
   // add user defined keys to userColumns and colMap
-  keys.forEach(function(key, index) {
+  userKeys.forEach(function(key, index) {
     userColumns.push(keyLabelColumn(key));
-    userColumns.push(keyValueColumn(key));
+    userColumns.push(keyValueColumn('user_defined', key));
     colMap[key] = [
-      systemColumns.length + 2 * index,
-      systemColumns.length + 2 * index + 1,
+      systemColumns.length + discrepancyColumns.length + 2 * index,
+      systemColumns.length + discrepancyColumns.length + 2 * index + 1,
     ];
-    labelColIndex.push(systemColumns.length + 2 * index);
+    labelColIndex.push(
+      systemColumns.length + discrepancyColumns.length + 2 * index
+    );
   });
 
   // get all the data
@@ -62,12 +77,13 @@ function constructTable(table, travelers, colMap) {
   }
 
   constructControl('#system-keys', systemColumns);
-  constructControl('#user-keys', keys);
+  constructControl('#descrepancy-keys', discrepancyKeys);
+  constructControl('#user-keys', userKeys);
 
   // draw the table
   var report = $(table).dataTable({
     aaData: rows,
-    aoColumns: systemColumns.concat(userColumns),
+    aoColumns: systemColumns.concat(discrepancyColumns).concat(userColumns),
     oTableTools: oTableTools,
     iDisplayLength: -1,
     aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
