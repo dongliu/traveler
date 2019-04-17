@@ -85,10 +85,10 @@ function personColumn(title, key) {
   };
 }
 
-function keyValueColumn(key) {
+function keyValueColumn(collection, key) {
   return {
     sTitle: key,
-    mData: 'user_defined.' + key + '.value',
+    mData: collection + '.' + key + '.value',
     sDefaultContent: '',
     bFilter: true,
   };

@@ -58,6 +58,30 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/released-forms/normal/json', auth.ensureAuthenticated, function(
+    req,
+    res
+  ) {
+    Form.find(
+      {
+        // TODO: filter the status with 1 when enforce normal forms
+        // with the release progess.
+        // status: 1,
+        status: {
+          $ne: 2,
+        },
+        formType: 'normal',
+      },
+      'title formType tags mapping _v updatedOn updatedBy'
+    ).exec(function(err, forms) {
+      if (err) {
+        console.error(err);
+        return res.send(500, err.message);
+      }
+      res.json(200, forms);
+    });
+  });
+
   app.get(
     '/released-forms/discrepancy/json',
     auth.ensureAuthenticated,

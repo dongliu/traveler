@@ -18,28 +18,52 @@
 var Binder = {};
 Binder.Util = {
   isFunction: function(obj) {
-    return obj != undefined && typeof(obj) == "function" && typeof(obj.constructor) == "function" && obj.constructor.prototype.hasOwnProperty("call");
+    return (
+      obj != undefined &&
+      typeof obj == 'function' &&
+      typeof obj.constructor == 'function' &&
+      obj.constructor.prototype.hasOwnProperty('call')
+    );
   },
   isArray: function(obj) {
-    return obj != undefined && (obj instanceof Array || obj.construtor == "Array");
+    return (
+      obj != undefined && (obj instanceof Array || obj.construtor == 'Array')
+    );
   },
   isString: function(obj) {
-    return typeof(obj) == "string" || obj instanceof String;
+    return typeof obj == 'string' || obj instanceof String;
   },
   isNumber: function(obj) {
-    return typeof(obj) == "number" || obj instanceof Number;
+    return typeof obj == 'number' || obj instanceof Number;
   },
   isBoolean: function(obj) {
-    return typeof(obj) == "boolean" || obj instanceof Boolean;
+    return typeof obj == 'boolean' || obj instanceof Boolean;
   },
   isDate: function(obj) {
     return obj instanceof Date;
   },
   isBasicType: function(obj) {
-    return this.isString(obj) || this.isNumber(obj) || this.isBoolean(obj) || this.isDate(obj);
+    return (
+      this.isString(obj) ||
+      this.isNumber(obj) ||
+      this.isBoolean(obj) ||
+      this.isDate(obj)
+    );
   },
   isNumeric: function(obj) {
     return this.isNumber(obj) || (this.isString(obj) && !isNaN(Number(obj)));
+  },
+  toBoolean: function(obj) {
+    if (this.isString(obj)) {
+      var clean = obj.trim().toLowerCase();
+      if (clean === 'true' || clean === 'on') {
+        return true;
+      }
+      if (clean === 'false' || clean === 'off') {
+        return false;
+      }
+    }
+    return Boolean(obj);
   },
   filter: function(array, callback) {
     var nv = [];
@@ -49,7 +73,7 @@ Binder.Util = {
       }
     }
     return nv;
-  }
+  },
 };
 
 Binder.PropertyAccessor = function(obj) {
@@ -62,13 +86,17 @@ Binder.PropertyAccessor.prototype = {
       return value;
     }
     var current = path.shift();
-    if (current.indexOf("[") >= 0) {
+    if (current.indexOf('[') >= 0) {
       var match = current.match(this.index_regexp);
       var index = match[2];
       current = match[1];
       obj[current] = obj[current] || (Binder.Util.isNumeric(index) ? [] : {});
       if (index) {
-        obj[current][index] = this._setProperty(obj[current][index] || {}, path, value);
+        obj[current][index] = this._setProperty(
+          obj[current][index] || {},
+          path,
+          value
+        );
       } else {
         var nv = this._setProperty({}, path, value);
         if (Binder.Util.isArray(nv)) {
@@ -87,7 +115,7 @@ Binder.PropertyAccessor.prototype = {
       return obj;
     }
     var current = path.shift();
-    if (current.indexOf("[") >= 0) {
+    if (current.indexOf('[') >= 0) {
       var match = current.match(this.index_regexp);
       current = match[1];
       if (match[2]) {
@@ -102,14 +130,18 @@ Binder.PropertyAccessor.prototype = {
   _enumerate: function(collection, obj, path) {
     if (Binder.Util.isArray(obj)) {
       for (var i = 0; i < obj.length; i++) {
-        this._enumerate(collection, obj[i], path + "[" + i + "]");
+        this._enumerate(collection, obj[i], path + '[' + i + ']');
       }
     } else if (Binder.Util.isBasicType(obj)) {
       collection.push(path);
     } else {
       for (property in obj) {
         if (!Binder.Util.isFunction(property)) {
-          this._enumerate(collection, obj[property], path == "" ? property : path + "." + property);
+          this._enumerate(
+            collection,
+            obj[property],
+            path == '' ? property : path + '.' + property
+          );
         }
       }
     }
@@ -118,49 +150,54 @@ Binder.PropertyAccessor.prototype = {
     return property.match(this.index_regexp) != undefined;
   },
   set: function(property, value) {
-    var path = property.split(".");
+    var path = property.split('.');
     return this._setProperty(this.target, path, value);
   },
   get: function(property) {
-    var path = property.split(".");
+    var path = property.split('.');
     return this._getProperty(this.target || {}, path);
   },
   properties: function() {
     var props = [];
-    this._enumerate(props, this.target, "");
+    this._enumerate(props, this.target, '');
     return props;
-  }
+  },
 };
 Binder.PropertyAccessor.bindTo = function(obj) {
   return new Binder.PropertyAccessor(obj);
 };
 
 Binder.TypeRegistry = {
-  'string': {
+  string: {
     format: function(value) {
-      return  value == null ? '' : String(value);
+      return value == null ? '' : String(value);
     },
     parse: function(value) {
       return value ? value : null;
-    }
+    },
   },
-  'stringArray': {
+  stringArray: {
     format: function(value) {
       return value.join();
     },
     parse: function(value) {
-      return value ? value.replace(/^(?:\s*,?)+/, '').replace(/(?:\s*,?)*$/, '').split(/\s*,\s*/) : [];
-    }
+      return value
+        ? value
+            .replace(/^(?:\s*,?)+/, '')
+            .replace(/(?:\s*,?)*$/, '')
+            .split(/\s*,\s*/)
+        : [];
+    },
   },
-  'number': {
+  number: {
     format: function(value) {
       return value == null ? '' : String(value);
     },
     parse: function(value) {
       return value ? Number(value) : null;
-    }
+    },
   },
-  'boolean': {
+  boolean: {
     format: function(value) {
       if (value == null) {
         return '';
@@ -170,11 +207,11 @@ Binder.TypeRegistry = {
     parse: function(value) {
       if (value) {
         value = value.toLowerCase();
-        return "true" == value || "yes" == value;
+        return 'true' == value || 'yes' == value;
       }
       return false;
-    }
-  }
+    },
+  },
 };
 
 Binder.FormBinder = function(form, accessor) {
@@ -190,17 +227,17 @@ Binder.FormBinder.prototype = {
           return true;
         }
       }
-    } else if (value != "" && value != "on") {
+    } else if (value != '' && value != 'on') {
       return value == options;
     } else {
-      return Boolean(options);
+      return Binder.Util.toBoolean(options);
     }
   },
   _getType: function(element) {
     // handle known types
     var type = element.type;
-    if (type === "number") {
-      return "number";
+    if (type === 'number') {
+      return 'number';
     }
     if (element.className) {
       var m = element.className.match(this.type_regexp);
@@ -208,7 +245,7 @@ Binder.FormBinder.prototype = {
         return m[1];
       }
     }
-    return "string";
+    return 'string';
   },
   _format: function(path, value, element) {
     var type = this._getType(element);
@@ -255,8 +292,8 @@ Binder.FormBinder.prototype = {
   serializeField: function(element, obj) {
     var accessor = this._getAccessor(obj);
     var value;
-    if (element.type == "radio" || element.type == "checkbox") {
-      if (element.value != "" && element.value != "on") {
+    if (element.type == 'radio' || element.type == 'checkbox') {
+      if (element.value != '' && element.value != 'on') {
         value = this._parse(element.name, element.value, element);
         if (element.checked) {
           accessor.set(element.name, value);
@@ -271,8 +308,14 @@ Binder.FormBinder.prototype = {
         value = element.checked;
         accessor.set(element.name, value);
       }
-    } else if (element.type == "select-one" || element.type == "select-multiple") {
-      accessor.set(element.name, accessor.isIndexed(element.name) ? [] : undefined);
+    } else if (
+      element.type == 'select-one' ||
+      element.type == 'select-multiple'
+    ) {
+      accessor.set(
+        element.name,
+        accessor.isIndexed(element.name) ? [] : undefined
+      );
       for (var j = 0; j < element.options.length; j++) {
         var v = this._parse(element.name, element.options[j].value, element);
         if (element.options[j].selected) {
@@ -297,11 +340,17 @@ Binder.FormBinder.prototype = {
     // do not deserialize undefined
     if (typeof value != 'undefined') {
       value = this._format(element.name, value, element);
-      if (element.type == "radio" || element.type == "checkbox") {
+      if (element.type == 'radio' || element.type == 'checkbox') {
         element.checked = this._isSelected(element.value, value);
-      } else if (element.type == "select-one" || element.type == "select-multiple") {
+      } else if (
+        element.type == 'select-one' ||
+        element.type == 'select-multiple'
+      ) {
         for (var j = 0; j < element.options.length; j++) {
-          element.options[j].selected = this._isSelected(element.options[j].value, value);
+          element.options[j].selected = this._isSelected(
+            element.options[j].value,
+            value
+          );
         }
       } else {
         element.value = value;
@@ -309,22 +358,26 @@ Binder.FormBinder.prototype = {
     }
   },
   deserializeFieldFromValue: function(element, value) {
-    // var accessor = this._getAccessor(obj);
-    // var value = accessor.get(element.name);
     // do not deserialize undefined
     if (typeof value != 'undefined') {
       value = this._format(element.name, value, element);
-      if (element.type == "radio" || element.type == "checkbox") {
+      if (element.type == 'radio' || element.type == 'checkbox') {
         element.checked = this._isSelected(element.value, value);
-      } else if (element.type == "select-one" || element.type == "select-multiple") {
+      } else if (
+        element.type == 'select-one' ||
+        element.type == 'select-multiple'
+      ) {
         for (var j = 0; j < element.options.length; j++) {
-          element.options[j].selected = this._isSelected(element.options[j].value, value);
+          element.options[j].selected = this._isSelected(
+            element.options[j].value,
+            value
+          );
         }
       } else {
         element.value = value;
       }
     }
-  }
+  },
 };
 Binder.FormBinder.bind = function(form, obj) {
   return new Binder.FormBinder(form, obj);
