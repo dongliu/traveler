@@ -1,9 +1,8 @@
 /*global ajax401: false, prefix: false, updateAjaxURL: false, traveler: true,
 FormLoader: false, moment: false*/
 /*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false,
-activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn:
-false, formColumn: false, sDomPage: false, fnAddFilterFoot: false, filterEvent:
-false*/
+sDomClean: false, titleColumn: false, formColumn: false, sDomPage: false,
+fnAddFilterFoot: false, filterEvent: false, versionColumn: false*/
 /*eslint max-nested-callbacks: [2, 4]*/
 
 function findById(a, id) {
@@ -23,32 +22,6 @@ function addForm(form, cb) {
     contentType: 'application/json',
     dataType: 'json',
     data: JSON.stringify(form),
-    processData: false,
-  })
-    .done(function(json) {
-      $('#modal .modal-body').append(
-        '<div class="text-success">The selected discrepancy form is active now.</div>'
-      );
-      cb(json);
-    })
-    .fail(function(jqXHR) {
-      $('#modal .modal-body').append(
-        '<div class="text-error">Something was wrong: ' +
-          jqXHR.responseText +
-          '</div>'
-      );
-    });
-}
-
-function setActive(fid, cb) {
-  $.ajax({
-    url: './discrepancy-forms/active',
-    type: 'PUT',
-    contentType: 'application/json',
-    dataType: 'json',
-    data: JSON.stringify({
-      formId: fid,
-    }),
     processData: false,
   })
     .done(function(json) {
@@ -234,7 +207,7 @@ $(function() {
         availableForms[fid].html +
         travelerLegend +
         form.html;
-      loadForm(availableForms[fid].html);
+      loadForm(html);
     }
   });
 
