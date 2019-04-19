@@ -207,7 +207,7 @@ $(function() {
         availableForms[fid].html +
         travelerLegend +
         form.html;
-      loadForm(availableForms[fid].html);
+      loadForm(html);
     }
   });
 
