@@ -111,11 +111,11 @@ block content
               = ' '
               span.time #{traveler.updatedOn}
         br
+        if locals.traveler.activeDiscrepancyForm
+          .control-group#discrepancy-legend
+            legend Discrepancy log
+          table#discrepancy-log-table.table.table-bordered.table-hover
         form.form-horizontal#form
-          if (traveler.activeDiscrepancyForm)
-            div.control-group#discrepancy-legend
-              legend Discrepancy
-            != traveler.discrepancyForms.id(traveler.activeDiscrepancyForm).html
             div.control-group#traveler-legend
               legend Traveler
           if (traveler.forms.length === 1)
