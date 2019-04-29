@@ -46,14 +46,13 @@ var user = new Schema({
 var logData = new Schema({
   name: String,
   value: Schema.Types.Mixed,
-  inputType: String,
 });
 
 // a log is an array of log data collected in a form.
 // the data is submitted in one request, which is different from traveler data.
 var log = new Schema({
   referenceForm: { type: ObjectId, ref: 'Form' },
-  data: [logData],
+  records: [logData],
   inputBy: String,
   inputOn: Date,
 });
