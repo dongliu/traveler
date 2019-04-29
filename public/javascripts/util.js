@@ -22,6 +22,16 @@ function json2List(json) {
   return output;
 }
 
+function findById(a, id) {
+  var i;
+  for (i = 0; i < a.length; i += 1) {
+    if (a[i]._id === id) {
+      return a[i];
+    }
+  }
+  return null;
+}
+
 // function nameAuto(input, nameCache){
 //   return {
 //     minLength: 3,

@@ -1,8 +1,5 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false,
-frames: false, history: false, Image: false, location: false, name: false,
-navigator: false, Option: false, parent: false, screen: false, setInterval:
-false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false,
-linkTarget, validationMessage, isValid*/
+/*global document: false, window: false, FormData: false, linkTarget,
+validationMessage, isValid*/
 /*global moment: false, Binder: false, Modernizr: false*/
 /*global travelerStatus: true, finishedInput: true, ajax401: false, prefix*/
 
@@ -184,6 +181,12 @@ function showValidation() {
   $('#validation').show();
 }
 
+function loadDiscrepancyLog(discrepancyForm) {
+  DiscrepancyFormLoader.setForm(discrepancyForm);
+  DiscrepancyFormLoader.retrieveLogs();
+  DiscrepancyFormLoader.renderLogs();
+}
+
 $(function() {
   ajax401(prefix);
 
@@ -193,6 +196,17 @@ $(function() {
 
   // update every 30 seconds
   // $.livestamp.interval(30 * 1000);
+
+  // load discrepancy table and data
+  var discrepancyForm;
+  if (traveler.activeDiscrepancyForm) {
+    discrepancyForm = findById(
+      traveler.discrepancyForms,
+      traveler.activeDiscrepancyForm
+    );
+    DiscrepancyFormLoader.setLogTable('#discrepancy-log-table');
+    loadDiscrepancyLog(discrepancyForm);
+  }
 
   // update img
   $('#form')
