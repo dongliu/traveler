@@ -81,6 +81,12 @@ function loadForm(html) {
   FormLoader.note();
 }
 
+function loadDiscrepancyLog(discrepancyForm) {
+  DiscrepancyFormLoader.setForm(discrepancyForm);
+  DiscrepancyFormLoader.retrieveLogs();
+  DiscrepancyFormLoader.renderLogs();
+}
+
 $(function() {
   ajax401(prefix);
 
@@ -132,11 +138,6 @@ $(function() {
     sDom: sDomPage,
   });
 
-  var discrepancyLegend =
-    '<div id="discrepancy-legend" class="control-group"><legend>Discrepancy</legend></div>';
-  var travelerLegend =
-    '<div id="traveler-legend" class="control-group"><legend>Traveler</legend></div>';
-
   FormLoader.setTravelerId(traveler._id);
   var form;
   if (traveler.forms.length === 1) {
@@ -151,6 +152,8 @@ $(function() {
       traveler.discrepancyForms,
       traveler.activeDiscrepancyForm
     );
+    DiscrepancyFormLoader.setLogTable('#discrepancy-log-table');
+    loadDiscrepancyLog(discrepancyForm);
   }
 
   if (!form) {
@@ -159,12 +162,7 @@ $(function() {
     );
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   } else {
-    let html = form.html;
-    // discrepancy on the top
-    if (discrepancyForm) {
-      html =
-        discrepancyLegend + discrepancyForm.html + travelerLegend + form.html;
-    }
+    var html = form.html;
     loadForm(html);
   }
 
@@ -189,25 +187,15 @@ $(function() {
 
     var fid = this.id;
 
-    if (!availableForms.hasOwnProperty(fid)) {
-      FormLoader.retrieveForm(fid, function(json) {
+    if (availableForms.hasOwnProperty(fid)) {
+      $('#form').fadeTo('slow', 1);
+      loadDiscrepancyLog(availableForms[fid]);
+    } else {
+      DiscrepancyFormLoader.retrieveForm(fid, function(json) {
         $('#form').fadeTo('slow', 1);
         availableForms[fid] = json;
-        let html =
-          discrepancyLegend +
-          availableForms[fid].html +
-          travelerLegend +
-          form.html;
-        loadForm(html);
+        loadDiscrepancyLog(json);
       });
-    } else {
-      $('#form').fadeTo('slow', 1);
-      let html =
-        discrepancyLegend +
-        availableForms[fid].html +
-        travelerLegend +
-        form.html;
-      loadForm(html);
     }
   });
 
