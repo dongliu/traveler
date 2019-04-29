@@ -41,17 +41,6 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
       aoColumns: cols,
       sDom: sDomClean,
     });
-    if (logs.length > 0) {
-      var data = logs.map(function(l) {
-        var logData = {};
-        logData.inputBy = l.inputBy;
-        logData.inputOn = l.inputOn;
-        return l.data.reduce(function(d, hash) {
-          hash[d.name] = d.value;
-        }, logData);
-      });
-      logTable.fnAddData(data);
-    }
   }
 
   function retrieveLogs(cb) {
@@ -64,6 +53,23 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
       dataType: 'json',
     }).done(function(json) {
       logs = json;
+      if (logs.length > 0) {
+        var data = [];
+        logs.forEach(function(l) {
+          var logData = {};
+          if (l.inputBy && l.inputOn && l.records.length > 0) {
+            logData.inputBy = l.inputBy;
+            logData.inputOn = l.inputOn;
+            l.records.forEach(function(r) {
+              if (r.name) {
+                logData[r.name] = r.value;
+              }
+            });
+            data.push(logData);
+          }
+        });
+        logTable.fnAddData(data);
+      }
       if (cb) {
         cb();
       }
@@ -92,6 +98,10 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
     form = f;
   }
 
+  function setTid(t) {
+    tid = t;
+  }
+
   function setLogTable(t) {
     table = t;
   }
@@ -101,6 +111,7 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
   parent.retrieveLogs = retrieveLogs;
   parent.retrieveForm = retrieveForm;
   parent.setForm = setForm;
+  parent.setTid = setTid;
 
   return parent;
 })(DiscrepancyFormLoader || {}, jQuery, _);
