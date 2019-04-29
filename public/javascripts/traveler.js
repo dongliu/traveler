@@ -1,7 +1,8 @@
 /*global document: false, window: false, FormData: false, linkTarget,
 validationMessage, isValid*/
 /*global moment: false, Binder: false, Modernizr: false*/
-/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix*/
+/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix,
+DiscrepancyFormLoader, traveler, markValidity*/
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 function livespan(stamp, live) {
@@ -133,9 +134,6 @@ function saveDiscrepancyLog(log) {
     url: './logs/' + log._id + '/records',
     type: 'POST',
     contentType: 'application/json',
-    // data: JSON.stringify({
-    //   records: formData
-    // }),
     data: JSON.stringify(formData),
   })
     .done(function() {
@@ -143,6 +141,7 @@ function saveDiscrepancyLog(log) {
         '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Discrepancy log data saved</div>'
       );
       // reload the discrepancy log
+      window.location.reload(true);
     })
     .fail(function(jqXHR) {
       if (jqXHR.status !== 401) {
