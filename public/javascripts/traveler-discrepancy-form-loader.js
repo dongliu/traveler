@@ -1,4 +1,4 @@
-/* global sDomClean, _, personColumn, dateColumn
+/* global sDomClean, _, personColumn, dateColumn, Holder
  */
 var DiscrepancyFormLoader = (function(parent, $, _) {
   var logs = [];
@@ -38,6 +38,11 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
       bAutoWidth: true,
       // allow destroy and reinit
       bDestroy: true,
+      fnDrawCallback: function() {
+        Holder.run({
+          images: 'img.user',
+        });
+      },
       aoColumns: cols,
       sDom: sDomClean,
     });
