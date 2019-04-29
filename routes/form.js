@@ -578,7 +578,7 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.filter('body', ['title', 'formType', 'html']),
     reqUtils.hasAll('body', ['title']),
-    reqUtils.requireRoles(req => {
+    auth.requireRoles(req => {
       return (
         req['body'].hasOwnProperty('formType') &&
         req['body']['formType'] == 'discrepancy'
@@ -795,7 +795,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.filter('body', ['status', 'version']),
     reqUtils.hasAll('body', ['status', 'version']),
-    reqUtils.requireRoles(
+    auth.requireRoles(
       req => {
         let s = req.body.status;
         if (req[req.params.id].type === 'discrepancy') {
