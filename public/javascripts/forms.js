@@ -1,6 +1,13 @@
-/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false, updateAjaxURL: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false, titleColumn: false, tagsColumn: false, keysColumn:false, createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdByColumn: false, createdOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
-/*global archiveFromModal, transferFromModal*/
+/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
+updateAjaxURL: false, travelerGlobal: false, Holder: false*/
+/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false,
+titleColumn: false, tagsColumn: false, keysColumn:false, createdOnColumn: false,
+updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false,
+sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
+createdByColumn: false, createdOnColumn: false, fnGetSelected: false,
+selectEvent: false, filterEvent: false, formShareLinkColumn: false,
+archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
+/*global transferFromModal*/
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
