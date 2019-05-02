@@ -20,6 +20,7 @@ var Group = mongoose.model('Group');
 var Traveler = mongoose.model('Traveler');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
+var Log = mongoose.model('Log');
 
 var TravelerError = require('../lib/error').TravelerError;
 
@@ -678,6 +679,29 @@ module.exports = function(app) {
     });
   }
 
+  function retrieveLogs(traveler, cb) {
+    if (_.isEmpty(traveler.discrepancyLogs)) {
+      return cb(null, []);
+    }
+
+    // var logData = traveler.discrepancyData.map(log => log.data);
+    // retrieve all log data in one find
+    Log.find(
+      {
+        _id: {
+          $in: traveler.discrepancyLogs,
+        },
+      },
+      'referenceForm records inputBy inputOn'
+    ).exec(function(dataErr, logs) {
+      if (dataErr) {
+        logger.error(dataErr);
+        return cb(dataErr);
+      }
+      return cb(null, logs);
+    });
+  }
+
   app.get(
     '/travelers/:id/keyvalue/json',
     auth.ensureAuthenticated,
@@ -713,6 +737,89 @@ module.exports = function(app) {
           return res.json(200, output);
         }
       );
+    }
+  );
+
+  app.get(
+    '/travelers/:id/logs/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    function(req, res) {
+      retrieveLogs(req[req.params.id], function(err, output) {
+        if (err) {
+          return res.send(500, err.message);
+        }
+        return res.json(200, output);
+      });
+    }
+  );
+
+  app.post(
+    '/travelers/:id/logs/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canWriteMw('id'),
+    reqUtils.status('id', [1, 1.5]),
+    reqUtils.filter('body', ['form']),
+    reqUtils.hasAll('body', ['form']),
+    reqUtils.sanitize('body', ['form']),
+    function(req, res) {
+      var traveler = req[req.params.id];
+      // check active discrepancy form
+      if (req.body.form !== traveler.referenceDiscrepancyForm.toString()) {
+        return res.send(400, 'Discrepancy form does not match.');
+      }
+      // create log
+      var log = new Log({
+        referenceForm: traveler.referenceDiscrepancyForm,
+        data: [],
+      });
+      // save log, and add reference to traveler
+      var newLog;
+      log
+        .save()
+        .then(function(doc) {
+          newLog = doc;
+          traveler.discrepancyLogs.push(newLog._id);
+          return traveler.save();
+        })
+        .then(function() {
+          return res.json(201, newLog);
+        })
+        .catch(err => {
+          logger.error(err);
+          res.send(500, err.message);
+        });
+    }
+  );
+
+  app.post(
+    '/travelers/:id/logs/:lid/records',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canWriteMw('id'),
+    reqUtils.status('id', [1]),
+    reqUtils.exist('lid', Log),
+    // reqUtils.filter('body', ['records']),
+    // reqUtils.hasAll('body', ['records']),
+    // reqUtils.sanitize('body', ['records']),
+    function(req, res) {
+      var log = req[req.params.lid];
+      debug(req.body);
+      log.records = req.body;
+      log.inputBy = req.session.userid;
+      log.inputOn = Date.now();
+      debug(log);
+      log
+        .save()
+        .then(function(doc) {
+          return res.json(200, doc);
+        })
+        .catch(function(err) {
+          logger.error(err);
+          res.send(500, err.message);
+        });
     }
   );
 

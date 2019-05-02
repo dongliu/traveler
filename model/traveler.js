@@ -20,8 +20,9 @@ var Binder = mongoose.model('Binder');
  * mapping : user-key -> name
  * labels: name -> label
  * inputs : list of input names in the form
- * mapping and inputs are decided by the form snapshot when a traveler is created from it.
- * they are within form because they will be never changed like the html once created.
+ * Mapping and inputs are decided by the form snapshot when a traveler is
+ * created from it. They are within form because they will be never changed once
+ * created.
  */
 
 var form = new Schema({
@@ -40,6 +41,20 @@ var form = new Schema({
 var user = new Schema({
   _id: String,
   username: String,
+});
+
+var logData = new Schema({
+  name: String,
+  value: Schema.Types.Mixed,
+});
+
+// a log is an array of log data collected in a form.
+// the data is submitted in one request, which is different from traveler data.
+var log = new Schema({
+  referenceForm: { type: ObjectId, ref: 'Form' },
+  records: [logData],
+  inputBy: String,
+  inputOn: Date,
 });
 
 /**
@@ -127,6 +142,8 @@ var traveler = new Schema({
   activeForm: String,
   // local id of the active discrepancy form in discrepancyForms
   activeDiscrepancyForm: String,
+  // array of logs
+  discrepancyLogs: [{ type: ObjectId, ref: 'Log' }],
   data: [ObjectId],
   notes: [ObjectId],
   // decided by the active form input list
@@ -244,11 +261,13 @@ var travelerNote = new Schema({
 var Traveler = mongoose.model('Traveler', traveler);
 var TravelerData = mongoose.model('TravelerData', travelerData);
 var TravelerNote = mongoose.model('TravelerNote', travelerNote);
+var Log = mongoose.model('Log', log);
 
 module.exports = {
   Traveler: Traveler,
   TravelerData: TravelerData,
   TravelerNote: TravelerNote,
+  Log: Log,
   statusMap: statusMap,
   stateTransition: stateTransition,
 };

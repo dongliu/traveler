@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title #{orgName} Traveler - traveler - #{traveler._id} - form manager
+  title #{orgName} Traveler - traveler - #{traveler._id} - discrepancy form manager
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -90,6 +90,12 @@ block content
               = ' '
               span.time #{traveler.updatedOn}
         br
+        if locals.traveler.activeDiscrepancyForm
+          .control-group#discrepancy-legend
+            legend Discrepancy log
+          table#discrepancy-log-table.table.table-bordered.table-hover
+        .control-group#traveler-legend
+            legend Traveler
         form.form-horizontal#form
       .span2.sidebar
 
@@ -100,7 +106,9 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')  
+  script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler-form-loader.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/traveler-discrepancy-form-loader.js')
   script(type='text/javascript', src='#{prefix}/javascripts/discrepancy-form-manager.js')

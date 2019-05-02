@@ -1,10 +1,8 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false,
-frames: false, history: false, Image: false, location: false, name: false,
-navigator: false, Option: false, parent: false, screen: false, setInterval:
-false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false,
-linkTarget, validationMessage, isValid*/
+/*global document: false, window: false, FormData: false, linkTarget,
+validationMessage, isValid*/
 /*global moment: false, Binder: false, Modernizr: false*/
-/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix*/
+/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix,
+DiscrepancyFormLoader, traveler, markValidity*/
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 function livespan(stamp, live) {
@@ -126,6 +124,36 @@ function complete() {
   setStatus(1.5);
 }
 
+/**
+ * save the data in the discrepance form into the log
+ * @param {Object} the log to save data into
+ */
+function saveDiscrepancyLog(log) {
+  var formData = $('#discrepancy-form').serializeArray();
+  $.ajax({
+    url: './logs/' + log._id + '/records',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(formData),
+  })
+    .done(function() {
+      $('#message').append(
+        '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Discrepancy log data saved</div>'
+      );
+      // reload the discrepancy log
+      window.location.reload(true);
+    })
+    .fail(function(jqXHR) {
+      if (jqXHR.status !== 401) {
+        $('#message').append(
+          '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot save discrepancy log data</div>'
+        );
+        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      }
+    })
+    .always();
+}
+
 function createSideNav() {
   var $legend = $('legend');
   var $affix = $(
@@ -184,6 +212,12 @@ function showValidation() {
   $('#validation').show();
 }
 
+function loadDiscrepancyLog(discrepancyForm) {
+  DiscrepancyFormLoader.setForm(discrepancyForm);
+  DiscrepancyFormLoader.retrieveLogs();
+  DiscrepancyFormLoader.renderLogs();
+}
+
 $(function() {
   ajax401(prefix);
 
@@ -193,6 +227,18 @@ $(function() {
 
   // update every 30 seconds
   // $.livestamp.interval(30 * 1000);
+
+  // load discrepancy table and data
+  var discrepancyForm;
+  if (traveler.activeDiscrepancyForm) {
+    discrepancyForm = findById(
+      traveler.discrepancyForms,
+      traveler.activeDiscrepancyForm
+    );
+    DiscrepancyFormLoader.setLogTable('#discrepancy-log-table');
+    DiscrepancyFormLoader.setTid(traveler._id);
+    loadDiscrepancyLog(discrepancyForm);
+  }
 
   // update img
   $('#form')
@@ -783,5 +829,44 @@ $(function() {
   $('#hide-validation').click(function() {
     $('#validation').hide();
     $('.validation').hide();
+  });
+
+  $('#add-discrepancy').click(function() {
+    $.ajax({
+      url: './logs/',
+      type: 'POST',
+      contentType: 'application/json',
+      dataType: 'json',
+      data: JSON.stringify({
+        form: traveler.referenceDiscrepancyForm,
+      }),
+    })
+      .done(function(log) {
+        $('#modalLabel').html('Please input discrepency log details');
+        $('#modal .modal-body').html(
+          '<form id="discrepancy-form" class="form-horizontal">' +
+            discrepancyForm.html +
+            '</form>'
+        );
+        $('#modal .modal-footer').html(
+          '<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+        );
+        $('#modal').modal('show');
+        if (travelerStatus === 1 || travelerStatus === 1.5) {
+          $('#discrepancy-form input,textarea').prop('disabled', false);
+        }
+        $('#modal button[value="submit"]').click(function() {
+          saveDiscrepancyLog(log);
+        });
+      })
+      .fail(function(jqXHR) {
+        if (jqXHR.status !== 401) {
+          $('#message').append(
+            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot create discrepancy log</div>'
+          );
+          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        }
+      })
+      .always();
   });
 });

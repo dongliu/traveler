@@ -1,9 +1,8 @@
 /*global ajax401: false, prefix: false, updateAjaxURL: false, traveler: true,
 FormLoader: false, moment: false*/
 /*global previewColumn: false, referenceFormLinkColumn: false, aliasColumn: false,
-activatedOnColumn: false, sDomClean: false, titleColumn: false, updatedOnColumn:
-false, formColumn: false, sDomPage: false, fnAddFilterFoot: false, filterEvent:
-false*/
+sDomClean: false, titleColumn: false, formColumn: false, sDomPage: false,
+fnAddFilterFoot: false, filterEvent: false, versionColumn: false*/
 /*eslint max-nested-callbacks: [2, 4]*/
 
 function findById(a, id) {
@@ -23,32 +22,6 @@ function addForm(form, cb) {
     contentType: 'application/json',
     dataType: 'json',
     data: JSON.stringify(form),
-    processData: false,
-  })
-    .done(function(json) {
-      $('#modal .modal-body').append(
-        '<div class="text-success">The selected discrepancy form is active now.</div>'
-      );
-      cb(json);
-    })
-    .fail(function(jqXHR) {
-      $('#modal .modal-body').append(
-        '<div class="text-error">Something was wrong: ' +
-          jqXHR.responseText +
-          '</div>'
-      );
-    });
-}
-
-function setActive(fid, cb) {
-  $.ajax({
-    url: './discrepancy-forms/active',
-    type: 'PUT',
-    contentType: 'application/json',
-    dataType: 'json',
-    data: JSON.stringify({
-      formId: fid,
-    }),
     processData: false,
   })
     .done(function(json) {
@@ -108,6 +81,12 @@ function loadForm(html) {
   FormLoader.note();
 }
 
+function loadDiscrepancyLog(discrepancyForm) {
+  DiscrepancyFormLoader.setForm(discrepancyForm);
+  DiscrepancyFormLoader.retrieveLogs();
+  DiscrepancyFormLoader.renderLogs();
+}
+
 $(function() {
   ajax401(prefix);
 
@@ -159,11 +138,6 @@ $(function() {
     sDom: sDomPage,
   });
 
-  var discrepancyLegend =
-    '<div id="discrepancy-legend" class="control-group"><legend>Discrepancy</legend></div>';
-  var travelerLegend =
-    '<div id="traveler-legend" class="control-group"><legend>Traveler</legend></div>';
-
   FormLoader.setTravelerId(traveler._id);
   var form;
   if (traveler.forms.length === 1) {
@@ -178,6 +152,8 @@ $(function() {
       traveler.discrepancyForms,
       traveler.activeDiscrepancyForm
     );
+    DiscrepancyFormLoader.setLogTable('#discrepancy-log-table');
+    loadDiscrepancyLog(discrepancyForm);
   }
 
   if (!form) {
@@ -186,12 +162,7 @@ $(function() {
     );
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   } else {
-    let html = form.html;
-    // discrepancy on the top
-    if (discrepancyForm) {
-      html =
-        discrepancyLegend + discrepancyForm.html + travelerLegend + form.html;
-    }
+    var html = form.html;
     loadForm(html);
   }
 
@@ -216,25 +187,15 @@ $(function() {
 
     var fid = this.id;
 
-    if (!availableForms.hasOwnProperty(fid)) {
-      FormLoader.retrieveForm(fid, function(json) {
+    if (availableForms.hasOwnProperty(fid)) {
+      $('#form').fadeTo('slow', 1);
+      loadDiscrepancyLog(availableForms[fid]);
+    } else {
+      DiscrepancyFormLoader.retrieveForm(fid, function(json) {
         $('#form').fadeTo('slow', 1);
         availableForms[fid] = json;
-        let html =
-          discrepancyLegend +
-          availableForms[fid].html +
-          travelerLegend +
-          form.html;
-        loadForm(html);
+        loadDiscrepancyLog(json);
       });
-    } else {
-      $('#form').fadeTo('slow', 1);
-      let html =
-        discrepancyLegend +
-        availableForms[fid].html +
-        travelerLegend +
-        form.html;
-      loadForm(availableForms[fid].html);
     }
   });
 
