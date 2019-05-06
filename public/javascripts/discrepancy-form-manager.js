@@ -170,7 +170,7 @@ $(function() {
   var availableForms = {};
 
   // add forms to available forms object
-  traveler.forms.forEach(function(f) {
+  traveler.discrepancyForms.forEach(function(f) {
     availableForms[f._id] = f;
   });
 
