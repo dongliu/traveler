@@ -9,11 +9,22 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
 
   function logColumns(form) {
     var cols = [];
+    cols.push({
+      sTitle: 'sequence',
+      mData: 'sequence',
+    });
     _.mapKeys(form.labels, function(label, name) {
       cols.push({
-        sTitle: label,
+        sTitle:
+          label +
+          '(' +
+          (_.findKey(form.mapping, function(n) {
+            return n === name;
+          }) || '') +
+          ')',
         mData: name,
         sDefaultContent: '',
+        bSortable: false,
       });
     });
     cols.push(
@@ -44,6 +55,7 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
         });
       },
       aoColumns: cols,
+      iDisplayLength: -1,
       sDom: sDomClean,
     });
   }
@@ -62,7 +74,13 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
         var data = [];
         logs.forEach(function(l) {
           var logData = {};
-          if (l.inputBy && l.inputOn && l.records.length > 0) {
+          if (
+            l.referenceForm &&
+            l.referenceForm === traveler.referenceDiscrepancyForm &&
+            l.inputBy &&
+            l.inputOn &&
+            l.records.length > 0
+          ) {
             logData.inputBy = l.inputBy;
             logData.inputOn = l.inputOn;
             l.records.forEach(function(r) {
@@ -72,6 +90,13 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
             });
             data.push(logData);
           }
+        });
+        // sort logData
+        data.sort(function(a, b) {
+          return a.inputOn - b.inputOn;
+        });
+        data.forEach(function(d, i) {
+          d.sequence = i + 1;
         });
         logTable.fnAddData(data);
       }
