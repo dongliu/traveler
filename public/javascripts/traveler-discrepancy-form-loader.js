@@ -28,7 +28,7 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
       });
     });
     cols.push(
-      personColumn('Inspected by', 'inputBy'),
+      personColumn('Documented by', 'inputBy'),
       dateColumn('On', 'inputOn')
     );
     return cols;
