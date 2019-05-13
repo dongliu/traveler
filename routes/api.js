@@ -6,12 +6,15 @@ var basic = require('basic-auth');
 var routesUtilities = require('../utilities/routes.js');
 var _ = require('lodash');
 var form = require('../model/form');
+var reqUtils = require('../lib/req-utils');
+var logger = require('../lib/loggers').getLogger();
 
 var Form = mongoose.model('Form');
 var Traveler = mongoose.model('Traveler');
 var Binder = mongoose.model('Binder');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
+var Log = mongoose.model('Log');
 
 var WRITE_API_USER = 'api_write';
 
@@ -421,6 +424,40 @@ module.exports = function(app) {
       noteDataKeys,
       res
     );
+  });
+
+  function retrieveLogs(traveler, cb) {
+    if (_.isEmpty(traveler.discrepancyLogs)) {
+      return cb(null, []);
+    }
+
+    // retrieve all log data in one find
+    Log.find(
+      {
+        _id: {
+          $in: traveler.discrepancyLogs,
+        },
+      },
+      'referenceForm records inputBy inputOn'
+    ).exec(function(dataErr, logs) {
+      if (dataErr) {
+        logger.error(dataErr);
+        return cb(dataErr);
+      }
+      return cb(null, logs);
+    });
+  }
+
+  app.get('/apis/travelers/:id/log/', reqUtils.exist('id', Traveler), function(
+    req,
+    res
+  ) {
+    retrieveLogs(req[req.params.id], function(err, output) {
+      if (err) {
+        return res.send(500, err.message);
+      }
+      return res.json(200, output);
+    });
   });
 
   app.get('/apis/data/:id/', function(req, res) {

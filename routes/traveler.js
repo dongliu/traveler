@@ -684,7 +684,6 @@ module.exports = function(app) {
       return cb(null, []);
     }
 
-    // var logData = traveler.discrepancyData.map(log => log.data);
     // retrieve all log data in one find
     Log.find(
       {
