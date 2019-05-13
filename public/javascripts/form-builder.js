@@ -1,7 +1,8 @@
 /* global formStatus: false, window: false, FormData: false*/
 
 /* global tinymce: false, rivets: false, UID: false, input: false, spec: false,
- ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false*/
+ ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false, 
+ formType*/
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
@@ -41,7 +42,7 @@ function sendRequest(data, cb, saveas, status) {
     url = path;
     type = 'PUT';
   }
-  var formRequest = $.ajax({
+  $.ajax({
     url: url,
     type: type,
     async: true,
@@ -49,11 +50,11 @@ function sendRequest(data, cb, saveas, status) {
     contentType: 'application/json',
     processData: false,
   })
-    .done(function() {
+    .done(function(data, textStatus, request) {
       var location;
-      var timestamp = formRequest.getResponseHeader('Date');
+      var timestamp = request.getResponseHeader('Date');
       if (saveas) {
-        location = formRequest.getResponseHeader('Location');
+        location = request.getResponseHeader('Location');
         $('#message').append(
           '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>A new form is created at <a href="' +
             location +
@@ -1288,6 +1289,7 @@ function binding_events() {
         {
           html: html,
           title: title,
+          formType: formType,
         },
         null,
         true

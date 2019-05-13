@@ -606,7 +606,10 @@ module.exports = function(app) {
             '/';
 
           res.set('Location', url);
-          return res.redirect(url);
+          return res.send(
+            201,
+            'You can see the new form at <a href="' + url + '">' + url + '</a>'
+          );
         }
       );
     }
