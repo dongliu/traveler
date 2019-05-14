@@ -1,4 +1,4 @@
-/* global sDomClean, _, personColumn, dateColumn, Holder
+/* global sDomClean, _, personColumn, dateColumn, Holder, traveler
  */
 var DiscrepancyFormLoader = (function(parent, $, _) {
   var logs = [];
@@ -6,6 +6,17 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
   var tid = null;
   var table = null;
   var logTable = null;
+
+  function discrepancyTableTitle(label, name, withKey = false) {
+    var key = withKey
+      ? '(' +
+        (_.findKey(form.mapping, function(n) {
+          return n === name;
+        }) || '') +
+        ')'
+      : '';
+    return label + key;
+  }
 
   function logColumns(form) {
     var cols = [];
@@ -15,13 +26,7 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
     });
     _.mapKeys(form.labels, function(label, name) {
       cols.push({
-        sTitle:
-          label +
-          '(' +
-          (_.findKey(form.mapping, function(n) {
-            return n === name;
-          }) || '') +
-          ')',
+        sTitle: discrepancyTableTitle(label, name),
         mData: name,
         sDefaultContent: '',
         bSortable: false,
