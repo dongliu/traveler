@@ -506,7 +506,7 @@ module.exports = function(app) {
           if (data.inputType === 'file') {
             fs.exists(data.file.path, function(exists) {
               if (exists) {
-                return res.sendfile(data.file.path);
+                return res.sendFile(data.file.path);
               }
               return res.status(410).send('gone');
             });
