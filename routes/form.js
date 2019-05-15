@@ -351,7 +351,7 @@ module.exports = function(app) {
     function(req, res) {
       var data = req[req.params.id];
       if (data.inputType === 'file') {
-        return res.sendfile(path.resolve(data.file.path));
+        return res.sendFile(path.resolve(data.file.path));
       }
       return res.status(500).send('it is not a file');
     }
