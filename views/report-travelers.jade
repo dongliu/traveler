@@ -31,14 +31,19 @@ block content
               | system defined keys
           td
             label.checkbox.inline-checkbox
+              input.group(type="checkbox", data-toggle="#descrepancy-keys", checked)
+              | descrepancy reporting ids
+          td
+            label.checkbox.inline-checkbox
               input.group(type="checkbox", data-toggle="#user-keys", checked)
-              | reporting ids
+              | user defined reporting ids
             label.checkbox.inline-checkbox
               input.labels(type="checkbox", checked)
               | input labels
       tbody
         tr
           td#system-keys
+          td#descrepancy-keys
           td#user-keys
 
     table#report-table.table.table-bordered.table-hover(data-travelers='#{JSON.stringify(tid)}')

@@ -18,15 +18,23 @@ function setAlias(fid, alias, updateTd) {
     type: 'PUT',
     contentType: 'application/json',
     data: JSON.stringify({
-      value: alias
+      value: alias,
+    }),
+  })
+    .done(function() {
+      $('#modal .modal-body').append(
+        '<div class="text-success">The new alias was set.</div>'
+      );
+      // update local table data
+      updateTd();
     })
-  }).done(function () {
-    $('#modal .modal-body').append('<div class="text-success">The new alias was set.</div>');
-    // update local table data
-    updateTd();
-  }).fail(function (jqXHR) {
-    $('#modal .modal-body').append('<div class="text-error">Something was wrong: ' + jqXHR.responseText + '</div>');
-  });
+    .fail(function(jqXHR) {
+      $('#modal .modal-body').append(
+        '<div class="text-error">Something was wrong: ' +
+          jqXHR.responseText +
+          '</div>'
+      );
+    });
 }
 
 function addForm(form, cb) {
@@ -36,13 +44,21 @@ function addForm(form, cb) {
     contentType: 'application/json',
     dataType: 'json',
     data: JSON.stringify(form),
-    processData: false
-  }).done(function (json) {
-    $('#modal .modal-body').append('<div class="text-success">The selected form is active now.</div>');
-    cb(json);
-  }).fail(function (jqXHR) {
-    $('#modal .modal-body').append('<div class="text-error">Something was wrong: ' + jqXHR.responseText + '</div>');
-  });
+    processData: false,
+  })
+    .done(function(json) {
+      $('#modal .modal-body').append(
+        '<div class="text-success">The selected form is active now.</div>'
+      );
+      cb(json);
+    })
+    .fail(function(jqXHR) {
+      $('#modal .modal-body').append(
+        '<div class="text-error">Something was wrong: ' +
+          jqXHR.responseText +
+          '</div>'
+      );
+    });
 }
 
 function setActive(fid, cb) {
@@ -52,17 +68,24 @@ function setActive(fid, cb) {
     contentType: 'application/json',
     dataType: 'json',
     data: JSON.stringify({
-      formId: fid
+      formId: fid,
     }),
-    processData: false
-  }).done(function (json) {
-    $('#modal .modal-body').append('<div class="text-success">The selected form is active now.</div>');
-    cb(json);
-  }).fail(function (jqXHR) {
-    $('#modal .modal-body').append('<div class="text-error">Something was wrong: ' + jqXHR.responseText + '</div>');
-  });
+    processData: false,
+  })
+    .done(function(json) {
+      $('#modal .modal-body').append(
+        '<div class="text-success">The selected form is active now.</div>'
+      );
+      cb(json);
+    })
+    .fail(function(jqXHR) {
+      $('#modal .modal-body').append(
+        '<div class="text-error">Something was wrong: ' +
+          jqXHR.responseText +
+          '</div>'
+      );
+    });
 }
-
 
 function initUsedForms(traveler, activeTable, usedTable) {
   var form;
@@ -73,19 +96,18 @@ function initUsedForms(traveler, activeTable, usedTable) {
   }
   if (form) {
     var active = {
-      activatedOn: form.activatedOn.length ? form.activatedOn : [traveler.createdOn],
       _id: form._id,
       reference: form.reference || traveler.referenceForm,
-      alias: form.alias || 'not set yet'
+      alias: form.alias || 'not set yet',
+      _v: form._v,
     };
     activeTable.fnClearTable();
     activeTable.fnAddData(active);
   }
   var used = [];
   if (traveler.forms.length > 1) {
-    traveler.forms.forEach(function (value) {
+    traveler.forms.forEach(function(value) {
       if (value._id !== traveler.activeForm) {
-        value.activatedOn = value.activatedOn.length ? value.activatedOn : [traveler.createdOn];
         value.reference = value.reference || traveler.referenceForm;
         value.alias = value.alias || 'not set yest';
         used.push(value);
@@ -98,19 +120,22 @@ function initUsedForms(traveler, activeTable, usedTable) {
   $('#active-form tbody tr:first-child').addClass('row-selected');
 }
 
-
-$(function () {
-
+$(function() {
   ajax401(prefix);
 
   updateAjaxURL(prefix);
 
-  var activeColumns = [previewColumn, aliasColumn, activatedOnColumn, referenceFormLinkColumn];
+  var activeColumns = [
+    previewColumn,
+    aliasColumn,
+    versionColumn,
+    referenceFormLinkColumn,
+  ];
   var activeTable = $('#active-form').dataTable({
     aaData: [],
     bAutoWidth: true,
     aoColumns: activeColumns,
-    sDom: sDomClean
+    sDom: sDomClean,
   });
 
   var usedColumns = activeColumns;
@@ -120,25 +145,28 @@ $(function () {
     aaData: [],
     bAutoWidth: true,
     aoColumns: usedColumns,
-    sDom: sDomPage
+    sDom: sDomPage,
   });
 
   initUsedForms(traveler, activeTable, usedTable);
 
-  var availableColumns = [previewColumn, titleColumn, updatedOnColumn, formColumn];
+  var availableColumns = [
+    previewColumn,
+    titleColumn,
+    versionColumn,
+    formColumn,
+  ];
   fnAddFilterFoot('#available-forms', availableColumns);
   var availableTable = $('#available-forms').dataTable({
-    sAjaxSource: '/forms/json',
+    sAjaxSource: '/released-forms/normal/json',
     sAjaxDataProp: '',
     bProcessing: true,
     oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...'
+      sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     aoColumns: availableColumns,
-    aaSorting: [
-      [2, 'desc']
-    ],
-    sDom: sDomPage
+    aaSorting: [[2, 'desc']],
+    sDom: sDomPage,
   });
 
   function loadForm(html) {
@@ -157,7 +185,9 @@ $(function () {
   }
 
   if (!form) {
-    $('#message').append('<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>HTTP request failed.</div>');
+    $('#message').append(
+      '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>HTTP request failed.</div>'
+    );
     $(window).scrollTop($('#message div:last-child').offset().top - 40);
   }
   loadForm(form.html);
@@ -166,7 +196,7 @@ $(function () {
   var availableForms = {};
 
   // add forms to available forms object
-  traveler.forms.forEach(function (f) {
+  traveler.forms.forEach(function(f) {
     availableForms[f._id] = f;
   });
 
@@ -184,7 +214,7 @@ $(function () {
     var fid = this.id;
 
     if (!availableForms.hasOwnProperty(fid)) {
-      FormLoader.retrieveForm(fid, function (json) {
+      FormLoader.retrieveForm(fid, function(json) {
         $('#form').fadeTo('slow', 1);
         availableForms[fid] = json;
         loadForm(availableForms[fid].html);
@@ -195,21 +225,29 @@ $(function () {
     }
   });
 
-  $('#set-alias').click(function () {
+  $('#set-alias').click(function() {
     var selected = $('.row-selected');
     var tid = selected.closest('table').prop('id');
     if (tid === 'available-forms') {
       $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('Please select a form from either current form or used forms tables.');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal .modal-body').html(
+        'Please select a form from either current form or used forms tables.'
+      );
+      $('#modal .modal-footer').html(
+        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
       $('#modal').modal('show');
     } else {
       $('#modalLabel').html('Set the alias to');
       $('#modal .modal-body').empty();
-      $('#modal .modal-body').append('<div><input id="new-alias" type="text" placeholder="new alias"</div>');
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal .modal-body').append(
+        '<div><input id="new-alias" type="text" placeholder="new alias"</div>'
+      );
+      $('#modal .modal-footer').html(
+        '<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
       $('#modal').modal('show');
-      $('#submit').click(function () {
+      $('#submit').click(function() {
         $('#submit').prop('disabled', true);
         var fid = $('a.preview', selected).prop('id');
         var alias = $('#new-alias').val();
@@ -223,7 +261,7 @@ $(function () {
     }
   });
 
-  $('#use').click(function () {
+  $('#use').click(function() {
     var selected = $('.row-selected');
     var fid = $('a.preview', selected).prop('id');
     var tid = selected.closest('table').prop('id');
@@ -231,34 +269,53 @@ $(function () {
     if (tid === 'active-form') {
       $('#modalLabel').html('Alert');
       $('#modal .modal-body').html('The selected form is currently in use.');
-      $('#modal .modal-footer').html('<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal .modal-footer').html(
+        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
       $('#modal').modal('show');
     } else if (tid === 'used-forms') {
       $('#modalLabel').html('Use the following used form');
-      $('#modal .modal-body').html('<b>' + availableForms[fid].alias + '</b> last activated on ' + moment(availableForms[fid].activatedOn[availableForms[fid].activatedOn.length - 1]).format('YYYY-MM-DD HH:mm:ss'));
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal .modal-body').html(
+        '<b>' +
+          availableForms[fid].alias +
+          '</b> last activated on ' +
+          moment(
+            availableForms[fid].activatedOn[
+              availableForms[fid].activatedOn.length - 1
+            ]
+          ).format('YYYY-MM-DD HH:mm:ss')
+      );
+      $('#modal .modal-footer').html(
+        '<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
       $('#modal').modal('show');
-      $('#submit').click(function () {
+      $('#submit').click(function() {
         $('#submit').prop('disabled', true);
         // set the active form id
-        setActive(fid, function (json) {
+        setActive(fid, function(json) {
           traveler = json;
           initUsedForms(json, activeTable, usedTable);
         });
       });
-
     } else {
       $('#modalLabel').html('Use the following selected form');
-      $('#modal .modal-body').html('<b>' + availableForms[fid].title + '</b> updated on ' + moment(availableForms[fid].updatedOn).format('YYYY-MM-DD HH:mm:ss'));
-      $('#modal .modal-footer').html('<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>');
+      $('#modal .modal-body').html(
+        '<b>' +
+          availableForms[fid].title +
+          '</b> updated on ' +
+          moment(availableForms[fid].updatedOn).format('YYYY-MM-DD HH:mm:ss')
+      );
+      $('#modal .modal-footer').html(
+        '<button id="submit" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
       $('#modal').modal('show');
-      $('#submit').click(function () {
+      $('#submit').click(function() {
         // add the new form to the traveler forms list and set it active
         $('#submit').prop('disabled', true);
         newform = {
-          formId: availableForms[fid]._id
+          formId: availableForms[fid]._id,
         };
-        addForm(newform, function (json) {
+        addForm(newform, function(json) {
           traveler = json;
           initUsedForms(json, activeTable, usedTable);
         });

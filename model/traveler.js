@@ -20,8 +20,9 @@ var Binder = mongoose.model('Binder');
  * mapping : user-key -> name
  * labels: name -> label
  * inputs : list of input names in the form
- * mapping and inputs are decided by the form snapshot when a traveler is created from it.
- * they are within form because they will be never changed like the html once created.
+ * Mapping and inputs are decided by the form snapshot when a traveler is
+ * created from it. They are within form because they will be never changed once
+ * created.
  */
 
 var form = new Schema({
@@ -33,13 +34,27 @@ var form = new Schema({
   // inputs: [String],
   activatedOn: [Date],
   reference: ObjectId,
-  alias: String
+  _v: Number,
+  alias: String,
 });
-
 
 var user = new Schema({
   _id: String,
-  username: String
+  username: String,
+});
+
+var logData = new Schema({
+  name: String,
+  value: Schema.Types.Mixed,
+});
+
+// a log is an array of log data collected in a form.
+// the data is submitted in one request, which is different from traveler data.
+var log = new Schema({
+  referenceForm: { type: ObjectId, ref: 'Form' },
+  records: [logData],
+  inputBy: String,
+  inputOn: Date,
 });
 
 /**
@@ -49,6 +64,38 @@ var user = new Schema({
  *         | 2 // completed
  *         | 3 // frozen
  */
+
+const statusMap = {
+  '0': 'initialized',
+  '1': 'active',
+  '1.5': 'submitted for completion',
+  '2': 'completed',
+  '3': 'frozen',
+  '4': 'archived',
+};
+
+var stateTransition = [
+  {
+    from: 0,
+    to: [1, 4],
+  },
+  {
+    from: 1,
+    to: [1.5, 3, 4],
+  },
+  {
+    from: 1.5,
+    to: [1, 2],
+  },
+  {
+    from: 2,
+    to: [4],
+  },
+  {
+    from: 3,
+    to: [1],
+  },
+];
 
 /**
  * publicAccess := 0 // for read or
@@ -64,7 +111,7 @@ var traveler = new Schema({
   manPower: [user],
   status: {
     type: Number,
-    default: 0
+    default: 0,
   },
   createdBy: String,
   createdOn: Date,
@@ -79,15 +126,24 @@ var traveler = new Schema({
   deadline: Date,
   publicAccess: {
     type: Number,
-    default: appConfig.default_traveler_public_access
+    default: appConfig.default_traveler_public_access,
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
+  // global object id of the active form
   referenceForm: ObjectId,
+  // global object if of the discrepancy form
+  referenceDiscrepancyForm: ObjectId,
   forms: [form],
+  discrepancyForms: [form],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
+  // local id of active form in forms
   activeForm: String,
+  // local id of the active discrepancy form in discrepancyForms
+  activeDiscrepancyForm: String,
+  // array of logs
+  discrepancyLogs: [{ type: ObjectId, ref: 'Log' }],
   data: [ObjectId],
   notes: [ObjectId],
   // decided by the active form input list
@@ -95,22 +151,22 @@ var traveler = new Schema({
   totalInput: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   // decided by the touched inputs
   // keep for compatibility with previous versions
   finishedInput: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   // list of inputs that have been touched accoring to the active form
   // update with traveler data and active form
   touchedInputs: [String],
   archived: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 /**
@@ -121,38 +177,46 @@ var traveler = new Schema({
 function updateBinderProgress(travelerDoc) {
   Binder.find({
     archived: {
-      $ne: true
+      $ne: true,
     },
     works: {
       $elemMatch: {
-        _id: travelerDoc._id
-      }
-    }
-  }).exec(function (err, binders) {
+        _id: travelerDoc._id,
+      },
+    },
+  }).exec(function(err, binders) {
     if (err) {
-      return console.error('cannot find binders for traveler ' + travelerDoc._id + ', error: ' + err.message);
+      return console.error(
+        'cannot find binders for traveler ' +
+          travelerDoc._id +
+          ', error: ' +
+          err.message
+      );
     }
-    binders.forEach(function (binder) {
+    binders.forEach(function(binder) {
       binder.updateWorkProgress(travelerDoc);
       binder.updateProgress();
     });
   });
 }
 
-traveler.pre('save', function (next) {
+traveler.pre('save', function(next) {
   var modifiedPaths = this.modifiedPaths();
   // keep it so that we can refer at post save
   this.wasModifiedPaths = modifiedPaths;
   next();
 });
 
-traveler.post('save', function (obj) {
+traveler.post('save', function(obj) {
   var modifiedPaths = this.wasModifiedPaths;
-  if (modifiedPaths.indexOf('totalInput') !== -1 || modifiedPaths.indexOf('finishedInput') !== -1 || modifiedPaths.indexOf('status') !== -1) {
+  if (
+    modifiedPaths.indexOf('totalInput') !== -1 ||
+    modifiedPaths.indexOf('finishedInput') !== -1 ||
+    modifiedPaths.indexOf('status') !== -1
+  ) {
     updateBinderProgress(obj);
   }
 });
-
 
 /**
  * type := 'file'
@@ -168,17 +232,19 @@ var travelerData = new Schema({
   file: {
     path: String,
     encoding: String,
-    mimetype: String
+    mimetype: String,
   },
   inputType: String,
   inputBy: String,
-  inputOn: Date
+  inputOn: Date,
 });
 
 travelerData.pre('save', function validateNumber(next) {
   if (this.inputType === 'number') {
     if (typeof this.value !== this.inputType) {
-      return next(new DataError('value "' + this.value + '" is not a number', 400));
+      return next(
+        new DataError('value "' + this.value + '" is not a number', 400)
+      );
     }
   }
   next();
@@ -189,16 +255,19 @@ var travelerNote = new Schema({
   name: String,
   value: String,
   inputBy: String,
-  inputOn: Date
+  inputOn: Date,
 });
-
 
 var Traveler = mongoose.model('Traveler', traveler);
 var TravelerData = mongoose.model('TravelerData', travelerData);
 var TravelerNote = mongoose.model('TravelerNote', travelerNote);
+var Log = mongoose.model('Log', log);
 
 module.exports = {
   Traveler: Traveler,
   TravelerData: TravelerData,
-  TravelerNote: TravelerNote
+  TravelerNote: TravelerNote,
+  Log: Log,
+  statusMap: statusMap,
+  stateTransition: stateTransition,
 };
