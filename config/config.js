@@ -50,7 +50,7 @@ function getPath(desiredPath, defaultPath) {
   }
 }
 
-module.exports.load = function () {
+module.exports.load = function() {
   // Load Paths
   if (process.env.TRAVELER_CONFIG_REL_PATH) {
     module.exports.configPath = process.env.TRAVELER_CONFIG_REL_PATH;
@@ -86,16 +86,16 @@ module.exports.load = function () {
   viewConfig.transferOwnership = true;
   viewConfig.linkTarget = '_blank';
   viewConfig.showBinderValue = false;
-  viewConfig.showCCDB = (this.service.device_application === 'devices');
+  viewConfig.showCCDB = this.service.device_application === 'devices';
 
   if (this.service.device !== undefined) {
     viewConfig.showDevice = true;
   }
   if (this.ad.shareUsers !== undefined) {
-    viewConfig.shareUsers = this.ad.shareUsers
+    viewConfig.shareUsers = this.ad.shareUsers;
   }
   if (this.ad.shareGroups !== undefined) {
-    viewConfig.shareGroups = this.ad.shareGroups
+    viewConfig.shareGroups = this.ad.shareGroups;
   }
   if (this.ad.transferOwnership !== undefined) {
     viewConfig.transferOwnership = this.ad.transferOwnership;
@@ -107,9 +107,12 @@ module.exports.load = function () {
     viewConfig.deploymentName = this.app.deployment_name;
   }
   if (this.app.link_target) {
-    viewConfig.linkTarget = this.app.link_target
+    viewConfig.linkTarget = this.app.link_target;
   }
-  if (this.travelerPackageFile.repository && this.travelerPackageFile.repository.release) {
+  if (
+    this.travelerPackageFile.repository &&
+    this.travelerPackageFile.repository.release
+  ) {
     viewConfig.appVersion = this.travelerPackageFile.repository.release;
   } else {
     viewConfig.appVersion = this.travelerPackageFile.version;

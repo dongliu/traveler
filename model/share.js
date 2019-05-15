@@ -9,16 +9,16 @@ access := 0 // for read or
 var sharedWithUser = new Schema({
   _id: String,
   username: String,
-  access: Number
+  access: Number,
 });
 
 var sharedWithGroup = new Schema({
   _id: String,
   groupname: String,
-  access: Number
+  access: Number,
 });
 
 module.exports = {
   user: sharedWithUser,
-  group: sharedWithGroup
+  group: sharedWithGroup,
 };

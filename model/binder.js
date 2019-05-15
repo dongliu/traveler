@@ -20,7 +20,7 @@ var work = new Schema({
   refType: {
     type: String,
     required: true,
-    enum: ['traveler', 'binder']
+    enum: ['traveler', 'binder'],
   },
   addedOn: Date,
   addedBy: String,
@@ -28,44 +28,44 @@ var work = new Schema({
   finished: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   inProgress: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   finishedInput: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   totalInput: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   priority: {
     type: Number,
     min: 1,
     max: 10,
-    default: 5
+    default: 5,
   },
   sequence: {
     type: Number,
     min: 1,
-    default: 1
+    default: 1,
   },
   value: {
     type: Number,
     min: 0,
-    default: 10
+    default: 10,
   },
   color: {
     type: String,
     default: 'blue',
-    enum: ['green', 'yellow', 'red', 'blue', 'black']
-  }
+    enum: ['green', 'yellow', 'red', 'blue', 'black'],
+  },
 });
 
 /**
@@ -85,6 +85,7 @@ var work = new Schema({
  * status := 0 // new
  *         | 1 // active
  *         | 2 // completed
+ *         | 3 // archived
  */
 
 var binder = new Schema({
@@ -92,7 +93,7 @@ var binder = new Schema({
   description: String,
   status: {
     type: Number,
-    default: 0
+    default: 0,
   },
   tags: [String],
   createdBy: String,
@@ -107,7 +108,7 @@ var binder = new Schema({
   deadline: Date,
   publicAccess: {
     type: Number,
-    default: appConfig.default_binder_public_access
+    default: appConfig.default_binder_public_access,
   },
   sharedWith: [share.user],
   sharedGroup: [share.group],
@@ -115,49 +116,49 @@ var binder = new Schema({
   finishedInput: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   totalInput: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   // the date that the progress was updated
   progressUpdatedOn: Date,
   finishedValue: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   inProgressValue: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   totalValue: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   finishedWork: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   inProgressWork: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   totalWork: {
     type: Number,
     default: 0,
-    min: 0
+    min: 0,
   },
   archived: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 function updateInputProgress(w, spec) {
@@ -165,7 +166,7 @@ function updateInputProgress(w, spec) {
   w.finishedInput = spec.finishedInput;
 }
 
-binder.methods.updateWorkProgress = function (spec) {
+binder.methods.updateWorkProgress = function(spec) {
   var w = this.works.id(spec._id);
   if (!w) {
     return;
@@ -204,8 +205,7 @@ binder.methods.updateWorkProgress = function (spec) {
   }
 };
 
-
-binder.methods.updateProgress = function (cb) {
+binder.methods.updateProgress = function(cb) {
   var works = this.works;
   var totalValue = 0;
   var finishedValue = 0;
@@ -215,7 +215,7 @@ binder.methods.updateProgress = function (cb) {
   var inProgressWork = 0;
   var totalInput = 0;
   var finishedInput = 0;
-  works.forEach(function (w) {
+  works.forEach(function(w) {
     totalInput += w.totalInput;
     finishedInput += w.finishedInput;
 
@@ -241,7 +241,7 @@ binder.methods.updateProgress = function (cb) {
 
   if (this.isModified()) {
     this.progressUpdatedOn = Date.now();
-    this.save(function (err, newBinder) {
+    this.save(function(err, newBinder) {
       if (cb) {
         return cb(err, newBinder);
       }
@@ -255,5 +255,5 @@ binder.methods.updateProgress = function (cb) {
 var Binder = mongoose.model('Binder', binder);
 
 module.exports = {
-  Binder: Binder
+  Binder: Binder,
 };

@@ -4,8 +4,17 @@ function json2List(json) {
   var output = '<dl>';
   for (var k in json) {
     if (json.hasOwnProperty(k)) {
-      if (typeof(json[k]) == 'object') {
-        output = output + '<dl>' + '<dt>' + k + '</dt>' + '<dd>' + json2List(json[k]) + '</dd>' + '</dl>';
+      if (typeof json[k] == 'object') {
+        output =
+          output +
+          '<dl>' +
+          '<dt>' +
+          k +
+          '</dt>' +
+          '<dd>' +
+          json2List(json[k]) +
+          '</dd>' +
+          '</dl>';
       } else {
         output = output + '<p><strong>' + k + '</strong> : ' + json[k] + '</p>';
       }
@@ -16,19 +25,27 @@ function json2List(json) {
 }
 
 function createSideNav() {
-    $('.sidebar').empty();
-    var $legend = $('legend');
-    var $affix = $('<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>');
-    var i;
-    if ($legend.length > 1) {
-        $affix.append('<li><h4>' + title + '</h4></li>');
-        for (i = 0; i < $legend.length; i += 1) {
-            $affix.append('<li><a href="#' + $legend[i].id + '">' + $legend[i].textContent + '</a></li>');
-        }
-        $('.sidebar').append($('<div id="affixlist"></div>').append($affix));
-        $('body').attr('data-spy', 'scroll');
-        $('body').attr('data-target', '#affixlist');
+  $('.sidebar').empty();
+  var $legend = $('legend');
+  var $affix = $(
+    '<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>'
+  );
+  var i;
+  if ($legend.length > 1) {
+    $affix.append('<li><h4>' + title + '</h4></li>');
+    for (i = 0; i < $legend.length; i += 1) {
+      $affix.append(
+        '<li><a href="#' +
+          $legend[i].id +
+          '">' +
+          $legend[i].textContent +
+          '</a></li>'
+      );
     }
+    $('.sidebar').append($('<div id="affixlist"></div>').append($affix));
+    $('body').attr('data-spy', 'scroll');
+    $('body').attr('data-target', '#affixlist');
+  }
 }
 
 function history(found) {
@@ -40,28 +57,59 @@ function history(found) {
       var historyValue = found[i].value;
       var inputBy = found[i].inputBy;
       var inputOn = found[i].inputOn;
-      output = output + generateHistoryRecordHtml(inputType, historyValue, inputBy, inputOn);
+      output =
+        output +
+        generateHistoryRecordHtml(inputType, historyValue, inputBy, inputOn);
     }
   }
   return output;
 }
 
-function generateHistoryRecordHtml(type, historyValue, inputBy, inputOn, live = false) {
+function generateHistoryRecordHtml(
+  type,
+  historyValue,
+  inputBy,
+  inputOn,
+  live = false
+) {
   if (type === 'url') {
     if (historyValue.startsWith('http') === false) {
       historyValue = 'http://' + historyValue;
     }
-    historyValue = '<a target="_blank" href=' + historyValue + '>' + historyValue + '</a>';
+    historyValue =
+      '<a target="_blank" href=' + historyValue + '>' + historyValue + '</a>';
   }
-  return 'changed to <strong>' + historyValue + '</strong> by ' + inputBy + ' ' + livespan(inputOn, live) + '; ';
+  return (
+    'changed to <strong>' +
+    historyValue +
+    '</strong> by ' +
+    inputBy +
+    ' ' +
+    livespan(inputOn, live) +
+    '; '
+  );
 }
 
 function livespan(stamp, live = true) {
   if (live) {
     return '<span data-livestamp="' + stamp + '"></span>';
   } else {
-    return '<span>' + moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') + '</span>';
+    return (
+      '<span>' +
+      moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') +
+      '</span>'
+    );
   }
+}
+
+function findById(a, id) {
+  var i;
+  for (i = 0; i < a.length; i += 1) {
+    if (a[i]._id === id) {
+      return a[i];
+    }
+  }
+  return null;
 }
 
 // function nameAuto(input, nameCache){

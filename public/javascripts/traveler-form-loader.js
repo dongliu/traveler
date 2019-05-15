@@ -1,11 +1,10 @@
 /*global moment: false, prefix: false, Binder: false*/
 
-var FormLoader = (function (parent, $) {
+var FormLoader = (function(parent, $) {
   var data = null;
   var notes = null;
   var formHTML = null;
   var tid = null;
-
 
   // temparary solution for the dirty forms
   function cleanForm() {
@@ -22,7 +21,15 @@ var FormLoader = (function (parent, $) {
     var output = '';
     if (found.length > 0) {
       for (i = 0; i < found.length; i += 1) {
-        output = output + 'changed to <strong>' + found[i].value + '</strong> by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+        output =
+          output +
+          'changed to <strong>' +
+          found[i].value +
+          '</strong> by ' +
+          found[i].inputBy +
+          ' ' +
+          moment(found[i].inputOn).fromNow() +
+          '; ';
       }
     }
     return output;
@@ -40,7 +47,19 @@ var FormLoader = (function (parent, $) {
     if (found.length > 0) {
       for (i = 0; i < found.length; i += 1) {
         link = prefix + '/data/' + found[i]._id;
-        output = output + '<strong><a href=' + link + ' target="' +linkTarget + '">' + found[i].value + '</a></strong> uploaded by ' + found[i].inputBy + ' ' + moment(found[i].inputOn).fromNow() + '; ';
+        output =
+          output +
+          '<strong><a href=' +
+          link +
+          ' target="' +
+          linkTarget +
+          '">' +
+          found[i].value +
+          '</a></strong> uploaded by ' +
+          found[i].inputBy +
+          ' ' +
+          moment(found[i].inputOn).fromNow() +
+          '; ';
       }
     }
     return output;
@@ -76,18 +95,32 @@ var FormLoader = (function (parent, $) {
       } else {
         value = input.value;
       }
-      label = $(input).closest('.control-group').children('.control-label').text();
+      label = $(input)
+        .closest('.control-group')
+        .children('.control-label')
+        .text();
       if (label === '' && input.type === 'checkbox') {
-        label = $(input).next().text();
+        label = $(input)
+          .next()
+          .text();
       }
       if (input.checkValidity()) {
         p.html('<b>' + label + '</b>: ' + value);
         span.text('validation passed');
       } else {
-        p.html('<b>' + label + '</b>: ' + value + ' | Message: ' + input.validationMessage);
+        p.html(
+          '<b>' +
+            label +
+            '</b>: ' +
+            value +
+            ' | Message: ' +
+            input.validationMessage
+        );
         span.text(input.validationMessage);
       }
-      $(input).closest('.controls').append(span);
+      $(input)
+        .closest('.controls')
+        .append(span);
       output.append(p);
     }
     return output;
@@ -103,7 +136,13 @@ var FormLoader = (function (parent, $) {
     var output = '<dl>';
     if (found.length > 0) {
       for (i = 0; i < found.length; i += 1) {
-        output = output + '<dt><b>' + found[i].inputBy + ' noted ' + moment(found[i].inputOn).fromNow() + '</b>: </dt>';
+        output =
+          output +
+          '<dt><b>' +
+          found[i].inputBy +
+          ' noted ' +
+          moment(found[i].inputOn).fromNow() +
+          '</b>: </dt>';
         output = output + '<dd>' + found[i].value + '</dd>';
       }
     }
@@ -114,51 +153,67 @@ var FormLoader = (function (parent, $) {
    * @return {undefined}
    */
   function renderNotes() {
-    $('#form .controls').each(function (index, controlsElement) {
+    $('#form .controls').each(function(index, controlsElement) {
       var inputElements = $(controlsElement).find('input,textarea');
       if (inputElements.length) {
         var element = inputElements[0];
-        var found = notes.filter(function (e) {
+        var found = notes.filter(function(e) {
           return e.name === element.name;
         });
-        $(element).closest('.controls').append('<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' + found.length + '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>');
+        $(element)
+          .closest('.controls')
+          .append(
+            '<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' +
+              found.length +
+              '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>'
+          );
         if (found.length) {
-          found.sort(function (a, b) {
+          found.sort(function(a, b) {
             if (a.inputOn > b.inputOn) {
               return -1;
             }
             return 1;
           });
-          $(element).closest('.controls').append('<div class="input-notes" style="display: none;">' + generateNotes(found) + '</div>');
+          $(element)
+            .closest('.controls')
+            .append(
+              '<div class="input-notes" style="display: none;">' +
+                generateNotes(found) +
+                '</div>'
+            );
         }
       }
     });
   }
 
   function renderImg() {
-    $('#form').find('img').each(function () {
-      var $this = $(this);
-      if ($this.attr('name')) {
-        if ($this.attr('src') === undefined) {
-          $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
-          return;
+    $('#form')
+      .find('img')
+      .each(function() {
+        var $this = $(this);
+        if ($this.attr('name')) {
+          if ($this.attr('src') === undefined) {
+            $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
+            return;
+          }
+          if ($this.attr('src').indexOf('http') === 0) {
+            $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
+            return;
+          }
+          if (prefix && $this.attr('src').indexOf(prefix) !== 0) {
+            $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
+            return;
+          }
         }
-        if ($this.attr('src').indexOf('http') === 0) {
-          $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
-          return;
-        }
-        if (prefix && $this.attr('src').indexOf(prefix) !== 0) {
-          $($this.attr('src', prefix + '/formfiles/' + $this.attr('name')));
-          return;
-        }
-      }
-    });
+      });
   }
 
   function viewerEvents() {
-    $('#form').on('click', 'a.notes-number', function (e) {
+    $('#form').on('click', 'a.notes-number', function(e) {
       e.preventDefault();
-      var $input_notes = $(this).closest('.controls').find('.input-notes');
+      var $input_notes = $(this)
+        .closest('.controls')
+        .find('.input-notes');
       if ($input_notes.is(':visible')) {
         $input_notes.hide();
       } else {
@@ -166,22 +221,25 @@ var FormLoader = (function (parent, $) {
       }
     });
 
-    $('#show-validation').click(function () {
+    $('#show-validation').click(function() {
       $('.validation').remove();
-      $('#validation').html('<h3>Summary</h3>' + validation_message(document.getElementById('form')).html());
+      $('#validation').html(
+        '<h3>Summary</h3>' +
+          validation_message(document.getElementById('form')).html()
+      );
       $('#validation').show();
     });
 
-    $('#hide-validation').click(function () {
+    $('#hide-validation').click(function() {
       $('#validation').hide();
       $('.validation').hide();
     });
 
-    $('#show-notes').click(function () {
+    $('#show-notes').click(function() {
       $('.input-notes').show();
     });
 
-    $('#hide-notes').click(function () {
+    $('#hide-notes').click(function() {
       $('.input-notes').hide();
     });
   }
@@ -197,19 +255,23 @@ var FormLoader = (function (parent, $) {
    * @return {undefined}
    */
   function bindData(binder) {
-    $('#form input,textarea').each(function (index, element) {
-      var found = data.filter(function (d) {
+    $('#form input,textarea').each(function(index, element) {
+      var found = data.filter(function(d) {
         return d.name === element.name;
       });
       if (found.length) {
-        found.sort(function (a, b) {
+        found.sort(function(a, b) {
           if (a.inputOn > b.inputOn) {
             return -1;
           }
           return 1;
         });
         if (element.type === 'file') {
-          $(element).closest('.controls').append('<div class="input-history">' + fileHistory(found) + '</div>');
+          $(element)
+            .closest('.controls')
+            .append(
+              '<div class="input-history">' + fileHistory(found) + '</div>'
+            );
         } else {
           binder.deserializeFieldFromValue(element, found[0].value);
           binder.accessor.set(element.name, found[0].value);
@@ -219,7 +281,9 @@ var FormLoader = (function (parent, $) {
               return false;
             }
           }
-          $(element).closest('.controls').append('<div class="input-history">' + history(found) + '</div>');
+          $(element)
+            .closest('.controls')
+            .append('<div class="input-history">' + history(found) + '</div>');
         }
       }
     });
@@ -229,8 +293,8 @@ var FormLoader = (function (parent, $) {
     $.ajax({
       url: '/travelers/' + tid + '/data/',
       type: 'GET',
-      dataType: 'json'
-    }).done(function (json) {
+      dataType: 'json',
+    }).done(function(json) {
       data = json;
       cb();
     });
@@ -240,8 +304,8 @@ var FormLoader = (function (parent, $) {
     $.ajax({
       url: '/travelers/' + tid + '/notes/',
       type: 'GET',
-      dataType: 'json'
-    }).done(function (json) {
+      dataType: 'json',
+    }).done(function(json) {
       notes = json;
       cb();
     });
@@ -256,9 +320,9 @@ var FormLoader = (function (parent, $) {
       url: '/forms/' + fid + '/json',
       type: 'GET',
       dataType: 'json',
-      success: function (json) {
+      success: function(json) {
         cb(json);
-      }
+      },
     });
   }
 
@@ -305,5 +369,4 @@ var FormLoader = (function (parent, $) {
   parent.note = note;
 
   return parent;
-
-}(FormLoader || {}, jQuery));
+})(FormLoader || {}, jQuery);

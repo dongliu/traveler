@@ -15,6 +15,13 @@ block content
         .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} title
         .controls
           input(type='text', name='title', required)
+      if (locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
+        .control-group
+          .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} type
+          .controls
+            select(name='formType', required)
+              option(value='normal') normal
+              option(value='discrepancy') discrepancy
       .control-group
         .controls
           .btn-group
