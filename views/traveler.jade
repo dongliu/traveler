@@ -119,8 +119,8 @@ block content
           .btn-group
             button.btn.btn-primary#add-discrepancy Add discrepancy log
         form.form-horizontal#form
-            div.control-group#traveler-legend
-              legend Traveler
+          div.control-group#traveler-legend
+            legend Traveler
           if (traveler.forms.length === 1)
             != traveler.forms[0].html
           else if (traveler.forms.id(traveler.activeForm))
