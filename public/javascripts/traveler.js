@@ -2,7 +2,7 @@
 validationMessage, isValid*/
 /*global moment: false, Binder: false, Modernizr: false*/
 /*global travelerStatus: true, finishedInput: true, ajax401: false, prefix,
-DiscrepancyFormLoader, traveler, markValidity*/
+DiscrepancyFormLoader, traveler, markValidity, markFormValidity, findById*/
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
