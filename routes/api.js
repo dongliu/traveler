@@ -437,6 +437,7 @@ module.exports = function(app) {
         _id: {
           $in: traveler.discrepancyLogs,
         },
+        referenceForm: traveler.referenceDiscrepancyForm,
       },
       'referenceForm records inputBy inputOn'
     ).exec(function(dataErr, logs) {
@@ -452,11 +453,17 @@ module.exports = function(app) {
     req,
     res
   ) {
-    retrieveLogs(req[req.params.id], function(err, output) {
+    let traveler = req[req.params.id];
+    retrieveLogs(traveler, function(err, output) {
       if (err) {
         return res.send(500, err.message);
       }
-      return res.json(200, output);
+      return res.json(200, {
+        discrepancyForm: traveler.discrepancyForms.id(
+          traveler.activeDiscrepancyForm
+        ),
+        discrepancyLogs: output,
+      });
     });
   });
 
