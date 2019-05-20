@@ -36,9 +36,9 @@ module.exports = function(app) {
       ).exec(function(err, forms) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        res.json(200, forms);
+        res.status(200).json(forms);
       });
     }
   );
@@ -52,9 +52,9 @@ module.exports = function(app) {
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      res.json(200, forms);
+      res.status(200).json(forms);
     });
   });
 
@@ -76,9 +76,9 @@ module.exports = function(app) {
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      res.json(200, forms);
+      res.status(200).json(forms);
     });
   });
 
@@ -95,9 +95,9 @@ module.exports = function(app) {
       ).exec(function(err, forms) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        res.json(200, forms);
+        res.status(200).json(forms);
       });
     }
   );

@@ -5,36 +5,6 @@ validationMessage, isValid*/
 DiscrepancyFormLoader, traveler, markValidity, markFormValidity, findById*/
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
-function livespan(stamp, live) {
-  if (live) {
-    return '<span data-livestamp="' + stamp + '"></span>';
-  } else {
-    return (
-      '<span>' +
-      moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') +
-      '</span>'
-    );
-  }
-}
-
-function history(found) {
-  var i;
-  var output = '';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output =
-        output +
-        'changed to <strong>' +
-        found[i].value +
-        '</strong> by ' +
-        found[i].inputBy +
-        ' ' +
-        livespan(found[i].inputOn) +
-        '; ';
-    }
-  }
-  return output;
-}
 
 function fileHistory(found) {
   var i;
@@ -56,7 +26,7 @@ function fileHistory(found) {
         '</a></strong> uploaded by ' +
         found[i].inputBy +
         ' ' +
-        livespan(found[i].inputOn) +
+        livespan(found[i].inputOn, false) +
         '; ';
     }
   }
@@ -73,7 +43,7 @@ function notes(found) {
         '<dt><b>' +
         found[i].inputBy +
         ' noted ' +
-        livespan(found[i].inputOn) +
+        livespan(found[i].inputOn, false) +
         '</b>: </dt>';
       output = output + '<dd>' + found[i].value + '</dd>';
     }
@@ -152,28 +122,6 @@ function saveDiscrepancyLog(log) {
       }
     })
     .always();
-}
-
-function createSideNav() {
-  var $legend = $('legend');
-  var $affix = $(
-    '<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>'
-  );
-  var i;
-  if ($legend.length > 1) {
-    for (i = 0; i < $legend.length; i += 1) {
-      $affix.append(
-        '<li><a href="#' +
-          $legend[i].id +
-          '">' +
-          $legend[i].textContent +
-          '</a></li>'
-      );
-    }
-    $('.sidebar').append($('<div id="affixlist"></div>').append($affix));
-    $('body').attr('data-spy', 'scroll');
-    $('body').attr('data-target', '#affixlist');
-  }
 }
 
 function incrementFinished() {
@@ -602,14 +550,14 @@ $(function() {
             $this.closest('.control-group-wrap').find('.controls')
           );
         }
-        $history.html(
-          'changed to <strong>' +
-            binder.accessor.target[input.name] +
-            '</strong> by you ' +
-            livespan(timestamp) +
-            '; ' +
-            $history.html()
+        var historyRecord = generateHistoryRecordHtml(
+          input.type,
+          binder.accessor.target[input.name],
+          'you',
+          timestamp,
+          true
         );
+        $history.html(historyRecord + $history.html());
         // $.livestamp.resume();
         $this.closest('.control-group-buttons').remove();
       })

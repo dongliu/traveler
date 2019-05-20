@@ -7,7 +7,7 @@ module.exports = function(app) {
       req.session.roles === undefined ||
       req.session.roles.indexOf('admin') === -1
     ) {
-      return res.send(403, 'only admin allowed');
+      return res.status(403).send('only admin allowed');
     }
     return res.render('admin', routesUtilities.getRenderObject(req));
   });

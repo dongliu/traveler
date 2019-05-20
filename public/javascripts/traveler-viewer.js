@@ -6,37 +6,6 @@ function cleanForm() {
   $('.control-group-buttons').remove();
 }
 
-function livespan(stamp, live) {
-  if (live) {
-    return '<span data-livestamp="' + stamp + '"></span>';
-  } else {
-    return (
-      '<span>' +
-      moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') +
-      '</span>'
-    );
-  }
-}
-
-function history(found) {
-  var i;
-  var output = '';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output =
-        output +
-        'changed to <strong>' +
-        found[i].value +
-        '</strong> by ' +
-        found[i].inputBy +
-        ' ' +
-        livespan(found[i].inputOn) +
-        '; ';
-    }
-  }
-  return output;
-}
-
 function fileHistory(found) {
   var i;
   var output = '';
@@ -78,28 +47,6 @@ function notes(found) {
     }
   }
   return output + '</dl>';
-}
-
-function createSideNav() {
-  var $legend = $('legend');
-  var $affix = $(
-    '<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>'
-  );
-  var i;
-  if ($legend.length > 1) {
-    for (i = 0; i < $legend.length; i += 1) {
-      $affix.append(
-        '<li><a href="#' +
-          $legend[i].id +
-          '">' +
-          $legend[i].textContent +
-          '</a></li>'
-      );
-    }
-    $('.sidebar').append($('<div id="affixlist"></div>').append($affix));
-    $('body').attr('data-spy', 'scroll');
-    $('body').attr('data-target', '.sidebar');
-  }
 }
 
 function renderNotes() {
