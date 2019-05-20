@@ -84,9 +84,9 @@ function createTraveler(form, req, res) {
       if (err) {
         logger.error(err);
         if (err instanceof TravelerError) {
-          return res.send(err.status, err.message);
+          return res.status(err.status).send(err.message);
         }
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       logger.info('new traveler ' + doc.id + ' created');
       var url =
@@ -95,7 +95,7 @@ function createTraveler(form, req, res) {
         doc.id +
         '/';
       res.set('Location', url);
-      return res.json(201, {
+      return res.status(201).json({
         location:
           (req.proxied ? req.proxied_prefix : '') +
           '/travelers/' +
@@ -131,8 +131,8 @@ function cloneTraveler(source, req, res) {
 
   traveler.save(function(err, doc) {
     if (err) {
-      logger.error(err);
-      return res.send(500, err.message);
+      console.error(err);
+      return res.status(500).send(err.message);
     }
     logger.info('new traveler ' + doc.id + ' created');
     doc.sharedWith.forEach(function(e) {
@@ -179,7 +179,7 @@ function cloneTraveler(source, req, res) {
       doc.id +
       '/';
     res.set('Location', url);
-    return res.json(201, {
+    return res.status(201).json({
       location: url,
     });
   });
@@ -210,9 +210,9 @@ module.exports = function(app) {
       .exec(function(err, docs) {
         if (err) {
           logger.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        return res.json(200, docs);
+        return res.status(200).json(docs);
       });
   });
 
@@ -233,9 +233,9 @@ module.exports = function(app) {
       .exec(function(err, travelers) {
         if (err) {
           logger.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        res.json(200, travelers);
+        res.status(200).json(travelers);
       });
   });
 
@@ -251,10 +251,10 @@ module.exports = function(app) {
     ).exec(function(err, me) {
       if (err) {
         logger.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       if (!me) {
-        return res.send(400, 'cannot identify the current user');
+        return res.status(400).send('cannot identify the current user');
       }
       Traveler.find(
         {
@@ -271,9 +271,9 @@ module.exports = function(app) {
         .exec(function(tErr, travelers) {
           if (tErr) {
             logger.error(tErr);
-            return res.send(500, tErr.message);
+            return res.status(500).send(tErr.message);
           }
-          return res.json(200, travelers);
+          return res.status(200).json(travelers);
         });
     });
   });
@@ -292,7 +292,7 @@ module.exports = function(app) {
     ).exec(function(err, groups) {
       if (err) {
         logger.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
       var travelerIds = [];
       var i;
@@ -317,9 +317,9 @@ module.exports = function(app) {
         .exec(function(tErr, travelers) {
           if (tErr) {
             logger.error(tErr);
-            return res.send(500, tErr.message);
+            return res.status(500).send(tErr.message);
           }
-          res.json(200, travelers);
+          res.status(200).json(travelers);
         });
     });
   });
@@ -342,9 +342,9 @@ module.exports = function(app) {
     }).exec(function(err, travelers) {
       if (err) {
         logger.error(err);
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      res.json(200, travelers);
+      res.status(200).json(travelers);
     });
   });
 
@@ -362,9 +362,9 @@ module.exports = function(app) {
       Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
         if (err) {
           logger.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        return res.json(200, travelers);
+        return res.status(200).json(travelers);
       });
     });
 
@@ -424,9 +424,9 @@ module.exports = function(app) {
       .exec(function(err, travelers) {
         if (err) {
           logger.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        return res.json(200, travelers);
+        return res.status(200).json(travelers);
       });
   });
 
@@ -439,12 +439,14 @@ module.exports = function(app) {
         Form.findById(req.body.form, function(err, form) {
           if (err) {
             logger.error(err);
-            return res.send(500, err.message);
+            return res.status(500).send(err.message);
           }
           if (form) {
             createTraveler(form, req, res);
           } else {
-            return res.send(400, 'cannot find the form ' + req.body.form);
+            return res
+              .status(400)
+              .send('cannot find the form ' + req.body.form);
           }
         });
       }
@@ -452,22 +454,23 @@ module.exports = function(app) {
         Traveler.findById(req.body.source, function(err, traveler) {
           if (err) {
             logger.error(err);
-            return res.send(500, err.message);
+            return res.status(500).send(err.message);
           }
           if (traveler) {
             // if (traveler.status === 0) {
-            //   return res.send(400, 'You cannot clone an initialized traveler.');
+            //   return res.status(400).send('You cannot clone an initialized traveler.');
             // }
             if (reqUtils.canRead(req, traveler)) {
               cloneTraveler(traveler, req, res);
             } else {
-              return res.send(
-                400,
-                'You cannot clone a traveler that you cannot read.'
-              );
+              return res
+                .status(400)
+                .send('You cannot clone a traveler that you cannot read.');
             }
           } else {
-            return res.send(400, 'cannot find the traveler ' + req.body.source);
+            return res
+              .status(400)
+              .send('cannot find the traveler ' + req.body.source);
           }
         });
       }
@@ -512,7 +515,9 @@ module.exports = function(app) {
             '/view'
         );
       } else {
-        return res.send(403, 'You are not authorized to access this resource');
+        return res
+          .status(403)
+          .send('You are not authorized to access this resource');
       }
     }
   );
@@ -712,9 +717,9 @@ module.exports = function(app) {
         ['id', 'title', 'status', 'tags', 'devices'],
         function(err, output) {
           if (err) {
-            return res.send(500, err.message);
+            return res.status(500).send(err.message);
           }
-          return res.json(200, output);
+          return res.status(200).json(output);
         }
       );
     }
@@ -731,9 +736,9 @@ module.exports = function(app) {
         ['id', 'title', 'status', 'tags', 'devices'],
         function(err, output) {
           if (err) {
-            return res.send(500, err.message);
+            return res.status(500).send(err.message);
           }
-          return res.json(200, output);
+          return res.status(200).json(output);
         }
       );
     }
@@ -747,9 +752,9 @@ module.exports = function(app) {
     function(req, res) {
       retrieveLogs(req[req.params.id], function(err, output) {
         if (err) {
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
-        return res.json(200, output);
+        return res.status(200).json(output);
       });
     }
   );
@@ -767,7 +772,7 @@ module.exports = function(app) {
       var traveler = req[req.params.id];
       // check active discrepancy form
       if (req.body.form !== traveler.referenceDiscrepancyForm.toString()) {
-        return res.send(400, 'Discrepancy form does not match.');
+        return res.status(400).send('Discrepancy form does not match.');
       }
       // create log
       var log = new Log({
@@ -784,11 +789,11 @@ module.exports = function(app) {
           return traveler.save();
         })
         .then(function() {
-          return res.json(201, newLog);
+          return res.status(201).json(newLog);
         })
         .catch(err => {
           logger.error(err);
-          res.send(500, err.message);
+          res.status(500).send(err.message);
         });
     }
   );
@@ -813,11 +818,11 @@ module.exports = function(app) {
       log
         .save()
         .then(function(doc) {
-          return res.json(200, doc);
+          return res.status(200).json(doc);
         })
         .catch(function(err) {
           logger.error(err);
-          res.send(500, err.message);
+          res.status(500).send(err.message);
         });
     }
   );
@@ -831,7 +836,7 @@ module.exports = function(app) {
     function(req, res) {
       var doc = req[req.params.id];
       if (doc.archived === req.body.archived) {
-        return res.send(204);
+        return res.status(204).send();
       }
 
       doc.archived = req.body.archived;
@@ -843,15 +848,16 @@ module.exports = function(app) {
       doc.save(function(saveErr, newDoc) {
         if (saveErr) {
           logger.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
-        return res.send(
-          200,
-          'traveler ' +
-            req.params.id +
-            ' archived state set to ' +
-            newDoc.archived
-        );
+        return res
+          .status(200)
+          .send(
+            'traveler ' +
+              req.params.id +
+              ' archived state set to ' +
+              newDoc.archived
+          );
       });
     }
   );
@@ -959,9 +965,9 @@ module.exports = function(app) {
         doc.save(function saveDoc(e, newDoc) {
           if (e) {
             logger.error(e);
-            return res.send(500, e.message);
+            return res.status(500).send(e.message);
           }
-          return res.json(200, newDoc);
+          return res.status(200).json(newDoc);
         });
       });
     }
@@ -983,13 +989,14 @@ module.exports = function(app) {
       var form = doc.forms.id(formId);
 
       if (!form) {
-        return res.send(
-          410,
-          'Cannot find form ' +
-            req.body.formId +
-            ' in traveler ' +
-            req[req.params.id]
-        );
+        return res
+          .status(410)
+          .send(
+            'Cannot find form ' +
+              req.body.formId +
+              ' in traveler ' +
+              req[req.params.id]
+          );
       }
 
       doc.activeForm = form._id;
@@ -1007,9 +1014,9 @@ module.exports = function(app) {
         doc.save(function saveDoc(e, newDoc) {
           if (e) {
             logger.error(e);
-            return res.send(500, e.message);
+            return res.status(500).send(e.message);
           }
-          return res.json(200, newDoc);
+          return res.status(200).json(newDoc);
         });
       });
     }
@@ -1028,14 +1035,13 @@ module.exports = function(app) {
     function putFormAlias(req, res) {
       var doc = req[req.params.id];
       if (doc.status > 1 || doc.archived) {
-        return res.send(
-          400,
-          'cannot update form because of current traveler state'
-        );
+        return res
+          .status(400)
+          .send('cannot update form because of current traveler state');
       }
       var form = doc.forms.id(req.params.fid);
       if (!form) {
-        return res.send(410, 'from ' + req.params.fid + ' not found.');
+        return res.status(410).send('from ' + req.params.fid + ' not found.');
       }
 
       form.alias = req.body.value;
@@ -1043,9 +1049,9 @@ module.exports = function(app) {
       doc.save(function saveDoc(e) {
         if (e) {
           logger.error(e);
-          return res.send(500, e.message);
+          return res.status(500).send(e.message);
         }
-        return res.send(204);
+        return res.status(204).send();
       });
     }
   );
@@ -1063,11 +1069,11 @@ module.exports = function(app) {
     reqUtils.existSource('formId', 'body', Form),
     function addDiscrepancyForm(req, res) {
       if (req[req.body.formId].formType !== 'discrepancy') {
-        return res.send(400, 'the form should be of discrepancy type!');
+        return res.status(400).send('the form should be of discrepancy type!');
       }
 
       if (req[req.body.formId].status !== 1) {
-        return res.send(400, 'the form should be released!');
+        return res.status(400).send('the form should be released!');
       }
 
       var doc = req[req.params.id];
@@ -1092,9 +1098,9 @@ module.exports = function(app) {
       doc.save(function saveDoc(e, newDoc) {
         if (e) {
           logger.error(e);
-          return res.send(500, e.message);
+          return res.status(500).send(e.message);
         }
-        return res.json(200, newDoc);
+        return res.status(200).json(newDoc);
       });
     }
   );
@@ -1121,7 +1127,7 @@ module.exports = function(app) {
       doc.save(function(saveErr, newDoc) {
         if (saveErr) {
           logger.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
         var out = {};
         for (k in req.body) {
@@ -1129,7 +1135,7 @@ module.exports = function(app) {
             out[k] = newDoc.get(k);
           }
         }
-        return res.json(200, out);
+        return res.status(200).json(out);
       });
     }
   );
@@ -1144,15 +1150,17 @@ module.exports = function(app) {
       var doc = req[req.params.id];
 
       if ([1, 1.5, 2, 3, 4].indexOf(req.body.status) === -1) {
-        return res.send(400, 'invalid status');
+        return res.status(400).send('invalid status');
       }
 
       if (doc.status === req.body.status) {
-        return res.send(204);
+        return res.status(204).send();
       }
 
       if (req.body.status !== 1.5 && !reqUtils.isOwner(req, doc)) {
-        return res.send(403, 'You are not authorized to change the status. ');
+        return res
+          .status(403)
+          .send('You are not authorized to change the status. ');
       }
 
       var stateTransition = require('../model/traveler').stateTransition;
@@ -1163,7 +1171,7 @@ module.exports = function(app) {
 
       debug(target);
       if (target.to.indexOf(req.body.status) === -1) {
-        return res.send(400, 'invalid status change');
+        return res.status(400).send('invalid status change');
       }
 
       doc.status = req.body.status;
@@ -1172,9 +1180,9 @@ module.exports = function(app) {
       doc.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
-        return res.send(200, 'status updated to ' + req.body.status);
+        return res.status(200).send('status updated to ' + req.body.status);
       });
     }
   );
@@ -1195,21 +1203,21 @@ module.exports = function(app) {
     function(req, res) {
       var newdevice = req.body.newdevice;
       if (!newdevice) {
-        return res.send(400, 'the new device name not accepted');
+        return res.status(400).send('the new device name not accepted');
       }
       var doc = req[req.params.id];
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       var added = doc.devices.addToSet(newdevice);
       if (added.length === 0) {
-        return res.send(204);
+        return res.status(204).send();
       }
       doc.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
-        return res.json(200, {
+        return res.status(200).json({
           device: newdevice,
         });
       });
@@ -1231,9 +1239,9 @@ module.exports = function(app) {
       doc.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
-        return res.send(204);
+        return res.status(204).send();
       });
     }
   );
@@ -1255,9 +1263,9 @@ module.exports = function(app) {
       ).exec(function(dataErr, docs) {
         if (dataErr) {
           logger.error(dataErr);
-          return res.send(500, dataErr.message);
+          return res.status(500).send(dataErr.message);
         }
-        return res.json(200, docs);
+        return res.status(200).json(docs);
       });
     }
   );
@@ -1286,9 +1294,9 @@ module.exports = function(app) {
         if (dataErr) {
           logger.error(dataErr.message);
           if (dataErr instanceof DataError) {
-            return res.send(dataErr.status, dataErr.message);
+            return res.status(dataErr.status).send(dataErr.message);
           }
-          return res.send(500, dataErr.message);
+          return res.status(500).send(dataErr.message);
         }
         doc.manPower.addToSet({
           _id: req.session.userid,
@@ -1303,9 +1311,9 @@ module.exports = function(app) {
           doc.save(function(saveErr) {
             if (saveErr) {
               logger.error(saveErr);
-              return res.send(500, saveErr.message);
+              return res.status(500).send(saveErr.message);
             }
-            return res.send(204);
+            return res.status(204).send();
           });
         });
       });
@@ -1329,9 +1337,9 @@ module.exports = function(app) {
       ).exec(function(noteErr, docs) {
         if (noteErr) {
           logger.error(noteErr);
-          return res.send(500, noteErr.message);
+          return res.status(500).send(noteErr.message);
         }
-        return res.json(200, docs);
+        return res.status(200).json(docs);
       });
     }
   );
@@ -1357,7 +1365,7 @@ module.exports = function(app) {
       note.save(function(noteErr) {
         if (noteErr) {
           logger.error(noteErr);
-          return res.send(500, noteErr.message);
+          return res.status(500).send(noteErr.message);
         }
         doc.notes.push(note._id);
         doc.manPower.addToSet({
@@ -1369,9 +1377,9 @@ module.exports = function(app) {
         doc.save(function(saveErr) {
           if (saveErr) {
             logger.error(saveErr);
-            return res.send(500, saveErr.message);
+            return res.status(500).send(saveErr.message);
           }
-          return res.send(204);
+          return res.status(204).send();
         });
       });
     }
@@ -1387,7 +1395,7 @@ module.exports = function(app) {
       var doc = req[req.params.id];
 
       if (_.isEmpty(req.files)) {
-        return res.send(400, 'Expecte One uploaded file');
+        return res.status(400).send('Expecte One uploaded file');
       }
 
       var data = new TravelerData({
@@ -1407,7 +1415,7 @@ module.exports = function(app) {
       data.save(function(dataErr) {
         if (dataErr) {
           logger.error(dataErr);
-          return res.send(500, dataErr.message);
+          return res.status(500).send(dataErr.message);
         }
         doc.data.push(data._id);
         doc.updatedBy = req.session.userid;
@@ -1415,14 +1423,14 @@ module.exports = function(app) {
         doc.save(function(saveErr) {
           if (saveErr) {
             logger.error(saveErr);
-            return res.send(500, saveErr.message);
+            return res.status(500).send(saveErr.message);
           }
           var url =
             (req.proxied ? authConfig.proxied_service : authConfig.service) +
             '/data/' +
             data._id;
           res.set('Location', url);
-          return res.json(201, {
+          return res.status(201).json({
             location: url,
           });
         });
@@ -1439,12 +1447,12 @@ module.exports = function(app) {
       if (data.inputType === 'file') {
         fs.exists(data.file.path, function(exists) {
           if (exists) {
-            return res.sendfile(path.resolve(data.file.path));
+            return res.sendFile(path.resolve(data.file.path));
           }
-          return res.send(410, 'gone');
+          return res.status(410).send('gone');
         });
       } else {
-        res.json(200, data);
+        res.status(200).json(data);
       }
     }
   );
@@ -1482,19 +1490,21 @@ module.exports = function(app) {
       // change the access
       var access = req.body.access;
       if (['-1', '0', '1'].indexOf(access) === -1) {
-        return res.send(400, 'not valid value');
+        return res.status(400).send('not valid value');
       }
       access = Number(access);
       if (traveler.publicAccess === access) {
-        return res.send(204);
+        return res.status(204).send();
       }
       traveler.publicAccess = access;
       traveler.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
-        return res.send(200, 'public access is set to ' + req.body.access);
+        return res
+          .status(200)
+          .send('public access is set to ' + req.body.access);
       });
     }
   );
@@ -1507,12 +1517,12 @@ module.exports = function(app) {
     function(req, res) {
       var traveler = req[req.params.id];
       if (req.params.list === 'users') {
-        return res.json(200, traveler.sharedWith || []);
+        return res.status(200).json(traveler.sharedWith || []);
       }
       if (req.params.list === 'groups') {
-        return res.json(200, traveler.sharedGroup || []);
+        return res.status(200).json(traveler.sharedGroup || []);
       }
-      return res.send(400, 'unknown share list.');
+      return res.status(400).send('unknown share list.');
     }
   );
 
@@ -1529,27 +1539,28 @@ module.exports = function(app) {
         if (req.body.name) {
           share = reqUtils.getSharedWith(traveler.sharedWith, req.body.name);
         } else {
-          return res.send(400, 'user name is empty.');
+          return res.status(400).send('user name is empty.');
         }
       }
       if (req.params.list === 'groups') {
         if (req.body.id) {
           share = reqUtils.getSharedGroup(traveler.sharedGroup, req.body.id);
         } else {
-          return res.send(400, 'group id is empty.');
+          return res.status(400).send('group id is empty.');
         }
       }
 
       if (share === -2) {
-        return res.send(400, 'unknown share list.');
+        return res.status(400).send('unknown share list.');
       }
 
       if (share >= 0) {
-        return res.send(
-          400,
-          req.body.name ||
-            req.body.id + ' is already in the ' + req.params.list + ' list.'
-        );
+        return res
+          .status(400)
+          .send(
+            req.body.name ||
+              req.body.id + ' is already in the ' + req.params.list + ' list.'
+          );
       }
 
       if (share === -1) {
@@ -1575,10 +1586,9 @@ module.exports = function(app) {
         share = traveler.sharedGroup.id(req.params.shareid);
       }
       if (!share) {
-        return res.send(
-          400,
-          'cannot find ' + req.params.shareid + ' in the list.'
-        );
+        return res
+          .status(400)
+          .send('cannot find ' + req.params.shareid + ' in the list.');
       }
       // change the access
       if (req.body.access && req.body.access === 'write') {
@@ -1589,7 +1599,7 @@ module.exports = function(app) {
       traveler.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
-          return res.send(500, saveErr.message);
+          return res.status(500).send(saveErr.message);
         }
         // check consistency of user's traveler list
         var Target;
@@ -1617,7 +1627,7 @@ module.exports = function(app) {
             }
           }
         );
-        return res.json(200, share);
+        return res.status(200).json(share);
       });
     }
   );

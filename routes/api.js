@@ -29,7 +29,7 @@ var WRITE_API_USER = 'api_write';
 function checkWritePermissions(req, res, next) {
   var credentials = basic(req);
   if (credentials.name !== WRITE_API_USER) {
-    return res.json(401, {
+    return res.status(401).json({
       error: 'Write permissions are needed to create a form',
     });
   } else {
@@ -50,13 +50,13 @@ function checkWritePermissions(req, res, next) {
 function performMongoResponse(err, data, res, successCB) {
   if (err) {
     console.error(err);
-    return res.send(500, err.message);
+    return res.status(500).send(err.message);
   }
   if (!data) {
-    return res.send(410, 'gone');
+    return res.status(410).send('gone');
   }
   if (successCB === undefined) {
-    return res.json(200, data);
+    return res.status(200).json(data);
   } else {
     successCB();
   }
@@ -147,13 +147,13 @@ module.exports = function(app) {
       .exec(function(err, travelers) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
         var output = [];
         travelers.forEach(function(t) {
           output = _.union(output, t.tags);
         });
-        res.json(200, output);
+        res.status(200).json(output);
       });
   });
 
@@ -173,13 +173,13 @@ module.exports = function(app) {
       .exec(function(err, travelers) {
         if (err) {
           console.error(err);
-          return res.send(500, err.message);
+          return res.status(500).send(err.message);
         }
         var output = [];
         travelers.forEach(function(t) {
           output = _.union(output, _.keys(t.mapping));
         });
-        res.json(200, output);
+        res.status(200).json(output);
       });
   });
 
@@ -240,7 +240,7 @@ module.exports = function(app) {
         userName,
         function(err, newBinder) {
           performMongoResponse(err, newBinder, res, function() {
-            return res.json(201, newBinder);
+            return res.status(201).json(newBinder);
           });
         }
       );
@@ -256,6 +256,21 @@ module.exports = function(app) {
         performMongoResponse(err, binder, res, function() {
           var userName = req.body.userName;
           routesUtilities.binder.addWork(binder, userName, req, res);
+        });
+      });
+    }
+  );
+
+  app.post(
+    '/apis/removeWork/binders/:id/',
+    routesUtilities.filterBody(['workId', 'userName'], true),
+    checkWritePermissions,
+    function(req, res) {
+      Binder.findById(req.params.id, function(err, binder) {
+        performMongoResponse(err, binder, res, function() {
+          var userName = req.body.userName;
+          var workId = req.body.workId;
+          routesUtilities.binder.deleteWork(binder, workId, userName, req, res);
         });
       });
     }
@@ -377,9 +392,9 @@ module.exports = function(app) {
         ['id', 'title', 'status', 'tags', 'devices'],
         function(err, output) {
           if (err) {
-            return res.send(500, err.message);
+            return res.status(500).send(err.message);
           }
-          return res.json(200, output);
+          return res.status(200).json(output);
         }
       );
     });
@@ -392,9 +407,9 @@ module.exports = function(app) {
         ['id', 'title', 'status', 'tags', 'devices'],
         function(err, output) {
           if (err) {
-            return res.send(500, err.message);
+            return res.status(500).send(err.message);
           }
-          return res.json(200, output);
+          return res.status(200).json(output);
         }
       );
     });
@@ -449,6 +464,29 @@ module.exports = function(app) {
     });
   }
 
+  app.post(
+    '/apis/archived/traveler/:id/',
+    routesUtilities.filterBody(['archived'], true),
+    checkWritePermissions,
+    function(req, res) {
+      var archivedStatus = req.body.archived;
+
+      Traveler.findById(req.params.id, function(travelerErr, traveler) {
+        performMongoResponse(travelerErr, traveler, res, function() {
+          routesUtilities.traveler.changeArchivedState(
+            traveler,
+            archivedStatus
+          );
+          traveler.save(function(err) {
+            performMongoResponse(err, traveler, res, function() {
+              return res.status(200).json(traveler);
+            });
+          });
+        });
+      });
+    }
+  );
+
   app.get('/apis/travelers/:id/log/', reqUtils.exist('id', Traveler), function(
     req,
     res
@@ -456,9 +494,9 @@ module.exports = function(app) {
     let traveler = req[req.params.id];
     retrieveLogs(traveler, function(err, output) {
       if (err) {
-        return res.send(500, err.message);
+        return res.status(500).send(err.message);
       }
-      return res.json(200, {
+      return res.status(200).json({
         discrepancyForm: traveler.discrepancyForms.id(
           traveler.activeDiscrepancyForm
         ),
@@ -475,12 +513,12 @@ module.exports = function(app) {
           if (data.inputType === 'file') {
             fs.exists(data.file.path, function(exists) {
               if (exists) {
-                return res.sendfile(data.file.path);
+                return res.sendFile(data.file.path);
               }
-              return res.send(410, 'gone');
+              return res.status(410).send('gone');
             });
           } else {
-            res.json(200, data);
+            res.status(200).json(data);
           }
         });
       });
@@ -504,7 +542,7 @@ module.exports = function(app) {
         },
         function(err, newForm) {
           performMongoResponse(err, newForm, res, function() {
-            return res.json(201, newForm);
+            return res.status(201).json(newForm);
           });
         }
       );
@@ -522,7 +560,7 @@ module.exports = function(app) {
       try {
         var status = parseFloat(req.body.status);
       } catch (ex) {
-        return res.json(400, {
+        return res.status(400).json({
           error: 'Status provided was of invalid type. Expected: Float.',
         });
       }
@@ -548,7 +586,7 @@ module.exports = function(app) {
               traveler.updatedOn = Date.now();
               traveler.save(function(err) {
                 performMongoResponse(err, traveler, res, function() {
-                  return res.json(200, traveler);
+                  return res.status(200).json(traveler);
                 });
               });
             }
@@ -582,7 +620,7 @@ module.exports = function(app) {
                 newTraveler,
                 res,
                 function() {
-                  return res.json(201, newTraveler);
+                  return res.status(201).json(newTraveler);
                 }
               );
             }
