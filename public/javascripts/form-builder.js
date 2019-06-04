@@ -2,7 +2,7 @@
 
 /* global tinymce: false, rivets: false, UID: false, input: false, spec: false,
  ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false, 
- formType*/
+ formType, livespan*/
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
