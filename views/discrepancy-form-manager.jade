@@ -14,6 +14,7 @@ block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
     var traveler = !{JSON.stringify(traveler)};
+    var title = '!{traveler.title}'
   .container-fluid
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -109,6 +110,7 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')  
   script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler-form-loader.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler-discrepancy-form-loader.js')
   script(type='text/javascript', src='#{prefix}/javascripts/discrepancy-form-manager.js')
