@@ -129,6 +129,16 @@ function done_button(view, $out) {
         $(this).attr('id', UID.generateShort());
       }
     });
+
+    // assign the sequence number to all legent
+    $('#output')
+      .find('legend')
+      .each(function(index) {
+        $(this)
+          .find('.section-number')
+          .text(index + 1);
+      });
+
     $out.closest('.control-group-wrap').removeAttr('data-status');
   };
 }
