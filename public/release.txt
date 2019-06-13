@@ -1,3 +1,8 @@
+APS-1.2.1 Release Changelog
+Jun 13, 2019
+# Bug Fixes
+- Resolve the issue with cloning traveler templates.
+
 APS-1.2.0 Release Changelog
 Jun 11, 2019
 # Add Discrepancy Support
