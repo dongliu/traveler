@@ -89,6 +89,17 @@ function userkey_error($userkey, msg) {
   }
 }
 
+function updateSectionNumbers() {
+  // assign the sequence number to all legend
+  $('#output')
+    .find('legend')
+    .each(function(index) {
+      $(this)
+        .find('.section-number')
+        .text(index + 1);
+    });
+}
+
 function done_button(view, $out) {
   return function(e) {
     e.preventDefault();
@@ -123,6 +134,7 @@ function done_button(view, $out) {
         $(this).attr('name', UID.generateShort());
       }
     });
+
     // assign id to legent, id is used for side nav
     $('legend', $out).each(function() {
       if (!$(this).attr('id')) {
@@ -130,15 +142,7 @@ function done_button(view, $out) {
       }
     });
 
-    // assign the sequence number to all legent
-    $('#output')
-      .find('legend')
-      .each(function(index) {
-        $(this)
-          .find('.section-number')
-          .text(index + 1);
-      });
-
+    updateSectionNumbers();
     $out.closest('.control-group-wrap').removeAttr('data-status');
   };
 }
@@ -1104,6 +1108,9 @@ function binding_events() {
       $('#more').attr('disabled', true);
       $('#output').sortable({
         placeholder: 'ui-state-highlight',
+        update: function() {
+          updateSectionNumbers();
+        },
       });
     } else {
       $(this).text('Adjust location');
