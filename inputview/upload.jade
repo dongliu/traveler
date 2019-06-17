@@ -1,6 +1,8 @@
 .control-group.output-control-group
   .control-label
-    span { model.label }
+    span.control-number
+    != ' '
+    span.model-label { model.label }
   .controls
     input(type='file', rv-data-userkey='model.userkey', disabled=true)
     span.help-block { model.help }
