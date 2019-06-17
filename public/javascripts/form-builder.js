@@ -1165,6 +1165,7 @@ function binding_events() {
         return;
       }
       $cgr.closest('.control-group-wrap').remove();
+      updateSectionNumbers();
     }
   );
 
@@ -1190,6 +1191,7 @@ function binding_events() {
     $(that)
       .closest('.control-group-wrap')
       .after(cloned);
+    updateSectionNumbers();
   });
 
   $('#output').on('click', '.control-focus a.btn[title="edit"]', function(e) {
