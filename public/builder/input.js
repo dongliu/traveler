@@ -101,8 +101,14 @@
   };
 
   // checkbox.jade compiled template
-  exports['checkbox'] = function tmpl_checkbox() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-required="model.required" rv-data-userkey="model.userkey"/><span>{ model.checkbox_text }</span></label></div></div>';
+  exports['checkbox'] = function tmpl_checkbox(locals) {
+    var buf = [];
+    buf.push(
+      '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
+        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        '<span class="model-label">{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-required="model.required" rv-data-userkey="model.userkey"/><span>{ model.checkbox_text }</span></label></div></div>'
+    );
+    return buf.join('');
   };
 
   // figure.jade compiled template
@@ -116,8 +122,14 @@
   };
 
   // number.jade compiled template
-  exports['number'] = function tmpl_number() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey" rv-min="model.min" rv-max="model.max" step="any"/><span rv-if="model.range" class="help-inline">{ model.range }</span><span class="help-block">{ model.help }</span></div></div>';
+  exports['number'] = function tmpl_number(locals) {
+    var buf = [];
+    buf.push(
+      '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
+        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        '<span class="model-label">{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey" rv-min="model.min" rv-max="model.max" step="any"/><span rv-if="model.range" class="help-inline">{ model.range }</span><span class="help-block">{ model.help }</span></div></div>'
+    );
+    return buf.join('');
   };
 
   // numberunit.jade compiled template
@@ -136,8 +148,14 @@
   };
 
   // radiogroup.jade compiled template
-  exports['radiogroup'] = function tmpl_radiogroup() {
-    return '<div rv-data-required="model.required" rv-data-userkey="model.userkey" class="control-group radio-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"></div></div>';
+  exports['radiogroup'] = function tmpl_radiogroup(locals) {
+    var buf = [];
+    buf.push(
+      '<div rv-data-required="model.required" rv-data-userkey="model.userkey" class="control-group radio-group"><div class="control-label"><span class="control-number"></span>' +
+        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        '<span class="model-label">{ model.label }</span></div><div class="controls"></div></div>'
+    );
+    return buf.join('');
   };
 
   // rich.jade compiled template
@@ -157,18 +175,36 @@
   };
 
   // text.jade compiled template
-  exports['text'] = function tmpl_text() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey"/><span class="help-block">{ model.help }</span></div></div>';
+  exports['text'] = function tmpl_text(locals) {
+    var buf = [];
+    buf.push(
+      '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
+        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        '<span class="model-label">{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey"/><span class="help-block">{ model.help }</span></div></div>'
+    );
+    return buf.join('');
   };
 
   // textarea.jade compiled template
-  exports['textarea'] = function tmpl_textarea() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows" rv-required="model.required" rv-data-userkey="model.userkey"></textarea><span class="help-block">{ model.help }</span></div></div>';
+  exports['textarea'] = function tmpl_textarea(locals) {
+    var buf = [];
+    buf.push(
+      '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
+        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        '<span class="model-label">{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows" rv-required="model.required" rv-data-userkey="model.userkey"></textarea><span class="help-block">{ model.help }</span></div></div>'
+    );
+    return buf.join('');
   };
 
   // upload.jade compiled template
-  exports['upload'] = function tmpl_upload() {
-    return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input type="file" rv-data-userkey="model.userkey" disabled="disabled"/><span class="help-block">{ model.help }</span></div></div>';
+  exports['upload'] = function tmpl_upload(locals) {
+    var buf = [];
+    buf.push(
+      '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
+        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        '<span class="model-label">{ model.label }</span></div><div class="controls"><input type="file" rv-data-userkey="model.userkey" disabled="disabled"/><span class="help-block">{ model.help }</span></div></div>'
+    );
+    return buf.join('');
   };
 
   // attach to window or export with commonJS
