@@ -680,8 +680,8 @@ module.exports = function(app) {
     function(req, res) {
       var doc = req[req.params.id];
       var form = {};
-      form.html = sanitize(doc.html);
-      form.title = sanitize(doc.title) + ' clone';
+      form.html = reqUtils.sanitizeText(doc.html);
+      form.title = reqUtils.sanitizeText(doc.title) + ' clone';
       form.createdBy = req.session.userid;
       form.createdOn = Date.now();
       form.clonedFrom = doc._id;
