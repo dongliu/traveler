@@ -2,7 +2,7 @@
 
 /* global tinymce: false, rivets: false, UID: false, input: false, spec: false,
  ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false, 
- formType*/
+ formType, livespan*/
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
@@ -89,6 +89,29 @@ function userkey_error($userkey, msg) {
   }
 }
 
+function updateSectionNumbers() {
+  var sectionNumber = 0;
+  var controlNumber = 0;
+  // assign the sequence number to all legend
+  $('#output')
+    .find('legend, .control-label')
+    .each(function(index) {
+      if ($(this).is('legend')) {
+        sectionNumber += 1;
+        // reset control number
+        controlNumber = 0;
+        $(this)
+          .find('.section-number')
+          .text(sectionNumber);
+      } else {
+        controlNumber += 1;
+        $(this)
+          .find('.control-number')
+          .text('' + sectionNumber + '.' + controlNumber);
+      }
+    });
+}
+
 function done_button(view, $out) {
   return function(e) {
     e.preventDefault();
@@ -123,12 +146,15 @@ function done_button(view, $out) {
         $(this).attr('name', UID.generateShort());
       }
     });
+
     // assign id to legent, id is used for side nav
     $('legend', $out).each(function() {
       if (!$(this).attr('id')) {
         $(this).attr('id', UID.generateShort());
       }
     });
+
+    updateSectionNumbers();
     $out.closest('.control-group-wrap').removeAttr('data-status');
   };
 }
@@ -294,7 +320,7 @@ function radio_edit($cgr) {
   var radio_button_count = 0;
 
   if ($cgr) {
-    label = $('.control-label span', $cgr).text();
+    label = $('.control-label span.model-label', $cgr).text();
     var inputs = $cgr.find('.controls').find('input');
     if (inputs.length > 0) {
       radio_group_name = inputs[0].name;
@@ -395,7 +421,7 @@ function checkbox_edit($cgr) {
   var checkbox_text = 'checkbox text';
   var required = false;
   if ($cgr) {
-    label = $('.control-label span', $cgr).text();
+    label = $('.control-label span.model-label', $cgr).text();
     userkey = $('.controls input', $cgr).data('userkey');
     checkbox_text = $('.controls label span', $cgr).text();
     required = $('input', $cgr).prop('required');
@@ -440,7 +466,7 @@ function text_edit($cgr) {
   var help = '';
   var required = false;
   if ($cgr) {
-    label = $('.control-label span', $cgr).text();
+    label = $('.control-label span.model-label', $cgr).text();
     userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
@@ -668,7 +694,7 @@ function other_edit($cgr) {
   var type = 'text';
   var required = false;
   if ($cgr) {
-    label = $('.control-label span', $cgr).text();
+    label = $('.control-label span.model-label', $cgr).text();
     userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
     type = $('.controls input', $cgr).attr('type');
@@ -726,7 +752,7 @@ function textarea_edit($cgr) {
   var required = false;
 
   if ($cgr) {
-    label = $('.control-label span', $cgr).text();
+    label = $('.control-label span.model-label', $cgr).text();
     userkey = $('.controls textarea', $cgr).data('userkey');
     placeholder = $('.controls textarea', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
@@ -798,7 +824,7 @@ function number_edit($cgr) {
   var max = null;
   var range = null;
   if ($cgr) {
-    label = $('.control-label span', $cgr).text();
+    label = $('.control-label span.model-label', $cgr).text();
     userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
@@ -861,7 +887,7 @@ function file_edit($cgr) {
   var userkey = '';
   var help = '';
   if ($cgr) {
-    label = $('.control-label span', $cgr).text();
+    label = $('.control-label span.model-label', $cgr).text();
     userkey = $('.controls input', $cgr).data('userkey');
     help = $('.controls span.help-block', $cgr).text();
   }
@@ -905,7 +931,7 @@ function section_edit($cgr) {
   $('#output .well.spec').remove();
   var legend = 'Section name';
   if ($cgr) {
-    legend = $('legend', $cgr).text();
+    legend = $('legend span.label-text', $cgr).text();
   }
   var $section = $(input.section());
   var $legend = $(spec.legend());
@@ -1094,6 +1120,9 @@ function binding_events() {
       $('#more').attr('disabled', true);
       $('#output').sortable({
         placeholder: 'ui-state-highlight',
+        update: function() {
+          updateSectionNumbers();
+        },
       });
     } else {
       $(this).text('Adjust location');
@@ -1136,6 +1165,7 @@ function binding_events() {
         return;
       }
       $cgr.closest('.control-group-wrap').remove();
+      updateSectionNumbers();
     }
   );
 
@@ -1161,6 +1191,7 @@ function binding_events() {
     $(that)
       .closest('.control-group-wrap')
       .after(cloned);
+    updateSectionNumbers();
   });
 
   $('#output').on('click', '.control-focus a.btn[title="edit"]', function(e) {
