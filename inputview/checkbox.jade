@@ -1,6 +1,8 @@
 .control-group.output-control-group
   .control-label
-    span { model.label }
+    span.control-number
+    != ' '
+    span.model-label { model.label }
   .controls
     label.checkbox
       input(type='checkbox', disabled=true, rv-required='model.required', rv-data-userkey='model.userkey')

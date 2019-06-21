@@ -1,6 +1,8 @@
 .control-group.output-control-group
   .control-label
-    span { model.label }
+    span.control-number
+    != ' '
+    span.model-label { model.label }
   .controls
     textarea(disabled=true, rv-placeholder='model.placeholder', rv-rows = 'model.rows', rv-required='model.required', rv-data-userkey='model.userkey')
     span.help-block { model.help }
