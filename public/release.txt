@@ -1,3 +1,27 @@
+APS-1.2.1 Release Changelog
+Jun 13, 2019
+# Bug Fixes
+- Resolve the issue with cloning traveler templates.
+
+APS-1.2.0 Release Changelog
+Jun 11, 2019
+# Add Discrepancy Support
+- Allow creation of discrepancy traveler templates
+- Support status of discrepancy traveler template
+- Support versioning of discrepancy traveler template 
+- Support workflow procedure for discrepancy traveler template
+  - Discrepancy traveler templates require releasing before they can be used. 
+  - Submission -> Approval (Reject/Release)
+  - Once approved (released) it can be used. 
+  - Also support obsolete released templates once they should no longer be used. 
+- Support linking a released discrepancy template to existing traveler instances. 
+- Display a tabular view of every filled out discrepancy for a particular traveler. 
+- Embed the discrepancy log right into a traveler instance. 
+- Require user with admin role for creation of the discrepancy traveler template
+- Enhance RESTful API to retrieve eTraveler discrepancy data
+# Bug Fixes
+- Decimal number validation (min/max) now works.
+
 APS-1.1.3 Release Changelog
 April 18, 2019
 # GUI

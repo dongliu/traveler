@@ -404,6 +404,9 @@ $(function() {
                     break;
                   }
                 }
+              } else if (element.type === 'number') {
+                // Patch to support appropriate stepping validation for input numbers.
+                element.step = 'any';
               }
               binder.deserializeFieldFromValue(element, currentValue);
               binder.accessor.set(element.name, currentValue);
