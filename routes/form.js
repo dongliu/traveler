@@ -612,15 +612,7 @@ module.exports = function(app) {
             '/';
 
           res.set('Location', url);
-          return res
-            .status(201)
-            .send(
-              'You can see the new form at <a href="' +
-                url +
-                '">' +
-                url +
-                '</a>'
-            );
+          return res.redirect(url);
         }
       );
     }
