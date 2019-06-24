@@ -102,7 +102,7 @@ form.pre('save', function(next) {
       label = input
         .closest('.control-group')
         .children('.control-label')
-        .children('span')
+        .children('span.model-label')
         .text();
       userkey = input.attr('data-userkey');
       if (inputName) {
