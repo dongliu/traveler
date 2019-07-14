@@ -112,6 +112,22 @@ function updateSectionNumbers() {
     });
 }
 
+function addSectionNumbers() {
+  $('#output')
+    .find('legend, .control-label')
+    .each(function() {
+      if ($(this).is('legend')) {
+        if ($(this).find('.section-number').length === 0) {
+          $(this).prepend('<span class="section-number"></span>&nbsp;');
+        }
+      } else {
+        if ($(this).find('.control-number').length === 0) {
+          $(this).prepend('<span class="control-number"></span>&nbsp;');
+        }
+      }
+    });
+}
+
 function done_button(view, $out) {
   return function(e) {
     e.preventDefault();
@@ -1270,6 +1286,20 @@ function binding_events() {
         }
       );
     }
+  });
+
+  $('#numbering').click(function(e) {
+    e.preventDefault();
+    if ($('#output .well.spec').length) {
+      modalAlert(
+        'Finish editing first',
+        'Please close all the opened edit area by clicking the "Done" button, and then generate the numbering if needed.'
+      );
+      return;
+    }
+    cleanBeforeSave();
+    addSectionNumbers();
+    updateSectionNumbers();
   });
 
   $('#preview').click(function(e) {
