@@ -95,7 +95,7 @@ function updateSectionNumbers() {
   // assign the sequence number to all legend
   $('#output')
     .find('legend, .control-label')
-    .each(function(index) {
+    .each(function() {
       if ($(this).is('legend')) {
         sectionNumber += 1;
         // reset control number
