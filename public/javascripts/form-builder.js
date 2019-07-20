@@ -47,20 +47,9 @@ function sendRequest(data, cb, saveas, status) {
     processData: false,
   })
     .done(function(data, textStatus, request) {
-      var location;
       var timestamp = request.getResponseHeader('Date');
-      if (saveas) {
-        location = request.getResponseHeader('Location');
-        $('#message').append(
-          '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>A new form is created at <a href="' +
-            location +
-            '">' +
-            location +
-            '</a> ' +
-            livespan(timestamp) +
-            '.</div>'
-        );
-        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      if (saveas && data.location) {
+        document.location.href = data.location;
       } else {
         $('#message').append(
           '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved ' +
