@@ -1,3 +1,12 @@
+APS-1.3.0 Release Changelog
+Aug 13, 2019
+# Add numbering support for step and section. 
+- Generate numbering for each input 
+- Generate number for each section
+- Example number 1.2 is section 1 and input 2 within the section
+- Update numbering on input item relocation
+- Generate numbering for an existing form button allows numbering each input for existing form. 
+
 APS-1.2.1 Release Changelog
 Jun 13, 2019
 # Bug Fixes
