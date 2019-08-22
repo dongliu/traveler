@@ -542,7 +542,7 @@ button.editable {
 }
 
 .control-number {
-  background: #0088cc;
+  background: #66cc99;
   color: white;
   padding: 2px;
   border: double;
@@ -550,11 +550,16 @@ button.editable {
   border-radius: 9px;
 }
 
+.rich-instruction {
+  display: flex;
+}
+
 .rich-instruction-number {
-  background: #66cc99;
+  background: #0088cc;
   color: white;
   padding: 2px;
   border: double;
   border-color: white;
   border-radius: 9px;
+  height: fit-content;
 }
