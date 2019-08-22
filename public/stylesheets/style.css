@@ -533,19 +533,28 @@ button.editable {
 }
 
 .section-number {
-    background: #ff9024;
-    color: white;
-    padding: 2px;
-    border: double;
-    border-color: white;
-    border-radius: 9px;
+  background: #ff9024;
+  color: white;
+  padding: 2px;
+  border: double;
+  border-color: white;
+  border-radius: 9px;
 }
 
 .control-number {
-    background: #0088cc;
-    color: white;
-    padding: 2px;
-    border: double;
-    border-color: white;
-    border-radius: 9px;
+  background: #0088cc;
+  color: white;
+  padding: 2px;
+  border: double;
+  border-color: white;
+  border-radius: 9px;
+}
+
+.rich-instruction-number {
+  background: #66cc99;
+  color: white;
+  padding: 2px;
+  border: double;
+  border-color: white;
+  border-radius: 9px;
 }
