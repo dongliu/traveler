@@ -80,41 +80,71 @@ function userkey_error($userkey, msg) {
 
 function updateSectionNumbers() {
   var sectionNumber = 0;
+  var instructionNumber = 0;
   var controlNumber = 0;
   // assign the sequence number to all legend
   $('#output')
-    .find('legend, .control-label')
+    .find('legend, .control-label, .rich-instruction')
     .each(function() {
       if ($(this).is('legend')) {
         sectionNumber += 1;
         // reset control number
         controlNumber = 0;
+        instructionNumber = 0;
         $(this)
           .find('.section-number')
           .text(sectionNumber);
+      } else if($(this).is('div.rich-instruction')) {
+        instructionNumber += 1;
+        //reset control number
+        controlNumber = 0;
+
+        $(this)
+          .find('.rich-instruction-number')
+          .text('' + sectionNumber + '.' + instructionNumber);
       } else {
         controlNumber += 1;
         $(this)
           .find('.control-number')
-          .text('' + sectionNumber + '.' + controlNumber);
+          .text('' + sectionNumber + '.' + instructionNumber + '.' + controlNumber);
       }
     });
 }
 
 function addSectionNumbers() {
   $('#output')
-    .find('legend, .control-label')
+    .find('legend, .control-label, .tinymce')
     .each(function() {
       if ($(this).is('legend')) {
-        if ($(this).find('.section-number').length === 0) {
-          $(this).prepend('<span class="section-number"></span>&nbsp;');
-        }
+        prependSpanIfNotExists(this, 'section-number');
+      } else if ($(this).is('div.tinymce')) {
+        var instructionParent = this.parentElement;
+        addSectionNumberToRichInstruction(instructionParent);
       } else {
-        if ($(this).find('.control-number').length === 0) {
-          $(this).prepend('<span class="control-number"></span>&nbsp;');
-        }
+        prependSpanIfNotExists(this, 'control-number');
       }
     });
+}
+
+function addSectionNumberToRichInstruction(richInstructionParent) {
+  if (richInstructionParent.className != 'rich-instruction') {
+    var tinymceChild = $(richInstructionParent).find('.tinymce')[0];
+    richInstructionParent.removeChild(tinymceChild);
+
+    var richInstructionDiv = document.createElement('div');
+    richInstructionDiv.className = 'rich-instruction';
+    richInstructionDiv.appendChild(tinymceChild);
+    richInstructionParent.appendChild(richInstructionDiv);
+    richInstructionParent = richInstructionDiv;
+  }
+
+  prependSpanIfNotExists(richInstructionParent, 'rich-instruction-number');
+}
+
+function prependSpanIfNotExists(element, sectionName) {
+  if ($(element).find('.'+sectionName).length === 0) {
+    $(element).prepend('<span class="' + sectionName + '"></span>&nbsp;');
+  }
 }
 
 function done_button(view, $out) {
@@ -999,6 +1029,9 @@ function rich_edit($cgr) {
         .closest('.spec')
         .remove();
       $rich.closest('.control-group-wrap').removeAttr('data-status');
+      var resultParent = $rich[0];
+      addSectionNumberToRichInstruction(resultParent);
+      updateSectionNumbers();
     }
   });
 }
