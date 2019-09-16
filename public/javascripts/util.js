@@ -73,11 +73,13 @@ function generateHistoryRecordHtml(
   live = false
 ) {
   if (type === 'url') {
-    if (historyValue.startsWith('http') === false) {
-      historyValue = 'http://' + historyValue;
+    if (historyValue !== null) {
+      if (historyValue.startsWith('http') === false) {
+        historyValue = 'http://' + historyValue;
+      }
+      historyValue =
+        '<a target="_blank" href=' + historyValue + '>' + historyValue + '</a>';
     }
-    historyValue =
-      '<a target="_blank" href=' + historyValue + '>' + historyValue + '</a>';
   }
   return (
     'changed to <strong>' +
