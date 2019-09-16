@@ -358,7 +358,7 @@ $(function() {
       $('#modal').modal('show');
       $('#submit').click(function() {
         updateStatusFromModal(
-          { status: 4 },
+          4,
           'travelers',
           activeTable,
           archivedTravelerTable
