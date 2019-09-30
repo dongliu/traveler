@@ -1,13 +1,21 @@
-/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
-updateAjaxURL: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false,
-titleColumn: false, tagsColumn: false, keysColumn:false, createdOnColumn: false,
-updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false,
-sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
-createdByColumn: false, createdOnColumn: false, fnGetSelected: false,
-selectEvent: false, filterEvent: false, formShareLinkColumn: false,
-archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
-/*global transferFromModal*/
+/**
+ * global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
+ * updateAjaxURL: false, travelerGlobal: false, Holder: false
+ */
+
+/**
+ * global selectColumn: false, formLinkColumn: false, formConfigLinkColumn:
+ * false, titleColumn: false, tagsColumn: false, keysColumn:false,
+ * createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false,
+ * sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false,
+ * sDomNoTools: false, createdByColumn: false, createdOnColumn: false,
+ * fnGetSelected: false, selectEvent: false, filterEvent: false,
+ * formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn:
+ * false, ownerColumn: false, formStatusColumn: false
+ */
+/**
+ * global transferFromModal
+ */
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
@@ -103,6 +111,7 @@ $(function() {
     formConfigLinkColumn,
     formShareLinkColumn,
     titleColumn,
+    formStatusColumn,
     tagsColumn,
     keysColumn,
     createdOnColumn,
@@ -128,7 +137,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[7, 'desc'], [8, 'desc']],
+    aaSorting: [[8, 'desc'], [9, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#form-table', formAoColumns);
@@ -140,6 +149,7 @@ $(function() {
     formLinkColumn,
     formShareLinkColumn,
     titleColumn,
+    formStatusColumn,
     tagsColumn,
     keysColumn,
     createdByColumn,
@@ -167,7 +177,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
-    aaSorting: [[8, 'desc'], [9, 'desc']],
+    aaSorting: [[9, 'desc'], [10, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#transferred-form-table', transferredFormAoColumns);
@@ -178,6 +188,7 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
+    formStatusColumn,
     tagsColumn,
     keysColumn,
     ownerColumn,
@@ -203,7 +214,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
-    aaSorting: [[7, 'desc']],
+    aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
@@ -239,6 +250,7 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
+    formStatusColumn,
     tagsColumn,
     keysColumn,
     archivedOnColumn,
@@ -262,7 +274,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[5, 'desc']],
+    aaSorting: [[6, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
