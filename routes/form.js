@@ -74,7 +74,7 @@ module.exports = function(app) {
     if (routesUtilities.checkUserRole(req, 'read_all_forms')) {
       Form.find(
         {},
-        'title formType tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup'
+        'title formType status tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup'
       )
         .lean()
         .exec(function(err, forms) {
@@ -198,7 +198,7 @@ module.exports = function(app) {
         },
       ],
     };
-    Form.find(search, 'title formType tags archivedOn _v').exec(function(
+    Form.find(search, 'title formType status tags archivedOn _v').exec(function(
       err,
       forms
     ) {
