@@ -1,11 +1,20 @@
-/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
-updateAjaxURL: false, Holder: false*/
-/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false,
-titleColumn: false, tagsColumn: false, keysColumn:false,  updatedOnColumn:
-false, updatedByColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
-fnGetSelected: false, selectEvent: false, filterEvent: false, formTypeColumn:
-false, versionColumn: false, formShareLinkColumn: false*/
-/*global archiveFromModal*/
+/**
+ * global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
+ * updateAjaxURL: false, Holder: false
+ */
+
+/**
+ * global selectColumn: false, formLinkColumn: false, formConfigLinkColumn:
+ * false, titleColumn: false, tagsColumn: false, keysColumn:false,
+ * updatedOnColumn: false, updatedByColumn: false, fnAddFilterFoot: false,
+ * sDomNoTools: false, fnGetSelected: false, selectEvent: false, filterEvent:
+ * false, formTypeColumn: false, versionColumn: false, formShareLinkColumn:
+ * false, formStatusColumn: false
+ */
+
+/**
+ * global archiveFromModal
+ */
 
 function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
@@ -69,6 +78,7 @@ $(function() {
     titleColumn,
     formTypeColumn,
     versionColumn,
+    formStatusColumn,
     tagsColumn,
     keysColumn,
     updatedByColumn,
@@ -91,7 +101,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[10, 'desc']],
+    aaSorting: [[11, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#submitted-form-table', formAoColumns);
@@ -104,6 +114,7 @@ $(function() {
     titleColumn,
     formTypeColumn,
     versionColumn,
+    formStatusColumn,
     tagsColumn,
     keysColumn,
     updatedByColumn,
@@ -126,7 +137,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[10, 'desc']],
+    aaSorting: [[11, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
@@ -136,6 +147,7 @@ $(function() {
     formLinkColumn,
     titleColumn,
     tagsColumn,
+    formStatusColumn,
     keysColumn,
     versionColumn,
     updatedByColumn,
@@ -158,7 +170,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[7, 'desc']],
+    aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
