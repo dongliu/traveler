@@ -146,6 +146,7 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
+    formTypeColumn,
     tagsColumn,
     formStatusColumn,
     keysColumn,
