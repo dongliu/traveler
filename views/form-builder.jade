@@ -78,19 +78,18 @@ block content
     if (status === 0)
       .btn-group
         button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
-    if (formType === 'discrepancy')
-      if (status === 0)
-       .btn-group
-         button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for Release') Submit
-      if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
-        if (status === 0.5)
-          .btn-group
-            button.btn.btn-primary#release(data-toggle='tooltip', title='release the form for usage') Release
-          .btn-group
-            button.btn.btn-warning#reject(data-toggle='tooltip', title='reject the submitted form for release') Reject
-        if (status === 1)
-          .btn-group
-            button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
+    if (status === 0)
+      .btn-group
+        button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for Release') Submit
+    if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
+      if (status === 0.5)
+        .btn-group
+          button.btn.btn-primary#release(data-toggle='tooltip', title='release the form for usage') Release
+        .btn-group
+          button.btn.btn-warning#reject(data-toggle='tooltip', title='reject the submitted form for release') Reject
+      if (status === 1)
+        .btn-group
+          button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
   br
   br
   br
