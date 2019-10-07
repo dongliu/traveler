@@ -12,6 +12,8 @@ var Binder = mongoose.model('Binder');
 var _ = require('lodash');
 var cheer = require('cheerio');
 
+const formStatusMap = require('../model/form').statusMap;
+
 var TravelerError = require('../lib/error').TravelerError;
 
 var devices = require('./devices/default.js');
@@ -299,6 +301,16 @@ var traveler = {
         )
       );
     }
+
+    if (formStatusMap['' + form.status] !== 'released') {
+      return newTravelerCallBack(
+        new TravelerError(
+          `cannot create a traveler from a non-released form ${form.id}`,
+          400
+        )
+      );
+    }
+
     var traveler = new Traveler({
       title: title,
       description: '',
