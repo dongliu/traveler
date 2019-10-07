@@ -138,7 +138,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[9, 'desc'], [10, 'desc']],
+    aaSorting: [[10, 'desc'], [9, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#form-table', formAoColumns);
