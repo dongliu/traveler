@@ -59,6 +59,8 @@ block content
           li
             a(href='#groupsharedfroms', data-toggle='tab') Group shared #{viewConfig.terminology.form}s
         li
+          a(href='#releasedforms', data-toggle='tab') Released #{viewConfig.terminology.form}s
+        li
           a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
       .tab-content
         #forms.tab-pane.active
@@ -101,6 +103,13 @@ block content
                   i.fa.fa-refresh.fa-lg
                   | &nbsp;Reload table
             table#group-shared-form-table.table.table-bordered.table-hover
+        #releasedforms.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#released-form-table.table.table-bordered.table-hover
         #archivedforms.tab-pane
           .btn-toolbar
             .btn-group
