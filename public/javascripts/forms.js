@@ -113,6 +113,7 @@ $(function() {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
+    versionColumn,
     tagsColumn,
     keysColumn,
     createdOnColumn,
@@ -138,7 +139,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[10, 'desc'], [9, 'desc']],
+    aaSorting: [[11, 'desc'], [10, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#form-table', formAoColumns);
@@ -152,6 +153,7 @@ $(function() {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
+    versionColumn,
     tagsColumn,
     keysColumn,
     createdByColumn,
@@ -179,7 +181,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
-    aaSorting: [[10, 'desc'], [11, 'desc']],
+    aaSorting: [[11, 'desc'], [12, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#transferred-form-table', transferredFormAoColumns);
@@ -192,6 +194,7 @@ $(function() {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
+    versionColumn,
     tagsColumn,
     keysColumn,
     ownerColumn,
@@ -217,7 +220,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
-    aaSorting: [[9, 'desc']],
+    aaSorting: [[10, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
@@ -289,6 +292,7 @@ $(function() {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
+    versionColumn,
     tagsColumn,
     keysColumn,
     archivedOnColumn,
@@ -312,7 +316,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[7, 'desc']],
+    aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
