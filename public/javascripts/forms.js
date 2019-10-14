@@ -112,6 +112,7 @@ $(function() {
     formShareLinkColumn,
     titleColumn,
     formStatusColumn,
+    formTypeColumn,
     tagsColumn,
     keysColumn,
     createdOnColumn,
@@ -137,7 +138,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[8, 'desc'], [9, 'desc']],
+    aaSorting: [[9, 'desc'], [10, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#form-table', formAoColumns);
@@ -150,6 +151,7 @@ $(function() {
     formShareLinkColumn,
     titleColumn,
     formStatusColumn,
+    formTypeColumn,
     tagsColumn,
     keysColumn,
     createdByColumn,
@@ -177,7 +179,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
-    aaSorting: [[9, 'desc'], [10, 'desc']],
+    aaSorting: [[10, 'desc'], [11, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#transferred-form-table', transferredFormAoColumns);
@@ -189,6 +191,7 @@ $(function() {
     formLinkColumn,
     titleColumn,
     formStatusColumn,
+    formTypeColumn,
     tagsColumn,
     keysColumn,
     ownerColumn,
@@ -214,7 +217,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [[9, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
@@ -239,7 +242,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: groupSharedFormAoColumns,
-    aaSorting: [[7, 'desc']],
+    aaSorting: [[9, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#group-shared-form-table', groupSharedFormAoColumns);
@@ -251,6 +254,7 @@ $(function() {
     formLinkColumn,
     titleColumn,
     formStatusColumn,
+    formTypeColumn,
     tagsColumn,
     keysColumn,
     archivedOnColumn,
@@ -274,7 +278,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[6, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
