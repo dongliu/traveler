@@ -1,18 +1,6 @@
-// let config = require('../config/config.js');
 let auth = require('../lib/auth');
-// let authConfig = config.auth;
-
 let mongoose = require('mongoose');
-// let path = require('path');
-// let sanitize = require('google-caja-sanitizer').sanitize;
-// let _ = require('lodash');
 let routesUtilities = require('../utilities/routes.js');
-// let reqUtils = require('../lib/req-utils');
-// let shareLib = require('../lib/share');
-// let tag = require('../lib/tag');
-// let FormError = require('../lib/error').FormError;
-// let formModel = require('../model/form');
-
 let Form = mongoose.model('Form');
 
 module.exports = function(app) {
@@ -32,7 +20,7 @@ module.exports = function(app) {
         {
           status: 0.5,
         },
-        'title formType tags mapping _v updatedOn updatedBy'
+        'title formType status tags mapping _v updatedOn updatedBy'
       ).exec(function(err, forms) {
         if (err) {
           console.error(err);
@@ -48,7 +36,7 @@ module.exports = function(app) {
       {
         status: 1,
       },
-      'title formType tags mapping _v updatedOn updatedBy'
+      'title formType status tags mapping _v updatedOn updatedBy'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -72,7 +60,7 @@ module.exports = function(app) {
         },
         formType: 'normal',
       },
-      'title formType tags mapping _v updatedOn updatedBy'
+      'title formType status tags mapping _v updatedOn updatedBy'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -91,7 +79,7 @@ module.exports = function(app) {
           status: 1,
           formType: 'discrepancy',
         },
-        'title formType tags mapping _v updatedOn updatedBy'
+        'title formType status tags mapping _v updatedOn updatedBy'
       ).exec(function(err, forms) {
         if (err) {
           console.error(err);
