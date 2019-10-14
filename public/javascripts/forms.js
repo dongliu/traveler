@@ -138,7 +138,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[9, 'desc'], [10, 'desc']],
+    aaSorting: [[10, 'desc'], [9, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#form-table', formAoColumns);
@@ -247,6 +247,40 @@ $(function() {
   });
   fnAddFilterFoot('#group-shared-form-table', groupSharedFormAoColumns);
   /*group shared form table ends*/
+
+  /*released form table starts*/
+  var releasedFormAoColumns = [
+    selectColumn,
+    formLinkColumn,
+    titleColumn,
+    formStatusColumn,
+    formTypeColumn,
+    versionColumn,
+    tagsColumn,
+    keysColumn,
+  ];
+  var releasedFormTable = $('#released-form-table').dataTable({
+    sAjaxSource: '/released-forms/json',
+    sAjaxDataProp: '',
+    fnDrawCallback: function() {
+      Holder.run({
+        images: 'img.user',
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: releasedFormAoColumns,
+    aaSorting: [[2, 'desc'], [5, 'desc']],
+    sDom: sDomNoTools,
+  });
+  fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
+  /*released form table ends*/
 
   /*archieved form table starts*/
   var archivedFormAoColumns = [

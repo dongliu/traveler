@@ -145,7 +145,7 @@ function addHistory(schema, options) {
       if (!doc.isModified()) {
         return resolve();
       }
-      debug(options.fieldsToWatch);
+      debug('watched field: ' + options.fieldsToWatch);
       options.fieldsToWatch.forEach(function(field) {
         debug(field + ' is modified ' + doc.isModified(field));
         if ((doc.isNew && doc.get(field)) || doc.isModified(field)) {
