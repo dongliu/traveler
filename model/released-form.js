@@ -7,7 +7,7 @@ status := 1 // released
         | 2 // archived
 ******/
 
-var stateTransition = [
+const stateTransition = [
   {
     from: 1,
     to: [2],
@@ -55,9 +55,13 @@ const releasedForm = new Schema({
   _v: Number,
 });
 
-var ReleasedForm = mongoose.model('ReleasedForm', releasedForm);
+const ReleasedForm = mongoose.model('ReleasedForm', releasedForm);
+
+// FormContent is not for persistence
+const FormContent = mongoose.model('FormContent', formContent);
 
 module.exports = {
   ReleasedForm,
   stateTransition,
+  FormContent,
 };
