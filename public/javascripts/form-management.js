@@ -117,8 +117,8 @@ $(function() {
     formStatusColumn,
     tagsColumn,
     keysColumn,
-    updatedByColumn,
-    updatedOnColumn,
+    releasedByColumn,
+    releasedOnColumn,
   ];
   var releasedFormTable = $('#released-form-table').dataTable({
     sAjaxSource: '/released-forms/json',
@@ -136,7 +136,7 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: formAoColumns,
+    aoColumns: releasedFormAoColumns,
     aaSorting: [[11, 'desc']],
     sDom: sDomNoTools,
   });
@@ -151,8 +151,8 @@ $(function() {
     formStatusColumn,
     keysColumn,
     versionColumn,
-    updatedByColumn,
-    updatedOnColumn,
+    archievedByColumn,
+    archievedOnColumn,
   ];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
