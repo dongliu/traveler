@@ -1,3 +1,23 @@
+APS-1.3.1
+Sept 16, 2019
+# Improve form numbering
+- Update numbering to support three tier (section, instruction, input) scheme.
+  - ex: the fourth section and instruction 2 within the section and input 3 within the instruction.
+    - 4.2.3
+- Improve visual of the numbers for each tier with background color. 
+# Bug Fixes
+- Travelers can now be archived from the GUI
+- Null url inputs do not crash the traveler anymore. 
+
+APS-1.3.0 Release Changelog
+Aug 13, 2019
+# Add numbering support for step and section. 
+- Generate numbering for each input 
+- Generate number for each section
+- Example number 1.2 is section 1 and input 2 within the section
+- Update numbering on input item relocation
+- Generate numbering for an existing form button allows numbering each input for existing form. 
+
 APS-1.2.1 Release Changelog
 Jun 13, 2019
 # Bug Fixes
