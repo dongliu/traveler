@@ -573,9 +573,13 @@ var clonedByColumn = personColumn('Cloned by', 'clonedBy');
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
 
+const releasedOnColumn = dateColumn('Released', 'releasedOn');
+const releasedByColumn = personColumn('Released by', 'releasedBy');
+
 var transferredOnColumn = dateColumn('transferred', 'transferredOn');
 
-var archivedOnColumn = dateColumn('Archived', 'archivedOn');
+const archivedOnColumn = dateColumn('Archived', 'archivedOn');
+const archivedByColumn = personColumn('Archived by', 'archivedBy');
 
 var deadlineColumn = dateColumn('Deadline', 'deadline');
 
