@@ -24,15 +24,27 @@ var mce_content = {
 
 var initHtml = '';
 
-function sendRequest(data, cb, saveas, status) {
+/**
+ * send request with data, and exec cb on response
+ *
+ * @param   {Object}  data    request body data
+ * @param   {function}  cb    callback
+ * @param   {string}  option  available options
+ *
+ * @return  {void}
+ */
+function sendRequest(data, cb, option) {
   var path = window.location.pathname;
   var url;
   var type;
-  if (saveas) {
+  if (option === 'saveas') {
     url = prefix + '/forms/';
     type = 'POST';
-  } else if (status) {
+  } else if (option === 'status') {
     url = path + 'status';
+    type = 'PUT';
+  } else if (option === 'release') {
+    url = path + 'released';
     type = 'PUT';
   } else {
     url = path;
@@ -1349,7 +1361,7 @@ function binding_events() {
           formType: formType,
         },
         null,
-        true
+        'saveas'
       );
     });
   });
@@ -1381,22 +1393,17 @@ function binding_events() {
       function() {
         window.location.reload(true);
       },
-      false,
-      true
+      'status'
     );
   });
 
   $('#release').click(function() {
     sendRequest(
-      {
-        status: 1,
-        version: Number($('#version').text()),
-      },
+      {},
       function() {
         window.location.reload(true);
       },
-      false,
-      true
+      'release'
     );
   });
 
@@ -1409,8 +1416,7 @@ function binding_events() {
       function() {
         window.location.reload(true);
       },
-      false,
-      true
+      'status'
     );
   });
 
@@ -1423,8 +1429,7 @@ function binding_events() {
       function() {
         window.location.reload(true);
       },
-      false,
-      true
+      'status'
     );
   });
 }
