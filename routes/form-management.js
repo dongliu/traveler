@@ -1,7 +1,9 @@
-let auth = require('../lib/auth');
-let mongoose = require('mongoose');
-let routesUtilities = require('../utilities/routes.js');
-let Form = mongoose.model('Form');
+const auth = require('../lib/auth');
+const mongoose = require('mongoose');
+const routesUtilities = require('../utilities/routes.js');
+const Form = mongoose.model('Form');
+const ReleasedForm = mongoose.model('ReleasedForm');
+const reqUtils = require('../lib/req-utils');
 
 module.exports = function(app) {
   app.get('/form-management/', auth.verifyRole('manager', 'admin'), function(
@@ -32,11 +34,11 @@ module.exports = function(app) {
   );
 
   app.get('/released-forms/json', auth.ensureAuthenticated, function(req, res) {
-    Form.find(
+    ReleasedForm.find(
       {
         status: 1,
       },
-      'title formType status tags mapping _v updatedOn updatedBy'
+      'title formType status tags _v releasedOn releasedBy'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -46,21 +48,48 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/released-forms/:id', auth.ensureAuthenticated, function(req, res) {
+    ReleasedForm.find(
+      {
+        status: 1,
+      },
+      'title formType status tags _v releasedOn releasedBy'
+    ).exec(function(err, forms) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      res.status(200).json(forms);
+    });
+  });
+
+  app.get(
+    '/released-forms/:id/preview',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', ReleasedForm),
+    function(req, res) {
+      const releasedForm = req[req.params.id];
+      return res.render(
+        'form-viewer',
+        routesUtilities.getRenderObject(req, {
+          id: req.params.id,
+          title: releasedForm.title,
+          html: releasedForm.base.html,
+        })
+      );
+    }
+  );
+
   app.get('/released-forms/normal/json', auth.ensureAuthenticated, function(
     req,
     res
   ) {
-    Form.find(
+    ReleasedForm.find(
       {
-        // TODO: filter the status with 1 when enforce normal forms
-        // with the release progess.
-        // status: 1,
-        status: {
-          $ne: 2,
-        },
+        status: 1,
         formType: 'normal',
       },
-      'title formType status tags mapping _v updatedOn updatedBy'
+      'title formType status tags _v releasedOn releasedBy'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
@@ -74,12 +103,12 @@ module.exports = function(app) {
     '/released-forms/discrepancy/json',
     auth.ensureAuthenticated,
     function(req, res) {
-      Form.find(
+      ReleasedForm.find(
         {
           status: 1,
           formType: 'discrepancy',
         },
-        'title formType status tags mapping _v updatedOn updatedBy'
+        'title formType status tags _v releasedOn releasedBy'
       ).exec(function(err, forms) {
         if (err) {
           console.error(err);
