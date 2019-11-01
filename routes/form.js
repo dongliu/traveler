@@ -854,7 +854,7 @@ module.exports = function(app) {
       releasedForm.title = req.body.title || form.title;
       releasedForm.description = req.body.description || form.description;
       releasedForm.tags = form.tags;
-      releasedForm.type = form.type;
+      releasedForm.formType = form.formType;
       releasedForm.base = new FormContent(form);
       if (discrepancyForm) {
         releasedForm.type = 'normal_discrepancy';
@@ -866,7 +866,7 @@ module.exports = function(app) {
       form.status = 0;
       try {
         const saveForm = await new ReleasedForm(releasedForm).save();
-        const url = `/released-form/${saveForm._id}/`;
+        const url = `/released-forms/${saveForm._id}/`;
         form.save();
         return res.status(201).json({
           location: url,
