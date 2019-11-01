@@ -1427,17 +1427,15 @@ function binding_events() {
     $('#modal .modal-body').empty();
     var defaultTitle = $('#formtitle').text();
     $('#modal .modal-body').append(
-      `<form class="form-horizontal" id="modalform">
-        <div class="control-group">
-          <label class="control-label">Form title</label>
-          <div class="controls"><input id="release-title" type="text" value="${defaultTitle}" class="input">
-          </div>
-        </div>
-      </form>
-      <h4>Choose a discrepancy to attach</h4>
-      <table id="discrepancy" class="table table-bordered table-hover"> </table>
-      `
+      '<form class="form-horizontal" id="modalform"> <div class="control-group"> <label class="control-label">Form title</label> <div class="controls"><input id="release-title" type="text" value="' +
+        defaultTitle +
+        '" class="input"> </div> </div> </form>'
     );
+    if (formType === 'normal') {
+      $('#modal .modal-body').append(
+        '<h4>Choose a discrepancy to attach</h4> <table id="discrepancy" class="table table-bordered table-hover"> </table>'
+      );
+    }
     $('#modal .modal-footer').html(
       '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
     );
