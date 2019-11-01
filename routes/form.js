@@ -851,8 +851,8 @@ module.exports = function(app) {
       const releasedForm = {};
       const form = req[req.params.id];
       const discrepancyForm = req[req.body.discrepancyFormId];
-      releasedForm.title = form.title;
-      releasedForm.description = form.description;
+      releasedForm.title = req.body.title || form.title;
+      releasedForm.description = req.body.description || form.description;
       releasedForm.tags = form.tags;
       releasedForm.type = form.type;
       releasedForm.base = new FormContent(form);
@@ -862,10 +862,13 @@ module.exports = function(app) {
       }
       releasedForm.releasedBy = req.session.userid;
       releasedForm.releasedOn = Date.now();
+      // reset the submitted form
+      form.status = 0;
       try {
         const saveForm = await new ReleasedForm(releasedForm).save();
-        const url = `/released-form/${saveForm._id}`;
-        res.status(201).json({
+        const url = `/released-form/${saveForm._id}/`;
+        form.save();
+        return res.status(201).json({
           location: url,
         });
       } catch (error) {
