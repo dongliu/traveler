@@ -60,7 +60,7 @@ function sendRequest(data, cb, option) {
   })
     .done(function(data, textStatus, request) {
       var timestamp = request.getResponseHeader('Date');
-      if (saveas && data.location) {
+      if (data.location) {
         document.location.href = data.location;
       } else {
         $('#message').append(
@@ -106,7 +106,7 @@ function updateSectionNumbers() {
         $(this)
           .find('.section-number')
           .text(sectionNumber);
-      } else if($(this).is('div.rich-instruction')) {
+      } else if ($(this).is('div.rich-instruction')) {
         instructionNumber += 1;
         //reset control number
         controlNumber = 0;
@@ -118,7 +118,9 @@ function updateSectionNumbers() {
         controlNumber += 1;
         $(this)
           .find('.control-number')
-          .text('' + sectionNumber + '.' + instructionNumber + '.' + controlNumber);
+          .text(
+            '' + sectionNumber + '.' + instructionNumber + '.' + controlNumber
+          );
       }
     });
 }
@@ -154,7 +156,7 @@ function addSectionNumberToRichInstruction(richInstructionParent) {
 }
 
 function prependSpanIfNotExists(element, sectionName) {
-  if ($(element).find('.'+sectionName).length === 0) {
+  if ($(element).find('.' + sectionName).length === 0) {
     $(element).prepend('<span class="' + sectionName + '"></span>&nbsp;');
   }
 }
@@ -1368,14 +1370,14 @@ function binding_events() {
     $('#modalLabel').html('Save the form as (a new one)');
     $('#modal .modal-body').empty();
     $('#modal .modal-body').append(
-      '<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>'
+      '<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="new-title" type="text" class="input"></div></div></form>'
     );
     $('#modal .modal-footer').html(
       '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
     );
     $('#modal').modal('show');
     $('#modal button[value="confirm"]').click(function() {
-      var title = $('#title').val();
+      var title = $('#new-title').val();
       sendRequest(
         {
           html: html,
@@ -1420,13 +1422,56 @@ function binding_events() {
   });
 
   $('#release').click(function() {
-    sendRequest(
-      {},
-      function() {
-        window.location.reload(true);
-      },
-      'release'
+    var html = $('#output').html();
+    $('#modalLabel').html('Release the form');
+    $('#modal .modal-body').empty();
+    var defaultTitle = $('#formtitle').text();
+    $('#modal .modal-body').append(
+      `<form class="form-horizontal" id="modalform">
+        <div class="control-group">
+          <label class="control-label">Form title</label>
+          <div class="controls"><input id="release-title" type="text" value="${defaultTitle}" class="input">
+          </div>
+        </div>
+      </form>
+      <h4>Choose a discrepancy to attach</h4>
+      <table id="discrepancy" class="table table-bordered table-hover"> </table>
+      `
     );
+    $('#modal .modal-footer').html(
+      '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
+    );
+    var discrepancyColumns = [
+      titleColumn,
+      versionColumn,
+      releasedOnColumn,
+      releasedByColumn,
+      formColumn,
+    ];
+    fnAddFilterFoot('#discrepancy', discrepancyColumns);
+    var availableTable = $('#discrepancy').dataTable({
+      sAjaxSource: '/released-forms/discrepancy/json',
+      sAjaxDataProp: '',
+      bProcessing: true,
+      oLanguage: {
+        sLoadingRecords: 'Please wait - loading data from the server ...',
+      },
+      aoColumns: discrepancyColumns,
+      iDisplayLength: 5,
+      aaSorting: [[2, 'desc']],
+      sDom: sDomPage,
+    });
+    $('#modal').modal('show');
+    $('#modal button[value="confirm"]').click(function() {
+      var title = $('#release-title').val();
+      sendRequest(
+        {
+          title: title,
+        },
+        null,
+        'release'
+      );
+    });
   });
 
   $('#reject').click(function() {
