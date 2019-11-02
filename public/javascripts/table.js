@@ -57,6 +57,20 @@ function dateColumn(title, key) {
   };
 }
 
+function longDateColumn(title, key) {
+  return {
+    sTitle: title,
+    mData: function(source, type, val) {
+      if (type === 'sort') {
+        return source[key];
+      }
+      return formatDateLong(source[key]);
+    },
+    sDefaultContent: '',
+    bFilter: true,
+  };
+}
+
 function personColumn(title, key) {
   return {
     sTitle: title,
@@ -573,7 +587,7 @@ var clonedByColumn = personColumn('Cloned by', 'clonedBy');
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
 
-const releasedOnColumn = dateColumn('Released', 'releasedOn');
+const releasedOnColumn = longDateColumn('Released', 'releasedOn');
 const releasedByColumn = personColumn('Released by', 'releasedBy');
 
 var transferredOnColumn = dateColumn('transferred', 'transferredOn');

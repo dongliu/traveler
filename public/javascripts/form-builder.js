@@ -1440,6 +1440,7 @@ function binding_events() {
       '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
     );
     var discrepancyColumns = [
+      selectColumn,
       titleColumn,
       versionColumn,
       releasedOnColumn,
@@ -1447,16 +1448,21 @@ function binding_events() {
       formColumn,
     ];
     fnAddFilterFoot('#discrepancy', discrepancyColumns);
-    var availableTable = $('#discrepancy').dataTable({
+    var discrepancyTable = $('#discrepancy').dataTable({
       sAjaxSource: '/released-forms/discrepancy/json',
       sAjaxDataProp: '',
       bProcessing: true,
+      fnDrawCallback: function() {
+        Holder.run({
+          images: 'img.user',
+        });
+      },
       oLanguage: {
         sLoadingRecords: 'Please wait - loading data from the server ...',
       },
       aoColumns: discrepancyColumns,
       iDisplayLength: 5,
-      aaSorting: [[2, 'desc']],
+      aaSorting: [[3, 'desc']],
       sDom: sDomPage,
     });
     $('#modal').modal('show');
