@@ -258,6 +258,7 @@ $(function() {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
+    releasedFormVersionColumn,
     tagsColumn,
     releasedByColumn,
     releasedOnColumn,
@@ -279,7 +280,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: releasedFormAoColumns,
-    aaSorting: [[7, 'desc']],
+    aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
