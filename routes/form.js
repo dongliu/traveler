@@ -824,26 +824,42 @@ module.exports = function(app) {
     },
     // if the base form is normal then load the released discrepancy form
     function(req, res, next) {
-      if (req[req.params.id].type === 'normal' && req.body.discrepancyFormId) {
-        return reqUtils.existSource('discrepancyFormId', 'body', ReleasedForm)(
+      debug(req.body.discrepancyFormId);
+      debug(req[req.params.id].formType);
+      if (
+        req[req.params.id].formType === 'normal' &&
+        req.body.discrepancyFormId
+      ) {
+        reqUtils.existSource('discrepancyFormId', 'body', ReleasedForm)(
           req,
           res,
           next
         );
+      } else {
+        next();
       }
-      next();
     },
     // check the discrepancy form type
     function(req, res, next) {
+      debug(req[req.body.discrepancyFormId]);
       if (
         req[req.body.discrepancyFormId] &&
-        req[req.body.discrepancyFormId].type !== 'discrepancy'
+        req[req.body.discrepancyFormId].formType !== 'discrepancy'
       ) {
         return res
           .status(400)
           .send(
             `${req[req.body.discrepancyFormId].id} is not a discrepancy form`
           );
+      }
+
+      if (
+        req[req.body.discrepancyFormId] &&
+        req[req.body.discrepancyFormId].status !== 1
+      ) {
+        return res
+          .status(400)
+          .send(`${req[req.body.discrepancyFormId].id} is not released`);
       }
       next();
     },
@@ -857,8 +873,8 @@ module.exports = function(app) {
       releasedForm.formType = form.formType;
       releasedForm.base = new FormContent(form);
       if (discrepancyForm) {
-        releasedForm.type = 'normal_discrepancy';
-        releaseForm.discrepancy = new FormContent(discrepancyForm);
+        releasedForm.formType = 'normal_discrepancy';
+        releasedForm.discrepancy = discrepancyForm.base;
       }
       releasedForm.releasedBy = req.session.userid;
       releasedForm.releasedOn = Date.now();
