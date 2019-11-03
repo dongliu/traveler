@@ -8,7 +8,7 @@ html
       var terminology = !{JSON.stringify(viewConfig.terminology)};
       var shareUsers = !{viewConfig.shareUsers};
       var shareGroups = !{viewConfig.shareGroups};
-      var linkTarget = '!{viewConfig.linkTarget}';
+      var linkTarget = '!{viewConfig.linkTarget}' || '_blank';
       var showCCDB = !{viewConfig.showCCDB};
 
     .navbar.navbar-fixed-top
