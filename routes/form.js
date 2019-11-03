@@ -200,16 +200,15 @@ module.exports = function(app) {
         },
       ],
     };
-    Form.find(search, 'title formType status tags archivedOn _v').exec(function(
-      err,
-      forms
-    ) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
+    Form.find(search, 'title formType status tags updatedBy updatedOn _v').exec(
+      function(err, forms) {
+        if (err) {
+          logger.error(err);
+          return res.status(500).send(err.message);
+        }
+        res.status(200).json(forms);
       }
-      res.status(200).json(forms);
-    });
+    );
   });
 
   app.get('/publicforms/', auth.ensureAuthenticated, function(req, res) {
