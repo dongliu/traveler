@@ -48,33 +48,20 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/released-forms/:id', auth.ensureAuthenticated, function(req, res) {
-    ReleasedForm.find(
-      {
-        status: 1,
-      },
-      'title formType status tags _v releasedOn releasedBy'
-    ).exec(function(err, forms) {
-      if (err) {
-        console.error(err);
-        return res.status(500).send(err.message);
-      }
-      res.status(200).json(forms);
-    });
-  });
-
   app.get(
-    '/released-forms/:id/preview',
+    '/released-forms/:id/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', ReleasedForm),
     function(req, res) {
       const releasedForm = req[req.params.id];
       return res.render(
-        'form-viewer',
+        'released-form',
         routesUtilities.getRenderObject(req, {
           id: req.params.id,
           title: releasedForm.title,
-          html: releasedForm.base.html,
+          formType: releasedForm.formType,
+          base: releasedForm.base,
+          discrepancy: releasedForm.discrepancy,
         })
       );
     }
