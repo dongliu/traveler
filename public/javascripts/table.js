@@ -23,6 +23,22 @@ function selectEvent() {
   });
 }
 
+function selectOneEvent(oTable) {
+  $('tbody').on('click', 'input.select-row', function(e) {
+    var tr = $(e.target).closest('tr');
+    if ($(tr).hasClass('row-selected')) {
+      $(tr).removeClass('row-selected');
+    } else {
+      oTable.$('tr.row-selected').removeClass('row-selected');
+      oTable
+        .$('input.select-row')
+        .not(this)
+        .prop('checked', false);
+      $(tr).addClass('row-selected');
+    }
+  });
+}
+
 function filterEvent() {
   $('.filter').on('keyup', 'input', function(e) {
     var table = $(this).closest('table');
