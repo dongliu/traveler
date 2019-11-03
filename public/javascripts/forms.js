@@ -295,9 +295,8 @@ $(function() {
     versionColumn,
     tagsColumn,
     keysColumn,
-    archivedOnColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
+    updatedByColumn,
+    updatedOnColumn,
   ];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
@@ -316,7 +315,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [[9, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
