@@ -52,7 +52,6 @@ const releasedForm = new Schema({
   archivedBy: String,
   base: formContent,
   discrepancy: { type: formContent, default: null },
-  _v: Number,
 });
 
 const ReleasedForm = mongoose.model('ReleasedForm', releasedForm);
