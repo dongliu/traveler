@@ -704,6 +704,14 @@ var versionColumn = {
   sWidth: '45px',
 };
 
+var releasedFormVersionColumn = {
+  sTitle: 'Ver',
+  mData: 'ver',
+  sDefaultContent: '',
+  bFilter: true,
+  sWidth: '45px',
+};
+
 var formTypeColumn = {
   sTitle: 'Type',
   mData: 'formType',

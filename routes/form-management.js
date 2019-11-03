@@ -38,7 +38,7 @@ module.exports = function(app) {
       {
         status: 1,
       },
-      'title formType status tags releasedOn releasedBy'
+      'title formType status tags ver releasedOn releasedBy'
     ).exec(function(err, forms) {
       if (err) {
         console.error(err);
