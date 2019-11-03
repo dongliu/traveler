@@ -52,6 +52,8 @@ const releasedForm = new Schema({
   archivedBy: String,
   base: formContent,
   discrepancy: { type: formContent, default: null },
+  // format: base_v[:discrepancy_v]
+  ver: String,
 });
 
 const ReleasedForm = mongoose.model('ReleasedForm', releasedForm);

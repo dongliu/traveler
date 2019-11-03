@@ -871,9 +871,11 @@ module.exports = function(app) {
       releasedForm.tags = form.tags;
       releasedForm.formType = form.formType;
       releasedForm.base = new FormContent(form);
+      releasedForm.ver = `${releasedForm.base._v}`;
       if (discrepancyForm) {
         releasedForm.formType = 'normal_discrepancy';
         releasedForm.discrepancy = discrepancyForm.base;
+        releasedForm.ver += `:${discrepancyForm.base._v}`;
       }
       releasedForm.releasedBy = req.session.userid;
       releasedForm.releasedOn = Date.now();
