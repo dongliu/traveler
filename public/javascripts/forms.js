@@ -254,13 +254,13 @@ $(function() {
   /*released form table starts*/
   var releasedFormAoColumns = [
     selectColumn,
-    formLinkColumn,
+    releasedFormLinkColumn,
     titleColumn,
     formStatusColumn,
     formTypeColumn,
-    versionColumn,
     tagsColumn,
-    keysColumn,
+    releasedByColumn,
+    releasedOnColumn,
   ];
   var releasedFormTable = $('#released-form-table').dataTable({
     sAjaxSource: '/released-forms/json',
@@ -279,7 +279,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: releasedFormAoColumns,
-    aaSorting: [[2, 'desc'], [5, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
