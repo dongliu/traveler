@@ -111,7 +111,7 @@ $(function() {
     formLinkColumn,
     titleColumn,
     formTypeColumn,
-    formStatusColumn,
+    releasedFormStatusColumn,
     releasedFormVersionColumn,
     tagsColumn,
     releasedByColumn,
