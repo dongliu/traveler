@@ -512,7 +512,7 @@ const releasedFormLinkColumn = {
       prefix +
       '/released-forms/' +
       data +
-      '/preview" target="' +
+      '/" target="' +
       linkTarget +
       '" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>'
     );
