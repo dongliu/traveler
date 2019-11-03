@@ -109,14 +109,10 @@ $(function() {
   var releasedFormAoColumns = [
     selectColumn,
     formLinkColumn,
-    formConfigLinkColumn,
-    formShareLinkColumn,
     titleColumn,
     formTypeColumn,
-    versionColumn,
     formStatusColumn,
     tagsColumn,
-    keysColumn,
     releasedByColumn,
     releasedOnColumn,
   ];
@@ -137,7 +133,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: releasedFormAoColumns,
-    aaSorting: [[11, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
