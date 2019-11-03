@@ -291,7 +291,7 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    formStatusColumn,
+    releasedFormStatusColumn,
     formTypeColumn,
     versionColumn,
     tagsColumn,
