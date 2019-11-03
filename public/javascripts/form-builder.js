@@ -1435,48 +1435,53 @@ function binding_events() {
       $('#modal .modal-body').append(
         '<h4>Choose a discrepancy to attach</h4> <table id="discrepancy" class="table table-bordered table-hover"> </table>'
       );
+      var discrepancyColumns = [
+        selectColumn,
+        titleColumn,
+        versionColumn,
+        releasedOnColumn,
+        releasedByColumn,
+        releasedFormLinkColumn,
+      ];
+      fnAddFilterFoot('#discrepancy', discrepancyColumns);
+      var discrepancyTable = $('#discrepancy').dataTable({
+        sAjaxSource: '/released-forms/discrepancy/json',
+        sAjaxDataProp: '',
+        bProcessing: true,
+        fnDrawCallback: function() {
+          Holder.run({
+            images: 'img.user',
+          });
+        },
+        oLanguage: {
+          sLoadingRecords: 'Please wait - loading data from the server ...',
+        },
+        aoColumns: discrepancyColumns,
+        iDisplayLength: 5,
+        aaSorting: [[4, 'desc']],
+        sDom: sDomPage,
+      });
+      selectOneEvent(discrepancyTable);
+      filterEvent();
     }
     $('#modal .modal-footer').html(
       '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
     );
-    var discrepancyColumns = [
-      selectColumn,
-      titleColumn,
-      versionColumn,
-      releasedOnColumn,
-      releasedByColumn,
-      releasedFormLinkColumn,
-    ];
-    fnAddFilterFoot('#discrepancy', discrepancyColumns);
-    var discrepancyTable = $('#discrepancy').dataTable({
-      sAjaxSource: '/released-forms/discrepancy/json',
-      sAjaxDataProp: '',
-      bProcessing: true,
-      fnDrawCallback: function() {
-        Holder.run({
-          images: 'img.user',
-        });
-      },
-      oLanguage: {
-        sLoadingRecords: 'Please wait - loading data from the server ...',
-      },
-      aoColumns: discrepancyColumns,
-      iDisplayLength: 5,
-      aaSorting: [[3, 'desc']],
-      sDom: sDomPage,
-    });
-    selectEvent();
-    filterEvent();
     $('#modal').modal('show');
     $('#modal button[value="confirm"]').click(function() {
       var title = $('#release-title').val();
-      sendRequest(
-        {
-          title: title,
-        },
-        null,
-        'release'
-      );
+      var json = {
+        title: title,
+      };
+      if (discrepancyTable) {
+        var selected = fnGetSelected(discrepancyTable, 'row-selected');
+        if (selected.length === 1) {
+          var data = discrepancyTable.fnGetData(selected[0]);
+          json.discrepancyFormId = data._id;
+        }
+      }
+
+      sendRequest(json, null, 'release');
     });
   });
 
