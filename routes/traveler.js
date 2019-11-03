@@ -909,22 +909,6 @@ module.exports = function(app) {
     }
   );
 
-  app.get(
-    '/travelers/:id/discrepancy-form-manager',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.archived('id', false),
-    function formviewer(req, res) {
-      res.render(
-        'discrepancy-form-manager',
-        routesUtilities.getRenderObject(req, {
-          traveler: req[req.params.id],
-        })
-      );
-    }
-  );
-
   // use the form in the request as the active form
   app.post(
     '/travelers/:id/forms/',
@@ -1052,55 +1036,6 @@ module.exports = function(app) {
           return res.status(500).send(e.message);
         }
         return res.status(204).send();
-      });
-    }
-  );
-
-  // use the form in the request as the active discrepancy form
-  app.post(
-    '/travelers/:id/discrepancy-forms/',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.archived('id', false),
-    reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['formId']),
-    reqUtils.hasAll('body', ['formId']),
-    reqUtils.existSource('formId', 'body', Form),
-    function addDiscrepancyForm(req, res) {
-      if (req[req.body.formId].formType !== 'discrepancy') {
-        return res.status(400).send('the form should be of discrepancy type!');
-      }
-
-      if (req[req.body.formId].status !== 1) {
-        return res.status(400).send('the form should be released!');
-      }
-
-      var doc = req[req.params.id];
-      var form = {
-        html: req[req.body.formId].html,
-        mapping: req[req.body.formId].mapping,
-        labels: req[req.body.formId].labels,
-        activatedOn: [Date.now()],
-        reference: req.body.formId,
-        _v: req[req.body.formId]._v,
-        alias: req[req.body.formId].title,
-      };
-
-      // migrate traveler without discrepancyForms
-      if (!doc.discrepancyForms) {
-        doc.discrepancyForms = [];
-      }
-      doc.discrepancyForms.push(form);
-      doc.activeDiscrepancyForm =
-        doc.discrepancyForms[doc.discrepancyForms.length - 1]._id;
-      doc.referenceDiscrepancyForm = form.reference;
-      doc.save(function saveDoc(e, newDoc) {
-        if (e) {
-          logger.error(e);
-          return res.status(500).send(e.message);
-        }
-        return res.status(200).json(newDoc);
       });
     }
   );
