@@ -60,6 +60,7 @@ module.exports = function(app) {
           id: req.params.id,
           title: releasedForm.title,
           formType: releasedForm.formType,
+          ver: releasedForm.ver,
           base: releasedForm.base,
           discrepancy: releasedForm.discrepancy,
         })
