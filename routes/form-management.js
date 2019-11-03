@@ -16,7 +16,7 @@ module.exports = function(app) {
   app.get(
     '/submitted-forms/json',
     auth.ensureAuthenticated,
-    auth.verifyRole(true, 'admin', 'manager'),
+    auth.verifyRole('admin', 'manager'),
     function(req, res) {
       Form.find(
         {
