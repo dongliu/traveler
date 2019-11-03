@@ -1445,7 +1445,7 @@ function binding_events() {
       versionColumn,
       releasedOnColumn,
       releasedByColumn,
-      formColumn,
+      releasedFormLinkColumn,
     ];
     fnAddFilterFoot('#discrepancy', discrepancyColumns);
     var discrepancyTable = $('#discrepancy').dataTable({
@@ -1465,6 +1465,8 @@ function binding_events() {
       aaSorting: [[3, 'desc']],
       sDom: sDomPage,
     });
+    selectEvent();
+    filterEvent();
     $('#modal').modal('show');
     $('#modal button[value="confirm"]').click(function() {
       var title = $('#release-title').val();

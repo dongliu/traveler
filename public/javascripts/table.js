@@ -1,5 +1,5 @@
 /*global moment: false*/
-/*global prefix: false*/
+/*global prefix: false, linkTarget: false*/
 
 function formatDate(date) {
   return date ? moment(date).fromNow() : '';
@@ -155,7 +155,9 @@ function personNameColumn(title, key) {
       return (
         '<a href = "/usernames/' +
         data +
-        '" target="" + linkTarget>' +
+        '" target="' +
+        linkTarget +
+        '" >' +
         data +
         '</a>'
       );
@@ -408,7 +410,9 @@ var referenceFormLinkColumn = {
       prefix +
       '/forms/' +
       data +
-      '/" target="" + linkTarget data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
+      '/" target="' +
+      linkTarget +
+      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
     );
   },
   bSortable: false,
@@ -424,7 +428,9 @@ var formColumn = {
       prefix +
       '/forms/' +
       data +
-      '/" target="" + linkTarget data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
+      '/" target="' +
+      linkTarget +
+      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
     );
   },
   bSortable: false,
@@ -455,7 +461,7 @@ var idColumn = {
   bVisible: false,
 };
 
-var formLinkColumn = {
+const formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data) {
@@ -467,6 +473,23 @@ var formLinkColumn = {
       '/" target="' +
       linkTarget +
       '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
+    );
+  },
+  bSortable: false,
+};
+
+const releasedFormLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function(data) {
+    return (
+      '<a href="' +
+      prefix +
+      '/released-forms/' +
+      data +
+      '/preview" target="' +
+      linkTarget +
+      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>'
     );
   },
   bSortable: false,
