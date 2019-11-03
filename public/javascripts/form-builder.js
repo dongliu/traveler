@@ -1474,7 +1474,12 @@ function binding_events() {
         title: title,
       };
       if (discrepancyTable) {
-        var selected = fnGetSelected(discrepancyTable, 'row-selected');
+        // get only current page after filtered
+        var selected = fnGetSelectedInPage(
+          discrepancyTable,
+          'row-selected',
+          true
+        );
         if (selected.length === 1) {
           var data = discrepancyTable.fnGetData(selected[0]);
           json.discrepancyFormId = data._id;
