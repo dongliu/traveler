@@ -209,6 +209,15 @@ function fnGetSelected(oTableLocal, selectedClass) {
   return aReturn;
 }
 
+function fnGetSelectedInPage(oTableLocal, selectedClass, current) {
+  if (current) {
+    return oTableLocal.$('tr.' + selectedClass, {
+      page: 'current',
+    });
+  }
+  return oTableLocal.$('tr.' + selectedClass);
+}
+
 function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
   var aTrs = oTableLocal.fnGetNodes();
   var i;
