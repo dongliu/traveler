@@ -14,7 +14,7 @@ var shareLib = require('../lib/share');
 var tag = require('../lib/tag');
 var DataError = require('../lib/error').DataError;
 
-var Form = mongoose.model('Form');
+var ReleasedForm = mongoose.model('ReleasedForm');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 var Traveler = mongoose.model('Traveler');
@@ -430,13 +430,14 @@ module.exports = function(app) {
       });
   });
 
+  // create new travelers
   app.post(
     '/travelers/',
     auth.ensureAuthenticated,
     reqUtils.filter('body', ['form', 'source']),
     function createOrCloneTraveler(req, res) {
       if (req.body.form) {
-        Form.findById(req.body.form, function(err, form) {
+        ReleasedForm.findById(req.body.form, function(err, form) {
           if (err) {
             logger.error(err);
             return res.status(500).send(err.message);
@@ -919,7 +920,7 @@ module.exports = function(app) {
     reqUtils.status('id', [0, 1]),
     reqUtils.filter('body', ['formId']),
     reqUtils.hasAll('body', ['formId']),
-    reqUtils.existSource('formId', 'body', Form),
+    reqUtils.existSource('formId', 'body', ReleasedForm),
     function addForm(req, res) {
       var doc = req[req.params.id];
       var form = {

@@ -89,14 +89,7 @@ function showHash() {
 
 function formatItemUpdate(data) {
   return (
-    '<div class="target" id="' +
-    data._id +
-    '"><b>' +
-    data.title +
-    '</b>, created ' +
-    moment(data.createdOn).fromNow() +
-    (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') +
-    '</div>'
+    '<div class="target" id="' + data._id + '"><b>' + data.title + '</b> </div>'
   );
 }
 
