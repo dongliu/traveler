@@ -249,7 +249,7 @@ $(function() {
     selectColumn,
     releasedFormLinkColumn,
     titleColumn,
-    formStatusColumn,
+    releasedFormStatusColumn,
     formTypeColumn,
     releasedFormVersionColumn,
     tagsColumn,
