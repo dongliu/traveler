@@ -636,6 +636,7 @@ module.exports = function(app) {
       form.updatedBy = req.session.userid;
       form.updatedOn = Date.now();
       form.clonedFrom = doc._id;
+      form.formType = doc.formType;
       form.sharedWith = [];
       form.tags = doc.tags;
 
