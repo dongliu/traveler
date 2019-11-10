@@ -613,7 +613,7 @@ module.exports = function(app) {
             '/';
 
           res.set('Location', url);
-          return res.status(201).json({
+          return res.status(303).json({
             location: url,
           });
         }
