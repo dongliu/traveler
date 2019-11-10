@@ -622,50 +622,6 @@ module.exports = function(app) {
   );
 
   app.post(
-    '/forms/clone/',
-    auth.ensureAuthenticated,
-    reqUtils.existSource('form', 'body', Form),
-    function(req, res) {
-      var access = reqUtils.getAccess(req, form);
-      if (access !== -1) {
-        var clonedForm = new Form({
-          title: form.title,
-          createdBy: req.session.userid,
-          createdOn: Date.now(),
-          clonedFrom: form._id,
-          sharedWith: [],
-          sharedGroup: [],
-          html: form.html,
-          tags: form.tags,
-        });
-
-        clonedForm.save(function(saveErr, createdForm) {
-          if (saveErr) {
-            logger.error(saveErr);
-            return res.status(500).send(err.message);
-          }
-
-          console.log('new form ' + createdForm.id + ' created');
-
-          var url =
-            (req.proxied ? authConfig.proxied_service : authConfig.service) +
-            '/forms/' +
-            createdForm.id +
-            '/';
-          res.set('Location', url);
-          return res.status(201).json({
-            location: url,
-          });
-        });
-      } else {
-        return res
-          .status(400)
-          .send('you are not authorized to clone this form');
-      }
-    }
-  );
-
-  app.post(
     '/forms/:id/clone',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
@@ -677,6 +633,8 @@ module.exports = function(app) {
       form.title = reqUtils.sanitizeText(doc.title) + ' clone';
       form.createdBy = req.session.userid;
       form.createdOn = Date.now();
+      form.updatedBy = req.session.userid;
+      form.updatedOn = Date.now();
       form.clonedFrom = doc._id;
       form.sharedWith = [];
       form.tags = doc.tags;
