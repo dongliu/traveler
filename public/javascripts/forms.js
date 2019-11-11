@@ -1,21 +1,12 @@
-/**
- * global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
- * updateAjaxURL: false, travelerGlobal: false, Holder: false
- */
-
-/**
- * global selectColumn: false, formLinkColumn: false, formConfigLinkColumn:
- * false, titleColumn: false, tagsColumn: false, keysColumn:false,
- * createdOnColumn: false, updatedOnColumn: false, updatedByColumn: false,
- * sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false,
- * sDomNoTools: false, createdByColumn: false, createdOnColumn: false,
- * fnGetSelected: false, selectEvent: false, filterEvent: false,
- * formShareLinkColumn: false, archivedOnColumn: false, transferredOnColumn:
- * false, ownerColumn: false, formStatusColumn: false
- */
-/**
- * global transferFromModal
- */
+/* global ajax401, disableAjaxCache, prefix, updateAjaxURL,
+ travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
+ updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn,
+ fnAddFilterFoot, sDomNoTools, createdByColumn, createdOnColumn,
+ fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
+ transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
+ versionColumn, releasedFormLinkColumn, releasedFormStatusColumn,
+ releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
+ transferFromModal */
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
@@ -257,7 +248,7 @@ $(function() {
     releasedByColumn,
     releasedOnColumn,
   ];
-  var releasedFormTable = $('#released-form-table').dataTable({
+  $('#released-form-table').dataTable({
     sAjaxSource: '/released-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
