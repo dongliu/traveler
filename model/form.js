@@ -29,11 +29,7 @@ var stateTransition = [
   },
   {
     from: 0.5,
-    to: [0, 1, 2],
-  },
-  {
-    from: 1,
-    to: [2],
+    to: [0, 2],
   },
 ];
 
