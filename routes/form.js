@@ -298,15 +298,15 @@ module.exports = function(app) {
     '/forms/:id/uploads/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
-    reqUtils.canReadMw('id'),
+    reqUtils.canWriteMw('id'),
     function(req, res) {
       var doc = req[req.params.id];
       if (_.isEmpty(req.files)) {
-        return res.status(400).send('Expecte One uploaded file');
+        return res.status(400).send('Expect One uploaded file');
       }
 
       if (!req.body.name) {
-        return res.status(400).send('Expecte input name');
+        return res.status(400).send('Expect input name');
       }
 
       var file = new FormFile({
@@ -613,57 +613,11 @@ module.exports = function(app) {
             '/';
 
           res.set('Location', url);
-          return res.status(201).json({
+          return res.status(303).json({
             location: url,
           });
         }
       );
-    }
-  );
-
-  app.post(
-    '/forms/clone/',
-    auth.ensureAuthenticated,
-    routesUtilities.filterBody('form'),
-    function(req, res) {
-      Form.findById(req.body.form, function(err, form) {
-        var access = reqUtils.getAccess(req, form);
-        if (access !== -1) {
-          var clonedForm = new Form({
-            title: form.title,
-            createdBy: req.session.userid,
-            createdOn: Date.now(),
-            clonedFrom: form._id,
-            sharedWith: [],
-            sharedGroup: [],
-            html: form.html,
-            tags: form.tags,
-          });
-
-          clonedForm.save(function(saveErr, createdForm) {
-            if (saveErr) {
-              logger.error(saveErr);
-              return res.status(500).send(err.message);
-            }
-
-            console.log('new form ' + createdForm.id + ' created');
-
-            var url =
-              (req.proxied ? authConfig.proxied_service : authConfig.service) +
-              '/forms/' +
-              createdForm.id +
-              '/';
-            res.set('Location', url);
-            return res.status(201).json({
-              location: url,
-            });
-          });
-        } else {
-          return res
-            .status(400)
-            .send('you are not authorized to clone this form');
-        }
-      });
     }
   );
 
@@ -679,7 +633,10 @@ module.exports = function(app) {
       form.title = reqUtils.sanitizeText(doc.title) + ' clone';
       form.createdBy = req.session.userid;
       form.createdOn = Date.now();
+      form.updatedBy = req.session.userid;
+      form.updatedOn = Date.now();
       form.clonedFrom = doc._id;
+      form.formType = doc.formType;
       form.sharedWith = [];
       form.tags = doc.tags;
 

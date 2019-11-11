@@ -4,6 +4,9 @@ const routesUtilities = require('../utilities/routes.js');
 const Form = mongoose.model('Form');
 const ReleasedForm = mongoose.model('ReleasedForm');
 const reqUtils = require('../lib/req-utils');
+const logger = require('../lib/loggers').getLogger();
+const config = require('../config/config.js');
+const authConfig = config.auth;
 
 module.exports = function(app) {
   app.get('/form-management/', auth.verifyRole('manager', 'admin'), function(
@@ -65,6 +68,44 @@ module.exports = function(app) {
           discrepancy: releasedForm.discrepancy,
         })
       );
+    }
+  );
+
+  app.post(
+    '/released-forms/:id/clone',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', ReleasedForm),
+    function(req, res) {
+      const releasedForm = req[req.params.id];
+      const base = releasedForm.base;
+      const clonedForm = {};
+      clonedForm.html = reqUtils.sanitizeText(base.html);
+      clonedForm.title = reqUtils.sanitizeText(releasedForm.title) + ' clone';
+      clonedForm.createdBy = req.session.userid;
+      clonedForm.createdOn = Date.now();
+      clonedForm.updatedBy = req.session.userid;
+      clonedForm.updatedOn = Date.now();
+      clonedForm.clonedFrom = base.reference;
+      clonedForm.formType = base.formType;
+      clonedForm.sharedWith = [];
+      clonedForm.tags = releasedForm.tags;
+      new Form(clonedForm).save(function(saveErr, newform) {
+        if (saveErr) {
+          logger.error(saveErr);
+          return res.status(500).send(saveErr.message);
+        }
+        var url =
+          (req.proxied ? authConfig.proxied_service : authConfig.service) +
+          '/forms/' +
+          newform.id +
+          '/';
+        res.set('Location', url);
+        return res
+          .status(201)
+          .send(
+            'You can see the new form at <a href="' + url + '">' + url + '</a>'
+          );
+      });
     }
   );
 

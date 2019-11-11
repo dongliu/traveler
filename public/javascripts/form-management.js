@@ -1,20 +1,13 @@
-/**
- * global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
- * updateAjaxURL: false, Holder: false
- */
-
-/**
- * global selectColumn: false, formLinkColumn: false, formConfigLinkColumn:
- * false, titleColumn: false, tagsColumn: false, keysColumn:false,
- * updatedOnColumn: false, updatedByColumn: false, fnAddFilterFoot: false,
- * sDomNoTools: false, fnGetSelected: false, selectEvent: false, filterEvent:
- * false, formTypeColumn: false, versionColumn: false, formShareLinkColumn:
- * false, formStatusColumn: false
- */
-
-/**
- * global archiveFromModal
- */
+/* global moment, ajax401, disableAjaxCache, prefix, updateAjaxURL,
+ Holder, selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn, keysColumn,
+ updatedOnColumn, updatedByColumn,
+ fnAddFilterFoot, sDomNoTools,
+ fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
+  formStatusColumn, formTypeColumn,
+ versionColumn, releasedFormStatusColumn,
+ releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
+ archievedByColumn, archievedOnColumn
+  */
 
 function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
