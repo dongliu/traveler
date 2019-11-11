@@ -54,11 +54,12 @@ function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
+  var base = formTable.fnSettings()['sAjaxSource'].split('/')[1];
   $('#modal .modal-body div.target').each(function() {
     var that = this;
     var success = false;
     $.ajax({
-      url: '/forms/' + that.id + '/clone',
+      url: '/' + base + '/' + that.id + '/clone',
       type: 'POST',
     })
       .done(function() {
@@ -429,7 +430,7 @@ $(function() {
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        cloneFromModal(formTable);
+        cloneFromModal(activeTable);
       });
     }
   });
