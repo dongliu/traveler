@@ -723,7 +723,7 @@ function formatFormStatus(s) {
   var status = {
     '0': 'draft',
     '0.5': 'submitted',
-    '1': 'released',
+    '1': 'pre released',
     '2': 'archived',
   };
   if (status[s.toString()]) {
@@ -736,6 +736,25 @@ var formStatusColumn = {
   sTitle: 'Status',
   mData: function(source, type, val) {
     return formatFormStatus(source.status);
+  },
+  bFilter: true,
+};
+
+function formatReleasedFormStatus(s) {
+  var status = {
+    '1': 'released',
+    '2': 'archived',
+  };
+  if (status[s.toString()]) {
+    return status[s.toString()];
+  }
+  return 'unknown';
+}
+
+var releasedFormStatusColumn = {
+  sTitle: 'Status',
+  mData: function(source, type, val) {
+    return formatReleasedFormStatus(source.status);
   },
   bFilter: true,
 };

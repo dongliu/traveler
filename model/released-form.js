@@ -14,6 +14,11 @@ const stateTransition = [
   },
 ];
 
+const statusMap = {
+  '1': 'released',
+  '2': 'archived',
+};
+
 const formContent = new Schema({
   html: String,
   mapping: Schema.Types.Mixed,
@@ -65,4 +70,5 @@ module.exports = {
   ReleasedForm,
   stateTransition,
   FormContent,
+  statusMap,
 };
