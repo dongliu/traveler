@@ -1184,7 +1184,7 @@ module.exports = function(app) {
       var doc = req[req.params.id];
 
       if (_.isEmpty(req.files)) {
-        return res.status(400).send('Expecte One uploaded file');
+        return res.status(400).send('Expect One uploaded file');
       }
 
       var data = new TravelerData({
