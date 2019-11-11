@@ -14,6 +14,8 @@ var formModel = require('../model/form');
 
 var Form = mongoose.model('Form');
 var FormFile = mongoose.model('FormFile');
+const ReleasedForm = mongoose.model('ReleasedForm');
+const FormContent = mongoose.model('FormContent');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 
@@ -42,7 +44,7 @@ module.exports = function(app) {
       'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
     ).exec(function(err, forms) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.status(500).send(err.message);
       }
       res.status(200).json(forms);
@@ -63,7 +65,7 @@ module.exports = function(app) {
       'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup'
     ).exec(function(err, forms) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.status(500).send(err.message);
       }
       res.status(200).json(forms);
@@ -79,7 +81,7 @@ module.exports = function(app) {
         .lean()
         .exec(function(err, forms) {
           if (err) {
-            console.error(err);
+            logger.error(err);
             return res.status(500).send(err.message);
           }
           res.status(200).json(forms);
@@ -97,7 +99,7 @@ module.exports = function(app) {
       'forms'
     ).exec(function(err, me) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.status(500).send(err.message);
       }
       if (!me) {
@@ -115,7 +117,7 @@ module.exports = function(app) {
         'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
       ).exec(function(fErr, forms) {
         if (fErr) {
-          console.error(fErr);
+          logger.error(fErr);
           return res.status(500).send(fErr.message);
         }
         res.status(200).json(forms);
@@ -136,7 +138,7 @@ module.exports = function(app) {
       'forms'
     ).exec(function(err, groups) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.status(500).send(err.message);
       }
       var formids = [];
@@ -162,7 +164,7 @@ module.exports = function(app) {
         'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
       ).exec(function(fErr, forms) {
         if (fErr) {
-          console.error(fErr);
+          logger.error(fErr);
           return res.status(500).send(fErr.message);
         }
         res.status(200).json(forms);
@@ -198,16 +200,15 @@ module.exports = function(app) {
         },
       ],
     };
-    Form.find(search, 'title formType status tags archivedOn _v').exec(function(
-      err,
-      forms
-    ) {
-      if (err) {
-        console.error(err);
-        return res.status(500).send(err.message);
+    Form.find(search, 'title formType status tags updatedBy updatedOn _v').exec(
+      function(err, forms) {
+        if (err) {
+          logger.error(err);
+          return res.status(500).send(err.message);
+        }
+        res.status(200).json(forms);
       }
-      res.status(200).json(forms);
-    });
+    );
   });
 
   app.get('/publicforms/', auth.ensureAuthenticated, function(req, res) {
@@ -224,7 +225,7 @@ module.exports = function(app) {
       },
     }).exec(function(err, forms) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.status(500).send(err.message);
       }
       res.status(200).json(forms);
@@ -323,7 +324,7 @@ module.exports = function(app) {
 
       file.save(function(saveErr, newfile) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
         var url =
@@ -432,7 +433,7 @@ module.exports = function(app) {
       form.publicAccess = access;
       form.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
         return res
@@ -534,7 +535,7 @@ module.exports = function(app) {
       }
       form.save(function(saveErr) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
         // check consistency of user's form list
@@ -554,10 +555,10 @@ module.exports = function(app) {
           },
           function(updateErr, target) {
             if (updateErr) {
-              console.error(updateErr);
+              logger.error(updateErr);
             }
             if (!target) {
-              console.error(
+              logger.error(
                 'The user/group ' + req.params.userid + ' is not in the db'
               );
             }
@@ -602,7 +603,7 @@ module.exports = function(app) {
         },
         function(err, newform) {
           if (err) {
-            console.error(err);
+            logger.error(err);
             return res.status(500).send(err.message);
           }
           var url =
@@ -641,7 +642,7 @@ module.exports = function(app) {
 
           clonedForm.save(function(saveErr, createdForm) {
             if (saveErr) {
-              console.error(saveErr);
+              logger.error(saveErr);
               return res.status(500).send(err.message);
             }
 
@@ -684,7 +685,7 @@ module.exports = function(app) {
 
       new Form(form).save(function(saveErr, newform) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
         var url =
@@ -721,7 +722,7 @@ module.exports = function(app) {
 
       doc.save(function(saveErr, newDoc) {
         if (saveErr) {
-          console.error(saveErr);
+          logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
         return res
@@ -805,29 +806,100 @@ module.exports = function(app) {
   tag.removeTag(app, '/forms/:id/tags/:tag', Form);
 
   app.put(
+    '/forms/:id/released',
+    auth.ensureAuthenticated,
+    // only admin or manager can release a form
+    auth.requireRoles(true, 'admin', 'manager'),
+    // find the unreleased form
+    reqUtils.exist('id', Form),
+    // the form was submitted for release
+    function(req, res, next) {
+      if (req[req.params.id].status !== 0.5) {
+        return res
+          .status(400)
+          .send(`${req[req.params.id].id} is not submitted for release`);
+      }
+      next();
+    },
+    // if the base form is normal then load the released discrepancy form
+    function(req, res, next) {
+      debug(req.body.discrepancyFormId);
+      debug(req[req.params.id].formType);
+      if (
+        req[req.params.id].formType === 'normal' &&
+        req.body.discrepancyFormId
+      ) {
+        reqUtils.existSource('discrepancyFormId', 'body', ReleasedForm)(
+          req,
+          res,
+          next
+        );
+      } else {
+        next();
+      }
+    },
+    // check the discrepancy form type
+    function(req, res, next) {
+      debug(req[req.body.discrepancyFormId]);
+      if (
+        req[req.body.discrepancyFormId] &&
+        req[req.body.discrepancyFormId].formType !== 'discrepancy'
+      ) {
+        return res
+          .status(400)
+          .send(
+            `${req[req.body.discrepancyFormId].id} is not a discrepancy form`
+          );
+      }
+
+      if (
+        req[req.body.discrepancyFormId] &&
+        req[req.body.discrepancyFormId].status !== 1
+      ) {
+        return res
+          .status(400)
+          .send(`${req[req.body.discrepancyFormId].id} is not released`);
+      }
+      next();
+    },
+    async function releaseForm(req, res) {
+      const releasedForm = {};
+      const form = req[req.params.id];
+      const discrepancyForm = req[req.body.discrepancyFormId];
+      releasedForm.title = req.body.title || form.title;
+      releasedForm.description = req.body.description || form.description;
+      releasedForm.tags = form.tags;
+      releasedForm.formType = form.formType;
+      releasedForm.base = new FormContent(form);
+      releasedForm.ver = `${releasedForm.base._v}`;
+      if (discrepancyForm) {
+        releasedForm.formType = 'normal_discrepancy';
+        releasedForm.discrepancy = discrepancyForm.base;
+        releasedForm.ver += `:${discrepancyForm.base._v}`;
+      }
+      releasedForm.releasedBy = req.session.userid;
+      releasedForm.releasedOn = Date.now();
+      // reset the submitted form
+      form.status = 0;
+      try {
+        const saveForm = await new ReleasedForm(releasedForm).save();
+        const url = `/released-forms/${saveForm._id}/`;
+        form.save();
+        return res.status(201).json({
+          location: url,
+        });
+      } catch (error) {
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
+  app.put(
     '/forms/:id/status',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.filter('body', ['status', 'version']),
     reqUtils.hasAll('body', ['status', 'version']),
-    auth.requireRoles(
-      req => {
-        let s = req.body.status;
-        if (req[req.params.id].type === 'discrepancy') {
-          if ([1, 2].indexOf(s) !== -1) {
-            return true;
-          }
-        }
-        if (req[req.params.id].type === 'normal') {
-          if ([1].indexOf(s) !== -1) {
-            return true;
-          }
-        }
-        return false;
-      },
-      'admin',
-      'manager'
-    ),
     reqUtils.canWriteMw('id'),
     function updateStatus(req, res) {
       var f = req[req.params.id];

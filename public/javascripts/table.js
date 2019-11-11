@@ -1,5 +1,5 @@
 /*global moment: false*/
-/*global prefix: false*/
+/*global prefix: false, linkTarget: false*/
 
 function formatDate(date) {
   return date ? moment(date).fromNow() : '';
@@ -19,6 +19,22 @@ function selectEvent() {
       $(e.target)
         .closest('tr')
         .removeClass('row-selected');
+    }
+  });
+}
+
+function selectOneEvent(oTable) {
+  $('tbody').on('click', 'input.select-row', function(e) {
+    var tr = $(e.target).closest('tr');
+    if ($(tr).hasClass('row-selected')) {
+      $(tr).removeClass('row-selected');
+    } else {
+      oTable.$('tr.row-selected').removeClass('row-selected');
+      oTable
+        .$('input.select-row')
+        .not(this)
+        .prop('checked', false);
+      $(tr).addClass('row-selected');
     }
   });
 }
@@ -54,6 +70,20 @@ function dateColumn(title, key) {
       return formatDate(source[key]);
     },
     sDefaultContent: '',
+  };
+}
+
+function longDateColumn(title, key) {
+  return {
+    sTitle: title,
+    mData: function(source, type, val) {
+      if (type === 'sort') {
+        return source[key];
+      }
+      return formatDateLong(source[key]);
+    },
+    sDefaultContent: '',
+    bFilter: true,
   };
 }
 
@@ -141,7 +171,9 @@ function personNameColumn(title, key) {
       return (
         '<a href = "/usernames/' +
         data +
-        '" target="" + linkTarget>' +
+        '" target="' +
+        linkTarget +
+        '" >' +
         data +
         '</a>'
       );
@@ -175,6 +207,15 @@ function fnGetSelected(oTableLocal, selectedClass) {
     }
   }
   return aReturn;
+}
+
+function fnGetSelectedInPage(oTableLocal, selectedClass, current) {
+  if (current) {
+    return oTableLocal.$('tr.' + selectedClass, {
+      page: 'current',
+    });
+  }
+  return oTableLocal.$('tr.' + selectedClass);
 }
 
 function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
@@ -394,7 +435,9 @@ var referenceFormLinkColumn = {
       prefix +
       '/forms/' +
       data +
-      '/" target="" + linkTarget data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
+      '/" target="' +
+      linkTarget +
+      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
     );
   },
   bSortable: false,
@@ -410,7 +453,9 @@ var formColumn = {
       prefix +
       '/forms/' +
       data +
-      '/" target="" + linkTarget data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
+      '/" target="' +
+      linkTarget +
+      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
     );
   },
   bSortable: false,
@@ -441,7 +486,7 @@ var idColumn = {
   bVisible: false,
 };
 
-var formLinkColumn = {
+const formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data) {
@@ -453,6 +498,23 @@ var formLinkColumn = {
       '/" target="' +
       linkTarget +
       '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
+    );
+  },
+  bSortable: false,
+};
+
+const releasedFormLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function(data) {
+    return (
+      '<a href="' +
+      prefix +
+      '/released-forms/' +
+      data +
+      '/" target="' +
+      linkTarget +
+      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>'
     );
   },
   bSortable: false,
@@ -573,9 +635,13 @@ var clonedByColumn = personColumn('Cloned by', 'clonedBy');
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
 
+const releasedOnColumn = longDateColumn('Released', 'releasedOn');
+const releasedByColumn = personColumn('Released by', 'releasedBy');
+
 var transferredOnColumn = dateColumn('transferred', 'transferredOn');
 
-var archivedOnColumn = dateColumn('Archived', 'archivedOn');
+const archivedOnColumn = dateColumn('Archived', 'archivedOn');
+const archivedByColumn = personColumn('Archived by', 'archivedBy');
 
 var deadlineColumn = dateColumn('Deadline', 'deadline');
 
@@ -633,6 +699,14 @@ var titleColumn = {
 var versionColumn = {
   sTitle: 'Ver',
   mData: '_v',
+  sDefaultContent: '',
+  bFilter: true,
+  sWidth: '45px',
+};
+
+var releasedFormVersionColumn = {
+  sTitle: 'Ver',
+  mData: 'ver',
   sDefaultContent: '',
   bFilter: true,
   sWidth: '45px',

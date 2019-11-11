@@ -24,15 +24,27 @@ var mce_content = {
 
 var initHtml = '';
 
-function sendRequest(data, cb, saveas, status) {
+/**
+ * send request with data, and exec cb on response
+ *
+ * @param   {Object}  data    request body data
+ * @param   {function}  cb    callback
+ * @param   {string}  option  available options
+ *
+ * @return  {void}
+ */
+function sendRequest(data, cb, option) {
   var path = window.location.pathname;
   var url;
   var type;
-  if (saveas) {
+  if (option === 'saveas') {
     url = prefix + '/forms/';
     type = 'POST';
-  } else if (status) {
+  } else if (option === 'status') {
     url = path + 'status';
+    type = 'PUT';
+  } else if (option === 'release') {
+    url = path + 'released';
     type = 'PUT';
   } else {
     url = path;
@@ -48,7 +60,7 @@ function sendRequest(data, cb, saveas, status) {
   })
     .done(function(data, textStatus, request) {
       var timestamp = request.getResponseHeader('Date');
-      if (saveas && data.location) {
+      if (data.location) {
         document.location.href = data.location;
       } else {
         $('#message').append(
@@ -94,7 +106,7 @@ function updateSectionNumbers() {
         $(this)
           .find('.section-number')
           .text(sectionNumber);
-      } else if($(this).is('div.rich-instruction')) {
+      } else if ($(this).is('div.rich-instruction')) {
         instructionNumber += 1;
         //reset control number
         controlNumber = 0;
@@ -106,7 +118,9 @@ function updateSectionNumbers() {
         controlNumber += 1;
         $(this)
           .find('.control-number')
-          .text('' + sectionNumber + '.' + instructionNumber + '.' + controlNumber);
+          .text(
+            '' + sectionNumber + '.' + instructionNumber + '.' + controlNumber
+          );
       }
     });
 }
@@ -142,7 +156,7 @@ function addSectionNumberToRichInstruction(richInstructionParent) {
 }
 
 function prependSpanIfNotExists(element, sectionName) {
-  if ($(element).find('.'+sectionName).length === 0) {
+  if ($(element).find('.' + sectionName).length === 0) {
     $(element).prepend('<span class="' + sectionName + '"></span>&nbsp;');
   }
 }
@@ -1356,14 +1370,14 @@ function binding_events() {
     $('#modalLabel').html('Save the form as (a new one)');
     $('#modal .modal-body').empty();
     $('#modal .modal-body').append(
-      '<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="title" type="text" class="input"></div></div></form>'
+      '<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Form title</label><div class="controls"><input id="new-title" type="text" class="input"></div></div></form>'
     );
     $('#modal .modal-footer').html(
       '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
     );
     $('#modal').modal('show');
     $('#modal button[value="confirm"]').click(function() {
-      var title = $('#title').val();
+      var title = $('#new-title').val();
       sendRequest(
         {
           html: html,
@@ -1371,7 +1385,7 @@ function binding_events() {
           formType: formType,
         },
         null,
-        true
+        'saveas'
       );
     });
   });
@@ -1403,23 +1417,77 @@ function binding_events() {
       function() {
         window.location.reload(true);
       },
-      false,
-      true
+      'status'
     );
   });
 
   $('#release').click(function() {
-    sendRequest(
-      {
-        status: 1,
-        version: Number($('#version').text()),
-      },
-      function() {
-        window.location.reload(true);
-      },
-      false,
-      true
+    var html = $('#output').html();
+    $('#modalLabel').html('Release the form');
+    $('#modal .modal-body').empty();
+    var defaultTitle = $('#formtitle').text();
+    $('#modal .modal-body').append(
+      '<form class="form-horizontal" id="modalform"> <div class="control-group"> <label class="control-label">Form title</label> <div class="controls"><input id="release-title" type="text" value="' +
+        defaultTitle +
+        '" class="input"> </div> </div> </form>'
     );
+    if (formType === 'normal') {
+      $('#modal .modal-body').append(
+        '<h4>Choose a discrepancy to attach</h4> <table id="discrepancy" class="table table-bordered table-hover"> </table>'
+      );
+      var discrepancyColumns = [
+        selectColumn,
+        titleColumn,
+        versionColumn,
+        releasedOnColumn,
+        releasedByColumn,
+        releasedFormLinkColumn,
+      ];
+      fnAddFilterFoot('#discrepancy', discrepancyColumns);
+      var discrepancyTable = $('#discrepancy').dataTable({
+        sAjaxSource: '/released-forms/discrepancy/json',
+        sAjaxDataProp: '',
+        bProcessing: true,
+        fnDrawCallback: function() {
+          Holder.run({
+            images: 'img.user',
+          });
+        },
+        oLanguage: {
+          sLoadingRecords: 'Please wait - loading data from the server ...',
+        },
+        aoColumns: discrepancyColumns,
+        iDisplayLength: 5,
+        aaSorting: [[4, 'desc']],
+        sDom: sDomPage,
+      });
+      selectOneEvent(discrepancyTable);
+      filterEvent();
+    }
+    $('#modal .modal-footer').html(
+      '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
+    );
+    $('#modal').modal('show');
+    $('#modal button[value="confirm"]').click(function() {
+      var title = $('#release-title').val();
+      var json = {
+        title: title,
+      };
+      if (discrepancyTable) {
+        // get only current page after filtered
+        var selected = fnGetSelectedInPage(
+          discrepancyTable,
+          'row-selected',
+          true
+        );
+        if (selected.length === 1) {
+          var data = discrepancyTable.fnGetData(selected[0]);
+          json.discrepancyFormId = data._id;
+        }
+      }
+
+      sendRequest(json, null, 'release');
+    });
   });
 
   $('#reject').click(function() {
@@ -1431,8 +1499,7 @@ function binding_events() {
       function() {
         window.location.reload(true);
       },
-      false,
-      true
+      'status'
     );
   });
 
@@ -1445,8 +1512,7 @@ function binding_events() {
       function() {
         window.location.reload(true);
       },
-      false,
-      true
+      'status'
     );
   });
 }

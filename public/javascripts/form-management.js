@@ -109,16 +109,13 @@ $(function() {
   var releasedFormAoColumns = [
     selectColumn,
     formLinkColumn,
-    formConfigLinkColumn,
-    formShareLinkColumn,
     titleColumn,
     formTypeColumn,
-    versionColumn,
     formStatusColumn,
+    releasedFormVersionColumn,
     tagsColumn,
-    keysColumn,
-    updatedByColumn,
-    updatedOnColumn,
+    releasedByColumn,
+    releasedOnColumn,
   ];
   var releasedFormTable = $('#released-form-table').dataTable({
     sAjaxSource: '/released-forms/json',
@@ -136,8 +133,8 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: formAoColumns,
-    aaSorting: [[11, 'desc']],
+    aoColumns: releasedFormAoColumns,
+    aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
@@ -151,8 +148,8 @@ $(function() {
     formStatusColumn,
     keysColumn,
     versionColumn,
-    updatedByColumn,
-    updatedOnColumn,
+    archievedByColumn,
+    archievedOnColumn,
   ];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
