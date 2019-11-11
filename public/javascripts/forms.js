@@ -41,17 +41,21 @@ function travelFromModal() {
   });
 }
 
-function cloneFromModal(formTable) {
+function cloneFromModal(activeTable, formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
-  var base = formTable.fnSettings()['sAjaxSource'].split('/')[1];
+  var base = activeTable.fnSettings()['sAjaxSource'].split('/')[1];
   $('#modal .modal-body div.target').each(function() {
     var that = this;
     var success = false;
     $.ajax({
       url: '/' + base + '/' + that.id + '/clone',
       type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        title: $('input', $(that)).val(),
+      }),
     })
       .done(function() {
         $(that).prepend('<i class="fa fa-check"></i>');
@@ -82,6 +86,18 @@ function showHash() {
 function formatItemUpdate(data) {
   return (
     '<div class="target" id="' + data._id + '"><b>' + data.title + '</b> </div>'
+  );
+}
+
+function cloneItem(data) {
+  return (
+    '<div class="target" id="' +
+    data._id +
+    '">clone <b>' +
+    data.title +
+    '</b> <br> to title: <input type="text" value="' +
+    data.title +
+    ' clone"></div></div>'
   );
 }
 
@@ -409,19 +425,19 @@ $(function() {
       $('#modal').modal('show');
     } else {
       $('#modalLabel').html(
-        'Clone the following ' + selected.length + ' forms? '
+        'Clone the following ' + selected.length + ' form(s)? '
       );
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
+        $('#modal .modal-body').append(cloneItem(data));
       });
       $('#modal .modal-footer').html(
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        cloneFromModal(activeTable);
+        cloneFromModal(activeTable, formTable);
       });
     }
   });
