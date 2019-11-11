@@ -134,6 +134,8 @@ var traveler = new Schema({
   referenceForm: ObjectId,
   // global object if of the discrepancy form
   referenceDiscrepancyForm: ObjectId,
+  referenceReleasedForm: ObjectId,
+  referenceReleasedFormVer: String,
   forms: [form],
   discrepancyForms: [form],
   mapping: Schema.Types.Mixed,

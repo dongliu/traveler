@@ -36,7 +36,7 @@ var stateTransition = [
 const statusMap = {
   '0': 'draft',
   '0.5': 'submitted for release',
-  '1': 'released',
+  '1': 'pre released',
   '2': 'archived',
 };
 
