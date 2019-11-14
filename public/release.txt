@@ -1,3 +1,7 @@
+APS-1.3.2
+# Form Builder
+  - Float all edit buttons on bottom of screen. Jump to bottom upon creation of new item in form.
+
 APS-1.3.1
 Sept 16, 2019
 # Improve form numbering
