@@ -34,8 +34,9 @@ block content
     .well-large
       form.form-horizontal#output
         != html
+  .button-footer.container
     if (status === 0)
-      .btn-group.dropdown
+      .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
           span.caret
         ul.dropdown-menu
@@ -55,7 +56,7 @@ block content
             a Upload file
           li#add-other
             a other types
-      .btn-group.dropdown
+      .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Advanced control
           span.caret
         ul.dropdown-menu
@@ -91,16 +92,6 @@ block content
         if (status === 1)
           .btn-group
             button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
-  br
-  br
-  br
-  br
-  br
-  br
-  br
-  br
-  br
-  br
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
