@@ -116,8 +116,9 @@ block content
           .control-group#discrepancy-legend
             legend Discrepancy log
           table#discrepancy-log-table.table.table-bordered.table-hover
-          .btn-group
-            button.btn.btn-primary#add-discrepancy Add discrepancy log
+          if (locals.traveler.status === 1 || traveler.forms.length === 1.5)
+            .btn-group
+              button.btn.btn-primary#add-discrepancy Add discrepancy log
         form.form-horizontal#form
           div.control-group#traveler-legend
             legend Traveler
