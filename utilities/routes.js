@@ -247,7 +247,7 @@ var binder = {
   },
 };
 
-function addDiscrepency(discrepancy, traveler) {
+function addDiscrepancy(discrepancy, traveler) {
   // migrate traveler without discrepancyForms
   if (!traveler.discrepancyForms) {
     traveler.discrepancyForms = [];
@@ -354,8 +354,9 @@ var traveler = {
     //   form.base.labels = this.inputLabels(form.base.html);
     // }
     addBase(form.base, traveler);
-    addDiscrepency(form.discrepancy, traveler);
-
+    if (form.discrepancy) {
+      addDiscrepancy(form.discrepancy, traveler);
+    }
     traveler.save(newTravelerCallBack);
   },
   changeArchivedState: function(traveler, archived) {
