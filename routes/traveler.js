@@ -808,7 +808,7 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     reqUtils.canWriteMw('id'),
-    reqUtils.status('id', [1]),
+    reqUtils.status('id', [1, 1.5]),
     reqUtils.exist('lid', Log),
     // reqUtils.filter('body', ['records']),
     // reqUtils.hasAll('body', ['records']),
