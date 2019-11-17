@@ -7,8 +7,8 @@
 var config = require('../config/config.js');
 
 var mongoose = require('mongoose');
-var Traveler = mongoose.model('Traveler');
-var Binder = mongoose.model('Binder');
+var Traveler = require('../model/traveler').Traveler;
+var Binder = require('../model/binder').Binder;
 var _ = require('lodash');
 var cheer = require('cheerio');
 
@@ -253,12 +253,16 @@ function addDiscrepancy(discrepancy, traveler) {
     traveler.discrepancyForms = [];
   }
   traveler.discrepancyForms.push(discrepancy);
+  // set reference for compatibility, discrepancy._id is the same as the discrepancy form id
+  traveler.discrepancyForms[0].reference = discrepancy._id;
   traveler.activeDiscrepancyForm = traveler.discrepancyForms[0]._id;
-  traveler.referenceDiscrepancyForm = discrepancy.reference;
+  traveler.referenceDiscrepancyForm = discrepancy._id;
 }
 
 function addBase(base, traveler) {
   traveler.forms.push(base);
+  // set reference for compatibility, base._id is the same as the base form id
+  traveler.forms[0].reference = base._id;
   traveler.activeForm = traveler.forms[0]._id;
   traveler.mapping = base.mapping;
   traveler.labels = base.labels;
