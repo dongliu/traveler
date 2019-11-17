@@ -793,7 +793,7 @@ $(function() {
       }),
     })
       .done(function(log) {
-        $('#modalLabel').html('Please input discrepency log details');
+        $('#modalLabel').html('Please input discrepancy log details');
         $('#modal .modal-body').html(
           '<form id="discrepancy-form" class="form-horizontal">' +
             discrepancyForm.html +
