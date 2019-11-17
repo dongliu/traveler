@@ -810,9 +810,7 @@ module.exports = function(app) {
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [1, 1.5]),
     reqUtils.exist('lid', Log),
-    // reqUtils.filter('body', ['records']),
-    // reqUtils.hasAll('body', ['records']),
-    // reqUtils.sanitize('body', ['records']),
+    reqUtils.sanitize('body'),
     function(req, res) {
       var log = req[req.params.lid];
       debug(req.body);
