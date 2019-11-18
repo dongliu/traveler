@@ -535,10 +535,14 @@ var formConfigLinkColumn = {
   bSortable: false,
 };
 
-function cloneForm(id) {
+function cloneForm(id, type, title) {
   $.ajax({
-    url: '/forms/' + id + '/clone',
+    url: '/' + type + '/' + id + '/clone',
     type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      title: title,
+    }),
   })
     .done(function(d) {
       $('#message').append(
@@ -558,18 +562,43 @@ function cloneForm(id) {
     });
 }
 
-var formCloneColumn = {
-  sTitle: 'Clone',
-  mData: '_id',
-  mRender: function(data) {
-    return (
-      '<a href="#" onclick="cloneForm(\'' +
-      data +
-      '\');" data-toggle="tooltip" title="clone the form"><i class="fa fa-copy fa-lg"></i></a>'
-    );
-  },
-  bSortable: false,
-};
+function cloneModal(id, type) {
+  $('#modalLabel').html('Specify the title');
+  $('#modal .modal-body').empty();
+
+  $('#modal .modal-body').append(
+    '<div><input type="text" value="clone"></div>'
+  );
+
+  $('#modal .modal-footer').html(
+    '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+  );
+  $('#modal').modal('show');
+  $('#submit').click(function() {
+    cloneForm(id, type, $('#modal input').val());
+  });
+}
+
+function cloneColumn(type) {
+  return {
+    sTitle: 'Clone',
+    mData: '_id',
+    mRender: function(data) {
+      return (
+        '<a href="#" onclick="cloneModal(\'' +
+        data +
+        "', '" +
+        type +
+        '\');" data-toggle="tooltip" title="clone the form"><i class="fa fa-copy fa-lg"></i></a>'
+      );
+    },
+    bSortable: false,
+  };
+}
+
+var formCloneColumn = cloneColumn('forms');
+
+var releasedFormCloneColumn = cloneColumn('released-forms');
 
 var formShareLinkColumn = {
   sTitle: '',
