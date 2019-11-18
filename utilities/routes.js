@@ -6,7 +6,6 @@
  */
 var config = require('../config/config.js');
 
-var mongoose = require('mongoose');
 var Traveler = require('../model/traveler').Traveler;
 var Binder = require('../model/binder').Binder;
 var _ = require('lodash');

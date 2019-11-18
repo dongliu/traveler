@@ -1,4 +1,4 @@
-/*global prefix, createSideNav, validationMessage*/
+/*global prefix, livespan, ajax401*/
 
 $(function() {
   /**

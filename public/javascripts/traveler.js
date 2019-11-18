@@ -1,8 +1,9 @@
-/*global document: false, window: false, FormData: false, linkTarget,
-validationMessage, isValid*/
-/*global moment: false, Binder: false, Modernizr: false*/
-/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix,
-DiscrepancyFormLoader, traveler, markValidity, markFormValidity, findById*/
+/*
+global document, window, FormData, linkTarget, validationMessage, isValid,
+moment, Binder, travelerStatus, finishedInput: writable, ajax401, prefix,
+DiscrepancyFormLoader, traveler, markValidity, markFormValidity, findById,
+livespan, Modernizr, createSideNav, generateHistoryRecordHtml
+*/
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
