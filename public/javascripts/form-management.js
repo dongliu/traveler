@@ -1,13 +1,12 @@
-/* global moment, ajax401, disableAjaxCache, prefix, updateAjaxURL,
- Holder, selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn, keysColumn,
- updatedOnColumn, updatedByColumn,
- fnAddFilterFoot, sDomNoTools,
- fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
-  formStatusColumn, formTypeColumn,
- versionColumn, releasedFormStatusColumn,
- releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
- archievedByColumn, archievedOnColumn
-  */
+/*
+global moment, ajax401, disableAjaxCache, prefix, updateAjaxURL, Holder,
+selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn,
+keysColumn, updatedOnColumn, updatedByColumn, fnAddFilterFoot, sDomNoTools,
+fnGetSelected, selectEvent, filterEvent, formShareLinkColumn, formStatusColumn,
+formTypeColumn, versionColumn, releasedFormStatusColumn,
+releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
+archivedByColumn, archivedOnColumn, releasedFormLinkColumn
+*/
 
 function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
@@ -101,7 +100,7 @@ $(function() {
 
   var releasedFormAoColumns = [
     selectColumn,
-    formLinkColumn,
+    releasedFormLinkColumn,
     titleColumn,
     formTypeColumn,
     releasedFormStatusColumn,
@@ -138,14 +137,13 @@ $(function() {
     titleColumn,
     formTypeColumn,
     tagsColumn,
-    formStatusColumn,
-    keysColumn,
-    versionColumn,
-    archievedByColumn,
-    archievedOnColumn,
+    releasedFormStatusColumn,
+    releasedFormVersionColumn,
+    archivedByColumn,
+    archivedOnColumn,
   ];
   var archivedFormTable = $('#archived-form-table').dataTable({
-    sAjaxSource: '/archivedforms/json',
+    sAjaxSource: '/archived-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
       Holder.run({

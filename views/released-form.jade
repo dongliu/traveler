@@ -14,11 +14,14 @@ block content
     var prefix = '!{prefix}';
     var title = '!{title}'
   .container
+    #message
     .row
       .span9
         h3 #{title}
         h4 type: #{formType}
-        h4 version: #{ver}
+        h4 status: #{status}
+        h4 version:&nbsp;
+          span#version #{ver}
         .well-large
           if (discrepancy)
             .control-group#discrepancy-legend
@@ -34,10 +37,19 @@ block content
     .btn-group(data-toggle='buttons-radio')
       button.btn.btn-info#show-validation Show validation
       button.btn.btn-info#hide-validation.active Hide validation
+    if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
+      if (status === 1)
+        .btn-group
+          button.btn.btn-warning#obsolete(data-toggle='tooltip', title='Obsolete the released form') Obsolete
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-viewer.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/released-form-management.js')
+
