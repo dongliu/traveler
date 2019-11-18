@@ -7,6 +7,8 @@ const reqUtils = require('../lib/req-utils');
 const logger = require('../lib/loggers').getLogger();
 const config = require('../config/config.js');
 const authConfig = config.auth;
+const debug = require('debug')('traveler:released-form');
+var _ = require('lodash');
 
 module.exports = function(app) {
   app.get('/form-management/', auth.verifyRole('manager', 'admin'), function(
@@ -51,6 +53,21 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/archived-forms/json', auth.ensureAuthenticated, function(req, res) {
+    ReleasedForm.find(
+      {
+        status: 2,
+      },
+      'title formType status tags ver archivedOn archivedBy'
+    ).exec(function(err, forms) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      res.status(200).json(forms);
+    });
+  });
+
   app.get(
     '/released-forms/:id/',
     auth.ensureAuthenticated,
@@ -63,11 +80,66 @@ module.exports = function(app) {
           id: req.params.id,
           title: releasedForm.title,
           formType: releasedForm.formType,
+          status: releasedForm.status,
           ver: releasedForm.ver,
           base: releasedForm.base,
           discrepancy: releasedForm.discrepancy,
         })
       );
+    }
+  );
+
+  app.put(
+    '/released-forms/:id/status',
+    auth.ensureAuthenticated,
+    auth.verifyRole('admin', 'manager'),
+    reqUtils.exist('id', ReleasedForm),
+    reqUtils.filter('body', ['status', 'version']),
+    reqUtils.hasAll('body', ['status', 'version']),
+    function updateStatus(req, res) {
+      var f = req[req.params.id];
+      var s = req.body.status;
+      var v = req.body.version;
+
+      if ([2].indexOf(s) === -1) {
+        return res.status(400).send('invalid status');
+      }
+
+      if (v !== f.ver) {
+        return res.status(400).send('the current version is ' + f.ver);
+      }
+
+      // no change
+      if (f.status === s) {
+        return res.status(204).send();
+      }
+
+      var stateTransition = require('../model/released-form').stateTransition;
+
+      var target = _.find(stateTransition, function(t) {
+        return t.from === f.status;
+      });
+
+      debug(target);
+      if (target.to.indexOf(s) === -1) {
+        return res.status(400).send('invalid status change');
+      }
+
+      f.status = s;
+      if (s === 2) {
+        f.archivedBy = req.session.userid;
+        f.archivedOn = Date.now();
+      }
+      // check if we need to increment the version
+      // in this case, no
+      f.incrementVersion();
+      f.saveWithHistory(req.session.userid)
+        .then(function() {
+          return res.status(200).send('status updated to ' + s);
+        })
+        .catch(function(err) {
+          return res.status(500).send(err.message);
+        });
     }
   );
 
