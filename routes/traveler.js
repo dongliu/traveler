@@ -447,7 +447,11 @@ module.exports = function(app) {
           } else {
             return res
               .status(400)
-              .send('cannot find the form ' + req.body.form);
+              .send(
+                `cannot find the released ${
+                  config.viewConfig.terminology.form
+                } with id ${req.body.form}`
+              );
           }
         });
       }
