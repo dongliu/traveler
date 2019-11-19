@@ -1,13 +1,12 @@
-/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
-updateAjaxURL: false, travelerGlobal: false, Holder: false*/
-/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false,
-titleColumn: false, tagsColumn: false, keysColumn:false, createdOnColumn: false,
-updatedOnColumn: false, updatedByColumn: false, sharedWithColumn: false,
-sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
-createdByColumn: false, createdOnColumn: false, fnGetSelected: false,
-selectEvent: false, filterEvent: false, formShareLinkColumn: false,
-archivedOnColumn: false, transferredOnColumn: false, ownerColumn: false*/
-/*global transferFromModal*/
+/* global ajax401, disableAjaxCache, prefix, updateAjaxURL,
+ travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
+ updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn,
+ fnAddFilterFoot, sDomNoTools, createdByColumn, createdOnColumn,
+ fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
+ transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
+ versionColumn, releasedFormLinkColumn, releasedFormStatusColumn,
+ releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
+ transferFromModal */
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
@@ -42,16 +41,28 @@ function travelFromModal() {
   });
 }
 
-function cloneFromModal(formTable) {
+function cloneFromModal(activeTable, formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
+  var base = activeTable.fnSettings()['sAjaxSource'].split('/')[1];
+  if (
+    base === 'archivedforms' ||
+    base === 'sharedforms' ||
+    base === 'groupsharedforms'
+  ) {
+    base = 'forms';
+  }
   $('#modal .modal-body div.target').each(function() {
     var that = this;
     var success = false;
     $.ajax({
-      url: '/forms/' + that.id + '/clone',
+      url: '/' + base + '/' + that.id + '/clone',
       type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        title: $('input', $(that)).val(),
+      }),
     })
       .done(function() {
         $(that).prepend('<i class="fa fa-check"></i>');
@@ -81,14 +92,19 @@ function showHash() {
 
 function formatItemUpdate(data) {
   return (
+    '<div class="target" id="' + data._id + '"><b>' + data.title + '</b> </div>'
+  );
+}
+
+function cloneItem(data) {
+  return (
     '<div class="target" id="' +
     data._id +
-    '"><b>' +
+    '">clone <b>' +
     data.title +
-    '</b>, created ' +
-    moment(data.createdOn).fromNow() +
-    (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') +
-    '</div>'
+    '</b> <br> with new title: <input type="text" value="' +
+    data.title +
+    ' clone"></div>'
   );
 }
 
@@ -103,6 +119,9 @@ $(function() {
     formConfigLinkColumn,
     formShareLinkColumn,
     titleColumn,
+    formStatusColumn,
+    formTypeColumn,
+    versionColumn,
     tagsColumn,
     keysColumn,
     createdOnColumn,
@@ -128,7 +147,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[7, 'desc'], [8, 'desc']],
+    aaSorting: [[11, 'desc'], [10, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#form-table', formAoColumns);
@@ -140,6 +159,9 @@ $(function() {
     formLinkColumn,
     formShareLinkColumn,
     titleColumn,
+    formStatusColumn,
+    formTypeColumn,
+    versionColumn,
     tagsColumn,
     keysColumn,
     createdByColumn,
@@ -167,7 +189,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
-    aaSorting: [[8, 'desc'], [9, 'desc']],
+    aaSorting: [[11, 'desc'], [12, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#transferred-form-table', transferredFormAoColumns);
@@ -178,6 +200,9 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
+    formStatusColumn,
+    formTypeColumn,
+    versionColumn,
     tagsColumn,
     keysColumn,
     ownerColumn,
@@ -203,7 +228,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
-    aaSorting: [[7, 'desc']],
+    aaSorting: [[10, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
@@ -228,22 +253,59 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: groupSharedFormAoColumns,
-    aaSorting: [[7, 'desc']],
+    aaSorting: [[9, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#group-shared-form-table', groupSharedFormAoColumns);
   /*group shared form table ends*/
+
+  /*released form table starts*/
+  var releasedFormAoColumns = [
+    selectColumn,
+    releasedFormLinkColumn,
+    titleColumn,
+    releasedFormStatusColumn,
+    formTypeColumn,
+    releasedFormVersionColumn,
+    tagsColumn,
+    releasedByColumn,
+    releasedOnColumn,
+  ];
+  $('#released-form-table').dataTable({
+    sAjaxSource: '/released-forms/json',
+    sAjaxDataProp: '',
+    fnDrawCallback: function() {
+      Holder.run({
+        images: 'img.user',
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: releasedFormAoColumns,
+    aaSorting: [[8, 'desc']],
+    sDom: sDomNoTools,
+  });
+  fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
+  /*released form table ends*/
 
   /*archieved form table starts*/
   var archivedFormAoColumns = [
     selectColumn,
     formLinkColumn,
     titleColumn,
+    releasedFormStatusColumn,
+    formTypeColumn,
+    versionColumn,
     tagsColumn,
     keysColumn,
-    archivedOnColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
+    updatedByColumn,
+    updatedOnColumn,
   ];
   var archivedFormTable = $('#archived-form-table').dataTable({
     sAjaxSource: '/archivedforms/json',
@@ -262,7 +324,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[5, 'desc']],
+    aaSorting: [[9, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
@@ -370,19 +432,19 @@ $(function() {
       $('#modal').modal('show');
     } else {
       $('#modalLabel').html(
-        'Clone the following ' + selected.length + ' forms? '
+        'Clone the following ' + selected.length + ' form(s)? '
       );
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
+        $('#modal .modal-body').append(cloneItem(data));
       });
       $('#modal .modal-footer').html(
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        cloneFromModal(formTable);
+        cloneFromModal(activeTable, formTable);
       });
     }
   });

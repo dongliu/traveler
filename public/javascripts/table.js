@@ -1,5 +1,5 @@
 /*global moment: false*/
-/*global prefix: false*/
+/*global prefix: false, linkTarget: false*/
 
 function formatDate(date) {
   return date ? moment(date).fromNow() : '';
@@ -19,6 +19,22 @@ function selectEvent() {
       $(e.target)
         .closest('tr')
         .removeClass('row-selected');
+    }
+  });
+}
+
+function selectOneEvent(oTable) {
+  $('tbody').on('click', 'input.select-row', function(e) {
+    var tr = $(e.target).closest('tr');
+    if ($(tr).hasClass('row-selected')) {
+      $(tr).removeClass('row-selected');
+    } else {
+      oTable.$('tr.row-selected').removeClass('row-selected');
+      oTable
+        .$('input.select-row')
+        .not(this)
+        .prop('checked', false);
+      $(tr).addClass('row-selected');
     }
   });
 }
@@ -54,6 +70,20 @@ function dateColumn(title, key) {
       return formatDate(source[key]);
     },
     sDefaultContent: '',
+  };
+}
+
+function longDateColumn(title, key) {
+  return {
+    sTitle: title,
+    mData: function(source, type, val) {
+      if (type === 'sort') {
+        return source[key];
+      }
+      return formatDateLong(source[key]);
+    },
+    sDefaultContent: '',
+    bFilter: true,
   };
 }
 
@@ -141,7 +171,9 @@ function personNameColumn(title, key) {
       return (
         '<a href = "/usernames/' +
         data +
-        '" target="" + linkTarget>' +
+        '" target="' +
+        linkTarget +
+        '" >' +
         data +
         '</a>'
       );
@@ -175,6 +207,15 @@ function fnGetSelected(oTableLocal, selectedClass) {
     }
   }
   return aReturn;
+}
+
+function fnGetSelectedInPage(oTableLocal, selectedClass, current) {
+  if (current) {
+    return oTableLocal.$('tr.' + selectedClass, {
+      page: 'current',
+    });
+  }
+  return oTableLocal.$('tr.' + selectedClass);
 }
 
 function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
@@ -394,7 +435,9 @@ var referenceFormLinkColumn = {
       prefix +
       '/forms/' +
       data +
-      '/" target="" + linkTarget data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
+      '/" target="' +
+      linkTarget +
+      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
     );
   },
   bSortable: false,
@@ -410,7 +453,9 @@ var formColumn = {
       prefix +
       '/forms/' +
       data +
-      '/" target="" + linkTarget data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
+      '/" target="' +
+      linkTarget +
+      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
     );
   },
   bSortable: false,
@@ -441,7 +486,7 @@ var idColumn = {
   bVisible: false,
 };
 
-var formLinkColumn = {
+const formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender: function(data) {
@@ -453,6 +498,23 @@ var formLinkColumn = {
       '/" target="' +
       linkTarget +
       '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
+    );
+  },
+  bSortable: false,
+};
+
+const releasedFormLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender: function(data) {
+    return (
+      '<a href="' +
+      prefix +
+      '/released-forms/' +
+      data +
+      '/" target="' +
+      linkTarget +
+      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>'
     );
   },
   bSortable: false,
@@ -473,10 +535,14 @@ var formConfigLinkColumn = {
   bSortable: false,
 };
 
-function cloneForm(id) {
+function cloneForm(id, type, title) {
   $.ajax({
-    url: '/forms/' + id + '/clone',
+    url: '/' + type + '/' + id + '/clone',
     type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      title: title,
+    }),
   })
     .done(function(d) {
       $('#message').append(
@@ -496,18 +562,43 @@ function cloneForm(id) {
     });
 }
 
-var formCloneColumn = {
-  sTitle: 'Clone',
-  mData: '_id',
-  mRender: function(data) {
-    return (
-      '<a href="#" onclick="cloneForm(\'' +
-      data +
-      '\');" data-toggle="tooltip" title="clone the form"><i class="fa fa-copy fa-lg"></i></a>'
-    );
-  },
-  bSortable: false,
-};
+function cloneModal(id, type) {
+  $('#modalLabel').html('Specify the title');
+  $('#modal .modal-body').empty();
+
+  $('#modal .modal-body').append(
+    '<div><input type="text" value="clone"></div>'
+  );
+
+  $('#modal .modal-footer').html(
+    '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+  );
+  $('#modal').modal('show');
+  $('#submit').click(function() {
+    cloneForm(id, type, $('#modal input').val());
+  });
+}
+
+function cloneColumn(type) {
+  return {
+    sTitle: 'Clone',
+    mData: '_id',
+    mRender: function(data) {
+      return (
+        '<a href="#" onclick="cloneModal(\'' +
+        data +
+        "', '" +
+        type +
+        '\');" data-toggle="tooltip" title="clone the form"><i class="fa fa-copy fa-lg"></i></a>'
+      );
+    },
+    bSortable: false,
+  };
+}
+
+var formCloneColumn = cloneColumn('forms');
+
+var releasedFormCloneColumn = cloneColumn('released-forms');
 
 var formShareLinkColumn = {
   sTitle: '',
@@ -573,9 +664,13 @@ var clonedByColumn = personColumn('Cloned by', 'clonedBy');
 var updatedOnColumn = dateColumn('Updated', 'updatedOn');
 var updatedByColumn = personColumn('Updated by', 'updatedBy');
 
+const releasedOnColumn = longDateColumn('Released', 'releasedOn');
+const releasedByColumn = personColumn('Released by', 'releasedBy');
+
 var transferredOnColumn = dateColumn('transferred', 'transferredOn');
 
-var archivedOnColumn = dateColumn('Archived', 'archivedOn');
+const archivedOnColumn = dateColumn('Archived', 'archivedOn');
+const archivedByColumn = personColumn('Archived by', 'archivedBy');
 
 var deadlineColumn = dateColumn('Deadline', 'deadline');
 
@@ -638,6 +733,14 @@ var versionColumn = {
   sWidth: '45px',
 };
 
+var releasedFormVersionColumn = {
+  sTitle: 'Ver',
+  mData: 'ver',
+  sDefaultContent: '',
+  bFilter: true,
+  sWidth: '45px',
+};
+
 var formTypeColumn = {
   sTitle: 'Type',
   mData: 'formType',
@@ -649,7 +752,7 @@ function formatFormStatus(s) {
   var status = {
     '0': 'draft',
     '0.5': 'submitted',
-    '1': 'released',
+    '1': 'pre released',
     '2': 'archived',
   };
   if (status[s.toString()]) {
@@ -662,6 +765,25 @@ var formStatusColumn = {
   sTitle: 'Status',
   mData: function(source, type, val) {
     return formatFormStatus(source.status);
+  },
+  bFilter: true,
+};
+
+function formatReleasedFormStatus(s) {
+  var status = {
+    '1': 'released',
+    '2': 'archived',
+  };
+  if (status[s.toString()]) {
+    return status[s.toString()];
+  }
+  return 'unknown';
+}
+
+var releasedFormStatusColumn = {
+  sTitle: 'Status',
+  mData: function(source, type, val) {
+    return formatReleasedFormStatus(source.status);
   },
   bFilter: true,
 };
