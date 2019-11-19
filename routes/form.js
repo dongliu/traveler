@@ -766,7 +766,7 @@ module.exports = function(app) {
     '/forms/:id/released',
     auth.ensureAuthenticated,
     // only admin or manager can release a form
-    auth.requireRoles(true, 'admin', 'manager'),
+    auth.verifyRole('admin', 'manager'),
     // find the unreleased form
     reqUtils.exist('id', Form),
     // the form was submitted for release
