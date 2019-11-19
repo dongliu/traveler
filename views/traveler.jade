@@ -55,12 +55,11 @@ block content
               = ' inputs'
         if (locals.traveler.devices && traveler.devices.length > 0)
           h4 Tags: !{traveler.devices}
-        if (locals.traveler.referenceForm)
+        if (locals.traveler.referenceReleasedForm)
           h4
-            a(href='#{prefix}/forms/#{locals.traveler.referenceForm}/', target='#{viewConfig.linkTarget}') #{viewConfig.terminology.form}
-        if (locals.traveler.referenceDiscrepancyForm)
-          h4
-            a(href='#{prefix}/forms/#{locals.traveler.referenceDiscrepancyForm}/', target='#{viewConfig.linkTarget}') Discrepancy #{viewConfig.terminology.form}
+            a(href='#{prefix}/released-forms/#{locals.traveler.referenceReleasedForm}/', target='#{viewConfig.linkTarget}') Released #{viewConfig.terminology.form}
+        if (locals.traveler.referenceReleasedFormVer)
+          h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
         if (locals.traveler.status !== undefined)
           if (locals.isOwner != undefined && locals.isOwner)
             case locals.traveler.status
@@ -117,8 +116,9 @@ block content
           .control-group#discrepancy-legend
             legend Discrepancy log
           table#discrepancy-log-table.table.table-bordered.table-hover
-          .btn-group
-            button.btn.btn-primary#add-discrepancy Add discrepancy log
+          if (locals.traveler.status === 1 || traveler.forms.length === 1.5)
+            .btn-group
+              button.btn.btn-primary#add-discrepancy Add discrepancy log
         form.form-horizontal#form
           div.control-group#traveler-legend
             legend Traveler

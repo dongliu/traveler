@@ -29,18 +29,14 @@ var stateTransition = [
   },
   {
     from: 0.5,
-    to: [0, 1, 2],
-  },
-  {
-    from: 1,
-    to: [2],
+    to: [0, 2],
   },
 ];
 
 const statusMap = {
   '0': 'draft',
   '0.5': 'submitted for release',
-  '1': 'released',
+  '1': 'pre released',
   '2': 'archived',
 };
 
@@ -199,6 +195,8 @@ var createForm = function(json, newFormResultCallBack) {
   formToCreate.title = json.title;
   formToCreate.createdBy = json.createdBy;
   formToCreate.createdOn = Date.now();
+  formToCreate.updatedBy = json.createdBy;
+  formToCreate.updatedOn = Date.now();
   formToCreate.html = json.html || '';
   formToCreate.formType = json.formType || 'normal';
   formToCreate.sharedWith = [];
