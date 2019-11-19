@@ -1088,55 +1088,70 @@ function init() {
   };
 }
 
+function scrollToBottom() {
+  var scrollingElement = (document.scrollingElement || document.body);
+  scrollingElement.scrollTop = scrollingElement.scrollHeight;
+}
+
 function working() {
   $('#add-checkbox').click(function(e) {
     e.preventDefault();
     checkbox_edit();
+    scrollToBottom();
   });
 
   $('#add-radio').click(function(e) {
     e.preventDefault();
     radio_edit();
+    scrollToBottom();
   });
 
   $('#add-text').click(function(e) {
     e.preventDefault();
     text_edit();
+    scrollToBottom();
   });
 
   $('#add-figure').click(function(e) {
     e.preventDefault();
     figure_edit();
+    scrollToBottom();
   });
 
   $('#add-par').click(function(e) {
     e.preventDefault();
     textarea_edit();
+    scrollToBottom();
   });
 
   $('#add-number').click(function(e) {
     e.preventDefault();
     number_edit();
+    scrollToBottom();
   });
 
   $('#add-file').click(function(e) {
     e.preventDefault();
     file_edit();
+    scrollToBottom();
   });
 
   $('#add-rich').click(function(e) {
     e.preventDefault();
     rich_edit();
+    scrollToBottom();
   });
 
   $('#add-section').click(function(e) {
     e.preventDefault();
     section_edit();
+    scrollToBottom();
   });
 
   $('#add-other').click(function(e) {
     e.preventDefault();
     other_edit();
+    scrollToBottom();
   });
 }
 
