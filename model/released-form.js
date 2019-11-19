@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+var addHistory = require('./history').addHistory;
+var addVersion = require('./history').addVersion;
 
 /******
 status := 1 // released
@@ -55,8 +57,31 @@ const releasedForm = new Schema({
   archivedBy: String,
   base: formContent,
   discrepancy: { type: formContent, default: null },
-  // format: base_v[:discrepancy_v]
+  // ver format: base_v[:discrepancy_v]
   ver: String,
+});
+
+releasedForm.plugin(addVersion, {
+  fieldsToVersion: [
+    'title',
+    'description',
+    'tags',
+    'status',
+    'base',
+    'discrepancy',
+  ],
+});
+
+releasedForm.plugin(addHistory, {
+  fieldsToWatch: [
+    'title',
+    'description',
+    'tags',
+    'status',
+    'base',
+    'discrepancy',
+    '_v',
+  ],
 });
 
 const ReleasedForm = mongoose.model('ReleasedForm', releasedForm);
