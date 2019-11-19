@@ -7,8 +7,8 @@
 var config = require('../config/config.js');
 
 var mongoose = require('mongoose');
-var Traveler = mongoose.model('Traveler');
-var Binder = mongoose.model('Binder');
+var Traveler = require('../model/traveler').Traveler;
+var Binder = require('../model/binder').Binder;
 var _ = require('lodash');
 var cheer = require('cheerio');
 
@@ -247,18 +247,22 @@ var binder = {
   },
 };
 
-function addDiscrepency(discrepancy, traveler) {
+function addDiscrepancy(discrepancy, traveler) {
   // migrate traveler without discrepancyForms
   if (!traveler.discrepancyForms) {
     traveler.discrepancyForms = [];
   }
   traveler.discrepancyForms.push(discrepancy);
+  // set reference for compatibility, discrepancy._id is the same as the discrepancy form id
+  traveler.discrepancyForms[0].reference = discrepancy._id;
   traveler.activeDiscrepancyForm = traveler.discrepancyForms[0]._id;
-  traveler.referenceDiscrepancyForm = discrepancy.reference;
+  traveler.referenceDiscrepancyForm = discrepancy._id;
 }
 
 function addBase(base, traveler) {
   traveler.forms.push(base);
+  // set reference for compatibility, base._id is the same as the base form id
+  traveler.forms[0].reference = base._id;
   traveler.activeForm = traveler.forms[0]._id;
   traveler.mapping = base.mapping;
   traveler.labels = base.labels;
@@ -354,8 +358,9 @@ var traveler = {
     //   form.base.labels = this.inputLabels(form.base.html);
     // }
     addBase(form.base, traveler);
-    addDiscrepency(form.discrepancy, traveler);
-
+    if (form.discrepancy) {
+      addDiscrepancy(form.discrepancy, traveler);
+    }
     traveler.save(newTravelerCallBack);
   },
   changeArchivedState: function(traveler, archived) {
