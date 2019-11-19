@@ -1,9 +1,9 @@
-/*global prefix:false*/
+/*global prefix, createSideNav, validationMessage*/
 
 $(function() {
   $('#output')
     .find('img')
-    .each(function(index) {
+    .each(function() {
       var $this = $(this);
       if ($this.attr('name')) {
         if ($this.attr('src') === undefined) {
