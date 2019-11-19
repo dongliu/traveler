@@ -46,6 +46,13 @@ function cloneFromModal(activeTable, formTable) {
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
   var base = activeTable.fnSettings()['sAjaxSource'].split('/')[1];
+  if (
+    base === 'archivedforms' ||
+    base === 'sharedforms' ||
+    base === 'groupsharedforms'
+  ) {
+    base = 'forms';
+  }
   $('#modal .modal-body div.target').each(function() {
     var that = this;
     var success = false;
