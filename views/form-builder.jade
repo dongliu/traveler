@@ -37,8 +37,9 @@ block content
     .well-large
       form.form-horizontal#output
         != html
+  .button-footer.container
     if (status === 0)
-      .btn-group.dropdown
+      .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
           span.caret
         ul.dropdown-menu
@@ -58,7 +59,7 @@ block content
             a Upload file
           li#add-other
             a other types
-      .btn-group.dropdown
+      .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Advanced control
           span.caret
         ul.dropdown-menu
@@ -82,8 +83,8 @@ block content
       .btn-group
         button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
     if (status === 0)
-      .btn-group
-        button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for Release') Submit
+     .btn-group
+       button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for Release') Submit
     if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
       if (status === 0.5)
         .btn-group
@@ -92,17 +93,7 @@ block content
           button.btn.btn-warning#reject(data-toggle='tooltip', title='reject the submitted form for release') Reject
       if (status === 1)
         .btn-group
-          button.btn.btn-warning#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
-  br
-  br
-  br
-  br
-  br
-  br
-  br
-  br
-  br
-  br
+          button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

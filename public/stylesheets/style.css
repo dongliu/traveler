@@ -407,6 +407,13 @@ button.editable {
   margin-bottom: 5px;
 }
 
+.button-footer {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 /**
  * Responsive
  */
