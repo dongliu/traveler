@@ -102,9 +102,9 @@ function cloneItem(data) {
     data._id +
     '">clone <b>' +
     data.title +
-    '</b> <br> to title: <input type="text" value="' +
+    '</b> <br> with new title: <input type="text" value="' +
     data.title +
-    ' clone"></div></div>'
+    ' clone"></div>'
   );
 }
 
