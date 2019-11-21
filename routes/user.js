@@ -116,63 +116,82 @@ function updateUserProfile(user, res) {
 }
 
 function addUser(req, res) {
-  var nameFilter = ad.nameFilter.replace('_name', req.body.name);
-  var opts = {
-    filter: nameFilter,
-    attributes: ad.objAttributes,
-    scope: 'sub',
-  };
-
-  ldapClient.search(ad.searchBase, opts, false, function(ldapErr, result) {
-    if (ldapErr) {
-      console.error(ldapErr.name + ' : ' + ldapErr.message);
-      return res.status(500).json(ldapErr);
-    }
-
-    if (result.length === 0) {
-      return res.status(404).send(req.body.name + ' is not found in AD!');
-    }
-
-    if (result.length > 1) {
-      return res.status(400).send(req.body.name + ' is not unique!');
-    }
-    var roles = [];
-    if (req.body.manager) {
-      roles.push('manager');
-    }
-    if (req.body.admin) {
-      roles.push('admin');
-    }
-    var user = new User({
-      _id: result[0].sAMAccountName.toLowerCase(),
-      name: result[0].displayName,
-      email: result[0].mail,
-      office: result[0].physicalDeliveryOfficeName,
-      phone: result[0].telephoneNumber,
-      mobile: result[0].mobile,
-      roles: roles,
-    });
-
-    user.save(function(err, newUser) {
-      if (err) {
-        console.error(err);
-        return res.status(500).send(err.message);
+  var ldapLookup = authConfig.type === 'ldapWithDnLookup';
+  if (ldapLookup) {
+    ldapClient.searchForUser(req.body.name, function(err, ldapUser) {
+      if (err !== null) {
+        console.log(err.message);
+        res.locals.error = 'Username not found.';
+        next();
       }
-      var url =
-        (req.proxied ? authConfig.proxied_service : authConfig.service) +
-        '/users/' +
-        newUser._id;
-      res.set('Location', url);
-      return res
-        .status(201)
-        .send(
-          'The new user is at <a target="_blank" href="' +
-            url +
-            '">' +
-            url +
-            '</a>'
-        );
+      //dn = ldapUser.dn;
+      storeUser(req, res, ldapUser);
     });
+    return;
+  } else {
+    var nameFilter = ad.nameFilter.replace('_name', req.body.name);
+    var opts = {
+      filter: nameFilter,
+      attributes: ad.objAttributes,
+      scope: 'sub',
+    };
+
+    ldapClient.search(ad.searchBase, opts, false, function(ldapErr, result) {
+      if (ldapErr) {
+        console.error(ldapErr.name + ' : ' + ldapErr.message);
+        return res.status(500).json(ldapErr);
+      }
+
+      if (result.length === 0) {
+        return res.status(404).send(req.body.name + ' is not found in AD!');
+      }
+
+      if (result.length > 1) {
+        return res.status(400).send(req.body.name + ' is not unique!');
+      }
+
+      storeUser(req, res, result[0]);
+    });
+  }
+}
+
+function storeUser(req, res, result) {
+  var roles = [];
+  if (req.body.manager) {
+    roles.push('manager');
+  }
+  if (req.body.admin) {
+    roles.push('admin');
+  }
+  var user = new User({
+    _id: result.sAMAccountName.toLowerCase(),
+    name: result.displayName,
+    email: result.mail,
+    office: result.physicalDeliveryOfficeName,
+    phone: result.telephoneNumber,
+    mobile: result.mobile,
+    roles: roles,
+  });
+
+  user.save(function(err, newUser) {
+    if (err) {
+      console.error(err);
+      return res.status(500).send(err.message);
+    }
+    var url =
+      (req.proxied ? authConfig.proxied_service : authConfig.service) +
+      '/users/' +
+      newUser._id;
+    res.set('Location', url);
+    return res
+      .status(201)
+      .send(
+        'The new user is at <a target="_blank" href="' +
+          url +
+          '">' +
+          url +
+          '</a>'
+      );
   });
 }
 
