@@ -830,6 +830,7 @@ module.exports = function(app) {
       releasedForm.base = new FormContent(form);
       releasedForm.ver = `${releasedForm.base._v}`;
       if (discrepancyForm) {
+        // update formType
         releasedForm.formType = 'normal_discrepancy';
         releasedForm.discrepancy = discrepancyForm.base;
         releasedForm.ver += `:${discrepancyForm.base._v}`;
@@ -838,6 +839,31 @@ module.exports = function(app) {
       releasedForm.releasedOn = Date.now();
       // reset the submitted form
       form.status = 0;
+      // check if there is already a released form with the same name and
+      // version
+      try {
+        const existingForm = await ReleasedForm.findOne({
+          title: releasedForm.title,
+          formType: releasedForm.formType,
+          ver: releasedForm.ver,
+          // only search the active released form, not archived
+          // remove this condition if including the archive released form
+          status: 1,
+        });
+        debug('find existing form: ' + existingForm);
+        if (existingForm) {
+          return res
+            .status(400)
+            .send(
+              `A form with same title, type, and version was already released in ${
+                existingForm._id
+              }.`
+            );
+        }
+      } catch (error) {
+        return res.status(500).send(error.message);
+      }
+
       try {
         const saveForm = await new ReleasedForm(releasedForm).save();
         const url = `/released-forms/${saveForm._id}/`;
