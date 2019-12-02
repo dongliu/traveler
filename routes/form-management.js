@@ -53,7 +53,10 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/archived-forms/json', auth.ensureAuthenticated, function(req, res) {
+  app.get('/archived-released-forms/json', auth.ensureAuthenticated, function(
+    req,
+    res
+  ) {
     ReleasedForm.find(
       {
         status: 2,

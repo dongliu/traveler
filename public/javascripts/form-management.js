@@ -143,7 +143,7 @@ $(function() {
     archivedOnColumn,
   ];
   var archivedFormTable = $('#archived-form-table').dataTable({
-    sAjaxSource: '/archived-forms/json',
+    sAjaxSource: '/archived-released-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
       Holder.run({
