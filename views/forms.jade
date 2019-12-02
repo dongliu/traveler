@@ -58,6 +58,8 @@ block content
           a(href='#releasedforms', data-toggle='tab') Released #{viewConfig.terminology.form}s
         li
           a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
+        li
+          a(href='#archived-released-forms', data-toggle='tab') Archived released #{viewConfig.terminology.form}s
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
@@ -117,6 +119,13 @@ block content
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
           table#archived-form-table.table.table-bordered.table-hover
+        #archived-released-forms.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#archived-released-form-table.table.table-bordered.table-hover
 
 
 block js

@@ -6,7 +6,7 @@
  transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
  versionColumn, releasedFormLinkColumn, releasedFormStatusColumn,
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
- transferFromModal */
+ transferFromModal, archivedByColumn, archivedOnColumn */
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
@@ -52,6 +52,10 @@ function cloneFromModal(activeTable, formTable) {
     base === 'groupsharedforms'
   ) {
     base = 'forms';
+  }
+
+  if (base === 'archived-released-forms') {
+    base = 'released-forms';
   }
   $('#modal .modal-body div.target').each(function() {
     var that = this;
@@ -330,6 +334,42 @@ $(function() {
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
   /*archived form table ends*/
 
+  var archivedReleasedFormAoColumns = [
+    selectColumn,
+    formLinkColumn,
+    titleColumn,
+    formTypeColumn,
+    tagsColumn,
+    releasedFormStatusColumn,
+    releasedFormVersionColumn,
+    archivedByColumn,
+    archivedOnColumn,
+  ];
+  var archivedReleasedFormTable = $('#archived-released-form-table').dataTable({
+    sAjaxSource: '/archived-released-forms/json',
+    sAjaxDataProp: '',
+    fnDrawCallback: function() {
+      Holder.run({
+        images: 'img.user',
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: archivedReleasedFormAoColumns,
+    aaSorting: [[8, 'desc']],
+    sDom: sDomNoTools,
+  });
+  fnAddFilterFoot(
+    '#archived-released-form-table',
+    archivedReleasedFormAoColumns
+  );
+
   // show the tab in hash
   showHash();
 
@@ -455,6 +495,7 @@ $(function() {
     sharedFormTable.fnReloadAjax();
     groupSharedFormTable.fnReloadAjax();
     archivedFormTable.fnReloadAjax();
+    archivedReleasedFormTable.fnReloadAjax();
   });
   // binding events
   selectEvent();
