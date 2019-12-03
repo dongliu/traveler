@@ -443,7 +443,10 @@ $(function() {
     })
     .always();
 
-  $('#complete').click(function(e) {
+  $('#complete').click(completeClick);
+  $('#complete2').click(completeClick);
+
+  function completeClick(e) {
     e.preventDefault();
     if (
       $('#validation').css('display') === 'none' &&
@@ -453,7 +456,7 @@ $(function() {
     } else {
       complete();
     }
-  });
+  }
 
   // deserialize the values here
   $('#form .control-group-wrap').mouseenter(function(e) {
