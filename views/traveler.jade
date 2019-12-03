@@ -55,9 +55,6 @@ block content
               = ' inputs'
         if (locals.traveler.devices && traveler.devices.length > 0)
           h4 Tags: !{traveler.devices}
-        if (locals.traveler.referenceReleasedForm)
-          h4
-            a(href='#{prefix}/released-forms/#{locals.traveler.referenceReleasedForm}/', target='#{viewConfig.linkTarget}') Released #{viewConfig.terminology.form}
         if (locals.traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
         if (locals.traveler.status !== undefined)
@@ -93,6 +90,10 @@ block content
           button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
         #validation.well.hide
         #details.collapse.out
+          if (locals.traveler.referenceReleasedForm)
+            h4
+              span Created from: 
+              a(href='#{prefix}/released-forms/#{locals.traveler.referenceReleasedForm}/', target='#{viewConfig.linkTarget}') Released #{viewConfig.terminology.form}
           if (locals.traveler.description !== undefined)
             h4 Description: #{traveler.description}
           if (locals.traveler.deadline !== undefined)
