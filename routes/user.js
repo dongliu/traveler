@@ -5,6 +5,7 @@ var ldapClient = require('../lib/ldap-client');
 
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
+var Group = mongoose.model('Group');
 
 var auth = require('../lib/auth');
 var authConfig = config.auth;
@@ -423,30 +424,36 @@ module.exports = function(app) {
 
   app.get('/adgroups', auth.ensureAuthenticated, function(req, res) {
     var query = req.query.term;
-    var filter;
-    var opts;
-    if (query && query.length > 0) {
-      if (query[query.length - 1] === '*') {
-        filter = ad.groupSearchFilter.replace('_id', query);
+    if (ad.groupSearchFilter && ad.groupAttributes && ad.groupSearchBase) {
+      var filter;
+      var opts;
+      if (query && query.length > 0) {
+        if (query[query.length - 1] === '*') {
+          filter = ad.groupSearchFilter.replace('_id', query);
+        } else {
+          filter = ad.groupSearchFilter.replace('_id', query + '*');
+        }
       } else {
-        filter = ad.groupSearchFilter.replace('_id', query + '*');
+        filter = ad.groupSearchFilter.replace('_id', '*');
       }
+      opts = {
+        filter: filter,
+        attributes: ad.groupAttributes,
+        scope: 'sub',
+      };
+      ldapClient.search(ad.groupSearchBase, opts, false, function (err, result) {
+        if (err) {
+          return res.status(500).send(err.message);
+        }
+        if (result.length === 0) {
+          return res.json([]);
+        }
+        return res.json(result);
+      });
     } else {
-      filter = ad.groupSearchFilter.replace('_id', '*');
+      Group.find({name: query + '*'}, function(err, groups) {
+        return res.json(groups);
+      })
     }
-    opts = {
-      filter: filter,
-      attributes: ad.groupAttributes,
-      scope: 'sub',
-    };
-    ldapClient.search(ad.groupSearchBase, opts, false, function(err, result) {
-      if (err) {
-        return res.status(500).send(err.message);
-      }
-      if (result.length === 0) {
-        return res.json([]);
-      }
-      return res.json(result);
-    });
   });
 };
