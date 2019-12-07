@@ -358,6 +358,16 @@ var selectColumn = {
   asSorting: ['desc', 'asc'],
 };
 
+var userIdColumn = {
+  sTitle: 'User Id',
+  mRender: function(data) {
+    return '<label>'+data+'</label>';
+  },
+  mData: '_id',
+  bSortable: true,
+  sWidth: '30px',
+};
+
 var previewColumn = {
   sTitle: '',
   mData: '_id',
@@ -1228,11 +1238,40 @@ var fullNameNoLinkColumn = {
   bFilter: true,
 };
 
-var groupNameColumn = {
-  sTitle: 'Group name',
-  mData: 'groupname',
+var groupIdColumn = {
+  sTitle: 'Group id',
+  mData: '_id',
   sDefaultContent: '',
   bFilter: true,
+  mRender: function(data) {
+    return '<a href="/groups/'+data+'">'+data+'</a>';
+  },
+};
+
+var displayNameColumn = {
+  sTitle: 'Display Name',
+  mData: 'name',
+  sDefaultContent: '',
+  bFilter: true,
+};
+
+var membersColumn = {
+  sTtile: 'Member',
+  mData: 'members',
+  sDefaultContent: '',
+  bFilter: true,
+  mRender: function(data) {
+    if (!data || data.length == 0) {
+      return '';
+    }
+    data.sort(function(a,b) {
+      return a.name < b.name;
+    });
+    var result = data.map(function(d) {
+      return '<li>'+d.name+'</li>';
+    });
+    return '<ul>'+result.join('')+'</ul>';
+  }
 };
 
 var accessColumn = {
