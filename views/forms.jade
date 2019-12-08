@@ -44,20 +44,20 @@ block content
     div
       ul.nav.nav-tabs
         li.active
-          a(href='#forms', data-toggle='tab') My #{viewConfig.terminology.form}s
+          a(href='#forms', data-toggle='tab') My draft #{viewConfig.terminology.form}s
         if (viewConfig.transferOwnership)
           li
-            a(href='#transferredforms', data-toggle='tab') Transferred #{viewConfig.terminology.form}s
+            a(href='#transferredforms', data-toggle='tab') Transferred draft #{viewConfig.terminology.form}s
         if (viewConfig.shareUsers)
           li
-            a(href='#sharedfroms', data-toggle='tab') Shared #{viewConfig.terminology.form}s
+            a(href='#sharedfroms', data-toggle='tab') Shared draft #{viewConfig.terminology.form}s
         if (viewConfig.shareGroups)
           li
-            a(href='#groupsharedfroms', data-toggle='tab') Group shared #{viewConfig.terminology.form}s
+            a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s
         li
           a(href='#releasedforms', data-toggle='tab') Released #{viewConfig.terminology.form}s
         li
-          a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
+          a(href='#archivedforms', data-toggle='tab') Archived draft #{viewConfig.terminology.form}s
         li
           a(href='#archived-released-forms', data-toggle='tab') Archived released #{viewConfig.terminology.form}s
       .tab-content
