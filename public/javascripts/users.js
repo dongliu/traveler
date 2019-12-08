@@ -137,12 +137,20 @@ $(function() {
           '</strong> is already in the user list. </div>'
       );
     } else {
+      let user = travelerGlobal.usernames.get(name);
+      if (user === null) {
+        console.error(
+          'Unknown user ' + name + '.  Please select from the list.'
+        );
+        return;
+      }
+      let uid = user[0].sAMAccountName;
       $.ajax({
         url: '/users/',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({
-          name: name,
+          name: uid,
           manager: $('#manager').prop('checked'),
           admin: $('#admin').prop('checked'),
         }),

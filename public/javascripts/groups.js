@@ -21,7 +21,7 @@ function deleteFromModal(cb) {
       url: '/groups/' + that.id,
       type: 'DELETE',
       contentType: 'application/json',
-      data: JSON.stringify({ } ),
+      data: JSON.stringify({}),
     })
       .done(function() {
         $(that).prepend('<i class="fa fa-check"></i>');
@@ -52,7 +52,7 @@ function modifyFromModal(cb) {
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
-        name: that.value
+        name: that.value,
       }),
     })
       .done(function() {
@@ -80,17 +80,17 @@ $(function() {
   travelerGlobal.usernames.initialize();
 
   $('#username').typeahead(
-      {
-        minLength: 1,
-        highlight: true,
-        hint: true,
-      },
-      {
-        name: 'usernames',
-        display: 'displayName',
-        limit: 20,
-        source: travelerGlobal.usernames,
-      }
+    {
+      minLength: 1,
+      highlight: true,
+      hint: true,
+    },
+    {
+      name: 'usernames',
+      display: 'displayName',
+      limit: 20,
+      source: travelerGlobal.usernames,
+    }
   );
 
   $('#groupname').typeahead(
@@ -218,7 +218,7 @@ $(function() {
     var selected = fnGetSelected(groupTable, 'row-selected');
     if (selected.length) {
       $('#modalLabel').html(
-        'Modify the following ' + selected.length + " groups? "
+        'Modify the following ' + selected.length + ' groups? '
       );
       $('#modal .modal-body').empty();
       $('#modal .modal-body').append(
@@ -227,12 +227,18 @@ $(function() {
       selected.forEach(function(row) {
         var data = groupTable.fnGetData(row);
         $('#modal .modal-body').append(
-          '<label class="textbox" for="#'+data._id+'">'+data._id+'<input id="'+data._id+'" class="displayName" type="text" value="'+data.name+'"></label>'
+          '<label class="textbox" for="#' +
+            data._id +
+            '">' +
+            data._id +
+            '<input id="' +
+            data._id +
+            '" class="displayName" type="text" value="' +
+            data.name +
+            '"></label>'
         );
       });
-      $('#modal .modal-body').append(
-        '</form>'
-      );
+      $('#modal .modal-body').append('</form>');
       $('#modal .modal-footer').html(
         '<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
@@ -252,27 +258,5 @@ $(function() {
       );
       $('#modal').modal('show');
     }
-  });
-
-  $("#addusertogroup").click(function(e) {
-    e.preventDefault();
-    var that = this;
-    var displayName = $("#username").val();
-    $.ajax({
-      url: '/groups/' + group._id + '/adduser/' + displayName,
-      type: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify({ } ),
-    })
-        .done(function() {
-          $(that).prepend('<i class="fa fa-check"></i>');
-          $(that).addClass('text-success');
-        })
-        .fail(function(jqXHR) {
-          $(that).append(' : ' + jqXHR.responseText);
-          $(that).addClass('text-error');
-        })
-        .always(function() {
-        });
   });
 });

@@ -4,6 +4,7 @@ var ad = config.ad;
 var ldapClient = require('../lib/ldap-client');
 
 var mongoose = require('mongoose');
+var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 
 var auth = require('../lib/auth');
@@ -26,7 +27,7 @@ function cleanList(id, f) {
 
 function addGroup(req, res) {
   var group;
-  if (ad.groupSearchBase && ad.groupSearchBase.length() > 0) {
+  if (ad.groupSearchBase && ad.groupSearchBase.length > 0) {
     var nameFilter = ad.nameFilter.replace('_name', req.body.name);
     var opts = {
       filter: nameFilter,
@@ -34,7 +35,10 @@ function addGroup(req, res) {
       scope: 'sub',
     };
 
-    ldapClient.search(ad.groupSearchBase, opts, false, function(ldapErr, result) {
+    ldapClient.search(ad.groupSearchBase, opts, false, function(
+      ldapErr,
+      result
+    ) {
       if (ldapErr) {
         console.error(ldapErr.name + ' : ' + ldapErr.message);
         return res.status(500).json(ldapErr);
@@ -67,7 +71,7 @@ function addGroup(req, res) {
   } else {
     group = new Group({
       _id: req.body.name.toLowerCase(),
-      name: req.body.name
+      name: req.body.name,
     });
   }
 
@@ -162,15 +166,17 @@ module.exports = function(app) {
         .status(403)
         .send('You are not authorized to access this resource. ');
     }
-    Group.find(req.query).populate('members').exec(function(err, groups) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-      return res.json(groups);
-    });
+    Group.find(req.query)
+      .populate('members')
+      .exec(function(err, groups) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({
+            error: err.message,
+          });
+        }
+        return res.json(groups);
+      });
   });
 
   app.get('/groups/:id', auth.ensureAuthenticated, function(req, res) {
@@ -190,20 +196,18 @@ module.exports = function(app) {
           })
         );
       }
-      return res
-        .status(404)
-        .send(req.params.id + ' has never logged into the application.');
+      return res.status(404).send('Group ' + req.params.id + ' does not exist');
     });
   });
 
   app.put('/groups/:id', auth.ensureAuthenticated, function(req, res) {
     if (
-        req.session.roles === undefined ||
-        req.session.roles.indexOf('admin') === -1
+      req.session.roles === undefined ||
+      req.session.roles.indexOf('admin') === -1
     ) {
       return res
-          .status(403)
-          .send('You are not authorized to access this resource. ');
+        .status(403)
+        .send('You are not authorized to access this resource. ');
     }
     if (!req.is('json')) {
       return res.status(415).json({
@@ -211,10 +215,10 @@ module.exports = function(app) {
       });
     }
     Group.findOneAndUpdate(
-        {
-          _id: req.params.id,
-        },
-        req.body
+      {
+        _id: req.params.id,
+      },
+      req.body
     ).exec(function(err) {
       if (err) {
         console.error(err);
@@ -226,46 +230,83 @@ module.exports = function(app) {
     });
   });
 
-  app.put('/groups/:id/adduser/:user', auth.ensureAuthenticated, function(req, res) {
+  app.put('/groups/:id/adduser/:user', auth.ensureAuthenticated, function(
+    req,
+    res
+  ) {
     if (
-        req.session.roles === undefined ||
-        req.session.roles.indexOf('admin') === -1
+      req.session.roles === undefined ||
+      req.session.roles.indexOf('admin') === -1
     ) {
       return res
-          .status(403)
-          .send('You are not authorized to access this resource. ');
+        .status(403)
+        .send('You are not authorized to access this resource. ');
     }
     let fullname = req.params.user;
     if (!fullname || fullname.length == 0) {
-      return "";
+      return res.status(403).send("You must provide a user's full name");
     }
     let nameFilter = ad.nameFilter.replace('_name', fullname + '*');
     let opts = {
       filter: nameFilter,
       attributes: ad.memberAttributes,
-      paged: {pageSize: 10},
+      paged: { pageSize: 10 },
       scope: 'sub',
     };
-    ldapClient.search(ad.searchBase, opts, false, function (err, result) {
+    ldapClient.search(ad.searchBase, opts, false, function(err, result) {
       if (err) {
-          return res.status(500).send(err);
+        return res.status(500).send(err);
       }
       if (result.length == 0) {
         return res.status(404).send('No user with name ' + fullname);
+      } else if (result.length > 1) {
+        return res.status(403).send('User ' + fullname + ' is not unique');
       }
       const uid = result[0].uid.toLowerCase();
       if (uid.length == 0) {
-        return res.status(404).send('Could not find user with name ' + req.params.user);
+        return res
+          .status(404)
+          .send('Could not find user with name ' + req.params.user);
       }
-      Group.findOne({_id: req.params.id}, function(err, group) {
+
+      // If user isn't already in user table, store it with no special roles.
+      User.findOne({ _id: uid }, function(err, user) {
+        if (err) {
+          return res
+            .status(500)
+            .send('Error finding user; please check configuration');
+        }
+        if (!user) {
+          user = new User({
+            _id: uid,
+            name: result[0].displayName,
+            email: result[0].mail,
+            office: result[0].physicalDeliveryOfficeName,
+            phone: result[0].telephoneNumber,
+            mobile: result[0].mobile,
+            roles: [],
+          });
+
+          user.save(function(err, newUser) {
+            if (err) {
+              console.error(err);
+              return res.status(500).send(err.message);
+            }
+          });
+        }
+      });
+
+      Group.findOne({ _id: req.params.id }, function(err, group) {
         if (err) {
           console.error(err);
-          return res.status(500).json({error: err.message});
+          return res.status(500).json({ error: err.message });
         }
         if (!group) {
-          return res.status(404).json({error: "Cannot find group with id " + req.params.id});
+          return res
+            .status(404)
+            .json({ error: 'Cannot find group with id ' + req.params.id });
         }
-        const theuid = group.members.find(function (name) {
+        const theuid = group.members.find(function(name) {
           return name == uid;
         });
         if (theuid) {
@@ -274,11 +315,11 @@ module.exports = function(app) {
         }
         group.members.push(uid);
         Group.findOneAndUpdate(
-            {
-              _id: req.params.id,
-            },
-            {members: group.members}
-        ).exec(function (err) {
+          {
+            _id: req.params.id,
+          },
+          { members: group.members }
+        ).exec(function(err) {
           if (err) {
             console.error(err);
             return res.status(500).json({
@@ -309,7 +350,7 @@ module.exports = function(app) {
       {
         _id: req.params.id,
       },
-        { deleted: true }
+      { deleted: true }
     ).exec(function(err) {
       if (err) {
         console.error(err);
@@ -336,22 +377,26 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/groups/:id/members/json', auth.ensureAuthenticated, function(req, res) {
+  app.get('/groups/:id/members/json', auth.ensureAuthenticated, function(
+    req,
+    res
+  ) {
     Group.findOne({
       _id: req.params.id,
-    }).populate('members').exec(function(err, group) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-      if (group === null) {
-        return res.status(404);
-      }
-      return res.json(group.members);
-    });
-
+    })
+      .populate('members')
+      .exec(function(err, group) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({
+            error: err.message,
+          });
+        }
+        if (group === null) {
+          return res.status(404);
+        }
+        return res.json(group.members);
+      });
   });
 
   app.get('/groups/:id/refresh', auth.ensureAuthenticated, function(req, res) {
