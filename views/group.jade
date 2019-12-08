@@ -23,20 +23,19 @@ block content
     .row
       .span9
         h3 Group id: #{group._id} - Display Name:  #{group.name}
-        .btn-group
-          button.btn.btn-info(data-toggle='collapse', data-target='#save') Save
         #validation.well.hide
-        form.form-horizontal#form
+        form.form-inline#form
           input#groupid(type="hidden", value="#{group._id}")
-          .row.span9
-            input#displayName(name='displayName', value='#{group.name}')
-          h4 #{group.members.length} Member(s):
-
-          table#members-table.table.table-bordered.table-hover
-
-          .row.span9
-            input#username(name='username', placeholder='Last, First')
+          .row
+            label(for='displayName') Display Name:
+            input#displayName.input(name='displayName', value='#{group.name}')
+            .btn-group
+              button#btnDisplayName.btn.btn-info(data-toggle='collapse', data-target='#save') Save
+          .well
+            input#username.input(name='username', placeholder='Last, First')
             button#addusertogroup.btn.btn-info(data-target='#add') Add User to Group
+        h4 #{group.members.length} Member(s):
+        table#members-table.table.table-bordered.table-hover
       .span3.sidebar
 
 block js

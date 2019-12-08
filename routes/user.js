@@ -117,13 +117,14 @@ function updateUserProfile(user, res) {
 }
 
 function addUser(req, res) {
-  var ldapLookup = authConfig.type === 'ldapWithDnLookup';
-  if (ldapLookup) {
+  if (authConfig.type === 'ldapWithDnLookup') {
     ldapClient.searchForUser(req.body.name, function(err, ldapUser) {
       if (err !== null) {
         console.log(err.message);
         res.locals.error = 'Username not found.';
-        next();
+        return res
+          .status(404)
+          .send('Username ' + req.body.name + ' not found.');
       }
       //dn = ldapUser.dn;
       storeUser(req, res, ldapUser);
@@ -460,7 +461,7 @@ module.exports = function(app) {
         attributes: ad.groupAttributes,
         scope: 'sub',
       };
-      ldapClient.search(ad.groupSearchBase, opts, false, function (err, result) {
+      ldapClient.search(ad.groupSearchBase, opts, false, function(err, result) {
         if (err) {
           return res.status(500).send(err.message);
         }
@@ -470,9 +471,9 @@ module.exports = function(app) {
         return res.json(result);
       });
     } else {
-      Group.find({name: query + '*'}, function(err, groups) {
+      Group.find({ name: query + '*' }, function(err, groups) {
         return res.json(groups);
-      })
+      });
     }
   });
 };
