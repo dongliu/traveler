@@ -202,7 +202,7 @@
     buf.push(
       '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
         (null == (jade.interp = ' ') ? '' : jade.interp) +
-        '<span class="model-label">{ model.label }</span></div><div class="controls"><input type="file" rv-data-userkey="model.userkey" disabled="disabled"/><span class="help-block">{ model.help }</span></div></div>'
+        '<span class="model-label">{ model.label }</span></div><div class="controls"><input type="file" rv-required="model.required" rv-data-userkey="model.userkey" disabled="disabled"/><span class="help-block">{ model.help }</span></div></div>'
     );
     return buf.join('');
   };
