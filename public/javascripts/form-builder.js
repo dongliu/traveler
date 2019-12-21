@@ -1479,7 +1479,7 @@ function binding_events() {
         },
         aoColumns: discrepancyColumns,
         iDisplayLength: 5,
-        aaSorting: [[4, 'desc']],
+        aaSorting: [[3, 'desc']],
         sDom: sDomPage,
       });
       selectOneEvent(discrepancyTable);
