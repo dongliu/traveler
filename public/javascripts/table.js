@@ -1256,16 +1256,19 @@ var displayNameColumn = {
 };
 
 var membersColumn = {
-  sTtile: 'Member',
+  sTitle: 'Member(s)',
   mData: 'members',
   sDefaultContent: '',
-  bFilter: true,
+  bFilter: false,
   mRender: function(data) {
-    if (!data || data.length == 0) {
-      return '';
-    }
     data.sort(function(a,b) {
-      return a.name < b.name;
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
     });
     var result = data.map(function(d) {
       return '<li>'+d.name+'</li>';
