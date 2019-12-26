@@ -100,12 +100,13 @@ function complete() {
  * @param {Object} the log to save data into
  */
 function saveDiscrepancyLog(log) {
-  var formData = $('#discrepancy-form').serializeArray();
+  var formData = new FormData($('#discrepancy-form')[0]);
   $.ajax({
     url: './logs/' + log._id + '/records',
     type: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify(formData),
+    data: formData,
+    contentType: false,
+    processData: false,
   })
     .done(function() {
       $('#message').append(
