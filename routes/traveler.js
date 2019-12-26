@@ -813,8 +813,24 @@ module.exports = function(app) {
     reqUtils.sanitize('body'),
     function(req, res) {
       var log = req[req.params.lid];
-      debug(req.body);
-      log.records = req.body;
+      log.records = [];
+      _.keys(req.body).map(function(name) {
+        log.records.push({ name: name, value: req.body[name] });
+      });
+      if (req.files) {
+        _.keys(req.files).map(function(name) {
+          let file = req.files[name];
+          log.records.push({
+            name: name,
+            value: file.originalname,
+            file: {
+              path: file.path,
+              encoding: file.encoding,
+              mimetype: file.mimetype,
+            },
+          });
+        });
+      }
       log.inputBy = req.session.userid;
       log.inputOn = Date.now();
       debug(log);
