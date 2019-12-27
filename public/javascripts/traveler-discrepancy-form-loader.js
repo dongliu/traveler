@@ -65,6 +65,18 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
     });
   }
 
+  function fileLink(log, record) {
+    return (
+      '<a target="_blank" href="./logs/' +
+      log._id +
+      '/records/' +
+      record._id +
+      '">' +
+      record.value +
+      '</a>'
+    );
+  }
+
   function retrieveLogs(cb) {
     if (tid === null) {
       return;
@@ -91,6 +103,9 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
             l.records.forEach(function(r) {
               if (r.name) {
                 logData[r.name] = r.value;
+              }
+              if (r.file) {
+                logData[r.name] = fileLink(l, r);
               }
             });
             data.push(logData);

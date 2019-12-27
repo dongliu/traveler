@@ -707,6 +707,12 @@ module.exports = function(app) {
         logger.error(dataErr);
         return cb(dataErr);
       }
+      logs.forEach(function(log) {
+        if (log.file) {
+          // remove file details
+          log.file = true;
+        }
+      });
       return cb(null, logs);
     });
   }
