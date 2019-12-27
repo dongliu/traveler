@@ -707,12 +707,6 @@ module.exports = function(app) {
         logger.error(dataErr);
         return cb(dataErr);
       }
-      logs.forEach(function(log) {
-        if (log.file) {
-          // remove file details
-          log.file = true;
-        }
-      });
       return cb(null, logs);
     });
   }
@@ -761,11 +755,17 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.canReadMw('id'),
     function(req, res) {
-      retrieveLogs(req[req.params.id], function(err, output) {
+      retrieveLogs(req[req.params.id], function(err, logs) {
         if (err) {
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(output);
+        logs.forEach(function(log) {
+          if (log.file) {
+            // remove file details
+            log.file = true;
+          }
+        });
+        return res.status(200).json(logs);
       });
     }
   );
@@ -849,6 +849,37 @@ module.exports = function(app) {
           logger.error(err);
           res.status(500).send(err.message);
         });
+    }
+  );
+
+  app.get(
+    '/travelers/:tid/logs/:lid/records/:rid',
+    auth.ensureAuthenticated,
+    reqUtils.exist('tid', Traveler),
+    reqUtils.canReadMw('tid'),
+    function(req, res) {
+      retrieveLogs(req[req.params.tid], function(err, logs) {
+        if (err) {
+          return res.status(500).send(err.message);
+        }
+        const log = _.find(logs, { id: req.params.lid });
+        if (!log) {
+          return res.status(404).send('log not found');
+        }
+        const record = log.records.id(req.params.rid);
+        if (!record) {
+          return res.status(404).send('record not found');
+        }
+        if (!record.file.path) {
+          return res.status(200).json(record);
+        }
+        fs.exists(record.file.path, function(exists) {
+          if (exists) {
+            return res.sendFile(path.resolve(record.file.path));
+          }
+          return res.status(410).send('gone');
+        });
+      });
     }
   );
 
