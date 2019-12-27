@@ -96,7 +96,7 @@ function complete() {
 }
 
 /**
- * save the data in the discrepance form into the log
+ * save the data in the discrepancy form into the log
  * @param {Object} the log to save data into
  */
 function saveDiscrepancyLog(log) {
@@ -164,8 +164,8 @@ function showValidation() {
 
 function loadDiscrepancyLog(discrepancyForm) {
   DiscrepancyFormLoader.setForm(discrepancyForm);
-  DiscrepancyFormLoader.retrieveLogs();
   DiscrepancyFormLoader.renderLogs();
+  DiscrepancyFormLoader.retrieveLogs();
 }
 
 $(function() {
