@@ -303,7 +303,6 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    releasedFormStatusColumn,
     formTypeColumn,
     versionColumn,
     tagsColumn,
@@ -328,7 +327,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[9, 'desc']],
+    aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
@@ -336,11 +335,10 @@ $(function() {
 
   var archivedReleasedFormAoColumns = [
     selectColumn,
-    formLinkColumn,
+    releasedFormLinkColumn,
     titleColumn,
     formTypeColumn,
     tagsColumn,
-    releasedFormStatusColumn,
     releasedFormVersionColumn,
     archivedByColumn,
     archivedOnColumn,
@@ -362,7 +360,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedReleasedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot(
