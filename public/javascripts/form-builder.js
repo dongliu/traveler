@@ -933,21 +933,25 @@ function number_edit($cgr) {
 function file_edit($cgr) {
   $('#output .well.spec').remove();
   var label = 'label';
+  var required = false;
   var userkey = '';
   var help = '';
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
+    required = $('input', $cgr).prop('required');
     userkey = $('.controls input', $cgr).data('userkey');
     help = $('.controls span.help-block', $cgr).text();
   }
 
   var $upload = $(input.upload());
   var $label = $(spec.label());
+  var $required = $(spec.required());
   var $userkey = $(spec.userkey());
   var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append(
     $label,
+    $required,
     $userkey,
     $help,
     $done
@@ -965,11 +969,13 @@ function file_edit($cgr) {
 
   var model = {
     label: label,
+    required: required,
     userkey: userkey,
     help: help,
   };
 
   $('input', $label).val(label);
+  $('input', $required).prop('checked', required);
   $('input', $userkey).val(userkey);
   $('input', $help).val(help);
 
@@ -1089,7 +1095,7 @@ function init() {
 }
 
 function scrollToBottom() {
-  var scrollingElement = (document.scrollingElement || document.body);
+  var scrollingElement = document.scrollingElement || document.body;
   scrollingElement.scrollTop = scrollingElement.scrollHeight;
 }
 
@@ -1473,7 +1479,7 @@ function binding_events() {
         },
         aoColumns: discrepancyColumns,
         iDisplayLength: 5,
-        aaSorting: [[4, 'desc']],
+        aaSorting: [[3, 'desc']],
         sDom: sDomPage,
       });
       selectOneEvent(discrepancyTable);
