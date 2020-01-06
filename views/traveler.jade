@@ -54,7 +54,7 @@ block content
                 em #{traveler.totalInput}
               = ' inputs'
         if (locals.traveler.devices && traveler.devices.length > 0)
-          h4 Tags: !{traveler.devices}
+          h4 Devices: !{traveler.devices}
         if (locals.traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
         if (locals.traveler.status !== undefined)
