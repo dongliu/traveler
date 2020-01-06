@@ -46,6 +46,11 @@ var user = new Schema({
 var logData = new Schema({
   name: String,
   value: Schema.Types.Mixed,
+  file: {
+    path: String,
+    encoding: String,
+    mimetype: String,
+  },
 });
 
 // a log is an array of log data collected in a form.

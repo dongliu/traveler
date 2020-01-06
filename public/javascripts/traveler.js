@@ -96,16 +96,17 @@ function complete() {
 }
 
 /**
- * save the data in the discrepance form into the log
+ * save the data in the discrepancy form into the log
  * @param {Object} the log to save data into
  */
 function saveDiscrepancyLog(log) {
-  var formData = $('#discrepancy-form').serializeArray();
+  var formData = new FormData($('#discrepancy-form')[0]);
   $.ajax({
     url: './logs/' + log._id + '/records',
     type: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify(formData),
+    data: formData,
+    contentType: false,
+    processData: false,
   })
     .done(function() {
       $('#message').append(
@@ -163,8 +164,8 @@ function showValidation() {
 
 function loadDiscrepancyLog(discrepancyForm) {
   DiscrepancyFormLoader.setForm(discrepancyForm);
-  DiscrepancyFormLoader.retrieveLogs();
   DiscrepancyFormLoader.renderLogs();
+  DiscrepancyFormLoader.retrieveLogs();
 }
 
 $(function() {
