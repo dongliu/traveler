@@ -11,6 +11,7 @@ html
       var linkTarget = '!{viewConfig.linkTarget}' || '_blank';
       var showCCDB = !{viewConfig.showCCDB};
 
+    - var isAdmin = locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 ||locals.session.roles.indexOf('manager') !== -1)
     .navbar.navbar-fixed-top
       .navbar-inner
         .container-fluid
