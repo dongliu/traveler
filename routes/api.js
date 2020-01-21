@@ -213,10 +213,9 @@ module.exports = function(app) {
   });
 
   app.get('/apis/forms/:id/released/', function(req, res) {
-    ReleasedForm.find({'base._id': req.params.id}).exec(function(err, forms) {
+    ReleasedForm.find({ 'base._id': req.params.id }).exec(function(err, forms) {
       performMongoResponse(err, forms, res);
     });
-
   });
 
   app.get('/apis/releasedForms/', function(req, res) {
@@ -224,7 +223,6 @@ module.exports = function(app) {
       performMongoResponse(err, releasedForms, res);
     });
   });
-
 
   app.get('/apis/binders/', function(req, res) {
     Binder.find({}, function(err, binders) {
