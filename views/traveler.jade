@@ -58,15 +58,18 @@ block content
         if (locals.traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
         if (locals.traveler.status !== undefined)
-          if (locals.isOwner != undefined && locals.isOwner)
+          if (locals.isOwner != undefined && (locals.isOwner || isAdmin))
             case locals.traveler.status
               when 0
-                  .btn-group
-                    button.btn.btn-primary#work Start to work
+                .btn-group
+                  button.btn.btn-primary#work Start to work
               when 1
                 .btn-group
                   button.btn.btn-warning#freeze Freeze
+                .btn-group
+                  button.btn.btn-primary#complete Submit for completion
               when 1.5
+                if (isAdmin)
                   .btn-group
                     button.btn.btn-primary#approve Approve completion
                   .btn-group
@@ -74,9 +77,6 @@ block content
               when 3
                   .btn-group
                     button.btn.btn-primary#resume Resume
-          if (locals.traveler.status === 1)
-            .btn-group
-              button.btn.btn-primary#complete Submit for completion
         if (locals.traveler.status !== undefined && locals.traveler.status > 0)
           //- .btn-group
           //-   button.btn.btn-info#update-progress Update progress

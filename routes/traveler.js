@@ -931,6 +931,15 @@ module.exports = function(app) {
     }
   );
 
+  /**
+   * Only user who can write can update the status.
+   * 1 => 1.5:
+   * only owner can submit the traveler for completion
+   * 1.5 => 2, 1.5 => 1 :
+   * only admin or manager can approve or reject submitted traveler
+   * 2 => 4 :
+   * only admin or manager can archive approved traveler
+   */
   app.put(
     '/travelers/:id/status',
     auth.ensureAuthenticated,
@@ -948,12 +957,6 @@ module.exports = function(app) {
         return res.status(204).send();
       }
 
-      if (req.body.status !== 1.5 && !reqUtils.isOwner(req, doc)) {
-        return res
-          .status(403)
-          .send('You are not authorized to change the status. ');
-      }
-
       var stateTransition = require('../model/traveler').stateTransition;
 
       var target = _.find(stateTransition, function(t) {
@@ -963,6 +966,39 @@ module.exports = function(app) {
       debug(target);
       if (target.to.indexOf(req.body.status) === -1) {
         return res.status(400).send('invalid status change');
+      }
+
+      // authorize status change
+      if (req.body.status === 1.5 && !reqUtils.isOwner(req, doc)) {
+        return res
+          .status(403)
+          .send('You are not authorized to change the status. ');
+      }
+
+      if (
+        doc.status === 1.5 &&
+        (req.body.status === 2 || req.body.status === 1) &&
+        !(
+          routesUtilities.checkUserRole(req, 'admin') ||
+          routesUtilities.checkUserRole(req, 'manager')
+        )
+      ) {
+        return res
+          .status(403)
+          .send('You are not authorized to change the status. ');
+      }
+
+      if (
+        doc.status === 2 &&
+        req.body.status === 4 &&
+        !(
+          routesUtilities.checkUserRole(req, 'admin') ||
+          routesUtilities.checkUserRole(req, 'manager')
+        )
+      ) {
+        return res
+          .status(403)
+          .send('You are not authorized to change the status. ');
       }
 
       doc.status = req.body.status;
