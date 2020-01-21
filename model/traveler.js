@@ -68,6 +68,7 @@ var log = new Schema({
  *         | 1.5 // complete request
  *         | 2 // completed
  *         | 3 // frozen
+ *         | 4 // archived
  */
 
 const statusMap = {
