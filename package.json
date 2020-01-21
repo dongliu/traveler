@@ -39,6 +39,7 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "acorn": "^7.1.0",
     "chai": "^4.2.0",
     "eslint": "^5.13.0",
     "eslint-config-prettier": "4.0.0",
