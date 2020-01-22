@@ -987,7 +987,7 @@ module.exports = function(app) {
   /**
    * Only user who can write can update the status.
    * 1 => 1.5:
-   * only owner can submit the traveler for completion
+   * user who can write can submit the traveler for completion
    * 1.5 => 2, 1.5 => 1 :
    * only admin or manager can approve or reject submitted traveler
    * 2 => 4 :
@@ -1022,12 +1022,6 @@ module.exports = function(app) {
       }
 
       // authorize status change
-      if (req.body.status === 1.5 && !reqUtils.isOwner(req, doc)) {
-        return res
-          .status(403)
-          .send('You are not authorized to change the status. ');
-      }
-
       if (
         doc.status === 1.5 &&
         (req.body.status === 2 || req.body.status === 1) &&
