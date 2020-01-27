@@ -129,9 +129,9 @@ block content
             != traveler.forms.id(traveler.activeForm).html
           else
             != ''
-          if (locals.traveler.status === 1)
-            .btn-group
-              button.btn.btn-primary#complete2 Submit for completion
+        if (locals.traveler.status === 1)
+          .btn-group
+            button.btn.btn-primary#complete2 Submit for completion
       .span3.sidebar
 
 block js
