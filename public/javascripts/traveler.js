@@ -375,6 +375,7 @@ $(function() {
     .done(function(data) {
       $('#form .controls').each(function(index, controlsElement) {
         var inputElements = $(controlsElement).find('input,textarea');
+        var currentValue;
         if (inputElements.length) {
           var element = inputElements[0];
           var found = data.filter(function(e) {
@@ -396,7 +397,7 @@ $(function() {
                     '</div>'
                 );
             } else {
-              var currentValue = found[0].value;
+              currentValue = found[0].value;
               if (found[0].inputType === 'radio') {
                 // Update element to match the value
                 for (var i = 0; i < inputElements.size(); i++) {
