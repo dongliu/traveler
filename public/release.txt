@@ -1,3 +1,34 @@
+APS-1.4.0
+# Release Form Functionality
+- Only released forms can be created into travelers.
+- Releasing
+  - A draft is kept when a released form is created.
+  - A released form may have a discrepancy attached.
+    - Admin is prompted when approving a form to be released.
+  - A traveler instance can only be created from a released form. 
+  - Discrepancy forms also need to be released before they can be used for released forms. 
+  - Versioning (n is form revision, m is discrepancy form revision). 
+    - Form with discrepancy: (n:m)
+    - Standalone form (n)
+    - Standalone discrepancy (m) 
+- Only draft can be edited.
+  - draft is the default state of a newly created form.
+  - A released or archived form can be cloned into a draft.
+- Travelers can no longer have discrepancy assigned. 
+  - Travelers get a discrepancy attached based on discrepancy assigned to released form. 
+- Views
+  - User can now see drafts and released forms under tabs. 
+  - Public forms view also has a tabular view for drafts and released. 
+# Discrepancy 
+- Now supports file upload
+- Cannot be linked to travelers (only assigned during form releasing process)
+# General
+- Admin can now approve completion of any traveler.
+- Form link is now hidden under details of a traveler.
+- Traveler submit button is now accessible from bottom of page. 
+- File upload can now be a required input. 
+- Update nodejs version to 12. 
+
 APS-1.3.2
 # Form Builder
   - Float all edit buttons on bottom of screen. Jump to bottom upon creation of new item in form.
