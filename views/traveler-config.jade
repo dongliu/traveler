@@ -93,11 +93,6 @@ block content
         | &nbsp;Add tag
     br
     br
-    if (locals.isOwner != undefined && locals.isOwner)
-      .btn-group
-        a.btn.btn-primary#manage(href='./discrepancy-form-manager', target='#{viewConfig.linkTarget}') Manage discrepancy #{viewConfig.terminology.form}
-      .btn-group
-        a.btn.btn-primary#manage(href='./formmanager', target='#{viewConfig.linkTarget}') Manage normal #{viewConfig.terminology.form}
     if (viewConfig.showCCDB)
       .btn-group
           a.btn.btn-info(href='#{prefix}/devices/', target='#{viewConfig.linkTarget}') Browse devices

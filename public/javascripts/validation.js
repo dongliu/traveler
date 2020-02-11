@@ -1,3 +1,14 @@
+function customCheckValidity(element) {
+  var $element = $(element);
+  if ($element.prop('type') === 'file' && $element.prop('required')) {
+    // check history for required, only required is available for file input
+    if ($element.closest('.controls').find('.input-history').length) {
+      return true;
+    }
+  }
+  return element.checkValidity();
+}
+
 function isValid(form) {
   var disabled = $('input,textarea', form)
     .first()
@@ -18,7 +29,7 @@ function isValid(form) {
     last_input_name = input_name;
 
     input = form.elements[i];
-    if (!input.checkValidity()) {
+    if (!customCheckValidity(input)) {
       if (disabled) {
         $('input,textarea', form).prop('disabled', true);
       }
@@ -29,7 +40,8 @@ function isValid(form) {
 }
 
 function markValidity(element) {
-  if (element.checkValidity()) {
+  // if (element.checkValidity()) {
+  if (customCheckValidity(element)) {
     $(element).removeClass('invalid');
   } else {
     $(element).addClass('invalid');
@@ -38,7 +50,8 @@ function markValidity(element) {
 
 function markFormValidity(form) {
   // set validity
-  $('input:not([type="file"]),textarea', form).each(function() {
+  // $('input:not([type="file"]),textarea', form).each(function() {
+  $('input,textarea', form).each(function() {
     var disabled = $(this).prop('disabled');
     if (disabled) {
       $(this).prop('disabled', false);
@@ -62,6 +75,7 @@ function validationMessage(form) {
   var p;
   var value;
   var input;
+  var $input;
   var label;
   var span;
   var last_input_name = '';
@@ -77,7 +91,7 @@ function validationMessage(form) {
     input = form.elements[i];
     p = $('<p>');
     span = $('<span class="validation">');
-    if (input.checkValidity()) {
+    if (customCheckValidity(input)) {
       p.css('color', '#468847');
       span.css('color', '#468847');
     } else {
@@ -103,6 +117,16 @@ function validationMessage(form) {
         radio_ittr++;
         ittr_input = form.elements[radio_ittr];
       }
+    } else if (input.type === 'file') {
+      $input = $(input);
+      if ($input.closest('.controls').find('.input-history').length) {
+        value = $input
+          .closest('.controls')
+          .find('.input-history a')
+          .text();
+      } else {
+        value = 'no file uploaded';
+      }
     } else if (input.value === '') {
       value = 'no input from user';
     } else {
@@ -117,7 +141,7 @@ function validationMessage(form) {
         .next()
         .text();
     }
-    if (input.checkValidity()) {
+    if (customCheckValidity(input)) {
       p.html('<b>' + label + '</b>: ' + value);
       span.text('validation passed');
     } else {

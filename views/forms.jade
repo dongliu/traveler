@@ -23,10 +23,6 @@ block content
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
       .btn-group
-        button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
-          i.fa.fa-plane.fa-lg
-          | &nbsp;Travel
-      .btn-group
         a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
           i.fa.fa-institution.fa-lg
           | &nbsp;All public #{viewConfig.terminology.form}s
@@ -48,18 +44,22 @@ block content
     div
       ul.nav.nav-tabs
         li.active
-          a(href='#forms', data-toggle='tab') My #{viewConfig.terminology.form}s
+          a(href='#forms', data-toggle='tab') My draft #{viewConfig.terminology.form}s
         if (viewConfig.transferOwnership)
           li
-            a(href='#transferredforms', data-toggle='tab') Transferred #{viewConfig.terminology.form}s
+            a(href='#transferredforms', data-toggle='tab') Transferred draft #{viewConfig.terminology.form}s
         if (viewConfig.shareUsers)
           li
-            a(href='#sharedfroms', data-toggle='tab') Shared #{viewConfig.terminology.form}s
+            a(href='#sharedfroms', data-toggle='tab') Shared draft #{viewConfig.terminology.form}s
         if (viewConfig.shareGroups)
           li
-            a(href='#groupsharedfroms', data-toggle='tab') Group shared #{viewConfig.terminology.form}s
+            a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s
         li
-          a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
+          a(href='#releasedforms', data-toggle='tab') Released #{viewConfig.terminology.form}s
+        li
+          a(href='#archivedforms', data-toggle='tab') Archived draft #{viewConfig.terminology.form}s
+        li
+          a(href='#archived-released-forms', data-toggle='tab') Archived released #{viewConfig.terminology.form}s
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
@@ -101,6 +101,17 @@ block content
                   i.fa.fa-refresh.fa-lg
                   | &nbsp;Reload table
             table#group-shared-form-table.table.table-bordered.table-hover
+        #releasedforms.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+            .btn-group
+              button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
+                i.fa.fa-plane.fa-lg
+                | &nbsp;Travel
+          table#released-form-table.table.table-bordered.table-hover
         #archivedforms.tab-pane
           .btn-toolbar
             .btn-group
@@ -108,6 +119,13 @@ block content
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
           table#archived-form-table.table.table-bordered.table-hover
+        #archived-released-forms.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#archived-released-form-table.table.table-bordered.table-hover
 
 
 block js

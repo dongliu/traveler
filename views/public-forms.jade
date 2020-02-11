@@ -14,8 +14,23 @@ block content
     var prefix = '!{prefix}';
   .container-fluid
     #message
-    h3 Public accessible forms
-    table#public-forms-table.table.table-bordered.table-hover
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body.modal-body-visible
+      .modal-footer
+    h3 Public accessible #{viewConfig.terminology.form}s
+    div
+      ul.nav.nav-tabs
+        li.active
+          a(href='#draft-forms', data-toggle='tab') draft #{viewConfig.terminology.form}s
+        li
+          a(href='#released-forms', data-toggle='tab') Released #{viewConfig.terminology.form}s
+      .tab-content
+        #draft-forms.tab-pane.active
+          table#public-forms-table.table.table-bordered.table-hover
+        #released-forms.tab-pane
+          table#released-forms-table.table.table-bordered.table-hover
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')

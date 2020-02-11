@@ -54,23 +54,22 @@ block content
                 em #{traveler.totalInput}
               = ' inputs'
         if (locals.traveler.devices && traveler.devices.length > 0)
-          h4 Tags: !{traveler.devices}
-        if (locals.traveler.referenceForm)
-          h4
-            a(href='#{prefix}/forms/#{locals.traveler.referenceForm}/', target='#{viewConfig.linkTarget}') #{viewConfig.terminology.form}
-        if (locals.traveler.referenceDiscrepancyForm)
-          h4
-            a(href='#{prefix}/forms/#{locals.traveler.referenceDiscrepancyForm}/', target='#{viewConfig.linkTarget}') Discrepancy #{viewConfig.terminology.form}
+          h4 Devices: !{traveler.devices}
+        if (locals.traveler.referenceReleasedFormVer)
+          h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
         if (locals.traveler.status !== undefined)
-          if (locals.isOwner != undefined && locals.isOwner)
+          if (locals.isOwner != undefined && (locals.isOwner || isAdmin))
             case locals.traveler.status
               when 0
-                  .btn-group
-                    button.btn.btn-primary#work Start to work
+                .btn-group
+                  button.btn.btn-primary#work Start to work
               when 1
                 .btn-group
                   button.btn.btn-warning#freeze Freeze
+                .btn-group
+                  button.btn.btn-primary#complete Submit for completion
               when 1.5
+                if (isAdmin)
                   .btn-group
                     button.btn.btn-primary#approve Approve completion
                   .btn-group
@@ -78,9 +77,6 @@ block content
               when 3
                   .btn-group
                     button.btn.btn-primary#resume Resume
-          if (locals.traveler.status === 1)
-            .btn-group
-              button.btn.btn-primary#complete Submit for completion
         if (locals.traveler.status !== undefined && locals.traveler.status > 0)
           //- .btn-group
           //-   button.btn.btn-info#update-progress Update progress
@@ -94,6 +90,10 @@ block content
           button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
         #validation.well.hide
         #details.collapse.out
+          if (locals.traveler.referenceReleasedForm)
+            h4
+              span Created from: 
+              a(href='#{prefix}/released-forms/#{locals.traveler.referenceReleasedForm}/', target='#{viewConfig.linkTarget}') Released #{viewConfig.terminology.form}
           if (locals.traveler.description !== undefined)
             h4 Description: #{traveler.description}
           if (locals.traveler.deadline !== undefined)
@@ -117,8 +117,9 @@ block content
           .control-group#discrepancy-legend
             legend Discrepancy log
           table#discrepancy-log-table.table.table-bordered.table-hover
-          .btn-group
-            button.btn.btn-primary#add-discrepancy Add discrepancy log
+          if (locals.traveler.status === 1 || traveler.forms.length === 1.5)
+            .btn-group
+              button.btn.btn-primary#add-discrepancy Add discrepancy log
         form.form-horizontal#form
           div.control-group#traveler-legend
             legend Traveler
@@ -128,6 +129,9 @@ block content
             != traveler.forms.id(traveler.activeForm).html
           else
             != ''
+        if (locals.traveler.status === 1)
+          .btn-group
+            button.btn.btn-primary#complete2 Submit for completion
       .span3.sidebar
 
 block js
