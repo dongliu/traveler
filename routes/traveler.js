@@ -14,7 +14,7 @@ var shareLib = require('../lib/share');
 var tag = require('../lib/tag');
 var DataError = require('../lib/error').DataError;
 
-var Form = mongoose.model('Form');
+var ReleasedForm = mongoose.model('ReleasedForm');
 var User = mongoose.model('User');
 var Group = mongoose.model('Group');
 var Traveler = mongoose.model('Traveler');
@@ -430,13 +430,14 @@ module.exports = function(app) {
       });
   });
 
+  // create new travelers
   app.post(
     '/travelers/',
     auth.ensureAuthenticated,
     reqUtils.filter('body', ['form', 'source']),
     function createOrCloneTraveler(req, res) {
       if (req.body.form) {
-        Form.findById(req.body.form, function(err, form) {
+        ReleasedForm.findById(req.body.form, function(err, form) {
           if (err) {
             logger.error(err);
             return res.status(500).send(err.message);
@@ -446,7 +447,11 @@ module.exports = function(app) {
           } else {
             return res
               .status(400)
-              .send('cannot find the form ' + req.body.form);
+              .send(
+                `cannot find the released ${
+                  config.viewConfig.terminology.form
+                } with id ${req.body.form}`
+              );
           }
         });
       }
@@ -750,11 +755,17 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.canReadMw('id'),
     function(req, res) {
-      retrieveLogs(req[req.params.id], function(err, output) {
+      retrieveLogs(req[req.params.id], function(err, logs) {
         if (err) {
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(output);
+        logs.forEach(function(log) {
+          if (log.file) {
+            // remove file details
+            log.file = true;
+          }
+        });
+        return res.status(200).json(logs);
       });
     }
   );
@@ -803,15 +814,29 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     reqUtils.canWriteMw('id'),
-    reqUtils.status('id', [1]),
+    reqUtils.status('id', [1, 1.5]),
     reqUtils.exist('lid', Log),
-    // reqUtils.filter('body', ['records']),
-    // reqUtils.hasAll('body', ['records']),
-    // reqUtils.sanitize('body', ['records']),
+    reqUtils.sanitize('body'),
     function(req, res) {
       var log = req[req.params.lid];
-      debug(req.body);
-      log.records = req.body;
+      log.records = [];
+      _.keys(req.body).map(function(name) {
+        log.records.push({ name: name, value: req.body[name] });
+      });
+      if (req.files) {
+        _.keys(req.files).map(function(name) {
+          let file = req.files[name];
+          log.records.push({
+            name: name,
+            value: file.originalname,
+            file: {
+              path: file.path,
+              encoding: file.encoding,
+              mimetype: file.mimetype,
+            },
+          });
+        });
+      }
       log.inputBy = req.session.userid;
       log.inputOn = Date.now();
       debug(log);
@@ -824,6 +849,37 @@ module.exports = function(app) {
           logger.error(err);
           res.status(500).send(err.message);
         });
+    }
+  );
+
+  app.get(
+    '/travelers/:tid/logs/:lid/records/:rid',
+    auth.ensureAuthenticated,
+    reqUtils.exist('tid', Traveler),
+    reqUtils.canReadMw('tid'),
+    function(req, res) {
+      retrieveLogs(req[req.params.tid], function(err, logs) {
+        if (err) {
+          return res.status(500).send(err.message);
+        }
+        const log = _.find(logs, { id: req.params.lid });
+        if (!log) {
+          return res.status(404).send('log not found');
+        }
+        const record = log.records.id(req.params.rid);
+        if (!record) {
+          return res.status(404).send('record not found');
+        }
+        if (!record.file.path) {
+          return res.status(200).json(record);
+        }
+        fs.exists(record.file.path, function(exists) {
+          if (exists) {
+            return res.sendFile(path.resolve(record.file.path));
+          }
+          return res.status(410).send('gone');
+        });
+      });
     }
   );
 
@@ -893,218 +949,6 @@ module.exports = function(app) {
     }
   );
 
-  app.get(
-    '/travelers/:id/formmanager',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.archived('id', false),
-    function formviewer(req, res) {
-      res.render(
-        'form-manager',
-        routesUtilities.getRenderObject(req, {
-          traveler: req[req.params.id],
-        })
-      );
-    }
-  );
-
-  app.get(
-    '/travelers/:id/discrepancy-form-manager',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.archived('id', false),
-    function formviewer(req, res) {
-      res.render(
-        'discrepancy-form-manager',
-        routesUtilities.getRenderObject(req, {
-          traveler: req[req.params.id],
-        })
-      );
-    }
-  );
-
-  // use the form in the request as the active form
-  app.post(
-    '/travelers/:id/forms/',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.archived('id', false),
-    reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['formId']),
-    reqUtils.hasAll('body', ['formId']),
-    reqUtils.existSource('formId', 'body', Form),
-    function addForm(req, res) {
-      var doc = req[req.params.id];
-      var form = {
-        html: req[req.body.formId].html,
-        mapping: req[req.body.formId].mapping,
-        labels: req[req.body.formId].labels,
-        activatedOn: [Date.now()],
-        reference: req.body.formId,
-        _v: req[req.body.formId]._v,
-        alias: req[req.body.formId].title,
-      };
-
-      // for old forms without lables
-      if (!(typeof form.labels === 'object' && _.size(form.labels) > 0)) {
-        form.labels = routesUtilities.traveler.inputLabels(form.html);
-      }
-
-      var num = _.size(form.labels);
-      doc.forms.push(form);
-      doc.activeForm = doc.forms[doc.forms.length - 1]._id;
-      doc.referenceForm = form.reference;
-      doc.mapping = form.mapping;
-      doc.labels = form.labels;
-      doc.totalInput = num;
-      // reset touched input list
-      resetTouched(doc, function() {
-        doc.save(function saveDoc(e, newDoc) {
-          if (e) {
-            logger.error(e);
-            return res.status(500).send(e.message);
-          }
-          return res.status(200).json(newDoc);
-        });
-      });
-    }
-  );
-
-  // set active form
-  app.put(
-    '/travelers/:id/forms/active',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.archived('id', false),
-    reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['formId']),
-    reqUtils.hasAll('body', ['formId']),
-    function putActiveForm(req, res) {
-      var doc = req[req.params.id];
-      var formId = req.body.formId;
-      var form = doc.forms.id(formId);
-
-      if (!form) {
-        return res
-          .status(410)
-          .send(
-            'Cannot find form ' +
-              req.body.formId +
-              ' in traveler ' +
-              req[req.params.id]
-          );
-      }
-
-      doc.activeForm = form._id;
-      doc.referenceForm = form.reference;
-      doc.mapping = form.mapping;
-      // for old forms without lables
-      if (!(typeof form.labels === 'object' && _.size(form.labels) > 0)) {
-        form.labels = routesUtilities.traveler.inputLabels(form.html);
-      }
-      doc.labels = form.labels;
-      doc.totalInput = _.size(form.labels);
-      form.activatedOn.push(Date.now());
-      // reset touched input list
-      resetTouched(doc, function() {
-        doc.save(function saveDoc(e, newDoc) {
-          if (e) {
-            logger.error(e);
-            return res.status(500).send(e.message);
-          }
-          return res.status(200).json(newDoc);
-        });
-      });
-    }
-  );
-
-  // set form alias
-  app.put(
-    '/travelers/:id/forms/:fid/alias',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.archived('id', false),
-    reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['value']),
-    reqUtils.sanitize('body', ['value']),
-    function putFormAlias(req, res) {
-      var doc = req[req.params.id];
-      if (doc.status > 1 || doc.archived) {
-        return res
-          .status(400)
-          .send('cannot update form because of current traveler state');
-      }
-      var form = doc.forms.id(req.params.fid);
-      if (!form) {
-        return res.status(410).send('from ' + req.params.fid + ' not found.');
-      }
-
-      form.alias = req.body.value;
-
-      doc.save(function saveDoc(e) {
-        if (e) {
-          logger.error(e);
-          return res.status(500).send(e.message);
-        }
-        return res.status(204).send();
-      });
-    }
-  );
-
-  // use the form in the request as the active discrepancy form
-  app.post(
-    '/travelers/:id/discrepancy-forms/',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.archived('id', false),
-    reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['formId']),
-    reqUtils.hasAll('body', ['formId']),
-    reqUtils.existSource('formId', 'body', Form),
-    function addDiscrepancyForm(req, res) {
-      if (req[req.body.formId].formType !== 'discrepancy') {
-        return res.status(400).send('the form should be of discrepancy type!');
-      }
-
-      if (req[req.body.formId].status !== 1) {
-        return res.status(400).send('the form should be released!');
-      }
-
-      var doc = req[req.params.id];
-      var form = {
-        html: req[req.body.formId].html,
-        mapping: req[req.body.formId].mapping,
-        labels: req[req.body.formId].labels,
-        activatedOn: [Date.now()],
-        reference: req.body.formId,
-        _v: req[req.body.formId]._v,
-        alias: req[req.body.formId].title,
-      };
-
-      // migrate traveler without discrepancyForms
-      if (!doc.discrepancyForms) {
-        doc.discrepancyForms = [];
-      }
-      doc.discrepancyForms.push(form);
-      doc.activeDiscrepancyForm =
-        doc.discrepancyForms[doc.discrepancyForms.length - 1]._id;
-      doc.referenceDiscrepancyForm = form.reference;
-      doc.save(function saveDoc(e, newDoc) {
-        if (e) {
-          logger.error(e);
-          return res.status(500).send(e.message);
-        }
-        return res.status(200).json(newDoc);
-      });
-    }
-  );
-
   app.put(
     '/travelers/:id/config',
     auth.ensureAuthenticated,
@@ -1140,6 +984,15 @@ module.exports = function(app) {
     }
   );
 
+  /**
+   * Only user who can write can update the status.
+   * 1 => 1.5:
+   * user who can write can submit the traveler for completion
+   * 1.5 => 2, 1.5 => 1 :
+   * only admin or manager can approve or reject submitted traveler
+   * 2 => 4 :
+   * only admin or manager can archive approved traveler
+   */
   app.put(
     '/travelers/:id/status',
     auth.ensureAuthenticated,
@@ -1157,12 +1010,6 @@ module.exports = function(app) {
         return res.status(204).send();
       }
 
-      if (req.body.status !== 1.5 && !reqUtils.isOwner(req, doc)) {
-        return res
-          .status(403)
-          .send('You are not authorized to change the status. ');
-      }
-
       var stateTransition = require('../model/traveler').stateTransition;
 
       var target = _.find(stateTransition, function(t) {
@@ -1172,6 +1019,33 @@ module.exports = function(app) {
       debug(target);
       if (target.to.indexOf(req.body.status) === -1) {
         return res.status(400).send('invalid status change');
+      }
+
+      // authorize status change
+      if (
+        doc.status === 1.5 &&
+        (req.body.status === 2 || req.body.status === 1) &&
+        !(
+          routesUtilities.checkUserRole(req, 'admin') ||
+          routesUtilities.checkUserRole(req, 'manager')
+        )
+      ) {
+        return res
+          .status(403)
+          .send('You are not authorized to change the status. ');
+      }
+
+      if (
+        doc.status === 2 &&
+        req.body.status === 4 &&
+        !(
+          routesUtilities.checkUserRole(req, 'admin') ||
+          routesUtilities.checkUserRole(req, 'manager')
+        )
+      ) {
+        return res
+          .status(403)
+          .send('You are not authorized to change the status. ');
       }
 
       doc.status = req.body.status;
@@ -1395,7 +1269,7 @@ module.exports = function(app) {
       var doc = req[req.params.id];
 
       if (_.isEmpty(req.files)) {
-        return res.status(400).send('Expecte One uploaded file');
+        return res.status(400).send('Expect One uploaded file');
       }
 
       var data = new TravelerData({

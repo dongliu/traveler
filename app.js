@@ -34,6 +34,7 @@ mongoose.connection.close();
 // Load MongoDB models
 require('./model/user.js');
 require('./model/form.js');
+require('./model/released-form.js');
 require('./model/traveler.js');
 require('./model/binder.js');
 require('./model/history.js');

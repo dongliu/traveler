@@ -4,5 +4,5 @@
     != ' '
     span.model-label { model.label }
   .controls
-    input(type='file', rv-data-userkey='model.userkey', disabled=true)
+    input(type='file', rv-required='model.required', rv-data-userkey='model.userkey', disabled=true)
     span.help-block { model.help }

@@ -1,8 +1,9 @@
-/*global document: false, window: false, FormData: false, linkTarget,
-validationMessage, isValid*/
-/*global moment: false, Binder: false, Modernizr: false*/
-/*global travelerStatus: true, finishedInput: true, ajax401: false, prefix,
-DiscrepancyFormLoader, traveler, markValidity, markFormValidity, findById*/
+/*
+global document, window, FormData, linkTarget, validationMessage, isValid,
+moment, Binder, travelerStatus, finishedInput: writable, ajax401, prefix,
+DiscrepancyFormLoader, traveler, markValidity, markFormValidity, findById,
+livespan, Modernizr, createSideNav, generateHistoryRecordHtml
+*/
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
@@ -95,16 +96,17 @@ function complete() {
 }
 
 /**
- * save the data in the discrepance form into the log
+ * save the data in the discrepancy form into the log
  * @param {Object} the log to save data into
  */
 function saveDiscrepancyLog(log) {
-  var formData = $('#discrepancy-form').serializeArray();
+  var formData = new FormData($('#discrepancy-form')[0]);
   $.ajax({
     url: './logs/' + log._id + '/records',
     type: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify(formData),
+    data: formData,
+    contentType: false,
+    processData: false,
   })
     .done(function() {
       $('#message').append(
@@ -162,8 +164,8 @@ function showValidation() {
 
 function loadDiscrepancyLog(discrepancyForm) {
   DiscrepancyFormLoader.setForm(discrepancyForm);
-  DiscrepancyFormLoader.retrieveLogs();
   DiscrepancyFormLoader.renderLogs();
+  DiscrepancyFormLoader.retrieveLogs();
 }
 
 $(function() {
@@ -373,6 +375,7 @@ $(function() {
     .done(function(data) {
       $('#form .controls').each(function(index, controlsElement) {
         var inputElements = $(controlsElement).find('input,textarea');
+        var currentValue;
         if (inputElements.length) {
           var element = inputElements[0];
           var found = data.filter(function(e) {
@@ -394,7 +397,7 @@ $(function() {
                     '</div>'
                 );
             } else {
-              var currentValue = found[0].value;
+              currentValue = found[0].value;
               if (found[0].inputType === 'radio') {
                 // Update element to match the value
                 for (var i = 0; i < inputElements.size(); i++) {
@@ -442,7 +445,10 @@ $(function() {
     })
     .always();
 
-  $('#complete').click(function(e) {
+  $('#complete').click(completeClick);
+  $('#complete2').click(completeClick);
+
+  function completeClick(e) {
     e.preventDefault();
     if (
       $('#validation').css('display') === 'none' &&
@@ -452,7 +458,7 @@ $(function() {
     } else {
       complete();
     }
-  });
+  }
 
   // deserialize the values here
   $('#form .control-group-wrap').mouseenter(function(e) {
@@ -793,7 +799,7 @@ $(function() {
       }),
     })
       .done(function(log) {
-        $('#modalLabel').html('Please input discrepency log details');
+        $('#modalLabel').html('Please input discrepancy log details');
         $('#modal .modal-body').html(
           '<form id="discrepancy-form" class="form-horizontal">' +
             discrepancyForm.html +

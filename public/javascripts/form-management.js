@@ -1,11 +1,12 @@
-/*global moment: false, ajax401: false, disableAjaxCache: false, prefix: false,
-updateAjaxURL: false, Holder: false*/
-/*global selectColumn: false, formLinkColumn: false, formConfigLinkColumn: false,
-titleColumn: false, tagsColumn: false, keysColumn:false,  updatedOnColumn:
-false, updatedByColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
-fnGetSelected: false, selectEvent: false, filterEvent: false, formTypeColumn:
-false, versionColumn: false, formShareLinkColumn: false*/
-/*global archiveFromModal*/
+/*
+global moment, ajax401, disableAjaxCache, prefix, updateAjaxURL, Holder,
+selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn,
+keysColumn, updatedOnColumn, updatedByColumn, fnAddFilterFoot, sDomNoTools,
+fnGetSelected, selectEvent, filterEvent, formShareLinkColumn, formStatusColumn,
+formTypeColumn, versionColumn, releasedFormStatusColumn,
+releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
+archivedByColumn, archivedOnColumn, releasedFormLinkColumn
+*/
 
 function cloneFromModal(formTable) {
   $('#submit').prop('disabled', true);
@@ -69,6 +70,7 @@ $(function() {
     titleColumn,
     formTypeColumn,
     versionColumn,
+    formStatusColumn,
     tagsColumn,
     keysColumn,
     updatedByColumn,
@@ -91,23 +93,21 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[10, 'desc']],
+    aaSorting: [[11, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#submitted-form-table', formAoColumns);
 
   var releasedFormAoColumns = [
     selectColumn,
-    formLinkColumn,
-    formConfigLinkColumn,
-    formShareLinkColumn,
+    releasedFormLinkColumn,
     titleColumn,
     formTypeColumn,
-    versionColumn,
+    releasedFormStatusColumn,
+    releasedFormVersionColumn,
     tagsColumn,
-    keysColumn,
-    updatedByColumn,
-    updatedOnColumn,
+    releasedByColumn,
+    releasedOnColumn,
   ];
   var releasedFormTable = $('#released-form-table').dataTable({
     sAjaxSource: '/released-forms/json',
@@ -125,8 +125,8 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: formAoColumns,
-    aaSorting: [[10, 'desc']],
+    aoColumns: releasedFormAoColumns,
+    aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
@@ -135,14 +135,15 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
+    formTypeColumn,
     tagsColumn,
-    keysColumn,
-    versionColumn,
-    updatedByColumn,
-    updatedOnColumn,
+    releasedFormStatusColumn,
+    releasedFormVersionColumn,
+    archivedByColumn,
+    archivedOnColumn,
   ];
   var archivedFormTable = $('#archived-form-table').dataTable({
-    sAjaxSource: '/archivedforms/json',
+    sAjaxSource: '/archived-released-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
       Holder.run({
@@ -158,7 +159,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[7, 'desc']],
+    aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);

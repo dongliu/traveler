@@ -1,6 +1,11 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global prefix: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false*/
-/*global formLinkColumn: false, titleColumn: false, ownerColumn: false, createdOnColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, createdByColumn: false, createdOnColumn: false, sDomNoTools: false, filterEvent: false*/
+/*
+ global prefix, ajax401, updateAjaxURL, disableAjaxCache: false formLinkColumn,
+ titleColumn, ownerColumn, createdOnColumn, sharedWithColumn, sharedGroupColumn,
+ fnAddFilterFoot, createdByColumn, createdOnColumn, sDomNoTools, filterEvent,
+ formCloneColumn, formStatusColumn, tagsColumn, keysColumn, Holder,
+ releasedFormLinkColumn, releasedFormCloneColumn, releasedFormStatusColumn,
+ formTypeColumn, releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
+ */
 
 $(function() {
   ajax401(prefix);
@@ -10,6 +15,7 @@ $(function() {
     formLinkColumn,
     formCloneColumn,
     titleColumn,
+    formStatusColumn,
     tagsColumn,
     keysColumn,
     createdByColumn,
@@ -38,6 +44,42 @@ $(function() {
     aaSorting: [[3, 'desc']],
     sDom: sDomNoTools,
   });
+
+  /*released form table starts*/
+  var releasedFormAoColumns = [
+    releasedFormLinkColumn,
+    releasedFormCloneColumn,
+    titleColumn,
+    releasedFormStatusColumn,
+    formTypeColumn,
+    releasedFormVersionColumn,
+    tagsColumn,
+    releasedByColumn,
+    releasedOnColumn,
+  ];
+  $('#released-forms-table').dataTable({
+    sAjaxSource: '/released-forms/json',
+    sAjaxDataProp: '',
+    fnDrawCallback: function() {
+      Holder.run({
+        images: 'img.user',
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: releasedFormAoColumns,
+    aaSorting: [[8, 'desc']],
+    sDom: sDomNoTools,
+  });
+  fnAddFilterFoot('#released-forms-table', releasedFormAoColumns);
+  /*released form table ends*/
+
   // binding events
   filterEvent();
 });

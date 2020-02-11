@@ -6,11 +6,12 @@
  */
 var config = require('../config/config.js');
 
-var mongoose = require('mongoose');
-var Traveler = mongoose.model('Traveler');
-var Binder = mongoose.model('Binder');
+var Traveler = require('../model/traveler').Traveler;
+var Binder = require('../model/binder').Binder;
 var _ = require('lodash');
 var cheer = require('cheerio');
+
+const formStatusMap = require('../model/released-form').statusMap;
 
 var TravelerError = require('../lib/error').TravelerError;
 
@@ -81,7 +82,7 @@ function getRenderObject(req, extraAttributes) {
 }
 
 function getDeviceValue(value) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     var deviceIndex = 0;
     processNextDevice();
 
@@ -245,6 +246,27 @@ var binder = {
   },
 };
 
+function addDiscrepancy(discrepancy, traveler) {
+  // migrate traveler without discrepancyForms
+  if (!traveler.discrepancyForms) {
+    traveler.discrepancyForms = [];
+  }
+  traveler.discrepancyForms.push(discrepancy);
+  // set reference for compatibility, discrepancy._id is the same as the discrepancy form id
+  traveler.discrepancyForms[0].reference = discrepancy._id;
+  traveler.activeDiscrepancyForm = traveler.discrepancyForms[0]._id;
+  traveler.referenceDiscrepancyForm = discrepancy._id;
+}
+
+function addBase(base, traveler) {
+  traveler.forms.push(base);
+  // set reference for compatibility, base._id is the same as the base form id
+  traveler.forms[0].reference = base._id;
+  traveler.activeForm = traveler.forms[0]._id;
+  traveler.mapping = base.mapping;
+  traveler.labels = base.labels;
+  traveler.totalInput = _.size(base.labels);
+}
 var traveler = {
   /**
    * get the map of input name -> label in the form
@@ -291,7 +313,10 @@ var traveler = {
     devices,
     newTravelerCallBack
   ) {
-    if (form.formType && form.formType !== 'normal') {
+    if (
+      form.formType &&
+      (form.formType !== 'normal' && form.formType !== 'normal_discrepancy')
+    ) {
       return newTravelerCallBack(
         new TravelerError(
           `cannot create a traveler from ${form.id} of non normal type`,
@@ -299,16 +324,27 @@ var traveler = {
         )
       );
     }
+
+    if (formStatusMap['' + form.status] !== 'released') {
+      return newTravelerCallBack(
+        new TravelerError(
+          `cannot create a traveler from a non-released form ${form.id}`,
+          400
+        )
+      );
+    }
+
     var traveler = new Traveler({
       title: title,
       description: '',
       devices: devices,
-      tags: form.tags,
+      tags: form.base.tags,
       status: 0,
       createdBy: userName,
       createdOn: Date.now(),
       sharedWith: [],
-      referenceForm: form._id,
+      referenceReleasedForm: form._id,
+      referenceReleasedFormVer: form.ver,
       forms: [],
       data: [],
       comments: [],
@@ -317,24 +353,13 @@ var traveler = {
     });
 
     // for old forms without lables
-    if (!(_.isObject(form.labels) && _.size(form.labels) > 0)) {
-      form.labels = this.inputLabels(form.html);
+    // if (!(_.isObject(form.base.labels) && _.size(form.base.labels) > 0)) {
+    //   form.base.labels = this.inputLabels(form.base.html);
+    // }
+    addBase(form.base, traveler);
+    if (form.discrepancy) {
+      addDiscrepancy(form.discrepancy, traveler);
     }
-
-    traveler.forms.push({
-      html: form.html,
-      activatedOn: [Date.now()],
-      reference: form._id,
-      alias: form.title,
-      mapping: form.mapping,
-      labels: form.labels,
-      _v: form._v,
-    });
-    traveler.activeForm = traveler.forms[0]._id;
-    traveler.mapping = form.mapping;
-    traveler.labels = form.labels;
-    traveler.totalInput = _.size(traveler.labels);
-
     traveler.save(newTravelerCallBack);
   },
   changeArchivedState: function(traveler, archived) {
@@ -418,7 +443,7 @@ var traveler = {
 
     return false;
   },
-  canWrite: function(req, travelerDoc, userid) {
+  canWrite: function(req, travelerDoc) {
     if (req.session == undefined) {
       return false;
     }
