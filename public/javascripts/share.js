@@ -209,6 +209,10 @@ function inArray(name, ao) {
 function addto(data, table, list) {
   if (!!data.name || !!data.id) {
     if (inArray(data.name || data.id, table.fnGetData())) {
+      var name = data.name;
+      if (list === 'groups') {
+        name = data.id;
+      }
       //show message
       $('#message').append(
         '<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button><strong>' +
@@ -344,7 +348,7 @@ $(function() {
     },
     {
       name: 'groupnames',
-      displayKey: 'name',
+      displayKey: '_id',
       limit: 20,
       source: travelerGlobal.groupnames,
     }
@@ -373,7 +377,7 @@ $(function() {
     sDom: sDomNoTools,
   });
 
-  var groupShareAoColumns = [selectColumn, groupIdColumn, accessColumn];
+  var groupShareAoColumns = [selectColumn, groupIdColumn, groupNameColumn, accessColumn];
   var groupShareTable = $('#groupshare-table').dataTable({
     aaData: [],
     // 'bAutoWidth': false,

@@ -1377,6 +1377,13 @@ var displayNameColumn = {
   bFilter: true,
 };
 
+var groupNameColumn = {
+  sTitle: 'Group Name',
+  mData: 'groupname',
+  sDefaultContent: '',
+  bFilter: true,
+};
+
 var membersColumn = {
   sTitle: 'Member(s)',
   mData: 'members',
