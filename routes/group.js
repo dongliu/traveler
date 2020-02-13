@@ -524,7 +524,7 @@ module.exports = function(app) {
           error: err.message,
         });
       }
-      res.json(groups);
+      return res.json(groups);
     });
   });
 
