@@ -25,6 +25,35 @@ function cleanList(id, f) {
   res_list.forEach(f);
 }
 
+function listADGroups(req, res) {
+  var query = req.query.term;
+  var filter;
+  var opts;
+  if (query && query.length > 0) {
+    if (query[query.length - 1] === '*') {
+      filter = ad.groupSearchFilter.replace('_id', query);
+    } else {
+      filter = ad.groupSearchFilter.replace('_id', query + '*');
+    }
+  } else {
+    filter = ad.groupSearchFilter.replace('_id', '*');
+  }
+  opts = {
+    filter: filter,
+    attributes: ad.groupAttributes,
+    scope: 'sub',
+  };
+  ldapClient.search(ad.groupSearchBase, opts, false, function(err, result) {
+    if (err) {
+      return res.status(500).send(err.message);
+    }
+    if (result.length === 0) {
+      return res.json([]);
+    }
+    return res.json(result);
+  });
+}
+
 function addGroup(req, res) {
   var group;
   if (ad.groupSearchBase && ad.groupSearchBase.length > 0) {
@@ -166,6 +195,11 @@ module.exports = function(app) {
         .status(403)
         .send('You are not authorized to access this resource. ');
     }
+
+    if (ad.groupSearchFilter) {
+      return listADGroups(req, res);
+    }
+
     Group.find(req.query)
       .populate('members')
       .exec(function(err, groups) {
@@ -517,6 +551,10 @@ module.exports = function(app) {
   });
 
   app.get('/groupnames', auth.ensureAuthenticated, function(req, res) {
+      if (ad.groupSearchFilter) {
+        return listADGroups(req, res);
+      }
+
     Group.find().exec(function(err, groups) {
       if (err) {
         console.error(err);
@@ -529,31 +567,6 @@ module.exports = function(app) {
   });
 
   app.get('/adgroups', auth.ensureAuthenticated, function(req, res) {
-    var query = req.query.term;
-    var filter;
-    var opts;
-    if (query && query.length > 0) {
-      if (query[query.length - 1] === '*') {
-        filter = ad.groupSearchFilter.replace('_id', query);
-      } else {
-        filter = ad.groupSearchFilter.replace('_id', query + '*');
-      }
-    } else {
-      filter = ad.groupSearchFilter.replace('_id', '*');
-    }
-    opts = {
-      filter: filter,
-      attributes: ad.groupAttributes,
-      scope: 'sub',
-    };
-    ldapClient.search(ad.groupSearchBase, opts, false, function(err, result) {
-      if (err) {
-        return res.status(500).send(err.message);
-      }
-      if (result.length === 0) {
-        return res.json([]);
-      }
-      return res.json(result);
-    });
+      return listADGroups(req, res);
   });
 };
