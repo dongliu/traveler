@@ -21,14 +21,6 @@ function isValid(form) {
   var input;
   for (i = 0; i < form.elements.length; i += 1) {
     input = form.elements[i];
-
-    var input_name = input.name;
-    if (input_name === last_input_name) {
-      continue;
-    }
-    last_input_name = input_name;
-
-    input = form.elements[i];
     if (!customCheckValidity(input)) {
       if (disabled) {
         $('input,textarea', form).prop('disabled', true);
@@ -50,7 +42,6 @@ function markValidity(element) {
 
 function markFormValidity(form) {
   // set validity
-  // $('input:not([type="file"]),textarea', form).each(function() {
   $('input,textarea', form).each(function() {
     var disabled = $(this).prop('disabled');
     if (disabled) {
@@ -88,7 +79,6 @@ function validationMessage(form) {
     }
     last_input_name = input_name;
 
-    input = form.elements[i];
     p = $('<p>');
     span = $('<span class="validation">');
     if (customCheckValidity(input)) {
