@@ -2,7 +2,7 @@ function customCheckValidity(element) {
   var $element = $(element);
   if ($element.prop('type') === 'file' && $element.prop('required')) {
     // check history for required, only required is available for file input
-    if($element.closest('.controls').find('.input-history').length) {
+    if ($element.closest('.controls').find('.input-history').length) {
       return true;
     }
   }
@@ -17,7 +17,6 @@ function isValid(form) {
     $('input,textarea', form).prop('disabled', false);
   }
   var i = 0;
-  var last_input_name = '';
   var input;
   for (i = 0; i < form.elements.length; i += 1) {
     input = form.elements[i];
@@ -110,7 +109,10 @@ function validationMessage(form) {
     } else if (input.type === 'file') {
       $input = $(input);
       if ($input.closest('.controls').find('.input-history').length) {
-        value = $input.closest('.controls').find('.input-history a').text();
+        value = $input
+          .closest('.controls')
+          .find('.input-history a')
+          .text();
       } else {
         value = 'no file uploaded';
       }
@@ -151,4 +153,35 @@ function validationMessage(form) {
     $('input,textarea', form).prop('disabled', true);
   }
   return output.html();
+}
+
+/**
+ * validate the discrepancy log form and show validation message for invalid input
+ *
+ * @param   {Element}  form  - form HTML element
+ *
+ * @return  {boolean}  - true if the form is valid
+ */
+function validateLog(form) {
+  var i = 0;
+  var input;
+  var valid = true;
+  for (i = 0; i < form.elements.length; i += 1) {
+    input = form.elements[i];
+    $(input).removeClass('invalid');
+    $(input)
+      .closest('.controls')
+      .find('span.validation')
+      .remove();
+    if (!input.checkValidity()) {
+      valid = false;
+      $(input).addClass('invalid');
+      $(input)
+        .closest('.controls')
+        .append(
+          '<span class="validation">' + input.validationMessage + '</span>'
+        );
+    }
+  }
+  return valid;
 }
