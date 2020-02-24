@@ -263,7 +263,7 @@ ul.dropdown-menu input[type='checkbox'] {
   box-shadow: 0 0 5px rgba(192, 152, 83, 1);
 }
 
-#form .invalid {
+form .invalid {
   outline: 1px solid #b94a48;
 }
 
