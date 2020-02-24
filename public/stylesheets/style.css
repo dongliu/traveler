@@ -267,6 +267,11 @@ form .invalid {
   outline: 1px solid #b94a48;
 }
 
+form .validation {
+  font-weight: bold;
+  color: #b94a48;
+}
+
 figcaption {
   font-weight: bold;
   font-size: large;
