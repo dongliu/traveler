@@ -806,13 +806,19 @@ $(function() {
             '</form>'
         );
         $('#modal .modal-footer').html(
-          '<button value="submit" class="btn btn-primary" data-dismiss="modal">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+          '<button value="submit" class="btn btn-primary">Submit</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
         );
         $('#modal').modal('show');
         if (travelerStatus === 1 || travelerStatus === 1.5) {
           $('#discrepancy-form input,textarea').prop('disabled', false);
         }
         $('#modal button[value="submit"]').click(function() {
+          // validate and then save it
+          var logForm = document.getElementById('discrepancy-form');
+          if (!validateLog(logForm)) {
+            $('#modalLabel').html('Discrepancy log data is invalid');
+            return;
+          }
           saveDiscrepancyLog(log);
         });
       })
