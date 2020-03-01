@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const routesUtilities = require('../utilities/routes.js');
 const Form = mongoose.model('Form');
 const ReleasedForm = mongoose.model('ReleasedForm');
+const { statusMap } = require('../model/released-form');
 const reqUtils = require('../lib/req-utils');
 const logger = require('../lib/loggers').getLogger();
 const config = require('../config/config.js');
@@ -84,6 +85,7 @@ module.exports = function(app) {
           title: releasedForm.title,
           formType: releasedForm.formType,
           status: releasedForm.status,
+          statusText: statusMap['' + releasedForm.status],
           ver: releasedForm.ver,
           base: releasedForm.base,
           discrepancy: releasedForm.discrepancy,
