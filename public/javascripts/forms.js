@@ -145,13 +145,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[11, 'desc'], [10, 'desc']],
+    aaSorting: [
+      [11, 'desc'],
+      [10, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#form-table', formAoColumns);
@@ -187,13 +193,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
-    aaSorting: [[11, 'desc'], [12, 'desc']],
+    aaSorting: [
+      [11, 'desc'],
+      [12, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#transferred-form-table', transferredFormAoColumns);
@@ -226,7 +238,10 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
@@ -251,7 +266,10 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
@@ -275,7 +293,7 @@ $(function() {
     releasedByColumn,
     releasedOnColumn,
   ];
-  $('#released-form-table').dataTable({
+  var releasedFormTable = $('#released-form-table').dataTable({
     sAjaxSource: '/released-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -286,7 +304,10 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
@@ -321,7 +342,10 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
@@ -354,7 +378,10 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
@@ -492,6 +519,7 @@ $(function() {
     transferredFormTable.fnReloadAjax();
     sharedFormTable.fnReloadAjax();
     groupSharedFormTable.fnReloadAjax();
+    releasedFormTable.fnReloadAjax();
     archivedFormTable.fnReloadAjax();
     archivedReleasedFormTable.fnReloadAjax();
   });
