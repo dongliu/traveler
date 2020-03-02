@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title #{orgName} Traveler - documentation
+  title #{orgName} Traveler - user manual
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -19,7 +19,7 @@ block content
       .span9
         section#how-to-use
           h2 How to use this document
-          p There is an Audience statement on the top of each section. If you are not the target audience, then you can skip the section.
+          p There is an Audience statement at the top of each section. If you are not the target audience, please feel free to skip that section.
         section#basics
           include ./docs/basics.jade
         section#travelers
