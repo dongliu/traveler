@@ -8,3 +8,5 @@ provides a Web interface for edit and manage [forms/templates](#form).
 Furthermore, users can organize travelers by [binder](#binder). The application
 provides a limited HTTP [API](#api) to read information from the traveler
 application.
+
+<img src="../images/traveler-flow.png" alt="traveler flow">
