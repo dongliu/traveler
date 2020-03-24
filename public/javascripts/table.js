@@ -1366,7 +1366,7 @@ var groupIdColumn = {
   sDefaultContent: '',
   bFilter: true,
   mRender: function(data) {
-    return '<a href="/groups/' + data + '">' + data + '</a>';
+    return '<a href="' + prefix + '/groups/' + data + '">' + data + '</a>';
   },
 };
 
