@@ -40,7 +40,7 @@ function updateFromModal(cb) {
   });
 }
 
-function modifyFromModal(cb) {
+function modifyRolesFromModal(cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   var roles = [];
@@ -237,7 +237,7 @@ $(function() {
       $('#modify').click(function(e) {
         e.preventDefault();
         $('#modify').prop('disabled', true);
-        modifyFromModal(function() {
+        modifyRolesFromModal(function() {
           userTable.fnReloadAjax();
         });
       });
