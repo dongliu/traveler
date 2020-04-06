@@ -448,9 +448,7 @@ module.exports = function(app) {
             return res
               .status(400)
               .send(
-                `cannot find the released ${
-                  config.viewConfig.terminology.form
-                } with id ${req.body.form}`
+                `cannot find the released ${config.viewConfig.terminology.form} with id ${req.body.form}`
               );
           }
         });
@@ -639,7 +637,7 @@ module.exports = function(app) {
    * @param  {Function} cb    callback function
    * @return {Object}         the json representation
    */
-  function retrieveKeyLableValue(traveler, props, cb) {
+  function retrieveKeyLabelValue(traveler, props, cb) {
     var output = {};
     props.forEach(function(p) {
       output[p] = traveler[p];
@@ -736,7 +734,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.canReadMw('id'),
     function(req, res) {
-      retrieveKeyLableValue(
+      retrieveKeyLabelValue(
         req[req.params.id],
         ['id', 'title', 'status', 'tags', 'devices'],
         function(err, output) {
@@ -938,7 +936,10 @@ module.exports = function(app) {
     reqUtils.archived('id', false),
     function(req, res) {
       var doc = req[req.params.id];
-      if (reqUtils.isOwner(req, doc) || routesUtilities.checkUserRole(req, 'admin')) {
+      if (
+        reqUtils.isOwner(req, doc) ||
+        routesUtilities.checkUserRole(req, 'admin')
+      ) {
         return res.render(
           'traveler-config',
           routesUtilities.getRenderObject(req, {
@@ -947,9 +948,7 @@ module.exports = function(app) {
           })
         );
       } else {
-        res
-          .status(403)
-          .send('you are not authorized to access this resource');
+        res.status(403).send('you are not authorized to access this resource');
       }
     }
   );
@@ -964,7 +963,10 @@ module.exports = function(app) {
     reqUtils.sanitize('body', ['title', 'description', 'deadline']),
     function(req, res) {
       var doc = req[req.params.id];
-      if (reqUtils.isOwner(req, doc) || routesUtilities.checkUserRole(req, 'admin')) {
+      if (
+        reqUtils.isOwner(req, doc) ||
+        routesUtilities.checkUserRole(req, 'admin')
+      ) {
         var k;
         for (k in req.body) {
           if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
@@ -973,7 +975,7 @@ module.exports = function(app) {
         }
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        doc.save(function (saveErr, newDoc) {
+        doc.save(function(saveErr, newDoc) {
           if (saveErr) {
             logger.error(saveErr);
             return res.status(500).send(saveErr.message);

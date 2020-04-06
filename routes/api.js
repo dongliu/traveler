@@ -299,7 +299,7 @@ module.exports = function(app) {
   /**
    * get the latest value for the given name from the data list
    * @param  {String} name input name
-   * @param  {Array} data an arrya of TravelerData
+   * @param  {Array} data an array of TravelerData
    * @return {Number|String|null}      the value for the given name
    */
   function dataForName(name, data) {
@@ -368,7 +368,7 @@ module.exports = function(app) {
    * @param  {Function} cb    callback function
    * @return {Object}         the json representation
    */
-  function retrieveKeyLableValue(traveler, props, cb) {
+  function retrieveKeyLabelValue(traveler, props, cb) {
     var output = {};
     props.forEach(function(p) {
       output[p] = traveler[p];
@@ -416,7 +416,7 @@ module.exports = function(app) {
 
   app.get('/apis/travelers/:id/keylabelvalue/', function(req, res) {
     Traveler.findById(req.params.id, function(travelerErr, traveler) {
-      retrieveKeyLableValue(
+      retrieveKeyLabelValue(
         traveler,
         ['id', 'title', 'status', 'tags', 'devices'],
         function(err, output) {
