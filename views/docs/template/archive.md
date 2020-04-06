@@ -1,1 +1,1 @@
-#### Archive a template
+### Archive a template
