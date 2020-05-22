@@ -1,3 +1,7 @@
+APS-1.4.1
+- Validations of required fields in discrepancy log.
+- Admins now have access to the config page of any traveler.
+
 APS-1.4.0
 # Release Form Functionality
 - Only released forms can be created into travelers.
