@@ -9,7 +9,7 @@ For detailed deployment instructions please see https://confluence.aps.anl.gov/d
     # Make a new directory to hold the traveler module and its support
     mkdir traveler
     cd traveler
-    git clone https://github.com/iTerminate/traveler.git distribution
+    git clone https://github.com/AdvancedPhotonSource/traveler.git distribution
     cd distribution
     # Install all of the support software
     make support

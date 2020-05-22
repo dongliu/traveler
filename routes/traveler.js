@@ -935,17 +935,22 @@ module.exports = function(app) {
     '/travelers/:id/config',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
     reqUtils.archived('id', false),
     function(req, res) {
       var doc = req[req.params.id];
-      return res.render(
-        'traveler-config',
-        routesUtilities.getRenderObject(req, {
-          traveler: doc,
-          isOwner: reqUtils.isOwner(req, doc),
-        })
-      );
+      if (reqUtils.isOwner(req, doc) || routesUtilities.checkUserRole(req, 'admin')) {
+        return res.render(
+          'traveler-config',
+          routesUtilities.getRenderObject(req, {
+            traveler: doc,
+            isOwner: reqUtils.isOwner(req, doc),
+          })
+        );
+      } else {
+        res
+          .status(403)
+          .send('you are not authorized to access this resource');
+      }
     }
   );
 
@@ -953,34 +958,39 @@ module.exports = function(app) {
     '/travelers/:id/config',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     reqUtils.filter('body', ['title', 'description', 'deadline']),
     reqUtils.sanitize('body', ['title', 'description', 'deadline']),
     function(req, res) {
       var doc = req[req.params.id];
-      var k;
-      for (k in req.body) {
-        if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
-          doc[k] = req.body[k];
-        }
-      }
-      doc.updatedBy = req.session.userid;
-      doc.updatedOn = Date.now();
-      doc.save(function(saveErr, newDoc) {
-        if (saveErr) {
-          logger.error(saveErr);
-          return res.status(500).send(saveErr.message);
-        }
-        var out = {};
+      if (reqUtils.isOwner(req, doc) || routesUtilities.checkUserRole(req, 'admin')) {
+        var k;
         for (k in req.body) {
           if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
-            out[k] = newDoc.get(k);
+            doc[k] = req.body[k];
           }
         }
-        return res.status(200).json(out);
-      });
+        doc.updatedBy = req.session.userid;
+        doc.updatedOn = Date.now();
+        doc.save(function (saveErr, newDoc) {
+          if (saveErr) {
+            logger.error(saveErr);
+            return res.status(500).send(saveErr.message);
+          }
+          var out = {};
+          for (k in req.body) {
+            if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
+              out[k] = newDoc.get(k);
+            }
+          }
+          return res.status(200).json(out);
+        });
+      } else {
+        res
+          .status(403)
+          .send('You are not authorized to change the configuration. ');
+      }
     }
   );
 
