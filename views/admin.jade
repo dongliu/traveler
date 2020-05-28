@@ -61,6 +61,19 @@ block content
 
           table#users-table.table.table-bordered.table-hover
         #groups.tab-pane
+          .well
+            form.form-inline
+              input#groupname.input(type='text', placeholder='Groupname', name='name')
+              != ' '
+              button.btn.btn-primary#addGroup(type='submit') Create New Group
+          h3 Group list
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning#group-delete
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Delete Selected Group(s)
+
+          table#groups-table.table.table-bordered.table-hover
 
 
 block js
@@ -77,5 +90,7 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/users.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/groupnames.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/groups.js')
 
 

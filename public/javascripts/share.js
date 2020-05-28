@@ -1,6 +1,6 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global prefix: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, access: false, travelerGlobal: false*/
-/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupNameColumn: false, accessColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false*/
+/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupIdColumn: false, accessColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false*/
 
 var path = window.location.pathname;
 
@@ -209,6 +209,10 @@ function inArray(name, ao) {
 function addto(data, table, list) {
   if (!!data.name || !!data.id) {
     if (inArray(data.name || data.id, table.fnGetData())) {
+      var name = data.name;
+      if (list === 'groups') {
+        name = data.id;
+      }
       //show message
       $('#message').append(
         '<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button><strong>' +
@@ -332,25 +336,25 @@ $(function() {
     $('#add').attr('disabled', false);
   });
 
-  if ($('#groupid').length) {
-    travelerGlobal.groupids.initialize();
+  if ($('#groupname').length) {
+    travelerGlobal.groupnames.initialize();
   }
 
-  $('#groupid').typeahead(
+  $('#groupname').typeahead(
     {
       minLength: 1,
       highlight: true,
       hint: true,
     },
     {
-      name: 'groupids',
-      displayKey: 'sAMAccountName',
+      name: 'groupnames',
+      displayKey: '_id',
       limit: 20,
-      source: travelerGlobal.groupids,
+      source: travelerGlobal.groupnames,
     }
   );
 
-  $('#groupid').on('typeahead:select', function() {
+  $('#groupname').on('typeahead:select', function() {
     $('#addgroup').attr('disabled', false);
   });
 
@@ -373,7 +377,7 @@ $(function() {
     sDom: sDomNoTools,
   });
 
-  var groupShareAoColumns = [selectColumn, groupNameColumn, accessColumn];
+  var groupShareAoColumns = [selectColumn, groupIdColumn, groupNameColumn, accessColumn];
   var groupShareTable = $('#groupshare-table').dataTable({
     aaData: [],
     // 'bAutoWidth': false,
@@ -403,7 +407,7 @@ $(function() {
   $('#addgroup').click(function(e) {
     e.preventDefault();
     var data = {};
-    data.id = $('#groupid')
+    data.id = $('#groupname')
       .val()
       .toLowerCase();
     data.access = $('#groupaccess').prop('checked') ? 'write' : 'read';
@@ -431,7 +435,7 @@ $(function() {
   if ($('#username').length) {
     initTable('users', shareTable);
   }
-  if ($('#groupid').length) {
+  if ($('#groupname').length) {
     initTable('groups', groupShareTable);
   }
 });

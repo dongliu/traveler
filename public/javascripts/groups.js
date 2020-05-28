@@ -1,4 +1,4 @@
-/*global selectColumn: false, useridColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, fnAddFilterFoot: false*/
+/*global selectColumn: false, groupIdColumn: false, displayNameColumn: false, membersColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, fnAddFilterFoot: false*/
 /*global updateAjaxURL: false, prefix: false, Holder: false*/
 /*global travelerGlobal: false*/
 
@@ -12,14 +12,16 @@ function inArray(name, ao) {
   return false;
 }
 
-function updateFromModal(cb) {
+function deleteFromModal(cb) {
   $('#remove').prop('disabled', true);
   var number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function() {
     var that = this;
     $.ajax({
-      url: '/users/' + that.id + '/refresh',
-      type: 'GET',
+      url: '/groups/' + that.id,
+      type: 'DELETE',
+      contentType: 'application/json',
+      data: JSON.stringify({}),
     })
       .done(function() {
         $(that).prepend('<i class="fa fa-check"></i>');
@@ -40,21 +42,17 @@ function updateFromModal(cb) {
   });
 }
 
-function modifyRolesFromModal(cb) {
+function modifyFromModal(cb) {
   $('#remove').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  var roles = [];
-  $('#modal-roles input:checked').each(function() {
-    roles.push($(this).val());
-  });
-  $('#modal .modal-body div').each(function() {
+  var number = $('input.displayName').length;
+  $('input.displayName').each(function() {
     var that = this;
     $.ajax({
-      url: '/users/' + that.id,
+      url: '/groups/' + that.id,
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
-        roles: roles,
+        name: that.value,
       }),
     })
       .done(function() {
@@ -95,20 +93,33 @@ $(function() {
     }
   );
 
-  var userColumns = [
+  $('#groupname').typeahead(
+    {
+      minLength: 1,
+      highlight: true,
+      hint: true,
+    },
+    {
+      name: 'groupnames',
+      display: 'displayName',
+      limit: 20,
+      source: travelerGlobal.groupnames,
+    }
+  );
+
+  var groupColumns = [
     selectColumn,
-    useridColumn,
-    fullNameNoLinkColumn,
-    rolesColumn,
-    lastVisitedOnColumn,
+    groupIdColumn,
+    displayNameColumn,
+    membersColumn,
   ];
 
-  var userTable = $('#users-table').dataTable({
-    sAjaxSource: '/users/json',
+  var groupTable = $('#groups-table').dataTable({
+    sAjaxSource: '/groups/json?deleted=false',
     sAjaxDataProp: '',
     fnInitComplete: function() {
       Holder.run({
-        images: 'img.user',
+        images: 'img.group',
       });
     },
     bAutoWidth: false,
@@ -118,39 +129,32 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: userColumns,
-    aaSorting: [[4, 'desc']],
+    aoColumns: groupColumns,
+    aaSorting: [[2, 'asc']],
     sDom: sDomNoTools,
   });
-  fnAddFilterFoot('#users-table', userColumns);
+  fnAddFilterFoot('#groups-table', groupColumns);
+
   selectEvent();
   filterEvent();
 
-  $('#add').click(function(e) {
+  $('#addGroup').click(function(e) {
     e.preventDefault();
-    var name = $('#username').val();
-    if (inArray(name, userTable.fnGetData())) {
+    var name = $('#groupname').val();
+    if (inArray(name, groupTable.fnGetData())) {
       //show message
       $('#message').append(
-        '<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The user named <strong>' +
+        '<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The group named <strong>' +
           name +
-          '</strong> is already in the user list. </div>'
+          '</strong> is already in the group list. </div>'
       );
     } else {
-      let user = travelerGlobal.usernames.get(name);
-      if (user === null) {
-        console.error(
-          'Unknown user ' + name + '.  Please select from the list.'
-        );
-        return;
-      }
-      let uid = user[0].sAMAccountName;
       $.ajax({
-        url: '/users/',
+        url: '/groups/',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({
-          name: uid,
+          name: name,
           manager: $('#manager').prop('checked'),
           admin: $('#admin').prop('checked'),
         }),
@@ -160,11 +164,11 @@ $(function() {
               jqXHR.responseText +
               '</div>'
           );
-          userTable.fnReloadAjax();
+          groupTable.fnReloadAjax();
         },
         error: function(jqXHR) {
           $('#message').append(
-            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' +
+            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the group list : ' +
               jqXHR.responseText +
               '</div>'
           );
@@ -174,35 +178,35 @@ $(function() {
     document.forms[0].reset();
   });
 
-  $('#user-update').click(function() {
-    var selected = fnGetSelected(userTable, 'row-selected');
+  $('#group-delete').click(function() {
+    var selected = fnGetSelected(groupTable, 'row-selected');
     if (selected.length) {
       $('#modalLabel').html(
-        'Update the following ' +
+        'Delete the following ' +
           selected.length +
-          ' users from the application? '
+          ' groups? WARNING - This cannot be undone! '
       );
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
-        var data = userTable.fnGetData(row);
+        var data = groupTable.fnGetData(row);
         $('#modal .modal-body').append(
-          '<div id="' + data._id + '">' + data.name + '</div>'
+          '<div id="' + data._id + '">' + data._id + ': ' + data.name + '</div>'
         );
       });
       $('#modal .modal-footer').html(
-        '<button id="update" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+        '<button id="delete" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
-      $('#update').click(function(e) {
+      $('#delete').click(function(e) {
         e.preventDefault();
-        $('#update').prop('disabled', true);
-        updateFromModal(function() {
-          userTable.fnReloadAjax();
+        $('#delete').prop('disabled', true);
+        deleteFromModal(function() {
+          groupTable.fnReloadAjax();
         });
       });
       $('#modal').modal('show');
     } else {
       $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No users has been selected!');
+      $('#modal .modal-body').html('No groups have been selected!');
       $('#modal .modal-footer').html(
         '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
@@ -210,41 +214,45 @@ $(function() {
     }
   });
 
-  $('#user-modify').click(function() {
-    var selected = fnGetSelected(userTable, 'row-selected');
+  $('#group-modify').click(function() {
+    var selected = fnGetSelected(groupTable, 'row-selected');
     if (selected.length) {
       $('#modalLabel').html(
-        'Modify the following ' + selected.length + " users' role? "
+        'Modify the following ' + selected.length + ' groups? '
       );
       $('#modal .modal-body').empty();
       $('#modal .modal-body').append(
-        '<form id="modal-roles" class="form-inline">' +
-          '<label class="checkbox"><input id="modal-manager" type="checkbox" value="manager">manager</label> ' +
-          '<label class="checkbox"><input id="modal-admin" type="checkbox" value="admin">admin</label> ' +
-          '<label class="checkbox"><input id="read_all_forms" type="checkbox" value="read_all_forms">read_all_forms</label> ' +
-          '<label class="checkbox"><input id="write_active_travelers" type="checkbox" value="write_active_travelers">write_active_travelers</label> ' +
-          '</form>'
+        '<form id="modal-groups" class="form-inline">'
       );
       selected.forEach(function(row) {
-        var data = userTable.fnGetData(row);
+        var data = groupTable.fnGetData(row);
         $('#modal .modal-body').append(
-          '<div id="' + data._id + '">' + data.name + '</div>'
+          '<label class="textbox" for="#' +
+            data._id +
+            '">' +
+            data._id +
+            '<input id="' +
+            data._id +
+            '" class="displayName" type="text" value="' +
+            data.name +
+            '"></label>'
         );
       });
+      $('#modal .modal-body').append('</form>');
       $('#modal .modal-footer').html(
         '<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modify').click(function(e) {
         e.preventDefault();
         $('#modify').prop('disabled', true);
-        modifyRolesFromModal(function() {
-          userTable.fnReloadAjax();
+        modifyFromModal(function() {
+          groupTable.fnReloadAjax();
         });
       });
       $('#modal').modal('show');
     } else {
       $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No users has been selected!');
+      $('#modal .modal-body').html('No groups have been selected!');
       $('#modal .modal-footer').html(
         '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );

@@ -23,6 +23,11 @@ var user = new Schema({
 var group = new Schema({
   _id: String,
   name: String,
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  members: [{type: String, ref: 'User'}],
   forms: [ObjectId],
   travelers: [ObjectId],
   binders: [ObjectId],
