@@ -565,9 +565,10 @@ module.exports = function(app) {
 
   app.post(
     '/apis/update/traveler/:id/',
-    routesUtilities.filterBody(
+    routesUtilities.filterBodyWithOptional(
       ['userName', 'title', 'description', 'deadline', 'status'],
-      true
+      true,
+      ['devices']
     ),
     checkWritePermissions,
     function(req, res) {
@@ -598,6 +599,10 @@ module.exports = function(app) {
               traveler.description = req.body.description;
               traveler.updatedBy = req.body.userName;
               traveler.updatedOn = Date.now();
+              if (req.body.devices) {
+                traveler.devices = req.body.devices;
+              }
+
               traveler.save(function(err) {
                 performMongoResponse(err, traveler, res, function() {
                   return res.status(200).json(traveler);
