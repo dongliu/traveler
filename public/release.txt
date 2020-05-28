@@ -1,3 +1,7 @@
+APS-1.4.2
+- API to update traveler now has optional parameter for updating device.
+- CDB communication from traveler application is now utilizing the java hosted API. 
+
 APS-1.4.1
 - Validations of required fields in discrepancy log.
 - Admins now have access to the config page of any traveler.
