@@ -160,6 +160,7 @@ require('./routes/binder')(app);
 require('./routes/report')(app);
 require('./routes/admin')(app);
 require('./routes/user')(app);
+require('./routes/group')(app);
 require('./routes/profile')(app);
 require('./routes/device')(app);
 require('./routes/ldaplogin')(app);

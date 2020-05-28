@@ -61,7 +61,7 @@ block content
         span.text-info #{title}
       //- .well
       form.form-inline(name='group')
-        input#groupid.input.input-xlarge(type='text', placeholder='LAB.FRIB.DIV.Department.Group', name='group')
+        input#groupname.input.input-xlarge(type='text', placeholder='Group Id', name='group')
         != ' '
         label.checkbox
           input#groupaccess(type='checkbox', name='access', value='write')
@@ -93,5 +93,5 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/groupids.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/groupnames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/share.js')

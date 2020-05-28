@@ -399,6 +399,16 @@ var selectColumn = {
   asSorting: ['desc', 'asc'],
 };
 
+var userIdColumn = {
+  sTitle: 'User Id',
+  mRender: function(data) {
+    return '<label>' + data + '</label>';
+  },
+  mData: '_id',
+  bSortable: true,
+  sWidth: '30px',
+};
+
 var previewColumn = {
   sTitle: '',
   mData: '_id',
@@ -1350,11 +1360,50 @@ var fullNameNoLinkColumn = {
   bFilter: true,
 };
 
+var groupIdColumn = {
+  sTitle: 'Group id',
+  mData: '_id',
+  sDefaultContent: '',
+  bFilter: true,
+  mRender: function(data) {
+    return '<a href="' + prefix + '/groups/' + data + '">' + data + '</a>';
+  },
+};
+
+var displayNameColumn = {
+  sTitle: 'Display Name',
+  mData: 'name',
+  sDefaultContent: '',
+  bFilter: true,
+};
+
 var groupNameColumn = {
-  sTitle: 'Group name',
+  sTitle: 'Group Name',
   mData: 'groupname',
   sDefaultContent: '',
   bFilter: true,
+};
+
+var membersColumn = {
+  sTitle: 'Member(s)',
+  mData: 'members',
+  sDefaultContent: '',
+  bFilter: false,
+  mRender: function(data) {
+    data.sort(function(a, b) {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
+    var result = data.map(function(d) {
+      return '<li>' + d.name + '</li>';
+    });
+    return '<ul>' + result.join('') + '</ul>';
+  },
 };
 
 var accessColumn = {
