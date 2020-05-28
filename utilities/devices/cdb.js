@@ -9,23 +9,18 @@
  *
  * "device_application": "cdb",
  * "cdb" : {
- *  "web_portal_url": "URL to home page of CDB",
- *  "web_service_url": "URL to the CDB web services"
+ *  "web_portal_url": "URL to home page of CDB. example: https://cdb.aps.anl.gov/cdb"
  * }
  */
 
 var config = require('./../../config/config.js');
 var request = require('request');
 
-var webServiceUrl = config.service.cdb.web_service_url;
 var webPortalUrl = config.service.cdb.web_portal_url;
 
 const PORTAL_PATH_FOR_ITEM = '/views/item/view.xhtml?id=REPLACE_ID';
-const PORTAL_PATH_FOR_ITEM_ELEMENT =
-  '/views/itemElement/view.xhtml?id=REPLACE_ID';
 
 const ITEM_INVENTORY_DOMAIN_NAME = 'Inventory';
-const ITEM_CATALOG_DOMAIN_NAME = 'Catalog';
 
 /**
  * Performs a request to an external service and calls the call back function when the request is complete/incomplete.
@@ -63,12 +58,7 @@ function performServiceRequest(fullUrl, cb) {
  * @returns {void}
  */
 function getItemById(id, cb) {
-  var fullUrl = webServiceUrl + '/items/' + id;
-  performServiceRequest(fullUrl, cb);
-}
-
-function getItemElementById(id, cb) {
-  var fullUrl = webServiceUrl + '/itemElements/' + id;
+  var fullUrl = webPortalUrl + '/api/Items/ById/' + id;
   performServiceRequest(fullUrl, cb);
 }
 
@@ -98,9 +88,9 @@ function getCDBEntityReference(valueOrig, cb) {
       var displayValue;
       if (error) {
         displayValue = valueOrig;
-      } else if (data.errorMessage) {
-        console.error(data.errorMessage);
-        displayValue = 'Error: ' + data.errorMessage;
+      } else if (data.exception) {
+        console.error(data.message);
+        displayValue = 'Error: ' + data.message;
       }
       resolve(displayValue);
     });
@@ -131,15 +121,20 @@ function getCDBEntityReference(valueOrig, cb) {
     performErrorChecking(data, error).then(function(displayValue) {
       if (displayValue === undefined) {
         switch (data.domain.name) {
-          case ITEM_CATALOG_DOMAIN_NAME:
-            displayValue = 'Catalog Item: ' + data.name;
-            finishItemResponse(displayValue);
-            break;
           case ITEM_INVENTORY_DOMAIN_NAME:
-            finishInventoryItemResponse(data);
+            let inventoryItem = data;
+            let catalogItem = inventoryItem.catalogItem;
+            displayValue = catalogItem.name + ' [' + inventoryItem.name + ']';
+
+            if (inventoryItem.qrId) {
+              displayValue += ' (QRID: ' + inventoryItem.qrId + ')';
+            }
+
+            finishItemResponse(displayValue);
             break;
           default:
             displayValue = 'Item: ' + data.name;
+            finishItemResponse(displayValue);
         }
       } else {
         finishItemResponse(displayValue);
@@ -147,73 +142,18 @@ function getCDBEntityReference(valueOrig, cb) {
     });
   }
 
-  function finishInventoryItemResponse(inventoryItem) {
-    function addCatalogItemInformation(data, error) {
-      performErrorChecking(data, error).then(function(displayValue) {
-        if (displayValue === undefined) {
-          catalogItem = data;
-          displayValue = catalogItem.name + ' [' + inventoryItem.name + ']';
-        } else {
-          displayValue =
-            displayValue + ' Inventory Item: ' + inventoryItem.name;
-        }
-
-        if (inventoryItem.qr_id) {
-          displayValue += ' (QRID: ' + inventoryItem.qr_id + ')';
-        }
-        finishItemResponse(displayValue);
-      });
-    }
-    catalogItemId = inventoryItem.derived_from_item_id;
-    getItemById(catalogItemId, addCatalogItemInformation);
-  }
-
   function finishItemResponse(displayValue) {
     constructFinalUrl(PORTAL_PATH_FOR_ITEM, displayValue);
-  }
-
-  function processItemElementResponse(data, error) {
-    performErrorChecking(data, error).then(function(displayValue) {
-      if (displayValue === undefined) {
-        displayValue = 'Element';
-        if (data.parentItem) {
-          displayValue += ' of ' + data.parentItem.name;
-        }
-        if (data.name) {
-          displayValue += ': ' + data.name;
-        }
-      }
-
-      constructFinalUrl(PORTAL_PATH_FOR_ITEM_ELEMENT, displayValue);
-    });
   }
 
   switch (entityType) {
     case 'item':
       getItemById(id, processItemResponse);
       break;
-    case 'itemElement':
-      getItemElementById(id, processItemElementResponse);
-      break;
     default:
       cb(valueOrig);
   }
 }
-
-/*
-function test() {
-  function showResult(data, error) {
-    console.log('error: ' + JSON.stringify(error));
-    console.log('data: ' + data);
-  }
-
-  getCDBEntityReference('Component:263', showResult);
-  getCDBEntityReference('ComponentInstance:108', showResult);
-  getCDBEntityReference('Design:24', showResult);
-
-}
-test()
-*/
 
 module.exports = {
   getDeviceValue: getCDBEntityReference,
