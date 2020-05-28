@@ -22,6 +22,15 @@ if (config.service.device_application === 'cdb') {
 }
 
 function filterBody(strings, findAll) {
+  return filterBodyWithOptional(strings, findAll, undefined);
+}
+
+function filterBodyWithOptional(requiredStrings, findAll, optionalStrings) {
+  var strings = requiredStrings;
+  if (optionalStrings !== undefined) {
+    strings = requiredStrings.concat(optionalStrings);
+  }
+
   return function(req, res, next) {
     var k;
     var foundCount = 0;
@@ -37,7 +46,7 @@ function filterBody(strings, findAll) {
     }
     if (!findAll && foundCount > 0) {
       next();
-    } else if (findAll && foundCount === strings.length) {
+    } else if (findAll && foundCount >= requiredStrings.length) {
       next();
     } else {
       var error;
@@ -315,7 +324,7 @@ var traveler = {
   ) {
     if (
       form.formType &&
-      (form.formType !== 'normal' && form.formType !== 'normal_discrepancy')
+      form.formType !== 'normal' && form.formType !== 'normal_discrepancy'
     ) {
       return newTravelerCallBack(
         new TravelerError(
@@ -475,6 +484,7 @@ var traveler = {
 
 module.exports = {
   filterBody: filterBody,
+  filterBodyWithOptional: filterBodyWithOptional,
   checkUserRole: checkUserRole,
   getRenderObject: getRenderObject,
   getDeviceValue: getDeviceValue,
