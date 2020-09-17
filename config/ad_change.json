@@ -5,7 +5,10 @@
   "searchBase": "ou=...,dc=...",
   "searchFilter": "(&(objectClass=user)(sAMAccountName=_id)(company=FRIB))",
   "nameFilter": "(&(objectClass=user)(displayName=_name)(company=FRIB))",
+
+  // Remove "groupSearchBase" for local group managament within the application
   "groupSearchBase": "ou=...,dc=...",
+
   "groupSearchFilter": "(&(objectClass=group)(sAMAccountName=_id))",
   "objAttributes": [
     "sAMAccountName",
