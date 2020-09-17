@@ -296,7 +296,7 @@ module.exports = function(app) {
       } else if (result.length > 1) {
         return res.status(403).send('User ' + fullname + ' is not unique');
       }
-      const uid = result[0].uid.toLowerCase();
+      const uid = result[0].sAMAccountName.toLowerCase();
       if (uid.length == 0) {
         return res
             .status(404)
