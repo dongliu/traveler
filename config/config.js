@@ -23,7 +23,9 @@
  *
  * */
 
-var fs = require('fs');
+const fs = require('fs');
+const optionalRequire = require("optional-require")(require)
+
 module.exports.configPath = '';
 module.exports.uploadPath = '';
 module.exports.viewConfig = '';
@@ -68,6 +70,8 @@ module.exports.load = function() {
   module.exports.mongo = require('../' + configPath + '/mongo.json');
   module.exports.service = require('../' + configPath + '/service.json');
   module.exports.ui = require('../' + configPath + '/ui.json');
+  module.exports.mqtt = optionalRequire('../' + configPath + '/mqtt.json',
+      "To configure copy and edit: `cp config/mqtt_optional-change.json " + configPath + '/mqtt.json`');
   module.exports.travelerPackageFile = require('../package.json');
 
   if (process.env.TRAVELER_UPLOAD_REL_PATH) {

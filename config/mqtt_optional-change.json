@@ -1,0 +1,12 @@
+{
+  "server_protocol": "mqtt or mqtts",
+  "server_address": "127.0.0.1",
+  "server_port": "OPTIONAL REMOVABLE VARIABLE",
+  "username": "OPTIONAL REMOVABLE VARIABLE",
+  "password": "REQUIRED IF USERNAME SPECIFIED",
+  "topics": {
+    "traveler_data_changed": "traveler/travelerDataChanged",
+    "traveler_status_changed": "traveler/travelerStatusChanged",
+    "traveler_discrepancy_log_added": "traveler/travelerDiscrepancyLogAdded"
+  }
+}
