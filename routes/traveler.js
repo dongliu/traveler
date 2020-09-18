@@ -2,6 +2,7 @@
 var config = require('../config/config.js');
 
 var routesUtilities = require('../utilities/routes.js');
+const mqttUtilities = require('../utilities/mqtt.js');
 
 var fs = require('fs');
 var auth = require('../lib/auth');
@@ -840,6 +841,8 @@ module.exports = function(app) {
       log.inputBy = req.session.userid;
       log.inputOn = Date.now();
       debug(log);
+      let travelerId = req.params.id
+      mqttUtilities.postDiscrepancyLogAddedMessage(travelerId, log);
       log
         .save()
         .then(function(doc) {
@@ -1061,6 +1064,7 @@ module.exports = function(app) {
       doc.status = req.body.status;
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
+      mqttUtilities.postTravelerStatusChangedMessage(doc);
       doc.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
@@ -1188,6 +1192,7 @@ module.exports = function(app) {
         });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
+        mqttUtilities.postTravelerDataChangedMessage(data);
         doc.data.push(data._id);
         // update the finishe input number by reset
         resetTouched(doc, function() {
