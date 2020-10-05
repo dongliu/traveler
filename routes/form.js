@@ -866,7 +866,9 @@ module.exports = function(app) {
 
       try {
         const saveForm = await new ReleasedForm(releasedForm).save();
-        const url = `/released-forms/${saveForm._id}/`;
+        const url =
+              (req.proxied ? authConfig.proxied_service : authConfig.service) +
+              `/released-forms/${saveForm._id}/`;
         form.save();
         return res.status(201).json({
           location: url,
