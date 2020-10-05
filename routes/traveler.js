@@ -1003,6 +1003,8 @@ module.exports = function(app) {
    * user who can write can submit the traveler for completion
    * 1.5 => 2, 1.5 => 1 :
    * only admin or manager can approve or reject submitted traveler
+   * 2 => 1:
+   * only admin or manager can return completed traveler for more work
    * 2 => 4 :
    * only admin or manager can archive approved traveler
    */
@@ -1049,8 +1051,11 @@ module.exports = function(app) {
       }
 
       if (
-        doc.status === 2 &&
-        req.body.status === 4 &&
+          (
+              (doc.status === 2 && req.body.status === 4) ||
+              (doc.status === 2 && req.body.status === 1)
+          )
+          &&
         !(
           routesUtilities.checkUserRole(req, 'admin') ||
           routesUtilities.checkUserRole(req, 'manager')

@@ -77,6 +77,10 @@ block content
               when 3
                   .btn-group
                     button.btn.btn-primary#resume Resume
+              when 2
+                if (isAdmin)
+                  .btn-group
+                    button.btn.btn-warning#more More work
         if (locals.traveler.status !== undefined && locals.traveler.status > 0)
           //- .btn-group
           //-   button.btn.btn-info#update-progress Update progress
