@@ -1,3 +1,22 @@
+APS-1.5.0
+# Features
+- MQTT integration with eTraveler
+  - Optional configuration can be added to connect eTraveler with an MQTT server
+  - Publish to topics for eTraveler events: 
+    - eTraveler instance data changed 
+    - Discrepancy log added to eTraveler
+    - Traveler status changed 
+  - Great driver for various facility specific automation/notifications with eTravelers. 
+- Added functionality that allows creating of groups and group management locally within eTraveler app. (@rfgunion)
+  - This can then be used for group sharing between users. 
+  - Replacement for ldap based groups. Allows for greater flexibility of group management specific to eTraveler. 
+  - Functionality is enabled when ldap configuration is missing 'groupSearchFilter'
+# Bug fixes
+- Resolve issue with sharing of draft forms (@rfgunion) 
+- Resolve conflicting function name in multiple javascript files, "modifyFromModal" (@rfgunion)
+- Add a configuration required by latest version of mongo-express. 
+- Resolve issue where user could have multiple usernames by changing the case when logging in. 
+
 APS-1.4.2
 - API to update traveler now has optional parameter for updating device.
 - CDB communication from traveler application is now utilizing the java hosted API. 
