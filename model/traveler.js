@@ -95,7 +95,7 @@ var stateTransition = [
   },
   {
     from: 2,
-    to: [4],
+    to: [4, 1],
   },
   {
     from: 3,
