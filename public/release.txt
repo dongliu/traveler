@@ -11,6 +11,7 @@ APS-1.5.0
   - This can then be used for group sharing between users. 
   - Replacement for ldap based groups. Allows for greater flexibility of group management specific to eTraveler. 
   - Functionality is enabled when ldap configuration is missing 'groupSearchFilter'
+- Add More Work button to completed traveler so admin can "un-approve" it. (@rfgunion)
 # Bug fixes
 - Resolve issue with sharing of draft forms (@rfgunion) 
 - Resolve conflicting function name in multiple javascript files, "modifyFromModal" (@rfgunion)
