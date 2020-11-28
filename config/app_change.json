@@ -18,5 +18,6 @@
   "upload_size": 5,
   "default_form_public_access": -1,
   "default_traveler_public_access": 0,
-  "default_binder_public_access": 0
+  "default_binder_public_access": 0,
+  "released_form_version_mgmt": 0
 }
