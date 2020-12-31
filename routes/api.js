@@ -224,6 +224,12 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/apis/releasedForms/:id/', function(req, res) {
+    ReleasedForm.findById(req.params.id, function(err, releasedForms) {
+      performMongoResponse(err, releasedForms, res);
+    });
+  });
+
   app.get('/apis/binders/', function(req, res) {
     Binder.find({}, function(err, binders) {
       performMongoResponse(err, binders, res);
