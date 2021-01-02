@@ -274,6 +274,7 @@ function addBase(base, traveler) {
   traveler.activeForm = traveler.forms[0]._id;
   traveler.mapping = base.mapping;
   traveler.labels = base.labels;
+  traveler.types = base.types;
   traveler.totalInput = _.size(base.labels);
 }
 var traveler = {
@@ -315,16 +316,11 @@ var traveler = {
     }
     return map;
   },
-  createTraveler: function(
-    form,
-    title,
-    userName,
-    devices,
-    newTravelerCallBack
-  ) {
+  createTraveler: function(form, title, userId, devices, newTravelerCallBack) {
     if (
       form.formType &&
-      form.formType !== 'normal' && form.formType !== 'normal_discrepancy'
+      form.formType !== 'normal' &&
+      form.formType !== 'normal_discrepancy'
     ) {
       return newTravelerCallBack(
         new TravelerError(
@@ -349,7 +345,7 @@ var traveler = {
       devices: devices,
       tags: form.base.tags,
       status: 0,
-      createdBy: userName,
+      createdBy: userId,
       createdOn: Date.now(),
       sharedWith: [],
       referenceReleasedForm: form._id,
