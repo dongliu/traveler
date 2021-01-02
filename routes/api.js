@@ -8,10 +8,10 @@ var _ = require('lodash');
 var form = require('../model/form');
 var reqUtils = require('../lib/req-utils');
 var logger = require('../lib/loggers').getLogger();
+const mqttUtilities = require('../utilities/mqtt.js');
 
 var Form = mongoose.model('Form');
 var ReleasedForm = mongoose.model('ReleasedForm');
-var FormContentRef = mongoose.model('FormContent');
 var Traveler = mongoose.model('Traveler');
 var Binder = mongoose.model('Binder');
 var TravelerData = mongoose.model('TravelerData');
@@ -301,6 +301,47 @@ module.exports = function(app) {
       performMongoResponse(travelerErr, traveler, res);
     });
   });
+
+  app.put(
+    '/apis/travelers/:id/status/',
+    reqUtils.exist('id', Traveler),
+    reqUtils.archived('id', false),
+    checkWritePermissions,
+    function(req, res) {
+      var doc = req[req.params.id];
+
+      if ([1, 1.5, 2, 3, 4].indexOf(req.body.status) === -1) {
+        return res.status(400).send('invalid status');
+      }
+
+      if (doc.status === req.body.status) {
+        return res.status(204).send();
+      }
+
+      var stateTransition = require('../model/traveler').stateTransition;
+
+      var target = _.find(stateTransition, function(t) {
+        return t.from === doc.status;
+      });
+
+      if (target.to.indexOf(req.body.status) === -1) {
+        return res.status(400).send('invalid status change');
+      }
+
+      doc.status = req.body.status;
+      // user id
+      doc.updatedBy = req.body.userName;
+      doc.updatedOn = Date.now();
+      mqttUtilities.postTravelerStatusChangedMessage(doc);
+      doc.save(function(saveErr, newDoc) {
+        if (saveErr) {
+          logger.error(saveErr);
+          return res.status(500).send(saveErr.message);
+        }
+        return res.status(200).json(newDoc);
+      });
+    }
+  );
 
   /**
    * get the latest value for the given name from the data list
