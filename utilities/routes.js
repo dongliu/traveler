@@ -7,9 +7,11 @@
 var config = require('../config/config.js');
 
 var Traveler = require('../model/traveler').Traveler;
+const TravelerData = require('../model/traveler').TravelerData;
 var Binder = require('../model/binder').Binder;
 var _ = require('lodash');
 var cheer = require('cheerio');
+const logger = require('../lib/loggers').getLogger();
 
 const formStatusMap = require('../model/released-form').statusMap;
 
@@ -111,6 +113,12 @@ function getDeviceValue(value) {
 
 function deviceRemovalAllowed() {
   return devices.devicesRemovalAllowed;
+}
+
+function addInputName(name, list) {
+  if (list.indexOf(name) === -1) {
+    list.push(name);
+  }
 }
 
 var binder = {
@@ -475,6 +483,46 @@ var traveler = {
       }
     }
     return false;
+  },
+  resetTouched: function(doc, cb) {
+    TravelerData.find(
+      {
+        _id: {
+          $in: doc.data,
+        },
+      },
+      'name'
+    ).exec(function(dataErr, data) {
+      if (dataErr) {
+        logger.error(dataErr);
+        return cb(dataErr);
+      }
+      // reset the touched input name list and the finished input number
+      logger.info('reset the touched inputs for traveler ' + doc._id);
+      var labels = {};
+      var activeForm;
+      if (doc.forms.length === 1) {
+        activeForm = doc.forms[0];
+      } else {
+        activeForm = doc.forms.id(doc.activeForm);
+      }
+
+      if (!(activeForm.labels && _.size(activeForm.labels) > 0)) {
+        activeForm.labels = traveler.inputLabels(activeForm.html);
+      }
+      labels = activeForm.labels;
+      // empty the current touched input list
+      doc.touchedInputs = [];
+      data.forEach(function(d) {
+        // check if the data is for the active form
+        if (labels.hasOwnProperty(d.name)) {
+          addInputName(d.name, doc.touchedInputs);
+        }
+      });
+      // finished input
+      doc.finishedInput = doc.touchedInputs.length;
+      cb();
+    });
   },
 };
 
