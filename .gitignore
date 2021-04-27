@@ -1,3 +1,12 @@
+# Generated and test API files
+/tools/openapi/*
+!/tools/openapi/ClientApiConfig.yml
+!/tools/openapi/generatePyClient.sh
+!/tools/openapi/openapi.yaml
+!/tools/openapi/setup.py
+!/tools/openapi/traveler_api_factory.py
+
+
 # Node modules #
 node_modules/
 
