@@ -17,6 +17,23 @@ paths:
       operationId: getTravelers
       security:
         - basicAuth: []
+      parameters:
+        - in: query
+          name: device
+          schema:
+            type: string
+        - in: query
+          name: tag
+          schema:
+            type: string
+        - in: query
+          name: userkey
+          schema:
+            type: string
+        - in: query
+          name: formid
+          schema:
+            type: string
       responses:
         default: 
           description: default response 

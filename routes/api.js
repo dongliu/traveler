@@ -113,6 +113,11 @@ module.exports = function(app) {
         $in: [req.query.device],
       };
     }
+    if (req.query.hasOwnProperty('formid')) {
+      search['forms._id'] = {
+        $in: [req.query.formid],
+      };
+    }
     if (req.query.hasOwnProperty('tag')) {
       search.tags = {
         $in: [req.query.tag],
