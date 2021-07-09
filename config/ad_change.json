@@ -22,7 +22,7 @@
     "physicalDeliveryOfficeName": "physicalDeliveryOfficeName",
     "telephoneNumber": "telephoneNumber"
   },
-
+  "singleConnection": false,
   "ldapsCA": "OPTIONAL CA file for accepting SSL Connections",
   "shareUsers": true,
   "shareGroups": true,
