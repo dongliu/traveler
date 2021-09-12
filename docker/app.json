@@ -1,8 +1,6 @@
 {
   "org_name": "Lab",
   "app_port": "3001",
-  "ssl_key": "server.key",
-  "ssl_cert": "server.crt",
   "top_bar_urls": [
     {
       "text": "Link",
