@@ -190,16 +190,16 @@ app.get('/apis', function(req, res) {
 // Start application using settings
 var appPort = appSettings.app_port;
 var server;
-if (appSettings.ssl_key !== undefined) {
+if (appSettings.ssl_key) {
   var appCredentials = {
     key: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_key),
     cert: fs.readFileSync('./' + configPath + '/' + appSettings.ssl_cert),
   };
   server = https.createServer(appCredentials, app).listen(appPort, function() {
-    logger.info('Express server listening on ssl port ' + appPort);
+    logger.info('Express server listening on ssl port ' + app.get('port'));
   });
 } else {
-  server = http.createServer(app).listen(app.get('port'), function() {
+  server = http.createServer(app).listen(appPort, function() {
     logger.info('Express server listening on port ' + app.get('port'));
   });
 }
@@ -221,7 +221,7 @@ require('./routes/api')(api);
 
 //Start Api using settings
 var apiserver;
-if (apiSettings.ssl_key !== undefined) {
+if (apiSettings.ssl_key) {
   var apiCredentials = {
     key: fs.readFileSync('./' + configPath + '/' + apiSettings.ssl_key),
     cert: fs.readFileSync('./' + configPath + '/' + apiSettings.ssl_cert),
@@ -233,7 +233,7 @@ if (apiSettings.ssl_key !== undefined) {
       logger.info('API server listening on ssl port ' + api.get('port'));
     });
 } else {
-  apiserver = http.createServer(api).listen(api.get('port'), function() {
+  apiserver = http.createServer(api).listen(apiPort, function() {
     logger.info('API server listening on port ' + api.get('port'));
   });
 }
