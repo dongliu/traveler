@@ -32,10 +32,10 @@ For detailed deployment instructions please see https://confluence.aps.anl.gov/d
     ./etc/init.d/traveler-webapp start
     # Check progress of traveler-webapp
     ./etc/init.d/traveler-webapp status
-    
+
 **Installing docker version (not for production use, but good for development and evaluation)**
 
-1. centos docker install (centos) https://docs.docker.com/install/linux/docker-ce/centos/ 
+1. centos docker install (centos) https://docs.docker.com/install/linux/docker-ce/centos/
    * uninstall old docker versions
    ```
    sudo yum remove docker \
@@ -68,7 +68,7 @@ For detailed deployment instructions please see https://confluence.aps.anl.gov/d
    ```
    sudo systemctl enable docker
    ```
-   * install docker-compose https://docs.docker.com/compose/install/ 
+   * install docker-compose https://docs.docker.com/compose/install/
    ```
    sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
    sudo chmod +x /usr/local/bin/docker-compose
@@ -83,17 +83,17 @@ For detailed deployment instructions please see https://confluence.aps.anl.gov/d
    sudo docker network create -d bridge --subnet 172.18.1.0/24 traveler-dev
    ```
 3. install dependencies
-   * traveler-mongo https://github.com/dongliu/traveler-mongo 
+   * traveler-mongo https://github.com/dongliu/traveler-mongo
       * clone git repo
       ```
       git clone https://github.com/dongliu/traveler-mongo.git (to e.g., ~/git/traveler)
       ```
       * run traveler-mongo
       ```
-      sudo docker-compose up 
+      sudo docker-compose up
       ```
       * access mongo express at http://localhost:8081. The username is traveler, and password is travelerpass.
-   * traveler-ldap https://github.com/dongliu/traveler-ldap 
+   * traveler-ldap https://github.com/dongliu/traveler-ldap
       * clone git repo
       ```
       git clone https://github.com/dongliu/traveler-ldap.git
@@ -104,7 +104,7 @@ For detailed deployment instructions please see https://confluence.aps.anl.gov/d
       ```
       * test
          * You can check the state of the openladp service via the php ldap admin web https://localhost:6443. There is a default admin account that you can use to log in user name: cn=admin,dc=example,dc=org password: admin
-4. install traveler https://github.com/AdvancedPhotonSource/traveler 
+4. install traveler https://github.com/AdvancedPhotonSource/traveler
    * clone git repo
    ```
    git clone https://github.com/AdvancedPhotonSource/traveler.git

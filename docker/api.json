@@ -3,7 +3,5 @@
       "api_read": "api_read_password",
       "api_write": "api_write_password"
   },
-  "app_port" : "3443",
-  "ssl_key": "server.key",
-  "ssl_cert": "server.crt"
+  "app_port" : "3002"
 }

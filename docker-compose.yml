@@ -1,8 +1,8 @@
 version: "3"
 networks:
   default:
-    external:
-      name: traveler-dev
+    external: true
+    name: traveler-dev
 services:
   web:
     build: .
@@ -10,10 +10,12 @@ services:
       - .:/app
       # exclude the node_modules
       - /app/node_modules
-      - /app/docker
+      # exclude the docker configuration
+      # - /app/docker
     ports:
       - "3001:3001"
-      - "3443:3443"
+      - "3002:3002"
+      # - "3443:3443"
     restart: unless-stopped
     command: nodemon app.js
     environment:
