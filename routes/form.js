@@ -271,6 +271,7 @@ module.exports = function(app) {
             _v: form._v,
             formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
+            released_form_version_mgmt: config.app.released_form_version_mgmt,
           })
         );
       }
@@ -292,6 +293,29 @@ module.exports = function(app) {
     function(req, res) {
       return res.status(200).json(req[req.params.id]);
     }
+  );
+
+  app.get(
+      '/forms/:id/released/json',
+      auth.ensureAuthenticated,
+      reqUtils.exist('id', Form),
+      reqUtils.canReadMw('id'),
+      function(req, res) {
+          try {
+              ReleasedForm.find({
+                  'base._id': req.params.id,
+                  status: 1, // released
+              }, function (err, existingForms) {
+                  if (err) {
+                      return res.status(500).send(error.message);
+                  }
+                  debug('found ' + existingForms.length + ' previously released form(s) based on : ' + req.params.id);
+                  return res.status(200).json(existingForms);
+              });
+          } catch (error) {
+              return res.status(500).send(error.message);
+          }
+      }
   );
 
   app.post(
