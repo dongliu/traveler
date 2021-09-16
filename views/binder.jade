@@ -61,7 +61,7 @@ block content
         h3#modalLabel
       .modal-body.modal-body-visible
       .modal-footer
-    form#report-form.hidden(action='/travelers/report/', method='post')
+    form#report-form.hidden(action='#{prefix}/travelers/report/', method='post')
     if (viewConfig.showBinderValue)
       #value-progress
     #traveler-progress
