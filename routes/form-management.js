@@ -94,6 +94,44 @@ module.exports = function(app) {
     }
   );
 
+    /**
+     * Batch archiving of multiple released forms
+     */
+  app.put(
+      '/released-forms/archive',
+      auth.ensureAuthenticated,
+      auth.verifyRole('admin', 'manager'),
+      function updateStatus(req, res) {
+          let ids = req.body;
+          if (!ids || ids.length < 1) {
+              return res.status(400).send('no id(s) provided');
+          }
+
+          let stateTransition = require('../model/released-form').stateTransition;
+
+          ids.forEach(function(id) {
+              ReleasedForm.findById({_id: id}, function (err, f) {
+                  if (err) {
+                      return res.status(400).send('Invalid id: ' + id);
+                  }
+                  f.status = 2;
+                  f.archivedBy = req.session.userid;
+                  f.archivedOn = Date.now();
+                  // check if we need to increment the version
+                  // in this case, no
+                  f.incrementVersion();
+                  f.saveWithHistory(req.session.userid)
+                      .then(function () {
+                      })
+                      .catch(function (err) {
+                          return res.status(500).send('Failed to archive form: ' + id);
+                      });
+              });
+          });
+          return res.status(200).send('Archived form(s): ' + ids.join(', '));
+      }
+  );
+
   app.put(
     '/released-forms/:id/status',
     auth.ensureAuthenticated,
