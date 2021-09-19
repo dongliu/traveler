@@ -35,7 +35,7 @@ block content
       h3#modalLabel
     .modal-body.modal-body-visible
     .modal-footer
-  form#report-form.hidden(action='/travelers/report/', method='post')
+  form#report-form.hidden(action='#{prefix}/travelers/report/', method='post')
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
