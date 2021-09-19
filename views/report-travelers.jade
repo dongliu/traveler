@@ -1,0 +1,62 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title #{orgName} - report - travelers
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script(type='text/javascript').
+    var prefix = '!{prefix}';
+  .container(style="margin-top: 10px")
+    h3 Traveler Report
+    h4 Generated on
+      != ' '
+      span.time #{new Date().toUTCString()}
+
+    h4 Format control
+    table.table.table-bordered.table-striped
+      col(width="25%")
+      col(width="75%")
+      thead
+        tr
+          td
+            label.checkbox
+              input.group(type="checkbox", data-toggle="#system-keys", checked)
+              | system defined keys
+          td
+            label.checkbox.inline-checkbox
+              input.group(type="checkbox", data-toggle="#descrepancy-keys", checked)
+              | descrepancy reporting ids
+          td
+            label.checkbox.inline-checkbox
+              input.group(type="checkbox", data-toggle="#user-keys", checked)
+              | user defined reporting ids
+            label.checkbox.inline-checkbox
+              input.labels(type="checkbox", checked)
+              | input labels
+      tbody
+        tr
+          td#system-keys
+          td#descrepancy-keys
+          td#user-keys
+
+    table#report-table.table.table-bordered.table-hover(data-travelers='#{JSON.stringify(tid)}')
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/report.js')

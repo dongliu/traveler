@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB traveler - user profile
+  title #{orgName} traveler - user profile
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -13,7 +13,8 @@ block content
   .container(style="margin-top: 10px")
     #message
     #profile.well
-      img(src="#{prefix}/adusers/#{user._id}/photo")
+      //- img(src="#{prefix}/adusers/#{user._id}/photo", data-src='holder.js/27x40?size=20&text=#{user._id.substr(0, 1).toUpperCase()}')
+      //- img(src="#{prefix}/adusers/#{user._id}/photo")
       dl
         dt Name
         dd #{user.name}

@@ -23,7 +23,9 @@
  *
  * */
 
-var fs = require('fs');
+const fs = require('fs');
+const optionalRequire = require("optional-require")(require)
+
 module.exports.configPath = '';
 module.exports.uploadPath = '';
 module.exports.viewConfig = '';
@@ -50,7 +52,7 @@ function getPath(desiredPath, defaultPath) {
   }
 }
 
-module.exports.load = function () {
+module.exports.load = function() {
   // Load Paths
   if (process.env.TRAVELER_CONFIG_REL_PATH) {
     module.exports.configPath = process.env.TRAVELER_CONFIG_REL_PATH;
@@ -68,6 +70,8 @@ module.exports.load = function () {
   module.exports.mongo = require('../' + configPath + '/mongo.json');
   module.exports.service = require('../' + configPath + '/service.json');
   module.exports.ui = require('../' + configPath + '/ui.json');
+  module.exports.mqtt = optionalRequire('../' + configPath + '/mqtt.json',
+      "To configure copy and edit: `cp config/mqtt_optional-change.json " + configPath + '/mqtt.json`');
   module.exports.travelerPackageFile = require('../package.json');
 
   if (process.env.TRAVELER_UPLOAD_REL_PATH) {
@@ -85,19 +89,20 @@ module.exports.load = function () {
   viewConfig.shareGroups = true;
   viewConfig.transferOwnership = true;
   viewConfig.linkTarget = '_blank';
-  viewConfig.showCCDB = (this.service.device_application === 'devices');
+  viewConfig.showBinderValue = false;
+  viewConfig.showCCDB = this.service.device_application === 'devices';
 
   if (this.service.device !== undefined) {
     viewConfig.showDevice = true;
   }
   if (this.ad.shareUsers !== undefined) {
-    viewConfig.shareUsers = this.ad.shareUsers
+    viewConfig.shareUsers = this.ad.shareUsers;
   }
   if (this.ad.shareGroups !== undefined) {
-    viewConfig.shareGroups = this.ad.shareGroups
+    viewConfig.shareGroups = this.ad.shareGroups;
   }
   if (this.ad.transferOwnership !== undefined) {
-      viewConfig.transferOwnership = this.ad.transferOwnership;
+    viewConfig.transferOwnership = this.ad.transferOwnership;
   }
   if (this.app.top_bar_urls) {
     viewConfig.topBarUrls = this.app.top_bar_urls;
@@ -106,9 +111,12 @@ module.exports.load = function () {
     viewConfig.deploymentName = this.app.deployment_name;
   }
   if (this.app.link_target) {
-    viewConfig.linkTarget = this.app.link_target
+    viewConfig.linkTarget = this.app.link_target;
   }
-  if (this.travelerPackageFile.repository && this.travelerPackageFile.repository.release) {
+  if (
+    this.travelerPackageFile.repository &&
+    this.travelerPackageFile.repository.release
+  ) {
     viewConfig.appVersion = this.travelerPackageFile.repository.release;
   } else {
     viewConfig.appVersion = this.travelerPackageFile.version;

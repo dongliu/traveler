@@ -1,0 +1,55 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title #{orgName} - forms - #{id} - preview
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script(type='text/javascript').
+    var prefix = '!{prefix}';
+    var title = '!{title}'
+  .container
+    #message
+    .row
+      .span9
+        h3 #{title}
+        h4 type: #{formType}
+        h4 status: #{statusText}
+        h4 version:&nbsp;
+          span#version #{ver}
+        .well-large
+          if (discrepancy)
+            .control-group#discrepancy-legend
+              legend Discrepancy
+            form.form-horizontal#discrepancy
+              != discrepancy.html
+          .control-group#discrepancy-legend
+              legend Base
+          form.form-horizontal#output
+            != base.html
+        #validation.well.hide
+      .span3.sidebar
+    .btn-group(data-toggle='buttons-radio')
+      button.btn.btn-info#show-validation Show validation
+      button.btn.btn-info#hide-validation.active Hide validation
+    if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
+      if (status === 1)
+        .btn-group
+          button.btn.btn-warning#obsolete(data-toggle='tooltip', title='Obsolete the released form') Obsolete
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/form-viewer.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/released-form-management.js')
+

@@ -1,0 +1,59 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title #{orgName} - group - #{group._id}
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script(type='text/javascript').
+    var prefix = '!{prefix}';
+    var group = !{JSON.stringify(group)}
+  .container
+    #message
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body
+      .modal-footer
+    .row
+      .span9
+        h3 Group id: #{group._id}
+        #validation.well.hide
+        form.form-inline#form
+          input#groupid(type="hidden", value="#{group._id}")
+          label(for='displayName') Display Name:
+          input#displayName.input(name='displayName', value='#{group.name}')
+          .btn-group
+            button#btnDisplayName.btn.btn-info(data-toggle='collapse', data-target='#save') Save
+          .well
+            input#username.input(name='username', placeholder='Last, First')
+            button#addusertogroup.btn.btn-info(data-target='#add') Add User to Group
+        h4 #{group.members.length} Member(s):
+        button#btnRemoveMembers.btn.btn-info(data-target='#remove') Remove Selected User(s) from Group
+        table#members-table.table.table-bordered.table-hover
+      .span3.sidebar
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/groupmembers.js')

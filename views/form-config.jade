@@ -1,0 +1,61 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title #{orgName} - form - #{form._id} - configuration
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script(type='text/javascript').
+    var prefix = '!{prefix}';
+  .container
+    #message
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body
+      .modal-footer
+    h3 Title:
+      = ' '
+      span#title.editable #{form.title}
+      button.btn.btn-primary.editable Edit
+    h4 Description:
+      = ' '
+      span#description.editable #{form.description}
+      button.btn.btn-small.btn-primary.editable Edit
+    p Created on
+      = ' '
+      span.time #{form.createdOn}
+    if (locals.form.updatedOn != undefined)
+      p Updated by #{form.updatedBy} on
+        = ' '
+        span.time #{form.updatedOn}
+    h4 Tags
+    ul#tags.tag-list
+      each tag in form.tags
+        li
+          span.tag #{tag}
+          = ' '
+          button.btn.btn-small.btn-warning.remove-tag
+            i.fa.fa-trash-o.fa-lg
+    br
+    .btn-group
+      button.btn.btn-primary#add-tag
+        i.fa.fa-tag.fa-lg
+        | &nbsp;Add tag
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery.jeditable.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/form-config.js')

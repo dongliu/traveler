@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title FRIB Binder
+  title #{orgName} Binder
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -68,8 +68,8 @@ block content
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
           table#binder-table.table.table-bordered.table-hover
-          if (viewConfig.transferOwnership)
-            #transferredbinders.tab-pane
+        if (viewConfig.transferOwnership)
+          #transferredbinders.tab-pane
             .btn-toolbar
               .btn-group
                 button.btn.btn-info.reload

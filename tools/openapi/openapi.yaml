@@ -1,0 +1,1113 @@
+openapi: 3.0.1
+info:
+  title: Traveler API
+  description: The API that provides access to Traveler data.
+  contact:
+    email: djarosz@anl.gov
+  license:
+    name: Copyright (c) 2015 Dong Liu, Dariusz Jarosz.
+    url: https://github.com/AdvancedPhotonSource/traveler/blob/master/LICENSE.md
+  version: APS-1.5.0
+
+paths:
+  /apis/travelers/:
+    get:
+      tags:
+      - traveler
+      operationId: getTravelers
+      security:
+        - basicAuth: []
+      parameters:
+        - in: query
+          name: device
+          schema:
+            type: string
+        - in: query
+          name: tag
+          schema:
+            type: string
+        - in: query
+          name: userkey
+          schema:
+            type: string
+        - in: query
+          name: formid
+          schema:
+            type: string
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Traveler"
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/travelers/{id}/:
+    get:
+      tags:
+      - traveler
+      operationId: getTravelerById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Traveler"
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/archived/traveler/{travelerId}/:
+    post:
+      tags:
+      - traveler
+      operationId: changeArchivedState
+      parameters:
+      - name: travelerId
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TravelerChangeArchiveOptions"
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Traveler"
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+          
+  /apis/create/traveler/:
+    post:
+      tags:
+      - traveler
+      operationId: createTraveler      
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TravelerCreateOptions"
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Traveler"
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/update/traveler/{travelerId}/:
+    post:
+      tags:
+      - traveler
+      operationId: updateTraveler
+      parameters:
+      - name: travelerId
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TravelerUpdateOptions"
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Traveler"
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/travelers/{id}/keyvalue/:
+    get:
+      tags:
+      - traveler
+      operationId: getKeyValueByTravelerId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:                
+                $ref: '#/components/schemas/TravelerKeyValue'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+    
+  /apis/travelers/{id}/keylabelvalue/:
+    get:
+      tags:
+      - traveler
+      operationId: getKeyLabelValueByTravelerId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:                
+                $ref: '#/components/schemas/TravelerKeyValueLabel'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/travelers/{id}/data/:
+    get:
+      tags:
+      - traveler
+      operationId: getTravelerDataByTravelerId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TravelerData"
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/travelers/{id}/notes/:
+    get:
+      tags:
+      - traveler
+      operationId: getTravelerNotesByTravelerId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TravelerNote"
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/travelers/{id}/log/:
+    get:
+      tags:
+      - traveler
+      operationId: getDiscrepancyLogByTravelerId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelerDiscrepancy'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/tags/travelers/:
+    get:
+      tags:
+      - traveler
+      operationId: getTravelerTags
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/keys/travelers/:
+    get:
+      tags:
+      - traveler
+      operationId: getTravelerKeys
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/data/{id}/:
+    get:
+      tags:
+      - data
+      operationId: getDataById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Data'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/forms/:
+    get:
+      tags:
+      - form
+      operationId: getForms      
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Form'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/forms/{id}/:
+    get:
+      tags:
+      - form
+      operationId: getFormById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Form'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/create/form/:
+    post:
+      tags:
+      - form
+      operationId: createForm      
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormCreateOptions"
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/releasedForms/:
+    get:
+      tags:
+      - form
+      operationId: getReleasedForms      
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReleasedForm'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/forms/{id}/released/:
+    get:
+      tags:
+      - form
+      operationId: getReleasedFormsByFormId
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReleasedForm'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+          
+  /apis/binders/:
+    get:
+      tags:
+      - binder
+      operationId: getBinders
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Binder'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/binders/{id}/:
+    get:
+      tags:
+      - binder
+      operationId: getBinderById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Binder'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/create/binders/:
+    post:
+      tags:
+      - binder
+      operationId: createBinder      
+      security:
+        - basicAuth: []
+      requestBody: 
+        required: true 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BinderCreateOptions'
+      responses:
+        default: 
+          description: default response 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Binder'
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/addWork/binders/{binderId}/:
+    post:
+      tags:
+      - binder
+      operationId: addWorkToBinder
+      parameters:
+      - name: binderId
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      requestBody: 
+        required: true 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BinderAddWorkOptions'
+      responses:                  
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/removeWork/binders/{binderId}/:
+    post:
+      tags:
+      - binder
+      operationId: removeWorkFromBinder
+      parameters:
+      - name: binderId
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: []
+      requestBody: 
+        required: true 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BinderRemoveWorkOptions'
+      responses:        
+        '401':
+           $ref: '#/components/responses/UnauthorizedError'      
+
+components:
+  schemas:
+    TravelerObject:
+      type: object
+      properties: 
+        _id:
+          type: string        
+
+    ManPower:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          username:
+            type: string
+        
+    Traveler:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          devices:
+            type: array
+            items:
+              type: string
+          locations:
+            type: array
+            items:
+              type: string
+          tags:
+            type: array
+            items:
+              type: string
+          discrepancyLogs:
+            type: array
+            items:
+              type: string
+          data:
+            type: array
+            items:
+              type: string
+          notes:
+            type: array
+            items:
+              type: string
+          touchedInputs:
+            type: array
+            items:
+              type: string
+          sharedWith:
+            type: array
+            items:
+              type: string
+          sharedGroup:
+            type: array
+            items:
+              type: string
+          manPower:
+            type: array
+            items:
+              $ref: "#/components/schemas/ManPower"
+          labels:
+            type: object
+            additionalProperties:
+              type: string
+          mapping:
+            type: object
+            additionalProperties:
+              type: string
+          title: 
+            type: string
+          description:
+            type: string
+          createdBy:
+            type: string
+          createdOn:
+            type: date-time
+          updatedBy:
+            type: string
+          updatedOn:
+            type: date-time
+          archived:
+            type: boolean
+          publicAccess:
+            type: number
+          status:
+            type: number
+          finishedInput:
+            type: number
+          totalInput:
+            type: number
+          referenceDiscrepancyForm:
+            type: string
+          activeDiscrepancyForm:
+            type: string
+          activeForm:
+            type: string
+          referenceReleasedForm:
+            type: string
+          referenceReleasedFormVer:
+            type: string
+          forms:
+            type: array
+            items:
+              $ref: "#/components/schemas/FormReference"
+          discrepancyForms:
+            type: array
+            items:
+              $ref: "#/components/schemas/FormReference"
+          __v:
+            type: number
+
+    TravelerDataNoteObject:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          name:
+            type: string
+          value:
+            type: string
+          inputBy:
+            type: string
+          inputOn:
+            type: date-time
+
+    TravelerNote:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerDataNoteObject'
+        type: object
+      
+    TravelerData:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerDataNoteObject'
+      - type: object
+        properties:
+          inputType:
+            type: string         
+
+    Data:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerData'
+      - type: object
+        properties:
+          __v:
+            type: number
+          traveler:
+            type: string
+
+    TravelerKeyObject: 
+      type: object
+      properties: 
+        id:
+          type: string 
+        title:
+          type: string
+        status:
+          type: number
+        tags:
+          type: array
+          items:
+            type: string
+        devices:
+          type: array
+          items:
+            type: string
+
+    TravelerKeyValue:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerKeyObject'
+      - type: object
+        properties:
+          user_defined:
+            type: object
+            additionalProperties:
+              type: object
+
+    ValueLabel:
+      type: object
+      properties: 
+        value:
+          type: string
+        label:
+          type: string 
+
+    TravelerKeyValueLabel:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerKeyObject'
+      - type: object
+        properties:
+          user_defined:
+            type: object
+            additionalProperties:
+              $ref: "#/components/schema/ValueLabel"
+
+    DiscrepancyForm:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          _v:
+            type: number
+          activatedOn:
+            type: array
+            items: 
+              type: string
+          html:
+            type: string
+          labels:
+            type: object
+            additionalProperties:
+              type: string
+          mapping:
+            type: object
+            additionalProperties:
+              type: string
+          reference:
+            type: string       
+
+    DiscrepancyLogRecord:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          name:
+            type: string
+          value:
+            type: string
+
+    DiscrepancyLog:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          referenceForm:
+            type: string
+          records:
+            type: array
+            items:
+              $ref: "#/components/schemas/DiscrepancyLogRecord"
+          inputBy:
+            type: string
+          inputOn:
+            type: date-time
+
+
+    TravelerDiscrepancy:
+      type: object
+      properties: 
+        discrepancyForm:
+          $ref: "#/components/schemas/DiscrepancyForm"
+        discrepancyLogs:
+          type: array
+          items: 
+            $ref: "#/components/schemas/DiscrepancyLog"
+
+    FormReferenceObject: 
+      type: object      
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          html:
+            type: string
+          labels:
+            type: object
+            additionalProperties:
+              type: string
+          mapping:
+            type: object
+            additionalProperties:
+              type: string         
+
+    FormReference: 
+      type: object      
+      allOf:
+      - $ref: '#/components/schemas/FormReferenceObject'
+      - type: object
+        properties:
+          activatedOn:
+            type: array
+            items:
+              type: string
+          reference:
+            type: string
+
+    ReleasedFormReference: 
+      type: object      
+      allOf:
+      - $ref: '#/components/schemas/FormReferenceObject'
+      - type: object
+        properties:
+          formType:
+            type: string
+            
+
+    ReleasedForm:
+      type: object      
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          tags:
+            type: array
+            items:
+              type: string
+          status:
+           type: number
+          discrepancy: 
+            $ref: "#/components/schemas/ReleasedFormReference"
+          base:
+            $ref: "#/components/schemas/ReleasedFormReference"
+          ver:
+            type: string
+          releasedBy:
+            type: string
+          releasedOn:
+            type: date-time
+          __v:
+            type: number
+          
+
+    Form:
+      type: object      
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          tags:
+            type: array
+            items:
+              type: string
+          status:
+            type: number
+          archived:
+            type: boolean
+          publicAccess:
+            type: number
+          formType:
+            type: string
+          __updates:
+            type: array
+            items:
+              type: string
+          title: 
+            type: string
+          createdBy:
+            type: string
+          createdOn:
+            type: date-time
+          updatedBy:
+            type: string
+          updatedOn:
+            type: date-time
+          html:
+            type: string
+          sharedGroup:
+            type: array
+            items:
+              type: string
+          sharedWith:
+            type: array
+            items:
+              type: string
+          labels:
+            type: object
+            additionalProperties:
+              type: string
+          mapping:
+            type: object
+            additionalProperties:
+              type: string
+          clonedFrom:
+            type: string
+
+    BinderWork:
+      type: object      
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          finished:
+            type: integer
+          inProgress:
+            type: integer
+          finishedInput:
+            type: integer
+          totalInput:
+            type: integer
+          priority:
+            type: integer
+          sequence:
+            type: integer
+          value: 
+            type: integer
+          color:
+            type: string
+          alias:
+            type: string
+          refType:
+            type: string
+          addedOn:
+            type: date-time
+          addedBy:
+            type: string
+          status: 
+            type: integer
+
+    Binder:
+      type: object      
+      allOf:
+      - $ref: '#/components/schemas/TravelerObject'
+      - type: object
+        properties:
+          status:
+            type: number
+          tags:
+            type: array
+            items:
+              type: string
+          publicAccess:
+            type: number
+          finishedInput:
+            type: number
+          totalInput:
+            type: number
+          finishedValue:
+            type: number
+          inProgressValue:
+            type: number
+          totalValue:
+            type: number
+          finishedWork:
+            type: number
+          inProgressWork:
+            type: number
+          totalWork:
+            type: number
+          archived:
+            type: boolean
+          title:
+            type: string
+          description:
+            type: string
+          createdBy:
+            type: string
+          createdOn:
+            type: date-time
+          updatedBy:
+            type: string
+          updatedOn:
+            type: date-time
+          sharedGroup:
+            type: array
+            items:
+              type: string
+          sharedWith:
+            type: array
+            items:
+              type: string
+          __v:
+            type: number
+          works:
+            type: array
+            items:
+              $ref: "#/components/schemas/BinderWork"
+
+    # Request Body Object
+    BinderCreateOptions: 
+      type: object
+      properties:
+        binderTitle:
+          type: string
+        description: 
+          type: string
+        userName:
+          type: string
+
+    BinderAddWorkOptions:
+      type: object
+      properties:
+        travelerIds:
+          type: array
+          items: 
+            type: string
+        userName:
+          type: string 
+    
+    BinderRemoveWorkOptions:
+      type: object
+      properties:
+        workId:
+          type: string 
+        userName:
+          type: string 
+
+    TravelerChangeArchiveOptions:
+      type: object
+      properties: 
+        archived:
+          type: boolean 
+
+    TravelerUpdateOptions:
+      type: object
+      properties:
+        userName:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        deadline:
+          type: date-time
+        status:
+          type: number
+        devices: 
+          type: array
+          items:
+            type: string 
+
+    TravelerCreateOptions:
+      type: object
+      properties: 
+        formId:
+          type: string
+        title:
+          type: string
+        userName:
+          type: string
+        devices:
+          type: array
+          items: 
+            type: string
+
+    FormCreateOptions:
+      type: object
+      properties:
+        formName:
+          type: string
+        userName:
+          type: string
+        html:
+          type: string
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+security:
+  - basicAuth: []

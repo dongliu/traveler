@@ -90,7 +90,8 @@ do
         --host $MONGO_SERVER_ADDRESS \
         --port $MONGO_SERVER_PORT \
         --username $MONGO_ADMIN_USERNAME \
-        --password $adminPassword
+        --password $adminPassword \
+	--batchSize=10
         break;
       fi
       ;;

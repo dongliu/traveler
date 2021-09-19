@@ -1,0 +1,6 @@
+h4 Value :: total: #{binder.totalValue}; finished: #{binder.finishedValue}; in-progress: #{Math.round(binder.inProgressValue)};
+.progress(class=binder.status === 1 ? "active progress-striped" : undefined)
+  .bar.bar-success(style="width: #{binder.finishedValue/binder.totalValue*100}%;")
+  .bar.bar-info(style="width: #{binder.inProgressValue/binder.totalValue*100}%;")
+  .progress-value #{binder.finishedValue} + #{Math.round(binder.inProgressValue)} / #{binder.totalValue}
+br

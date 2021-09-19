@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB - binder - #{binder._id} - configuration
+  title #{orgName} - binder - #{binder._id} - configuration
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -91,7 +91,7 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/binder-config.js')

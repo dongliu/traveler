@@ -5,11 +5,31 @@
   "searchBase": "ou=...,dc=...",
   "searchFilter": "(&(objectClass=user)(sAMAccountName=_id)(company=FRIB))",
   "nameFilter": "(&(objectClass=user)(displayName=_name)(company=FRIB))",
+
+  // Remove "groupSearchBase" for local group managament within the application
   "groupSearchBase": "ou=...,dc=...",
+
   "groupSearchFilter": "(&(objectClass=group)(sAMAccountName=_id))",
-  "objAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName"],
-  "memberAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName", "memberOf"],
-  "groupAttributes": ["sAMAccountName","displayName","mail"],
+  "objAttributes": [
+    "sAMAccountName",
+    "displayName",
+    "company",
+    "mail",
+    "telephoneNumber",
+    "mobile",
+    "physicalDeliveryOfficeName"
+  ],
+  "memberAttributes": [
+    "sAMAccountName",
+    "displayName",
+    "company",
+    "mail",
+    "telephoneNumber",
+    "mobile",
+    "physicalDeliveryOfficeName",
+    "memberOf"
+  ],
+  "groupAttributes": ["sAMAccountName", "displayName", "mail"],
   "rawAttributes": ["thumbnailPhoto"],
   "defaultKeys": {
     "displayName": "displayName",
@@ -24,6 +44,7 @@
   },
 
   "ldapsCA": "OPTIONAL CA file for accepting SSL Connections",
+  "ldapsRejectUnauthorized": true,
   "shareUsers": true,
   "shareGroups": true,
   "transferOwnership": true

@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title FRIB Travelers
+  title #{orgName} Travelers
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -22,6 +22,10 @@ block content
         button.btn.btn-primary#add-to-binder(data-toggle='tooltip', title='add selected travelers into a binder')
           i.fa.fa-briefcase.fa-lg
           | &nbsp;Add to binder
+      .btn-group
+        button.btn.btn-primary#report(data-toggle='tooltip', title='generate report for selected travelers')
+          i.fa.fa-table.fa-large
+          | &nbsp;Generate report
       .btn-group
         button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
@@ -45,6 +49,7 @@ block content
         h3#modalLabel
       .modal-body.modal-body-visible
       .modal-footer
+    form#report-form.hidden(action='#{prefix}/travelers/report/', method='post')
     div
       ul.nav.nav-tabs
         li.active
@@ -68,6 +73,14 @@ block content
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
+            .btn-group
+              button.btn.btn-info.select-all(data-toggle='tooltip', title='select all the rows in the current view')
+                i.fa.fa-list.fa-lg
+                | &nbsp;Select all
+            .btn-group
+              button.btn.btn-info.deselect-all(data-toggle='tooltip', title='deselect all the rows')
+                i.fa.fa-list.fa-lg
+                | &nbsp;Select none
             .btn-group
               button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
                 i.fa.fa-archive.fa-lg
@@ -116,10 +129,6 @@ block content
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
-            .btn-group
-              button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
-                i.fa.fa-inbox.fa-lg
-                | &nbsp;De-archive
           table#archived-traveler-table.table.table-bordered.table-hover
 
 
@@ -131,7 +140,6 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')

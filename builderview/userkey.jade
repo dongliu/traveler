@@ -1,0 +1,6 @@
+.control-group
+  .control-label User defined key
+  .controls
+    //- letter, _, number allowed at lease 1 at most 30
+    input(type='text', name='userkey', pattern='[a-zA-Z_0-9]{1,30}')
+    span.help-inline Only letter, number, and "_" allowed (Example: MagMeas_1)

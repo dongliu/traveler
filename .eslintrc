@@ -4,9 +4,13 @@
     "browser": true,
     "jquery": true,
     "node": true,
-    "mocha": true
+    "mocha": true,
+    "es6": true
   },
-  "extends": "defaults/configurations/walmart/es5",
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
+  "extends": ["eslint:recommended", "prettier"],
   "rules": {
     "no-console": 0,
     "quotes": [2, "single", "avoid-escape"],
@@ -16,6 +20,7 @@
     "max-len": 0,
     "max-params": [2, 10],
     "operator-assignment": 0,
-    "consistent-this": 0
+    "consistent-this": 0,
+    "no-unused-expressions": 1
   }
 }

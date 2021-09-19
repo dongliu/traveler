@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title FRIB Traveler - public travelers
+  title #{orgName} Traveler - public travelers
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -13,9 +13,29 @@ block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
   .container-fluid
+    .btn-toolbar
+      .btn-group
+        button.btn.btn-info.select-all(data-toggle='tooltip', title='select all the rows in the current view')
+          i.fa.fa-list.fa-lg
+          | &nbsp;Select all
+      .btn-group
+        button.btn.btn-info.deselect-all(data-toggle='tooltip', title='deselect all the rows')
+          i.fa.fa-list.fa-lg
+          | &nbsp;Select none
+      .btn-group
+        button.btn.btn-primary#report(data-toggle='tooltip', title='generate report for selected travelers')
+          i.fa.fa-table.fa-large
+          | &nbsp;Generate report
+  #publictravelers.table.active
     #message
     h3 Public accessible travelers
     table#public-travelers-table.table.table-bordered.table-hover
+  #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+    .modal-header
+      h3#modalLabel
+    .modal-body.modal-body-visible
+    .modal-footer
+  form#report-form.hidden(action='#{prefix}/travelers/report/', method='post')
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
@@ -24,7 +44,6 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/public-travelers.js')

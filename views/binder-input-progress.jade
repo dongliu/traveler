@@ -1,0 +1,5 @@
+h4 Step :: total: #{binder.totalInput}; finished: #{binder.finishedInput};
+.progress(class=binder.status === 1 ? "active progress-striped" : undefined)
+  .bar.bar-success(style="width: #{binder.finishedInput/binder.totalInput*100}%;")
+  .progress-value #{binder.finishedInput} / #{binder.totalInput}
+br

@@ -6,28 +6,29 @@ body {
   color: #0088cc;
 }
 
-
 /* Tweak navbar brand link to be super sleek
 -------------------------------------------------- */
 body > .navbar {
   font-size: 13px;
 }
 /* Change the docs' brand */
- body > .navbar .brand {
+body > .navbar .brand {
   padding-right: 0;
   padding-left: 0;
   margin-left: 20px;
   float: right;
   font-weight: bold;
   color: #000;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, .1), 0 0 30px rgba(255, 255, 255, .125);
-  -webkit-transition: all .2s linear;
-  -moz-transition: all .2s linear;
-  transition: all .2s linear;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 30px rgba(255, 255, 255, 0.125);
+  -webkit-transition: all 0.2s linear;
+  -moz-transition: all 0.2s linear;
+  transition: all 0.2s linear;
 }
 body > .navbar .brand:hover {
   text-decoration: none;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, .1), 0 0 30px rgba(255, 255, 255, .4);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 30px rgba(255, 255, 255, 0.4);
 }
 /* Sections
 -------------------------------------------------- */
@@ -36,7 +37,8 @@ body > .navbar .brand:hover {
 section {
   padding-top: 30px;
 }
-section > .page-header, section > .lead {
+section > .page-header,
+section > .lead {
   color: #5a5a5a;
 }
 section > ul li {
@@ -47,15 +49,36 @@ section > ul li {
 hr.soften {
   height: 1px;
   margin: 70px 0;
-  background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 0), rgba(0, 0, 0, .1), rgba(0, 0, 0, 0));
-  background-image: -moz-linear-gradient(left, rgba(0, 0, 0, 0), rgba(0, 0, 0, .1), rgba(0, 0, 0, 0));
-  background-image: -ms-linear-gradient(left, rgba(0, 0, 0, 0), rgba(0, 0, 0, .1), rgba(0, 0, 0, 0));
-  background-image: -o-linear-gradient(left, rgba(0, 0, 0, 0), rgba(0, 0, 0, .1), rgba(0, 0, 0, 0));
+  background-image: -webkit-linear-gradient(
+    left,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0)
+  );
+  background-image: -moz-linear-gradient(
+    left,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0)
+  );
+  background-image: -ms-linear-gradient(
+    left,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0)
+  );
+  background-image: -o-linear-gradient(
+    left,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0)
+  );
   border: 0;
 }
 
 /* twitter typeahead 0.11 styles */
-.twitter-typeahead .tt-query, .twitter-typeahead .tt-hint {
+.twitter-typeahead .tt-query,
+.twitter-typeahead .tt-hint {
   margin-bottom: 0;
 }
 .tt-menu {
@@ -64,15 +87,15 @@ hr.soften {
   padding: 5px 0;
   background-color: #fff;
   border: 1px solid #ccc;
-  border: 1px solid rgba(0, 0, 0, .2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
   *border-right-width: 2px;
   *border-bottom-width: 2px;
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
   border-radius: 6px;
-  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
   -webkit-background-clip: padding-box;
   -moz-background-clip: padding;
   background-clip: padding-box;
@@ -86,12 +109,18 @@ hr.soften {
   color: #fff;
   background-color: #0081c2;
   background-image: -moz-linear-gradient(top, #0088cc, #0077b3);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0077b3));
+  background-image: -webkit-gradient(
+    linear,
+    0 0,
+    0 100%,
+    from(#0088cc),
+    to(#0077b3)
+  );
   background-image: -webkit-linear-gradient(top, #0088cc, #0077b3);
   background-image: -o-linear-gradient(top, #0088cc, #0077b3);
   background-image: linear-gradient(to bottom, #0088cc, #0077b3);
   background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0)
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0);
 }
 .tt-suggestion.tt-cursor a {
   color: #fff;
@@ -102,19 +131,19 @@ hr.soften {
 /* FRIB style */
 
 .progress {
-  text-align:center;
+  text-align: center;
   margin-bottom: 0;
   position: relative;
 }
 
 .progress.active {
-  background: #FFFF00;
+  background: #ffff00;
 }
 
 .progress-value {
-  position:absolute;
-  right:0;
-  left:0;
+  position: absolute;
+  right: 0;
+  left: 0;
 }
 
 /* section for the main page
@@ -148,8 +177,6 @@ hr.soften {
   max-height: 145px;
 }
 
-
-
 /*user photo*/
 
 .navbar .nav > li > a.user {
@@ -177,7 +204,7 @@ hr.soften {
 rect {
   stroke: #eee;
   fill: #aaa;
-  fill-opacity: .8;
+  fill-opacity: 0.8;
 }
 rect.parent {
   cursor: pointer;
@@ -194,17 +221,17 @@ text {
 
 /*modal scroll*/
 .modal-body-scroll {
-    max-height: calc(100vh - 212px);
-    overflow-y: auto;
+  max-height: calc(100vh - 212px);
+  overflow-y: auto;
 }
 
 /*modal visible*/
 .modal-body-visible {
-    overflow-y: visible;
+  overflow-y: visible;
 }
 
 /* builder stuff */
-ul.dropdown-menu input[type="checkbox"] {
+ul.dropdown-menu input[type='checkbox'] {
   margin-left: 0;
 }
 .ui-autocomplete {
@@ -236,13 +263,22 @@ ul.dropdown-menu input[type="checkbox"] {
   box-shadow: 0 0 5px rgba(192, 152, 83, 1);
 }
 
+form .invalid {
+  outline: 1px solid #b94a48;
+}
+
+form .validation {
+  font-weight: bold;
+  color: #b94a48;
+}
+
 figcaption {
   font-weight: bold;
-  font-size: large
+  font-size: large;
 }
 
 .fe-type {
-  display: none
+  display: none;
 }
 .input-history {
   margin-top: 10px;
@@ -257,7 +293,7 @@ figcaption {
   margin-bottom: 0;
   display: block;
   color: #595959;
-  background-color: #F5F6CE;
+  background-color: #f5f6ce;
 }
 
 .table-hover tbody tr:hover.row-selected > td {
@@ -274,6 +310,10 @@ figcaption {
   padding-top: 40px;
 }
 
+.inline-checkbox {
+  display: inline-block;
+  padding-right: 10px;
+}
 
 /**
  * Sidenav for sections
@@ -286,9 +326,9 @@ figcaption {
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
   border-radius: 6px;
-  -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
-  -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
+  -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+  -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
 }
 .bs-docs-sidenav > li > a {
   display: block;
@@ -297,7 +337,16 @@ figcaption {
   padding: 8px 14px;
   border: 1px solid #e5e5e5;
 }
-.bs-docs-sidenav > li:first-child > a {
+.bs-docs-sidenav > li > h4 {
+  padding: 8px 14px;
+  margin: 0 0 -1px;
+  width: 190px \9;
+  display: block;
+  background-color: #ff9024;
+  color: white;
+}
+.bs-docs-sidenav > li:first-child > a,
+.bs-docs-sidenav > li:first-child > h4 {
   -webkit-border-radius: 6px 6px 0 0;
   -moz-border-radius: 6px 6px 0 0;
   border-radius: 6px 6px 0 0;
@@ -312,25 +361,29 @@ figcaption {
   z-index: 2;
   padding: 9px 15px;
   border: 0;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, .15);
-  -webkit-box-shadow: inset 1px 0 0 rgba(0, 0, 0, .1), inset -1px 0 0 rgba(0, 0, 0, .1);
-  -moz-box-shadow: inset 1px 0 0 rgba(0, 0, 0, .1), inset -1px 0 0 rgba(0, 0, 0, .1);
-  box-shadow: inset 1px 0 0 rgba(0, 0, 0, .1), inset -1px 0 0 rgba(0, 0, 0, .1);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.1),
+    inset -1px 0 0 rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.1),
+    inset -1px 0 0 rgba(0, 0, 0, 0.1);
+  box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.1),
+    inset -1px 0 0 rgba(0, 0, 0, 0.1);
 }
 /* Chevrons */
- .bs-docs-sidenav .icon-chevron-right {
+.bs-docs-sidenav .icon-chevron-right {
   float: right;
   margin-top: 2px;
   margin-right: -6px;
-  opacity: .25;
+  opacity: 0.25;
 }
 .bs-docs-sidenav > li > a:hover {
   background-color: #f5f5f5;
 }
 .bs-docs-sidenav a:hover .icon-chevron-right {
-  opacity: .5;
+  opacity: 0.5;
 }
-.bs-docs-sidenav .active .icon-chevron-right, .bs-docs-sidenav .active a:hover .icon-chevron-right {
+.bs-docs-sidenav .active .icon-chevron-right,
+.bs-docs-sidenav .active a:hover .icon-chevron-right {
   background-image: url(../img/glyphicons-halflings-white.png);
   opacity: 1;
 }
@@ -344,13 +397,36 @@ figcaption {
 }
 
 /**
+ * config page
+ */
+
+.tag-list li {
+  padding-top: 10px;
+}
+
+button.editable {
+  margin-left: 10px;
+}
+
+.btn-group {
+  margin-bottom: 5px;
+}
+
+.button-footer {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/**
  * Responsive
  */
 
 /**
  * Desktop large
  */
-@media (min-width:1200px) {
+@media (min-width: 1200px) {
   .bs-docs-sidenav {
     width: 258px;
   }
@@ -363,7 +439,7 @@ figcaption {
 /**
  * Desktop
  */
-@media (max-width:980px) {
+@media (max-width: 980px) {
   /* Unfloat brand */
   body > .navbar-fixed-top .brand {
     float: left;
@@ -387,7 +463,7 @@ figcaption {
 /**
  * Tablet to desktop
  */
-@media (min-width:768px) and (max-width:979px) {
+@media (min-width: 768px) and (max-width: 979px) {
   /* Remove any padding from the body */
   body {
     padding-top: 0;
@@ -404,7 +480,7 @@ figcaption {
 /**
  * Tablet
  */
-@media (max-width:767px) {
+@media (max-width: 767px) {
   /* Remove any padding from the body */
   body {
     padding-top: 0;
@@ -417,7 +493,7 @@ figcaption {
     margin: 0 -20px;
   }
   /* Space out the show-grid examples */
-  .show-grid[class*="span"] {
+  .show-grid[class*='span'] {
     margin-bottom: 5px;
   }
   /* Sidenav */
@@ -444,7 +520,7 @@ figcaption {
 /**
  * Landscape phones
  */
-@media (max-width:480px) {
+@media (max-width: 480px) {
   /* Remove padding above jumbotron */
   body {
     padding-top: 0;
@@ -466,4 +542,36 @@ figcaption {
     padding-top: 20px;
     padding-bottom: 20px;
   }
+}
+
+.section-number {
+  background: #ff9024;
+  color: white;
+  padding: 2px;
+  border: double;
+  border-color: white;
+  border-radius: 9px;
+}
+
+.control-number {
+  background: #66cc99;
+  color: white;
+  padding: 2px;
+  border: double;
+  border-color: white;
+  border-radius: 9px;
+}
+
+.rich-instruction {
+  display: flex;
+}
+
+.rich-instruction-number {
+  background: #0088cc;
+  color: white;
+  padding: 2px;
+  border: double;
+  border-color: white;
+  border-radius: 9px;
+  height: fit-content;
 }

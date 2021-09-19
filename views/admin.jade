@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title FRIB Admin
+  title #{orgName} Admin
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -61,6 +61,19 @@ block content
 
           table#users-table.table.table-bordered.table-hover
         #groups.tab-pane
+          .well
+            form.form-inline
+              input#groupname.input(type='text', placeholder='Groupname', name='name')
+              != ' '
+              button.btn.btn-primary#addGroup(type='submit') Create New Group
+          h3 Group list
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-warning#group-delete
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Delete Selected Group(s)
+
+          table#groups-table.table.table-bordered.table-hover
 
 
 block js
@@ -71,12 +84,13 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/users.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/groupnames.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/groups.js')
 
 

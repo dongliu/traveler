@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB - forms - #{id} - preview
+  title #{orgName} - forms - #{id} - preview
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -12,6 +12,7 @@ block head
 block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
+    var title = '!{title}'
   .container
     .row
       .span9
@@ -28,4 +29,6 @@ block content
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-viewer.js')

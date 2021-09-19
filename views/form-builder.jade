@@ -3,12 +3,13 @@ extends layout
 block head
   meta(charset='urf-8')
   if (typeof id == 'undefined')
-    title FRIB - new form
+    title #{orgName} - new form
   else
-    title FRIB - forms - #{title}
+    title #{orgName} - forms - #{title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/jquery/ui-lightness/jquery-ui-1.10.2.custom.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
@@ -17,7 +18,9 @@ block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
     var id = '!{id}';
+    var released_form_version_mgmt = '!{released_form_version_mgmt}';
     var formStatus = !{JSON.stringify(locals.status)} || 0;
+    var formType = !{JSON.stringify(locals.formType)} || 'normal';
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -26,11 +29,18 @@ block content
       .modal-body
       .modal-footer
     h3#formtitle #{title}
+    p Type: 
+      | &nbsp;#{formType}
+    p Status:
+      | &nbsp;#{statusText}
+    p Version:&nbsp;
+      span#version #{_v}
     .well-large
       form.form-horizontal#output
         != html
-    if (locals.status === 0)
-      .btn-group.dropdown
+  .button-footer.container
+    if (status === 0)
+      .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
           span.caret
         ul.dropdown-menu
@@ -50,7 +60,7 @@ block content
             a Upload file
           li#add-other
             a other types
-      .btn-group.dropdown
+      .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Advanced control
           span.caret
         ul.dropdown-menu
@@ -67,28 +77,24 @@ block content
     .btn-group
       a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
     .btn-group
+      button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
+    .btn-group
       button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
-    if (locals.status === 0)
+    if (status === 0)
       .btn-group
-        button.btn.btn-primary#rename(data-toggle='tooltip', title='rename the form') Rename
-      //- .btn-group
-        button.btn.btn-primary#ready(data-toggle='tooltip', title='ready to publish form') Ready to publish
-    if (locals.status === 0.5)
-      .btn-group
-        button.btn.btn-primary#publish(data-toggle='tooltip', title='publish the form') Publish
-    if (locals.status === 1)
-      .btn-group
-        button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
-  br
-  br
-  br
-  br
-  br
-  br
-  br
-  br
-  br
-  br
+        button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
+    if (status === 0)
+     .btn-group
+       button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for Release') Submit
+    if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
+      if (status === 0.5)
+        .btn-group
+          button.btn.btn-primary#release(data-toggle='tooltip', title='release the form for usage') Release
+        .btn-group
+          button.btn.btn-warning#reject(data-toggle='tooltip', title='reject the submitted form for release') Reject
+      if (status === 1)
+        .btn-group
+          button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
@@ -102,5 +108,11 @@ block js
   script(type='text/javascript', src='#{prefix}/builder/input.js')
   script(type='text/javascript', src='#{prefix}/builder/spec.js')
   script(type='text/javascript', src='#{prefix}/javascripts/uid.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-builder.js')

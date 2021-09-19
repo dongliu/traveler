@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title FRIB Traveler - new form
+  title #{orgName} Traveler - new form
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -15,6 +15,13 @@ block content
         .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} title
         .controls
           input(type='text', name='title', required)
+      if (locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
+        .control-group
+          .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} type
+          .controls
+            select(name='formType', required)
+              option(value='normal') normal
+              option(value='discrepancy') discrepancy
       .control-group
         .controls
           .btn-group

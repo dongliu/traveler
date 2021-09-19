@@ -8,9 +8,10 @@ html
       var terminology = !{JSON.stringify(viewConfig.terminology)};
       var shareUsers = !{viewConfig.shareUsers};
       var shareGroups = !{viewConfig.shareGroups};
-      var linkTarget = '!{viewConfig.linkTarget}';
+      var linkTarget = '!{viewConfig.linkTarget}' || '_blank';
       var showCCDB = !{viewConfig.showCCDB};
 
+    - var isAdmin = locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 ||locals.session.roles.indexOf('manager') !== -1)
     .navbar.navbar-fixed-top
       .navbar-inner
         .container-fluid
@@ -20,7 +21,7 @@ html
             span.icon-bar
           .nav-collapse.collapse
             ul.nav
-              li.active
+              li
                 - var appName = "Traveler"
                 if (viewConfig.deploymentName)
                     - appName += " - " + viewConfig.deploymentName
@@ -43,8 +44,7 @@ html
             ul.nav.pull-right
               if (locals.session && locals.session.userid)
                 li
-                  .user
-                    img(src='#{prefix}/adusers/#{session.userid}/photo', title='#{session.username}')
+                  img.user(src='#{prefix}/adusers/#{session.userid}/photo', title='#{session.username}', data-src='holder.js/27x40?size=20&text=#{session.username.substr(0, 1).toUpperCase()}')
                 li.dropdown
                   a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
                     b.caret
@@ -61,6 +61,8 @@ html
     block content
     .container-fluid
       h6.text-right
-        a(href='https://github.com/dongliu/traveler/releases/tag/#{viewConfig.appVersion}', target='_blank') Release #{viewConfig.appVersion}
+        a(href='https://github.com/AdvancedPhotonSource/traveler/releases/tag/#{viewConfig.appVersion}', target='_blank') Release #{viewConfig.appVersion}
+
+    script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
     block js
 

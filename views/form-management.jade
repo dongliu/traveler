@@ -1,0 +1,82 @@
+extends layout
+
+block head
+  title #{orgName} Form management
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script(type='text/javascript').
+    var prefix = '!{prefix}';
+  .container-fluid
+    .btn-toolbar
+      .btn-group
+        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create new empty #{viewConfig.terminology.form}s')
+          i.fa.fa-file-o.fa-lg
+          | &nbsp;New #{viewConfig.terminology.form}
+      .btn-group
+        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
+          i.fa.fa-copy.fa-lg
+          | &nbsp;Clone
+      .btn-group
+        button.btn.btn-info#reload
+          i.fa.fa-refresh.fa-lg
+          | &nbsp;Reload all tables
+    #message
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body.modal-body-visible
+      .modal-footer
+    div
+      ul.nav.nav-tabs
+        li.active
+          a(href='#submitted-forms', data-toggle='tab') Submitted #{viewConfig.terminology.form}s
+        li
+          a(href='#released-forms', data-toggle='tab')  Released #{viewConfig.terminology.form}s
+        li
+          a(href='#archived-forms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
+      .tab-content
+        #submitted-forms.tab-pane.active
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#submitted-form-table.table.table-bordered.table-hover
+        #released-forms.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#released-form-table.table.table-bordered.table-hover
+        #archived-forms.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#archived-form-table.table.table-bordered.table-hover
+
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/form-management.js')
+
+

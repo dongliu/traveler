@@ -1,6 +1,9 @@
 .control-group.output-control-group
   .control-label
-    span { model.label }
+    span.control-number
+    != ' '
+    span.model-label { model.label }
   .controls
-    input(type='number', disabled=true, rv-placeholder='model.placeholder', rv-required='model.required', rv-min='model.min', rv-max='model.max', step='any')
+    input(type='number', disabled=true, rv-placeholder='model.placeholder', rv-required='model.required', rv-data-userkey='model.userkey', rv-min='model.min', rv-max='model.max', step='any')
+    span.help-inline(rv-if="model.range") { model.range }
     span.help-block { model.help }
