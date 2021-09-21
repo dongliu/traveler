@@ -22,6 +22,7 @@
     "express-session": "1.15.6",
     "express-slash": "1.0.0",
     "file-stream-rotator": "0.0.5",
+    "helmet": "^4.6.0",
     "jade": "1.10.0",
     "jstransformer-marked": "1.0.1",
     "ldapjs": "1.0.0",

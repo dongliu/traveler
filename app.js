@@ -4,6 +4,7 @@ var config = require('./config/config.js');
 config.load();
 
 var express = require('express');
+const helmet = require('helmet');
 var compression = require('compression');
 var favicon = require('serve-favicon');
 var morgan = require('morgan');
@@ -112,7 +113,7 @@ if (app.get('env') === 'production') {
 
 //TODO test
 //app.set('logger', logger);
-
+app.use(helmet());
 app.use(compression());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -209,6 +210,7 @@ var apiPort = apiSettings.app_port;
 api.enable('strict routing');
 
 api.set('port', process.env.APIPORT || apiPort);
+api.use(helmet());
 api.use(morgan('common'));
 
 // api.use(express.logger({stream: access_logfile}));
