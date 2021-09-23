@@ -1,4 +1,6 @@
 FROM node:14-alpine
+WORKDIR /app
+COPY package.json .
 RUN apk update && \
     apk add openssl
 
@@ -10,10 +12,8 @@ ENTRYPOINT ["/sbin/tini", "--"]
 EXPOSE 3001
 # api port if https enabled
 # EXPOSE 3443
-
-COPY . /app
-WORKDIR /app
 RUN npm install --only=prod
-RUN npm install -g nodemon@1.18.10
+RUN npm install -g nodemon@2
+COPY . .
 # RUN bower install
 CMD ["node", "app.js"]
