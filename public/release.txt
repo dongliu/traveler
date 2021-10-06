@@ -1,3 +1,6 @@
+APS 1.5.2
+- Update the process manager from forever to pm2.
+
 APS-1.5.1
 - Resolve issue with undefined exception when loading form for some users. 
 
