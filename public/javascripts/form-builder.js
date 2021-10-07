@@ -93,17 +93,21 @@ function archive_prior_released_forms(selected) {
     contentType: 'application/json',
     processData: false,
   })
-      .done(function(data, textStatus, request) {
-        $('#message').append(
-            '<div class="alert alert-success"><button class="close" data-dismiss="alert"></button>' + data + '</div>'
-        );
-      })
-      .fail(function(data, textStatus, request) {
-        $('#message').append(
-            '<div class="alert alert-error"><button class="close" data-dismiss="alert"></button>' + data + '</div>'
-        );
-      })
-      .always(function() {});
+    .done(function(data, textStatus, request) {
+      $('#message').append(
+        '<div class="alert alert-success"><button class="close" data-dismiss="alert"></button>' +
+          data +
+          '</div>'
+      );
+    })
+    .fail(function(data, textStatus, request) {
+      $('#message').append(
+        '<div class="alert alert-error"><button class="close" data-dismiss="alert"></button>' +
+          data +
+          '</div>'
+      );
+    })
+    .always(function() {});
 }
 
 function userkey_error($userkey, msg) {
@@ -1472,7 +1476,7 @@ function binding_events() {
     $('#modal .modal-body').empty();
     let defaultTitle = $('#formtitle').text();
     $('#modal .modal-body').append(
-        '<form class="form-horizontal" id="modalform"> <div class="control-group"> <label class="control-label">Form title</label> <div class="controls"><input id="release-title" type="text" value="' +
+      '<form class="form-horizontal" id="modalform"> <div class="control-group"> <label class="control-label">Form title</label> <div class="controls"><input id="release-title" type="text" value="' +
         defaultTitle +
         '" class="input"> </div> </div> </form>'
     );
@@ -1481,7 +1485,7 @@ function binding_events() {
     if (released_form_version_mgmt) {
       $('#modalLabel').html('Archive previously released form(s)');
       $('#modal .modal-body').append(
-          '<h4>Prior version(s) of this form:</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
+        '<h4>Prior version(s) of this form:</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
       );
       let priorVersionsColumns = [
         selectColumn,
@@ -1546,9 +1550,9 @@ function binding_events() {
       if (priorVersionsTable) {
         // get all selected forms
         let selected = fnGetSelectedInPage(
-            priorVersionsTable,
-            'row-selected',
-            false
+          priorVersionsTable,
+          'row-selected',
+          false
         );
         let json = [];
         $(selected).each(function(s) {
