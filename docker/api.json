@@ -1,7 +1,7 @@
 {
-  "api_users" : {
-      "api_read": "api_read_password",
-      "api_write": "api_write_password"
+  "api_users": {
+    "api_read": "api_read_password",
+    "api_write": "api_write_password"
   },
-  "app_port" : "3002"
+  "app_port": "3002"
 }

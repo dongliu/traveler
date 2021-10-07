@@ -296,26 +296,34 @@ module.exports = function(app) {
   );
 
   app.get(
-      '/forms/:id/released/json',
-      auth.ensureAuthenticated,
-      reqUtils.exist('id', Form),
-      reqUtils.canReadMw('id'),
-      function(req, res) {
-          try {
-              ReleasedForm.find({
-                  'base._id': req.params.id,
-                  status: 1, // released
-              }, function (err, existingForms) {
-                  if (err) {
-                      return res.status(500).send(error.message);
-                  }
-                  debug('found ' + existingForms.length + ' previously released form(s) based on : ' + req.params.id);
-                  return res.status(200).json(existingForms);
-              });
-          } catch (error) {
+    '/forms/:id/released/json',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Form),
+    reqUtils.canReadMw('id'),
+    function(req, res) {
+      try {
+        ReleasedForm.find(
+          {
+            'base._id': req.params.id,
+            status: 1, // released
+          },
+          function(err, existingForms) {
+            if (err) {
               return res.status(500).send(error.message);
+            }
+            debug(
+              'found ' +
+                existingForms.length +
+                ' previously released form(s) based on : ' +
+                req.params.id
+            );
+            return res.status(200).json(existingForms);
           }
+        );
+      } catch (error) {
+        return res.status(500).send(error.message);
       }
+    }
   );
 
   app.post(
@@ -879,9 +887,7 @@ module.exports = function(app) {
           return res
             .status(400)
             .send(
-              `A form with same title, type, and version was already released in ${
-                existingForm._id
-              }.`
+              `A form with same title, type, and version was already released in ${existingForm._id}.`
             );
         }
       } catch (error) {
@@ -891,8 +897,8 @@ module.exports = function(app) {
       try {
         const saveForm = await new ReleasedForm(releasedForm).save();
         const url =
-              (req.proxied ? authConfig.proxied_service : authConfig.service) +
-              `/released-forms/${saveForm._id}/`;
+          (req.proxied ? authConfig.proxied_service : authConfig.service) +
+          `/released-forms/${saveForm._id}/`;
         form.save();
         return res.status(201).json({
           location: url,

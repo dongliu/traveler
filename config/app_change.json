@@ -15,6 +15,7 @@
   "log_dir": "../logs/",
   "cookie_sec": "traveler",
   "cookie_life": 28800000,
+  "body_max_size": "1mb",
   "upload_size": 5,
   "default_form_public_access": -1,
   "default_traveler_public_access": 0,

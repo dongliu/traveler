@@ -11,6 +11,7 @@ Check if the docker desktop has `docker-compose` installed on your machine. If n
 ## create development network
 
 Clone this repo to your local environment. Make sure you have the `traveler-dev` network in the docker.
+
 ```
 docker network list
 ```
