@@ -122,7 +122,6 @@ function addHistory(schema, options) {
    * embedded document. Otherwise, explicitly #markModified(path) to mark
    * modified of the path.
    * @param  {String}   userid the user making this update
-   * @param  {Function} cb     the callback when save is done
    */
   schema.methods.saveWithHistory = function(userid) {
     var doc = this;
