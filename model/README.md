@@ -11,7 +11,7 @@ The forms are the templates on the basis of which the released forms are created
 State transition of form
 
 archived <------------------------------------\
- ^ | |
+ ^                |                           |
 draft ----> submitted for review ----> ready to release
 ^-----------------|
 
