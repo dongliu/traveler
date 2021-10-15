@@ -1,8 +1,9 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var ObjectId = Schema.Types.ObjectId;
+const mongoose = require('mongoose');
 
-var user = new Schema({
+const {Schema} = mongoose;
+const {ObjectId} = Schema.Types;
+
+const user = new Schema({
   _id: String,
   name: String,
   email: String,
@@ -14,13 +15,14 @@ var user = new Schema({
   forms: [ObjectId],
   travelers: [ObjectId],
   binders: [ObjectId],
+  reviews: [ObjectId],
   subscribe: {
     type: Boolean,
     default: false,
   },
 });
 
-var group = new Schema({
+const group = new Schema({
   _id: String,
   name: String,
   deleted: {
@@ -33,9 +35,9 @@ var group = new Schema({
   binders: [ObjectId],
 });
 
-var User = mongoose.model('User', user);
-var Group = mongoose.model('Group', group);
+const User = mongoose.model('User', user);
+const Group = mongoose.model('Group', group);
 module.exports = {
-  User: User,
-  Group: Group,
+  User,
+  Group,
 };
