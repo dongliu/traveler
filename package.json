@@ -44,8 +44,10 @@
   "devDependencies": {
     "acorn": "^7.1.0",
     "chai": "^4.2.0",
-    "eslint": "^6.8.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-import": "^2.24.2",
     "husky": "^3.1.0",
     "lint-staged": "^9.5.0",
     "mocha": "^5.2.0",
@@ -58,9 +60,8 @@
     }
   },
   "lint-staged": {
-    "*.{js,json,css,md}": [
-      "prettier --config ./prettier.config.js --write",
-      "git add"
+    "*.{js}": [
+      "eslint --fix"
     ]
   }
 }
