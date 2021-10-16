@@ -1,111 +1,113 @@
-var config = require('../config/config.js');
-var auth = require('../lib/auth');
-var authConfig = config.auth;
+const debug = require('debug')('traveler:route:form');
+const _ = require('lodash');
+const mongoose = require('mongoose');
+const path = require('path');
+// const util = require('util');
+const config = require('../config/config');
+const auth = require('../lib/auth');
 
-var mongoose = require('mongoose');
-var path = require('path');
-var _ = require('lodash');
-var routesUtilities = require('../utilities/routes.js');
-var reqUtils = require('../lib/req-utils');
-var shareLib = require('../lib/share');
-var tag = require('../lib/tag');
-var FormError = require('../lib/error').FormError;
-var formModel = require('../model/form');
+const authConfig = config.auth;
 
-var Form = mongoose.model('Form');
-var FormFile = mongoose.model('FormFile');
+const routesUtilities = require('../utilities/routes');
+const reqUtils = require('../lib/req-utils');
+const shareLib = require('../lib/share');
+const tag = require('../lib/tag');
+const { FormError } = require('../lib/error');
+const formModel = require('../model/form');
+
+const Form = mongoose.model('Form');
+const FormFile = mongoose.model('FormFile');
 const ReleasedForm = mongoose.model('ReleasedForm');
 const FormContent = mongoose.model('FormContent');
-var User = mongoose.model('User');
-var Group = mongoose.model('Group');
+const User = mongoose.model('User');
+const Group = mongoose.model('Group');
+const { stateTransition } = require('../model/form');
 
-var debug = require('debug')('traveler:route:form');
-var logger = require('../lib/loggers').getLogger();
+const logger = require('../lib/loggers').getLogger();
 
 module.exports = function(app) {
   app.get('/forms/', auth.ensureAuthenticated, function(req, res) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/forms/json', auth.ensureAuthenticated, function(req, res) {
-    Form.find(
-      {
-        createdBy: req.session.userid,
-        archived: {
-          $ne: true,
+  app.get('/forms/json', auth.ensureAuthenticated, async function(req, res) {
+    try {
+      const forms = await Form.find(
+        {
+          createdBy: req.session.userid,
+          archived: {
+            $ne: true,
+          },
+          status: {
+            $ne: 2,
+          },
+          owner: {
+            $exists: false,
+          },
         },
-        status: {
-          $ne: 2,
-        },
-        owner: {
-          $exists: false,
-        },
-      },
-      'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
-    ).exec(function(err, forms) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      res.status(200).json(forms);
-    });
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
+      ).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
+    }
   });
 
-  app.get('/transferredforms/json', auth.ensureAuthenticated, function(
+  app.get('/transferredforms/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
-    Form.find(
-      {
-        owner: req.session.userid,
-        archived: {
-          $ne: true,
+    try {
+      const forms = await Form.find(
+        {
+          owner: req.session.userid,
+          archived: {
+            $ne: true,
+          },
         },
-      },
-      'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup'
-    ).exec(function(err, forms) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      res.status(200).json(forms);
-    });
+        'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup'
+      ).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
+    }
   });
 
-  app.get('/allforms/json', auth.ensureAuthenticated, function(req, res) {
-    if (routesUtilities.checkUserRole(req, 'read_all_forms')) {
-      Form.find(
+  app.get('/allforms/json', auth.ensureAuthenticated, async function(req, res) {
+    if (!routesUtilities.checkUserRole(req, 'read_all_forms')) {
+      return res.status(401).json('You are not authorized to view all forms.');
+    }
+    try {
+      const forms = await Form.find(
         {},
         'title formType status tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup'
       )
         .lean()
-        .exec(function(err, forms) {
-          if (err) {
-            logger.error(err);
-            return res.status(500).send(err.message);
-          }
-          res.status(200).json(forms);
-        });
-    } else {
-      res.status(200).json('You are not authorized to view all forms.');
+        .exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
     }
   });
 
-  app.get('/sharedforms/json', auth.ensureAuthenticated, function(req, res) {
-    User.findOne(
-      {
-        _id: req.session.userid,
-      },
-      'forms'
-    ).exec(function(err, me) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
+  app.get('/sharedforms/json', auth.ensureAuthenticated, async function(
+    req,
+    res
+  ) {
+    try {
+      const me = await User.findOne(
+        {
+          _id: req.session.userid,
+        },
+        'forms'
+      ).exec();
       if (!me) {
         return res.status(400).send('cannot identify the current user');
       }
-      Form.find(
+      const forms = await Form.find(
         {
           _id: {
             $in: me.forms,
@@ -115,35 +117,30 @@ module.exports = function(app) {
           },
         },
         'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
-      ).exec(function(fErr, forms) {
-        if (fErr) {
-          logger.error(fErr);
-          return res.status(500).send(fErr.message);
-        }
-        res.status(200).json(forms);
-      });
-    });
+      ).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      debug(`error: ${error}`);
+      return res.status(500).send(error.message);
+    }
   });
 
-  app.get('/groupsharedforms/json', auth.ensureAuthenticated, function(
+  app.get('/groupsharedforms/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
-    Group.find(
-      {
-        _id: {
-          $in: req.session.memberOf,
+    try {
+      const groups = await Group.find(
+        {
+          _id: {
+            $in: req.session.memberOf,
+          },
         },
-      },
-      'forms'
-    ).exec(function(err, groups) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      var formids = [];
-      var i;
-      var j;
+        'forms'
+      ).exec();
+      const formids = [];
+      let i;
+      let j;
       // merge the forms arrays
       for (i = 0; i < groups.length; i += 1) {
         for (j = 0; j < groups[i].forms.length; j += 1) {
@@ -152,7 +149,7 @@ module.exports = function(app) {
           }
         }
       }
-      Form.find(
+      const forms = await Form.find(
         {
           _id: {
             $in: formids,
@@ -162,18 +159,19 @@ module.exports = function(app) {
           },
         },
         'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
-      ).exec(function(fErr, forms) {
-        if (fErr) {
-          logger.error(fErr);
-          return res.status(500).send(fErr.message);
-        }
-        res.status(200).json(forms);
-      });
-    });
+      ).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
+    }
   });
 
-  app.get('/archivedforms/json', auth.ensureAuthenticated, function(req, res) {
-    var search = {
+  app.get('/archivedforms/json', auth.ensureAuthenticated, async function(
+    req,
+    res
+  ) {
+    const search = {
       $and: [
         {
           $or: [
@@ -200,36 +198,40 @@ module.exports = function(app) {
         },
       ],
     };
-    Form.find(search, 'title formType status tags updatedBy updatedOn _v').exec(
-      function(err, forms) {
-        if (err) {
-          logger.error(err);
-          return res.status(500).send(err.message);
-        }
-        res.status(200).json(forms);
-      }
-    );
+    try {
+      const forms = await Form.find(
+        search,
+        'title formType status tags updatedBy updatedOn _v'
+      ).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
+    }
   });
 
   app.get('/publicforms/', auth.ensureAuthenticated, function(req, res) {
     res.render('public-forms', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/publicforms/json', auth.ensureAuthenticated, function(req, res) {
-    Form.find({
-      publicAccess: {
-        $in: [0, 1],
-      },
-      archived: {
-        $ne: true,
-      },
-    }).exec(function(err, forms) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      res.status(200).json(forms);
-    });
+  app.get('/publicforms/json', auth.ensureAuthenticated, async function(
+    req,
+    res
+  ) {
+    try {
+      const forms = await Form.find({
+        publicAccess: {
+          $in: [0, 1],
+        },
+        archived: {
+          $ne: true,
+        },
+      }).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
+    }
   });
 
   app.get('/forms/new', auth.ensureAuthenticated, function(req, res) {
@@ -241,8 +243,8 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     function formBuilder(req, res) {
-      var form = req[req.params.id];
-      var access = reqUtils.getAccess(req, form);
+      const form = req[req.params.id];
+      const access = reqUtils.getAccess(req, form);
 
       if (access === -1) {
         return res
@@ -252,10 +254,9 @@ module.exports = function(app) {
 
       if (form.archived) {
         return res.redirect(
-          (req.proxied ? authConfig.proxied_service : authConfig.service) +
-            '/forms/' +
-            req.params.id +
-            '/preview'
+          `${
+            req.proxied ? authConfig.proxied_service : authConfig.service
+          }/forms/${req.params.id}/preview`
         );
       }
 
@@ -267,7 +268,7 @@ module.exports = function(app) {
             title: form.title,
             html: form.html,
             status: form.status,
-            statusText: formModel.statusMap['' + form.status],
+            statusText: formModel.statusMap[`${form.status}`],
             _v: form._v,
             formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
@@ -277,10 +278,9 @@ module.exports = function(app) {
       }
 
       return res.redirect(
-        (req.proxied ? authConfig.proxied_service : authConfig.service) +
-          '/forms/' +
-          req.params.id +
-          '/preview'
+        `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/forms/${req.params.id}/preview`
       );
     }
   );
@@ -300,26 +300,13 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
-    function(req, res) {
+    async function(req, res) {
       try {
-        ReleasedForm.find(
-          {
-            'base._id': req.params.id,
-            status: 1, // released
-          },
-          function(err, existingForms) {
-            if (err) {
-              return res.status(500).send(error.message);
-            }
-            debug(
-              'found ' +
-                existingForms.length +
-                ' previously released form(s) based on : ' +
-                req.params.id
-            );
-            return res.status(200).json(existingForms);
-          }
-        );
+        const forms = await ReleasedForm.find({
+          'base._id': req.params.id,
+          status: 1, // released
+        }).exec();
+        return res.status(200).json(forms);
       } catch (error) {
         return res.status(500).send(error.message);
       }
@@ -331,8 +318,8 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
-    function(req, res) {
-      var doc = req[req.params.id];
+    async function(req, res) {
+      const doc = req[req.params.id];
       if (_.isEmpty(req.files)) {
         return res.status(400).send('Expect One uploaded file');
       }
@@ -341,7 +328,7 @@ module.exports = function(app) {
         return res.status(400).send('Expect input name');
       }
 
-      var file = new FormFile({
+      const file = new FormFile({
         form: doc._id,
         value: req.files[req.body.name].originalname,
         file: {
@@ -353,27 +340,21 @@ module.exports = function(app) {
         uploadedBy: req.session.userid,
         uploadedOn: Date.now(),
       });
-
-      file.save(function(saveErr, newfile) {
-        if (saveErr) {
-          logger.error(saveErr);
-          return res.status(500).send(saveErr.message);
-        }
-        var url =
-          (req.proxied ? authConfig.proxied_service : authConfig.service) +
-          '/formfiles/' +
-          newfile.id;
+      try {
+        const newFile = await file.save();
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/formfiles/${newFile.id}`;
         res.set('Location', url);
         return res
           .status(201)
           .send(
-            'The uploaded file is at <a target="_blank" href="' +
-              url +
-              '">' +
-              url +
-              '</a>'
+            `The uploaded file is at <a target="_blank" href="${url}">${url}</a>`
           );
-      });
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
@@ -382,7 +363,7 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', FormFile),
     function(req, res) {
-      var data = req[req.params.id];
+      const data = req[req.params.id];
       if (data.inputType === 'file') {
         return res.sendFile(path.resolve(data.file.path));
       }
@@ -396,7 +377,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
     function(req, res) {
-      var form = req[req.params.id];
+      const form = req[req.params.id];
       return res.render(
         'form-viewer',
         routesUtilities.getRenderObject(req, {
@@ -415,7 +396,7 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     reqUtils.archived('id', false),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       return res.render(
         'form-config',
         routesUtilities.getRenderObject(req, {
@@ -432,7 +413,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     function(req, res) {
-      var form = req[req.params.id];
+      const form = req[req.params.id];
       return res.render(
         'share',
         routesUtilities.getRenderObject(req, {
@@ -451,10 +432,9 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['access']),
-    function(req, res) {
-      var form = req[req.params.id];
-      // change the access
-      var access = req.body.access;
+    async function(req, res) {
+      const form = req[req.params.id];
+      let { access } = req.body;
       if (['-1', '0', '1'].indexOf(access) === -1) {
         return res.status(400).send('not valid value');
       }
@@ -463,15 +443,15 @@ module.exports = function(app) {
         return res.status(204).send();
       }
       form.publicAccess = access;
-      form.save(function(saveErr) {
-        if (saveErr) {
-          logger.error(saveErr);
-          return res.status(500).send(saveErr.message);
-        }
+      try {
+        await form.save();
         return res
           .status(200)
-          .send('public access is set to ' + req.body.access);
-      });
+          .send(`public access is set to ${req.body.access}`);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
@@ -481,7 +461,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     function(req, res) {
-      var form = req[req.params.id];
+      const form = req[req.params.id];
       if (req.params.list === 'users') {
         return res.status(200).json(form.sharedWith || []);
       }
@@ -498,8 +478,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     function(req, res) {
-      var form = req[req.params.id];
-      var share = -2;
+      const form = req[req.params.id];
+      let share = -2;
       if (req.params.list === 'users') {
         if (req.body.name) {
           share = reqUtils.getSharedWith(form.sharedWith, req.body.name);
@@ -524,14 +504,12 @@ module.exports = function(app) {
           .status(400)
           .send(
             req.body.name ||
-              req.body.id + ' is already in the ' + req.params.list + ' list.'
+              `${req.body.id} is already in the ${req.params.list} list.`
           );
       }
 
-      if (share === -1) {
-        // new user
-        shareLib.addShare(req, res, form);
-      }
+      // share === -1
+      return shareLib.addShare(req, res, form);
     }
   );
 
@@ -541,9 +519,9 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['access']),
-    function(req, res) {
-      var form = req[req.params.id];
-      var share;
+    async function(req, res) {
+      const form = req[req.params.id];
+      let share;
       if (req.params.list === 'users') {
         share = form.sharedWith.id(req.params.shareid);
       }
@@ -553,7 +531,7 @@ module.exports = function(app) {
       if (!share) {
         return res
           .status(400)
-          .send('cannot find ' + req.params.shareid + ' in the list.');
+          .send(`cannot find ${req.params.shareid} in the list.`);
       }
       // change the access
       if (req.body.access === 'write') {
@@ -563,41 +541,34 @@ module.exports = function(app) {
       } else {
         return res
           .status(400)
-          .send('cannot take the access ' + req.body.access);
+          .send(`cannot take the access ${req.body.access}`);
       }
-      form.save(function(saveErr) {
-        if (saveErr) {
-          logger.error(saveErr);
-          return res.status(500).send(saveErr.message);
-        }
+      try {
+        await form.save();
         // check consistency of user's form list
-        var Target;
+        let Target;
         if (req.params.list === 'users') {
           Target = User;
         }
         if (req.params.list === 'groups') {
           Target = Group;
         }
-        Target.findByIdAndUpdate(
-          req.params.shareid,
-          {
-            $addToSet: {
-              forms: form._id,
-            },
+        const newTarget = await Target.findByIdAndUpdate(req.params.shareid, {
+          $addToSet: {
+            forms: form._id,
           },
-          function(updateErr, target) {
-            if (updateErr) {
-              logger.error(updateErr);
-            }
-            if (!target) {
-              logger.error(
-                'The user/group ' + req.params.userid + ' is not in the db'
-              );
-            }
-          }
-        );
+        });
+        if (!newTarget) {
+          logger.error(`The user/group ${req.params.shareid} is not in the db`);
+          return res
+            .status(404)
+            .send(`user/group ${req.params.shareid} not found`);
+        }
         return res.status(200).json(share);
-      });
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
@@ -607,7 +578,7 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     auth.ensureAuthenticated,
     function(req, res) {
-      var form = req[req.params.id];
+      const form = req[req.params.id];
       shareLib.removeShare(req, res, form);
     }
   );
@@ -619,30 +590,28 @@ module.exports = function(app) {
     reqUtils.hasAll('body', ['title']),
     auth.requireRoles(req => {
       return (
-        req['body'].hasOwnProperty('formType') &&
-        req['body']['formType'] == 'discrepancy'
+        req.body.hasOwnProperty('formType') &&
+        req.body.formType === 'discrepancy'
       );
     }, 'admin'),
     reqUtils.sanitize('body', ['html']),
     function(req, res) {
-      var html = req.body.html || '';
+      const html = req.body.html || '';
       formModel.createForm(
         {
           title: req.body.title,
           formType: req.body.formType,
           createdBy: req.session.userid,
-          html: html,
+          html,
         },
         function(err, newform) {
           if (err) {
             logger.error(err);
             return res.status(500).send(err.message);
           }
-          var url =
-            (req.proxied ? authConfig.proxied_service : authConfig.service) +
-            '/forms/' +
-            newform.id +
-            '/';
+          const url = `${
+            req.proxied ? authConfig.proxied_service : authConfig.service
+          }/forms/${newform.id}/`;
 
           res.set('Location', url);
           return res.status(303).json({
@@ -659,8 +628,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
     function(req, res) {
-      var doc = req[req.params.id];
-      var form = {};
+      const doc = req[req.params.id];
+      const form = {};
       form.html = reqUtils.sanitizeText(doc.html);
       form.title = reqUtils.sanitizeText(req.body.title);
       form.createdBy = req.session.userid;
@@ -677,17 +646,13 @@ module.exports = function(app) {
           logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
-        var url =
-          (req.proxied ? authConfig.proxied_service : authConfig.service) +
-          '/forms/' +
-          newform.id +
-          '/';
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/forms/${newform.id}/`;
         res.set('Location', url);
         return res
           .status(201)
-          .send(
-            'You can see the new form at <a href="' + url + '">' + url + '</a>'
-          );
+          .send(`You can see the new form at <a href="${url}">${url}</a>`);
       });
     }
   );
@@ -698,8 +663,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['archived']),
-    function(req, res) {
-      var doc = req[req.params.id];
+    async function(req, res) {
+      const doc = req[req.params.id];
       if (doc.archived === req.body.archived) {
         return res.status(204).send();
       }
@@ -708,21 +673,17 @@ module.exports = function(app) {
       if (doc.archived) {
         doc.archivedOn = Date.now();
       }
-
-      doc.save(function(saveErr, newDoc) {
-        if (saveErr) {
-          logger.error(saveErr);
-          return res.status(500).send(saveErr.message);
-        }
+      try {
+        const newDoc = await doc.save();
         return res
           .status(200)
           .send(
-            'Form ' +
-              req.params.id +
-              ' archived state set to ' +
-              newDoc.archived
+            `Form ${req.params.id} archived state set to ${newDoc.archived}`
           );
-      });
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
@@ -733,7 +694,7 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['name']),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       shareLib.changeOwner(req, res, doc);
     }
   );
@@ -746,11 +707,11 @@ module.exports = function(app) {
     reqUtils.status('id', [0]),
     reqUtils.filter('body', ['html', 'title', 'description']),
     reqUtils.sanitize('body', ['html', 'title', 'description']),
-    function(req, res) {
+    async function(req, res) {
       if (!req.is('json')) {
         return res.status(415).send('json request expected');
       }
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       if (req.body.hasOwnProperty('html')) {
         doc.html = req.body.html;
       }
@@ -773,20 +734,12 @@ module.exports = function(app) {
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.incrementVersion();
-      doc
-        .saveWithHistory(req.session.userid)
-        .then(function(newDoc) {
-          return res.json(newDoc);
-        })
-        .catch(function(saveErr) {
-          if (saveErr) {
-            logger.error(saveErr.message);
-            if (saveErr instanceof FormError) {
-              return res.status(saveErr.status).send(saveErr.message);
-            }
-            return res.status(500).send(saveErr.message);
-          }
-        });
+      try {
+        const newDoc = await doc.saveWithHistory(req.session.userid);
+        return res.json(newDoc);
+      } catch (error) {
+        return res.status(500).send(error.message);
+      }
     }
   );
 
@@ -798,17 +751,19 @@ module.exports = function(app) {
     '/forms/:id/released',
     auth.ensureAuthenticated,
     // only admin or manager can release a form
+    // TODO: owner decide if release
     auth.verifyRole('admin', 'manager'),
     // find the unreleased form
     reqUtils.exist('id', Form),
     // the form was submitted for release
+    // TODO: the form is under review and passed the review
     function(req, res, next) {
       if (req[req.params.id].status !== 0.5) {
         return res
           .status(400)
           .send(`${req[req.params.id].id} is not submitted for release`);
       }
-      next();
+      return next();
     },
     // if the base form is normal then load the released discrepancy form
     function(req, res, next) {
@@ -849,7 +804,7 @@ module.exports = function(app) {
           .status(400)
           .send(`${req[req.body.discrepancyFormId].id} is not released`);
       }
-      next();
+      return next();
     },
     async function releaseForm(req, res) {
       const releasedForm = {};
@@ -869,8 +824,7 @@ module.exports = function(app) {
       }
       releasedForm.releasedBy = req.session.userid;
       releasedForm.releasedOn = Date.now();
-      // reset the submitted form
-      form.status = 0;
+
       // check if there is already a released form with the same name and
       // version
       try {
@@ -882,7 +836,7 @@ module.exports = function(app) {
           // remove this condition if including the archive released form
           status: 1,
         });
-        debug('find existing form: ' + existingForm);
+        debug(`find existing form: ${existingForm}`);
         if (existingForm) {
           return res
             .status(400)
@@ -890,16 +844,13 @@ module.exports = function(app) {
               `A form with same title, type, and version was already released in ${existingForm._id}.`
             );
         }
-      } catch (error) {
-        return res.status(500).send(error.message);
-      }
-
-      try {
+        // reset the submitted form
+        form.status = 0;
         const saveForm = await new ReleasedForm(releasedForm).save();
-        const url =
-          (req.proxied ? authConfig.proxied_service : authConfig.service) +
-          `/released-forms/${saveForm._id}/`;
-        form.save();
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/released-forms/${saveForm._id}/`;
+        await form.save();
         return res.status(201).json({
           location: url,
         });
@@ -916,17 +867,17 @@ module.exports = function(app) {
     reqUtils.filter('body', ['status', 'version']),
     reqUtils.hasAll('body', ['status', 'version']),
     reqUtils.canWriteMw('id'),
-    function updateStatus(req, res) {
-      var f = req[req.params.id];
-      var s = req.body.status;
-      var v = req.body.version;
+    async function updateStatus(req, res) {
+      const f = req[req.params.id];
+      const s = req.body.status;
+      const v = req.body.version;
 
       if ([0, 0.5, 1, 2].indexOf(s) === -1) {
         return res.status(400).send('invalid status');
       }
 
       if (v !== f._v) {
-        return res.status(400).send('the current version is ' + f._v);
+        return res.status(400).send(`the current version is ${f._v}`);
       }
 
       // no change
@@ -934,9 +885,7 @@ module.exports = function(app) {
         return res.status(204).send();
       }
 
-      var stateTransition = require('../model/form').stateTransition;
-
-      var target = _.find(stateTransition, function(t) {
+      const target = _.find(stateTransition, function(t) {
         return t.from === f.status;
       });
 
@@ -951,13 +900,12 @@ module.exports = function(app) {
       // check if we need to increment the version
       // in this case, no
       f.incrementVersion();
-      f.saveWithHistory(req.session.userid)
-        .then(function() {
-          return res.status(200).send('status updated to ' + s);
-        })
-        .catch(function(err) {
-          return res.status(500).send(err.message);
-        });
+      try {
+        await f.saveWithHistory(req.session.userid);
+        return res.status(200).send(`status updated to ${s}`);
+      } catch (error) {
+        return res.status(500).send(error.message);
+      }
     }
   );
 };
