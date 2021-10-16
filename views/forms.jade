@@ -55,6 +55,8 @@ block content
           li
             a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s
         li
+          a(href='#submittedforms', data-toggle='tab') Submitted #{viewConfig.terminology.form}s
+        li
           a(href='#releasedforms', data-toggle='tab') Released #{viewConfig.terminology.form}s
         li
           a(href='#archivedforms', data-toggle='tab') Archived draft #{viewConfig.terminology.form}s
@@ -101,6 +103,14 @@ block content
                   i.fa.fa-refresh.fa-lg
                   | &nbsp;Reload table
             table#group-shared-form-table.table.table-bordered.table-hover
+        //- the table to hold under review forms and their result
+        #submittedforms.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#submitted-form-table.table.table-bordered.table-hover
         #releasedforms.tab-pane
           .btn-toolbar
             .btn-group

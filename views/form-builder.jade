@@ -86,6 +86,7 @@ block content
     if (status === 0)
      .btn-group
        button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for review') Submit for review
+    //- TODO: add review logic and review result here
     if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
       if (status === 0.5)
         .btn-group
