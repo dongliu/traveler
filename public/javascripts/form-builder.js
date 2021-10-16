@@ -1458,10 +1458,11 @@ function binding_events() {
     if (html !== initHtml) {
       modalAlert(
         'Save before submit',
-        'There are unsaved changes. Please save the changes if needed before submit.'
+        'There are unsaved changes. Please save the changes if needed before submit for review.'
       );
       return;
     }
+
     sendRequest(
       {
         status: 0.5,
