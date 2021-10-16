@@ -983,8 +983,6 @@ const travelerProgressColumn = {
       return progressBar(false, 100, 0);
     }
 
-    let inProgress;
-
     if (!source.hasOwnProperty('totalInput')) {
       if (type === 'sort') {
         return 0;
@@ -1006,7 +1004,7 @@ const travelerProgressColumn = {
       return 'unknown';
     }
 
-    inProgress = Math.floor((source.finishedInput / source.totalInput) * 100);
+    const inProgress = Math.floor((source.finishedInput / source.totalInput) * 100);
 
     return progressBar(
       source.status === 1,
@@ -1406,6 +1404,7 @@ const accessColumn = {
     if (data === 1) {
       return 'write';
     }
+    return 'unknown';
   },
   bFilter: true,
 };
@@ -1539,15 +1538,14 @@ const colorColumn = {
   mData: 'color',
   sClass: 'editable',
   mRender(data, type) {
-    let snippet;
     if (type === 'sort' || type === 'filter') {
       return data;
     }
-      snippet = $(
-        '<select name="select" class="input-small config"><option value = "blue" class="text-info">blue</option><option value = "green" class="text-success">green</option><option value = "yellow" class="text-warning">yellow</option><option value = "red" class="text-error">red</option><option value = "black">black</option></select>'
-      );
-      $(`option[value="${  data  }"]`, snippet).attr('selected', 'selected');
-      return snippet[0].outerHTML;
+    const snippet = $(
+      '<select name="select" class="input-small config"><option value = "blue" class="text-info">blue</option><option value = "green" class="text-success">green</option><option value = "yellow" class="text-warning">yellow</option><option value = "red" class="text-error">red</option><option value = "black">black</option></select>'
+    );
+    $(`option[value="${  data  }"]`, snippet).attr('selected', 'selected');
+    return snippet[0].outerHTML;
 
   },
 };
@@ -1704,13 +1702,13 @@ jQuery.fn.dataTableExt.oApi.fnReloadAjax = function(
       that.oApi._fnClearTable(oSettings);
 
       /* Got the data - add it to the table */
-      const aData =
+      const dataArray =
         oSettings.sAjaxDataProp !== ''
           ? that.oApi._fnGetObjectDataFn(oSettings.sAjaxDataProp)(json)
           : json;
       let i;
-      for (i = 0; i < aData.length; i++) {
-        that.oApi._fnAddData(oSettings, aData[i]);
+      for (i = 0; i < dataArray.length; i += 1) {
+        that.oApi._fnAddData(oSettings, dataArray[i]);
       }
 
       oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
