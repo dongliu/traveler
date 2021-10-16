@@ -24,6 +24,9 @@
     "consistent-this": 0,
     "no-unused-expressions": 1,
     "no-underscore-dangle": 1,
-    "no-use-before-define": 1
+    "no-use-before-define": 1,
+    "no-unused-vars": 1,
+    "no-param-reassign": 1,
+    "no-prototype-builtins": 1
   }
 }
