@@ -2,7 +2,6 @@ const debug = require('debug')('traveler:route:form');
 const _ = require('lodash');
 const mongoose = require('mongoose');
 const path = require('path');
-// const util = require('util');
 const config = require('../config/config');
 const auth = require('../lib/auth');
 
@@ -12,7 +11,6 @@ const routesUtilities = require('../utilities/routes');
 const reqUtils = require('../lib/req-utils');
 const shareLib = require('../lib/share');
 const tag = require('../lib/tag');
-const { FormError } = require('../lib/error');
 const formModel = require('../model/form');
 
 const Form = mongoose.model('Form');
@@ -38,8 +36,33 @@ module.exports = function(app) {
           archived: {
             $ne: true,
           },
+          status: 0,
+          owner: {
+            $exists: false,
+          },
+        },
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
+      ).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
+    }
+  });
+
+  app.get('/submittedforms/json', auth.ensureAuthenticated, async function(
+    req,
+    res
+  ) {
+    try {
+      const forms = await Form.find(
+        {
+          createdBy: req.session.userid,
+          archived: {
+            $ne: true,
+          },
           status: {
-            $ne: 2,
+            $in: [0.5, 1],
           },
           owner: {
             $exists: false,
