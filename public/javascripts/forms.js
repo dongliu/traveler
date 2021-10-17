@@ -25,11 +25,10 @@ function travelFromModal() {
       .done(function() {
         $(that).prepend('<i class="fa fa-check"></i>');
         $(that).addClass('text-success');
-        // success = true;
       })
       .fail(function(jqXHR) {
         $(that).prepend('<i class="icon-question"></i>');
-        $(that).append(` : ${  jqXHR.responseText}`);
+        $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
       .always(function() {
@@ -61,7 +60,7 @@ function cloneFromModal(activeTable, formTable) {
     const that = this;
     let success = false;
     $.ajax({
-      url: `/${  base  }/${  that.id  }/clone`,
+      url: `/${base}/${that.id}/clone`,
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -75,7 +74,7 @@ function cloneFromModal(activeTable, formTable) {
       })
       .fail(function(jqXHR) {
         $(that).prepend('<i class="icon-question"></i>');
-        $(that).append(` : ${  jqXHR.responseText}`);
+        $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
       .always(function() {
@@ -90,26 +89,16 @@ function cloneFromModal(activeTable, formTable) {
 
 function showHash() {
   if (window.location.hash) {
-    $(`.nav-tabs a[href=${  window.location.hash  }]`).tab('show');
+    $(`.nav-tabs a[href=${window.location.hash}]`).tab('show');
   }
 }
 
 function formatItemUpdate(data) {
-  return (
-    `<div class="target" id="${  data._id  }"><b>${  data.title  }</b> </div>`
-  );
+  return `<div class="target" id="${data._id}"><b>${data.title}</b> </div>`;
 }
 
 function cloneItem(data) {
-  return (
-    `<div class="target" id="${
-    data._id
-    }">clone <b>${
-    data.title
-    }</b> <br> with new title: <input type="text" value="${
-    data.title
-    } clone"></div>`
-  );
+  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" value="${data.title} clone"></div>`;
 }
 
 $(function() {
@@ -281,6 +270,53 @@ $(function() {
   fnAddFilterFoot('#group-shared-form-table', groupSharedFormAoColumns);
   /* group shared form table ends */
 
+  /* submitted form table starts */
+  const submittedFormAoColumns = [
+    selectColumn,
+    formLinkColumn,
+    formConfigLinkColumn,
+    formShareLinkColumn,
+    titleColumn,
+    formStatusColumn,
+    formTypeColumn,
+    versionColumn,
+    tagsColumn,
+    keysColumn,
+    createdOnColumn,
+    updatedOnColumn,
+    updatedByColumn,
+    sharedWithColumn,
+    sharedGroupColumn,
+  ];
+  const submittedFormTable = $('#submitted-form-table').dataTable({
+    sAjaxSource: '/submittedforms/json',
+    sAjaxDataProp: '',
+    fnDrawCallback() {
+      Holder.run({
+        images: 'img.user',
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: formAoColumns,
+    aaSorting: [
+      [11, 'desc'],
+      [10, 'desc'],
+    ],
+    sDom: sDomNoTools,
+  });
+  fnAddFilterFoot('#submittedforms', submittedFormAoColumns);
+  /* submitted form table ends */
+
   /* released form table starts */
   const releasedFormAoColumns = [
     selectColumn,
@@ -367,7 +403,9 @@ $(function() {
     archivedByColumn,
     archivedOnColumn,
   ];
-  const archivedReleasedFormTable = $('#archived-released-form-table').dataTable({
+  const archivedReleasedFormTable = $(
+    '#archived-released-form-table'
+  ).dataTable({
     sAjaxSource: '/archived-released-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -400,7 +438,7 @@ $(function() {
 
   // add state for tab changes
   $('.nav-tabs a').on('click', function() {
-    window.history.pushState(null, `forms :: ${  this.text}`, this.href);
+    window.history.pushState(null, `forms :: ${this.text}`, this.href);
   });
 
   // show the tab when back and forward
@@ -420,7 +458,7 @@ $(function() {
       $('#modal').modal('show');
     } else {
       $('#modalLabel').html(
-        `Create travelers from the following ${  selected.length  } forms? `
+        `Create travelers from the following ${selected.length} forms? `
       );
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
@@ -449,7 +487,7 @@ $(function() {
       $('#modal').modal('show');
     } else {
       $('#modalLabel').html(
-        `Transfer the following ${  selected.length  } forms? `
+        `Transfer the following ${selected.length} forms? `
       );
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
@@ -496,9 +534,7 @@ $(function() {
       );
       $('#modal').modal('show');
     } else {
-      $('#modalLabel').html(
-        `Clone the following ${  selected.length  } form(s)? `
-      );
+      $('#modalLabel').html(`Clone the following ${selected.length} form(s)? `);
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         const data = activeTable.fnGetData(row);
