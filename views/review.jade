@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title #{orgName} traveler - #{type} - #{id} - review
+  title #{orgName} - #{type} - #{id} - review
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -13,7 +13,6 @@ block head
 block content
   script(type='text/javascript').
     var prefix = '!{prefix}';
-    var access = !{access};
 
   .container(style="margin-top: 10px")
     #message
@@ -34,7 +33,7 @@ block content
         button.btn.btn-warning#review-remove
           i.fa.fa-trash-o.fa-lg
           | &nbsp;Remove
-    table#share-table.table.table-bordered.table-hover
+    table#review-table.table.table-bordered.table-hover
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
@@ -49,5 +48,4 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/groupnames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/review.js')

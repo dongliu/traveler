@@ -546,7 +546,7 @@ const formShareLinkColumn = {
 const formReviewLinkColumn = {
   sTitle: '',
   mData(source) {
-    return `<a href="${prefix}/forms/${source._id}/review/" target="${linkTarget}" data-toggle="tooltip" title="request review for the form"><i class="fa fa-eye fa-lg"></i></a>`;
+    return `<a href="${prefix}/forms/${source._id}/review/" target="${linkTarget}" data-toggle="tooltip" title="reviews for the form"><i class="fa fa-eye fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -621,10 +621,20 @@ const keysColumn = {
   bFilter: true,
 };
 
-const commentsColumn = {
-  sTitle: 'Comments',
+const reviewResultColumn = {
+  sTitle: 'Review result',
   sDefaultContent: '',
-  mData: 'comments',
+  mData: 'result',
+  mRender(data) {
+    return data ? 'approved' : 'rejected';
+  },
+  bFilter: true,
+};
+
+const commentColumn = {
+  sTitle: 'Comment',
+  sDefaultContent: '',
+  mData: 'comment',
   bFilter: true,
 };
 
