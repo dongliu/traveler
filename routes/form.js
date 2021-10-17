@@ -449,6 +449,24 @@ module.exports = function(app) {
     }
   );
 
+  app.get(
+    '/forms/:id/review/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Form),
+    reqUtils.isOwnerMw('id'),
+    function(req, res) {
+      const form = req[req.params.id];
+      return res.render(
+        'review',
+        routesUtilities.getRenderObject(req, {
+          type: 'form',
+          id: req.params.id,
+          title: form.title,
+        })
+      );
+    }
+  );
+
   app.put(
     '/forms/:id/share/public',
     auth.ensureAuthenticated,
