@@ -6,7 +6,7 @@
  transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
  versionColumn, releasedFormLinkColumn, releasedFormStatusColumn,
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
- transferFromModal, archivedByColumn, archivedOnColumn */
+ transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn */
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
@@ -275,7 +275,7 @@ $(function() {
     selectColumn,
     formLinkColumn,
     formConfigLinkColumn,
-    formShareLinkColumn,
+    formReviewLinkColumn,
     titleColumn,
     formStatusColumn,
     formTypeColumn,
@@ -307,7 +307,7 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: formAoColumns,
+    aoColumns: submittedFormAoColumns,
     aaSorting: [
       [11, 'desc'],
       [10, 'desc'],

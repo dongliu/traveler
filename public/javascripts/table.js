@@ -58,14 +58,10 @@ function filterEvent() {
     let index;
     if (filter.is('thead')) {
       index = $('thead.filter th', table).index(th);
-      $(`tfoot.filter th:nth-child(${  index + 1  }) input`, table).val(
-        this.value
-      );
+      $(`tfoot.filter th:nth-child(${index + 1}) input`, table).val(this.value);
     } else {
       index = $('tfoot.filter th', table).index(th);
-      $(`thead.filter th:nth-child(${  index + 1  }) input`, table).val(
-        this.value
-      );
+      $(`thead.filter th:nth-child(${index + 1}) input`, table).val(this.value);
     }
     table.dataTable().fnFilter(this.value, index);
   });
@@ -106,21 +102,13 @@ function personColumn(title, key) {
     mRender(data, type) {
       if (type === 'sort' || type === 'filter') {
         return data;
-      } if (data) {
-        return (
-          `<img class="user" data-src="holder.js/27x40?size=20&text=${
-          data.substr(0, 1).toUpperCase()
-          }" src="${
-          prefix
-          }/adusers/${
-          data
-          }/photo" title="${
-          data
-          }">`
-        );
       }
-        return '';
-
+      if (data) {
+        return `<img class="user" data-src="holder.js/27x40?size=20&text=${data
+          .substr(0, 1)
+          .toUpperCase()}" src="${prefix}/adusers/${data}/photo" title="${data}">`;
+      }
+      return '';
     },
     bFilter: true,
   };
@@ -129,7 +117,7 @@ function personColumn(title, key) {
 function keyValueColumn(collection, key) {
   return {
     sTitle: key,
-    mData: `${collection  }.${  key  }.value`,
+    mData: `${collection}.${key}.value`,
     sDefaultContent: '',
     bFilter: true,
   };
@@ -138,7 +126,7 @@ function keyValueColumn(collection, key) {
 function keyLabelColumn(key) {
   return {
     sTitle: 'label',
-    mData: `user_defined.${  key  }.label`,
+    mData: `user_defined.${key}.label`,
     sDefaultContent: '',
     bFilter: true,
   };
@@ -147,9 +135,9 @@ function keyLabelColumn(key) {
 function valueLabel(data) {
   let output = '';
   if (data.value) {
-    output += `<span class="input-value">${  data.value  }</span>`;
+    output += `<span class="input-value">${data.value}</span>`;
     if (data.label) {
-      output += `<span class="input-label"> (${  data.label  })</span>`;
+      output += `<span class="input-label"> (${data.label})</span>`;
     }
   }
   return output;
@@ -158,16 +146,16 @@ function valueLabel(data) {
 function keyValueLableColumn(key) {
   return {
     sTitle: key,
-    mData: `user_defined.${  key}`,
+    mData: `user_defined.${key}`,
     sDefaultContent: '',
     mRender(data, type) {
       if (type === 'sort' || type === 'filter') {
         return data.value;
-      } if (data) {
+      }
+      if (data) {
         return valueLabel(data);
       }
-        return '';
-
+      return '';
     },
     bFilter: true,
   };
@@ -179,15 +167,7 @@ function personNameColumn(title, key) {
     mData: key,
     sDefaultContent: '',
     mRender(data, type, full) {
-      return (
-        `<a href = "/usernames/${
-        data
-        }" target="${
-        linkTarget
-        }" >${
-        data
-        }</a>`
-      );
+      return `<a href = "/usernames/${data}" target="${linkTarget}" >${data}</a>`;
     },
     bFilter: true,
   };
@@ -209,7 +189,7 @@ function fnUnwrap(oTableLocal) {
 
 function fnGetSelected(oTableLocal, selectedClass) {
   const aReturn = [];
-    let i;
+  let i;
   const aTrs = oTableLocal.fnGetNodes();
 
   for (i = 0; i < aTrs.length; i += 1) {
@@ -222,11 +202,11 @@ function fnGetSelected(oTableLocal, selectedClass) {
 
 function fnGetSelectedInPage(oTableLocal, selectedClass, current) {
   if (current) {
-    return oTableLocal.$(`tr.${  selectedClass}`, {
+    return oTableLocal.$(`tr.${selectedClass}`, {
       page: 'current',
     });
   }
-  return oTableLocal.$(`tr.${  selectedClass}`);
+  return oTableLocal.$(`tr.${selectedClass}`);
 }
 
 function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
@@ -237,7 +217,7 @@ function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
     if ($(aTrs[i]).hasClass(selectedClass)) {
       $(aTrs[i]).removeClass(selectedClass);
       $(aTrs[i])
-        .find(`input.${  checkboxClass  }:checked`)
+        .find(`input.${checkboxClass}:checked`)
         .prop('checked', false);
     }
   }
@@ -260,7 +240,7 @@ function fnSelectAll(oTableLocal, selectedClass, checkboxClass, current) {
   for (i = 0; i < rows.length; i += 1) {
     $(rows[i]).addClass(selectedClass);
     $(rows[i])
-      .find(`input.${  checkboxClass}`)
+      .find(`input.${checkboxClass}`)
       .prop('checked', true);
   }
 }
@@ -269,7 +249,7 @@ function fnSetDeselect(nTr, selectedClass, checkboxClass) {
   if ($(nTr).hasClass(selectedClass)) {
     $(nTr).removeClass(selectedClass);
     $(nTr)
-      .find(`input.${  checkboxClass  }:checked`)
+      .find(`input.${checkboxClass}:checked`)
       .prop('checked', false);
   }
 }
@@ -285,9 +265,7 @@ function fnAddFilterFoot(sTable, aoColumns) {
   aoColumns.forEach(function(c) {
     if (c.bFilter) {
       tr.append(
-        `<th><input type="text" placeholder="${
-          c.sTitle
-          }" style="width:80%;" autocomplete="off"></th>`
+        `<th><input type="text" placeholder="${c.sTitle}" style="width:80%;" autocomplete="off"></th>`
       );
     } else {
       tr.append('<th></th>');
@@ -301,9 +279,7 @@ function fnAddFilterHead(sTable, aoColumns) {
   aoColumns.forEach(function(c) {
     if (c.bFilter) {
       tr.append(
-        `<th><input type="text" placeholder="${
-          c.sTitle
-          }" style="width:80%;" autocomplete="off"></th>`
+        `<th><input type="text" placeholder="${c.sTitle}" style="width:80%;" autocomplete="off"></th>`
       );
     } else {
       tr.append('<th></th>');
@@ -340,7 +316,8 @@ $.fn.dataTableExt.oApi.fnAddDataAndDisplay = function(oSettings, aData) {
 
   /* Find it's position in the table */
   let iPos = -1;
-  let i; let iLen;
+  let i;
+  let iLen;
 
   for (i = 0, iLen = oSettings.aiDisplay.length; i < iLen; i += 1) {
     if (oSettings.aoData[oSettings.aiDisplay[i]].nTr === nAdded) {
@@ -371,7 +348,8 @@ $.fn.dataTableExt.oApi.fnDisplayRow = function(oSettings, nRow) {
 
   // Find the node in the table
   let iPos = -1;
-  let i; let iLen;
+  let i;
+  let iLen;
   for (i = 0, iLen = oSettings.aiDisplay.length; i < iLen; i += 1) {
     if (oSettings.aoData[oSettings.aiDisplay[i]].nTr === nRow) {
       iPos = i;
@@ -400,7 +378,7 @@ const selectColumn = {
 const userIdColumn = {
   sTitle: 'User Id',
   mRender(data) {
-    return `<label>${  data  }</label>`;
+    return `<label>${data}</label>`;
   },
   mData: '_id',
   bSortable: true,
@@ -412,11 +390,7 @@ const previewColumn = {
   mData: '_id',
   bSortable: false,
   mRender(data) {
-    return (
-      `<a data-toggle="tooltip" title="preview the traveler with this form" class="preview" id="${
-      data
-      }"><i class="fa fa-eye fa-lg"></i></a>`
-    );
+    return `<a data-toggle="tooltip" title="preview the traveler with this form" class="preview" id="${data}"><i class="fa fa-eye fa-lg"></i></a>`;
   },
   sWidth: '25px',
 };
@@ -426,11 +400,7 @@ const removeColumn = {
   mData: '_id',
   bSortable: false,
   mRender(data) {
-    return (
-      `<a data-toggle="tooltip" title="remove the item" class="remove text-warning" id="${
-      data
-      }"><i class="fa fa-trash fa-lg"></i></a>`
-    );
+    return `<a data-toggle="tooltip" title="remove the item" class="remove text-warning" id="${data}"><i class="fa fa-trash fa-lg"></i></a>`;
   },
 };
 
@@ -438,15 +408,7 @@ const referenceFormLinkColumn = {
   sTitle: 'Ref',
   mData: 'reference',
   mRender(data) {
-    return (
-      `<a href="${
-      prefix
-      }/forms/${
-      data
-      }/" target="${
-      linkTarget
-      }" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
   },
   bSortable: false,
   sWidth: '45px',
@@ -456,15 +418,7 @@ const formColumn = {
   sTitle: 'Link',
   mData: '_id',
   mRender(data) {
-    return (
-      `<a href="${
-      prefix
-      }/forms/${
-      data
-      }/" target="${
-      linkTarget
-      }" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
   },
   bSortable: false,
   sWidth: '45px',
@@ -498,15 +452,7 @@ const formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender(data) {
-    return (
-      `<a href="${
-      prefix
-      }/forms/${
-      data
-      }/" target="${
-      linkTarget
-      }" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -515,15 +461,7 @@ const releasedFormLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender(data) {
-    return (
-      `<a href="${
-      prefix
-      }/released-forms/${
-      data
-      }/" target="${
-      linkTarget
-      }" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/released-forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -532,20 +470,14 @@ const formConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender(data, type, full) {
-    return (
-      `<a href="${
-      prefix
-      }/forms/${
-      data
-      }/config" data-toggle="tooltip" title="config the form"><i class="fa fa-gear fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/forms/${data}/config" data-toggle="tooltip" title="config the form"><i class="fa fa-gear fa-lg"></i></a>`;
   },
   bSortable: false,
 };
 
 function cloneForm(id, type, title) {
   $.ajax({
-    url: `/${  type  }/${  id  }/clone`,
+    url: `/${type}/${id}/clone`,
     type: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({
@@ -555,9 +487,7 @@ function cloneForm(id, type, title) {
     .done(function(d) {
       $('#message').append(
         `${'<div class="alert alert-success">' +
-          '<button class="close" data-dismiss="alert">x</button>The form was cloned. '}${
-          d
-          }</div>`
+          '<button class="close" data-dismiss="alert">x</button>The form was cloned. '}${d}</div>`
       );
     })
     .fail(function(jqXHR) {
@@ -565,7 +495,7 @@ function cloneForm(id, type, title) {
         `${'<div class="alert alert-error">' +
           '<button class="close" data-dismiss="alert">x</button>'}${
           jqXHR.responseText
-          }.</div>`
+        }.</div>`
       );
     });
 }
@@ -592,13 +522,7 @@ function cloneColumn(type) {
     sTitle: 'Clone',
     mData: '_id',
     mRender(data) {
-      return (
-        `<a href="#" onclick="cloneModal('${
-        data
-        }', '${
-        type
-        }');" data-toggle="tooltip" title="clone the form"><i class="fa fa-copy fa-lg"></i></a>`
-      );
+      return `<a href="#" onclick="cloneModal('${data}', '${type}');" data-toggle="tooltip" title="clone the form"><i class="fa fa-copy fa-lg"></i></a>`;
     },
     bSortable: false,
   };
@@ -612,25 +536,17 @@ const formShareLinkColumn = {
   sTitle: '',
   mData(source) {
     if (source.publicAccess >= 0) {
-      return (
-        `<a href="${
-        prefix
-        }/forms/${
-        source._id
-        }/share/" target="${
-        linkTarget
-        }" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>`
-      );
+      return `<a href="${prefix}/forms/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>`;
     }
-    return (
-      `<a href="${
-      prefix
-      }/forms/${
-      source._id
-      }/share/" target="${
-      linkTarget
-      }" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/forms/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>`;
+  },
+  bSortable: false,
+};
+
+const formReviewLinkColumn = {
+  sTitle: '',
+  mData(source) {
+    return `<a href="${prefix}/forms/${source._id}/review/" target="${linkTarget}" data-toggle="tooltip" title="request review for the form"><i class="fa fa-eye fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -644,25 +560,13 @@ const ownerColumn = {
     const owner = source.owner || source.createdBy;
     if (type === 'sort' || type === 'filter') {
       return owner;
-    } if (owner) {
-      return (
-        `<a target="${
-        linkTarget
-        }" href="/users/${
-        owner
-        }"><img class="user" data-src="holder.js/27x40?size=20&text=${
-        owner.substr(0, 1).toUpperCase()
-        }" src="${
-        prefix
-        }/adusers/${
-        owner
-        }/photo" title="${
-        owner
-        }"></a>`
-      );
     }
-      return '';
-
+    if (owner) {
+      return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
+        .substr(0, 1)
+        .toUpperCase()}" src="${prefix}/adusers/${owner}/photo" title="${owner}"></a>`;
+    }
+    return '';
   },
   bFilter: true,
 };
@@ -692,8 +596,7 @@ const tagsColumn = {
     if (type === 'sort' || type === 'filter') {
       return data.join(' ');
     }
-      return data.join('; ');
-
+    return data.join('; ');
   },
   bFilter: true,
 };
@@ -711,8 +614,7 @@ const keysColumn = {
     if (type === 'sort' || type === 'filter') {
       return data.join(' ');
     }
-      return data.join('; ');
-
+    return data.join('; ');
   },
   bAutoWidth: false,
   sWidth: '210px',
@@ -800,20 +702,10 @@ const travelerLinkColumn = {
   sTitle: '',
   mData(source, type, val) {
     if (source.hasOwnProperty('url')) {
-      return (
-        `<a href="${
-        source.url
-        }" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>`
-      );
+      return `<a href="${source.url}" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>`;
     }
     if (source.hasOwnProperty('_id')) {
-      return (
-        `<a href="${
-        prefix
-        }/travelers/${
-        source._id
-        }/" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>`
-      );
+      return `<a href="${prefix}/travelers/${source._id}/" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>`;
     }
     return 'unknown';
   },
@@ -824,13 +716,7 @@ const travelerConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender(data, type, full) {
-    return (
-      `<a href="${
-      prefix
-      }/travelers/${
-      data
-      }/config" data-toggle="tooltip" title="config the traveler"><i class="fa fa-gear fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/travelers/${data}/config" data-toggle="tooltip" title="config the traveler"><i class="fa fa-gear fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -839,25 +725,9 @@ const travelerShareLinkColumn = {
   sTitle: '',
   mData(source) {
     if (source.publicAccess >= 0) {
-      return (
-        `<a href="${
-        prefix
-        }/travelers/${
-        source._id
-        }/share/" target="${
-        linkTarget
-        }" data-toggle="tooltip" title="share the traveler" class="text-success"><i class="fa fa-users fa-lg"></i></a>`
-      );
+      return `<a href="${prefix}/travelers/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the traveler" class="text-success"><i class="fa fa-users fa-lg"></i></a>`;
     }
-    return (
-      `<a href="${
-      prefix
-      }/travelers/${
-      source._id
-      }/share/" target="${
-      linkTarget
-      }" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/travelers/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -866,24 +736,10 @@ const binderLinkColumn = {
   sTitle: '',
   mData(source, type, val) {
     if (source.hasOwnProperty('url')) {
-      return (
-        `<a href="${
-        source.url
-        }" target="${
-        linkTarget
-        }" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>`
-      );
+      return `<a href="${source.url}" target="${linkTarget}" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>`;
     }
     if (source.hasOwnProperty('_id')) {
-      return (
-        `<a href="${
-        prefix
-        }/binders/${
-        source._id
-        }/" target="${
-        linkTarget
-        }" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>`
-      );
+      return `<a href="${prefix}/binders/${source._id}/" target="${linkTarget}" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>`;
     }
     return 'unknown';
   },
@@ -894,15 +750,7 @@ const binderConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender(data, type, full) {
-    return (
-      `<a href="${
-      prefix
-      }/binders/${
-      data
-      }/config" target="${
-      linkTarget
-      }" data-toggle="tooltip" title="config the binder"><i class="fa fa-gear fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/binders/${data}/config" target="${linkTarget}" data-toggle="tooltip" title="config the binder"><i class="fa fa-gear fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -911,25 +759,9 @@ const binderShareLinkColumn = {
   sTitle: '',
   mData(source) {
     if (source.publicAccess >= 0) {
-      return (
-        `<a href="${
-        prefix
-        }/binders/${
-        source._id
-        }/share/" target="${
-        linkTarget
-        }" data-toggle="tooltip" title="share the binder" class="text-success"><i class="fa fa-users fa-lg"></i></a>`
-      );
+      return `<a href="${prefix}/binders/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the binder" class="text-success"><i class="fa fa-users fa-lg"></i></a>`;
     }
-    return (
-      `<a href="${
-      prefix
-      }/binders/${
-      source._id
-      }/share/" target="${
-      linkTarget
-      }" data-toggle="tooltip" title="share the binder"><i class="fa fa-users fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/binders/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the binder"><i class="fa fa-users fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -938,13 +770,7 @@ const deviceTravelerLinkColumn = {
   sTitle: '',
   mData: 'inventoryId',
   mRender(data, type, full) {
-    return (
-      `<a href="${
-      prefix
-      }/currenttravelers/?device=${
-      data
-      }" data-toggle="tooltip" title="travelers for this device"><i class="fa fa-search fa-lg"></i></a>`
-    );
+    return `<a href="${prefix}/currenttravelers/?device=${data}" data-toggle="tooltip" title="travelers for this device"><i class="fa fa-search fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -953,15 +779,7 @@ function progressBar(active, finished, inProgress, text, width) {
   const w = width || '100px';
   const t = text || '';
   const bar = $(
-    `<div class="progress" style="width: ${
-      w
-      };"><div class="bar bar-success" style="width:${
-      finished
-      }%;"></div><div class="bar bar-info" style="width:${
-      inProgress
-      }%;"></div><div class="progress-value">${
-      t
-      }</div></div>`
+    `<div class="progress" style="width: ${w};"><div class="bar bar-success" style="width:${finished}%;"></div><div class="bar bar-info" style="width:${inProgress}%;"></div><div class="progress-value">${t}</div></div>`
   );
   if (active) {
     bar.addClass('active').addClass('progress-striped');
@@ -1004,13 +822,15 @@ const travelerProgressColumn = {
       return 'unknown';
     }
 
-    const inProgress = Math.floor((source.finishedInput / source.totalInput) * 100);
+    const inProgress = Math.floor(
+      (source.finishedInput / source.totalInput) * 100
+    );
 
     return progressBar(
       source.status === 1,
       0,
       inProgress,
-      `${  source.finishedInput  } / ${  source.totalInput}`
+      `${source.finishedInput} / ${source.totalInput}`
     );
   },
 };
@@ -1031,12 +851,12 @@ const workProgressColumn = {
         false,
         100,
         0,
-        `${  source.value  } + 0 / ${  source.value}`,
+        `${source.value} + 0 / ${source.value}`,
         w
       );
     }
 
-    const {inProgress} = source;
+    const { inProgress } = source;
     let finished = 0;
 
     if (source.hasOwnProperty('finished')) {
@@ -1051,12 +871,9 @@ const workProgressColumn = {
       source.status === 1,
       finished * 100,
       inProgress * 100,
-      `${
-        Math.round(finished * source.value)
-        } + ${
-        Math.round(inProgress * source.value)
-        } / ${
-        Math.round(source.value)}`,
+      `${Math.round(finished * source.value)} + ${Math.round(
+        inProgress * source.value
+      )} / ${Math.round(source.value)}`,
       w
     );
   },
@@ -1094,14 +911,7 @@ const binderWorkProgressColumn = {
       source.status === 1,
       finished * 100,
       inProgress * 100,
-      `${
-        source.finishedWork
-        } / ${
-        source.totalWork
-        } + ${
-        source.finishedInput
-        } / ${
-        source.totalInput}`
+      `${source.finishedWork} / ${source.totalWork} + ${source.finishedInput} / ${source.totalInput}`
     );
   },
 };
@@ -1138,12 +948,9 @@ const binderValueProgressColumn = {
       source.status === 1,
       finished * 100,
       inProgress * 100,
-      `${
-        Math.round(source.finishedValue)
-        } + ${
-        Math.round(source.inProgressValue)
-        } / ${
-        Math.round(source.totalValue)}`
+      `${Math.round(source.finishedValue)} + ${Math.round(
+        source.inProgressValue
+      )} / ${Math.round(source.totalValue)}`
     );
   },
 };
@@ -1157,8 +964,7 @@ const deviceColumn = {
     if (type === 'sort' || type === 'filter') {
       return data.join(' ');
     }
-      return data.join('; ');
-
+    return data.join('; ');
   },
   bFilter: true,
 };
@@ -1178,28 +984,12 @@ function usersColumn(title, prop) {
           if (type === 'filter' || type === 'sort') {
             return u.username;
           }
-            return (
-              `<a target="${
-              linkTarget
-              }" href="/users/${
-              u._id
-              }"><img class="user" data-src="holder.js/27x40?size=20&text=${
-              u._id.substr(0, 1).toUpperCase()
-              }" src="${
-              prefix
-              }/adusers/${
-              u._id
-              }/photo" title="${
-              u.username
-              }"></a>`
-            );
-
+          return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${u._id}/photo" title="${u.username}"></a>`;
         });
         if (type === 'filter' || type === 'sort') {
           return names.join('; ');
         }
-          return names.join(' ');
-
+        return names.join(' ');
       }
       return '';
     },
@@ -1222,28 +1012,12 @@ function usersFilteredColumn(title, filter) {
         if (type === 'filter' || type === 'sort') {
           return u.username;
         }
-          return (
-            `<a target="${
-            linkTarget
-            }" href="/users/${
-            u._id
-            }"><img class="user" data-src="holder.js/27x40?size=20&text=${
-            u._id.substr(0, 1).toUpperCase()
-            }" src="${
-            prefix
-            }/adusers/${
-            u._id
-            }/photo" title="${
-            u.username
-            }"></a>`
-          );
-
+        return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${u._id}/photo" title="${u.username}"></a>`;
       });
       if (type === 'filter' || type === 'sort') {
         return names.join('; ');
       }
-        return names.join(' ');
-
+      return names.join(' ');
     },
     bFilter: true,
   };
@@ -1326,9 +1100,7 @@ const userNameColumn = {
   mData: 'username',
   sDefaultContent: '',
   mRender(data, type, full) {
-    return (
-      `<a href = "${  prefix  }/users?name=${  data  }">${  data  }</a>`
-    );
+    return `<a href = "${prefix}/users?name=${data}">${data}</a>`;
   },
   bFilter: true,
 };
@@ -1353,7 +1125,7 @@ const groupIdColumn = {
   sDefaultContent: '',
   bFilter: true,
   mRender(data) {
-    return `<a href="${  prefix  }/groups/${  data  }">${  data  }</a>`;
+    return `<a href="${prefix}/groups/${data}">${data}</a>`;
   },
 };
 
@@ -1387,9 +1159,9 @@ const membersColumn = {
       return 0;
     });
     const result = data.map(function(d) {
-      return `<li>${  d.name  }</li>`;
+      return `<li>${d.name}</li>`;
     });
-    return `<ul>${  result.join('')  }</ul>`;
+    return `<ul>${result.join('')}</ul>`;
   },
 };
 
@@ -1468,12 +1240,7 @@ const sequenceColumn = {
     if (type === 'sort' || type === 'filter') {
       return data;
     }
-      return (
-        `<input type="number" min=1 step=1 class="input-mini config" value="${
-        data
-        }">`
-      );
-
+    return `<input type="number" min=1 step=1 class="input-mini config" value="${data}">`;
   },
 };
 
@@ -1493,12 +1260,7 @@ const priorityColumn = {
     if (type === 'sort' || type === 'filter') {
       return data;
     }
-      return (
-        `<input type="number" min=1 step=1 class="input-mini config" value="${
-        data
-        }">`
-      );
-
+    return `<input type="number" min=1 step=1 class="input-mini config" value="${data}">`;
   },
 };
 
@@ -1518,12 +1280,7 @@ const valueColumn = {
     if (type === 'sort' || type === 'filter') {
       return data;
     }
-      return (
-        `<input type="number" min=0 class="input-mini config" value="${
-        data
-        }">`
-      );
-
+    return `<input type="number" min=0 class="input-mini config" value="${data}">`;
   },
 };
 
@@ -1544,9 +1301,8 @@ const colorColumn = {
     const snippet = $(
       '<select name="select" class="input-small config"><option value = "blue" class="text-info">blue</option><option value = "green" class="text-success">green</option><option value = "yellow" class="text-warning">yellow</option><option value = "red" class="text-error">red</option><option value = "black">black</option></select>'
     );
-    $(`option[value="${  data  }"]`, snippet).attr('selected', 'selected');
+    $(`option[value="${data}"]`, snippet).attr('selected', 'selected');
     return snippet[0].outerHTML;
-
   },
 };
 
@@ -1558,23 +1314,22 @@ const cColumn = {
     if (type === 'sort' || type === 'filter') {
       return data;
     }
-      switch (data) {
-        case 'blue':
-          snippet.addClass('text-info');
-          break;
-        case 'green':
-          snippet.addClass('text-success');
-          break;
-        case 'yellow':
-          snippet.addClass('text-warning');
-          break;
-        case 'red':
-          snippet.addClass('text-error');
-          break;
-        default:
-      }
-      return snippet[0].outerHTML;
-
+    switch (data) {
+      case 'blue':
+        snippet.addClass('text-info');
+        break;
+      case 'green':
+        snippet.addClass('text-success');
+        break;
+      case 'yellow':
+        snippet.addClass('text-warning');
+        break;
+      case 'red':
+        snippet.addClass('text-error');
+        break;
+      default:
+    }
+    return snippet[0].outerHTML;
   },
 };
 
@@ -1592,7 +1347,7 @@ function exportVisible(tool) {
 
 const oTableTools = {
   sSwfPath: prefix
-    ? `${prefix  }/datatables/swf/copy_csv_xls_pdf.swf`
+    ? `${prefix}/datatables/swf/copy_csv_xls_pdf.swf`
     : '/datatables/swf/copy_csv_xls_pdf.swf',
   aButtons: [
     exportVisible('copy'),
