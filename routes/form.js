@@ -477,7 +477,7 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     function(req, res) {
       const form = req[req.params.id];
-      return res.status(200).json(form.__review || []);
+      return res.status(200).json(form.__review || {});
     }
   );
 
