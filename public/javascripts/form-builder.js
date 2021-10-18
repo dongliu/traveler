@@ -65,9 +65,9 @@ function sendRequest(data, cb, option) {
         document.location.href = responseData.location;
       } else {
         $('#message').append(
-          `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved ${
-            livespan(timestamp)
-            }.</div>`
+          `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved ${livespan(
+            timestamp
+          )}.</div>`
         );
       }
       $.livestamp.resume();
@@ -96,16 +96,12 @@ function archive_prior_released_forms(selected) {
   })
     .done(function(data) {
       $('#message').append(
-        `<div class="alert alert-success"><button class="close" data-dismiss="alert"></button>${
-          data
-          }</div>`
+        `<div class="alert alert-success"><button class="close" data-dismiss="alert"></button>${data}</div>`
       );
     })
     .fail(function(data) {
       $('#message').append(
-        `<div class="alert alert-error"><button class="close" data-dismiss="alert"></button>${
-          data
-          }</div>`
+        `<div class="alert alert-error"><button class="close" data-dismiss="alert"></button>${data}</div>`
       );
     })
     .always(function() {});
@@ -149,9 +145,7 @@ function updateSectionNumbers() {
         controlNumber += 1;
         $(this)
           .find('.control-number')
-          .text(
-            `${sectionNumber}.${instructionNumber}.${controlNumber}`
-          );
+          .text(`${sectionNumber}.${instructionNumber}.${controlNumber}`);
       }
     });
 }
@@ -208,9 +202,7 @@ function done_button(view, $out) {
       if (
         userkey &&
         $(
-          `.control-group-wrap[data-status!="editing"] input[data-userkey="${
-            userkey
-            }"]`
+          `.control-group-wrap[data-status!="editing"] input[data-userkey="${userkey}"]`
         ).length >= 1
       ) {
         userkey_error(userKeyInput, 'duplicated userkey found');
@@ -328,20 +320,20 @@ function binding($edit, $out, model, $done) {
 function add_radio($radio_group, $radio_value_spec, $done, count, model) {
   // Add radio button text configuration screen
   const $radio_text = $(
-    spec.generic_text_input({ label: `Radio button ${  count  } value` })
+    spec.generic_text_input({ label: `Radio button ${count} value` })
   );
-  $('input', $radio_text).attr('name', `radio_text_${  count}`);
+  $('input', $radio_text).attr('name', `radio_text_${count}`);
   $($radio_value_spec).append($radio_text);
 
   // Add radio button input control
   const $radio_button_control = $(input.radio_button());
   $('input', $radio_button_control).attr(
     'rv-value',
-    `model.radio_text_${  count}`
+    `model.radio_text_${count}`
   );
   $('span.radio_text', $radio_button_control).attr(
     'rv-text',
-    `model.radio_text_${  count}`
+    `model.radio_text_${count}`
   );
   $radio_group.find('.controls').append($radio_button_control);
 
@@ -361,17 +353,17 @@ function add_radio($radio_group, $radio_value_spec, $done, count, model) {
       .find('input')
       .prop('name');
     const radio = $radio_group
-      .find(`input[type="radio"][value="${  value  }"]`)
+      .find(`input[type="radio"][value="${value}"]`)
       .parent();
     model[name] = undefined;
     radio.remove();
     e.delegateTarget.remove();
   });
 
-  let radio_text = `radio_text_${  count}`;
+  let radio_text = `radio_text_${count}`;
 
-  if (model[`radio_text_${  count}`]) {
-    radio_text = model[`radio_text_${  count}`];
+  if (model[`radio_text_${count}`]) {
+    radio_text = model[`radio_text_${count}`];
   }
 
   $('input', $radio_text).val(radio_text);
@@ -458,8 +450,9 @@ function radio_edit($cgr) {
     }
   } else {
     // Add initial radio button
-    model[`radio_text_${  radio_button_count}`] =
-      `radio_text_${  radio_button_count}`;
+    model[
+      `radio_text_${radio_button_count}`
+    ] = `radio_text_${radio_button_count}`;
     add_radio(
       $radio_group,
       $radio_value_spec,
@@ -477,8 +470,9 @@ function radio_edit($cgr) {
   // Add functionality for adding and removing radio buttons in the group
   $add_radio_button.on('click', 'button', function(e) {
     e.preventDefault();
-    model[`radio_text_${  radio_button_count}`] =
-      `radio_text_${  radio_button_count}`;
+    model[
+      `radio_text_${radio_button_count}`
+    ] = `radio_text_${radio_button_count}`;
     add_radio(
       $radio_group,
       $radio_value_spec,
@@ -667,7 +661,7 @@ function figure_edit($cgr) {
 
     if (!/image\/(gif|jpe?g|png)$/i.test(file.type)) {
       $validation.html(
-        `<p class="text-error">${  file.type  } is not allowed to upload</p>`
+        `<p class="text-error">${file.type} is not allowed to upload</p>`
       );
       $file.children('.file-upload-buttons').remove();
       return;
@@ -675,7 +669,7 @@ function figure_edit($cgr) {
 
     if (file.size > 5000000) {
       $validation.html(
-        `<p class="text-error">${  file.size  } is too large to upload</p>`
+        `<p class="text-error">${file.size} is too large to upload</p>`
       );
       $file.children('.file-upload-buttons').remove();
       return;
@@ -712,9 +706,9 @@ function figure_edit($cgr) {
         const location = jqXHR.getResponseHeader('Location');
         const timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append(
-          `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ${
-            livespan(timestamp)
-            }</div>`
+          `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ${livespan(
+            timestamp
+          )}</div>`
         );
         $.livestamp.resume();
 
@@ -748,9 +742,8 @@ function figure_edit($cgr) {
       .fail(function(jqXHR) {
         if (jqXHR.status !== 401) {
           $('#message').append(
-            `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ${
-              jqXHR.responseText || 'unknown'
-              }</div>`
+            `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ${jqXHR.responseText ||
+              'unknown'}</div>`
           );
           $(window).scrollTop($('#message div:last-child').offset().top - 40);
         }
@@ -886,10 +879,10 @@ function textarea_edit($cgr) {
 function rangeText(min, max) {
   const output = [];
   if (typeof min === 'number') {
-    output.push(`min: ${  min}`);
+    output.push(`min: ${min}`);
   }
   if (typeof max === 'number') {
-    output.push(`max: ${  max}`);
+    output.push(`max: ${max}`);
   }
   return output.join(', ') || null;
 }
@@ -1052,7 +1045,10 @@ function rich_edit($cgr) {
   const $rich = $(input.rich());
   const $rich_textarea = $(spec.rich_textarea());
   const $done = $(spec.done());
-  const $edit = $('<div class="well spec"></div>').append($rich_textarea, $done);
+  const $edit = $('<div class="well spec"></div>').append(
+    $rich_textarea,
+    $done
+  );
   const $new_cgr = $(
     '<div class="control-group-wrap" data-status="editing"><span class="fe-type">rich</span></div>'
   ).append($rich);
@@ -1095,16 +1091,15 @@ function init() {
       const $this = $(this);
       if ($this.attr('name')) {
         if ($this.attr('src') === undefined) {
-          $($this.attr('src', `${prefix  }/formfiles/${  $this.attr('name')}`));
+          $($this.attr('src', `${prefix}/formfiles/${$this.attr('name')}`));
           return;
         }
         if ($this.attr('src').indexOf('http') === 0) {
-          $($this.attr('src', `${prefix  }/formfiles/${  $this.attr('name')}`));
+          $($this.attr('src', `${prefix}/formfiles/${$this.attr('name')}`));
           return;
         }
         if (prefix && $this.attr('src').indexOf(prefix) !== 0) {
-          $($this.attr('src', `${prefix  }/formfiles/${  $this.attr('name')}`));
-
+          $($this.attr('src', `${prefix}/formfiles/${$this.attr('name')}`));
         }
       }
     });
@@ -1408,7 +1403,6 @@ function binding_events() {
         'Save changes first',
         'The form has been changed. Please save it before this action.'
       );
-
     }
   });
 
@@ -1479,9 +1473,7 @@ function binding_events() {
     $('#modal .modal-body').empty();
     const defaultTitle = $('#formtitle').text();
     $('#modal .modal-body').append(
-      `<form class="form-horizontal" id="modalform"> <div class="control-group"> <label class="control-label">Form title</label> <div class="controls"><input id="release-title" type="text" value="${
-        defaultTitle
-        }" class="input"> </div> </div> </form>`
+      `<form class="form-horizontal" id="modalform"> <div class="control-group"> <label class="control-label">Form title</label> <div class="controls"><input id="release-title" type="text" value="${defaultTitle}" class="input"> </div> </div> </form>`
     );
 
     let priorVersionsTable = null;
@@ -1587,17 +1579,21 @@ function binding_events() {
     });
   });
 
-  $('#reject').click(function() {
-    sendRequest(
-      {
-        status: 0,
-        version: Number($('#version').text()),
-      },
-      function() {
-        window.location.reload(true);
-      },
-      'status'
-    );
+  // $('#reject').click(function() {
+  //   sendRequest(
+  //     {
+  //       status: 0,
+  //       version: Number($('#version').text()),
+  //     },
+  //     function() {
+  //       window.location.reload(true);
+  //     },
+  //     'status'
+  //   );
+  // });
+
+  $('#review').click(function() {
+    // TODO: show modal of comment and then report
   });
 
   $('#obsolete, #archive').click(function() {

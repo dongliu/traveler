@@ -5,7 +5,7 @@ block head
   if (typeof id == 'undefined')
     title #{orgName} - new form
   else
-    title #{orgName} - forms - #{title}
+    title #{orgName} - form - #{title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -86,11 +86,8 @@ block content
       .btn-group
         button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for review') Submit for review
     if (status === 0.5 && isReviewer)
-      h4 Review actions
       .btn-group
-        button.btn.btn-primary#release(data-toggle='tooltip', title='approve the form for release') Approve
-      .btn-group
-        button.btn.btn-warning#reject(data-toggle='tooltip', title='reject the form for release') Reject
+        button.btn.btn-primary#review(data-toggle='tooltip', title='Report review result') Report review result
     if (status === 1 && locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
       .btn-group
         button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
