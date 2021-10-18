@@ -87,15 +87,14 @@ block content
      .btn-group
        button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for review') Submit for review
     //- TODO: add review logic and review result here
-    if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
-      if (status === 0.5)
-        .btn-group
-          button.btn.btn-primary#release(data-toggle='tooltip', title='release the form for usage') Release
-        .btn-group
-          button.btn.btn-warning#reject(data-toggle='tooltip', title='reject the submitted form for release') Reject
-      if (status === 1)
-        .btn-group
-          button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
+    if (status === 0.5 && isReviewer)
+      .btn-group
+        button.btn.btn-primary#release(data-toggle='tooltip', title='approve the form for release') Approve
+      .btn-group
+        button.btn.btn-warning#reject(data-toggle='tooltip', title='reject the form for release') Reject
+    if (status === 1 && locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
+      .btn-group
+        button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

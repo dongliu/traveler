@@ -284,6 +284,9 @@ module.exports = function(app) {
         );
       }
 
+      const isReviewer =
+        form.__review && form.__review.reviewers.includes(req.session.userid);
+
       if (access === 1) {
         return res.render(
           'form-builder',
@@ -296,6 +299,7 @@ module.exports = function(app) {
             _v: form._v,
             formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
+            isReviewer,
             released_form_version_mgmt: config.app.released_form_version_mgmt,
           })
         );
