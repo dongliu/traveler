@@ -34,7 +34,7 @@ const review = new Schema({
   itemType: {
     type: String,
     required: true,
-    enum: ['form', 'traveler'],
+    enum: ['Form', 'Traveler'],
   },
   itemId: {
     type: ObjectId,
@@ -51,19 +51,27 @@ const Review = mongoose.model('Review', review);
 
 function addReview(schema) {
   schema.add({
-    __review: {
-      type: ObjectId,
-      ref: Review.modelName,
-    },
+    __review: review,
   });
 
-  schema.methods.requestReview = async function(reviewer) {
+  schema.methods.requestReview = async function(requesterId, reviewer) {
     const doc = this;
     try {
-      doc.__review.reviewer.addToSet(reviewer._id);
+      if (!doc.__review) {
+        doc.__review = {
+          policy: 'all',
+          itemType: doc.constructor.modelName,
+          itemId: doc._id,
+          requestedOn: Date.now(),
+          requestedBy: requesterId,
+          reviewers: [],
+          reviewResults: [],
+        };
+      }
+      doc.__review.reviewers.addToSet(reviewer._id);
       const newDoc = await doc.save();
       debug(`doc saved as ${newDoc}`);
-      reviewer.reviewers.addToSet(newDoc._id);
+      reviewer.reviews.addToSet(newDoc._id);
       const newReviewer = await reviewer.save();
       debug(`reviewer saved as ${newReviewer}`);
       return newDoc;
@@ -73,10 +81,10 @@ function addReview(schema) {
     }
   };
 
-  schema.methods.updateReview = async function(reviewResult) {
+  schema.methods.updateReview = async function(result) {
     const doc = this;
     try {
-      doc.__review.reviewResult.addToSet(reviewResult);
+      doc.__review.reviewResult.addToSet(result);
       const newDoc = await doc.save();
       debug(`doc saved as ${newDoc}`);
       return newDoc;

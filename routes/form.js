@@ -12,6 +12,7 @@ const reqUtils = require('../lib/req-utils');
 const shareLib = require('../lib/share');
 const tag = require('../lib/tag');
 const formModel = require('../model/form');
+const reviewLib = require('../lib/review');
 
 const Form = mongoose.model('Form');
 const FormFile = mongoose.model('FormFile');
@@ -475,6 +476,18 @@ module.exports = function(app) {
     function(req, res) {
       const form = req[req.params.id];
       return res.status(200).json(form.__review || []);
+    }
+  );
+
+  // add a new reviewer
+  app.post(
+    '/forms/:id/review/reviewer',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Form),
+    reqUtils.isOwnerMw('id'),
+    async function(req, res) {
+      const form = req[req.params.id];
+      await reviewLib.addReviewer(req, res, form);
     }
   );
 

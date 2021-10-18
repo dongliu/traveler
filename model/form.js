@@ -1,28 +1,30 @@
-var mongoose = require('mongoose');
-var appConfig = require('../config/config').app;
-var Schema = mongoose.Schema;
-var ObjectId = Schema.Types.ObjectId;
-var cheerio = require('cheerio');
-var share = require('./share.js');
-var FormError = require('../lib/error').FormError;
-var addHistory = require('./history').addHistory;
-var addVersion = require('./history').addVersion;
+const mongoose = require('mongoose');
+const cheerio = require('cheerio');
+const appConfig = require('../config/config').app;
 
-/******
+const { Schema } = mongoose;
+const { ObjectId } = Schema.Types;
+const share = require('./share');
+const { FormError } = require('../lib/error');
+const { addHistory } = require('./history');
+const { addVersion } = require('./history');
+const { addReview } = require('./review');
+
+/** ****
 publicAccess := 0 // for read or
         | 1 // for write or
         | -1 // no access
-******/
-/******
+***** */
+/** ****
 status := 0 // editable draft
         | 0.5 // submitted for reviewing
         | 1 // ready to release (review passed)
         | 2 // archived
-******/
+***** */
 // mapping : user-key -> name
 // labels : name -> label
 
-var stateTransition = [
+const stateTransition = [
   {
     from: 0,
     to: [0.5, 2],
@@ -47,7 +49,7 @@ const statusMap = {
   '2': 'archived',
 };
 
-var form = new Schema({
+const form = new Schema({
   title: String,
   description: String,
   createdBy: String,
@@ -88,19 +90,19 @@ var form = new Schema({
  * and validate unique input name and data-userkey
  */
 form.pre('save', function(next) {
-  var doc = this;
+  const doc = this;
   if (doc.isNew || doc.isModified('html')) {
-    let mapping = {};
-    let labels = {};
-    let $ = cheerio.load(doc.html);
-    let inputs = $('input, textarea');
+    const mapping = {};
+    const labels = {};
+    const $ = cheerio.load(doc.html);
+    const inputs = $('input, textarea');
     let lastInputName = '';
     let lastUserkey = '';
     let inputName = '';
     let label = '';
     let userkey = '';
     for (let i = 0; i < inputs.length; i += 1) {
-      let input = $(inputs[i]);
+      const input = $(inputs[i]);
       inputName = input.attr('name');
       label = input
         .closest('.control-group')
@@ -131,16 +133,14 @@ form.pre('save', function(next) {
           } else {
             return next(
               new FormError(
-                'inconsistent usekey "' +
-                  userkey +
-                  '"found for the same input name',
+                `inconsistent usekey "${userkey}"found for the same input name`,
                 400
               )
             );
           }
         } else {
           return next(
-            new FormError('duplicated input name "' + inputName + '"', 400)
+            new FormError(`duplicated input name "${inputName}"`, 400)
           );
         }
       } else {
@@ -149,7 +149,7 @@ form.pre('save', function(next) {
         if (userkey) {
           if (mapping.hasOwnProperty(userkey)) {
             return next(
-              new FormError('duplicated input userkey "' + userkey + '"', 400)
+              new FormError(`duplicated input userkey "${userkey}"`, 400)
             );
           }
           mapping[userkey] = inputName;
@@ -161,7 +161,7 @@ form.pre('save', function(next) {
     doc.mapping = mapping;
     doc.labels = labels;
   }
-  next();
+  return next();
 });
 
 form.plugin(addVersion, {
@@ -181,7 +181,9 @@ form.plugin(addHistory, {
   ],
 });
 
-var formFile = new Schema({
+form.plugin(addReview);
+
+const formFile = new Schema({
   form: ObjectId,
   value: String,
   inputType: String,
@@ -194,11 +196,11 @@ var formFile = new Schema({
   uploadedOn: Date,
 });
 
-var Form = mongoose.model('Form', form);
-var FormFile = mongoose.model('FormFile', formFile);
+const Form = mongoose.model('Form', form);
+const FormFile = mongoose.model('FormFile', formFile);
 
-var createForm = function(json, newFormResultCallBack) {
-  var formToCreate = {};
+const createForm = function(json, newFormResultCallBack) {
+  const formToCreate = {};
   formToCreate.title = json.title;
   formToCreate.createdBy = json.createdBy;
   formToCreate.createdOn = Date.now();
@@ -211,9 +213,9 @@ var createForm = function(json, newFormResultCallBack) {
 };
 
 module.exports = {
-  Form: Form,
-  FormFile: FormFile,
-  stateTransition: stateTransition,
-  statusMap: statusMap,
-  createForm: createForm,
+  Form,
+  FormFile,
+  stateTransition,
+  statusMap,
+  createForm,
 };
