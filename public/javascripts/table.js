@@ -551,6 +551,8 @@ const formReviewLinkColumn = {
   bSortable: false,
 };
 
+const reviewerIdColumn = personColumn('Reviewer', '_id');
+
 const createdOnColumn = dateColumn('Created', 'createdOn');
 const createdByColumn = personColumn('Created by', 'createdBy');
 const ownerColumn = {
@@ -626,7 +628,13 @@ const reviewResultColumn = {
   sDefaultContent: '',
   mData: 'result',
   mRender(data) {
-    return data ? 'approved' : 'rejected';
+    if (!data) {
+      return 'not reported';
+    }
+    if (data.result) {
+      return 'approved';
+    }
+    return 'rejected';
   },
   bFilter: true,
 };

@@ -1,7 +1,20 @@
-/* global prefix: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, access: false, travelerGlobal: false, Holder */
-/* global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupIdColumn: false, accessColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, groupNameColumn, reviewResultColumn */
+/* global prefix: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder, moment */
+/* global selectColumn: false, reviewerIdColumn, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, reviewResultColumn */
 
 const path = window.location.pathname;
+
+function transformReview(review) {
+  const reviews = [];
+  const { reviewers = [], reviewResults = [] } = review;
+  reviewers.forEach(reviewer => {
+    const result = {
+      _id: reviewer,
+      result: reviewResults.find(reviewResult => reviewResult._id === reviewer),
+    };
+    reviews.push(result);
+  });
+  return reviews;
+}
 
 function initTable(list, oTable) {
   $.ajax({
@@ -11,7 +24,8 @@ function initTable(list, oTable) {
   })
     .done(function(json) {
       oTable.fnClearTable();
-      oTable.fnAddData(json);
+      const reviews = transformReview(json);
+      oTable.fnAddData(reviews);
       oTable.fnDraw();
     })
     .fail(function(jqXHR) {
@@ -148,6 +162,12 @@ $(function() {
   updateAjaxURL(prefix);
   disableAjaxCache();
 
+  $('span.time').each(function() {
+    $(this).text(
+      moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a')
+    );
+  });
+
   if ($('#username').length) {
     travelerGlobal.usernames.initialize();
   }
@@ -170,12 +190,7 @@ $(function() {
     $('#add').attr('disabled', false);
   });
 
-  const reviewAoColumns = [
-    selectColumn,
-    useridColumn,
-    userNameNoLinkColumn,
-    reviewResultColumn,
-  ];
+  const reviewAoColumns = [selectColumn, reviewerIdColumn, reviewResultColumn];
   const reviewTable = $('#review-table').dataTable({
     aaData: [],
     aoColumns: reviewAoColumns,

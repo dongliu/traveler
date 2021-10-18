@@ -463,6 +463,8 @@ module.exports = function(app) {
           type: 'form',
           id: req.params.id,
           title: form.title,
+          requestedBy: form.__review.requestedBy,
+          requestedOn: form.__review.requestedOn,
         })
       );
     }
