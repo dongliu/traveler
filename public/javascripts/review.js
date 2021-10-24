@@ -5,11 +5,15 @@ const path = window.location.pathname;
 
 function transformReview(review) {
   const reviews = [];
-  const { reviewers = [], reviewResults = [] } = review;
-  reviewers.forEach(reviewer => {
+  const { reviewRequests = [], reviewResults = [] } = review;
+  reviewRequests.forEach(reviewRequest => {
     const result = {
-      _id: reviewer,
-      result: reviewResults.find(reviewResult => reviewResult._id === reviewer),
+      _id: reviewRequest._id,
+      requestedOn: reviewRequest.requestedOn,
+      requestedBy: reviewRequest.requestedBy,
+      result: reviewResults.find(
+        reviewResult => reviewResult._id === reviewRequest._id
+      ),
     };
     reviews.push(result);
   });
@@ -136,7 +140,7 @@ function addTo(data, table, list) {
     return;
   }
   $.ajax({
-    url: `${path}reviewer`,
+    url: `${path}requests`,
     type: 'POST',
     contentType: 'application/json',
     data: JSON.stringify(data),
@@ -163,9 +167,11 @@ $(function() {
   disableAjaxCache();
 
   $('span.time').each(function() {
-    $(this).text(
-      moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a')
-    );
+    if ($(this).text()) {
+      $(this).text(
+        moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a')
+      );
+    }
   });
 
   if ($('#username').length) {
@@ -211,7 +217,6 @@ $(function() {
     const data = {};
     data.name = $('#username').val();
     addTo(data, reviewTable, 'users');
-    // document.forms[0].reset();
     $('form[name="user"]')[0].reset();
   });
 

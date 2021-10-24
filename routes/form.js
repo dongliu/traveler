@@ -487,7 +487,7 @@ module.exports = function(app) {
 
   // add a new reviewer
   app.post(
-    '/forms/:id/review/reviewer',
+    '/forms/:id/review/requests',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
