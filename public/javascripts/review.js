@@ -20,7 +20,7 @@ function transformReview(review) {
   return reviews;
 }
 
-function initTable(list, oTable) {
+function initTable(oTable) {
   $.ajax({
     url: `${path}json`,
     type: 'GET',
@@ -41,26 +41,19 @@ function initTable(list, oTable) {
     });
 }
 
-function removeFromModal(list, cb) {
+function removeFromModal(cb) {
   const ids = [];
   $('#modal .modal-body .target').each(function() {
     ids.push(this.id);
   });
   $.ajax({
-    url: `${path + list}/${ids.join()}`,
+    url: `${path}requests/${ids.join()}`,
     type: 'DELETE',
     dataType: 'json',
   })
     .done(function(json) {
       json.forEach(function(id) {
-        let item;
-        if (list === 'users') {
-          item = $(`#${id}`);
-        } else if (list === 'groups') {
-          item = $(`[title="${encodeURIComponent(id)}"]`);
-        } else {
-          return;
-        }
+        const item = $(`#${id}`);
         item.wrap('<del></del>');
         item.addClass('text-success');
       });
@@ -73,25 +66,18 @@ function removeFromModal(list, cb) {
     });
 }
 
-function remove(list, oTable) {
+function remove(oTable) {
   const selected = fnGetSelected(oTable, 'row-selected');
   if (selected.length) {
-    $('#modalLabel').html(`Remove the following ${selected.length} ${list}? `);
+    $('#modalLabel').html(
+      `Remove the following ${selected.length} review requests? `
+    );
     $('#modal .modal-body').empty();
     selected.forEach(function(row) {
       const data = oTable.fnGetData(row);
-      if (list === 'users') {
-        $('#modal .modal-body').append(
-          `<div class="target" id="${data._id}">${data.username}</div>`
-        );
-      }
-      if (list === 'groups') {
-        $('#modal .modal-body').append(
-          `<div class="target" id="${encodeURIComponent(
-            data._id
-          )}" title="${encodeURIComponent(data._id)}">${data.groupname}</div>`
-        );
-      }
+      $('#modal .modal-body').append(
+        `<div class="target" id="${data._id}">${data._id}</div>`
+      );
     });
     $('#modal .modal-footer').html(
       '<button id="remove" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
@@ -99,8 +85,8 @@ function remove(list, oTable) {
     $('#remove').click(function(e) {
       e.preventDefault();
       $('#remove').prop('disabled', true);
-      removeFromModal(list, function() {
-        initTable(list, oTable);
+      removeFromModal(function() {
+        initTable(oTable);
       });
     });
     $('#modal').modal('show');
@@ -227,10 +213,10 @@ $(function() {
   });
 
   $('#review-remove').click(function() {
-    remove('users', reviewTable);
+    remove(reviewTable);
   });
 
   if ($('#username').length) {
-    initTable('users', reviewTable);
+    initTable(reviewTable);
   }
 });
