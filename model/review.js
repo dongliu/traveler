@@ -7,6 +7,16 @@ const { ObjectId } = Schema.Types;
 const debug = require('debug')('traveler:review');
 const logger = require('../lib/loggers').getLogger();
 
+const reviewRequest = new Schema({
+  // use the reviewer _id as review request id, in order to use addToSet
+  _id: {
+    type: String,
+    required: true,
+  },
+  requestedOn: Date,
+  requestedBy: String,
+});
+
 const reviewResult = new Schema({
   // use the reviewer _id as review result id, in order to use addToSet
   _id: {
@@ -17,6 +27,8 @@ const reviewResult = new Schema({
     type: Boolean,
     required: true,
   },
+  requestedOn: Date,
+  requestedBy: String,
   updatedOn: {
     type: Date,
     required: true,
@@ -41,9 +53,7 @@ const review = new Schema({
     refPath: 'itemType',
     required: true,
   },
-  requestedOn: Date,
-  requestedBy: String,
-  reviewers: [String],
+  reviewRequests: [reviewRequest],
   reviewResults: [reviewResult],
 });
 
@@ -62,13 +72,15 @@ function addReview(schema) {
           policy: 'all',
           itemType: doc.constructor.modelName,
           itemId: doc._id,
-          requestedOn: Date.now(),
-          requestedBy: requesterId,
-          reviewers: [],
+          reviewRequests: [],
           reviewResults: [],
         };
       }
-      doc.__review.reviewers.addToSet(reviewer._id);
+      doc.__review.reviewRequests.addToSet({
+        _id: reviewer._id,
+        requestedOn: Date.now(),
+        requestedBy: requesterId,
+      });
       const newDoc = await doc.save();
       debug(`doc saved as ${newDoc}`);
       reviewer.reviews.addToSet(newDoc._id);
