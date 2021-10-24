@@ -39,7 +39,7 @@ block content
       form.form-horizontal#output
         != html
   .button-footer.container
-    if (status === 0)
+    if (status === 0 || status === 0.5)
       .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
           span.caret
@@ -78,11 +78,12 @@ block content
       a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
     .btn-group
       button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
-    if (status === 0)
+    if (status === 0 || status === 0.5)
       .btn-group
         button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
       .btn-group
         button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
+    if (status === 0)
       .btn-group
         button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for review') Submit for review
     if (status === 0.5 && isReviewer)

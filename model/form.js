@@ -164,6 +164,11 @@ form.pre('save', function(next) {
   return next();
 });
 
+form.methods.isEditable = function() {
+  const doc = this;
+  return [0, 0.5].includes(doc.status);
+};
+
 form.plugin(addVersion, {
   fieldsToVersion: ['title', 'description', 'html'],
 });

@@ -1616,7 +1616,7 @@ $(function() {
   disableAjaxCache();
 
   init();
-  if (formStatus === 0) {
+  if (formStatus === 0 || formStatus === 0.5) {
     working();
   }
   binding_events();

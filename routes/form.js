@@ -287,7 +287,7 @@ module.exports = function(app) {
       const isReviewer =
         form.__review && form.__review.reviewers.includes(req.session.userid);
 
-      if (access === 1) {
+      if (access === 1 && form.isEditable()) {
         return res.render(
           'form-builder',
           routesUtilities.getRenderObject(req, {
@@ -775,7 +775,7 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
-    reqUtils.status('id', [0]),
+    reqUtils.status('id', [0, 0.5]),
     reqUtils.filter('body', ['html', 'title', 'description']),
     reqUtils.sanitize('body', ['html', 'title', 'description']),
     async function(req, res) {
