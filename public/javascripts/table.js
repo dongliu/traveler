@@ -553,6 +553,10 @@ const formReviewLinkColumn = {
 
 const reviewerIdColumn = personColumn('Reviewer', '_id');
 
+const reviewRequestedOnColumn = dateColumn('Requested', 'requestedOn');
+
+const reviewRequestedByColumn = personColumn('Requested by', 'requestedBy');
+
 const createdOnColumn = dateColumn('Created', 'createdOn');
 const createdByColumn = personColumn('Created by', 'createdBy');
 const ownerColumn = {

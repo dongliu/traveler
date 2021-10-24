@@ -1,5 +1,5 @@
 /* global prefix: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, travelerGlobal: false, Holder, moment */
-/* global selectColumn: false, reviewerIdColumn, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, reviewResultColumn */
+/* global selectColumn: false, reviewerIdColumn, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, reviewResultColumn, reviewRequestedByColumn, reviewRequestedOnColumn */
 
 const path = window.location.pathname;
 
@@ -196,7 +196,13 @@ $(function() {
     $('#add').attr('disabled', false);
   });
 
-  const reviewAoColumns = [selectColumn, reviewerIdColumn, reviewResultColumn];
+  const reviewAoColumns = [
+    selectColumn,
+    reviewerIdColumn,
+    reviewRequestedByColumn,
+    reviewRequestedOnColumn,
+    reviewResultColumn,
+  ];
   const reviewTable = $('#review-table').dataTable({
     aaData: [],
     aoColumns: reviewAoColumns,
