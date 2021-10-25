@@ -135,7 +135,7 @@ function addTo(data, table, list) {
       $('#message').append(
         `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>${jqXHR.responseText}</div>`
       );
-      initTable(list, table);
+      initTable(table);
     },
     error(jqXHR) {
       if (jqXHR.status !== 401) {

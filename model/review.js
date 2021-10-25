@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 const mongoose = require('mongoose');
 
+const User = mongoose.model('User');
 const { Schema } = mongoose;
 const { ObjectId } = Schema.Types;
 
@@ -87,6 +88,23 @@ function addReview(schema) {
       const newReviewer = await reviewer.save();
       debug(`reviewer saved as ${newReviewer}`);
       return newDoc;
+    } catch (error) {
+      logger.error(`request review db error: ${error}`);
+      throw error;
+    }
+  };
+
+  schema.methods.removeReviewRequest = async function(id) {
+    const doc = this;
+    try {
+      doc.__review.reviewRequests.id(id).remove();
+      await doc.save();
+      debug(`${id} removed from ${doc._id}`);
+      const pull = { reviews: doc._id };
+      await User.findByIdAndUpdate(id, {
+        $pull: pull,
+      });
+      debug(`${doc._id} removed from user ${id}`);
     } catch (error) {
       logger.error(`request review db error: ${error}`);
       throw error;

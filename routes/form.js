@@ -485,7 +485,7 @@ module.exports = function(app) {
     }
   );
 
-  // add a new reviewer
+  // add a new review request
   app.post(
     '/forms/:id/review/requests',
     auth.ensureAuthenticated,
@@ -493,7 +493,18 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     async function(req, res) {
       const form = req[req.params.id];
-      await reviewLib.addReviewer(req, res, form);
+      await reviewLib.addReviewRequest(req, res, form);
+    }
+  );
+
+  app.delete(
+    '/forms/:id/review/requests/:requestId',
+    reqUtils.exist('id', Form),
+    reqUtils.isOwnerMw('id'),
+    auth.ensureAuthenticated,
+    async function(req, res) {
+      const form = req[req.params.id];
+      await reviewLib.removeReviewRequest(req, res, form);
     }
   );
 
