@@ -1,15 +1,18 @@
-const auth = require('../lib/auth');
 const mongoose = require('mongoose');
-const routesUtilities = require('../utilities/routes.js');
+const debug = require('debug')('traveler:released-form');
+const _ = require('lodash');
+const auth = require('../lib/auth');
+const routesUtilities = require('../utilities/routes');
+
 const Form = mongoose.model('Form');
 const ReleasedForm = mongoose.model('ReleasedForm');
 const { statusMap } = require('../model/released-form');
 const reqUtils = require('../lib/req-utils');
 const logger = require('../lib/loggers').getLogger();
-const config = require('../config/config.js');
+const config = require('../config/config');
+const { stateTransition } = require('../model/released-form');
+
 const authConfig = config.auth;
-const debug = require('debug')('traveler:released-form');
-var _ = require('lodash');
 
 module.exports = function(app) {
   app.get('/form-management/', auth.verifyRole('manager', 'admin'), function(
@@ -31,10 +34,10 @@ module.exports = function(app) {
         'title formType status tags mapping _v updatedOn updatedBy'
       ).exec(function(err, forms) {
         if (err) {
-          console.error(err);
+          logger.error(err);
           return res.status(500).send(err.message);
         }
-        res.status(200).json(forms);
+        return res.status(200).json(forms);
       });
     }
   );
@@ -47,10 +50,10 @@ module.exports = function(app) {
       'title formType status tags ver releasedOn releasedBy'
     ).exec(function(err, forms) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.status(500).send(err.message);
       }
-      res.status(200).json(forms);
+      return res.status(200).json(forms);
     });
   });
 
@@ -65,10 +68,10 @@ module.exports = function(app) {
       'title formType status tags ver archivedOn archivedBy'
     ).exec(function(err, forms) {
       if (err) {
-        console.error(err);
+        logger.error(err);
         return res.status(500).send(err.message);
       }
-      res.status(200).json(forms);
+      return res.status(200).json(forms);
     });
   });
 
@@ -85,7 +88,7 @@ module.exports = function(app) {
           title: releasedForm.title,
           formType: releasedForm.formType,
           status: releasedForm.status,
-          statusText: statusMap['' + releasedForm.status],
+          statusText: statusMap[`${releasedForm.status}`],
           ver: releasedForm.ver,
           base: releasedForm.base,
           discrepancy: releasedForm.discrepancy,
@@ -95,39 +98,32 @@ module.exports = function(app) {
   );
 
   /**
-   * Batch archiving of multiple released forms
+   * archiving a released form
    */
   app.put(
     '/released-forms/archive',
     auth.ensureAuthenticated,
     auth.verifyRole('admin', 'manager'),
-    function updateStatus(req, res) {
-      let ids = req.body;
-      if (!ids || ids.length < 1) {
+    async function updateStatus(req, res) {
+      const { id } = req.body;
+      if (!id) {
         return res.status(400).send('no id(s) provided');
       }
 
-      let stateTransition = require('../model/released-form').stateTransition;
-
-      ids.forEach(function(id) {
-        ReleasedForm.findById({ _id: id }, function(err, f) {
-          if (err) {
-            return res.status(400).send('Invalid id: ' + id);
-          }
+      try {
+        const f = await ReleasedForm.findById({ _id: id });
+        if (f) {
           f.status = 2;
           f.archivedBy = req.session.userid;
           f.archivedOn = Date.now();
-          // check if we need to increment the version
-          // in this case, no
           f.incrementVersion();
-          f.saveWithHistory(req.session.userid)
-            .then(function() {})
-            .catch(function(err) {
-              return res.status(500).send('Failed to archive form: ' + id);
-            });
-        });
-      });
-      return res.status(200).send('Archived form(s): ' + ids.join(', '));
+          await f.saveWithHistory(req.session.userid);
+        }
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(`Failed to archive form: ${id}`);
+      }
+      return res.status(200).send(`Archived form ${id}`);
     }
   );
 
@@ -138,17 +134,17 @@ module.exports = function(app) {
     reqUtils.exist('id', ReleasedForm),
     reqUtils.filter('body', ['status', 'version']),
     reqUtils.hasAll('body', ['status', 'version']),
-    function updateStatus(req, res) {
-      var f = req[req.params.id];
-      var s = req.body.status;
-      var v = req.body.version;
+    async function updateStatus(req, res) {
+      const f = req[req.params.id];
+      const s = req.body.status;
+      const v = req.body.version;
 
       if ([2].indexOf(s) === -1) {
         return res.status(400).send('invalid status');
       }
 
       if (v !== f.ver) {
-        return res.status(400).send('the current version is ' + f.ver);
+        return res.status(400).send(`the current version is ${f.ver}`);
       }
 
       // no change
@@ -156,9 +152,7 @@ module.exports = function(app) {
         return res.status(204).send();
       }
 
-      var stateTransition = require('../model/released-form').stateTransition;
-
-      var target = _.find(stateTransition, function(t) {
+      const target = _.find(stateTransition, function(t) {
         return t.from === f.status;
       });
 
@@ -175,13 +169,12 @@ module.exports = function(app) {
       // check if we need to increment the version
       // in this case, no
       f.incrementVersion();
-      f.saveWithHistory(req.session.userid)
-        .then(function() {
-          return res.status(200).send('status updated to ' + s);
-        })
-        .catch(function(err) {
-          return res.status(500).send(err.message);
-        });
+      try {
+        await f.saveWithHistory(req.session.userid);
+        return res.status(200).send(`status updated to ${s}`);
+      } catch (error) {
+        return res.status(500).send(error.message);
+      }
     }
   );
 
@@ -191,7 +184,7 @@ module.exports = function(app) {
     reqUtils.exist('id', ReleasedForm),
     function(req, res) {
       const releasedForm = req[req.params.id];
-      const base = releasedForm.base;
+      const { base } = releasedForm;
       const clonedForm = {};
       clonedForm.html = reqUtils.sanitizeText(base.html);
       clonedForm.title = reqUtils.sanitizeText(req.body.title);
@@ -208,17 +201,13 @@ module.exports = function(app) {
           logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
-        var url =
-          (req.proxied ? authConfig.proxied_service : authConfig.service) +
-          '/forms/' +
-          newform.id +
-          '/';
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/forms/${newform.id}/`;
         res.set('Location', url);
         return res
           .status(201)
-          .send(
-            'You can see the new form at <a href="' + url + '">' + url + '</a>'
-          );
+          .send(`You can see the new form at <a href="${url}">${url}</a>`);
       });
     }
   );
@@ -238,7 +227,7 @@ module.exports = function(app) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      res.status(200).json(forms);
+      return res.status(200).json(forms);
     });
   });
 
@@ -257,7 +246,7 @@ module.exports = function(app) {
           console.error(err);
           return res.status(500).send(err.message);
         }
-        res.status(200).json(forms);
+        return res.status(200).json(forms);
       });
     }
   );
