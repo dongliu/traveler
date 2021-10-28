@@ -51,6 +51,7 @@ module.exports = function(app) {
     }
   });
 
+  // forms owned by the user that are under review
   app.get('/submittedforms/json', auth.ensureAuthenticated, async function(
     req,
     res
