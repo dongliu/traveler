@@ -557,6 +557,54 @@ const reviewRequestedOnColumn = dateColumn('Requested', 'requestedOn');
 
 const reviewRequestedByColumn = personColumn('Requested by', 'requestedBy');
 
+const reviewersColumn = {
+  sTitle: 'reviewers',
+  mData(source, type) {
+    if (source.__review) {
+      const requests = source.__review.reviewRequests;
+      if (!requests) {
+        return '';
+      }
+      if (requests.length === 0) {
+        return '';
+      }
+      const reviews = requests.map(function(r) {
+        if (type === 'filter' || type === 'sort') {
+          return r._id;
+        }
+        return `<a target="${linkTarget}" href="/users/${r._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${r._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${r._id}/photo" title="${r._id}"></a>`;
+      });
+      if (type === 'filter' || type === 'sort') {
+        return reviews.join('; ');
+      }
+      return reviews.join(' ');
+    }
+    return '';
+  },
+  bFilter: true,
+};
+
+const firstReviewRequestedOnColumn = {
+  sTitle: 'Requested on',
+  mData(source, type) {
+    if (source.__review) {
+      const requests = source.__review.reviewRequests;
+      if (!requests) {
+        return '';
+      }
+      if (requests.length === 0) {
+        return '';
+      }
+      const first = requests[0];
+      if (type === 'sort') {
+        return first.requestedOn;
+      }
+      return formatDate(first.requestedOn);
+    }
+    return '';
+  },
+};
+
 const createdOnColumn = dateColumn('Created', 'createdOn');
 const createdByColumn = personColumn('Created by', 'createdBy');
 const ownerColumn = {
