@@ -286,7 +286,9 @@ module.exports = function(app) {
       }
 
       const isReviewer =
-        form.__review && form.__review.reviewers.includes(req.session.userid);
+        form.__review &&
+        form.__review.reviewRequests &&
+        form.__review.reviewRequests.id(req.session.userid);
 
       if (access === 1 && form.isEditable()) {
         return res.render(
