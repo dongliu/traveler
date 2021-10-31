@@ -553,6 +553,8 @@ const formReviewLinkColumn = {
 
 const reviewerIdColumn = personColumn('Reviewer', '_id');
 
+const requestedOnColumn = dateColumn('Requested on', 'requestedOn');
+
 const reviewRequestedOnColumn = {
   sTitle: 'Requested on',
   mData(source, type) {
