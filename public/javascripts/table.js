@@ -553,7 +553,26 @@ const formReviewLinkColumn = {
 
 const reviewerIdColumn = personColumn('Reviewer', '_id');
 
-const reviewRequestedOnColumn = dateColumn('Requested', 'requestedOn');
+const reviewRequestedOnColumn = {
+  sTitle: 'Requested on',
+  mData(source, type) {
+    if (!source.__review) {
+      return '';
+    }
+    const requests = source.__review.reviewRequests;
+    if (!requests) {
+      return '';
+    }
+    const request = requests.find(function(r) {
+      return r._id === userid;
+    });
+    if (!request) {
+      return '';
+    }
+    return formatDate(request.requestedOn);
+  },
+  bFilter: true,
+};
 
 const reviewRequestedByColumn = {
   sTitle: 'Requested by',
