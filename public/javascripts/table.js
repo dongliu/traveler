@@ -1,5 +1,5 @@
 /* global moment: false */
-/* global prefix: false, linkTarget: false */
+/* global prefix: false, linkTarget: false, userid */
 
 function formatDate(date) {
   return date ? moment(date).fromNow() : '';
@@ -555,10 +555,35 @@ const reviewerIdColumn = personColumn('Reviewer', '_id');
 
 const reviewRequestedOnColumn = dateColumn('Requested', 'requestedOn');
 
-const reviewRequestedByColumn = personColumn('Requested by', 'requestedBy');
+const reviewRequestedByColumn = {
+  sTitle: 'Requested by',
+  mData(source, type) {
+    if (!source.__review) {
+      return '';
+    }
+    const requests = source.__review.reviewRequests;
+    if (!requests) {
+      return '';
+    }
+    const request = requests.find(function(r) {
+      return r._id === userid;
+    });
+    if (!request) {
+      return '';
+    }
+    return `<a target="${linkTarget}" href="/users/${
+      request.requestedBy
+    }"><img class="user" data-src="holder.js/27x40?size=20&text=${request.requestedBy
+      .substr(0, 1)
+      .toUpperCase()}" src="${prefix}/adusers/${
+      request.requestedBy
+    }/photo" title="${request.requestedBy}"></a>`;
+  },
+  bFilter: true,
+};
 
 const reviewersColumn = {
-  sTitle: 'reviewers',
+  sTitle: 'Reviewers',
   mData(source, type) {
     if (source.__review) {
       const requests = source.__review.reviewRequests;
