@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
-const {Schema} = mongoose;
-const {ObjectId} = Schema.Types;
+const { Schema } = mongoose;
+const { ObjectId } = Schema.Types;
 
 const user = new Schema({
   _id: String,
@@ -15,6 +15,7 @@ const user = new Schema({
   forms: [ObjectId],
   travelers: [ObjectId],
   binders: [ObjectId],
+  // form reviews
   reviews: [ObjectId],
   subscribe: {
     type: Boolean,
@@ -27,9 +28,9 @@ const group = new Schema({
   name: String,
   deleted: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  members: [{type: String, ref: 'User'}],
+  members: [{ type: String, ref: 'User' }],
   forms: [ObjectId],
   travelers: [ObjectId],
   binders: [ObjectId],
