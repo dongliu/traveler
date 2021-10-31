@@ -15,23 +15,25 @@ const { stateTransition } = require('../model/released-form');
 const authConfig = config.auth;
 
 module.exports = function(app) {
-  app.get('/form-management/', auth.verifyRole('manager', 'admin'), function(
-    req,
-    res
-  ) {
-    res.render('form-management', routesUtilities.getRenderObject(req));
-  });
+  app.get(
+    '/form-management/',
+    auth.ensureAuthenticated,
+    auth.verifyRole('admin'),
+    function(req, res) {
+      res.render('form-management', routesUtilities.getRenderObject(req));
+    }
+  );
 
   app.get(
     '/submitted-forms/json',
     auth.ensureAuthenticated,
-    auth.verifyRole('admin', 'manager'),
+    auth.verifyRole('admin'),
     function(req, res) {
       Form.find(
         {
           status: 0.5,
         },
-        'title formType status tags mapping _v updatedOn updatedBy'
+        'title formType status tags mapping _v __review'
       ).exec(function(err, forms) {
         if (err) {
           logger.error(err);
@@ -103,7 +105,7 @@ module.exports = function(app) {
   app.put(
     '/released-forms/archive',
     auth.ensureAuthenticated,
-    auth.verifyRole('admin', 'manager'),
+    auth.verifyRole('admin'),
     async function updateStatus(req, res) {
       const { id } = req.body;
       if (!id) {
