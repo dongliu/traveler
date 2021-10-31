@@ -35,6 +35,36 @@ block content
       | &nbsp;#{statusText}
     p Version:&nbsp;
       span#version #{_v}
+    if (status === 0.5)
+      h4 Reviews
+      #reviews.accordion
+        .accordion-group
+          .accordion-heading
+            .accordion-heading
+              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#review-results") Reported reviews
+          #review-results.accordion-body.collapse.in
+            .accordion-inner
+              div add later
+        if (isReviewer)
+          .accordion-group
+            .accordion-heading
+              .accordion-heading
+                a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Add a new review
+            #new-review.accordion-body.collapse
+              .accordion-inner
+                form.form-horizontal#review
+                  .control-group
+                    .controls
+                      label.checkbox
+                        input#approve(type="checkbox")
+                        span Approve
+                  .control-group
+                    .control-label comment
+                    .controls
+                      textarea#comment(name="comment", cols="40", rows="10")
+                  .btn-group
+                    button.btn.btn-primary#review(data-toggle='tooltip', title='Report review result') Report
+
     .well-large
       form.form-horizontal#output
         != html
@@ -78,17 +108,14 @@ block content
       a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
     .btn-group
       button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
-    if (status === 0 || status === 0.5)
+    if (status === 0 || status === 0.5 && !isReviewer)
       .btn-group
         button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
       .btn-group
         button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
-    if (status === 0)
+    if (status === 0 && !isReviewer)
       .btn-group
         button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for review') Submit for review
-    if (status === 0.5 && isReviewer)
-      .btn-group
-        button.btn.btn-primary#review(data-toggle='tooltip', title='Report review result') Report review result
     if (status === 1 && locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
       .btn-group
         button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
