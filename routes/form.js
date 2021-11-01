@@ -24,6 +24,14 @@ const { stateTransition } = require('../model/form');
 
 const logger = require('../lib/loggers').getLogger();
 
+function checkReviewer(form, userid) {
+  return (
+    form.__review &&
+    form.__review.reviewRequests &&
+    form.__review.reviewRequests.id(userid)
+  );
+}
+
 module.exports = function(app) {
   app.get('/forms/', auth.ensureAuthenticated, function(req, res) {
     res.render('forms', routesUtilities.getRenderObject(req));
@@ -285,10 +293,7 @@ module.exports = function(app) {
         );
       }
 
-      const isReviewer =
-        form.__review &&
-        form.__review.reviewRequests &&
-        form.__review.reviewRequests.id(req.session.userid);
+      const isReviewer = checkReviewer(form, req.session.userid);
 
       if (access === 1 && form.isEditable()) {
         return res.render(
@@ -303,6 +308,7 @@ module.exports = function(app) {
             formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
             isReviewer,
+            review: form.__review,
             released_form_version_mgmt: config.app.released_form_version_mgmt,
           })
         );
@@ -500,6 +506,7 @@ module.exports = function(app) {
     }
   );
 
+  // remove a review request
   app.delete(
     '/forms/:id/review/requests/:requestId',
     reqUtils.exist('id', Form),
@@ -508,6 +515,29 @@ module.exports = function(app) {
     async function(req, res) {
       const form = req[req.params.id];
       await reviewLib.removeReviewRequest(req, res, form);
+    }
+  );
+
+  // add a new review request
+  app.post(
+    '/forms/:id/review/results',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Form),
+    function(req, res, next) {
+      const isReviewer = checkReviewer(req[req.params.id], req.session.userid);
+      if (!isReviewer) {
+        return res.status(401).send('only reviewer can submit');
+      }
+      return next();
+    },
+    async function(req, res) {
+      const form = req[req.params.id];
+      // try {
+      await reviewLib.addReviewResult(req, res, form);
+      // } catch (error) {
+      //   logger.error(`failed to add review result, ${error}`);
+      //   res.status(500).send(error.message);
+      // }
     }
   );
 

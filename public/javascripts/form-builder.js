@@ -3,7 +3,7 @@
 
 /* global tinymce: false, rivets: false, UID: false, input: false, spec: false,
  ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false,
- formType, livespan, Holder */
+ formType, livespan, Holder, moment */
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
@@ -41,6 +41,9 @@ function sendRequest(data, cb, option) {
   if (option === 'saveas') {
     url = `${prefix}/forms/`;
     type = 'POST';
+  } else if (option === 'review') {
+    url = `${path}review/results`;
+    type = 'POST';
   } else if (option === 'status') {
     url = `${path}status`;
     type = 'PUT';
@@ -77,8 +80,7 @@ function sendRequest(data, cb, option) {
     })
     .fail(function() {
       $('form#output').fadeTo('slow', 1);
-    })
-    .always(function() {});
+    });
 }
 
 function archive_prior_released_forms(selected) {
@@ -1106,8 +1108,13 @@ function init() {
 
   initHtml = $('#output').html();
 
+  $('span.time').each(function() {
+    $(this).text(
+      moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a')
+    );
+  });
   // update every 30 seconds
-  $.livestamp.interval(30 * 1000);
+  // $.livestamp.interval(30 * 1000);
 
   rivets.binders.required = function(el, value) {
     const attrToSet = 'required';
@@ -1579,21 +1586,18 @@ function binding_events() {
     });
   });
 
-  // $('#reject').click(function() {
-  //   sendRequest(
-  //     {
-  //       status: 0,
-  //       version: Number($('#version').text()),
-  //     },
-  //     function() {
-  //       window.location.reload(true);
-  //     },
-  //     'status'
-  //   );
-  // });
-
-  $('#review').click(function() {
-    // TODO: show modal of comment and then report
+  $('#submit-review').on('click', function(e) {
+    e.preventDefault();
+    sendRequest(
+      {
+        result: $('#approve').prop('checked'),
+        comment: $('#comment').val(),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      'review'
+    );
   });
 
   $('#obsolete, #archive').click(function() {

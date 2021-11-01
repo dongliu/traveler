@@ -37,19 +37,33 @@ block content
       span#version #{_v}
     if (status === 0.5)
       h4 Reviews
+      p Polily:
+        | &nbsp;#{review.policy}
       #reviews.accordion
         .accordion-group
           .accordion-heading
-            .accordion-heading
-              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#review-results") Reported reviews
+            a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#review-results") Reported reviews
           #review-results.accordion-body.collapse.in
             .accordion-inner
-              div add later
+              each result in review.reviewResults
+                accordion(id="#{result._id}")
+                  .accordion-group
+                    .accordion-heading
+                      a.accordion-toggle(data-toggle="collapse" data-parent="#{result._id}" href="\##{result._id}-comment") #{result.reviewerId}
+                        | &nbsp;
+                        if (result.result)
+                          b approved
+                        else
+                          b commented
+                        | &nbsp;on&nbsp;
+                        span.time #{result.submittedOn}
+                    .accordion-body.collapse.in(id="#{result._id}-comment")
+                      .accordion-inner
+                        span #{result.comment}
         if (isReviewer)
           .accordion-group
             .accordion-heading
-              .accordion-heading
-                a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Add a new review
+              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Add a new review
             #new-review.accordion-body.collapse
               .accordion-inner
                 form.form-horizontal#review
@@ -63,7 +77,7 @@ block content
                     .controls
                       textarea#comment(name="comment", cols="40", rows="10")
                   .btn-group
-                    button.btn.btn-primary#review(data-toggle='tooltip', title='Report review result') Report
+                    button.btn.btn-primary#submit-review(data-toggle='tooltip', title='Report review result') Report
 
     .well-large
       form.form-horizontal#output

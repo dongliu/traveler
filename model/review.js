@@ -19,8 +19,7 @@ const reviewRequest = new Schema({
 });
 
 const reviewResult = new Schema({
-  // use the reviewer _id as review result id, in order to use addToSet
-  _id: {
+  reviewerId: {
     type: String,
     required: true,
   },
@@ -28,12 +27,7 @@ const reviewResult = new Schema({
     type: Boolean,
     required: true,
   },
-  requestedOn: Date,
-  requestedBy: String,
-  updatedOn: {
-    type: Date,
-    required: true,
-  },
+  submittedOn: Date,
   comment: String,
 });
 
@@ -43,16 +37,6 @@ const review = new Schema({
     required: true,
     default: 'all',
     enum: ['all', 'any', 'majority'],
-  },
-  itemType: {
-    type: String,
-    required: true,
-    enum: ['Form', 'Traveler'],
-  },
-  itemId: {
-    type: ObjectId,
-    refPath: 'itemType',
-    required: true,
   },
   reviewRequests: [reviewRequest],
   reviewResults: [reviewResult],
@@ -71,8 +55,6 @@ function addReview(schema) {
       if (!doc.__review) {
         doc.__review = {
           policy: 'all',
-          itemType: doc.constructor.modelName,
-          itemId: doc._id,
           reviewRequests: [],
           reviewResults: [],
         };
@@ -111,10 +93,15 @@ function addReview(schema) {
     }
   };
 
-  schema.methods.updateReview = async function(result) {
+  schema.methods.addReviewResult = async function(reviewerId, result, comment) {
     const doc = this;
     try {
-      doc.__review.reviewResult.addToSet(result);
+      doc.__review.reviewResults.push({
+        reviewerId,
+        result,
+        comment,
+        submittedOn: Date.now(),
+      });
       const newDoc = await doc.save();
       debug(`doc saved as ${newDoc}`);
       return newDoc;
