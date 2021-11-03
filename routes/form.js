@@ -294,6 +294,7 @@ module.exports = function(app) {
       }
 
       const isReviewer = checkReviewer(form, req.session.userid);
+      const allApproved = form.allApproved();
 
       if (access === 1 && form.isEditable()) {
         return res.render(
@@ -308,6 +309,7 @@ module.exports = function(app) {
             formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
             isReviewer,
+            allApproved,
             review: form.__review,
             released_form_version_mgmt: config.app.released_form_version_mgmt,
           })
@@ -532,12 +534,7 @@ module.exports = function(app) {
     },
     async function(req, res) {
       const form = req[req.params.id];
-      // try {
       await reviewLib.addReviewResult(req, res, form);
-      // } catch (error) {
-      //   logger.error(`failed to add review result, ${error}`);
-      //   res.status(500).send(error.message);
-      // }
     }
   );
 
@@ -865,18 +862,23 @@ module.exports = function(app) {
   app.put(
     '/forms/:id/released',
     auth.ensureAuthenticated,
-    // only admin or manager can release a form
-    // TODO: owner decide if release
-    auth.verifyRole('admin', 'manager'),
     // find the unreleased form
     reqUtils.exist('id', Form),
-    // the form was submitted for release
-    // TODO: the form is under review and passed the review
+    // owner decide if release
+    reqUtils.isOwnerMw('id'),
     function(req, res, next) {
       if (req[req.params.id].status !== 0.5) {
         return res
           .status(400)
-          .send(`${req[req.params.id].id} is not submitted for release`);
+          .send(`${req[req.params.id].id} has not been submitted for review`);
+      }
+      return next();
+    },
+    function(req, res, next) {
+      if (!req[req.params.id].allApproved) {
+        return res
+          .status(400)
+          .send(`${req[req.params.id].id} was not approved by all reviewers`);
       }
       return next();
     },
@@ -959,13 +961,10 @@ module.exports = function(app) {
               `A form with same title, type, and version was already released in ${existingForm._id}.`
             );
         }
-        // reset the submitted form
-        form.status = 0;
         const saveForm = await new ReleasedForm(releasedForm).save();
         const url = `${
           req.proxied ? authConfig.proxied_service : authConfig.service
         }/released-forms/${saveForm._id}/`;
-        await form.save();
         return res.status(201).json({
           location: url,
         });

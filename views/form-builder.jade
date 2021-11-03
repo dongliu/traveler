@@ -37,8 +37,8 @@ block content
       span#version #{_v}
     if (status === 0.5)
       h4 Reviews
-      p Polily:
-        | &nbsp;#{review.policy}
+      if (allApproved)
+        p All reviewers has approved, the form is ready for release
       #reviews.accordion
         .accordion-group
           .accordion-heading
@@ -133,6 +133,9 @@ block content
     if (status === 0 && !isReviewer)
       .btn-group
         button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for review') Submit for review
+    if (status === 0.5 && !isReviewer && allApproved)
+      .btn-group
+        button.btn.btn-primary#release(data-toggle='tooltip', title='Release') Release
     if (status === 1 && locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
       .btn-group
         button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
