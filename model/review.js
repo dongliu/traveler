@@ -110,6 +110,33 @@ function addReview(schema) {
       throw error;
     }
   };
+
+  schema.methods.allApproved = function() {
+    const doc = this;
+    const { reviewRequests = [], reviewResults = [] } = doc.__review;
+    if (reviewRequests.length === 0) {
+      return false;
+    }
+    const approval = {};
+    let i;
+    for (i = reviewResults.length - 1; i >= 0; i -= 1) {
+      if (
+        reviewResults[i].result !== '1' &&
+        !approval[reviewResults[i].reviewerId]
+      ) {
+        return false;
+      }
+      if (reviewResults[i].result === '1') {
+        approval[reviewResults[i].reviewerId] = true;
+      }
+    }
+    for (i = 0; i < reviewRequests.length; i += 1) {
+      if (!approval[reviewRequests[i]._id]) {
+        return false;
+      }
+    }
+    return true;
+  };
 }
 
 module.exports = {
