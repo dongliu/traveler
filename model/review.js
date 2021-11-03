@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 
 const User = mongoose.model('User');
 const { Schema } = mongoose;
-const { ObjectId } = Schema.Types;
 
 const debug = require('debug')('traveler:review');
 const logger = require('../lib/loggers').getLogger();
@@ -18,13 +17,14 @@ const reviewRequest = new Schema({
   requestedBy: String,
 });
 
+// result: 1: approve 2: comment
 const reviewResult = new Schema({
   reviewerId: {
     type: String,
     required: true,
   },
   result: {
-    type: Boolean,
+    type: String,
     required: true,
   },
   submittedOn: Date,
@@ -98,7 +98,7 @@ function addReview(schema) {
     try {
       doc.__review.reviewResults.push({
         reviewerId,
-        result,
+        result: result || '2',
         comment,
         submittedOn: Date.now(),
       });

@@ -7,15 +7,15 @@ function transformReview(review) {
   const reviews = [];
   const { reviewRequests = [], reviewResults = [] } = review;
   reviewRequests.forEach(reviewRequest => {
-    const result = {
+    const transformed = {
       _id: reviewRequest._id,
       requestedOn: reviewRequest.requestedOn,
       requestedBy: reviewRequest.requestedBy,
-      result: reviewResults.find(
-        reviewResult => reviewResult._id === reviewRequest._id
-      ),
+      result: reviewResults.reverse().find(reviewResult => {
+        return reviewResult.reviewerId === reviewRequest._id;
+      }),
     };
-    reviews.push(result);
+    reviews.push(transformed);
   });
   return reviews;
 }

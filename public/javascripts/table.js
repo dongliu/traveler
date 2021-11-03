@@ -722,17 +722,20 @@ const keysColumn = {
 };
 
 const reviewResultColumn = {
-  sTitle: 'Review result',
+  sTitle: 'Latest review result',
   sDefaultContent: '',
   mData: 'result',
   mRender(data) {
     if (!data) {
       return 'not reported';
     }
-    if (data.result) {
+    if (data.result === '1') {
       return 'approved';
     }
-    return 'rejected';
+    if (data.result === '2') {
+      return 'comment';
+    }
+    return '';
   },
   bFilter: true,
 };

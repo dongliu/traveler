@@ -51,7 +51,7 @@ block content
                     .accordion-heading
                       a.accordion-toggle(data-toggle="collapse" data-parent="#{result._id}" href="\##{result._id}-comment") #{result.reviewerId}
                         | &nbsp;
-                        if (result.result)
+                        if (result.result === "1")
                           b approved
                         else
                           b commented
@@ -69,9 +69,12 @@ block content
                 form.form-horizontal#review
                   .control-group
                     .controls
-                      label.checkbox
-                        input#approve(type="checkbox")
+                      label.radio
+                        input#approve(type="radio" name="result" value="1")
                         span Approve
+                      label.radio
+                        input#non-approve(type="radio" name="result" value="2")
+                        span Comment
                   .control-group
                     .control-label comment
                     .controls
