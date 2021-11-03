@@ -1,7 +1,7 @@
 /*
  global prefix, ajax401, updateAjaxURL, disableAjaxCache: false formLinkColumn,
  titleColumn, fnAddFilterFoot, sDomNoTools, filterEvent, formStatusColumn, tagsColumn, Holder,
- versionColumn, reviewRequestedByColumn, reviewRequestedOnColumn, reviewResultColumn
+ versionColumn, reviewRequestedByColumn, reviewRequestedOnColumn
  */
 
 $(function() {
@@ -16,9 +16,8 @@ $(function() {
     tagsColumn,
     reviewRequestedByColumn,
     reviewRequestedOnColumn,
-    reviewResultColumn,
   ];
-  fnAddFilterFoot('#public-forms-table', reviewFormsAoColumns);
+  fnAddFilterFoot('#form-table', reviewFormsAoColumns);
   $('#form-table').dataTable({
     sAjaxSource: '/reviews/forms/json',
     sAjaxDataProp: '',
