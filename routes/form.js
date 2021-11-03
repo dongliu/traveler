@@ -295,6 +295,7 @@ module.exports = function(app) {
 
       const isReviewer = checkReviewer(form, req.session.userid);
       const allApproved = form.allApproved();
+      debug(`all approved: ${allApproved}`);
 
       if (access === 1 && form.isEditable()) {
         return res.render(
@@ -478,8 +479,6 @@ module.exports = function(app) {
           type: 'form',
           id: req.params.id,
           title: form.title,
-          requestedBy: form.__review.requestedBy,
-          requestedOn: form.__review.requestedOn,
         })
       );
     }

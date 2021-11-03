@@ -113,13 +113,19 @@ function addReview(schema) {
 
   schema.methods.allApproved = function() {
     const doc = this;
+    if (!doc.__review) {
+      return false;
+    }
     const { reviewRequests = [], reviewResults = [] } = doc.__review;
     if (reviewRequests.length === 0) {
       return false;
     }
     const approval = {};
     let i;
+    debug(`has ${reviewResults.length} results`);
+    debug(`has ${reviewRequests.length} requests`);
     for (i = reviewResults.length - 1; i >= 0; i -= 1) {
+      debug(reviewResults[i].result);
       if (
         reviewResults[i].result !== '1' &&
         !approval[reviewResults[i].reviewerId]
