@@ -1590,7 +1590,7 @@ function binding_events() {
     e.preventDefault();
     sendRequest(
       {
-        result: $('#approve').prop('checked'),
+        result: $('input[name="result"]:checked').val(),
         comment: $('#comment').val(),
       },
       function() {
