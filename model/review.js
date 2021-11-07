@@ -27,6 +27,7 @@ const reviewResult = new Schema({
     type: String,
     required: true,
   },
+  v: Number,
   submittedOn: Date,
   comment: String,
 });
@@ -93,7 +94,12 @@ function addReview(schema) {
     }
   };
 
-  schema.methods.addReviewResult = async function(reviewerId, result, comment) {
+  schema.methods.addReviewResult = async function(
+    reviewerId,
+    result,
+    comment,
+    v
+  ) {
     const doc = this;
     try {
       doc.__review.reviewResults.push({
@@ -101,6 +107,7 @@ function addReview(schema) {
         result: result || '2',
         comment,
         submittedOn: Date.now(),
+        v,
       });
       const newDoc = await doc.save();
       debug(`doc saved as ${newDoc}`);

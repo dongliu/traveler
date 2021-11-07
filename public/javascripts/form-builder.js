@@ -1592,6 +1592,7 @@ function binding_events() {
       {
         result: $('input[name="result"]:checked').val(),
         comment: $('#comment').val(),
+        v: $('#version').text(),
       },
       function() {
         window.location.reload(true);
