@@ -1,0 +1,76 @@
+extends layout
+
+block head
+  title #{orgName} Forms
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script(type='text/javascript').
+    var prefix = '!{prefix}';
+  .container-fluid
+    .btn-toolbar
+      .btn-group
+        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
+          i.fa.fa-copy.fa-lg
+          | &nbsp;Clone
+      .btn-group
+        a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
+          i.fa.fa-institution.fa-lg
+          | &nbsp;All public #{viewConfig.terminology.form}s
+      .btn-group
+        button.btn.btn-info#reload
+          i.fa.fa-refresh.fa-lg
+          | &nbsp;Reload all tables
+    #message
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body.modal-body-visible
+      .modal-footer
+    div
+      ul.nav.nav-tabs
+        li.active
+          a(href='#released', data-toggle='tab') Released #{viewConfig.terminology.form}s
+        li
+          a(href='#archived-released-forms', data-toggle='tab') Archived released #{viewConfig.terminology.form}s
+      .tab-content
+        #released.tab-pane.active
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+            .btn-group
+              button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
+                i.fa.fa-plane.fa-lg
+                | &nbsp;Travel
+          table#released-form-table.table.table-bordered.table-hover
+        #archived-released-forms.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#archived-released-form-table.table.table-bordered.table-hover
+
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/released-forms.js')
