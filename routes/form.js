@@ -37,6 +37,10 @@ module.exports = function(app) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });
 
+  app.get('/releasedforms/', auth.ensureAuthenticated, function(req, res) {
+    res.render('released-forms', routesUtilities.getRenderObject(req));
+  });
+
   app.get('/forms/json', auth.ensureAuthenticated, async function(req, res) {
     try {
       const forms = await Form.find(
@@ -72,7 +76,35 @@ module.exports = function(app) {
             $ne: true,
           },
           status: {
-            $in: [0.5, 1],
+            $in: [0.5],
+          },
+          owner: {
+            $exists: false,
+          },
+        },
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
+      ).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
+    }
+  });
+
+  // forms owned by the user that are under review
+  app.get('/closedforms/json', auth.ensureAuthenticated, async function(
+    req,
+    res
+  ) {
+    try {
+      const forms = await Form.find(
+        {
+          createdBy: req.session.userid,
+          archived: {
+            $ne: true,
+          },
+          status: {
+            $in: [1],
           },
           owner: {
             $exists: false,
@@ -961,6 +993,13 @@ module.exports = function(app) {
             );
         }
         const saveForm = await new ReleasedForm(releasedForm).save();
+
+        // update the form status
+        form.status = 1;
+        form.updatedBy = req.session.userid;
+        form.updatedOn = Date.now();
+        await form.save();
+
         const url = `${
           req.proxied ? authConfig.proxied_service : authConfig.service
         }/released-forms/${saveForm._id}/`;
