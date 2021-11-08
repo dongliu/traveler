@@ -314,23 +314,29 @@ $(function() {
     ],
     sDom: sDomNoTools,
   });
-  fnAddFilterFoot('#submittedforms', submittedFormAoColumns);
+  fnAddFilterFoot('#submitted-form-table', submittedFormAoColumns);
   /* submitted form table ends */
 
-  /* released form table starts */
-  const releasedFormAoColumns = [
+  /* closed form table starts */
+  const closedFormAoColumns = [
     selectColumn,
-    releasedFormLinkColumn,
+    formLinkColumn,
+    formConfigLinkColumn,
+    formReviewLinkColumn,
     titleColumn,
-    releasedFormStatusColumn,
+    formStatusColumn,
     formTypeColumn,
-    releasedFormVersionColumn,
+    versionColumn,
     tagsColumn,
-    releasedByColumn,
-    releasedOnColumn,
+    keysColumn,
+    createdOnColumn,
+    updatedOnColumn,
+    updatedByColumn,
+    sharedWithColumn,
+    sharedGroupColumn,
   ];
-  const releasedFormTable = $('#released-form-table').dataTable({
-    sAjaxSource: '/released-forms/json',
+  const closedFormTable = $('#closed-form-table').dataTable({
+    sAjaxSource: '/closedforms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
       Holder.run({
@@ -348,12 +354,15 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: releasedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aoColumns: closedFormAoColumns,
+    aaSorting: [
+      [11, 'desc'],
+      [10, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
-  fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
-  /* released form table ends */
+  fnAddFilterFoot('#closed-form-table', closedFormAoColumns);
+  /* submitted form table ends */
 
   /* archieved form table starts */
   const archivedFormAoColumns = [
@@ -392,46 +401,6 @@ $(function() {
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
   /* archived form table ends */
-
-  const archivedReleasedFormAoColumns = [
-    selectColumn,
-    releasedFormLinkColumn,
-    titleColumn,
-    formTypeColumn,
-    tagsColumn,
-    releasedFormVersionColumn,
-    archivedByColumn,
-    archivedOnColumn,
-  ];
-  const archivedReleasedFormTable = $(
-    '#archived-released-form-table'
-  ).dataTable({
-    sAjaxSource: '/archived-released-forms/json',
-    sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
-    bAutoWidth: false,
-    bProcessing: true,
-    iDisplayLength: 10,
-    aLengthMenu: [
-      [10, 50, 100, -1],
-      [10, 50, 100, 'All'],
-    ],
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-    },
-    bDeferRender: true,
-    aoColumns: archivedReleasedFormAoColumns,
-    aaSorting: [[7, 'desc']],
-    sDom: sDomNoTools,
-  });
-  fnAddFilterFoot(
-    '#archived-released-form-table',
-    archivedReleasedFormAoColumns
-  );
 
   // show the tab in hash
   showHash();
@@ -555,9 +524,9 @@ $(function() {
     transferredFormTable.fnReloadAjax();
     sharedFormTable.fnReloadAjax();
     groupSharedFormTable.fnReloadAjax();
-    releasedFormTable.fnReloadAjax();
+    submittedFormTable.fnReloadAjax();
+    closedFormTable.fnReloadAjax();
     archivedFormTable.fnReloadAjax();
-    archivedReleasedFormTable.fnReloadAjax();
   });
   // binding events
   selectEvent();
