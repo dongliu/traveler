@@ -329,7 +329,7 @@ module.exports = function(app) {
       const allApproved = form.allApproved();
       debug(`all approved: ${allApproved}`);
 
-      if (access === 1 && form.isEditable()) {
+      if (access === 1 && form.isBuilder()) {
         return res.render(
           'form-builder',
           routesUtilities.getRenderObject(req, {
@@ -1000,6 +1000,8 @@ module.exports = function(app) {
         form.updatedOn = Date.now();
         await form.save();
 
+        // close the review requests
+        await form.closeReviewRequests();
         const url = `${
           req.proxied ? authConfig.proxied_service : authConfig.service
         }/released-forms/${saveForm._id}/`;

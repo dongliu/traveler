@@ -94,6 +94,27 @@ function addReview(schema) {
     }
   };
 
+  schema.methods.closeReviewRequests = async function() {
+    const doc = this;
+    const requests = doc.__review.reviewRequests;
+    const pull = { reviews: doc._id };
+    let i;
+    const actions = [];
+    for (i = 0; i < requests.length; i += 1) {
+      actions.push(
+        User.findByIdAndUpdate(requests[i]._id, {
+          $pull: pull,
+        })
+      );
+    }
+    try {
+      await Promise.all(actions);
+    } catch (error) {
+      logger.error(`request review db error: ${error}`);
+      throw error;
+    }
+  };
+
   schema.methods.addReviewResult = async function(
     reviewerId,
     result,

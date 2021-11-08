@@ -35,7 +35,7 @@ block content
       | &nbsp;#{statusText}
     p Version:&nbsp;
       span#version #{_v}
-    if (status === 0.5 && review)
+    if ((status === 0.5 || status === 1 ) && review)
       h4 Reviews
       if (allApproved)
         p All reviewers has approved, the form is ready for release
