@@ -780,8 +780,8 @@ const formTypeColumn = {
 function formatFormStatus(s) {
   const status = {
     '0': 'draft',
-    '0.5': 'submitted for approval',
-    '1': 'pre released',
+    '0.5': 'under review',
+    '1': 'closed',
     '2': 'archived',
   };
   if (status[s.toString()]) {
