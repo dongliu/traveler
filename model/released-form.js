@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-var addHistory = require('./history').addHistory;
-var addVersion = require('./history').addVersion;
 
-/******
+const { Schema } = mongoose;
+const { addHistory } = require('./history');
+const { addVersion } = require('./history');
+
+/*
 status := 1 // released
         | 2 // archived
-******/
+*/
 
 const stateTransition = [
   {
