@@ -1,0 +1,5 @@
+etc
+sbin
+!public
+public/*
+public/javascripts
