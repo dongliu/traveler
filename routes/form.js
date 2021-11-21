@@ -373,9 +373,17 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
     async function(req, res) {
+      const baseIds = [req.params.id];
+      const parentFormId = req[req.params.id].clonedFrom;
+      if (parentFormId) {
+        baseIds.push(parentFormId);
+      }
+
       try {
         const forms = await ReleasedForm.find({
-          'base._id': req.params.id,
+          'base._id': {
+            $in: baseIds,
+          },
           status: 1, // released
         }).exec();
         return res.status(200).json(forms);
