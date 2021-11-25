@@ -132,7 +132,7 @@ module.exports = function(app) {
   app.put(
     '/released-forms/:id/status',
     auth.ensureAuthenticated,
-    auth.verifyRole('admin', 'manager'),
+    reqUtils.isOwnerOrAdminMw,
     reqUtils.exist('id', ReleasedForm),
     reqUtils.filter('body', ['status', 'version']),
     reqUtils.hasAll('body', ['status', 'version']),
