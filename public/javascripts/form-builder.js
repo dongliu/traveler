@@ -65,7 +65,9 @@ function sendRequest(data, cb, option) {
     .done(function(responseData, textStatus, request) {
       const timestamp = request.getResponseHeader('Date');
       if (responseData.location) {
-        document.location.href = responseData.location;
+        $('#message').append(
+          `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>New resource is available at <a href="${responseData.location}">${responseData.location}</a></div>`
+        );
       } else {
         $('#message').append(
           `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved ${livespan(
@@ -83,30 +85,30 @@ function sendRequest(data, cb, option) {
     });
 }
 
-function archive_prior_released_forms(selected) {
-  if (!selected || selected.length < 1) {
+function archive_prior_released_forms(target) {
+  if (!target) {
     return;
   }
-
-  $.ajax({
-    url: '/released-forms/archive',
-    type: 'PUT',
-    async: true,
-    data: JSON.stringify(selected),
-    contentType: 'application/json',
-    processData: false,
-  })
-    .done(function(data) {
-      $('#message').append(
-        `<div class="alert alert-success"><button class="close" data-dismiss="alert"></button>${data}</div>`
-      );
+  for (const [key, value] of Object.entries(target)) {
+    $.ajax({
+      url: `/released-forms/${key}/status`,
+      type: 'PUT',
+      async: false,
+      data: JSON.stringify(value),
+      contentType: 'application/json',
+      processData: false,
     })
-    .fail(function(data) {
-      $('#message').append(
-        `<div class="alert alert-error"><button class="close" data-dismiss="alert"></button>${data}</div>`
-      );
-    })
-    .always(function() {});
+      .done(function(data) {
+        $('#message').append(
+          `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>${data}</div>`
+        );
+      })
+      .fail(function(data) {
+        $('#message').append(
+          `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>${data}</div>`
+        );
+      });
+  }
 }
 
 function userkey_error($userkey, msg) {
@@ -1495,6 +1497,7 @@ function binding_events() {
         titleColumn,
         releasedOnColumn,
         releasedByColumn,
+        releasedFormVersionColumn,
         releasedFormLinkColumn,
       ];
       priorVersionsTable = $('#prior_versions').dataTable({
@@ -1507,6 +1510,11 @@ function binding_events() {
         aoColumns: priorVersionsColumns,
         iDisplayLength: 2,
         sDom: sDomPage,
+        fnDrawCallback() {
+          Holder.run({
+            images: 'img.user',
+          });
+        },
       });
       selectMultiEvent(priorVersionsTable);
       filterEvent();
@@ -1557,12 +1565,12 @@ function binding_events() {
           'row-selected',
           false
         );
-        const json = [];
+        const target = {};
         $(selected).each(function(s) {
           const data = priorVersionsTable.fnGetData(s);
-          json.push(data._id);
+          target[data._id] = { version: data.ver, status: 2 };
         });
-        archive_prior_released_forms(json);
+        archive_prior_released_forms(target);
       }
 
       const title = $('#release-title').val();

@@ -173,7 +173,9 @@ module.exports = function(app) {
       f.incrementVersion();
       try {
         await f.saveWithHistory(req.session.userid);
-        return res.status(200).send(`status updated to ${s}`);
+        return res
+          .status(200)
+          .send(`released form ${req.params.id} status updated to ${s}`);
       } catch (error) {
         return res.status(500).send(error.message);
       }
