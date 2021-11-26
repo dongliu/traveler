@@ -43,6 +43,42 @@ const review = new Schema({
   reviewResults: [reviewResult],
 });
 
+async function removeReviewRequest(doc, id) {
+  try {
+    doc.__review.reviewRequests.id(id).remove();
+    await doc.save();
+    debug(`${id} removed from ${doc._id}`);
+    const pull = { reviews: doc._id };
+    await User.findByIdAndUpdate(id, {
+      $pull: pull,
+    });
+    debug(`${doc._id} removed from user ${id}`);
+  } catch (error) {
+    logger.error(`request review db error: ${error}`);
+    throw error;
+  }
+}
+
+async function closeReviewRequests(doc) {
+  const requests = doc.__review.reviewRequests;
+  const pull = { reviews: doc._id };
+  let i;
+  const actions = [];
+  for (i = 0; i < requests.length; i += 1) {
+    actions.push(
+      User.findByIdAndUpdate(requests[i]._id, {
+        $pull: pull,
+      })
+    );
+  }
+  try {
+    await Promise.all(actions);
+  } catch (error) {
+    logger.error(`request review db error: ${error}`);
+    throw error;
+  }
+}
+
 const Review = mongoose.model('Review', review);
 
 function addReview(schema) {
@@ -79,40 +115,12 @@ function addReview(schema) {
 
   schema.methods.removeReviewRequest = async function(id) {
     const doc = this;
-    try {
-      doc.__review.reviewRequests.id(id).remove();
-      await doc.save();
-      debug(`${id} removed from ${doc._id}`);
-      const pull = { reviews: doc._id };
-      await User.findByIdAndUpdate(id, {
-        $pull: pull,
-      });
-      debug(`${doc._id} removed from user ${id}`);
-    } catch (error) {
-      logger.error(`request review db error: ${error}`);
-      throw error;
-    }
+    await removeReviewRequest(doc, id);
   };
 
   schema.methods.closeReviewRequests = async function() {
     const doc = this;
-    const requests = doc.__review.reviewRequests;
-    const pull = { reviews: doc._id };
-    let i;
-    const actions = [];
-    for (i = 0; i < requests.length; i += 1) {
-      actions.push(
-        User.findByIdAndUpdate(requests[i]._id, {
-          $pull: pull,
-        })
-      );
-    }
-    try {
-      await Promise.all(actions);
-    } catch (error) {
-      logger.error(`request review db error: ${error}`);
-      throw error;
-    }
+    await closeReviewRequests(doc);
   };
 
   schema.methods.addReviewResult = async function(
@@ -125,11 +133,19 @@ function addReview(schema) {
     try {
       doc.__review.reviewResults.push({
         reviewerId,
-        result: result || '2',
+        result,
         comment,
         submittedOn: Date.now(),
         v,
       });
+
+      // if rework (result = 2), then
+      // 1. remove doc from reviewer's review list
+      // 2. remove reviewer from reviewer list
+      if (result === '2') {
+        closeReviewRequests(doc);
+        doc.__review.reviewRequests = [];
+      }
       const newDoc = await doc.save();
       debug(`doc saved as ${newDoc}`);
       return newDoc;
