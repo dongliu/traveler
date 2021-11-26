@@ -99,36 +99,6 @@ module.exports = function(app) {
     }
   );
 
-  /**
-   * archiving a released form
-   */
-  app.put(
-    '/released-forms/archive',
-    auth.ensureAuthenticated,
-    auth.verifyRole('admin'),
-    async function updateStatus(req, res) {
-      const { id } = req.body;
-      if (!id) {
-        return res.status(400).send('no id(s) provided');
-      }
-
-      try {
-        const f = await ReleasedForm.findById({ _id: id });
-        if (f) {
-          f.status = 2;
-          f.archivedBy = req.session.userid;
-          f.archivedOn = Date.now();
-          f.incrementVersion();
-          await f.saveWithHistory(req.session.userid);
-        }
-      } catch (error) {
-        logger.error(error);
-        return res.status(500).send(`Failed to archive form: ${id}`);
-      }
-      return res.status(200).send(`Archived form ${id}`);
-    }
-  );
-
   app.put(
     '/released-forms/:id/status',
     auth.ensureAuthenticated,
