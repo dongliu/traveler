@@ -54,7 +54,7 @@ block content
                         if (result.result === "1")
                           b approved
                         else
-                          b commented
+                          b requested for change
                         | &nbsp;on&nbsp;
                         span.time #{result.submittedOn}
                         | &nbsp;for version #{result.v}
@@ -75,7 +75,7 @@ block content
                         span Approve
                       label.radio
                         input#non-approve(type="radio" name="result" value="2")
-                        span Comment
+                        span Rework
                   .control-group
                     .control-label comment
                     .controls
