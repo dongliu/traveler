@@ -1,9 +1,12 @@
-var mongoose = require('mongoose');
-var appConfig = require('../config/config').app;
-var Schema = mongoose.Schema;
-var ObjectId = Schema.Types.ObjectId;
+/* eslint-disable no-param-reassign */
+const mongoose = require('mongoose');
+const appConfig = require('../config/config').app;
 
-var share = require('./share.js');
+const {Schema} = mongoose;
+const {ObjectId} = Schema.Types;
+
+const share = require('./share');
+const logger = require('../lib/loggers').getLogger();
 
 /**
  * finished is the percentage of value that is completed.
@@ -11,11 +14,11 @@ var share = require('./share.js');
  * If status === 2, then finished = 100, and inProgress = 0;
  * If status === 0, then finished = 0, and inProgress = 0;
  * finished and inProgress are cached status.
- * totalSteps and finishedteps are cached status.
- * They should be updated when the reference traveler is loaed.
+ * totalSteps and finishedSteps are cached status.
+ * They should be updated when the reference traveler is loaded.
  */
 
-var work = new Schema({
+const work = new Schema({
   alias: String,
   refType: {
     type: String,
@@ -88,7 +91,7 @@ var work = new Schema({
  *         | 3 // archived
  */
 
-var binder = new Schema({
+const binder = new Schema({
   title: String,
   description: String,
   status: {
@@ -167,7 +170,7 @@ function updateInputProgress(w, spec) {
 }
 
 binder.methods.updateWorkProgress = function(spec) {
-  var w = this.works.id(spec._id);
+  const w = this.works.id(spec._id);
   if (!w) {
     return;
   }
@@ -193,28 +196,28 @@ binder.methods.updateWorkProgress = function(spec) {
     } else {
       w.inProgress = spec.finishedInput / spec.totalInput;
     }
+    return;
+  }
+  //  the binder
+  if (spec.totalValue === 0) {
+    w.finished = 0;
+    w.inProgress = 1;
   } else {
-    //  the binder
-    if (spec.totalValue === 0) {
-      w.finished = 0;
-      w.inProgress = 1;
-    } else {
-      w.finished = spec.finishedValue / spec.totalValue;
-      w.inProgress = spec.inProgressValue / spec.totalValue;
-    }
+    w.finished = spec.finishedValue / spec.totalValue;
+    w.inProgress = spec.inProgressValue / spec.totalValue;
   }
 };
 
 binder.methods.updateProgress = function(cb) {
-  var works = this.works;
-  var totalValue = 0;
-  var finishedValue = 0;
-  var inProgressValue = 0;
-  var totalWork = 0;
-  var finishedWork = 0;
-  var inProgressWork = 0;
-  var totalInput = 0;
-  var finishedInput = 0;
+  const {works} = this;
+  let totalValue = 0;
+  let finishedValue = 0;
+  let inProgressValue = 0;
+  let totalWork = 0;
+  let finishedWork = 0;
+  let inProgressWork = 0;
+  let totalInput = 0;
+  let finishedInput = 0;
   works.forEach(function(w) {
     totalInput += w.totalInput;
     finishedInput += w.finishedInput;
@@ -243,17 +246,17 @@ binder.methods.updateProgress = function(cb) {
     this.progressUpdatedOn = Date.now();
     this.save(function(err, newBinder) {
       if (cb) {
-        return cb(err, newBinder);
+        cb(err, newBinder);
       }
       if (err) {
-        console.error(err);
+        logger.error(err);
       }
     });
   }
 };
 
-var Binder = mongoose.model('Binder', binder);
+const Binder = mongoose.model('Binder', binder);
 
 module.exports = {
-  Binder: Binder,
+  Binder,
 };

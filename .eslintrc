@@ -10,7 +10,8 @@
   "parserOptions": {
     "ecmaVersion": 2017
   },
-  "extends": ["eslint:recommended", "prettier"],
+
+  "extends": ["airbnb-base", "prettier"],
   "rules": {
     "no-console": 0,
     "quotes": [2, "single", "avoid-escape"],
@@ -21,6 +22,12 @@
     "max-params": [2, 10],
     "operator-assignment": 0,
     "consistent-this": 0,
-    "no-unused-expressions": 1
+    "no-unused-expressions": 1,
+    "no-underscore-dangle": 1,
+    "no-use-before-define": 1,
+    "no-unused-vars": 1,
+    "no-param-reassign": 1,
+    "no-prototype-builtins": 1,
+    "no-continue": 1
   }
 }

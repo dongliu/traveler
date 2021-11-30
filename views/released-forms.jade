@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title #{orgName} Form management
+  title #{orgName} Forms
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -15,13 +15,13 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create new empty #{viewConfig.terminology.form}s')
-          i.fa.fa-file-o.fa-lg
-          | &nbsp;New #{viewConfig.terminology.form}
-      .btn-group
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
+      .btn-group
+        a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
+          i.fa.fa-institution.fa-lg
+          | &nbsp;All public #{viewConfig.terminology.form}s
       .btn-group
         button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
@@ -35,33 +35,28 @@ block content
     div
       ul.nav.nav-tabs
         li.active
-          a(href='#submitted-forms', data-toggle='tab') Submitted #{viewConfig.terminology.form}s for review
+          a(href='#released', data-toggle='tab') Released #{viewConfig.terminology.form}s
         li
-          a(href='#released-forms', data-toggle='tab')  Released #{viewConfig.terminology.form}s
-        li
-          a(href='#archived-forms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
+          a(href='#archived-released-forms', data-toggle='tab') Archived released #{viewConfig.terminology.form}s
       .tab-content
-        #submitted-forms.tab-pane.active
+        #released.tab-pane.active
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
-          table#submitted-form-table.table.table-bordered.table-hover
-        #released-forms.tab-pane
-          .btn-toolbar
             .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
+              button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
+                i.fa.fa-plane.fa-lg
+                | &nbsp;Travel
           table#released-form-table.table.table-bordered.table-hover
-        #archived-forms.tab-pane
+        #archived-released-forms.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
-          table#archived-form-table.table.table-bordered.table-hover
+          table#archived-released-form-table.table.table-bordered.table-hover
 
 
 block js
@@ -76,7 +71,6 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/form-management.js')
-
-
+  script(type='text/javascript', src='#{prefix}/javascripts/released-forms.js')

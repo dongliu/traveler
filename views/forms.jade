@@ -30,7 +30,7 @@ block content
         button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
-      if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
+      if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1))
         .btn-group
           a.btn.btn-info#form-management(href='#{prefix}/form-management/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='manage #{viewConfig.terminology.form}s')
             i.fa.fa-suitcase.fa-lg
@@ -55,11 +55,11 @@ block content
           li
             a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s
         li
-          a(href='#releasedforms', data-toggle='tab') Released #{viewConfig.terminology.form}s
+          a(href='#submittedforms', data-toggle='tab') Under review #{viewConfig.terminology.form}s
+        li
+          a(href='#closedforms', data-toggle='tab') Closed #{viewConfig.terminology.form} reviews
         li
           a(href='#archivedforms', data-toggle='tab') Archived draft #{viewConfig.terminology.form}s
-        li
-          a(href='#archived-released-forms', data-toggle='tab') Archived released #{viewConfig.terminology.form}s
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
@@ -101,17 +101,22 @@ block content
                   i.fa.fa-refresh.fa-lg
                   | &nbsp;Reload table
             table#group-shared-form-table.table.table-bordered.table-hover
-        #releasedforms.tab-pane
+        //- the table for under review forms
+        #submittedforms.tab-pane
           .btn-toolbar
             .btn-group
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
+          table#submitted-form-table.table.table-bordered.table-hover
+        //- the table for forms going through review release flow
+        #closedforms.tab-pane
+          .btn-toolbar
             .btn-group
-              button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
-                i.fa.fa-plane.fa-lg
-                | &nbsp;Travel
-          table#released-form-table.table.table-bordered.table-hover
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#closed-form-table.table.table-bordered.table-hover
         #archivedforms.tab-pane
           .btn-toolbar
             .btn-group
@@ -119,14 +124,6 @@ block content
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
           table#archived-form-table.table.table-bordered.table-hover
-        #archived-released-forms.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#archived-released-form-table.table.table-bordered.table-hover
-
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
