@@ -21,3 +21,4 @@ services:
     environment:
       - TRAVELER_CONFIG_REL_PATH=docker
       - DEBUG=traveler:*
+      - DEBUG_COLORS=true

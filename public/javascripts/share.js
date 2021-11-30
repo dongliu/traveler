@@ -1,12 +1,11 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global prefix: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, access: false, travelerGlobal: false*/
-/*global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupIdColumn: false, accessColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false*/
+/* global prefix: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, access: false, travelerGlobal: false, Holder */
+/* global selectColumn: false, useridColumn: false, userNameNoLinkColumn: false, groupIdColumn: false, accessColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, groupNameColumn */
 
-var path = window.location.pathname;
+const path = window.location.pathname;
 
 function initTable(list, oTable) {
   $.ajax({
-    url: path + list + '/json',
+    url: `${path + list}/json`,
     type: 'GET',
     dataType: 'json',
   })
@@ -25,22 +24,22 @@ function initTable(list, oTable) {
 }
 
 function removeFromModal(list, cb) {
-  var ids = [];
+  const ids = [];
   $('#modal .modal-body .target').each(function() {
     ids.push(this.id);
   });
   $.ajax({
-    url: path + list + '/' + ids.join(),
+    url: `${path + list}/${ids.join()}`,
     type: 'DELETE',
     dataType: 'json',
   })
     .done(function(json) {
       json.forEach(function(id) {
-        var item;
+        let item;
         if (list === 'users') {
-          item = $('#' + id);
+          item = $(`#${id}`);
         } else if (list === 'groups') {
-          item = $('[title="' + encodeURIComponent(id) + '"]');
+          item = $(`[title="${encodeURIComponent(id)}"]`);
         } else {
           return;
         }
@@ -49,7 +48,7 @@ function removeFromModal(list, cb) {
       });
     })
     .fail(function(jqXHR) {
-      $('.modal-body').append('Error : ' + jqXHR.responseText);
+      $('.modal-body').append(`Error : ${jqXHR.responseText}`);
     })
     .always(function() {
       cb();
@@ -57,32 +56,22 @@ function removeFromModal(list, cb) {
 }
 
 function remove(list, oTable) {
-  var selected = fnGetSelected(oTable, 'row-selected');
+  const selected = fnGetSelected(oTable, 'row-selected');
   if (selected.length) {
-    $('#modalLabel').html(
-      'Remove the following ' + selected.length + ' ' + list + '? '
-    );
+    $('#modalLabel').html(`Remove the following ${selected.length} ${list}? `);
     $('#modal .modal-body').empty();
     selected.forEach(function(row) {
-      var data = oTable.fnGetData(row);
+      const data = oTable.fnGetData(row);
       if (list === 'users') {
         $('#modal .modal-body').append(
-          '<div class="target" id="' +
-            data._id +
-            '">' +
-            data.username +
-            '</div>'
+          `<div class="target" id="${data._id}">${data.username}</div>`
         );
       }
       if (list === 'groups') {
         $('#modal .modal-body').append(
-          '<div class="target" id="' +
-            encodeURIComponent(data._id) +
-            '" title="' +
-            encodeURIComponent(data._id) +
-            '">' +
-            data.groupname +
-            '</div>'
+          `<div class="target" id="${encodeURIComponent(
+            data._id
+          )}" title="${encodeURIComponent(data._id)}">${data.groupname}</div>`
         );
       }
     });
@@ -108,11 +97,11 @@ function remove(list, oTable) {
 }
 
 function modifyFromModal(list, cb) {
-  var number = $('#modal .modal-body div').length;
+  let number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function() {
-    var that = this;
+    const that = this;
     $.ajax({
-      url: path + list + '/' + that.id,
+      url: `${path + list}/${that.id}`,
       type: 'PUT',
       contentType: 'application/json',
       processData: false,
@@ -125,7 +114,7 @@ function modifyFromModal(list, cb) {
         $(that).addClass('text-success');
       })
       .fail(function(jqXHR) {
-        $(that).append(' : ' + jqXHR.responseText);
+        $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
       .always(function() {
@@ -140,30 +129,26 @@ function modifyFromModal(list, cb) {
 }
 
 function modify(list, oTable) {
-  var selected = fnGetSelected(oTable, 'row-selected');
+  const selected = fnGetSelected(oTable, 'row-selected');
   if (selected.length) {
     $('#modalLabel').html(
-      'Modify the following ' + selected.length + ' ' + list + "' privilege? "
+      `Modify the following ${selected.length} ${list}' privilege? `
     );
     $('#modal .modal-body').empty();
     $('#modal .modal-body').append(
       '<form class="form-inline"><lable class="checkbox"><input id="modal-access" type="checkbox" name="access" value="write">write</lable></form>'
     );
     selected.forEach(function(row) {
-      var data = oTable.fnGetData(row);
+      const data = oTable.fnGetData(row);
       if (list === 'users') {
         $('#modal .modal-body').append(
-          '<div id="' + data._id + '">' + data.username + '</div>'
+          `<div id="${data._id}">${data.username}</div>`
         );
       }
 
       if (list === 'groups') {
         $('#modal .modal-body').append(
-          '<div id="' +
-            encodeURIComponent(data._id) +
-            '">' +
-            data.groupname +
-            '</div>'
+          `<div id="${encodeURIComponent(data._id)}">${data.groupname}</div>`
         );
       }
     });
@@ -197,7 +182,7 @@ function modify(list, oTable) {
 }
 
 function inArray(name, ao) {
-  var i;
+  let i;
   for (i = 0; i < ao.length; i += 1) {
     if ((ao[i].username || ao[i]._id) === name) {
       return true;
@@ -209,41 +194,31 @@ function inArray(name, ao) {
 function addto(data, table, list) {
   if (!!data.name || !!data.id) {
     if (inArray(data.name || data.id, table.fnGetData())) {
-      var name = data.name;
+      let { name } = data;
       if (list === 'groups') {
         name = data.id;
       }
-      //show message
+      // show message
       $('#message').append(
-        '<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button><strong>' +
-          name +
-          '</strong> is already in the ' +
-          list +
-          ' share list. </div>'
+        `<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button><strong>${name}</strong> is already in the ${list} share list. </div>`
       );
     } else {
       $.ajax({
-        url: path + list + '/',
+        url: `${path + list}/`,
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(data),
         processData: false,
-        success: function(res, status, jqXHR) {
+        success(res, status, jqXHR) {
           $('#message').append(
-            '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' +
-              jqXHR.responseText +
-              '</div>'
+            `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>${jqXHR.responseText}</div>`
           );
           initTable(list, table);
         },
-        error: function(jqXHR) {
+        error(jqXHR) {
           if (jqXHR.status !== 401) {
             $('#message').append(
-              '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ' +
-                list +
-                ' share list : ' +
-                jqXHR.responseText +
-                '</div>'
+              `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the ${list} share list : ${jqXHR.responseText}</div>`
             );
           }
         },
@@ -251,9 +226,7 @@ function addto(data, table, list) {
     }
   } else {
     $('#message').append(
-      '<div class="alert"><button class="close" data-dismiss="alert">x</button>' +
-        list +
-        ' name is empty. </div>'
+      `<div class="alert"><button class="close" data-dismiss="alert">x</button>${list} name is empty. </div>`
     );
   }
 }
@@ -266,9 +239,9 @@ $(function() {
   if (typeof access !== 'undefined') {
     $('select[name="public"]').val(access);
   }
-  var initAccess = $('select[name="public"]').val();
+  let initAccess = $('select[name="public"]').val();
 
-  $('select[name="public"]').click(function() {
+  $('select[name="public"]').change(function() {
     if ($('select[name="public"]').val() !== initAccess) {
       $('#update').attr('disabled', false);
     } else {
@@ -278,35 +251,31 @@ $(function() {
 
   $('#update').click(function(e) {
     e.preventDefault();
-    var value = $('select[name="public"]').val();
+    const value = $('select[name="public"]').val();
     if (initAccess === value) {
       $('#message').append(
         '<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The setting is not changed.</div>'
       );
     } else {
       $.ajax({
-        url: path + 'public',
+        url: `${path}public`,
         type: 'PUT',
         contentType: 'application/json',
         data: JSON.stringify({
           access: value,
         }),
         processData: false,
-        success: function(res, status, jqXHR) {
+        success(res, status, jqXHR) {
           $('#message').append(
-            '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' +
-              jqXHR.responseText +
-              '</div>'
+            `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>${jqXHR.responseText}</div>`
           );
           initAccess = value;
           $('#update').attr('disabled', true);
         },
-        error: function(jqXHR) {
+        error(jqXHR) {
           if (jqXHR.status !== 401) {
             $('#message').append(
-              '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the public access setting : ' +
-                jqXHR.responseText +
-                '</div>'
+              `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the public access setting : ${jqXHR.responseText}</div>`
             );
           }
         },
@@ -358,17 +327,17 @@ $(function() {
     $('#addgroup').attr('disabled', false);
   });
 
-  var shareAoColumns = [
+  const shareAoColumns = [
     selectColumn,
     useridColumn,
     userNameNoLinkColumn,
     accessColumn,
   ];
-  var shareTable = $('#share-table').dataTable({
+  const shareTable = $('#share-table').dataTable({
     aaData: [],
     // 'bAutoWidth': false,
     aoColumns: shareAoColumns,
-    fnDrawCallback: function() {
+    fnDrawCallback() {
       Holder.run({
         images: 'img.user',
       });
@@ -377,12 +346,17 @@ $(function() {
     sDom: sDomNoTools,
   });
 
-  var groupShareAoColumns = [selectColumn, groupIdColumn, groupNameColumn, accessColumn];
-  var groupShareTable = $('#groupshare-table').dataTable({
+  const groupShareAoColumns = [
+    selectColumn,
+    groupIdColumn,
+    groupNameColumn,
+    accessColumn,
+  ];
+  const groupShareTable = $('#groupshare-table').dataTable({
     aaData: [],
     // 'bAutoWidth': false,
     aoColumns: groupShareAoColumns,
-    fnDrawCallback: function() {
+    fnDrawCallback() {
       Holder.run({
         images: 'img.user',
       });
@@ -396,7 +370,7 @@ $(function() {
 
   $('#add').click(function(e) {
     e.preventDefault();
-    var data = {};
+    const data = {};
     data.name = $('#username').val();
     data.access = $('#access').prop('checked') ? 'write' : 'read';
     addto(data, shareTable, 'users');
@@ -406,7 +380,7 @@ $(function() {
 
   $('#addgroup').click(function(e) {
     e.preventDefault();
-    var data = {};
+    const data = {};
     data.id = $('#groupname')
       .val()
       .toLowerCase();

@@ -16,21 +16,21 @@
     "cheerio": "0.22.0",
     "compression": "1.7.3",
     "cookie-parser": "1.4.4",
-    "debug": "^4.1.1",
+    "debug": "^4.3.2",
     "errorhandler": "1.5.0",
     "express": "^4.17.1",
     "express-session": "1.15.6",
     "express-slash": "1.0.0",
-    "file-stream-rotator": "0.0.5",
+    "file-stream-rotator": "^0.5.7",
     "helmet": "^4.6.0",
     "jade": "1.10.0",
     "jstransformer-marked": "1.0.1",
     "ldapjs": "1.0.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "method-override": "3.0.0",
-    "mongoose": "^5.0.18",
+    "mongoose": "^5.13.13",
     "morgan": "1.9.1",
-    "mqtt": "4.2.1",
+    "mqtt": "^4.2.8",
     "multer": "0.1.0",
     "optional-require": "^1.0.2",
     "pause": "0.0.1",
@@ -38,19 +38,22 @@
     "sanitize-html": "^1.20.0",
     "serve-favicon": "2.5.0",
     "templatizer": "0.2.10",
-    "tinymce": "5.0.3",
+    "tinymce": "^5.10.1",
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "acorn": "^7.1.0",
+    "acorn": "^7.4.1",
     "chai": "^4.2.0",
-    "eslint": "^6.8.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-import": "^2.24.2",
     "husky": "^3.1.0",
-    "lint-staged": "^9.5.0",
+    "lint-staged": "^11.2.3",
     "mocha": "^5.2.0",
     "prettier": "^1.19.1",
-    "sinon": "^7.2.3"
+    "sinon": "^7.2.3",
+    "supports-color": "^9.0.2"
   },
   "husky": {
     "hooks": {
@@ -58,9 +61,9 @@
     }
   },
   "lint-staged": {
-    "*.{js,json,css,md}": [
-      "prettier --config ./prettier.config.js --write",
-      "git add"
+    "*.js": [
+      "prettier --write",
+      "eslint"
     ]
   }
 }

@@ -40,7 +40,7 @@ function travelFromModal() {
   });
 }
 
-function cloneFromModal(activeTable, formTable) {
+function cloneFromModal(activeTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   let number = $('#modal .modal-body div.target').length;
@@ -48,8 +48,7 @@ function cloneFromModal(activeTable, formTable) {
   if (
     base === 'archivedforms' ||
     base === 'sharedforms' ||
-    base === 'groupsharedforms' ||
-    base === 'closedforms'
+    base === 'groupsharedforms'
   ) {
     base = 'forms';
   }
@@ -82,7 +81,6 @@ function cloneFromModal(activeTable, formTable) {
         number = number - 1;
         if (number === 0 && success) {
           $('#return').prop('disabled', false);
-          formTable.fnReloadAjax();
         }
       });
   });
@@ -106,74 +104,21 @@ $(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
-  /* form table starts */
-  const formAoColumns = [
-    selectColumn,
-    formLinkColumn,
-    formConfigLinkColumn,
-    formShareLinkColumn,
-    titleColumn,
-    formStatusColumn,
-    formTypeColumn,
-    versionColumn,
-    tagsColumn,
-    keysColumn,
-    createdOnColumn,
-    updatedOnColumn,
-    updatedByColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
-  ];
-  const formTable = $('#form-table').dataTable({
-    sAjaxSource: '/forms/json',
-    sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
-    bAutoWidth: false,
-    bProcessing: true,
-    iDisplayLength: 10,
-    aLengthMenu: [
-      [10, 50, 100, -1],
-      [10, 50, 100, 'All'],
-    ],
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-    },
-    bDeferRender: true,
-    aoColumns: formAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [10, 'desc'],
-    ],
-    sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#form-table', formAoColumns);
-  /* form table ends */
 
-  /* transferred form table starts */
-  const transferredFormAoColumns = [
+  /* released form table starts */
+  const releasedFormAoColumns = [
     selectColumn,
-    formLinkColumn,
-    formShareLinkColumn,
+    releasedFormLinkColumn,
     titleColumn,
-    formStatusColumn,
+    releasedFormStatusColumn,
     formTypeColumn,
-    versionColumn,
+    releasedFormVersionColumn,
     tagsColumn,
-    keysColumn,
-    createdByColumn,
-    createdOnColumn,
-    transferredOnColumn,
-    updatedOnColumn,
-    updatedByColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
+    releasedByColumn,
+    releasedOnColumn,
   ];
-  const transferredFormTable = $('#transferred-form-table').dataTable({
-    sAjaxSource: '/transferredforms/json',
+  const releasedFormTable = $('#released-form-table').dataTable({
+    sAjaxSource: '/released-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
       Holder.run({
@@ -191,217 +136,54 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: transferredFormAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [12, 'desc'],
-    ],
-    sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#transferred-form-table', transferredFormAoColumns);
-  /* transferred form table ends */
-
-  /* shared form table starts */
-  const sharedFormAoColumns = [
-    selectColumn,
-    formLinkColumn,
-    titleColumn,
-    formStatusColumn,
-    formTypeColumn,
-    versionColumn,
-    tagsColumn,
-    keysColumn,
-    ownerColumn,
-    updatedByColumn,
-    updatedOnColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
-  ];
-  const sharedFormTable = $('#shared-form-table').dataTable({
-    sAjaxSource: '/sharedforms/json',
-    sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
-    bAutoWidth: false,
-    bProcessing: true,
-    iDisplayLength: 10,
-    aLengthMenu: [
-      [10, 50, 100, -1],
-      [10, 50, 100, 'All'],
-    ],
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-    },
-    bDeferRender: true,
-    aoColumns: sharedFormAoColumns,
-    aaSorting: [[10, 'desc']],
-    sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#shared-form-table', sharedFormAoColumns);
-  /* shared form table ends */
-
-  /* group shared form table starts */
-  const groupSharedFormAoColumns = sharedFormAoColumns;
-  const groupSharedFormTable = $('#group-shared-form-table').dataTable({
-    sAjaxSource: '/groupsharedforms/json',
-    sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
-    bAutoWidth: false,
-    bProcessing: true,
-    iDisplayLength: 10,
-    aLengthMenu: [
-      [10, 50, 100, -1],
-      [10, 50, 100, 'All'],
-    ],
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-    },
-    bDeferRender: true,
-    aoColumns: groupSharedFormAoColumns,
-    aaSorting: [[9, 'desc']],
-    sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#group-shared-form-table', groupSharedFormAoColumns);
-  /* group shared form table ends */
-
-  /* submitted form table starts */
-  const submittedFormAoColumns = [
-    selectColumn,
-    formLinkColumn,
-    formConfigLinkColumn,
-    formReviewLinkColumn,
-    titleColumn,
-    formStatusColumn,
-    formTypeColumn,
-    versionColumn,
-    tagsColumn,
-    keysColumn,
-    createdOnColumn,
-    updatedOnColumn,
-    updatedByColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
-  ];
-  const submittedFormTable = $('#submitted-form-table').dataTable({
-    sAjaxSource: '/submittedforms/json',
-    sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
-    bAutoWidth: false,
-    bProcessing: true,
-    iDisplayLength: 10,
-    aLengthMenu: [
-      [10, 50, 100, -1],
-      [10, 50, 100, 'All'],
-    ],
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-    },
-    bDeferRender: true,
-    aoColumns: submittedFormAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [10, 'desc'],
-    ],
-    sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#submitted-form-table', submittedFormAoColumns);
-  /* submitted form table ends */
-
-  /* closed form table starts */
-  const closedFormAoColumns = [
-    selectColumn,
-    formLinkColumn,
-    formConfigLinkColumn,
-    formReviewLinkColumn,
-    titleColumn,
-    formStatusColumn,
-    formTypeColumn,
-    versionColumn,
-    tagsColumn,
-    keysColumn,
-    createdOnColumn,
-    updatedOnColumn,
-    updatedByColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
-  ];
-  const closedFormTable = $('#closed-form-table').dataTable({
-    sAjaxSource: '/closedforms/json',
-    sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
-    bAutoWidth: false,
-    bProcessing: true,
-    iDisplayLength: 10,
-    aLengthMenu: [
-      [10, 50, 100, -1],
-      [10, 50, 100, 'All'],
-    ],
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-    },
-    bDeferRender: true,
-    aoColumns: closedFormAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [10, 'desc'],
-    ],
-    sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#closed-form-table', closedFormAoColumns);
-  /* submitted form table ends */
-
-  /* archieved form table starts */
-  const archivedFormAoColumns = [
-    selectColumn,
-    formLinkColumn,
-    titleColumn,
-    formTypeColumn,
-    versionColumn,
-    tagsColumn,
-    keysColumn,
-    updatedByColumn,
-    updatedOnColumn,
-  ];
-  const archivedFormTable = $('#archived-form-table').dataTable({
-    sAjaxSource: '/archivedforms/json',
-    sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
-    bAutoWidth: false,
-    bProcessing: true,
-    iDisplayLength: 10,
-    aLengthMenu: [
-      [10, 50, 100, -1],
-      [10, 50, 100, 'All'],
-    ],
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-    },
-    bDeferRender: true,
-    aoColumns: archivedFormAoColumns,
+    aoColumns: releasedFormAoColumns,
     aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
   });
-  fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
-  /* archived form table ends */
+  fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
+  /* released form table ends */
+
+  /* archived released form table starts */
+  const archivedReleasedFormAoColumns = [
+    selectColumn,
+    releasedFormLinkColumn,
+    titleColumn,
+    formTypeColumn,
+    tagsColumn,
+    releasedFormVersionColumn,
+    archivedByColumn,
+    archivedOnColumn,
+  ];
+  const archivedReleasedFormTable = $(
+    '#archived-released-form-table'
+  ).dataTable({
+    sAjaxSource: '/archived-released-forms/json',
+    sAjaxDataProp: '',
+    fnDrawCallback() {
+      Holder.run({
+        images: 'img.user',
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: archivedReleasedFormAoColumns,
+    aaSorting: [[7, 'desc']],
+    sDom: sDomNoTools,
+  });
+  fnAddFilterFoot(
+    '#archived-released-form-table',
+    archivedReleasedFormAoColumns
+  );
+  /* archived released form table ends */
 
   // show the tab in hash
   showHash();
@@ -515,19 +297,14 @@ $(function() {
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        cloneFromModal(activeTable, formTable);
+        cloneFromModal(activeTable);
       });
     }
   });
 
   $('#reload').click(function() {
-    formTable.fnReloadAjax();
-    transferredFormTable.fnReloadAjax();
-    sharedFormTable.fnReloadAjax();
-    groupSharedFormTable.fnReloadAjax();
-    submittedFormTable.fnReloadAjax();
-    closedFormTable.fnReloadAjax();
-    archivedFormTable.fnReloadAjax();
+    releasedFormTable.fnReloadAjax();
+    archivedReleasedFormTable.fnReloadAjax();
   });
   // binding events
   selectEvent();

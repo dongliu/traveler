@@ -1,5 +1,5 @@
-/*global moment: false*/
-/*global prefix: false, linkTarget: false*/
+/* global moment: false */
+/* global prefix: false, linkTarget: false, userid */
 
 function formatDate(date) {
   return date ? moment(date).fromNow() : '';
@@ -25,7 +25,7 @@ function selectEvent() {
 
 function selectMultiEvent(oTable) {
   $(oTable.$('tbody')).on('click', 'input.select-row', function(e) {
-    var tr = $(e.target).closest('tr');
+    const tr = $(e.target).closest('tr');
     if ($(tr).hasClass('row-selected')) {
       $(tr).removeClass('row-selected');
     } else {
@@ -36,7 +36,7 @@ function selectMultiEvent(oTable) {
 
 function selectOneEvent(oTable) {
   $('tbody').on('click', 'input.select-row', function(e) {
-    var tr = $(e.target).closest('tr');
+    const tr = $(e.target).closest('tr');
     if ($(tr).hasClass('row-selected')) {
       $(tr).removeClass('row-selected');
     } else {
@@ -52,20 +52,16 @@ function selectOneEvent(oTable) {
 
 function filterEvent() {
   $('.filter').on('keyup', 'input', function(e) {
-    var table = $(this).closest('table');
-    var th = $(this).closest('th');
-    var filter = $(this).closest('.filter');
-    var index;
+    const table = $(this).closest('table');
+    const th = $(this).closest('th');
+    const filter = $(this).closest('.filter');
+    let index;
     if (filter.is('thead')) {
       index = $('thead.filter th', table).index(th);
-      $('tfoot.filter th:nth-child(' + (index + 1) + ') input', table).val(
-        this.value
-      );
+      $(`tfoot.filter th:nth-child(${index + 1}) input`, table).val(this.value);
     } else {
       index = $('tfoot.filter th', table).index(th);
-      $('thead.filter th:nth-child(' + (index + 1) + ') input', table).val(
-        this.value
-      );
+      $(`thead.filter th:nth-child(${index + 1}) input`, table).val(this.value);
     }
     table.dataTable().fnFilter(this.value, index);
   });
@@ -74,7 +70,7 @@ function filterEvent() {
 function dateColumn(title, key) {
   return {
     sTitle: title,
-    mData: function(source, type, val) {
+    mData(source, type, val) {
       if (type === 'sort') {
         return source[key];
       }
@@ -87,7 +83,7 @@ function dateColumn(title, key) {
 function longDateColumn(title, key) {
   return {
     sTitle: title,
-    mData: function(source, type, val) {
+    mData(source, type, val) {
       if (type === 'sort') {
         return source[key];
       }
@@ -103,24 +99,16 @@ function personColumn(title, key) {
     sTitle: title,
     mData: key,
     sDefaultContent: '',
-    mRender: function(data, type) {
+    mRender(data, type) {
       if (type === 'sort' || type === 'filter') {
         return data;
-      } else if (data) {
-        return (
-          '<img class="user" data-src="holder.js/27x40?size=20&text=' +
-          data.substr(0, 1).toUpperCase() +
-          '" src="' +
-          prefix +
-          '/adusers/' +
-          data +
-          '/photo" title="' +
-          data +
-          '">'
-        );
-      } else {
-        return '';
       }
+      if (data) {
+        return `<img class="user" data-src="holder.js/27x40?size=20&text=${data
+          .substr(0, 1)
+          .toUpperCase()}" src="${prefix}/adusers/${data}/photo" title="${data}">`;
+      }
+      return '';
     },
     bFilter: true,
   };
@@ -129,7 +117,7 @@ function personColumn(title, key) {
 function keyValueColumn(collection, key) {
   return {
     sTitle: key,
-    mData: collection + '.' + key + '.value',
+    mData: `${collection}.${key}.value`,
     sDefaultContent: '',
     bFilter: true,
   };
@@ -138,18 +126,18 @@ function keyValueColumn(collection, key) {
 function keyLabelColumn(key) {
   return {
     sTitle: 'label',
-    mData: 'user_defined.' + key + '.label',
+    mData: `user_defined.${key}.label`,
     sDefaultContent: '',
     bFilter: true,
   };
 }
 
 function valueLabel(data) {
-  var output = '';
+  let output = '';
   if (data.value) {
-    output += '<span class="input-value">' + data.value + '</span>';
+    output += `<span class="input-value">${data.value}</span>`;
     if (data.label) {
-      output += '<span class="input-label"> (' + data.label + ')</span>';
+      output += `<span class="input-label"> (${data.label})</span>`;
     }
   }
   return output;
@@ -158,16 +146,16 @@ function valueLabel(data) {
 function keyValueLableColumn(key) {
   return {
     sTitle: key,
-    mData: 'user_defined.' + key,
+    mData: `user_defined.${key}`,
     sDefaultContent: '',
-    mRender: function(data, type) {
+    mRender(data, type) {
       if (type === 'sort' || type === 'filter') {
         return data.value;
-      } else if (data) {
-        return valueLabel(data);
-      } else {
-        return '';
       }
+      if (data) {
+        return valueLabel(data);
+      }
+      return '';
     },
     bFilter: true,
   };
@@ -178,16 +166,8 @@ function personNameColumn(title, key) {
     sTitle: title,
     mData: key,
     sDefaultContent: '',
-    mRender: function(data, type, full) {
-      return (
-        '<a href = "/usernames/' +
-        data +
-        '" target="' +
-        linkTarget +
-        '" >' +
-        data +
-        '</a>'
-      );
+    mRender(data, type, full) {
+      return `<a href = "/usernames/${data}" target="${linkTarget}" >${data}</a>`;
     },
     bFilter: true,
   };
@@ -208,11 +188,11 @@ function fnUnwrap(oTableLocal) {
 }
 
 function fnGetSelected(oTableLocal, selectedClass) {
-  var aReturn = [],
-    i;
-  var aTrs = oTableLocal.fnGetNodes();
+  const aReturn = [];
+  let i;
+  const aTrs = oTableLocal.fnGetNodes();
 
-  for (i = 0; i < aTrs.length; i++) {
+  for (i = 0; i < aTrs.length; i += 1) {
     if ($(aTrs[i]).hasClass(selectedClass)) {
       aReturn.push(aTrs[i]);
     }
@@ -222,22 +202,22 @@ function fnGetSelected(oTableLocal, selectedClass) {
 
 function fnGetSelectedInPage(oTableLocal, selectedClass, current) {
   if (current) {
-    return oTableLocal.$('tr.' + selectedClass, {
+    return oTableLocal.$(`tr.${selectedClass}`, {
       page: 'current',
     });
   }
-  return oTableLocal.$('tr.' + selectedClass);
+  return oTableLocal.$(`tr.${selectedClass}`);
 }
 
 function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
-  var aTrs = oTableLocal.fnGetNodes();
-  var i;
+  const aTrs = oTableLocal.fnGetNodes();
+  let i;
 
-  for (i = 0; i < aTrs.length; i++) {
+  for (i = 0; i < aTrs.length; i += 1) {
     if ($(aTrs[i]).hasClass(selectedClass)) {
       $(aTrs[i]).removeClass(selectedClass);
       $(aTrs[i])
-        .find('input.' + checkboxClass + ':checked')
+        .find(`input.${checkboxClass}:checked`)
         .prop('checked', false);
     }
   }
@@ -245,8 +225,8 @@ function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
 
 function fnSelectAll(oTableLocal, selectedClass, checkboxClass, current) {
   fnDeselect(oTableLocal, selectedClass, checkboxClass);
-  var rows;
-  var i;
+  let rows;
+  let i;
   if (current) {
     rows = oTableLocal.$('tr', {
       page: 'current',
@@ -260,7 +240,7 @@ function fnSelectAll(oTableLocal, selectedClass, checkboxClass, current) {
   for (i = 0; i < rows.length; i += 1) {
     $(rows[i]).addClass(selectedClass);
     $(rows[i])
-      .find('input.' + checkboxClass)
+      .find(`input.${checkboxClass}`)
       .prop('checked', true);
   }
 }
@@ -269,7 +249,7 @@ function fnSetDeselect(nTr, selectedClass, checkboxClass) {
   if ($(nTr).hasClass(selectedClass)) {
     $(nTr).removeClass(selectedClass);
     $(nTr)
-      .find('input.' + checkboxClass + ':checked')
+      .find(`input.${checkboxClass}:checked`)
       .prop('checked', false);
   }
 }
@@ -281,13 +261,11 @@ function fnSetColumnsVis(oTableLocal, columns, show) {
 }
 
 function fnAddFilterFoot(sTable, aoColumns) {
-  var tr = $('<tr role="row">');
+  const tr = $('<tr role="row">');
   aoColumns.forEach(function(c) {
     if (c.bFilter) {
       tr.append(
-        '<th><input type="text" placeholder="' +
-          c.sTitle +
-          '" style="width:80%;" autocomplete="off"></th>'
+        `<th><input type="text" placeholder="${c.sTitle}" style="width:80%;" autocomplete="off"></th>`
       );
     } else {
       tr.append('<th></th>');
@@ -297,13 +275,11 @@ function fnAddFilterFoot(sTable, aoColumns) {
 }
 
 function fnAddFilterHead(sTable, aoColumns) {
-  var tr = $('<tr role="row">');
+  const tr = $('<tr role="row">');
   aoColumns.forEach(function(c) {
     if (c.bFilter) {
       tr.append(
-        '<th><input type="text" placeholder="' +
-          c.sTitle +
-          '" style="width:80%;" autocomplete="off"></th>'
+        `<th><input type="text" placeholder="${c.sTitle}" style="width:80%;" autocomplete="off"></th>`
       );
     } else {
       tr.append('<th></th>');
@@ -313,7 +289,7 @@ function fnAddFilterHead(sTable, aoColumns) {
 }
 
 function formatTravelerStatus(s) {
-  var status = {
+  const status = {
     '1': 'active',
     '1.5': 'submitted for completion',
     '2': 'completed',
@@ -327,23 +303,10 @@ function formatTravelerStatus(s) {
   return 'unknown';
 }
 
-function formatFormStatus(s) {
-  var status = {
-    '0': 'editable',
-    '0.5': 'ready to publish',
-    '1': 'published',
-    '2': 'obsoleted',
-  };
-  if (status[s.toString()]) {
-    return status[s.toString()];
-  }
-  return 'unknown';
-}
-
 $.fn.dataTableExt.oApi.fnAddDataAndDisplay = function(oSettings, aData) {
   /* Add the data */
-  var iAdded = this.oApi._fnAddData(oSettings, aData);
-  var nAdded = oSettings.aoData[iAdded].nTr;
+  const iAdded = this.oApi._fnAddData(oSettings, aData);
+  const nAdded = oSettings.aoData[iAdded].nTr;
 
   /* Need to re-filter and re-sort the table to get positioning correct, not perfect
    * as this will actually redraw the table on screen, but the update should be so fast (and
@@ -352,10 +315,11 @@ $.fn.dataTableExt.oApi.fnAddDataAndDisplay = function(oSettings, aData) {
   this.oApi._fnReDraw(oSettings);
 
   /* Find it's position in the table */
-  var iPos = -1;
-  var i, iLen;
+  let iPos = -1;
+  let i;
+  let iLen;
 
-  for (i = 0, iLen = oSettings.aiDisplay.length; i < iLen; i++) {
+  for (i = 0, iLen = oSettings.aiDisplay.length; i < iLen; i += 1) {
     if (oSettings.aoData[oSettings.aiDisplay[i]].nTr === nAdded) {
       iPos = i;
       break;
@@ -383,9 +347,10 @@ $.fn.dataTableExt.oApi.fnDisplayRow = function(oSettings, nRow) {
   }
 
   // Find the node in the table
-  var iPos = -1;
-  var i, iLen;
-  for (i = 0, iLen = oSettings.aiDisplay.length; i < iLen; i++) {
+  let iPos = -1;
+  let i;
+  let iLen;
+  for (i = 0, iLen = oSettings.aiDisplay.length; i < iLen; i += 1) {
     if (oSettings.aoData[oSettings.aiDisplay[i]].nTr === nRow) {
       iPos = i;
       break;
@@ -402,7 +367,7 @@ $.fn.dataTableExt.oApi.fnDisplayRow = function(oSettings, nRow) {
   this.oApi._fnDraw(oSettings);
 };
 
-var selectColumn = {
+const selectColumn = {
   sTitle: '',
   sDefaultContent:
     '<label class="checkbox"><input type="checkbox" class="select-row"></label>',
@@ -410,89 +375,65 @@ var selectColumn = {
   asSorting: ['desc', 'asc'],
 };
 
-var userIdColumn = {
+const userIdColumn = {
   sTitle: 'User Id',
-  mRender: function(data) {
-    return '<label>' + data + '</label>';
+  mRender(data) {
+    return `<label>${data}</label>`;
   },
   mData: '_id',
   bSortable: true,
   sWidth: '30px',
 };
 
-var previewColumn = {
+const previewColumn = {
   sTitle: '',
   mData: '_id',
   bSortable: false,
-  mRender: function(data) {
-    return (
-      '<a data-toggle="tooltip" title="preview the traveler with this form" class="preview" id="' +
-      data +
-      '"><i class="fa fa-eye fa-lg"></i></a>'
-    );
+  mRender(data) {
+    return `<a data-toggle="tooltip" title="preview the traveler with this form" class="preview" id="${data}"><i class="fa fa-eye fa-lg"></i></a>`;
   },
   sWidth: '25px',
 };
 
-var removeColumn = {
+const removeColumn = {
   sTitle: '',
   mData: '_id',
   bSortable: false,
-  mRender: function(data) {
-    return (
-      '<a data-toggle="tooltip" title="remove the item" class="remove text-warning" id="' +
-      data +
-      '"><i class="fa fa-trash fa-lg"></i></a>'
-    );
+  mRender(data) {
+    return `<a data-toggle="tooltip" title="remove the item" class="remove text-warning" id="${data}"><i class="fa fa-trash fa-lg"></i></a>`;
   },
 };
 
-var referenceFormLinkColumn = {
+const referenceFormLinkColumn = {
   sTitle: 'Ref',
   mData: 'reference',
-  mRender: function(data) {
-    return (
-      '<a href="' +
-      prefix +
-      '/forms/' +
-      data +
-      '/" target="' +
-      linkTarget +
-      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
-    );
+  mRender(data) {
+    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
   },
   bSortable: false,
   sWidth: '45px',
 };
 
-var formColumn = {
+const formColumn = {
   sTitle: 'Link',
   mData: '_id',
-  mRender: function(data) {
-    return (
-      '<a href="' +
-      prefix +
-      '/forms/' +
-      data +
-      '/" target="' +
-      linkTarget +
-      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
-    );
+  mRender(data) {
+    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
   },
   bSortable: false,
   sWidth: '45px',
 };
 
-var aliasColumn = {
+const aliasColumn = {
   sTitle: 'Alias',
   mData: 'alias',
   bFilter: true,
 };
 
-var activatedOnColumn = {
+const activatedOnColumn = {
   sTitle: 'Activated',
-  mData: function(source, type) {
-    var a = source.activatedOn;
+  mData(source, type) {
+    const a = source.activatedOn;
     if (type === 'sort') {
       return a[a.length - 1];
     }
@@ -501,7 +442,7 @@ var activatedOnColumn = {
   sDefaultContent: '',
 };
 
-var idColumn = {
+const idColumn = {
   sTitle: '',
   mData: '_id',
   bVisible: false,
@@ -510,16 +451,8 @@ var idColumn = {
 const formLinkColumn = {
   sTitle: '',
   mData: '_id',
-  mRender: function(data) {
-    return (
-      '<a href="' +
-      prefix +
-      '/forms/' +
-      data +
-      '/" target="' +
-      linkTarget +
-      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>'
-    );
+  mRender(data) {
+    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -527,58 +460,42 @@ const formLinkColumn = {
 const releasedFormLinkColumn = {
   sTitle: '',
   mData: '_id',
-  mRender: function(data) {
-    return (
-      '<a href="' +
-      prefix +
-      '/released-forms/' +
-      data +
-      '/" target="' +
-      linkTarget +
-      '" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>'
-    );
+  mRender(data) {
+    return `<a href="${prefix}/released-forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>`;
   },
   bSortable: false,
 };
 
-var formConfigLinkColumn = {
+const formConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
-  mRender: function(data, type, full) {
-    return (
-      '<a href="' +
-      prefix +
-      '/forms/' +
-      data +
-      '/config" data-toggle="tooltip" title="config the form"><i class="fa fa-gear fa-lg"></i></a>'
-    );
+  mRender(data, type, full) {
+    return `<a href="${prefix}/forms/${data}/config" data-toggle="tooltip" title="config the form"><i class="fa fa-gear fa-lg"></i></a>`;
   },
   bSortable: false,
 };
 
 function cloneForm(id, type, title) {
   $.ajax({
-    url: '/' + type + '/' + id + '/clone',
+    url: `/${type}/${id}/clone`,
     type: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({
-      title: title,
+      title,
     }),
   })
     .done(function(d) {
       $('#message').append(
-        '<div class="alert alert-success">' +
-          '<button class="close" data-dismiss="alert">x</button>The form was cloned. ' +
-          d +
-          '</div>'
+        `${'<div class="alert alert-success">' +
+          '<button class="close" data-dismiss="alert">x</button>The form was cloned. '}${d}</div>`
       );
     })
     .fail(function(jqXHR) {
       $('#message').append(
-        '<div class="alert alert-error">' +
-          '<button class="close" data-dismiss="alert">x</button>' +
-          jqXHR.responseText +
-          '.</div>'
+        `${'<div class="alert alert-error">' +
+          '<button class="close" data-dismiss="alert">x</button>'}${
+          jqXHR.responseText
+        }.</div>`
       );
     });
 }
@@ -604,149 +521,240 @@ function cloneColumn(type) {
   return {
     sTitle: 'Clone',
     mData: '_id',
-    mRender: function(data) {
-      return (
-        '<a href="#" onclick="cloneModal(\'' +
-        data +
-        "', '" +
-        type +
-        '\');" data-toggle="tooltip" title="clone the form"><i class="fa fa-copy fa-lg"></i></a>'
-      );
+    mRender(data) {
+      return `<a href="#" onclick="cloneModal('${data}', '${type}');" data-toggle="tooltip" title="clone the form"><i class="fa fa-copy fa-lg"></i></a>`;
     },
     bSortable: false,
   };
 }
 
-var formCloneColumn = cloneColumn('forms');
+const formCloneColumn = cloneColumn('forms');
 
-var releasedFormCloneColumn = cloneColumn('released-forms');
+const releasedFormCloneColumn = cloneColumn('released-forms');
 
-var formShareLinkColumn = {
+const formShareLinkColumn = {
   sTitle: '',
-  mData: function(source) {
+  mData(source) {
     if (source.publicAccess >= 0) {
-      return (
-        '<a href="' +
-        prefix +
-        '/forms/' +
-        source._id +
-        '/share/" target="' +
-        linkTarget +
-        '" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>'
-      );
+      return `<a href="${prefix}/forms/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the form" class="text-success"><i class="fa fa-users fa-lg"></i></a>`;
     }
-    return (
-      '<a href="' +
-      prefix +
-      '/forms/' +
-      source._id +
-      '/share/" target="' +
-      linkTarget +
-      '" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>'
-    );
+    return `<a href="${prefix}/forms/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the form"><i class="fa fa-users fa-lg"></i></a>`;
   },
   bSortable: false,
 };
 
-var createdOnColumn = dateColumn('Created', 'createdOn');
-var createdByColumn = personColumn('Created by', 'createdBy');
-var ownerColumn = {
-  sTitle: 'Owner',
-  sDefaultContent: '',
-  mData: function(source, type) {
-    var owner = source.owner || source.createdBy;
-    if (type === 'sort' || type === 'filter') {
-      return owner;
-    } else if (owner) {
-      return (
-        '<a target="' +
-        linkTarget +
-        '" href="/users/' +
-        owner +
-        '"><img class="user" data-src="holder.js/27x40?size=20&text=' +
-        owner.substr(0, 1).toUpperCase() +
-        '" src="' +
-        prefix +
-        '/adusers/' +
-        owner +
-        '/photo" title="' +
-        owner +
-        '"></a>'
-      );
-    } else {
+const formReviewLinkColumn = {
+  sTitle: '',
+  mData(source) {
+    return `<a href="${prefix}/forms/${source._id}/review/" target="${linkTarget}" data-toggle="tooltip" title="reviews for the form"><i class="fa fa-eye fa-lg"></i></a>`;
+  },
+  bSortable: false,
+};
+
+const reviewerIdColumn = personColumn('Reviewer', '_id');
+
+const requestedOnColumn = dateColumn('Requested on', 'requestedOn');
+
+const reviewRequestedOnColumn = {
+  sTitle: 'Requested on',
+  mData(source, type) {
+    if (!source.__review) {
       return '';
     }
+    const requests = source.__review.reviewRequests;
+    if (!requests) {
+      return '';
+    }
+    const request = requests.find(function(r) {
+      return r._id === userid;
+    });
+    if (!request) {
+      return '';
+    }
+    return formatDate(request.requestedOn);
   },
   bFilter: true,
 };
 
-var clonedByColumn = personColumn('Cloned by', 'clonedBy');
+const reviewRequestedByColumn = {
+  sTitle: 'Requested by',
+  mData(source, type) {
+    if (!source.__review) {
+      return '';
+    }
+    const requests = source.__review.reviewRequests;
+    if (!requests) {
+      return '';
+    }
+    const request = requests.find(function(r) {
+      return r._id === userid;
+    });
+    if (!request) {
+      return '';
+    }
+    return `<a target="${linkTarget}" href="/users/${
+      request.requestedBy
+    }"><img class="user" data-src="holder.js/27x40?size=20&text=${request.requestedBy
+      .substr(0, 1)
+      .toUpperCase()}" src="${prefix}/adusers/${
+      request.requestedBy
+    }/photo" title="${request.requestedBy}"></a>`;
+  },
+  bFilter: true,
+};
 
-var updatedOnColumn = dateColumn('Updated', 'updatedOn');
-var updatedByColumn = personColumn('Updated by', 'updatedBy');
+const reviewersColumn = {
+  sTitle: 'Reviewers',
+  mData(source, type) {
+    if (source.__review) {
+      const requests = source.__review.reviewRequests;
+      if (!requests) {
+        return '';
+      }
+      if (requests.length === 0) {
+        return '';
+      }
+      const reviews = requests.map(function(r) {
+        if (type === 'filter' || type === 'sort') {
+          return r._id;
+        }
+        return `<a target="${linkTarget}" href="/users/${r._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${r._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${r._id}/photo" title="${r._id}"></a>`;
+      });
+      if (type === 'filter' || type === 'sort') {
+        return reviews.join('; ');
+      }
+      return reviews.join(' ');
+    }
+    return '';
+  },
+  bFilter: true,
+};
+
+const firstReviewRequestedOnColumn = {
+  sTitle: 'Requested on',
+  mData(source, type) {
+    if (source.__review) {
+      const requests = source.__review.reviewRequests;
+      if (!requests) {
+        return '';
+      }
+      if (requests.length === 0) {
+        return '';
+      }
+      const first = requests[0];
+      if (type === 'sort') {
+        return first.requestedOn;
+      }
+      return formatDate(first.requestedOn);
+    }
+    return '';
+  },
+};
+
+const createdOnColumn = dateColumn('Created', 'createdOn');
+const createdByColumn = personColumn('Created by', 'createdBy');
+const ownerColumn = {
+  sTitle: 'Owner',
+  sDefaultContent: '',
+  mData(source, type) {
+    const owner = source.owner || source.createdBy;
+    if (type === 'sort' || type === 'filter') {
+      return owner;
+    }
+    if (owner) {
+      return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
+        .substr(0, 1)
+        .toUpperCase()}" src="${prefix}/adusers/${owner}/photo" title="${owner}"></a>`;
+    }
+    return '';
+  },
+  bFilter: true,
+};
+
+const clonedByColumn = personColumn('Cloned by', 'clonedBy');
+
+const updatedOnColumn = dateColumn('Updated', 'updatedOn');
+const updatedByColumn = personColumn('Updated by', 'updatedBy');
 
 const releasedOnColumn = longDateColumn('Released', 'releasedOn');
 const releasedByColumn = personColumn('Released by', 'releasedBy');
 
-var transferredOnColumn = dateColumn('transferred', 'transferredOn');
+const transferredOnColumn = dateColumn('transferred', 'transferredOn');
 
 const archivedOnColumn = dateColumn('Archived', 'archivedOn');
 const archivedByColumn = personColumn('Archived by', 'archivedBy');
 
-var deadlineColumn = dateColumn('Deadline', 'deadline');
+const deadlineColumn = dateColumn('Deadline', 'deadline');
 
-var tagsColumn = {
+const tagsColumn = {
   sTitle: 'Tags',
   sDefaultContent: '',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     return source.tags || [];
   },
-  mRender: function(data, type) {
+  mRender(data, type) {
     if (type === 'sort' || type === 'filter') {
       return data.join(' ');
-    } else {
-      return data.join('; ');
     }
+    return data.join('; ');
   },
   bFilter: true,
 };
 
-var keysColumn = {
+const keysColumn = {
   sTitle: 'Reporting IDs',
   sDefaultContent: '',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     if (source.mapping) {
       return Object.keys(source.mapping);
     }
     return [];
   },
-  mRender: function(data, type) {
+  mRender(data, type) {
     if (type === 'sort' || type === 'filter') {
       return data.join(' ');
-    } else {
-      return data.join('; ');
     }
+    return data.join('; ');
   },
   bAutoWidth: false,
   sWidth: '210px',
   bFilter: true,
 };
 
-var commentsColumn = {
-  sTitle: 'Comments',
+const reviewResultColumn = {
+  sTitle: 'Latest review result',
   sDefaultContent: '',
-  mData: 'comments',
+  mData: 'result',
+  mRender(data) {
+    if (!data) {
+      return 'not reported';
+    }
+    if (data.result === '1') {
+      return 'approved';
+    }
+    if (data.result === '2') {
+      return 'comment';
+    }
+    return '';
+  },
   bFilter: true,
 };
 
-var titleColumn = {
+const commentColumn = {
+  sTitle: 'Comment',
+  sDefaultContent: '',
+  mData: 'comment',
+  bFilter: true,
+};
+
+const titleColumn = {
   sTitle: 'Title',
   sDefaultContent: '',
   mData: 'title',
   bFilter: true,
 };
 
-var versionColumn = {
+const versionColumn = {
   sTitle: 'Ver',
   mData: '_v',
   sDefaultContent: '',
@@ -754,7 +762,7 @@ var versionColumn = {
   sWidth: '45px',
 };
 
-var releasedFormVersionColumn = {
+const releasedFormVersionColumn = {
   sTitle: 'Ver',
   mData: 'ver',
   sDefaultContent: '',
@@ -762,7 +770,7 @@ var releasedFormVersionColumn = {
   sWidth: '45px',
 };
 
-var formTypeColumn = {
+const formTypeColumn = {
   sTitle: 'Type',
   mData: 'formType',
   sDefaultContent: 'normal',
@@ -770,10 +778,10 @@ var formTypeColumn = {
 };
 
 function formatFormStatus(s) {
-  var status = {
+  const status = {
     '0': 'draft',
-    '0.5': 'submitted',
-    '1': 'pre released',
+    '0.5': 'under review',
+    '1': 'closed',
     '2': 'archived',
   };
   if (status[s.toString()]) {
@@ -782,16 +790,16 @@ function formatFormStatus(s) {
   return 'unknown';
 }
 
-var formStatusColumn = {
+const formStatusColumn = {
   sTitle: 'Status',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     return formatFormStatus(source.status);
   },
   bFilter: true,
 };
 
 function formatReleasedFormStatus(s) {
-  var status = {
+  const status = {
     '1': 'released',
     '2': 'archived',
   };
@@ -801,180 +809,96 @@ function formatReleasedFormStatus(s) {
   return 'unknown';
 }
 
-var releasedFormStatusColumn = {
+const releasedFormStatusColumn = {
   sTitle: 'Status',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     return formatReleasedFormStatus(source.status);
   },
   bFilter: true,
 };
 
-var travelerLinkColumn = {
+const travelerLinkColumn = {
   sTitle: '',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     if (source.hasOwnProperty('url')) {
-      return (
-        '<a href="' +
-        source.url +
-        '" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>'
-      );
+      return `<a href="${source.url}" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>`;
     }
     if (source.hasOwnProperty('_id')) {
-      return (
-        '<a href="' +
-        prefix +
-        '/travelers/' +
-        source._id +
-        '/" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>'
-      );
+      return `<a href="${prefix}/travelers/${source._id}/" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>`;
     }
     return 'unknown';
   },
   bSortable: false,
 };
 
-var travelerConfigLinkColumn = {
+const travelerConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
-  mRender: function(data, type, full) {
-    return (
-      '<a href="' +
-      prefix +
-      '/travelers/' +
-      data +
-      '/config" data-toggle="tooltip" title="config the traveler"><i class="fa fa-gear fa-lg"></i></a>'
-    );
+  mRender(data, type, full) {
+    return `<a href="${prefix}/travelers/${data}/config" data-toggle="tooltip" title="config the traveler"><i class="fa fa-gear fa-lg"></i></a>`;
   },
   bSortable: false,
 };
 
-var travelerShareLinkColumn = {
+const travelerShareLinkColumn = {
   sTitle: '',
-  mData: function(source) {
+  mData(source) {
     if (source.publicAccess >= 0) {
-      return (
-        '<a href="' +
-        prefix +
-        '/travelers/' +
-        source._id +
-        '/share/" target="' +
-        linkTarget +
-        '" data-toggle="tooltip" title="share the traveler" class="text-success"><i class="fa fa-users fa-lg"></i></a>'
-      );
+      return `<a href="${prefix}/travelers/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the traveler" class="text-success"><i class="fa fa-users fa-lg"></i></a>`;
     }
-    return (
-      '<a href="' +
-      prefix +
-      '/travelers/' +
-      source._id +
-      '/share/" target="' +
-      linkTarget +
-      '" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>'
-    );
+    return `<a href="${prefix}/travelers/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the traveler"><i class="fa fa-users fa-lg"></i></a>`;
   },
   bSortable: false,
 };
 
-var binderLinkColumn = {
+const binderLinkColumn = {
   sTitle: '',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     if (source.hasOwnProperty('url')) {
-      return (
-        '<a href="' +
-        source.url +
-        '" target="' +
-        linkTarget +
-        '" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>'
-      );
+      return `<a href="${source.url}" target="${linkTarget}" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>`;
     }
     if (source.hasOwnProperty('_id')) {
-      return (
-        '<a href="' +
-        prefix +
-        '/binders/' +
-        source._id +
-        '/" target="' +
-        linkTarget +
-        '" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>'
-      );
+      return `<a href="${prefix}/binders/${source._id}/" target="${linkTarget}" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>`;
     }
     return 'unknown';
   },
   bSortable: false,
 };
 
-var binderConfigLinkColumn = {
+const binderConfigLinkColumn = {
   sTitle: '',
   mData: '_id',
-  mRender: function(data, type, full) {
-    return (
-      '<a href="' +
-      prefix +
-      '/binders/' +
-      data +
-      '/config" target="' +
-      linkTarget +
-      '" data-toggle="tooltip" title="config the binder"><i class="fa fa-gear fa-lg"></i></a>'
-    );
+  mRender(data, type, full) {
+    return `<a href="${prefix}/binders/${data}/config" target="${linkTarget}" data-toggle="tooltip" title="config the binder"><i class="fa fa-gear fa-lg"></i></a>`;
   },
   bSortable: false,
 };
 
-var binderShareLinkColumn = {
+const binderShareLinkColumn = {
   sTitle: '',
-  mData: function(source) {
+  mData(source) {
     if (source.publicAccess >= 0) {
-      return (
-        '<a href="' +
-        prefix +
-        '/binders/' +
-        source._id +
-        '/share/" target="' +
-        linkTarget +
-        '" data-toggle="tooltip" title="share the binder" class="text-success"><i class="fa fa-users fa-lg"></i></a>'
-      );
+      return `<a href="${prefix}/binders/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the binder" class="text-success"><i class="fa fa-users fa-lg"></i></a>`;
     }
-    return (
-      '<a href="' +
-      prefix +
-      '/binders/' +
-      source._id +
-      '/share/" target="' +
-      linkTarget +
-      '" data-toggle="tooltip" title="share the binder"><i class="fa fa-users fa-lg"></i></a>'
-    );
+    return `<a href="${prefix}/binders/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the binder"><i class="fa fa-users fa-lg"></i></a>`;
   },
   bSortable: false,
 };
 
-var deviceTravelerLinkColumn = {
+const deviceTravelerLinkColumn = {
   sTitle: '',
   mData: 'inventoryId',
-  mRender: function(data, type, full) {
-    return (
-      '<a href="' +
-      prefix +
-      '/currenttravelers/?device=' +
-      data +
-      '" data-toggle="tooltip" title="travelers for this device"><i class="fa fa-search fa-lg"></i></a>'
-    );
+  mRender(data, type, full) {
+    return `<a href="${prefix}/currenttravelers/?device=${data}" data-toggle="tooltip" title="travelers for this device"><i class="fa fa-search fa-lg"></i></a>`;
   },
   bSortable: false,
 };
 
 function progressBar(active, finished, inProgress, text, width) {
-  var w = width || '100px';
-  var t = text || '';
-  var bar = $(
-    '<div class="progress" style="width: ' +
-      w +
-      ';"><div class="bar bar-success" style="width:' +
-      finished +
-      '%;"></div><div class="bar bar-info" style="width:' +
-      inProgress +
-      '%;"></div><div class="progress-value">' +
-      t +
-      '</div></div>'
+  const w = width || '100px';
+  const t = text || '';
+  const bar = $(
+    `<div class="progress" style="width: ${w};"><div class="bar bar-success" style="width:${finished}%;"></div><div class="bar bar-info" style="width:${inProgress}%;"></div><div class="progress-value">${t}</div></div>`
   );
   if (active) {
     bar.addClass('active').addClass('progress-striped');
@@ -982,21 +906,19 @@ function progressBar(active, finished, inProgress, text, width) {
   return bar[0].outerHTML;
 }
 
-var travelerProgressColumn = {
+const travelerProgressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
   sType: 'numeric',
   bAutoWidth: false,
   sWidth: '105px',
-  mData: function(source, type) {
+  mData(source, type) {
     if (source.status === 2) {
       if (type === 'sort') {
         return 1;
       }
       return progressBar(false, 100, 0);
     }
-
-    var inProgress;
 
     if (!source.hasOwnProperty('totalInput')) {
       if (type === 'sort') {
@@ -1019,25 +941,27 @@ var travelerProgressColumn = {
       return 'unknown';
     }
 
-    inProgress = Math.floor((source.finishedInput / source.totalInput) * 100);
+    const inProgress = Math.floor(
+      (source.finishedInput / source.totalInput) * 100
+    );
 
     return progressBar(
       source.status === 1,
       0,
       inProgress,
-      '' + source.finishedInput + ' / ' + source.totalInput
+      `${source.finishedInput} / ${source.totalInput}`
     );
   },
 };
 
-var workProgressColumn = {
+const workProgressColumn = {
   sTitle: 'Estimated progress',
   bSortable: true,
   sType: 'numeric',
   bAutoWidth: false,
   sWidth: '210px',
-  mData: function(source, type) {
-    var w = '200px';
+  mData(source, type) {
+    const w = '200px';
     if (source.status === 2) {
       if (type === 'sort') {
         return 1;
@@ -1046,13 +970,13 @@ var workProgressColumn = {
         false,
         100,
         0,
-        '' + source.value + ' + 0 / ' + source.value,
+        `${source.value} + 0 / ${source.value}`,
         w
       );
     }
 
-    var inProgress = source.inProgress;
-    var finished = 0;
+    const { inProgress } = source;
+    let finished = 0;
 
     if (source.hasOwnProperty('finished')) {
       finished = source.finished;
@@ -1066,24 +990,21 @@ var workProgressColumn = {
       source.status === 1,
       finished * 100,
       inProgress * 100,
-      '' +
-        Math.round(finished * source.value) +
-        ' + ' +
-        Math.round(inProgress * source.value) +
-        ' / ' +
-        Math.round(source.value),
+      `${Math.round(finished * source.value)} + ${Math.round(
+        inProgress * source.value
+      )} / ${Math.round(source.value)}`,
       w
     );
   },
 };
 
-var binderWorkProgressColumn = {
+const binderWorkProgressColumn = {
   sTitle: 'Work progress',
   bSortable: true,
   sType: 'numeric',
   bAutoWidth: false,
   sWidth: '105px',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     if (source.status === 2) {
       if (type === 'sort') {
         return 1;
@@ -1098,8 +1019,8 @@ var binderWorkProgressColumn = {
       return progressBar(false, 0, 0);
     }
 
-    var inProgress = source.inProgressWork / source.totalWork;
-    var finished = source.finishedWork / source.totalWork;
+    const inProgress = source.inProgressWork / source.totalWork;
+    const finished = source.finishedWork / source.totalWork;
 
     if (type === 'sort') {
       return finished + inProgress;
@@ -1109,25 +1030,18 @@ var binderWorkProgressColumn = {
       source.status === 1,
       finished * 100,
       inProgress * 100,
-      '' +
-        source.finishedWork +
-        ' / ' +
-        source.totalWork +
-        ' + ' +
-        source.finishedInput +
-        ' / ' +
-        source.totalInput
+      `${source.finishedWork} / ${source.totalWork} + ${source.finishedInput} / ${source.totalInput}`
     );
   },
 };
 
-var binderValueProgressColumn = {
+const binderValueProgressColumn = {
   sTitle: 'Value progress',
   bSortable: true,
   sType: 'numeric',
   bAutoWidth: false,
   sWidth: '105px',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     if (source.status === 2) {
       if (type === 'sort') {
         return 1;
@@ -1142,8 +1056,8 @@ var binderValueProgressColumn = {
       return progressBar(false, 0, 0);
     }
 
-    var inProgress = source.inProgressValue / source.totalValue;
-    var finished = source.finishedValue / source.totalValue;
+    const inProgress = source.inProgressValue / source.totalValue;
+    const finished = source.finishedValue / source.totalValue;
 
     if (type === 'sort') {
       return finished + inProgress;
@@ -1153,27 +1067,23 @@ var binderValueProgressColumn = {
       source.status === 1,
       finished * 100,
       inProgress * 100,
-      '' +
-        Math.round(source.finishedValue) +
-        ' + ' +
-        Math.round(source.inProgressValue) +
-        ' / ' +
-        Math.round(source.totalValue)
+      `${Math.round(source.finishedValue)} + ${Math.round(
+        source.inProgressValue
+      )} / ${Math.round(source.totalValue)}`
     );
   },
 };
 
-var deviceColumn = {
+const deviceColumn = {
   sTitle: 'Devices',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     return source.devices || [];
   },
-  mRender: function(data, type) {
+  mRender(data, type) {
     if (type === 'sort' || type === 'filter') {
       return data.join(' ');
-    } else {
-      return data.join('; ');
     }
+    return data.join('; ');
   },
   bFilter: true,
 };
@@ -1181,40 +1091,24 @@ var deviceColumn = {
 function usersColumn(title, prop) {
   return {
     sTitle: title,
-    mData: function(source, type) {
+    mData(source, type) {
       if (source[prop]) {
         if (source[prop].length === 0) {
           return '';
         }
-        var names = source[prop].map(function(u) {
+        const names = source[prop].map(function(u) {
           if (!u._id) {
             return u;
           }
           if (type === 'filter' || type === 'sort') {
             return u.username;
-          } else {
-            return (
-              '<a target="' +
-              linkTarget +
-              '" href="/users/' +
-              u._id +
-              '"><img class="user" data-src="holder.js/27x40?size=20&text=' +
-              u._id.substr(0, 1).toUpperCase() +
-              '" src="' +
-              prefix +
-              '/adusers/' +
-              u._id +
-              '/photo" title="' +
-              u.username +
-              '"></a>'
-            );
           }
+          return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${u._id}/photo" title="${u.username}"></a>`;
         });
         if (type === 'filter' || type === 'sort') {
           return names.join('; ');
-        } else {
-          return names.join(' ');
         }
+        return names.join(' ');
       }
       return '';
     },
@@ -1225,49 +1119,33 @@ function usersColumn(title, prop) {
 function usersFilteredColumn(title, filter) {
   return {
     sTitle: title,
-    mData: function(source, type) {
-      var users = filter(source);
+    mData(source, type) {
+      const users = filter(source);
       if (users.length === 0) {
         return '';
       }
-      var names = users.map(function(u) {
+      const names = users.map(function(u) {
         if (!u._id) {
           return u;
         }
         if (type === 'filter' || type === 'sort') {
           return u.username;
-        } else {
-          return (
-            '<a target="' +
-            linkTarget +
-            '" href="/users/' +
-            u._id +
-            '"><img class="user" data-src="holder.js/27x40?size=20&text=' +
-            u._id.substr(0, 1).toUpperCase() +
-            '" src="' +
-            prefix +
-            '/adusers/' +
-            u._id +
-            '/photo" title="' +
-            u.username +
-            '"></a>'
-          );
         }
+        return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${u._id}/photo" title="${u.username}"></a>`;
       });
       if (type === 'filter' || type === 'sort') {
         return names.join('; ');
-      } else {
-        return names.join(' ');
       }
+      return names.join(' ');
     },
     bFilter: true,
   };
 }
 
-var sharedWithColumn = usersColumn('Shared with', 'sharedWith');
+const sharedWithColumn = usersColumn('Shared with', 'sharedWith');
 
 function notIn(user, users) {
-  var i;
+  let i;
   for (i = 0; i < users.length; i += 1) {
     if (users[i]._id === user._id) {
       return false;
@@ -1276,8 +1154,8 @@ function notIn(user, users) {
   return true;
 }
 
-var manPowerColumn = usersFilteredColumn('Powered by', function(source) {
-  var out = [];
+const manPowerColumn = usersFilteredColumn('Powered by', function(source) {
+  const out = [];
   if (source.manPower) {
     source.manPower.forEach(function(m) {
       if (notIn(m, out)) {
@@ -1298,16 +1176,16 @@ var manPowerColumn = usersFilteredColumn('Powered by', function(source) {
   return out;
 });
 
-var filledByColumn = usersColumn('Filled by', 'manPower');
+const filledByColumn = usersColumn('Filled by', 'manPower');
 
-var sharedGroupColumn = {
+const sharedGroupColumn = {
   sTitle: 'Shared groups',
-  mData: function(source, type, val) {
+  mData(source, type, val) {
     if (source.sharedGroup) {
       if (source.sharedGroup.length === 0) {
         return '';
       }
-      var names = source.sharedGroup.map(function(g) {
+      const names = source.sharedGroup.map(function(g) {
         return g.groupname;
       });
       return names.join('; ');
@@ -1317,90 +1195,79 @@ var sharedGroupColumn = {
   bFilter: true,
 };
 
-var statusColumn = {
+const statusColumn = {
   sTitle: 'Status',
   mData: 'status',
-  mRender: function(data, type, full) {
+  mRender(data, type, full) {
     return formatTravelerStatus(data);
   },
   bFilter: true,
 };
 
-var formStatusColumn = {
-  sTitle: 'Status',
-  mData: 'status',
-  mRender: function(data, type, full) {
-    return formatFormStatus(data);
-  },
-  bFilter: true,
-};
+/* shared user columns */
+const useridColumn = personColumn('User', '_id');
 
-/*shared user columns*/
-var useridColumn = personColumn('User', '_id');
-
-var useridNoLinkColumn = {
+const useridNoLinkColumn = {
   sTitle: 'User id',
   mData: '_id',
   sDefaultContent: '',
   bFilter: true,
 };
 
-var userNameColumn = {
+const userNameColumn = {
   sTitle: 'Full name',
   mData: 'username',
   sDefaultContent: '',
-  mRender: function(data, type, full) {
-    return (
-      '<a href = "' + prefix + '/users?name=' + data + '">' + data + '</a>'
-    );
+  mRender(data, type, full) {
+    return `<a href = "${prefix}/users?name=${data}">${data}</a>`;
   },
   bFilter: true,
 };
 
-var userNameNoLinkColumn = {
+const userNameNoLinkColumn = {
   sTitle: 'Full name',
   mData: 'username',
   sDefaultContent: '',
   bFilter: true,
 };
 
-var fullNameNoLinkColumn = {
+const fullNameNoLinkColumn = {
   sTitle: 'Full name',
   mData: 'name',
   sDefaultContent: '',
   bFilter: true,
 };
 
-var groupIdColumn = {
+const groupIdColumn = {
   sTitle: 'Group id',
   mData: '_id',
   sDefaultContent: '',
   bFilter: true,
-  mRender: function(data) {
-    return '<a href="' + prefix + '/groups/' + data + '">' + data + '</a>';
+  mRender(data) {
+    return `<a href="${prefix}/groups/${data}">${data}</a>`;
   },
 };
 
-var displayNameColumn = {
+const displayNameColumn = {
   sTitle: 'Display Name',
   mData: 'name',
   sDefaultContent: '',
   bFilter: true,
 };
 
-var groupNameColumn = {
+const groupNameColumn = {
   sTitle: 'Group Name',
   mData: 'groupname',
   sDefaultContent: '',
   bFilter: true,
 };
 
-var membersColumn = {
+const membersColumn = {
   sTitle: 'Member(s)',
   mData: 'members',
   sDefaultContent: '',
   bFilter: false,
-  mRender: function(data) {
+  mRender(data) {
     data.sort(function(a, b) {
       if (a.name < b.name) {
         return -1;
@@ -1410,195 +1277,178 @@ var membersColumn = {
       }
       return 0;
     });
-    var result = data.map(function(d) {
-      return '<li>' + d.name + '</li>';
+    const result = data.map(function(d) {
+      return `<li>${d.name}</li>`;
     });
-    return '<ul>' + result.join('') + '</ul>';
+    return `<ul>${result.join('')}</ul>`;
   },
 };
 
-var accessColumn = {
+const accessColumn = {
   sTitle: 'Privilege',
   mData: 'access',
   sDefaultContent: '',
-  mRender: function(data, type, full) {
+  mRender(data, type, full) {
     if (data === 0) {
       return 'read';
     }
     if (data === 1) {
       return 'write';
     }
+    return 'unknown';
   },
   bFilter: true,
 };
 
-/*user columns*/
-var rolesColumn = {
+/* user columns */
+const rolesColumn = {
   sTitle: 'Roles',
   mData: 'roles',
   sDefaultContent: '',
-  mRender: function(data, type, full) {
+  mRender(data, type, full) {
     return data.join();
   },
   bFilter: true,
 };
 
-var lastVisitedOnColumn = dateColumn('Last visited', 'lastVisitedOn');
+const lastVisitedOnColumn = dateColumn('Last visited', 'lastVisitedOn');
 
-/*device columns*/
+/* device columns */
 
-var serialColumn = {
+const serialColumn = {
   sTitle: 'Serial',
   mData: 'inventoryId',
   sDefaultContent: '',
   bFilter: true,
 };
 
-var typeColumn = {
+const typeColumn = {
   sTitle: 'Type',
   mData: 'deviceType.name',
   sDefaultContent: '',
   bFilter: true,
 };
 
-var descriptionColumn = {
+const descriptionColumn = {
   sTitle: 'Description',
   mData: 'deviceType.description',
   sDefaultContent: '',
   bFilter: true,
 };
 
-var modifiedOnColumn = dateColumn('Modified', 'dateModified');
+const modifiedOnColumn = dateColumn('Modified', 'dateModified');
 
-var modifiedByColumn = {
+const modifiedByColumn = {
   sTitle: 'Modified by',
   mData: 'modifiedBy',
   sDefaultContent: '',
   bFilter: true,
 };
 
-var addedByColumn = personColumn('Added by', 'addedBy');
+const addedByColumn = personColumn('Added by', 'addedBy');
 
-var addedOnColumn = dateColumn('Added on', 'addedOn');
+const addedOnColumn = dateColumn('Added on', 'addedOn');
 
-var sequenceColumn = {
+const sequenceColumn = {
   sTitle: 'Sequence',
   mData: 'sequence',
   sClass: 'editable',
   sType: 'numeric',
   bFilter: true,
-  mRender: function(data, type) {
+  mRender(data, type) {
     if (type === 'sort' || type === 'filter') {
       return data;
-    } else {
-      return (
-        '<input type="number" min=1 step=1 class="input-mini config" value="' +
-        data +
-        '">'
-      );
     }
+    return `<input type="number" min=1 step=1 class="input-mini config" value="${data}">`;
   },
 };
 
-var sColumn = {
+const sColumn = {
   sTitle: 'S',
   mData: 'sequence',
   bFilter: true,
 };
 
-var priorityColumn = {
+const priorityColumn = {
   sTitle: 'Priority',
   mData: 'priority',
   sClass: 'editable',
   sType: 'numeric',
   bFilter: true,
-  mRender: function(data, type) {
+  mRender(data, type) {
     if (type === 'sort' || type === 'filter') {
       return data;
-    } else {
-      return (
-        '<input type="number" min=1 step=1 class="input-mini config" value="' +
-        data +
-        '">'
-      );
     }
+    return `<input type="number" min=1 step=1 class="input-mini config" value="${data}">`;
   },
 };
 
-var pColumn = {
+const pColumn = {
   sTitle: 'P',
   mData: 'priority',
   bFilter: true,
 };
 
-var valueColumn = {
+const valueColumn = {
   sTitle: 'Value',
   mData: 'value',
   sClass: 'editable',
   sType: 'numeric',
   bFilter: true,
-  mRender: function(data, type) {
+  mRender(data, type) {
     if (type === 'sort' || type === 'filter') {
       return data;
-    } else {
-      return (
-        '<input type="number" min=0 class="input-mini config" value="' +
-        data +
-        '">'
-      );
     }
+    return `<input type="number" min=0 class="input-mini config" value="${data}">`;
   },
 };
 
-var vColumn = {
+const vColumn = {
   sTitle: 'V',
   mData: 'value',
   bFilter: true,
 };
 
-var colorColumn = {
+const colorColumn = {
   sTitle: 'Color',
   mData: 'color',
   sClass: 'editable',
-  mRender: function(data, type) {
-    var snippet;
+  mRender(data, type) {
     if (type === 'sort' || type === 'filter') {
       return data;
-    } else {
-      snippet = $(
-        '<select name="select" class="input-small config"><option value = "blue" class="text-info">blue</option><option value = "green" class="text-success">green</option><option value = "yellow" class="text-warning">yellow</option><option value = "red" class="text-error">red</option><option value = "black">black</option></select>'
-      );
-      $('option[value="' + data + '"]', snippet).attr('selected', 'selected');
-      return snippet[0].outerHTML;
     }
+    const snippet = $(
+      '<select name="select" class="input-small config"><option value = "blue" class="text-info">blue</option><option value = "green" class="text-success">green</option><option value = "yellow" class="text-warning">yellow</option><option value = "red" class="text-error">red</option><option value = "black">black</option></select>'
+    );
+    $(`option[value="${data}"]`, snippet).attr('selected', 'selected');
+    return snippet[0].outerHTML;
   },
 };
 
-var cColumn = {
+const cColumn = {
   sTitle: 'C',
   mData: 'color',
-  mRender: function(data, type) {
-    var snippet = $('<i class="fa fa-flag fa-lg"></i>');
+  mRender(data, type) {
+    const snippet = $('<i class="fa fa-flag fa-lg"></i>');
     if (type === 'sort' || type === 'filter') {
       return data;
-    } else {
-      switch (data) {
-        case 'blue':
-          snippet.addClass('text-info');
-          break;
-        case 'green':
-          snippet.addClass('text-success');
-          break;
-        case 'yellow':
-          snippet.addClass('text-warning');
-          break;
-        case 'red':
-          snippet.addClass('text-error');
-          break;
-        default:
-      }
-      return snippet[0].outerHTML;
     }
+    switch (data) {
+      case 'blue':
+        snippet.addClass('text-info');
+        break;
+      case 'green':
+        snippet.addClass('text-success');
+        break;
+      case 'yellow':
+        snippet.addClass('text-warning');
+        break;
+      case 'red':
+        snippet.addClass('text-error');
+        break;
+      default:
+    }
+    return snippet[0].outerHTML;
   },
 };
 
@@ -1614,9 +1464,9 @@ function exportVisible(tool) {
   };
 }
 
-var oTableTools = {
+const oTableTools = {
   sSwfPath: prefix
-    ? prefix + '/datatables/swf/copy_csv_xls_pdf.swf'
+    ? `${prefix}/datatables/swf/copy_csv_xls_pdf.swf`
     : '/datatables/swf/copy_csv_xls_pdf.swf',
   aButtons: [
     exportVisible('copy'),
@@ -1633,17 +1483,17 @@ var oTableTools = {
   ],
 };
 
-var sDom =
+const sDom =
   "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDom2i =
+const sDom2i =
   "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDom2i1p =
+const sDom2i1p =
   "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span3'r><'span3'f>>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDomNoTools =
+const sDomNoTools =
   "<'row-fluid'<'span4'l><'span4'<'text-center'r>><'span4'f>>t<'row-fluid'<'span6'i><'span6'p>>";
-var sDomNoTNoR = "t<'row-fluid'<'span6'i><'span6'p>>";
-var sDomClean = 't';
-var sDomPage = "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>";
+const sDomNoTNoR = "t<'row-fluid'<'span6'i><'span6'p>>";
+const sDomClean = 't';
+const sDomPage = "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>";
 
 /**
  * By default DataTables only uses the sAjaxSource variable at initialisation
@@ -1690,7 +1540,7 @@ jQuery.fn.dataTableExt.oApi.fnReloadAjax = function(
   // 1.10's API has ajax reloading built in, so we use those abilities
   // directly.
   if (jQuery.fn.dataTable.versionCheck) {
-    var api = new jQuery.fn.dataTable.Api(oSettings);
+    const api = new jQuery.fn.dataTable.Api(oSettings);
 
     if (sNewSource) {
       api.ajax.url(sNewSource).load(fnCallback, !bStandingRedraw);
@@ -1711,9 +1561,9 @@ jQuery.fn.dataTableExt.oApi.fnReloadAjax = function(
   }
 
   this.oApi._fnProcessingDisplay(oSettings, true);
-  var that = this;
-  var iStart = oSettings._iDisplayStart;
-  var aData = [];
+  const that = this;
+  const iStart = oSettings._iDisplayStart;
+  const aData = [];
 
   this.oApi._fnServerParams(oSettings, aData);
 
@@ -1726,13 +1576,13 @@ jQuery.fn.dataTableExt.oApi.fnReloadAjax = function(
       that.oApi._fnClearTable(oSettings);
 
       /* Got the data - add it to the table */
-      var aData =
+      const dataArray =
         oSettings.sAjaxDataProp !== ''
           ? that.oApi._fnGetObjectDataFn(oSettings.sAjaxDataProp)(json)
           : json;
-      var i;
-      for (i = 0; i < aData.length; i++) {
-        that.oApi._fnAddData(oSettings, aData[i]);
+      let i;
+      for (i = 0; i < dataArray.length; i += 1) {
+        that.oApi._fnAddData(oSettings, dataArray[i]);
       }
 
       oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
@@ -1748,7 +1598,7 @@ jQuery.fn.dataTableExt.oApi.fnReloadAjax = function(
       that.oApi._fnProcessingDisplay(oSettings, false);
 
       /* Callback user function - for event handlers etc */
-      if (typeof fnCallback == 'function' && fnCallback !== null) {
+      if (typeof fnCallback === 'function' && fnCallback !== null) {
         fnCallback(oSettings);
       }
     },
