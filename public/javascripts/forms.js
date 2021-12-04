@@ -322,8 +322,6 @@ $(function() {
   const closedFormAoColumns = [
     selectColumn,
     formLinkColumn,
-    formConfigLinkColumn,
-    formReviewLinkColumn,
     titleColumn,
     formStatusColumn,
     formTypeColumn,
@@ -357,8 +355,8 @@ $(function() {
     bDeferRender: true,
     aoColumns: closedFormAoColumns,
     aaSorting: [
-      [11, 'desc'],
-      [10, 'desc'],
+      [9, 'desc'],
+      [8, 'desc'],
     ],
     sDom: sDomNoTools,
   });

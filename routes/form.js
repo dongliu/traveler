@@ -511,6 +511,8 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
+    // only available when under review
+    reqUtils.status('id', [0.5]),
     function(req, res) {
       const form = req[req.params.id];
       return res.render(
@@ -541,6 +543,8 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
+    // only available when under review
+    reqUtils.status('id', [0.5]),
     async function(req, res) {
       const form = req[req.params.id];
       await reviewLib.addReviewRequest(req, res, form);
@@ -550,9 +554,11 @@ module.exports = function(app) {
   // remove a review request
   app.delete(
     '/forms/:id/review/requests/:requestId',
+    auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
-    auth.ensureAuthenticated,
+    // only available when under review
+    reqUtils.status('id', [0.5]),
     async function(req, res) {
       const form = req[req.params.id];
       await reviewLib.removeReviewRequest(req, res, form);
@@ -564,6 +570,8 @@ module.exports = function(app) {
     '/forms/:id/review/results',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
+    // only available when under review
+    reqUtils.status('id', [0.5]),
     function(req, res, next) {
       const isReviewer = checkReviewer(req[req.params.id], req.session.userid);
       if (!isReviewer) {

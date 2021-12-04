@@ -61,7 +61,8 @@ block content
                     .accordion-body.collapse(id="#{result._id}-comment")
                       .accordion-inner
                         span #{result.comment}
-        if (isReviewer)
+        //- reviewer and under review see the simple review form
+        if (isReviewer && status === 0.5)
           .accordion-group
             .accordion-heading
               a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Add a new review
@@ -87,7 +88,8 @@ block content
       form.form-horizontal#output
         != html
   .button-footer.container
-    if (status === 0 || status === 0.5)
+    //- edit controls available for draft
+    if (status === 0)
       .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
           span.caret
@@ -124,8 +126,9 @@ block content
         button.btn.btn-primary#save Save
     .btn-group
       a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
-    .btn-group
-      button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
+    if (status === 0)
+      .btn-group
+        button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
     if (status === 0 || status === 0.5 && !isReviewer)
       .btn-group
         button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
