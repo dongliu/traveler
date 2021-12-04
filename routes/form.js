@@ -855,7 +855,7 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
-    reqUtils.status('id', [0, 0.5]),
+    reqUtils.status('id', [0]),
     reqUtils.filter('body', ['html', 'title', 'description']),
     reqUtils.sanitize('body', ['html', 'title', 'description']),
     async function(req, res) {
