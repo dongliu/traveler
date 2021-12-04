@@ -129,20 +129,17 @@ block content
     if (status === 0)
       .btn-group
         button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
-    if (status === 0 || status === 0.5 && !isReviewer)
+    if (status === 0)
       .btn-group
         button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
-      .btn-group
-        button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
-    if (status === 0 && !isReviewer)
+    .btn-group
+      button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
+    if (status === 0)
       .btn-group
         button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for review') Submit for review
     if (status === 0.5 && !isReviewer && allApproved)
       .btn-group
         button.btn.btn-primary#release(data-toggle='tooltip', title='Release') Release
-    if (status === 1 && locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
-      .btn-group
-        button.btn.btn-primary#obsolete(data-toggle='tooltip', title='Obsolete the form') Obsolete
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
