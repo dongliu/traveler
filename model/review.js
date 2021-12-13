@@ -166,24 +166,38 @@ function addReview(schema) {
     if (reviewRequests.length === 0) {
       return false;
     }
-    const approval = {};
+    const approval = new Map();
     let i;
     debug(`has ${reviewResults.length} results`);
     debug(`has ${reviewRequests.length} requests`);
-    for (i = reviewResults.length - 1; i >= 0; i -= 1) {
-      debug(reviewResults[i].result);
-      if (
-        reviewResults[i].result !== '1' &&
-        !approval[reviewResults[i].reviewerId]
-      ) {
-        return false;
+    // filter to the current version
+    const docVersion = doc._v;
+    const currentReviewResults = reviewResults.filter(r => r.v === docVersion);
+    // the last is the latest
+    for (i = currentReviewResults.length - 1; i >= 0; i -= 1) {
+      debug(`${i} : ${currentReviewResults[i].result}`);
+      if (!approval.has(currentReviewResults[i].reviewerId)) {
+        if (reviewResults[i].result === '1') {
+          approval.set(currentReviewResults[i].reviewerId, true);
+        } else {
+          approval.set(currentReviewResults[i].reviewerId, false);
+        }
       }
-      if (reviewResults[i].result === '1') {
-        approval[reviewResults[i].reviewerId] = true;
-      }
+      //   if (
+      //     currentReviewResults[i].result !== '1' &&
+      //     !approval.has(currentReviewResults[i].reviewerId)
+      //   ) {
+      //     approval[reviewResults[i].reviewerId] = false;
+      //   }
+      // if (
+      //   reviewResults[i].result === '1' &&
+      //   approval[reviewResults[i].reviewerId] !== undefined
+      // ) {
+      //   approval[reviewResults[i].reviewerId] = true;
+      // }
     }
     for (i = 0; i < reviewRequests.length; i += 1) {
-      if (!approval[reviewRequests[i]._id]) {
+      if (!approval.get(reviewRequests[i]._id)) {
         return false;
       }
     }
