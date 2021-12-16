@@ -5,6 +5,7 @@ const User = mongoose.model('User');
 const { Schema } = mongoose;
 
 const debug = require('debug')('traveler:review');
+const util = require('util');
 const logger = require('../lib/loggers').getLogger();
 
 const reviewRequest = new Schema({
@@ -175,29 +176,19 @@ function addReview(schema) {
     const currentReviewResults = reviewResults.filter(r => r.v === docVersion);
     // the last is the latest
     for (i = currentReviewResults.length - 1; i >= 0; i -= 1) {
-      debug(`${i} : ${currentReviewResults[i].result}`);
+      debug(
+        `${i} : ${currentReviewResults[i].reviewerId} , ${currentReviewResults[i].result}`
+      );
       if (!approval.has(currentReviewResults[i].reviewerId)) {
-        if (reviewResults[i].result === '1') {
-          approval.set(currentReviewResults[i].reviewerId, true);
-        } else {
-          approval.set(currentReviewResults[i].reviewerId, false);
-        }
+        approval.set(
+          currentReviewResults[i].reviewerId,
+          currentReviewResults[i].result
+        );
       }
-      //   if (
-      //     currentReviewResults[i].result !== '1' &&
-      //     !approval.has(currentReviewResults[i].reviewerId)
-      //   ) {
-      //     approval[reviewResults[i].reviewerId] = false;
-      //   }
-      // if (
-      //   reviewResults[i].result === '1' &&
-      //   approval[reviewResults[i].reviewerId] !== undefined
-      // ) {
-      //   approval[reviewResults[i].reviewerId] = true;
-      // }
     }
+    debug(`filtered list ${util.inspect(approval)}`);
     for (i = 0; i < reviewRequests.length; i += 1) {
-      if (!approval.get(reviewRequests[i]._id)) {
+      if (approval.get(reviewRequests[i]._id) !== '1') {
         return false;
       }
     }
