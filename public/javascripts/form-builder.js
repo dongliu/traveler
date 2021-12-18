@@ -1479,6 +1479,7 @@ function binding_events() {
   });
 
   $('#release').click(function() {
+    $('#release').attr('disabled', true);
     $('#modal .modal-body').empty();
     const defaultTitle = $('#formtitle').text();
     $('#modal .modal-body').append(

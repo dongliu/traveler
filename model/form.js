@@ -18,7 +18,7 @@ publicAccess := 0 // for read or
 /** ****
 status := 0 // editable draft
         | 0.5 // submitted for reviewing
-        | 1 // ready to release (review passed)
+        | 1 // review finished and released
         | 2 // archived
 ***** */
 // mapping : user-key -> name
@@ -164,6 +164,10 @@ form.pre('save', function(next) {
   return next();
 });
 
+/**
+ * Check if a form should be rendered in builder
+ * @returns true if rendered in builder view, other wise false
+ */
 form.methods.isBuilder = function() {
   const doc = this;
   return [0, 0.5, 1].includes(doc.status);
