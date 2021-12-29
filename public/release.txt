@@ -1,29 +1,32 @@
+APS 1.5.2
+- Update the process manager from forever to pm2.
+
 APS-1.5.1
-- Resolve issue with undefined exception when loading form for some users. 
+- Resolve issue with undefined exception when loading form for some users.
 
 APS-1.5.0
 # Features
 - MQTT integration with eTraveler
   - Optional configuration can be added to connect eTraveler with an MQTT server
-  - Publish to topics for eTraveler events: 
-    - eTraveler instance data changed 
+  - Publish to topics for eTraveler events:
+    - eTraveler instance data changed
     - Discrepancy log added to eTraveler
-    - Traveler status changed 
-  - Great driver for various facility specific automation/notifications with eTravelers. 
+    - Traveler status changed
+  - Great driver for various facility specific automation/notifications with eTravelers.
 - Added functionality that allows creating of groups and group management locally within eTraveler app. (@rfgunion)
-  - This can then be used for group sharing between users. 
-  - Replacement for ldap based groups. Allows for greater flexibility of group management specific to eTraveler. 
+  - This can then be used for group sharing between users.
+  - Replacement for ldap based groups. Allows for greater flexibility of group management specific to eTraveler.
   - Functionality is enabled when ldap configuration is missing 'groupSearchFilter'
 - Add More Work button to completed traveler so admin can "un-approve" it. (@rfgunion)
 # Bug fixes
-- Resolve issue with sharing of draft forms (@rfgunion) 
+- Resolve issue with sharing of draft forms (@rfgunion)
 - Resolve conflicting function name in multiple javascript files, "modifyFromModal" (@rfgunion)
-- Add a configuration required by latest version of mongo-express. 
-- Resolve issue where user could have multiple usernames by changing the case when logging in. 
+- Add a configuration required by latest version of mongo-express.
+- Resolve issue where user could have multiple usernames by changing the case when logging in.
 
 APS-1.4.2
 - API to update traveler now has optional parameter for updating device.
-- CDB communication from traveler application is now utilizing the java hosted API. 
+- CDB communication from traveler application is now utilizing the java hosted API.
 
 APS-1.4.1
 - Validations of required fields in discrepancy log.
@@ -36,29 +39,29 @@ APS-1.4.0
   - A draft is kept when a released form is created.
   - A released form may have a discrepancy attached.
     - Admin is prompted when approving a form to be released.
-  - A traveler instance can only be created from a released form. 
-  - Discrepancy forms also need to be released before they can be used for released forms. 
-  - Versioning (n is form revision, m is discrepancy form revision). 
+  - A traveler instance can only be created from a released form.
+  - Discrepancy forms also need to be released before they can be used for released forms.
+  - Versioning (n is form revision, m is discrepancy form revision).
     - Form with discrepancy: (n:m)
     - Standalone form (n)
-    - Standalone discrepancy (m) 
+    - Standalone discrepancy (m)
 - Only draft can be edited.
   - draft is the default state of a newly created form.
   - A released or archived form can be cloned into a draft.
-- Travelers can no longer have discrepancy assigned. 
-  - Travelers get a discrepancy attached based on discrepancy assigned to released form. 
+- Travelers can no longer have discrepancy assigned.
+  - Travelers get a discrepancy attached based on discrepancy assigned to released form.
 - Views
-  - User can now see drafts and released forms under tabs. 
-  - Public forms view also has a tabular view for drafts and released. 
-# Discrepancy 
+  - User can now see drafts and released forms under tabs.
+  - Public forms view also has a tabular view for drafts and released.
+# Discrepancy
 - Now supports file upload
 - Cannot be linked to travelers (only assigned during form releasing process)
 # General
 - Admin can now approve completion of any traveler.
 - Form link is now hidden under details of a traveler.
-- Traveler submit button is now accessible from bottom of page. 
-- File upload can now be a required input. 
-- Update nodejs version to 12. 
+- Traveler submit button is now accessible from bottom of page.
+- File upload can now be a required input.
+- Update nodejs version to 12.
 
 APS-1.3.2
 # Form Builder
@@ -70,19 +73,19 @@ Sept 16, 2019
 - Update numbering to support three tier (section, instruction, input) scheme.
   - ex: the fourth section and instruction 2 within the section and input 3 within the instruction.
     - 4.2.3
-- Improve visual of the numbers for each tier with background color. 
+- Improve visual of the numbers for each tier with background color.
 # Bug Fixes
 - Travelers can now be archived from the GUI
-- Null url inputs do not crash the traveler anymore. 
+- Null url inputs do not crash the traveler anymore.
 
 APS-1.3.0 Release Changelog
 Aug 13, 2019
-# Add numbering support for step and section. 
-- Generate numbering for each input 
+# Add numbering support for step and section.
+- Generate numbering for each input
 - Generate number for each section
 - Example number 1.2 is section 1 and input 2 within the section
 - Update numbering on input item relocation
-- Generate numbering for an existing form button allows numbering each input for existing form. 
+- Generate numbering for an existing form button allows numbering each input for existing form.
 
 APS-1.2.1 Release Changelog
 Jun 13, 2019
@@ -94,15 +97,15 @@ Jun 11, 2019
 # Add Discrepancy Support
 - Allow creation of discrepancy traveler templates
 - Support status of discrepancy traveler template
-- Support versioning of discrepancy traveler template 
+- Support versioning of discrepancy traveler template
 - Support workflow procedure for discrepancy traveler template
-  - Discrepancy traveler templates require releasing before they can be used. 
+  - Discrepancy traveler templates require releasing before they can be used.
   - Submission -> Approval (Reject/Release)
-  - Once approved (released) it can be used. 
-  - Also support obsolete released templates once they should no longer be used. 
-- Support linking a released discrepancy template to existing traveler instances. 
-- Display a tabular view of every filled out discrepancy for a particular traveler. 
-- Embed the discrepancy log right into a traveler instance. 
+  - Once approved (released) it can be used.
+  - Also support obsolete released templates once they should no longer be used.
+- Support linking a released discrepancy template to existing traveler instances.
+- Display a tabular view of every filled out discrepancy for a particular traveler.
+- Embed the discrepancy log right into a traveler instance.
 - Require user with admin role for creation of the discrepancy traveler template
 - Enhance RESTful API to retrieve eTraveler discrepancy data
 # Bug Fixes
@@ -111,29 +114,29 @@ Jun 11, 2019
 APS-1.1.3 Release Changelog
 April 18, 2019
 # GUI
-- Add a title of currently shown traveler to the traveler sections sidebar. 
-- Generate an html link for 'url' input in the history of the input. 
+- Add a title of currently shown traveler to the traveler sections sidebar.
+- Generate an html link for 'url' input in the history of the input.
 # General Improvements
 - Update tinymce rich text editor to latest version.
-  - Now installed via npm. 
-- Replaced google-caja-sanitizer with sanitize-html. 
-  - google-caja-sanitizer is a unmaintained ported library that was ported from a google library 4 years ago. 
+  - Now installed via npm.
+- Replaced google-caja-sanitizer with sanitize-html.
+  - google-caja-sanitizer is a unmaintained ported library that was ported from a google library 4 years ago.
   - sanitize-html is maintained and highly configurable html sanitize library.
-  - New library provides Improved html storage. 
+  - New library provides Improved html storage.
   - Configured to replace google-caja-sanitizer and to support functionality of tinymce (rich text editor).
-    - Users can now save links. 
-    - Users can now link to external images. 
-    - Various text formatting now fully functional. 
+    - Users can now save links.
+    - Users can now link to external images.
+    - Various text formatting now fully functional.
 - Standardize functionality for better reuse across pages.
   - Generating an anchor sidebar.
-  - Generating history and timestamps. 
+  - Generating history and timestamps.
 # API
-- Add functionality for archiving and un-archiving travelers. 
-- Add functionality for removing a traveler from a binder. 
+- Add functionality for archiving and un-archiving travelers.
+- Add functionality for removing a traveler from a binder.
 # Bug Fixes
-- Resolve send syntax issue with new express version not responding to requests. 
+- Resolve send syntax issue with new express version not responding to requests.
 - Resolve issue with login redirects not working.
-- Resolve deprecated express functionality. 
+- Resolve deprecated express functionality.
 
 APS-1.1.2 Release Changelog
 February 15, 2019
@@ -146,16 +149,16 @@ February 15, 2019
 APS-1.1.1 Release Changelog
 January 29, 2019
 - General
-    Resolve the issue that prevented user from being able to save radio and checkboxes on safari. 
-    Ability to jump to template from traveler instance 
+    Resolve the issue that prevented user from being able to save radio and checkboxes on safari.
+    Ability to jump to template from traveler instance
     Add tags and keys columns to public template list
-    Rename user defined keys to reporting id 
-    Support ldap authentication with user lookup 
+    Rename user defined keys to reporting id
+    Support ldap authentication with user lookup
 - Permissions
     Admin role that can now update any template
 - Other
     Script that allows updating of keys for existing traveler instances
-    ZSH shell sourcing 
+    ZSH shell sourcing
 
 APS-1.1.0 Release Changelog
 October 24, 2018
