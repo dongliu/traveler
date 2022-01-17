@@ -1,3 +1,6 @@
+APS 1.5.3
+- Update the traveler naigator to be collapsible to reveal the discrepancy log. 
+
 APS 1.5.2
 - Update the process manager from forever to pm2.
 
