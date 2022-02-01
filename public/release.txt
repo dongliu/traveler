@@ -1,3 +1,9 @@
+APS 1.5.4
+- Ability to archive previously released forms during form release. (@rfgunion)
+- Resolve missing prefix from some views (@rfgunion)
+- Add option for fetching travelers from API that were created from specific form id. 
+- Resolve issue with restoring a large db. 
+
 APS 1.5.3
 - Update the traveler naigator to be collapsible to reveal the discrepancy log. 
 
