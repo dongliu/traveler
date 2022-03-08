@@ -966,10 +966,12 @@ function file_edit($cgr) {
   var required = false;
   var userkey = '';
   var help = '';
+  var filetype = '';
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     required = $('input', $cgr).prop('required');
     userkey = $('.controls input', $cgr).data('userkey');
+    filetype = $('.controls input', $cgr).data('filetype');
     help = $('.controls span.help-block', $cgr).text();
   }
 
@@ -977,12 +979,15 @@ function file_edit($cgr) {
   var $label = $(spec.label());
   var $required = $(spec.required());
   var $userkey = $(spec.userkey());
+  var $filetype = $(spec.filetype());
+
   var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append(
     $label,
     $required,
     $userkey,
+    $filetype,
     $help,
     $done
   );
@@ -1001,12 +1006,14 @@ function file_edit($cgr) {
     label: label,
     required: required,
     userkey: userkey,
+    filetype: filetype,
     help: help,
   };
 
   $('input', $label).val(label);
   $('input', $required).prop('checked', required);
   $('input', $userkey).val(userkey);
+  $('input', $filetype).val(filetype);
   $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
