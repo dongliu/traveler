@@ -449,9 +449,7 @@ module.exports = function(app) {
             return res
               .status(400)
               .send(
-                `cannot find the released ${
-                  config.viewConfig.terminology.form
-                } with id ${req.body.form}`
+                `cannot find the released ${config.viewConfig.terminology.form} with id ${req.body.form}`
               );
           }
         });
@@ -841,7 +839,7 @@ module.exports = function(app) {
       log.inputBy = req.session.userid;
       log.inputOn = Date.now();
       debug(log);
-      let travelerId = req.params.id
+      let travelerId = req.params.id;
       mqttUtilities.postDiscrepancyLogAddedMessage(travelerId, log);
       log
         .save()
@@ -941,7 +939,10 @@ module.exports = function(app) {
     reqUtils.archived('id', false),
     function(req, res) {
       var doc = req[req.params.id];
-      if (reqUtils.isOwner(req, doc) || routesUtilities.checkUserRole(req, 'admin')) {
+      if (
+        reqUtils.isOwner(req, doc) ||
+        routesUtilities.checkUserRole(req, 'admin')
+      ) {
         return res.render(
           'traveler-config',
           routesUtilities.getRenderObject(req, {
@@ -950,9 +951,7 @@ module.exports = function(app) {
           })
         );
       } else {
-        res
-          .status(403)
-          .send('you are not authorized to access this resource');
+        res.status(403).send('you are not authorized to access this resource');
       }
     }
   );
@@ -967,7 +966,10 @@ module.exports = function(app) {
     reqUtils.sanitize('body', ['title', 'description', 'deadline']),
     function(req, res) {
       var doc = req[req.params.id];
-      if (reqUtils.isOwner(req, doc) || routesUtilities.checkUserRole(req, 'admin')) {
+      if (
+        reqUtils.isOwner(req, doc) ||
+        routesUtilities.checkUserRole(req, 'admin')
+      ) {
         var k;
         for (k in req.body) {
           if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
@@ -976,7 +978,7 @@ module.exports = function(app) {
         }
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        doc.save(function (saveErr, newDoc) {
+        doc.save(function(saveErr, newDoc) {
           if (saveErr) {
             logger.error(saveErr);
             return res.status(500).send(saveErr.message);
@@ -1051,11 +1053,8 @@ module.exports = function(app) {
       }
 
       if (
-          (
-              (doc.status === 2 && req.body.status === 4) ||
-              (doc.status === 2 && req.body.status === 1)
-          )
-          &&
+        ((doc.status === 2 && req.body.status === 4) ||
+          (doc.status === 2 && req.body.status === 1)) &&
         !(
           routesUtilities.checkUserRole(req, 'admin') ||
           routesUtilities.checkUserRole(req, 'manager')
@@ -1341,7 +1340,7 @@ module.exports = function(app) {
       if (data.inputType === 'file') {
         fs.exists(data.file.path, function(exists) {
           if (exists) {
-            return res.sendFile(path.resolve(data.file.path));
+            return res.download(path.resolve(data.file.path), data.value);
           }
           return res.status(410).send('gone');
         });
