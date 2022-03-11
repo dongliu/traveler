@@ -1196,7 +1196,7 @@ module.exports = function(app) {
         });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        mqttUtilities.postTravelerDataChangedMessage(data);
+        mqttUtilities.postTravelerDataChangedMessage(data, doc);
         doc.data.push(data._id);
         // update the finishe input number by reset
         resetTouched(doc, function() {
