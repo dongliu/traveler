@@ -80,6 +80,36 @@ function sendRequest(data, cb, option) {
     .always(function() {});
 }
 
+function archive_prior_released_forms(selected) {
+  if (!selected || selected.length < 1) {
+    return;
+  }
+
+  $.ajax({
+    url: '/released-forms/archive',
+    type: 'PUT',
+    async: true,
+    data: JSON.stringify(selected),
+    contentType: 'application/json',
+    processData: false,
+  })
+    .done(function(data, textStatus, request) {
+      $('#message').append(
+        '<div class="alert alert-success"><button class="close" data-dismiss="alert"></button>' +
+          data +
+          '</div>'
+      );
+    })
+    .fail(function(data, textStatus, request) {
+      $('#message').append(
+        '<div class="alert alert-error"><button class="close" data-dismiss="alert"></button>' +
+          data +
+          '</div>'
+      );
+    })
+    .always(function() {});
+}
+
 function userkey_error($userkey, msg) {
   if (!$userkey.closest('.control-group').hasClass('error')) {
     $userkey
@@ -936,10 +966,12 @@ function file_edit($cgr) {
   var required = false;
   var userkey = '';
   var help = '';
+  var filetype = '';
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     required = $('input', $cgr).prop('required');
     userkey = $('.controls input', $cgr).data('userkey');
+    filetype = $('.controls input', $cgr).data('filetype');
     help = $('.controls span.help-block', $cgr).text();
   }
 
@@ -947,12 +979,15 @@ function file_edit($cgr) {
   var $label = $(spec.label());
   var $required = $(spec.required());
   var $userkey = $(spec.userkey());
+  var $filetype = $(spec.filetype());
+
   var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append(
     $label,
     $required,
     $userkey,
+    $filetype,
     $help,
     $done
   );
@@ -971,12 +1006,14 @@ function file_edit($cgr) {
     label: label,
     required: required,
     userkey: userkey,
+    filetype: filetype,
     help: help,
   };
 
   $('input', $label).val(label);
   $('input', $required).prop('checked', required);
   $('input', $userkey).val(userkey);
+  $('input', $filetype).val(filetype);
   $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
@@ -1443,15 +1480,42 @@ function binding_events() {
   });
 
   $('#release').click(function() {
-    var html = $('#output').html();
-    $('#modalLabel').html('Release the form');
     $('#modal .modal-body').empty();
-    var defaultTitle = $('#formtitle').text();
+    let defaultTitle = $('#formtitle').text();
     $('#modal .modal-body').append(
       '<form class="form-horizontal" id="modalform"> <div class="control-group"> <label class="control-label">Form title</label> <div class="controls"><input id="release-title" type="text" value="' +
         defaultTitle +
         '" class="input"> </div> </div> </form>'
     );
+
+    let priorVersionsTable = null;
+    if (released_form_version_mgmt) {
+      $('#modalLabel').html('Form Release');
+      $('#modal .modal-body').append(
+        '<h4>Select prior version(s) of this form to archive:</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
+      );
+      let priorVersionsColumns = [
+        selectColumn,
+        titleColumn,
+        releasedOnColumn,
+        releasedByColumn,
+        releasedFormLinkColumn,
+      ];
+      priorVersionsTable = $('#prior_versions').dataTable({
+        sAjaxSource: '/forms/' + id + '/released/json',
+        sAjaxDataProp: '',
+        bProcessing: true,
+        oLanguage: {
+          sLoadingRecords: 'Please wait - loading data from the server ...',
+        },
+        aoColumns: priorVersionsColumns,
+        iDisplayLength: 2,
+        sDom: sDomPage,
+      });
+      selectMultiEvent(priorVersionsTable);
+      filterEvent();
+    }
+
     if (formType === 'normal') {
       $('#modal .modal-body').append(
         '<h4>Choose a discrepancy to attach</h4> <table id="discrepancy" class="table table-bordered table-hover"> </table>'
@@ -1490,6 +1554,21 @@ function binding_events() {
     );
     $('#modal').modal('show');
     $('#modal button[value="confirm"]').click(function() {
+      if (priorVersionsTable) {
+        // get all selected forms
+        let selected = fnGetSelectedInPage(
+          priorVersionsTable,
+          'row-selected',
+          false
+        );
+        let json = [];
+        $(selected).each(function(s) {
+          const data = priorVersionsTable.fnGetData(s);
+          json.push(data._id);
+        });
+        archive_prior_released_forms(json);
+      }
+
       var title = $('#release-title').val();
       var json = {
         title: title,

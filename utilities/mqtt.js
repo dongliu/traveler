@@ -25,9 +25,9 @@ if (mqttConfig) {
   }
 
   // If disconnects try every minute
-  const options = { reconnectPeriod: 60 };
+  options = { reconnectPeriod: 60 };
 
-  const mqttUser = mqttConfig.username;
+  mqttUser = mqttConfig.username;
   if (mqttUser !== undefined) {
     options.username = mqttUser;
     options.password = mqttConfig.password;
@@ -53,8 +53,53 @@ function postDataEnteredMessage(topic, data) {
   }
 }
 
-function postTravelerDataChangedMessage(documentData) {
-  postDataEnteredMessage(travelerDataChangedTopic, documentData);
+function findUDKByMapping(mapping, inputId) {
+  if (mapping != null) {
+    let mappings = Object.entries(mapping);
+
+    for (let i = 0; i < mappings.length; i++) {
+      mapping = mappings[i];
+      if (mapping[1] === inputId) {
+        return mapping[0];
+      }
+    }
+  }
+
+  return null;
+}
+
+function postTravelerDataChangedMessage(documentData, document) {
+  if (mqttConfig === undefined) {
+    return;
+  }
+
+  let udk = null;
+  let inputId = documentData.name;
+
+  // Attempt fetching latest mapping from form
+  if (document.forms.length == 1) {
+    let form = document.forms[0];
+    let mapping = form.mapping;
+    udk = findUDKByMapping(mapping, inputId);
+  }
+  // Try to fetch traveler mapping
+  if (udk == null) {
+    let mapping = document.mapping;
+    udk = findUDKByMapping(mapping, inputId);
+  }
+
+  let dataEntered = {
+    _id: documentData._id,
+    traveler: documentData.traveler,
+    name: documentData.name,
+    value: documentData.value,
+    inputType: documentData.inputType,
+    inputBy: documentData.inputBy,
+    inputOn: documentData.inputOn,
+    userDefinedKey: udk,
+  };
+
+  postDataEnteredMessage(travelerDataChangedTopic, dataEntered);
 }
 
 function postTravelerStatusChangedMessage(document) {

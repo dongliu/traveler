@@ -213,6 +213,10 @@
     return '<div class="control-group"><div class="control-label">User defined key</div><div class="controls"><input type="text" name="userkey" pattern="[a-zA-Z_0-9]{1,30}"/><span class="help-inline">Only letter, number, and "_" allowed (Example: MagMeas_1)</span></div></div>';
   };
 
+  exports['filetype'] = function tmpl_filetype() {
+    return '<div class="control-group"><div class="control-label">File type</div><div class="controls"><input type="text" name="filetype" /><span class="help-inline">Leave blank for default file formats (PDF, excel & image/text formats). Specify for a specific file format (ex: zip)</span></div></div>';
+  };
+
   // width.jade compiled template
   exports['width'] = function tmpl_width() {
     return '<div class="control-group"><div class="control-label">Width</div><div class="controls"><input type="number" disabled="disabled" name="width" step="any"/></div></div>';

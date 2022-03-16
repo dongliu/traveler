@@ -1151,7 +1151,7 @@ module.exports = function(app) {
         });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        mqttUtilities.postTravelerDataChangedMessage(data);
+        mqttUtilities.postTravelerDataChangedMessage(data, doc);
         doc.data.push(data._id);
         // update the finishe input number by reset
         routesUtilities.traveler.resetTouched(doc, function() {
@@ -1295,7 +1295,7 @@ module.exports = function(app) {
       if (data.inputType === 'file') {
         fs.exists(data.file.path, function(exists) {
           if (exists) {
-            return res.sendFile(path.resolve(data.file.path));
+            return res.download(path.resolve(data.file.path), data.value);
           }
           return res.status(410).send('gone');
         });
