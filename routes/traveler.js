@@ -28,53 +28,6 @@ var TravelerError = require('../lib/error').TravelerError;
 var debug = require('debug')('traveler:route:traveler');
 var logger = require('../lib/loggers').getLogger();
 
-function addInputName(name, list) {
-  if (list.indexOf(name) === -1) {
-    list.push(name);
-  }
-}
-
-function resetTouched(doc, cb) {
-  TravelerData.find(
-    {
-      _id: {
-        $in: doc.data,
-      },
-    },
-    'name'
-  ).exec(function(dataErr, data) {
-    if (dataErr) {
-      logger.error(dataErr);
-      return cb(dataErr);
-    }
-    // reset the touched input name list and the finished input number
-    logger.info('reset the touched inputs for traveler ' + doc._id);
-    var labels = {};
-    var activeForm;
-    if (doc.forms.length === 1) {
-      activeForm = doc.forms[0];
-    } else {
-      activeForm = doc.forms.id(doc.activeForm);
-    }
-
-    if (!(activeForm.labels && _.size(activeForm.labels) > 0)) {
-      activeForm.labels = routesUtilities.traveler.inputLabels(activeForm.html);
-    }
-    labels = activeForm.labels;
-    // empty the current touched input list
-    doc.touchedInputs = [];
-    data.forEach(function(d) {
-      // check if the data is for the active form
-      if (labels.hasOwnProperty(d.name)) {
-        addInputName(d.name, doc.touchedInputs);
-      }
-    });
-    // finished input
-    doc.finishedInput = doc.touchedInputs.length;
-    cb();
-  });
-}
-
 function createTraveler(form, req, res) {
   routesUtilities.traveler.createTraveler(
     form,
@@ -124,6 +77,8 @@ function cloneTraveler(source, req, res) {
     forms: source.forms,
     activeForm: source.activeForm,
     mapping: source.mapping,
+    labels: source.labels,
+    types: source.types,
     data: [],
     comments: [],
     totalInput: source.totalInput,
@@ -1199,7 +1154,7 @@ module.exports = function(app) {
         mqttUtilities.postTravelerDataChangedMessage(data, doc);
         doc.data.push(data._id);
         // update the finishe input number by reset
-        resetTouched(doc, function() {
+        routesUtilities.traveler.resetTouched(doc, function() {
           // save doc anyway
           doc.save(function(saveErr) {
             if (saveErr) {

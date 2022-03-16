@@ -1,7 +1,7 @@
 const config = require('../config/config.js');
 const logger = require('../lib/loggers').getLogger();
 
-mqttConfig = config.mqtt;
+const mqttConfig = config.mqtt;
 
 let travelerDataChangedTopic = undefined;
 let travelerStatusChangedTopic = undefined;
@@ -9,7 +9,7 @@ let travelerDiscrepancyLogAddedTopic = undefined;
 
 let mqttClient = undefined;
 
-if (mqttConfig !== undefined) {
+if (mqttConfig) {
   const mqtt = require('mqtt');
 
   travelerDataChangedTopic = mqttConfig.topics.traveler_data_changed;
@@ -47,7 +47,7 @@ if (mqttConfig !== undefined) {
 }
 
 function postDataEnteredMessage(topic, data) {
-  if (mqttConfig !== undefined) {
+  if (mqttConfig) {
     let mqttMessage = JSON.stringify(data);
     mqttClient.publish(topic, mqttMessage);
   }
@@ -103,7 +103,7 @@ function postTravelerDataChangedMessage(documentData, document) {
 }
 
 function postTravelerStatusChangedMessage(document) {
-  if (mqttConfig === undefined) {
+  if (!mqttConfig) {
     return;
   }
   let statusChanged = {
@@ -116,7 +116,7 @@ function postTravelerStatusChangedMessage(document) {
 }
 
 function postDiscrepancyLogAddedMessage(travelerId, log) {
-  if (mqttConfig === undefined) {
+  if (!mqttConfig) {
     return;
   }
   let newDiscrepancy = {
