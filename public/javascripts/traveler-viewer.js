@@ -100,8 +100,23 @@ function renderNotes() {
 }
 
 $(function() {
+  ajax401(prefix);
+
   createSideNav();
+
   cleanForm();
+
+  // load discrepancy table and data
+  var discrepancyForm;
+  if (traveler.activeDiscrepancyForm) {
+    discrepancyForm = findById(
+      traveler.discrepancyForms,
+      traveler.activeDiscrepancyForm
+    );
+    DiscrepancyFormLoader.setLogTable('#discrepancy-log-table');
+    DiscrepancyFormLoader.setTid(traveler._id);
+    loadDiscrepancyLog(discrepancyForm);
+  }
 
   $('span.time').each(function() {
     $(this).text(
@@ -229,5 +244,10 @@ $(function() {
 
   $('#hide-notes').click(function() {
     $('.input-notes').hide();
+  });
+
+  $('#create-pdf').click(function() {
+    const html = $('.traveler-print').html();
+    createPDF(html, `traveler-${traveler._id}`);
   });
 });
