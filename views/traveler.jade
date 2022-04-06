@@ -81,6 +81,8 @@ block content
                 if (isAdmin)
                   .btn-group
                     button.btn.btn-warning#more More work
+                .btn-group
+                  a.btn.btn-primary#pdf(data-toggle='tooltip', title='create pdf in print view', href='view', target='#{viewConfig.linkTarget}') Create PDF
         if (locals.traveler.status !== undefined && locals.traveler.status > 0)
           //- .btn-group
           //-   button.btn.btn-info#update-progress Update progress
