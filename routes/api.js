@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var mongoose = require('mongoose');
+var cheerio = require('cheerio');
 var basic = require('basic-auth');
 var routesUtilities = require('../utilities/routes.js');
 var _ = require('lodash');
@@ -21,6 +22,21 @@ var Log = mongoose.model('Log');
 
 var WRITE_API_USER = 'api_write';
 
+var ALLOWED_API_INPUT_TYPES = [
+  'checkbox',
+  'radio',
+  'text',
+  'textarea',
+  'number',
+  'date',
+  'datetime-local',
+  'email',
+  'tel',
+  'time',
+  'url',
+  'text',
+];
+
 /**
  * Checks if the api user who is logged in has write access.
  *
@@ -29,14 +45,23 @@ var WRITE_API_USER = 'api_write';
  * @param {function} next  - Callback to be called when successful
  * @returns {*|ServerResponse} error when no permissions exist for writing
  */
-function checkWritePermissions(req, res, next) {
+function checkSystemWritePermissions(req, res, next) {
   var credentials = basic(req);
   if (credentials.name !== WRITE_API_USER) {
     return res.status(401).json({
-      error: 'Write permissions are needed to create a form',
+      error: 'Insufficient write privilages',
     });
   } else {
     next();
+  }
+}
+
+function checkSystemOrUserWritePermissions(req, res, next) {
+  if (req.user) {
+    // Ldap user logged in (permission needs to be verified to specific entitiy being updated)
+    next();
+  } else {
+    checkSystemWritePermissions(req, res, next);
   }
 }
 
@@ -254,7 +279,7 @@ module.exports = function(app) {
       ['binderTitle', 'description', 'userName'],
       true
     ),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       var binderTitle = req.body.binderTitle;
       var userName = req.body.userName;
@@ -276,7 +301,7 @@ module.exports = function(app) {
   app.post(
     '/apis/addWork/binders/:id/',
     routesUtilities.filterBody(['travelerIds', 'userName'], true),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       Binder.findById(req.params.id, function(err, binder) {
         performMongoResponse(err, binder, res, function() {
@@ -290,7 +315,7 @@ module.exports = function(app) {
   app.post(
     '/apis/removeWork/binders/:id/',
     routesUtilities.filterBody(['workId', 'userName'], true),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       Binder.findById(req.params.id, function(err, binder) {
         performMongoResponse(err, binder, res, function() {
@@ -312,7 +337,7 @@ module.exports = function(app) {
     '/apis/travelers/:id/status/',
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       var doc = req[req.params.id];
 
@@ -349,51 +374,159 @@ module.exports = function(app) {
     }
   );
 
-  app.post(
+  app.put(
     '/apis/travelers/:id/data/',
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
     reqUtils.status('id', [1]),
-    checkWritePermissions,
-    reqUtils.filter('body', ['name', 'value', 'type', 'userId']),
-    reqUtils.hasAll('body', ['name', 'value', 'type']),
-    reqUtils.sanitize('body', ['name', 'value', 'type', 'userId']),
+    checkSystemOrUserWritePermissions,
+    reqUtils.filter('body', ['name', 'value', 'userId']),
+    reqUtils.hasAll('body', ['name', 'value']),
+    reqUtils.sanitize('body', ['name', 'value', 'userId']),
     function(req, res) {
-      var doc = req[req.params.id];
-      var data = new TravelerData({
-        traveler: doc._id,
-        name: req.body.name,
-        value: req.body.value,
-        inputType: req.body.type,
-        inputBy: req.body.userId,
-        inputOn: Date.now(),
-      });
-      data.save(function(dataErr) {
-        if (dataErr) {
-          logger.error(dataErr.message);
-          if (dataErr instanceof DataError) {
-            return res.status(dataErr.status).send(dataErr.message);
-          }
-          return res.status(500).send(dataErr.message);
+      var traveler = req[req.params.id];
+      var fieldName = req.body.name;
+      var fieldValue = req.body.value;
+      var specifiedInputUser = req.body.userId;
+
+      if (req.user) {
+        // Standard User execution
+        if (specifiedInputUser !== undefined) {
+          return res
+            .status(500)
+            .send(
+              'Insuffient privilates to specify user Id. Remove parameter and try again.'
+            );
         }
-        doc.updatedBy = req.body.userId;
-        doc.updatedOn = Date.now();
-        mqttUtilities.postTravelerDataChangedMessage(data);
-        doc.data.push(data._id);
-        // update the finished input number by reset
-        routesUtilities.traveler.resetTouched(doc, function() {
-          // save doc anyway
-          doc.save(function(saveErr) {
-            if (saveErr) {
-              logger.error(saveErr);
-              return res.status(500).send(saveErr.message);
-            }
-            return res.status(204).send();
-          });
-        });
-      });
+        specifiedInputUser = req.user.id;
+
+        if (reqUtils.canWrite(req, traveler)) {
+          performDataEntry(
+            req,
+            res,
+            traveler,
+            fieldName,
+            fieldValue,
+            specifiedInputUser
+          );
+        } else {
+          return res
+            .status(401)
+            .send(
+              'User does not have sufficient privilages for updating the traveler.'
+            );
+        }
+      } else {
+        // System account execution
+        if (specifiedInputUser === undefined) {
+          return res
+            .status(500)
+            .send('User id must be specified for this request.');
+        } else {
+          performDataEntry(
+            req,
+            res,
+            traveler,
+            fieldName,
+            fieldValue,
+            specifiedInputUser
+          );
+        }
+      }
     }
   );
+
+  function performDataEntry(
+    req,
+    res,
+    traveler,
+    fieldName,
+    fieldValue,
+    inputUserId
+  ) {
+    // Fetch inputType
+    var traveler_html = traveler.forms[0].html;
+    var result = cheerio.load(traveler_html);
+    var inputs = result('input, textarea');
+    inputType = undefined;
+    var error = '';
+
+    for (let i = 0; i < inputs.length; i += 1) {
+      var input = result(inputs[i]);
+      ittrInputName = input.attr('name');
+      ittrInputType = input.attr('type');
+
+      if (ittrInputName === fieldName) {
+        if (ittrInputType === undefined) {
+          ittrInputType = input[0].name;
+        }
+        inputType = ittrInputType;
+
+        if (inputType === 'radio') {
+          var allowed_val = input.attr('value');
+          if (allowed_val == fieldValue) {
+            error = undefined;
+            break;
+          } else {
+            if (error.length == 0) {
+              error = 'Allowed value needs to be specified: ' + allowed_val;
+            } else {
+              error += ', ' + allowed_val;
+            }
+          }
+        } else {
+          break;
+        }
+      }
+    }
+
+    if (error) {
+      return res.status(500).send(error);
+    }
+
+    if (inputType === undefined) {
+      return res.status(500).send('Input name provided was not found.');
+    }
+
+    if (ALLOWED_API_INPUT_TYPES.indexOf(inputType) === -1) {
+      return res
+        .status(500)
+        .send(inputType + ' type entry is not supported by the API.');
+    }
+
+    var data = new TravelerData({
+      traveler: traveler._id,
+      name: fieldName,
+      value: fieldValue,
+      inputType: inputType,
+      inputBy: inputUserId,
+      inputOn: Date.now(),
+    });
+    data.save(function(dataErr, result) {
+      if (dataErr) {
+        logger.error(dataErr.message);
+        if (dataErr instanceof DataError) {
+          return res.status(dataErr.status).send(dataErr.message);
+        }
+        return res.status(500).send(dataErr.message);
+      }
+      traveler.updatedBy = inputUserId;
+      traveler.updatedOn = Date.now();
+      mqttUtilities.postTravelerDataChangedMessage(data);
+      traveler.data.push(data._id);
+      // update the finished input number by reset
+      routesUtilities.traveler.resetTouched(traveler, function() {
+        // save traveler
+        traveler.save(function(saveErr) {
+          if (saveErr) {
+            logger.error(saveErr);
+            return res.status(500).send(saveErr.message);
+          }
+          return res.status(201).json(result);
+        });
+      });
+    });
+  }
 
   /**
    * get the latest value for the given name from the data list
@@ -580,7 +713,7 @@ module.exports = function(app) {
   app.post(
     '/apis/archived/traveler/:id/',
     routesUtilities.filterBody(['archived'], true),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       var archivedStatus = req.body.archived;
 
@@ -640,7 +773,7 @@ module.exports = function(app) {
   app.post(
     '/apis/create/form/',
     routesUtilities.filterBody(['formName', 'userName', 'html'], true),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       var formName = req.body.formName;
       var userName = req.body.userName;
@@ -669,7 +802,7 @@ module.exports = function(app) {
       true,
       ['devices']
     ),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       try {
         var status = parseFloat(req.body.status);
@@ -720,7 +853,7 @@ module.exports = function(app) {
       ['formId', 'title', 'userName', 'devices'],
       true
     ),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       ReleasedForm.findById(req.body.formId, function(formErr, form) {
         performMongoResponse(formErr, form, res, function() {
