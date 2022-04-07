@@ -1,14 +1,12 @@
-function createPDF(html, fileName, opts) {
+function createPDF(selector, fileName, opts) {
   const opt = {
     ...opts,
-    margin: 1,
+    margin: 0.5,
     pagebreak: { mode: 'avoid-all' },
     filename: fileName,
     jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
   };
-  html += `<p>generated from <a href="${window.location}">${
-    window.location
-  }</a> on ${Date()}</p>`;
+  const html = window.document.querySelector(selector);
   html2pdf()
     .set(opt)
     .from(html)

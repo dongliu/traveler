@@ -124,6 +124,11 @@ $(function() {
     );
   });
 
+  $('#location')
+    .attr('href', window.location)
+    .text(window.location);
+  $('#localtime').text(Date());
+
   // update img
   $('#form')
     .find('img')
@@ -247,7 +252,6 @@ $(function() {
   });
 
   $('#create-pdf').click(function() {
-    const html = $('.traveler-print').html();
-    createPDF(html, `traveler-${traveler._id}`);
+    createPDF('div.traveler-print', `traveler-${traveler._id}`);
   });
 });
