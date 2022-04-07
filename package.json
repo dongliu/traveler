@@ -1,6 +1,6 @@
 {
   "name": "traveler-aps",
-  "version": "1.5.5",
+  "version": "1.6.0",
   "private": true,
   "scripts": {
     "start": "node app"
@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/AdvancedPhotonSource/traveler.git",
-    "release": "APS-1.5.5"
+    "release": "APS-1.6.0"
   },
   "dependencies": {
     "basic-auth": "1.0.0",
@@ -22,6 +22,7 @@
     "express-session": "1.15.6",
     "express-slash": "1.0.0",
     "file-stream-rotator": "0.0.5",
+    "generate-api-key": "^1.0.0",
     "jade": "1.10.0",
     "jstransformer-marked": "1.0.1",
     "ldapjs": "1.0.0",
