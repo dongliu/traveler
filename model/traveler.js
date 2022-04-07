@@ -11,6 +11,12 @@ var DataError = require('../lib/error').DataError;
 require('./binder');
 var Binder = mongoose.model('Binder');
 
+var TIME_PART_REG_EX = '([0-1][0-9]|2[0-4]):([0-5][0-9])';
+var TIME_REG_EX = '^' + TIME_PART_REG_EX + '$';
+var DATE_REG_EX_START = '^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][1-9]|3[0-1])';
+var DATE_REG_EX = DATE_REG_EX_START + '$';
+var DATETIME_REG_EX = DATE_REG_EX_START + 'T' + TIME_PART_REG_EX + '$';
+
 /**
  * A form can become active, inactive, and reactive. The form's activated date
  *   and the form's updated data can tell if the form has been updated since
@@ -256,7 +262,34 @@ travelerData.pre('save', function validateNumber(next) {
         new DataError('value "' + this.value + '" is not a number', 400)
       );
     }
-  }
+  } else if (this.inputType == 'checkbox') {
+    if ((this.value == true || this.value == false) === false) {
+      return next(
+        new DataError('value "' + this.value + '" is not a boolean', 400)
+      );
+    }
+  } else if (this.inputType == 'datetime-local') {
+    if (this.value.match(DATETIME_REG_EX) === null) {
+      return next(
+        new DataError(
+          this.value + ' does not match format yyyy-mm-ddThh:mm',
+          400
+        )
+      );
+    }
+  } else if (this.inputType == 'date') {
+    if (this.value.match(DATE_REG_EX) === null) {
+      return next(
+        new DataError(this.value + ' does not match format yyyy-mm-dd', 400)
+      );
+    }
+  } else if (this.inputType == 'time') {
+    if (this.value.match(TIME_REG_EX) === null) {
+      return next(
+        new DataError(this.value + ' does not match format hh:mm', 400)
+      );
+    }
+  } //url
   next();
 });
 
