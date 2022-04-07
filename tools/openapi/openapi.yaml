@@ -97,7 +97,65 @@ paths:
                 $ref: "#/components/schemas/Traveler"
         '401':
            $ref: '#/components/responses/UnauthorizedError'
-          
+
+  /apis/travelers/{travelerId}/status/:
+    put:
+      tags:
+      - traveler
+      operationId: updateTravelerStatus
+      parameters:
+      - name: travelerId
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: [ ]
+      requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelerStatusOptions"
+      responses:
+          default:
+            description: default response
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Traveler"
+          '401':
+            $ref: '#/components/responses/UnauthorizedError'
+
+  /apis/travelers/{travelerId}/data/:
+    put:
+      tags:
+      - traveler
+      operationId: updateTravelerData
+      parameters:
+      - name: travelerId
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: [ ]
+      requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TravelerDataOptions"
+      responses:
+          default:
+            description: default response
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/TravelerData"
+          '401':
+            $ref: '#/components/responses/UnauthorizedError'
+
   /apis/create/traveler/:
     post:
       tags:
@@ -112,8 +170,8 @@ paths:
             schema:
               $ref: "#/components/schemas/TravelerCreateOptions"
       responses:
-        default: 
-          description: default response 
+        default:
+          description: default response
           content:
             application/json:
               schema:
@@ -1094,6 +1152,24 @@ components:
           type: array
           items: 
             type: string
+
+    TravelerStatusOptions:
+      type: object
+      properties:
+        status:
+          type: string
+        userId:
+          type: string
+
+    TravelerDataOptions:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        userId:
+          type: string
 
     FormCreateOptions:
       type: object
