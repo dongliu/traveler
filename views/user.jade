@@ -42,6 +42,15 @@ block content
           label.checkbox.inline
             input(type='checkbox', value='admin')
             | admin
+          label.checkbox.inline
+            input(type='checkbox', value='api')
+            | API
+          label.checkbox.inline
+            input(type='checkbox', value='read_all_forms')
+            | Read all forms
+          label.checkbox.inline
+            input(type='checkbox', value='write_active_travelers')
+            | Write to all active travelers
       if (myRoles.indexOf('admin') !== -1)
         button#modify.btn.btn-primary(type='submit') Modify
         = ' '
