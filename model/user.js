@@ -18,6 +18,8 @@ var user = new Schema({
     type: Boolean,
     default: false,
   },
+  apiKey: String,
+  apiKeyExpiration: Date,
 });
 
 var group = new Schema({
@@ -25,9 +27,9 @@ var group = new Schema({
   name: String,
   deleted: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  members: [{type: String, ref: 'User'}],
+  members: [{ type: String, ref: 'User' }],
   forms: [ObjectId],
   travelers: [ObjectId],
   binders: [ObjectId],
