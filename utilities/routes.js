@@ -63,10 +63,16 @@ function filterBodyWithOptional(requiredStrings, findAll, optionalStrings) {
 }
 
 function checkUserRole(req, role) {
-  if (
-    req.session.roles !== undefined &&
-    req.session.roles.indexOf(role) !== -1
-  ) {
+  var roles = undefined;
+  if (req.user) {
+    // API session
+    roles = req.user.roles;
+  } else {
+    // Web session
+    roles = req.session.roles;
+  }
+
+  if (roles !== undefined && roles.indexOf(role) !== -1) {
     return true;
   } else {
     return false;
