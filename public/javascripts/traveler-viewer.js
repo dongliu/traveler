@@ -124,11 +124,6 @@ $(function() {
     );
   });
 
-  $('#location')
-    .attr('href', window.location)
-    .text(window.location);
-  $('#localtime').text(Date());
-
   // update img
   $('#form')
     .find('img')
@@ -249,9 +244,5 @@ $(function() {
 
   $('#hide-notes').click(function() {
     $('.input-notes').hide();
-  });
-
-  $('#create-pdf').click(function() {
-    createPDF('div.traveler-print', `traveler-${traveler._id}`);
   });
 });
