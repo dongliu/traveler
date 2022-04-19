@@ -512,7 +512,7 @@ module.exports = function(app) {
       }
       traveler.updatedBy = inputUserId;
       traveler.updatedOn = Date.now();
-      mqttUtilities.postTravelerDataChangedMessage(data);
+      mqttUtilities.postTravelerDataChangedMessage(data, traveler);
       traveler.data.push(data._id);
       // update the finished input number by reset
       routesUtilities.traveler.resetTouched(traveler, function() {
