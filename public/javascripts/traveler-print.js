@@ -17,9 +17,7 @@ function fileHistory(found) {
         output +
         '<strong><a href=' +
         link +
-        ' target="' +
-        linkTarget +
-        '">' +
+        ' target="_blank">' +
         found[i].value +
         '</a></strong> uploaded by ' +
         found[i].inputBy +
@@ -99,6 +97,12 @@ function renderNotes() {
     .always();
 }
 
+function loadDiscrepancyLog(discrepancyForm) {
+  DiscrepancyFormLoader.setForm(discrepancyForm);
+  DiscrepancyFormLoader.renderLogs();
+  DiscrepancyFormLoader.retrieveLogs();
+}
+
 $(function() {
   ajax401(prefix);
 
@@ -124,9 +128,8 @@ $(function() {
     );
   });
 
-  $('#location')
-    .attr('href', window.location)
-    .text(window.location);
+  $('#location').attr('href', window.location);
+  // .text(window.location);
   $('#localtime').text(Date());
 
   // update img
@@ -260,6 +263,12 @@ $(function() {
   });
 
   $('#create-pdf').click(function() {
-    createPDF('div.traveler-print', `traveler-${traveler._id}`);
+    window.onbeforeprint = event => {
+      $('#print-control').hide();
+    };
+    window.onafterprint = event => {
+      $('#print-control').show();
+    };
+    window.print();
   });
 });
