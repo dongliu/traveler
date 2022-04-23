@@ -99,6 +99,12 @@ function renderNotes() {
     .always();
 }
 
+function loadDiscrepancyLog(discrepancyForm) {
+  DiscrepancyFormLoader.setForm(discrepancyForm);
+  DiscrepancyFormLoader.renderLogs();
+  DiscrepancyFormLoader.retrieveLogs();
+}
+
 $(function() {
   ajax401(prefix);
 
