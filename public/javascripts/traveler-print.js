@@ -22,7 +22,7 @@ function fileHistory(found) {
         '</a></strong> uploaded by ' +
         found[i].inputBy +
         ' ' +
-        livespan(found[i].inputOn) +
+        livespan(found[i].inputOn, false) +
         '; ';
     }
   }
@@ -39,7 +39,7 @@ function notes(found) {
         '<dt><b>' +
         found[i].inputBy +
         ' noted ' +
-        livespan(found[i].inputOn) +
+        livespan(found[i].inputOn, false) +
         '</b>: </dt>';
       output = output + '<dd>' + found[i].value + '</dd>';
     }

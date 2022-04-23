@@ -1,12 +1,12 @@
 body {
-font: 12pt Georgia, "Times New Roman", Times, serif;
-line-height: 1.2;
-background: #fff !important;
-color: #000;
+  font: 12pt Georgia, 'Times New Roman', Times, serif;
+  line-height: 1.2;
+  background: #fff !important;
+  color: #000;
 }
 
-.input-history {
-    page-break-inside:avoid
+.control-group-wrap {
+  page-break-inside: avoid;
 }
 
 .fe-type {
@@ -15,8 +15,4 @@ color: #000;
 
 .new-note {
   display: none;
-}
-
-.control-group-wrap {
-  margin-bottom: 1em;
 }
