@@ -95,6 +95,7 @@ module.exports.load = function() {
   viewConfig.linkTarget = '_blank';
   viewConfig.showBinderValue = false;
   viewConfig.showCCDB = this.service.device_application === 'devices';
+  viewConfig.showPublicTravelers = true;
 
   if (this.service.device !== undefined) {
     viewConfig.showDevice = true;
@@ -116,6 +117,9 @@ module.exports.load = function() {
   }
   if (this.app.link_target) {
     viewConfig.linkTarget = this.app.link_target;
+  }
+  if (this.app.public_travelers_page !== undefined) {
+    viewConfig.showPublicTravelers = this.app.public_travelers_page;
   }
   if (
     this.travelerPackageFile.repository &&
