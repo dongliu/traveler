@@ -234,7 +234,8 @@ $(function() {
   $('#show-validation').click(function() {
     $('.validation').remove();
     $('#validation').html(
-      '<h3>Summary</h3>' + validationMessage(document.getElementById('form'))
+      '<h3>Summary</h3>' +
+        validationMessage(document.getElementById('form'), true)
     );
     $('#validation').show();
   });

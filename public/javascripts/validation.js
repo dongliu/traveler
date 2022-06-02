@@ -53,7 +53,7 @@ function markFormValidity(form) {
   });
 }
 
-function validationMessage(form) {
+function validationMessage(form, showHelp = false) {
   var disabled = $('input,textarea', form)
     .first()
     .prop('disabled');
@@ -64,6 +64,7 @@ function validationMessage(form) {
   var output = $('<div>');
   var p;
   var value;
+  let help;
   var input;
   var $input;
   var label;
@@ -130,8 +131,18 @@ function validationMessage(form) {
         .next()
         .text();
     }
+    help = $(input)
+      .closest('.controls')
+      .children('.help-block')
+      .text();
     if (customCheckValidity(input)) {
-      p.html('<b>' + label + '</b>: ' + value);
+      p.html(
+        '<b>' +
+          label +
+          '</b>: ' +
+          value +
+          (showHelp && help.length > 0 ? ' | Help: ' + help + ' ' : '')
+      );
       span.text('validation passed');
     } else {
       p.html(
@@ -139,6 +150,7 @@ function validationMessage(form) {
           label +
           '</b>: ' +
           value +
+          (showHelp && help.length > 0 ? ' | Help: ' + help + ' ' : '') +
           ' | Message: ' +
           input.validationMessage
       );
