@@ -141,7 +141,7 @@ function validationMessage(form, showHelp = false) {
           label +
           '</b>: ' +
           value +
-          (showHelp && help.length > 0 ? ' | Help: ' + help + ' ' : '')
+          (showHelp && help.length > 0 ? ' | ' + help + ' ' : '')
       );
       span.text('validation passed');
     } else {
@@ -150,7 +150,7 @@ function validationMessage(form, showHelp = false) {
           label +
           '</b>: ' +
           value +
-          (showHelp && help.length > 0 ? ' | Help: ' + help + ' ' : '') +
+          (showHelp && help.length > 0 ? ' | ' + help + ' ' : '') +
           ' | Message: ' +
           input.validationMessage
       );
