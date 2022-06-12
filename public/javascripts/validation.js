@@ -53,7 +53,7 @@ function markFormValidity(form) {
   });
 }
 
-function validationMessage(form, showHelp = false) {
+function validationMessage(form, showHelp = true) {
   var disabled = $('input,textarea', form)
     .first()
     .prop('disabled');
@@ -67,10 +67,10 @@ function validationMessage(form, showHelp = false) {
   let help;
   var input;
   var $input;
-  var label;
   var span;
   var last_input_name = '';
   for (i = 0; i < form.elements.length; i += 1) {
+    let label = [];
     input = form.elements[i];
 
     var input_name = input.name;
@@ -122,15 +122,20 @@ function validationMessage(form, showHelp = false) {
     } else {
       value = input.value;
     }
-    label = $(input)
-      .closest('.control-group')
-      .children('.control-label')
-      .text();
-    if (label === '' && input.type === 'checkbox') {
-      label = $(input)
-        .next()
-        .text();
+    label.push(
+      $(input)
+        .closest('.control-group')
+        .children('.control-label')
+        .text()
+    );
+    if (input.type === 'checkbox') {
+      label.push(
+        $(input)
+          .next()
+          .text()
+      );
     }
+    label = label.filter(e => e.length > 0).join(' ');
     help = $(input)
       .closest('.controls')
       .children('.help-block')
