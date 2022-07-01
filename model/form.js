@@ -70,6 +70,7 @@ var form = new Schema({
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
   types: Schema.Types.Mixed,
+  wipHtml: String,
   html: String,
   formType: {
     type: String,
