@@ -132,15 +132,7 @@ app.use(
     },
   })
 );
-app.use(
-  multer({
-    dest: config.uploadPath,
-    limits: {
-      files: 1,
-      fileSize: (config.app.upload_size || 10) * 1024 * 1024,
-    },
-  })
-);
+app.use(multer(config.multerConfig));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(auth.proxied);

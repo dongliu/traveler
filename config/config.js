@@ -86,6 +86,14 @@ module.exports.load = function() {
     module.exports.uploadPath = getPath('../data/traveler-uploads', 'uploads');
   }
 
+  module.exports.multerConfig = {
+    dest: module.exports.uploadPath,
+    limits: {
+      files: 1,
+      fileSize: (module.exports.app.upload_size || 10) * 1024 * 1024,
+    },
+  };
+
   // Load view configuration
   var viewConfig = {};
   viewConfig.showDevice = false;
