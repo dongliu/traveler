@@ -1265,9 +1265,10 @@ module.exports = function(app) {
           logger.error(dataErr);
           return res.status(500).send(dataErr.message);
         }
-        doc.data.push(data._id);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
+        mqttUtilities.postTravelerDataChangedMessage(data, doc);
+        doc.data.push(data._id);
         doc.save(function(saveErr) {
           if (saveErr) {
             logger.error(saveErr);
