@@ -156,6 +156,35 @@ paths:
           '401':
             $ref: '#/components/responses/UnauthorizedError'
 
+  /apis/travelers/{travelerId}/data/upload:
+    put:
+      tags:
+      - traveler
+      operationId: updateTravelerDataUpload
+      parameters:
+      - name: travelerId
+        in: path
+        required: true
+        schema:
+          type: string
+      security:
+        - basicAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TravelerDataUploadOptions'                        
+      responses:
+          default:
+            description: default response
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/TravelerData"
+          '401':
+            $ref: '#/components/responses/UnauthorizedError'
+
   /apis/create/traveler/:
     post:
       tags:
@@ -1160,6 +1189,20 @@ components:
           type: string
         userId:
           type: string
+    
+    TravelerDataUploadOptions:
+      type: object
+      properties:
+        name:
+          type: string
+        fileName:
+          type: string
+          format: binary 
+        userId:
+          type: string
+      required:
+        - name
+        - fileName
 
     TravelerDataOptions:
       type: object
