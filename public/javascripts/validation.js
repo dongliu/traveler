@@ -53,27 +53,24 @@ function markFormValidity(form) {
   });
 }
 
-function validationMessage(form, showHelp = true) {
+function validationMessage(form) {
   var disabled = $('input,textarea', form)
     .first()
     .prop('disabled');
   if (disabled) {
     $('input,textarea', form).prop('disabled', false);
   }
-  var i = 0;
-  var output = $('<div>');
-  var p;
-  var value;
-  let help;
-  var input;
-  var $input;
-  var span;
-  var last_input_name = '';
-  for (i = 0; i < form.elements.length; i += 1) {
+  let output = $('<div>');
+  let last_input_name = '';
+  for (let i = 0; i < form.elements.length; i += 1) {
+    let p;
+    let value;
+    let help;
+    let input = form.elements[i];
+    let $input;
+    let span;
     let label = [];
-    input = form.elements[i];
-
-    var input_name = input.name;
+    let input_name = input.name;
     if (input_name === last_input_name) {
       continue;
     }
@@ -135,19 +132,14 @@ function validationMessage(form, showHelp = true) {
           .text()
       );
     }
-    label = label.filter(e => e.length > 0).join(' ');
     help = $(input)
       .closest('.controls')
       .children('.help-block')
       .text();
+    label.push(help);
+    label = label.filter(e => e.length > 0).join(' ');
     if (customCheckValidity(input)) {
-      p.html(
-        '<b>' +
-          label +
-          '</b>: ' +
-          value +
-          (showHelp && help.length > 0 ? ' | ' + help + ' ' : '')
-      );
+      p.html('<b>' + label + '</b>: ' + value);
       span.text('validation passed');
     } else {
       p.html(
@@ -155,7 +147,6 @@ function validationMessage(form, showHelp = true) {
           label +
           '</b>: ' +
           value +
-          (showHelp && help.length > 0 ? ' | ' + help + ' ' : '') +
           ' | Message: ' +
           input.validationMessage
       );
