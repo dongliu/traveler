@@ -11,6 +11,9 @@ var reqUtils = require('../lib/req-utils');
 var logger = require('../lib/loggers').getLogger();
 const mqttUtilities = require('../utilities/mqtt.js');
 const DataError = require('../lib/error').DataError;
+const multer = require('multer');
+const config = require('../config/config.js');
+const upload = multer(config.multerConfig);
 
 var Form = mongoose.model('Form');
 var ReleasedForm = mongoose.model('ReleasedForm');
@@ -22,6 +25,8 @@ var Log = mongoose.model('Log');
 
 var WRITE_API_USER = 'api_write';
 
+var FILE_UPLOAD_INPUT_TYPE = 'file';
+var UPLOAD_API_INPUT_TYPES = [FILE_UPLOAD_INPUT_TYPE];
 var ALLOWED_API_INPUT_TYPES = [
   'checkbox',
   'radio',
@@ -35,6 +40,43 @@ var ALLOWED_API_INPUT_TYPES = [
   'time',
   'url',
   'text',
+];
+
+// Allowed file types when extension is not specified on form.
+var DEFAULT_ALLOWED_UPLOAD_FILE_EXT = [
+  // Image
+  'tif',
+  'tiff',
+  'webp',
+  'svg',
+  'png',
+  'jpg',
+  'jpeg',
+  'ico',
+  'gif',
+  'bmp',
+  'avif',
+  // Text
+  'css',
+  'csv',
+  'htm',
+  'html',
+  'ics',
+  'odt',
+  'php',
+  'rtf',
+  'txt',
+  'xml',
+  // application/pdf
+  'pdf',
+  //application/vnd.ms-excel
+  'xls',
+  //application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  'xlsx',
+  // application/vnd.ms-xpsdocument
+  'xps',
+  //application/oxps
+  'oxps',
 ];
 
 /**
@@ -375,6 +417,40 @@ module.exports = function(app) {
   );
 
   app.put(
+    '/apis/travelers/:id/data/upload',
+    reqUtils.exist('id', Traveler),
+    reqUtils.archived('id', false),
+    reqUtils.status('id', [1]),
+    checkSystemOrUserWritePermissions,
+    upload,
+    reqUtils.filter('body', ['name', 'userId']),
+    reqUtils.hasAll('body', ['name']),
+    reqUtils.sanitize('body', ['name', 'userId']),
+    function(req, res) {
+      performDataEntryVerifyAndSave(req, res, UPLOAD_API_INPUT_TYPES, function(
+        req,
+        res,
+        errStatus,
+        msg
+      ) {
+        if (errStatus) {
+          // Cleanup uploaded data
+          if (!req.files.isEmpty) {
+            file = req.files.fileName;
+            // Remove file
+            fs.unlink(file.path, err => {
+              if (err) {
+                console.error(err);
+              }
+            });
+          }
+          return res.status(errStatus).send(msg);
+        }
+      });
+    }
+  );
+
+  app.put(
     '/apis/travelers/:id/data/',
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
@@ -384,66 +460,58 @@ module.exports = function(app) {
     reqUtils.hasAll('body', ['name', 'value']),
     reqUtils.sanitize('body', ['name', 'value', 'userId']),
     function(req, res) {
-      var traveler = req[req.params.id];
-      var fieldName = req.body.name;
-      var fieldValue = req.body.value;
-      var specifiedInputUser = req.body.userId;
-
-      if (req.user) {
-        // Standard User execution
-        if (specifiedInputUser !== undefined) {
-          return res
-            .status(500)
-            .send(
-              'Insuffient privilates to specify user Id. Remove parameter and try again.'
-            );
+      performDataEntryVerifyAndSave(req, res, ALLOWED_API_INPUT_TYPES, function(
+        req,
+        res,
+        errStatus,
+        msg
+      ) {
+        if (errStatus) {
+          return res.status(errStatus).send(msg);
         }
-        specifiedInputUser = req.user.id;
-
-        if (reqUtils.canWrite(req, traveler)) {
-          performDataEntry(
-            req,
-            res,
-            traveler,
-            fieldName,
-            fieldValue,
-            specifiedInputUser
-          );
-        } else {
-          return res
-            .status(401)
-            .send(
-              'User does not have sufficient privilages for updating the traveler.'
-            );
-        }
-      } else {
-        // System account execution
-        if (specifiedInputUser === undefined) {
-          return res
-            .status(500)
-            .send('User id must be specified for this request.');
-        } else {
-          performDataEntry(
-            req,
-            res,
-            traveler,
-            fieldName,
-            fieldValue,
-            specifiedInputUser
-          );
-        }
-      }
+      });
     }
   );
 
-  function performDataEntry(
-    req,
-    res,
-    traveler,
-    fieldName,
-    fieldValue,
-    inputUserId
-  ) {
+  function performDataEntryVerifyAndSave(req, res, allowed_input_types, next) {
+    var traveler = req[req.params.id];
+    var fieldName = req.body.name;
+    var fieldValue = req.body.value;
+    var file = undefined;
+    var inputUserId = req.body.userId;
+
+    if (req.user) {
+      // Standard User execution
+      if (inputUserId !== undefined) {
+        return next(
+          req,
+          res,
+          500,
+          'Insuffient privilates to specify user Id. Remove parameter and try again.'
+        );
+      }
+      inputUserId = req.user.id;
+
+      if (!reqUtils.canWrite(req, traveler)) {
+        return next(
+          req,
+          res,
+          401,
+          'User does not have sufficient privilages for updating the traveler.'
+        );
+      }
+    } else {
+      // System account execution
+      if (!inputUserId) {
+        return next(
+          req,
+          res,
+          500,
+          'User id must be specified for this request.'
+        );
+      }
+    }
+
     // Fetch inputType
     var traveler_html = traveler.forms[0].html;
     var result = cheerio.load(traveler_html);
@@ -481,17 +549,60 @@ module.exports = function(app) {
     }
 
     if (error) {
-      return res.status(500).send(error);
+      return next(req, res, 500, error);
     }
 
     if (inputType === undefined) {
-      return res.status(500).send('Input name provided was not found.');
+      return next(req, res, 500, 'Input name provided was not found.');
     }
 
-    if (ALLOWED_API_INPUT_TYPES.indexOf(inputType) === -1) {
-      return res
-        .status(500)
-        .send(inputType + ' type entry is not supported by the API.');
+    if (allowed_input_types.indexOf(inputType) === -1) {
+      return next(
+        req,
+        res,
+        500,
+        inputType + ' type entry is not supported by the API.'
+      );
+    }
+
+    if (inputType === FILE_UPLOAD_INPUT_TYPE) {
+      if (req.files.isEmpty || req.files.fileName === undefined) {
+        return next(
+          req,
+          res,
+          500,
+          'File upload not specified or failed to upload.'
+        );
+      }
+
+      var file = req.files.fileName;
+      // TODO verify allowed file type.
+      inputSpecifiedType = input[0].attribs['data-filetype'];
+      if (inputSpecifiedType) {
+        // file type specified for input
+        if (inputSpecifiedType !== file.extension) {
+          return next(
+            req,
+            res,
+            500,
+            file.extension +
+              ' file extension uploaded, ' +
+              inputSpecifiedType +
+              ' file extension required.'
+          );
+        }
+      } else if (
+        DEFAULT_ALLOWED_UPLOAD_FILE_EXT.indexOf(file.extension) === -1
+      ) {
+        return next(
+          req,
+          res,
+          500,
+          file.extension + ' file extension is not allowed for this upload.'
+        );
+      }
+
+      fieldValue = file.originalname;
     }
 
     var data = new TravelerData({
@@ -502,13 +613,22 @@ module.exports = function(app) {
       inputBy: inputUserId,
       inputOn: Date.now(),
     });
+
+    if (file) {
+      data.file = {
+        path: file.path,
+        encoding: file.encoding,
+        mimetype: file.mimetype,
+      };
+    }
+
     data.save(function(dataErr, result) {
       if (dataErr) {
         logger.error(dataErr.message);
         if (dataErr instanceof DataError) {
-          return res.status(dataErr.status).send(dataErr.message);
+          return next(req, res, dataErr.status, dataErr.message);
         }
-        return res.status(500).send(dataErr.message);
+        return next(req, res, 500, dataErr.message);
       }
       traveler.updatedBy = inputUserId;
       traveler.updatedOn = Date.now();
@@ -520,7 +640,7 @@ module.exports = function(app) {
         traveler.save(function(saveErr) {
           if (saveErr) {
             logger.error(saveErr);
-            return res.status(500).send(saveErr.message);
+            return next(req, res, 500, saveErr.message);
           }
           return res.status(201).json(result);
         });
