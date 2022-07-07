@@ -1,3 +1,28 @@
+APS 1.6.0
+# Form work in progress auto save
+- Form will automatically save after user makes changes to the draft form. 
+- Notify user of session loss or connection loss to server. 
+  - Keep read only tab to allow user to review last unsaved change. 
+  - Provide a link that will automatically open in new tab and prompt user to log in and reload form.
+- Allow user to go back to the form at any time and the unsaved changes will automatically load next time they navigate to the form. 
+- Provide a switcher to saved form and unsaved form when form is loaded from unsaved changes. 
+# API Enhancements
+- Users can now generate an api key from their profile given the API permission. 
+- Users can now authenticate into the API using the new API Key and perform most read operations.
+- A new API permission grants user ability to generate key and to use the key to authenticate
+- The API keys have a default expiration of 30 days but can be changed in the API configuration file. 
+- Ability to verify user permission from web and API side
+- Ability to enter data into traveler via API
+  - System API account can write data as any user. 
+  - First API call where users can write using the new API Key authentication. 
+- Ability to upload data into traveler upload field via API.
+- New system API only call with ability to update traveler status.  
+- Admins can grant the API permission for each user.  
+# MQTT 
+- Data changed message is now sent with User defined key if available. 
+- When lost connection to mqtt reconnect try is every minute. 
+- Resolve issue with file upload not publishing mqtt event.
+
 APS 1.5.5
 - Ability to specify a custom/specific file type for file upload input at the form design stage (Allowing additional formats such as zip).
 - Retain the original file name when downloading an uploaded file from the server. 
