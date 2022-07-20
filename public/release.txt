@@ -1,3 +1,6 @@
+APS 1.6.1
+- Resolve issue with date validation that end in 0. 
+
 APS 1.6.0
 # Form work in progress auto save
 - Form will automatically save after user makes changes to the draft form. 
