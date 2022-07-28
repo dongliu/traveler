@@ -11,8 +11,7 @@ block head
 
 block content
   script(type='text/javascript').
-    var prefix = '!{prefix}';
-    var group = !{JSON.stringify(group)}
+    var group = !{JSON.stringify(group)};
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
