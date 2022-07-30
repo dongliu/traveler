@@ -1516,6 +1516,9 @@ function binding_events() {
             images: 'img.user',
           });
         },
+        fnInitComplete() {
+          fnSelectAll(priorVersionsTable, 'row-selected', 'select-row', true);
+        },
       });
       selectMultiEvent('#prior_versions');
       filterEvent();
