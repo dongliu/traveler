@@ -1,32 +1,33 @@
-/*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
-var config = require('../config/config.js');
+/* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
+const fs = require('fs');
+const path = require('path');
+const debug = require('debug')('traveler:route:traveler');
+const mongoose = require('mongoose');
+const _ = require('lodash');
 
-var routesUtilities = require('../utilities/routes.js');
-const mqttUtilities = require('../utilities/mqtt.js');
+const config = require('../config/config');
+const routesUtilities = require('../utilities/routes');
+const mqttUtilities = require('../utilities/mqtt');
 
-var fs = require('fs');
-var auth = require('../lib/auth');
-var authConfig = config.auth;
-var mongoose = require('mongoose');
-var path = require('path');
-var _ = require('lodash');
-var reqUtils = require('../lib/req-utils');
-var shareLib = require('../lib/share');
-var tag = require('../lib/tag');
-var DataError = require('../lib/error').DataError;
+const auth = require('../lib/auth');
 
-var ReleasedForm = mongoose.model('ReleasedForm');
-var User = mongoose.model('User');
-var Group = mongoose.model('Group');
-var Traveler = mongoose.model('Traveler');
-var TravelerData = mongoose.model('TravelerData');
-var TravelerNote = mongoose.model('TravelerNote');
-var Log = mongoose.model('Log');
+const authConfig = config.auth;
+const reqUtils = require('../lib/req-utils');
+const shareLib = require('../lib/share');
+const tag = require('../lib/tag');
+const { DataError } = require('../lib/error');
 
-var TravelerError = require('../lib/error').TravelerError;
+const ReleasedForm = mongoose.model('ReleasedForm');
+const User = mongoose.model('User');
+const Group = mongoose.model('Group');
+const Traveler = mongoose.model('Traveler');
+const TravelerData = mongoose.model('TravelerData');
+const TravelerNote = mongoose.model('TravelerNote');
+const Log = mongoose.model('Log');
 
-var debug = require('debug')('traveler:route:traveler');
-var logger = require('../lib/loggers').getLogger();
+const { TravelerError } = require('../lib/error');
+const { stateTransition } = require('../model/traveler');
+const logger = require('../lib/loggers').getLogger();
 
 function addInputName(name, list) {
   if (list.indexOf(name) === -1) {
@@ -48,11 +49,11 @@ function resetTouched(doc, cb) {
       return cb(dataErr);
     }
     // reset the touched input name list and the finished input number
-    logger.info('reset the touched inputs for traveler ' + doc._id);
-    var labels = {};
-    var activeForm;
+    logger.info(`reset the touched inputs for traveler ${doc._id}`);
+    let labels = {};
+    let activeForm;
     if (doc.forms.length === 1) {
-      activeForm = doc.forms[0];
+      [activeForm] = doc.forms;
     } else {
       activeForm = doc.forms.id(doc.activeForm);
     }
@@ -71,7 +72,7 @@ function resetTouched(doc, cb) {
     });
     // finished input
     doc.finishedInput = doc.touchedInputs.length;
-    cb();
+    return cb();
   });
 }
 
@@ -89,27 +90,23 @@ function createTraveler(form, req, res) {
         }
         return res.status(500).send(err.message);
       }
-      logger.info('new traveler ' + doc.id + ' created');
-      var url =
-        (req.proxied ? authConfig.proxied_service : authConfig.service) +
-        '/travelers/' +
-        doc.id +
-        '/';
+      logger.info(`new traveler ${doc.id} created`);
+      const url = `${
+        req.proxied ? authConfig.proxied_service : authConfig.service
+      }/travelers/${doc.id}/`;
       res.set('Location', url);
       return res.status(201).json({
-        location:
-          (req.proxied ? req.proxied_prefix : '') +
-          '/travelers/' +
-          doc.id +
-          '/',
+        location: `${req.proxied ? req.proxied_prefix : ''}/travelers/${
+          doc.id
+        }/`,
       });
     }
   );
 }
 
 function cloneTraveler(source, req, res) {
-  var traveler = new Traveler({
-    title: source.title + ' clone',
+  const traveler = new Traveler({
+    title: `${source.title} clone`,
     description: source.description,
     devices: [],
     tags: source.tags,
@@ -135,7 +132,7 @@ function cloneTraveler(source, req, res) {
       console.error(err);
       return res.status(500).send(err.message);
     }
-    logger.info('new traveler ' + doc.id + ' created');
+    logger.info(`new traveler ${doc.id} created`);
     doc.sharedWith.forEach(function(e) {
       User.findByIdAndUpdate(
         e._id,
@@ -149,7 +146,7 @@ function cloneTraveler(source, req, res) {
             logger.error(userErr);
           }
           if (!user) {
-            logger.error('The user ' + e._id + ' does not in the db');
+            logger.error(`The user ${e._id} does not in the db`);
           }
         }
       );
@@ -168,17 +165,15 @@ function cloneTraveler(source, req, res) {
             logger.error(groupErr);
           }
           if (!user) {
-            logger.error('The group ' + e._id + ' does not in the db');
+            logger.error(`The group ${e._id} does not in the db`);
           }
         }
       );
     });
 
-    var url =
-      (req.proxied ? authConfig.proxied_service : authConfig.service) +
-      '/travelers/' +
-      doc.id +
-      '/';
+    const url = `${
+      req.proxied ? authConfig.proxied_service : authConfig.service
+    }/travelers/${doc.id}/`;
     res.set('Location', url);
     return res.status(201).json({
       location: url,
@@ -236,7 +231,7 @@ module.exports = function(app) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
-        res.status(200).json(travelers);
+        return res.status(200).json(travelers);
       });
   });
 
@@ -257,7 +252,7 @@ module.exports = function(app) {
       if (!me) {
         return res.status(400).send('cannot identify the current user');
       }
-      Traveler.find(
+      return Traveler.find(
         {
           _id: {
             $in: me.travelers,
@@ -295,9 +290,9 @@ module.exports = function(app) {
         logger.error(err);
         return res.status(500).send(err.message);
       }
-      var travelerIds = [];
-      var i;
-      var j;
+      const travelerIds = [];
+      let i;
+      let j;
       // merge the travelers arrays
       for (i = 0; i < groups.length; i += 1) {
         for (j = 0; j < groups[i].travelers.length; j += 1) {
@@ -306,7 +301,7 @@ module.exports = function(app) {
           }
         }
       }
-      Traveler.find(
+      return Traveler.find(
         {
           _id: {
             $in: travelerIds,
@@ -320,7 +315,7 @@ module.exports = function(app) {
             logger.error(tErr);
             return res.status(500).send(tErr.message);
           }
-          res.status(200).json(travelers);
+          return res.status(200).json(travelers);
         });
     });
   });
@@ -345,7 +340,7 @@ module.exports = function(app) {
         logger.error(err);
         return res.status(500).send(err.message);
       }
-      res.status(200).json(travelers);
+      return res.status(200).json(travelers);
     });
   });
 
@@ -384,13 +379,13 @@ module.exports = function(app) {
       return res.render('currenttravelers', {
         device: req.query.device || null
       });
-    });*/
+    }); */
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function(
     req,
     res
   ) {
-    var search = {
+    const search = {
       $and: [
         {
           $or: [
@@ -444,16 +439,13 @@ module.exports = function(app) {
             return res.status(500).send(err.message);
           }
           if (form) {
-            createTraveler(form, req, res);
-          } else {
-            return res
-              .status(400)
-              .send(
-                `cannot find the released ${
-                  config.viewConfig.terminology.form
-                } with id ${req.body.form}`
-              );
+            return createTraveler(form, req, res);
           }
+          return res
+            .status(400)
+            .send(
+              `cannot find the released ${config.viewConfig.terminology.form} with id ${req.body.form}`
+            );
         });
       }
       if (req.body.source) {
@@ -463,21 +455,16 @@ module.exports = function(app) {
             return res.status(500).send(err.message);
           }
           if (traveler) {
-            // if (traveler.status === 0) {
-            //   return res.status(400).send('You cannot clone an initialized traveler.');
-            // }
             if (reqUtils.canRead(req, traveler)) {
-              cloneTraveler(traveler, req, res);
-            } else {
-              return res
-                .status(400)
-                .send('You cannot clone a traveler that you cannot read.');
+              return cloneTraveler(traveler, req, res);
             }
-          } else {
             return res
               .status(400)
-              .send('cannot find the traveler ' + req.body.source);
+              .send('You cannot clone a traveler that you cannot read.');
           }
+          return res
+            .status(400)
+            .send(`cannot find the traveler ${req.body.source}`);
         });
       }
     }
@@ -488,43 +475,45 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     function getTraveler(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       if (doc.archived) {
         return res.redirect(
-          (req.proxied ? authConfig.proxied_service : authConfig.service) +
-            '/travelers/' +
-            req.params.id +
-            '/view'
+          `${
+            req.proxied ? authConfig.proxied_service : authConfig.service
+          }/travelers/${req.params.id}/view`
         );
       }
 
       if (reqUtils.canWrite(req, doc)) {
-        routesUtilities.getDeviceValue(doc.devices).then(function(value) {
-          doc.devices = value;
-          return res.render(
-            'traveler',
-            routesUtilities.getRenderObject(req, {
-              isOwner: reqUtils.isOwner(req, doc),
-              traveler: doc,
-              formHTML:
-                doc.forms.length === 1
-                  ? doc.forms[0].html
-                  : doc.forms.id(doc.activeForm).html,
-            })
-          );
-        });
-      } else if (reqUtils.canRead(req, doc)) {
-        return res.redirect(
-          (req.proxied ? authConfig.proxied_service : authConfig.service) +
-            '/travelers/' +
-            req.params.id +
-            '/view'
-        );
-      } else {
-        return res
-          .status(403)
-          .send('You are not authorized to access this resource');
+        return routesUtilities
+          .getDeviceValue(doc.devices)
+          .then(function(value) {
+            doc.devices = value;
+            return res.render(
+              'traveler',
+              routesUtilities.getRenderObject(req, {
+                isOwner: reqUtils.isOwner(req, doc),
+                traveler: doc,
+                formHTML:
+                  doc.forms.length === 1
+                    ? doc.forms[0].html
+                    : doc.forms.id(doc.activeForm).html,
+              })
+            );
+          });
       }
+
+      if (reqUtils.canRead(req, doc)) {
+        return res.redirect(
+          `${
+            req.proxied ? authConfig.proxied_service : authConfig.service
+          }/travelers/${req.params.id}/view`
+        );
+      }
+
+      return res
+        .status(403)
+        .send('You are not authorized to access this resource');
     }
   );
 
@@ -533,11 +522,29 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       routesUtilities.getDeviceValue(doc.devices).then(function(value) {
         res.devices = value;
         return res.render(
           'traveler-viewer',
+          routesUtilities.getRenderObject(req, {
+            traveler: req[req.params.id],
+          })
+        );
+      });
+    }
+  );
+
+  app.get(
+    '/travelers/:id/print',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    function(req, res) {
+      const doc = req[req.params.id];
+      routesUtilities.getDeviceValue(doc.devices).then(function(value) {
+        res.devices = value;
+        return res.render(
+          'traveler-print',
           routesUtilities.getRenderObject(req, {
             traveler: req[req.params.id],
           })
@@ -582,7 +589,7 @@ module.exports = function(app) {
       return null;
     }
 
-    var found = data.filter(function(d) {
+    const found = data.filter(function(d) {
       return d.name === name;
     });
     // get the latest value from history
@@ -607,11 +614,11 @@ module.exports = function(app) {
    * @return {Object}         the json representation
    */
   function retrieveKeyvalue(traveler, props, cb) {
-    var output = {};
+    const output = {};
     props.forEach(function(p) {
       output[p] = traveler[p];
     });
-    var mapping = traveler.mapping;
+    const { mapping } = traveler;
     TravelerData.find(
       {
         _id: {
@@ -623,7 +630,7 @@ module.exports = function(app) {
       if (dataErr) {
         return cb(dataErr);
       }
-      var userDefined = {};
+      const userDefined = {};
       _.mapKeys(mapping, function(name, key) {
         userDefined[key] = dataForName(name, docs);
       });
@@ -641,14 +648,14 @@ module.exports = function(app) {
    * @return {Object}         the json representation
    */
   function retrieveKeyLableValue(traveler, props, cb) {
-    var output = {};
+    const output = {};
     props.forEach(function(p) {
       output[p] = traveler[p];
     });
-    var mapping = traveler.mapping;
-    var labels = traveler.labels;
-    var discrepancyMapping = {};
-    var discrepancyLabels = {};
+    const { mapping } = traveler;
+    const { labels } = traveler;
+    let discrepancyMapping = {};
+    let discrepancyLabels = {};
     if (traveler.activeDiscrepancyForm) {
       discrepancyMapping = traveler.discrepancyForms.id(
         traveler.activeDiscrepancyForm
@@ -668,7 +675,7 @@ module.exports = function(app) {
       if (dataErr) {
         return cb(dataErr);
       }
-      var userDefined = {};
+      const userDefined = {};
       _.mapKeys(mapping, function(name, key) {
         userDefined[key] = {};
         userDefined[key].value = dataForName(name, docs);
@@ -676,7 +683,7 @@ module.exports = function(app) {
           userDefined[key].label = labels[name];
         }
       });
-      var discrepancy = {};
+      const discrepancy = {};
       _.mapKeys(discrepancyMapping, function(name, key) {
         discrepancy[key] = {};
         discrepancy[key].value = dataForName(name, docs);
@@ -696,7 +703,7 @@ module.exports = function(app) {
     }
 
     // retrieve all log data in one find
-    Log.find(
+    return Log.find(
       {
         _id: {
           $in: traveler.discrepancyLogs,
@@ -781,19 +788,19 @@ module.exports = function(app) {
     reqUtils.hasAll('body', ['form']),
     reqUtils.sanitize('body', ['form']),
     function(req, res) {
-      var traveler = req[req.params.id];
+      const traveler = req[req.params.id];
       // check active discrepancy form
       if (req.body.form !== traveler.referenceDiscrepancyForm.toString()) {
         return res.status(400).send('Discrepancy form does not match.');
       }
       // create log
-      var log = new Log({
+      const log = new Log({
         referenceForm: traveler.referenceDiscrepancyForm,
         data: [],
       });
       // save log, and add reference to traveler
-      var newLog;
-      log
+      let newLog;
+      return log
         .save()
         .then(function(doc) {
           newLog = doc;
@@ -805,7 +812,7 @@ module.exports = function(app) {
         })
         .catch(err => {
           logger.error(err);
-          res.status(500).send(err.message);
+          return res.status(500).send(err.message);
         });
     }
   );
@@ -819,16 +826,16 @@ module.exports = function(app) {
     reqUtils.exist('lid', Log),
     reqUtils.sanitize('body'),
     function(req, res) {
-      var log = req[req.params.lid];
+      const log = req[req.params.lid];
       log.records = [];
-      _.keys(req.body).map(function(name) {
-        log.records.push({ name: name, value: req.body[name] });
+      _.keys(req.body).forEach(function(name) {
+        log.records.push({ name, value: req.body[name] });
       });
       if (req.files) {
-        _.keys(req.files).map(function(name) {
-          let file = req.files[name];
+        _.keys(req.files).forEach(function(name) {
+          const file = req.files[name];
           log.records.push({
-            name: name,
+            name,
             value: file.originalname,
             file: {
               path: file.path,
@@ -841,7 +848,7 @@ module.exports = function(app) {
       log.inputBy = req.session.userid;
       log.inputOn = Date.now();
       debug(log);
-      let travelerId = req.params.id
+      const travelerId = req.params.id;
       mqttUtilities.postDiscrepancyLogAddedMessage(travelerId, log);
       log
         .save()
@@ -876,7 +883,7 @@ module.exports = function(app) {
         if (!record.file.path) {
           return res.status(200).json(record);
         }
-        fs.exists(record.file.path, function(exists) {
+        return fs.exists(record.file.path, function(exists) {
           if (exists) {
             return res.sendFile(path.resolve(record.file.path));
           }
@@ -893,7 +900,7 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['archived']),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       if (doc.archived === req.body.archived) {
         return res.status(204).send();
       }
@@ -904,7 +911,7 @@ module.exports = function(app) {
         doc.archivedOn = Date.now();
       }
 
-      doc.save(function(saveErr, newDoc) {
+      return doc.save(function(saveErr, newDoc) {
         if (saveErr) {
           logger.error(saveErr);
           return res.status(500).send(saveErr.message);
@@ -912,10 +919,7 @@ module.exports = function(app) {
         return res
           .status(200)
           .send(
-            'traveler ' +
-              req.params.id +
-              ' archived state set to ' +
-              newDoc.archived
+            `traveler ${req.params.id} archived state set to ${newDoc.archived}`
           );
       });
     }
@@ -929,7 +933,7 @@ module.exports = function(app) {
     reqUtils.status('id', [0, 1, 1.5]),
     reqUtils.filter('body', ['name']),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       shareLib.changeOwner(req, res, doc);
     }
   );
@@ -940,8 +944,11 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
     function(req, res) {
-      var doc = req[req.params.id];
-      if (reqUtils.isOwner(req, doc) || routesUtilities.checkUserRole(req, 'admin')) {
+      const doc = req[req.params.id];
+      if (
+        reqUtils.isOwner(req, doc) ||
+        routesUtilities.checkUserRole(req, 'admin')
+      ) {
         return res.render(
           'traveler-config',
           routesUtilities.getRenderObject(req, {
@@ -949,11 +956,10 @@ module.exports = function(app) {
             isOwner: reqUtils.isOwner(req, doc),
           })
         );
-      } else {
-        res
-          .status(403)
-          .send('you are not authorized to access this resource');
       }
+      return res
+        .status(403)
+        .send('you are not authorized to access this resource');
     }
   );
 
@@ -966,27 +972,25 @@ module.exports = function(app) {
     reqUtils.filter('body', ['title', 'description', 'deadline']),
     reqUtils.sanitize('body', ['title', 'description', 'deadline']),
     function(req, res) {
-      var doc = req[req.params.id];
-      if (reqUtils.isOwner(req, doc) || routesUtilities.checkUserRole(req, 'admin')) {
-        var k;
-        for (k in req.body) {
-          if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
-            doc[k] = req.body[k];
-          }
-        }
+      const doc = req[req.params.id];
+      if (
+        reqUtils.isOwner(req, doc) ||
+        routesUtilities.checkUserRole(req, 'admin')
+      ) {
+        Object.keys(req.body).forEach(k => {
+          doc[k] = req.body[k];
+        });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        doc.save(function (saveErr, newDoc) {
+        doc.save(function(saveErr, newDoc) {
           if (saveErr) {
             logger.error(saveErr);
             return res.status(500).send(saveErr.message);
           }
-          var out = {};
-          for (k in req.body) {
-            if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
-              out[k] = newDoc.get(k);
-            }
-          }
+          const out = {};
+          Object.keys(req.body).forEach(k => {
+            out[k] = newDoc.get(k);
+          });
           return res.status(200).json(out);
         });
       } else {
@@ -1015,7 +1019,7 @@ module.exports = function(app) {
     reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
 
       if ([1, 1.5, 2, 3, 4].indexOf(req.body.status) === -1) {
         return res.status(400).send('invalid status');
@@ -1025,9 +1029,7 @@ module.exports = function(app) {
         return res.status(204).send();
       }
 
-      var stateTransition = require('../model/traveler').stateTransition;
-
-      var target = _.find(stateTransition, function(t) {
+      const target = _.find(stateTransition, function(t) {
         return t.from === doc.status;
       });
 
@@ -1051,11 +1053,8 @@ module.exports = function(app) {
       }
 
       if (
-          (
-              (doc.status === 2 && req.body.status === 4) ||
-              (doc.status === 2 && req.body.status === 1)
-          )
-          &&
+        ((doc.status === 2 && req.body.status === 4) ||
+          (doc.status === 2 && req.body.status === 1)) &&
         !(
           routesUtilities.checkUserRole(req, 'admin') ||
           routesUtilities.checkUserRole(req, 'manager')
@@ -1070,12 +1069,12 @@ module.exports = function(app) {
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       mqttUtilities.postTravelerStatusChangedMessage(doc);
-      doc.save(function(saveErr) {
+      return doc.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
-        return res.status(200).send('status updated to ' + req.body.status);
+        return res.status(200).send(`status updated to ${req.body.status}`);
       });
     }
   );
@@ -1094,18 +1093,18 @@ module.exports = function(app) {
     reqUtils.filter('body', ['newdevice']),
     reqUtils.sanitize('body', ['newdevice']),
     function(req, res) {
-      var newdevice = req.body.newdevice;
+      const { newdevice } = req.body;
       if (!newdevice) {
         return res.status(400).send('the new device name not accepted');
       }
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      var added = doc.devices.addToSet(newdevice);
+      const added = doc.devices.addToSet(newdevice);
       if (added.length === 0) {
         return res.status(204).send();
       }
-      doc.save(function(saveErr) {
+      return doc.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
           return res.status(500).send(saveErr.message);
@@ -1125,7 +1124,7 @@ module.exports = function(app) {
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.devices.pull(req.params.number);
@@ -1145,7 +1144,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.canReadMw('id'),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       TravelerData.find(
         {
           _id: {
@@ -1174,8 +1173,8 @@ module.exports = function(app) {
     reqUtils.hasAll('body', ['name', 'value', 'type']),
     reqUtils.sanitize('body', ['name', 'value', 'type']),
     function(req, res) {
-      var doc = req[req.params.id];
-      var data = new TravelerData({
+      const doc = req[req.params.id];
+      const data = new TravelerData({
         traveler: doc._id,
         name: req.body.name,
         value: req.body.value,
@@ -1200,7 +1199,7 @@ module.exports = function(app) {
         mqttUtilities.postTravelerDataChangedMessage(data);
         doc.data.push(data._id);
         // update the finishe input number by reset
-        resetTouched(doc, function() {
+        return resetTouched(doc, function() {
           // save doc anyway
           doc.save(function(saveErr) {
             if (saveErr) {
@@ -1220,7 +1219,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.canReadMw('id'),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       TravelerNote.find(
         {
           _id: {
@@ -1248,8 +1247,8 @@ module.exports = function(app) {
     reqUtils.hasAll('body', ['name', 'value']),
     reqUtils.sanitize('body', ['name', 'value']),
     function(req, res) {
-      var doc = req[req.params.id];
-      var note = new TravelerNote({
+      const doc = req[req.params.id];
+      const note = new TravelerNote({
         traveler: doc._id,
         name: req.body.name,
         value: req.body.value,
@@ -1268,7 +1267,7 @@ module.exports = function(app) {
         });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        doc.save(function(saveErr) {
+        return doc.save(function(saveErr) {
           if (saveErr) {
             logger.error(saveErr);
             return res.status(500).send(saveErr.message);
@@ -1286,13 +1285,13 @@ module.exports = function(app) {
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [1]),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
 
       if (_.isEmpty(req.files)) {
         return res.status(400).send('Expect One uploaded file');
       }
 
-      var data = new TravelerData({
+      const data = new TravelerData({
         traveler: doc._id,
         name: req.body.name,
         value: req.files[req.body.name].originalname,
@@ -1306,7 +1305,7 @@ module.exports = function(app) {
         inputOn: Date.now(),
       });
 
-      data.save(function(dataErr) {
+      return data.save(function(dataErr) {
         if (dataErr) {
           logger.error(dataErr);
           return res.status(500).send(dataErr.message);
@@ -1314,15 +1313,14 @@ module.exports = function(app) {
         doc.data.push(data._id);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        doc.save(function(saveErr) {
+        return doc.save(function(saveErr) {
           if (saveErr) {
             logger.error(saveErr);
             return res.status(500).send(saveErr.message);
           }
-          var url =
-            (req.proxied ? authConfig.proxied_service : authConfig.service) +
-            '/data/' +
-            data._id;
+          const url = `${
+            req.proxied ? authConfig.proxied_service : authConfig.service
+          }/data/${data._id}`;
           res.set('Location', url);
           return res.status(201).json({
             location: url,
@@ -1337,7 +1335,7 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', TravelerData),
     function(req, res) {
-      var data = req[req.params.id];
+      const data = req[req.params.id];
       if (data.inputType === 'file') {
         fs.exists(data.file.path, function(exists) {
           if (exists) {
@@ -1358,7 +1356,7 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     reqUtils.archived('id', false),
     function(req, res) {
-      var traveler = req[req.params.id];
+      const traveler = req[req.params.id];
       return res.render(
         'share',
         routesUtilities.getRenderObject(req, {
@@ -1380,9 +1378,9 @@ module.exports = function(app) {
     reqUtils.archived('id', false),
     reqUtils.filter('body', ['access']),
     function(req, res) {
-      var traveler = req[req.params.id];
+      const traveler = req[req.params.id];
       // change the access
-      var access = req.body.access;
+      let { access } = req.body;
       if (['-1', '0', '1'].indexOf(access) === -1) {
         return res.status(400).send('not valid value');
       }
@@ -1391,14 +1389,14 @@ module.exports = function(app) {
         return res.status(204).send();
       }
       traveler.publicAccess = access;
-      traveler.save(function(saveErr) {
+      return traveler.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
         return res
           .status(200)
-          .send('public access is set to ' + req.body.access);
+          .send(`public access is set to ${req.body.access}`);
       });
     }
   );
@@ -1409,7 +1407,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.isOwnerMw('id'),
     function(req, res) {
-      var traveler = req[req.params.id];
+      const traveler = req[req.params.id];
       if (req.params.list === 'users') {
         return res.status(200).json(traveler.sharedWith || []);
       }
@@ -1427,8 +1425,8 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     reqUtils.archived('id', false),
     function(req, res) {
-      var traveler = req[req.params.id];
-      var share = -2;
+      const traveler = req[req.params.id];
+      let share = -2;
       if (req.params.list === 'users') {
         if (req.body.name) {
           share = reqUtils.getSharedWith(traveler.sharedWith, req.body.name);
@@ -1453,14 +1451,11 @@ module.exports = function(app) {
           .status(400)
           .send(
             req.body.name ||
-              req.body.id + ' is already in the ' + req.params.list + ' list.'
+              `${req.body.id} is already in the ${req.params.list} list.`
           );
       }
 
-      if (share === -1) {
-        // new user
-        shareLib.addShare(req, res, traveler);
-      }
+      return shareLib.addShare(req, res, traveler);
     }
   );
 
@@ -1471,8 +1466,8 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     reqUtils.archived('id', false),
     function(req, res) {
-      var traveler = req[req.params.id];
-      var share;
+      const traveler = req[req.params.id];
+      let share;
       if (req.params.list === 'users') {
         share = traveler.sharedWith.id(req.params.shareid);
       }
@@ -1482,7 +1477,7 @@ module.exports = function(app) {
       if (!share) {
         return res
           .status(400)
-          .send('cannot find ' + req.params.shareid + ' in the list.');
+          .send(`cannot find ${req.params.shareid} in the list.`);
       }
       // change the access
       if (req.body.access && req.body.access === 'write') {
@@ -1490,13 +1485,13 @@ module.exports = function(app) {
       } else {
         share.access = 0;
       }
-      traveler.save(function(saveErr) {
+      return traveler.save(function(saveErr) {
         if (saveErr) {
           logger.error(saveErr);
           return res.status(500).send(saveErr.message);
         }
         // check consistency of user's traveler list
-        var Target;
+        let Target;
         if (req.params.list === 'users') {
           Target = User;
         }
@@ -1516,7 +1511,7 @@ module.exports = function(app) {
             }
             if (!target) {
               logger.error(
-                'The user/group ' + req.params.userid + ' is not in the db'
+                `The user/group ${req.params.userid} is not in the db`
               );
             }
           }
@@ -1533,7 +1528,7 @@ module.exports = function(app) {
     reqUtils.isOwnerMw('id'),
     reqUtils.archived('id', false),
     function(req, res) {
-      var traveler = req[req.params.id];
+      const traveler = req[req.params.id];
       shareLib.removeShare(req, res, traveler);
     }
   );

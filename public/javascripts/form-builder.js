@@ -1517,7 +1517,7 @@ function binding_events() {
           });
         },
       });
-      selectMultiEvent(priorVersionsTable);
+      selectMultiEvent('#prior_versions');
       filterEvent();
     }
 
@@ -1551,7 +1551,7 @@ function binding_events() {
         aaSorting: [[3, 'desc']],
         sDom: sDomPage,
       });
-      selectOneEvent(discrepancyTable);
+      selectOneEvent('#discrepancy');
       filterEvent();
     }
     $('#modal .modal-footer').html(
