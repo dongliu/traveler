@@ -11,9 +11,8 @@ block head
 
 block content
   script(type='text/javascript').
+    var title = !{JSON.stringify(traveler.title)};
     var traveler = !{JSON.stringify(traveler)};
-    var prefix = '!{prefix}';
-    var title = '!{traveler.title}'
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')

@@ -6,11 +6,12 @@ html
   body
     script(type='text/javascript').
       var terminology = !{JSON.stringify(viewConfig.terminology)};
-      var shareUsers = !{viewConfig.shareUsers};
-      var shareGroups = !{viewConfig.shareGroups};
-      var linkTarget = '!{viewConfig.linkTarget}' || '_blank';
-      var showCCDB = !{viewConfig.showCCDB};
-      var userid = '!{locals.session.userid}';
+      var shareUsers = !{JSON.stringify(viewConfig.shareUsers)};
+      var shareGroups = !{JSON.stringify(viewConfig.shareGroups)};
+      var linkTarget = !{JSON.stringify(viewConfig.linkTarget)} || '_blank';
+      var showCCDB = !{JSON.stringify(viewConfig.showCCDB)};
+      var userid = !{JSON.stringify(locals.session.userid)};
+      var prefix = !{JSON.stringify(prefix)};
 
     - var isAdmin = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1
     - var isManager = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('manager') !== -1
