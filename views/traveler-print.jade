@@ -1,0 +1,123 @@
+doctype html
+html
+  block head
+    meta(charset='urf-8')
+    title #{orgName}_traveler_#{traveler._id}
+    link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+    link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+    link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+    link(rel='stylesheet', href='#{prefix}/stylesheets/traveler-print.css')
+
+  block content
+    script(type='text/javascript').
+      var traveler = !{JSON.stringify(traveler)};
+      var prefix = '!{prefix}';
+      var title = '!{traveler.title}'
+    .container
+      .row
+        .span10#print-control
+          br
+          if (locals.traveler.status !== undefined && locals.traveler.status === 2)
+            .btn-group
+              button.btn.btn-primary#create-pdf Create PDF
+            .btn-group(data-toggle='buttons-radio')
+              button.btn.btn-info#show-validation Show validation
+              button.btn.btn-info#hide-validation.active Hide validation
+            .btn-group(data-toggle='buttons-radio')
+              button.btn.btn-info#show-notes Show notes
+              button.btn.btn-info#hide-notes.active Hide notes
+            .btn-group(data-toggle='buttons-radio')
+              button.btn.btn-info#show-details Show details
+              button.btn.btn-info#hide-details.active Hide details
+        .span10#traveler-print
+          h3 Traveler title:  #{traveler.title}
+          if (locals.traveler.status !== undefined)
+            h4 Status:
+              case locals.traveler.status
+                when 1
+                  = ' '
+                  span active
+                when 1.5
+                  = ' '
+                  span submitted
+                when 2
+                  = ' '
+                  span completed
+                when 3
+                  = ' '
+                  span frozen
+                when 0
+                  = ' '
+                  span initialized
+                default
+                  = ' '
+              if (locals.traveler.status > 0)
+                    = '; '
+                    span
+                      em#finished-input #{traveler.finishedInput}
+                    = ' inputs finished out of '
+                    span
+                      em #{traveler.totalInput}
+                    = ' inputs'
+          if (locals.traveler.devices && traveler.devices.length > 0)
+            h4 Tags: !{traveler.devices}
+          #validation.well.hide
+          #details.hide
+            if (locals.traveler.description !== undefined)
+              h4 Description: #{traveler.description}
+            if (locals.traveler.deadline !== undefined)
+              p Deadline:
+                = ' '
+                span.time #{traveler.deadline}
+            p Created by #{traveler.createdBy}
+              = ' '
+              if (locals.traveler.clonedBy !== undefined)
+                | cloned by #{traveler.clonedBy} on
+              else
+                | on
+              = ' '
+              span.time #{traveler.createdOn}
+            if (locals.traveler.updatedBy !== undefined)
+              p Updated by #{traveler.updatedBy} on
+                = ' '
+                span.time #{traveler.updatedOn}
+          br
+          if locals.traveler.activeDiscrepancyForm
+            .control-group#discrepancy-legend
+              legend Discrepancy log
+            table#discrepancy-log-table.table.table-bordered.table-hover
+          form.form-horizontal#form
+            div.control-group#traveler-legend
+              legend Traveler
+            if (traveler.forms.length === 1)
+              != traveler.forms[0].html
+            else if (traveler.forms.id(traveler.activeForm))
+              != traveler.forms.id(traveler.activeForm).html
+            else
+              != ''
+          hr
+          div
+            p
+              a#location #{traveler.title}
+              = ' '
+              | printed on
+              = ' '
+              span#localtime
+
+  block js
+    script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+    script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+    script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+    script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+    script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
+    script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
+    script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
+    script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+    script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
+    script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
+    script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
+    script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+    script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+    script(type='text/javascript', src='#{prefix}/javascripts/util.js')
+    script(type='text/javascript', src='#{prefix}/javascripts/traveler-discrepancy-form-loader.js')
+    script(type='text/javascript', src='#{prefix}/javascripts/traveler-print.js')

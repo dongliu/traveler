@@ -23,8 +23,8 @@ function selectEvent() {
   });
 }
 
-function selectMultiEvent(oTable) {
-  $(oTable.$('tbody')).on('click', 'input.select-row', function(e) {
+function selectMultiEvent(table) {
+  $(`${table} tbody`).on('click', 'input.select-row', function(e) {
     const tr = $(e.target).closest('tr');
     if ($(tr).hasClass('row-selected')) {
       $(tr).removeClass('row-selected');
@@ -34,18 +34,20 @@ function selectMultiEvent(oTable) {
   });
 }
 
-function selectOneEvent(oTable) {
-  $('tbody').on('click', 'input.select-row', function(e) {
-    const tr = $(e.target).closest('tr');
-    if ($(tr).hasClass('row-selected')) {
-      $(tr).removeClass('row-selected');
-    } else {
-      oTable.$('tr.row-selected').removeClass('row-selected');
-      oTable
-        .$('input.select-row')
+function selectOneEvent(table) {
+  $(`${table} tbody`).on('click', 'input.select-row', function(e) {
+    if ($(this).prop('checked')) {
+      $(`${table} tr.row-selected`).removeClass('row-selected');
+      $(`${table} input.select-row`)
         .not(this)
         .prop('checked', false);
-      $(tr).addClass('row-selected');
+      $(e.target)
+        .closest('tr')
+        .addClass('row-selected');
+    } else {
+      $(e.target)
+        .closest('tr')
+        .removeClass('row-selected');
     }
   });
 }
