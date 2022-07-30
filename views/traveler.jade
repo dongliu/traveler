@@ -15,8 +15,7 @@ block content
     var travelerStatus = !{JSON.stringify(traveler.status)};
     var finishedInput = !{JSON.stringify(traveler.finishedInput)};
     var totalInput = !{JSON.stringify(traveler.totalInput)};
-    var title = '!{traveler.title}'
-    var prefix = '!{prefix}';
+    var title = !{JSON.stringify(traveler.title)};
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')

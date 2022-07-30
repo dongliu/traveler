@@ -11,8 +11,7 @@ block head
 
 block content
   script(type='text/javascript').
-    var prefix = '!{prefix}';
-    var title = '!{title}'
+    var title = !{JSON.stringify(title)};
   .container
     #message
     .row
