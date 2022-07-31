@@ -16,7 +16,7 @@
   "body_max_size": "1mb",
   "upload_size": 5,
   "alias": {
-    "traveler/formfiles/*" : "/formfiles/$1"
+    "/traveler/formfiles/*" : "/formfiles/$1"
   },
   "default_form_public_access": -1,
   "default_traveler_public_access": 0,
