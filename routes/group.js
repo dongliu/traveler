@@ -92,7 +92,7 @@ function addGroup(req, res) {
         name: result[0].displayName,
         email: result[0].mail,
         office: result[0].physicalDeliveryOfficeName,
-        phone: result[0].telephoneNumber,
+        phone: result[0].telephoneNumber.toString(),
         mobile: result[0].mobile,
         roles: roles,
       });
@@ -316,7 +316,7 @@ module.exports = function(app) {
             name: result[0].displayName,
             email: result[0].mail,
             office: result[0].physicalDeliveryOfficeName,
-            phone: result[0].telephoneNumber,
+            phone: result[0].telephoneNumber.toString(),
             mobile: result[0].mobile,
             roles: [],
           });

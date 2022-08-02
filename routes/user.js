@@ -103,7 +103,7 @@ function updateUserProfile(user, res) {
         name: result[0].displayName,
         email: result[0].mail,
         office: result[0].physicalDeliveryOfficeName,
-        phone: result[0].telephoneNumber,
+        phone: result[0].telephoneNumber.toString(),
         mobile: result[0].mobile,
       },
       function(err) {
@@ -170,7 +170,7 @@ function storeUser(req, res, result) {
     name: result.displayName,
     email: result.mail,
     office: result.physicalDeliveryOfficeName,
-    phone: result.telephoneNumber,
+    phone: result.telephoneNumber.toString(),
     mobile: result.mobile,
     roles: roles,
   });
