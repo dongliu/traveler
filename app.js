@@ -8,6 +8,7 @@ const methodOverride = require('method-override');
 const expressSession = require('express-session');
 const cookieParser = require('cookie-parser');
 const errorHandler = require('errorhandler');
+const rewrite = require('express-urlrewrite');
 
 const http = require('http');
 const https = require('https');
@@ -149,6 +150,17 @@ app.use(auth.sessionLocals);
 
 if (app.get('env') === 'development') {
   app.use(errorHandler());
+}
+
+// apply app alias routing if any
+if (appSettings.alias) {
+  const fromList = Object.keys(appSettings.alias);
+  for (let i = 0; i < fromList.length; i += 1) {
+    const from = fromList[i];
+    const to = appSettings.alias[from];
+    logger.info(`Route ${from} to ${to}`);
+    app.use(rewrite(from, to));
+  }
 }
 
 const routes = require('./routes');
