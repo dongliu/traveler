@@ -52,7 +52,7 @@ html
             ul.nav.pull-right
               if (locals.session && locals.session.userid)
                 li
-                  img.user(src='#{prefix}/adusers/#{session.userid}/photo', title='#{session.username}', data-src='holder.js/27x40?size=20&text=#{session.username.substr(0, 1).toUpperCase()}')
+                  img.user(title='#{session.username}', src='holder.js/27x40?size=20&text=#{session.username.substr(0, 1).toUpperCase()}')
                 li.dropdown
                   a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
                     b.caret
