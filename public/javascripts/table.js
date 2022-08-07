@@ -106,9 +106,9 @@ function personColumn(title, key) {
         return data;
       }
       if (data) {
-        return `<img class="user" data-src="holder.js/27x40?size=20&text=${data
+        return `<img class="user" src="holder.js/27x40?size=20&text=${data
           .substr(0, 1)
-          .toUpperCase()}" src="${prefix}/adusers/${data}/photo" title="${data}">`;
+          .toUpperCase()}">`;
       }
       return '';
     },
@@ -596,11 +596,9 @@ const reviewRequestedByColumn = {
     }
     return `<a target="${linkTarget}" href="/users/${
       request.requestedBy
-    }"><img class="user" data-src="holder.js/27x40?size=20&text=${request.requestedBy
+    }"><img class="user" src="holder.js/27x40?size=20&text=${request.requestedBy
       .substr(0, 1)
-      .toUpperCase()}" src="${prefix}/adusers/${
-      request.requestedBy
-    }/photo" title="${request.requestedBy}"></a>`;
+      .toUpperCase()}" title="${request.requestedBy}"></a>`;
   },
   bFilter: true,
 };
@@ -620,7 +618,7 @@ const reviewersColumn = {
         if (type === 'filter' || type === 'sort') {
           return r._id;
         }
-        return `<a target="${linkTarget}" href="/users/${r._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${r._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${r._id}/photo" title="${r._id}"></a>`;
+        return `<a target="${linkTarget}" href="/users/${r._id}"><img class="user" src="holder.js/27x40?size=20&text=${r._id.substr(0, 1).toUpperCase()}" title="${r._id}"></a>`;
       });
       if (type === 'filter' || type === 'sort') {
         return reviews.join('; ');
@@ -664,9 +662,9 @@ const ownerColumn = {
       return owner;
     }
     if (owner) {
-      return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
+      return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" src="holder.js/27x40?size=20&text=${owner
         .substr(0, 1)
-        .toUpperCase()}" src="${prefix}/adusers/${owner}/photo" title="${owner}"></a>`;
+        .toUpperCase()}" title="${owner}"></a>`;
     }
     return '';
   },
@@ -1105,7 +1103,7 @@ function usersColumn(title, prop) {
           if (type === 'filter' || type === 'sort') {
             return u.username;
           }
-          return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${u._id}/photo" title="${u.username}"></a>`;
+          return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
         });
         if (type === 'filter' || type === 'sort') {
           return names.join('; ');
@@ -1133,7 +1131,7 @@ function usersFilteredColumn(title, filter) {
         if (type === 'filter' || type === 'sort') {
           return u.username;
         }
-        return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${u._id}/photo" title="${u.username}"></a>`;
+        return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
       });
       if (type === 'filter' || type === 'sort') {
         return names.join('; ');
