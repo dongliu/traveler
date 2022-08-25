@@ -1415,6 +1415,28 @@ function binding_events() {
     }
   });
 
+  $('#import').click(function(e) {
+    if ($('#output .well.spec').length) {
+      e.preventDefault();
+      modalAlert(
+        'Save changes first',
+        'The form has been changed. Please save it before this action.'
+      );
+      return;
+    }
+    cleanBeforeSave();
+    $('#modalLabel').html('Form importer');
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append('form manager here');
+    $('#modal .modal-footer').html(
+      '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
+    );
+    $('#modal').modal('show');
+    $('#modal button[value="confirm"]').click(function() {
+      alert('confirm');
+    });
+  });
+
   $('#saveas').click(function(e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
