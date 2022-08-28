@@ -22,7 +22,7 @@ block content
     var formType = !{JSON.stringify(locals.formType)} || 'normal';
   .container
     #message
-    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+    #modal.modal.modal-lg.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
         h3#modalLabel
       .modal-body
@@ -161,4 +161,5 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/form-explorer.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-builder.js')
