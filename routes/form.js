@@ -63,6 +63,42 @@ module.exports = function(app) {
     }
   });
 
+  app.get('/myforms/json', auth.ensureAuthenticated, async function(req, res) {
+    try {
+      const me = await User.findOne(
+        {
+          _id: req.session.userid,
+        },
+        'forms'
+      ).exec();
+      if (!me) {
+        return res.status(400).send('cannot identify the current user');
+      }
+      const forms = await Form.find(
+        {
+          $or: [
+            {
+              createdBy: req.session.userid,
+            },
+            {
+              owner: req.session.userid,
+            },
+            {
+              _id: {
+                $in: me.forms,
+              },
+            },
+          ],
+        },
+        'title formType status updatedOn'
+      ).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
+    }
+  });
+
   // forms owned by the user that are under review
   app.get('/submittedforms/json', auth.ensureAuthenticated, async function(
     req,

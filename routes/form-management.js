@@ -224,4 +224,13 @@ module.exports = function(app) {
       });
     }
   );
+
+  app.get(
+    '/released-forms/:id/json',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', ReleasedForm),
+    function(req, res) {
+      return res.status(200).json(req[req.params.id]);
+    }
+  );
 };

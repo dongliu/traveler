@@ -1415,6 +1415,46 @@ function binding_events() {
     }
   });
 
+  $('#import').click(function(e) {
+    if ($('#output .well.spec').length) {
+      e.preventDefault();
+      modalAlert(
+        'Save changes first',
+        'The form has been changed. Please save it before this action.'
+      );
+      return;
+    }
+    cleanBeforeSave();
+    $('#modalLabel').html('Form importer');
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append(
+      '<div class="container-fluid"> <div class="row-fluid"> <div class="span4 form-list"> <ul class="nav nav-tabs"> <li class="active"><a href="#my-forms" data-toggle="tab">My forms</a></li> <li><a href="#released-forms" data-toggle="tab">Released forms</a></li> </ul> <div class="tab-content"> <div id="my-forms" class="tab-pane active"> <table class="my-forms table table-bordered table-hover"></table> </div> <div id="released-forms" class="tab-pane"> <table class="released-forms table table-bordered table-hover"></table> </div> </div> </div> <div class="span8 form-preview"> </div> </div> </div>'
+    );
+
+    $('#modal .modal-footer').html(
+      '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Import</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
+    );
+    $('#modal').modal('show');
+    FormExplorer.init('.released-forms', '.my-forms', '.form-preview');
+    $('#modal button[value="confirm"]').click(function() {
+      const html = FormExplorer.getHtml();
+      if (html !== null) {
+        $('#output').append(html);
+        // generate unique name
+        $('input, textarea').each(function() {
+          $(this).attr('name', UID.generateShort());
+        });
+
+        // assign id to legent, id is used for side nav
+        $('legend').each(function() {
+          $(this).attr('id', UID.generateShort());
+        });
+
+        updateSectionNumbers();
+      }
+    });
+  });
+
   $('#saveas').click(function(e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {

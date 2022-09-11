@@ -22,7 +22,7 @@ block content
     var formType = !{JSON.stringify(locals.formType)} || 'normal';
   .container
     #message
-    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+    #modal.modal.modal-lg.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
         h3#modalLabel
       .modal-body
@@ -127,6 +127,8 @@ block content
       a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
     if (status === 0)
       .btn-group
+        button.btn.btn-primary#import(data-toggle='tooltip', title='import the content of a form') Import
+      .btn-group
         button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
     if (status === 0)
       .btn-group
@@ -159,4 +161,5 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/form-explorer.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-builder.js')
