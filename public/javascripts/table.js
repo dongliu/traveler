@@ -106,7 +106,7 @@ function personColumn(title, key) {
         return data;
       }
       if (data) {
-        return `<img class="user" src="holder.js/27x40?size=20&text=${data
+        return `<img class="user" data-src="holder.js/27x40?size=20&text=${data
           .substr(0, 1)
           .toUpperCase()}">`;
       }
@@ -397,6 +397,16 @@ const previewColumn = {
   sWidth: '25px',
 };
 
+const formExploreColumn = {
+  sTitle: '',
+  mData: '_id',
+  bSortable: false,
+  mRender(data) {
+    return `<a data-toggle="tooltip" title="show the form" class="preview" id="${data}"><i class="fa fa-eye fa-lg"></i></a>`;
+  },
+  sWidth: '25px',
+};
+
 const removeColumn = {
   sTitle: '',
   mData: '_id',
@@ -421,6 +431,16 @@ const formColumn = {
   mData: '_id',
   mRender(data) {
     return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
+  },
+  bSortable: false,
+  sWidth: '45px',
+};
+
+const releasedFormColumn = {
+  sTitle: 'Link',
+  mData: '_id',
+  mRender(data) {
+    return `<a href="${prefix}/released-forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the released form"><i class="fa fa-edit fa-lg"></i></a>`;
   },
   bSortable: false,
   sWidth: '45px',
@@ -596,7 +616,7 @@ const reviewRequestedByColumn = {
     }
     return `<a target="${linkTarget}" href="/users/${
       request.requestedBy
-    }"><img class="user" src="holder.js/27x40?size=20&text=${request.requestedBy
+    }"><img class="user" data-src="holder.js/27x40?size=20&text=${request.requestedBy
       .substr(0, 1)
       .toUpperCase()}" title="${request.requestedBy}"></a>`;
   },
@@ -618,7 +638,7 @@ const reviewersColumn = {
         if (type === 'filter' || type === 'sort') {
           return r._id;
         }
-        return `<a target="${linkTarget}" href="/users/${r._id}"><img class="user" src="holder.js/27x40?size=20&text=${r._id.substr(0, 1).toUpperCase()}" title="${r._id}"></a>`;
+        return `<a target="${linkTarget}" href="/users/${r._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${r._id.substr(0, 1).toUpperCase()}" title="${r._id}"></a>`;
       });
       if (type === 'filter' || type === 'sort') {
         return reviews.join('; ');
@@ -662,7 +682,7 @@ const ownerColumn = {
       return owner;
     }
     if (owner) {
-      return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" src="holder.js/27x40?size=20&text=${owner
+      return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
         .substr(0, 1)
         .toUpperCase()}" title="${owner}"></a>`;
     }
@@ -1103,7 +1123,7 @@ function usersColumn(title, prop) {
           if (type === 'filter' || type === 'sort') {
             return u.username;
           }
-          return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
+          return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
         });
         if (type === 'filter' || type === 'sort') {
           return names.join('; ');
@@ -1131,7 +1151,7 @@ function usersFilteredColumn(title, filter) {
         if (type === 'filter' || type === 'sort') {
           return u.username;
         }
-        return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
+        return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
       });
       if (type === 'filter' || type === 'sort') {
         return names.join('; ');

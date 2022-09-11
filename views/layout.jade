@@ -4,6 +4,7 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
   body
+    script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
     script(type='text/javascript').
       var terminology = !{JSON.stringify(viewConfig.terminology)};
       var shareUsers = !{JSON.stringify(viewConfig.shareUsers)};
@@ -52,7 +53,7 @@ html
             ul.nav.pull-right
               if (locals.session && locals.session.userid)
                 li
-                  img.user(title='#{session.username}', src='holder.js/27x40?size=20&text=#{session.username.substr(0, 1).toUpperCase()}')
+                  img.user(title='#{session.username}', data-src='holder.js/27x40?size=20&text=#{session.username.substr(0, 1).toUpperCase()}')
                 li.dropdown
                   a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
                     b.caret
@@ -70,7 +71,5 @@ html
     .container-fluid
       h6.text-right
         a(href='https://github.com/dongliu/traveler', target='_blank') Release #{viewConfig.appVersion}
-
-    script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
     block js
 

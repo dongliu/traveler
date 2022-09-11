@@ -230,6 +230,12 @@ text {
   overflow-y: visible;
 }
 
+.modal-lg {
+  width: 80%;
+  margin-left: -40%;
+  max-height: calc(100vh - 212px);
+}
+
 /* builder stuff */
 ul.dropdown-menu input[type='checkbox'] {
   margin-left: 0;
