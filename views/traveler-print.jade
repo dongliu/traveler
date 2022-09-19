@@ -30,7 +30,7 @@ html
               button.btn.btn-info#show-details Show details
               button.btn.btn-info#hide-details.active Hide details
         .span10#traveler-print
-          h3 Traveler title:  #{traveler.title}
+          h3 Traveler title:  !{traveler.title}
           if (locals.traveler.status !== undefined)
             h4 Status:
               case locals.traveler.status
