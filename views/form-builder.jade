@@ -5,7 +5,7 @@ block head
   if (typeof id == 'undefined')
     title #{orgName} - new form
   else
-    title #{orgName} - form - #{title}
+    title #{orgName} - form - !{title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
