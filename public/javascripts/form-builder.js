@@ -907,8 +907,12 @@ function number_edit($cgr) {
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     required = $('input', $cgr).prop('required');
-    min = Number($('input', $cgr).prop('min'));
-    max = Number($('input', $cgr).prop('max'));
+    if ($('input', $cgr).prop('min')) {
+      min = Number($('input', $cgr).prop('min'));
+    }
+    if ($('input', $cgr).prop('max')) {
+      max = Number($('input', $cgr).prop('max'));
+    }
     range = rangeText(min, max);
   }
 
@@ -953,9 +957,12 @@ function number_edit($cgr) {
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
   $('input', $required).prop('checked', required);
-  $('input', $min).val(min);
-  $('input', $max).val(max);
-
+  if (min !== null) {
+    $('input', $min).val(min);
+  }
+  if (max !== null) {
+    $('input', $max).val(max);
+  }
   binding($edit, $number, model, $done);
 }
 
