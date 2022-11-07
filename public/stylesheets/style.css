@@ -581,3 +581,76 @@ button.editable {
   border-radius: 9px;
   height: fit-content;
 }
+
+/* patch bootstrap 2 */
+ul.pagination {
+  display: inline-block;
+  *display: inline;
+  margin-bottom: 0;
+  margin-left: 0;
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+  *zoom: 1;
+  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+     -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+ul.pagination > li {
+  display: inline;
+}
+
+ul.pagination > li > a,
+ul.pagination > li > span {
+  float: left;
+  padding: 4px 12px;
+  line-height: 20px;
+  text-decoration: none;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-left-width: 0;
+}
+
+ul.pagination > li > a:hover,
+ul.pagination > li > a:focus,
+ul.pagination > .active > a,
+ul.pagination > .active > span {
+  background-color: #f5f5f5;
+}
+
+ul.pagination > .active > a,
+ul.pagination > .active > span {
+  color: #999999;
+  cursor: default;
+}
+
+ul.pagination > .disabled > span,
+ul.pagination > .disabled > a,
+ul.pagination > .disabled > a:hover,
+ul.pagination > .disabled > a:focus {
+  color: #999999;
+  cursor: default;
+  background-color: transparent;
+}
+
+ul.pagination > li:first-child > a,
+ul.pagination > li:first-child > span {
+  border-left-width: 1px;
+  -webkit-border-bottom-left-radius: 4px;
+          border-bottom-left-radius: 4px;
+  -webkit-border-top-left-radius: 4px;
+          border-top-left-radius: 4px;
+  -moz-border-radius-bottomleft: 4px;
+  -moz-border-radius-topleft: 4px;
+}
+
+ul.pagination > li:last-child > a,
+ul.pagination > li:last-child > span {
+  -webkit-border-top-right-radius: 4px;
+          border-top-right-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+          border-bottom-right-radius: 4px;
+  -moz-border-radius-topright: 4px;
+  -moz-border-radius-bottomright: 4px;
+}

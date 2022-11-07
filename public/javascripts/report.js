@@ -81,20 +81,23 @@ function constructTable(table, travelers, colMap) {
   constructControl('#user-keys', userKeys);
 
   // draw the table
-  var report = $(table).dataTable({
-    aaData: rows,
-    aoColumns: systemColumns.concat(discrepancyColumns).concat(userColumns),
-    oTableTools: oTableTools,
-    iDisplayLength: -1,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
-    sDom: sDom,
+  var report = $(table).DataTable({
+    data: rows,
+    columns: systemColumns.concat(discrepancyColumns).concat(userColumns),
+    pageLength: -1,
+    lengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
+    pagingType: 'simple_numbers',
+    dom: Dom,
   });
 
   // register column event handler
   $('.inline-checkbox input.userkey').on('input', function() {
     var show = $(this).prop('checked');
     colMap[$(this).data('toggle')].forEach(function(c) {
-      report.fnSetColumnVis(c, show);
+      report.column(c).visible(show);
     });
   });
 
@@ -102,7 +105,7 @@ function constructTable(table, travelers, colMap) {
   $('.inline-checkbox input.labels').on('input', function() {
     var show = $(this).prop('checked');
     labelColIndex.forEach(function(c) {
-      report.fnSetColumnVis(c, show);
+      report.column(c).visible(show);
     });
   });
 
