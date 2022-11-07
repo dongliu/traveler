@@ -18,7 +18,7 @@ block content
       if (locals.traveler.title == undefined)
         span#title.editable No title
       else
-        span#title.editable #{traveler.title}
+        span#title.editable !{traveler.title}
       = ' '
       button.btn.btn-primary.editable Edit
     h4 Description:
@@ -26,7 +26,7 @@ block content
       if (locals.traveler.description == undefined)
         span#description.editable No description
       else
-        span#description.editable #{traveler.description}
+        span#description.editable !{traveler.description}
       = ' '
       button.btn.btn-primary.editable Edit
     h4 Deadline:

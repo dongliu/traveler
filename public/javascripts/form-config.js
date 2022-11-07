@@ -38,7 +38,7 @@ $(function() {
         data: JSON.stringify(data),
         success: function(json) {
           initValue[that.id] = json[that.id];
-          $(that).text(json[that.id]);
+          $(that).html(json[that.id]);
         },
         error: function(jqXHR) {
           $(that).text(initValue[that.id]);
