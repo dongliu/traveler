@@ -1,33 +1,37 @@
-var config = require('../config/config.js');
-var ad = config.ad;
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable consistent-return */
+/* eslint-disable func-names */
+const mongoose = require('mongoose');
+const fs = require('fs');
+const config = require('../config/config');
 
-var ldapClient = require('../lib/ldap-client');
+const { ad } = config;
 
-var mongoose = require('mongoose');
-var User = mongoose.model('User');
-var Group = mongoose.model('Group');
+const ldapClient = require('../lib/ldap-client');
 
-var auth = require('../lib/auth');
-var authConfig = config.auth;
-var routesUtilities = require('../utilities/routes.js');
-var Roles = ['manager', 'admin', 'read_all_forms', 'write_active_travelers'];
+const User = mongoose.model('User');
+const Group = mongoose.model('Group');
 
-var fs = require('fs');
-var pending_photo = {};
-var options = {
-  root: __dirname + '/../userphoto/',
+const auth = require('../lib/auth');
+
+const authConfig = config.auth;
+const routesUtilities = require('../utilities/routes');
+
+const pending_photo = {};
+const options = {
+  root: `${__dirname}/../userphoto/`,
   maxAge: 30 * 24 * 3600 * 1000,
 };
 
 function cleanList(id, f) {
-  var res_list = pending_photo[id];
+  const res_list = pending_photo[id];
   delete pending_photo[id];
   res_list.forEach(f);
 }
 
 function fetch_photo_from_ad(id) {
-  var searchFilter = ad.searchFilter.replace('_id', id);
-  var opts = {
+  const searchFilter = ad.searchFilter.replace('_id', id);
+  const opts = {
     filter: searchFilter,
     attributes: ad.rawAttributes,
     scope: 'sub',
@@ -40,16 +44,16 @@ function fetch_photo_from_ad(id) {
       });
     } else if (result.length === 0) {
       cleanList(id, function(res) {
-        return res.status(400).send(id + ' is not found');
+        return res.status(400).send(`${id} is not found`);
       });
     } else if (result.length > 1) {
       cleanList(id, function(res) {
-        return res.status(400).send(id + ' is not unique!');
+        return res.status(400).send(`${id} is not unique!`);
       });
     } else if (result[0].thumbnailPhoto && result[0].thumbnailPhoto.length) {
-      if (!fs.existsSync(options.root + id + '.jpg')) {
+      if (!fs.existsSync(`${options.root + id}.jpg`)) {
         fs.writeFile(
-          options.root + id + '.jpg',
+          `${options.root + id}.jpg`,
           result[0].thumbnailPhoto,
           function(fsErr) {
             if (fsErr) {
@@ -57,7 +61,7 @@ function fetch_photo_from_ad(id) {
             }
             cleanList(id, function(res) {
               res.set('Content-Type', 'image/jpeg');
-              res.set('Cache-Control', 'public, max-age=' + options.maxAge);
+              res.set('Cache-Control', `public, max-age=${options.maxAge}`);
               return res.status(200).send(result[0].thumbnailPhoto);
             });
           }
@@ -65,21 +69,21 @@ function fetch_photo_from_ad(id) {
       } else {
         cleanList(id, function(res) {
           res.set('Content-Type', 'image/jpeg');
-          res.set('Cache-Control', 'public, max-age=' + options.maxAge);
+          res.set('Cache-Control', `public, max-age=${options.maxAge}`);
           return res.status(200).send(result[0].thumbnailPhoto);
         });
       }
     } else {
       cleanList(id, function(res) {
-        return res.status(400).send(id + ' photo is not found');
+        return res.status(400).send(`${id} photo is not found`);
       });
     }
   });
 }
 
 function updateUserProfile(user, res) {
-  var searchFilter = ad.searchFilter.replace('_id', user._id);
-  var opts = {
+  const searchFilter = ad.searchFilter.replace('_id', user._id);
+  const opts = {
     filter: searchFilter,
     attributes: ad.objAttributes,
     scope: 'sub',
@@ -90,12 +94,12 @@ function updateUserProfile(user, res) {
     }
     if (result.length === 0) {
       return res.status(500).json({
-        error: user._id + ' is not found!',
+        error: `${user._id} is not found!`,
       });
     }
     if (result.length > 1) {
       return res.status(500).json({
-        error: user._id + ' is not unique!',
+        error: `${user._id} is not unique!`,
       });
     }
     user.update(
@@ -122,17 +126,14 @@ function addUser(req, res) {
       if (err !== null) {
         console.log(err.message);
         res.locals.error = 'Username not found.';
-        return res
-          .status(404)
-          .send('Username ' + req.body.name + ' not found.');
+        return res.status(404).send(`Username ${req.body.name} not found.`);
       }
-      //dn = ldapUser.dn;
+      // dn = ldapUser.dn;
       storeUser(req, res, ldapUser);
     });
-    return;
   } else {
-    var nameFilter = ad.nameFilter.replace('_name', req.body.name);
-    var opts = {
+    const nameFilter = ad.nameFilter.replace('_name', req.body.name);
+    const opts = {
       filter: nameFilter,
       attributes: ad.objAttributes,
       scope: 'sub',
@@ -140,16 +141,16 @@ function addUser(req, res) {
 
     ldapClient.search(ad.searchBase, opts, false, function(ldapErr, result) {
       if (ldapErr) {
-        console.error(ldapErr.name + ' : ' + ldapErr.message);
+        console.error(`${ldapErr.name} : ${ldapErr.message}`);
         return res.status(500).json(ldapErr);
       }
 
       if (result.length === 0) {
-        return res.status(404).send(req.body.name + ' is not found in AD!');
+        return res.status(404).send(`${req.body.name} is not found in AD!`);
       }
 
       if (result.length > 1) {
-        return res.status(400).send(req.body.name + ' is not unique!');
+        return res.status(400).send(`${req.body.name} is not unique!`);
       }
 
       storeUser(req, res, result[0]);
@@ -158,21 +159,21 @@ function addUser(req, res) {
 }
 
 function storeUser(req, res, result) {
-  var roles = [];
+  const roles = [];
   if (req.body.manager) {
     roles.push('manager');
   }
   if (req.body.admin) {
     roles.push('admin');
   }
-  var user = new User({
+  const user = new User({
     _id: result.sAMAccountName.toLowerCase(),
     name: result.displayName,
     email: result.mail,
     office: result.physicalDeliveryOfficeName,
     phone: result.telephoneNumber.toString(),
     mobile: result.mobile,
-    roles: roles,
+    roles,
   });
 
   user.save(function(err, newUser) {
@@ -180,20 +181,13 @@ function storeUser(req, res, result) {
       console.error(err);
       return res.status(500).send(err.message);
     }
-    var url =
-      (req.proxied ? authConfig.proxied_service : authConfig.service) +
-      '/users/' +
-      newUser._id;
+    const url = `${
+      req.proxied ? authConfig.proxied_service : authConfig.service
+    }/users/${newUser._id}`;
     res.set('Location', url);
     return res
       .status(201)
-      .send(
-        'The new user is at <a target="_blank" href="' +
-          url +
-          '">' +
-          url +
-          '</a>'
-      );
+      .send(`The new user is at <a target="_blank" href="${url}">${url}</a>`);
   });
 }
 
@@ -210,12 +204,12 @@ module.exports = function(app) {
         return res.render(
           'user',
           routesUtilities.getRenderObject(req, {
-            user: user,
+            user,
             myRoles: req.session.roles,
           })
         );
       }
-      return res.status(404).send(req.params.name + ' not found');
+      return res.status(404).send(`${req.params.name} not found`);
     });
   });
 
@@ -239,19 +233,12 @@ module.exports = function(app) {
         return res.status(500).send(err.message);
       }
       if (user) {
-        var url =
-          (req.proxied ? authConfig.proxied_service : authConfig.service) +
-          '/users/' +
-          user._id;
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/users/${user._id}`;
         return res
           .status(200)
-          .send(
-            'The user is at <a target="_blank" href="' +
-              url +
-              '">' +
-              url +
-              '</a>'
-          );
+          .send(`The user is at <a target="_blank" href="${url}">${url}</a>`);
       }
       addUser(req, res);
     });
@@ -289,14 +276,14 @@ module.exports = function(app) {
         return res.render(
           'user',
           routesUtilities.getRenderObject(req, {
-            user: user,
+            user,
             myRoles: req.session.roles,
           })
         );
       }
       return res
         .status(404)
-        .send(req.params.id + ' has never logged into the application.');
+        .send(`${req.params.id} has never logged into the application.`);
     });
   });
 
@@ -366,7 +353,7 @@ module.exports = function(app) {
       } else {
         return res
           .status(404)
-          .send(req.params.id + ' is not in the application.');
+          .send(`${req.params.id} is not in the application.`);
       }
     });
   });
@@ -378,8 +365,8 @@ module.exports = function(app) {
   });
 
   app.get('/adusers/:id', auth.ensureAuthenticated, function(req, res) {
-    var searchFilter = ad.searchFilter.replace('_id', req.params.id);
-    var opts = {
+    const searchFilter = ad.searchFilter.replace('_id', req.params.id);
+    const opts = {
       filter: searchFilter,
       attributes: ad.objAttributes,
       scope: 'sub',
@@ -390,12 +377,12 @@ module.exports = function(app) {
       }
       if (result.length === 0) {
         return res.status(500).json({
-          error: req.params.id + ' is not found!',
+          error: `${req.params.id} is not found!`,
         });
       }
       if (result.length > 1) {
         return res.status(500).json({
-          error: req.params.id + ' is not unique!',
+          error: `${req.params.id} is not unique!`,
         });
       }
 
@@ -404,9 +391,10 @@ module.exports = function(app) {
   });
 
   app.get('/adusers/:id/photo', auth.ensureAuthenticated, function(req, res) {
-    if (fs.existsSync(options.root + req.params.id + '.jpg')) {
-      return res.sendFile(req.params.id + '.jpg', options);
-    } else if (pending_photo[req.params.id]) {
+    if (fs.existsSync(`${options.root + req.params.id}.jpg`)) {
+      return res.sendFile(`${req.params.id}.jpg`, options);
+    }
+    if (pending_photo[req.params.id]) {
       pending_photo[req.params.id].push(res);
     } else {
       pending_photo[req.params.id] = [res];
@@ -415,15 +403,14 @@ module.exports = function(app) {
   });
 
   app.get('/adusernames', auth.ensureAuthenticated, function(req, res) {
-    var query = req.query.term;
-    var nameFilter;
-    var opts;
+    const query = req.query.term;
+    let nameFilter;
     if (query && query.length > 0) {
-      nameFilter = ad.nameFilter.replace('_name', query + '*');
+      nameFilter = ad.nameFilter.replace('_name', `${query}*`);
     } else {
       nameFilter = ad.nameFilter.replace('_name', '*');
     }
-    opts = {
+    const opts = {
       filter: nameFilter,
       attributes: ad.memberAttributes,
       paged: {
@@ -443,21 +430,20 @@ module.exports = function(app) {
   });
 
   app.get('/adgroups', auth.ensureAuthenticated, function(req, res) {
-    var query = req.query.term;
+    const query = req.query.term;
     if (ad.groupSearchFilter && ad.groupAttributes && ad.groupSearchBase) {
-      var filter;
-      var opts;
+      let filter;
       if (query && query.length > 0) {
         if (query[query.length - 1] === '*') {
           filter = ad.groupSearchFilter.replace('_id', query);
         } else {
-          filter = ad.groupSearchFilter.replace('_id', query + '*');
+          filter = ad.groupSearchFilter.replace('_id', `${query}*`);
         }
       } else {
         filter = ad.groupSearchFilter.replace('_id', '*');
       }
-      opts = {
-        filter: filter,
+      const opts = {
+        filter,
         attributes: ad.groupAttributes,
         scope: 'sub',
       };
@@ -471,7 +457,7 @@ module.exports = function(app) {
         return res.json(result);
       });
     } else {
-      Group.find({ name: query + '*' }, function(err, groups) {
+      Group.find({ name: `${query}*` }, function(err, groups) {
         return res.json(groups);
       });
     }
