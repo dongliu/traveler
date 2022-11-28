@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const auth = require('../lib/auth');
 const routesUtilities = require('../utilities/routes');
 
+const { Reviewer } = require('../lib/role');
+
 const User = mongoose.model('User');
 const Form = mongoose.model('Form');
 
@@ -10,9 +12,9 @@ module.exports = function(app) {
   app.get('/reviews/', auth.ensureAuthenticated, function(req, res) {
     if (
       req.session.roles === undefined ||
-      req.session.roles.indexOf('manager') === -1
+      req.session.roles.indexOf(Reviewer) === -1
     ) {
-      return res.status(403).send('only manager allowed');
+      return res.status(403).send('only reviewer allowed');
     }
     return res.render('reviews', routesUtilities.getRenderObject(req));
   });
@@ -23,9 +25,9 @@ module.exports = function(app) {
   ) {
     if (
       req.session.roles === undefined ||
-      req.session.roles.indexOf('manager') === -1
+      req.session.roles.indexOf(Reviewer) === -1
     ) {
-      return res.status(403).send('only manager allowed');
+      return res.status(403).send('only reviewer allowed');
     }
     try {
       const me = await User.findOne(

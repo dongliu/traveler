@@ -4,6 +4,7 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 const config = require('../config/config');
+const { Manager, Reviewer, Admin } = require('../lib/role');
 
 const { ad } = config;
 
@@ -161,10 +162,13 @@ function addUser(req, res) {
 function storeUser(req, res, result) {
   const roles = [];
   if (req.body.manager) {
-    roles.push('manager');
+    roles.push(Manager);
+  }
+  if (req.body.reviewer) {
+    roles.push(Reviewer);
   }
   if (req.body.admin) {
-    roles.push('admin');
+    roles.push(Admin);
   }
   const user = new User({
     _id: result.sAMAccountName.toLowerCase(),
