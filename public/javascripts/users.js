@@ -113,7 +113,10 @@ $(function() {
     },
     bAutoWidth: false,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
@@ -220,6 +223,7 @@ $(function() {
       $('#modal .modal-body').append(
         '<form id="modal-roles" class="form-inline">' +
           '<label class="checkbox"><input id="modal-manager" type="checkbox" value="manager">manager</label> ' +
+          '<label class="checkbox"><input id="modal-reviewer" type="checkbox" value="reviewer">reviewer</label> ' +
           '<label class="checkbox"><input id="modal-admin" type="checkbox" value="admin">admin</label> ' +
           '<label class="checkbox"><input id="read_all_forms" type="checkbox" value="read_all_forms">read_all_forms</label> ' +
           '<label class="checkbox"><input id="write_active_travelers" type="checkbox" value="write_active_travelers">write_active_travelers</label> ' +
