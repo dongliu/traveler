@@ -39,6 +39,9 @@ block content
             input(type='checkbox', value='manager')
             | manager
           label.checkbox.inline
+            input#reviwer(type='checkbox', value='reviewer')
+            | reviewer
+          label.checkbox.inline
             input(type='checkbox', value='admin')
             | admin
       if (myRoles.indexOf('admin') !== -1)

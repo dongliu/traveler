@@ -36,5 +36,5 @@ The released forms are the forms that have been approved for release, and theref
 An approval model represents the request and the result of a reviewing process. It contains
 
 - policy: all | majority | any
-- requested reviewers: admin or manager role required
+- requested reviewers: admin or reviewer role required
 - review results: approval or not, optional review comments
