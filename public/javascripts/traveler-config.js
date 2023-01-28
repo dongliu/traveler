@@ -1,6 +1,8 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
 /*global moment: false, ajax401: false, Modernizr: false, prefix: false, updateAjaxURL: false, disableAjaxCache: false, Bloodhound: false*/
 
+import * as Editable from './lib/editable.js';
+
 function cleanDeviceForm() {
   $('#newDevice')
     .closest('li')
@@ -39,53 +41,7 @@ $(function() {
     description: $('#description').text(),
   };
 
-  $('span.editable').editable(
-    function(value) {
-      var that = this;
-      if (value === initValue[that.id]) {
-        return value;
-      }
-      var data = {};
-      data[that.id] = value;
-      $.ajax({
-        url: './config',
-        type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify(data),
-        success: function(json) {
-          initValue[that.id] = json[that.id];
-          $(that).html(json[that.id]);
-        },
-        error: function(jqXHR) {
-          $(that).text(initValue[that.id]);
-          $('#message').append(
-            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config : ' +
-              jqXHR.responseText +
-              '</div>'
-          );
-          $(window).scrollTop($('#message div:last-child').offset().top - 40);
-        },
-      });
-      return '';
-    },
-    {
-      type: 'textarea',
-      rows: 1,
-      cols: 120,
-      style: 'display: inline',
-      cancel: 'Cancel',
-      submit: 'Update',
-      indicator: 'Updating...',
-      tooltip: 'Click to edit...',
-    }
-  );
-
-  $('button.editable').click(function() {
-    $(this)
-      .siblings('span.editable')
-      .first()
-      .click();
-  });
+  Editable.binding($, initValue);
 
   var deadline = $('#deadline').val();
 
