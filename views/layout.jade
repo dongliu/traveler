@@ -15,6 +15,7 @@ html
       var prefix = !{JSON.stringify(prefix)};
 
     - var isAdmin = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1
+    - var isManager = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('manager') !== -1
     - var isReviwer = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('reviewer') !== -1
     .navbar.navbar-fixed-top
       .navbar-inner
