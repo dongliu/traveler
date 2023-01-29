@@ -4,6 +4,8 @@
 /*global removeColumn, sequenceColumn, colorColumn, priorityColumn, valueColumn, travelerLinkColumn, aliasColumn, addedByColumn, addedOnColumn, ownerColumn, deviceColumn, tagsColumn, sharedWithColumn, sharedGroupColumn, sDomNoTools*/
 /*global moment: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, Holder*/
 
+import * as Editable from './lib/editable.js';
+
 function cleanTagForm() {
   $('#new-tag')
     .closest('li')
@@ -122,55 +124,6 @@ function tagEvents() {
   });
 }
 
-function editEvents(initValue) {
-  $('span.editable').editable(
-    function(value) {
-      var that = this;
-      if (value === initValue[that.id]) {
-        return value;
-      }
-      var data = {};
-      data[that.id] = value;
-      $.ajax({
-        url: './config',
-        type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify(data),
-        success: function() {
-          initValue[that.id] = value;
-        },
-        error: function(jqXHR) {
-          $(that).text(initValue[that.id]);
-          $('#message').append(
-            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the binder config : ' +
-              jqXHR.responseText +
-              '</div>'
-          );
-          $(window).scrollTop($('#message div:last-child').offset().top - 40);
-        },
-      });
-      return value;
-    },
-    {
-      type: 'textarea',
-      rows: 1,
-      cols: 120,
-      style: 'display: inline',
-      cancel: 'Cancel',
-      submit: 'Update',
-      indicator: 'Updating...',
-      tooltip: 'Click to edit...',
-    }
-  );
-
-  $('button.editable').click(function() {
-    $(this)
-      .siblings('span.editable')
-      .first()
-      .click();
-  });
-}
-
 function removeWork(id, cb) {
   $.ajax({
     url: './works/' + id,
@@ -285,7 +238,10 @@ $(function() {
     bAutoWidth: false,
     bPaginate: false,
     iDisplayLength: 10,
-    aLengthMenu: [[10, -1], [10, 'All']],
+    aLengthMenu: [
+      [10, -1],
+      [10, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
@@ -298,7 +254,10 @@ $(function() {
       works = worksTable.fnGetData();
       changeEvents();
     },
-    aaSorting: [[1, 'asc'], [2, 'asc']],
+    aaSorting: [
+      [1, 'asc'],
+      [2, 'asc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -374,7 +333,7 @@ $(function() {
     }
   });
 
-  editEvents(initValue);
+  Editable.binding($, initValue);
 
   tagEvents();
 });

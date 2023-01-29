@@ -37,8 +37,8 @@ $(function() {
     });
   }
   var initValue = {
-    title: $('#title').text(),
-    description: $('#description').text(),
+    title: $('#title').html(),
+    description: $('#description').html(),
   };
 
   Editable.binding($, initValue);

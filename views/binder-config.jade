@@ -20,11 +20,11 @@ block content
       .modal-footer
     h3 Title:
       = ' '
-      span#title.editable #{binder.title}
+      span#title.editable !{binder.title}
       button.btn-primary.editable Edit
     h4 Description:
       = ' '
-      span#description.editable #{binder.description}
+      span#description.editable !{binder.description}
       button.btn-primary.editable Edit
     p Created on
       = ' '
@@ -92,4 +92,4 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/binder-config.js')
+  script(type='module', src='#{prefix}/javascripts/binder-config.js')
