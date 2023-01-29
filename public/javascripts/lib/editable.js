@@ -19,7 +19,7 @@ export function binding($, initValue, path) {
           $(that).html(json[that.id]);
         },
         error: function(jqXHR) {
-          $(that).text(initValue[that.id]);
+          $(that).html(initValue[that.id]);
           $('#message').append(
             '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config : ' +
               jqXHR.responseText +
@@ -28,7 +28,7 @@ export function binding($, initValue, path) {
           $(window).scrollTop($('#message div:last-child').offset().top - 40);
         },
       });
-      return '';
+      return value;
     },
     {
       type: 'textarea',
