@@ -1039,6 +1039,7 @@ module.exports = function(app) {
       }
 
       // authorize status change
+      // admin and manager can approve completion or request more work for submitted traveler
       if (
         doc.status === 1.5 &&
         (req.body.status === 2 || req.body.status === 1) &&
@@ -1052,9 +1053,10 @@ module.exports = function(app) {
           .send('You are not authorized to change the status. ');
       }
 
+      // admin and manager can request more work or archive a complted traveler
       if (
-        ((doc.status === 2 && req.body.status === 4) ||
-          (doc.status === 2 && req.body.status === 1)) &&
+        doc.status === 2 &&
+        (req.body.status === 4 || req.body.status === 1) &&
         !(
           routesUtilities.checkUserRole(req, 'admin') ||
           routesUtilities.checkUserRole(req, 'manager')
