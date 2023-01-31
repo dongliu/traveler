@@ -17,18 +17,7 @@ tagsColumn: false, sDomNoTNoR: false*/
 
 /*global archiveFromModal, transferFromModal, modalScroll*/
 
-function formatItemUpdate(data) {
-  return (
-    '<div class="target" id="' +
-    data._id +
-    '"><b>' +
-    data.title +
-    '</b>, created ' +
-    moment(data.createdOn).fromNow() +
-    (data.updatedOn ? ', updated ' + moment(data.updatedOn).fromNow() : '') +
-    '</div>'
-  );
-}
+import * as AddBinder from './lib/binder.js';
 
 function noneSelectedModal() {
   $('#modalLabel').html('Alert');
@@ -82,25 +71,6 @@ function cloneFromModal(
   });
 }
 
-function addTravelers(travelers, binders) {
-  var number = binders.length;
-  binders.forEach(function(p) {
-    $.ajax({
-      url: '/binders/' + p + '/',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        travelerIds: travelers,
-      }),
-    }).always(function() {
-      number -= 1;
-      if (number === 0) {
-        $('#return').prop('disabled', false);
-      }
-    });
-  });
-}
-
 function showHash() {
   if (window.location.hash) {
     $('.nav-tabs a[href=' + window.location.hash + ']').tab('show');
@@ -141,13 +111,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: travelerAoColumns,
-    aaSorting: [[11, 'desc'], [14, 'desc']],
+    aaSorting: [
+      [11, 'desc'],
+      [14, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -181,13 +157,20 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: transferredTravelerAoColumns,
-    aaSorting: [[10, 'desc'], [11, 'desc'], [14, 'desc']],
+    aaSorting: [
+      [10, 'desc'],
+      [11, 'desc'],
+      [14, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#transferred-traveler-table', transferredTravelerAoColumns);
@@ -221,13 +204,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: sharedTravelerAoColumns,
-    aaSorting: [[12, 'desc'], [9, 'desc']],
+    aaSorting: [
+      [12, 'desc'],
+      [9, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
   var groupSharedTravelerAoColumns = [
@@ -258,13 +247,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: groupSharedTravelerAoColumns,
-    aaSorting: [[12, 'desc'], [9, 'desc']],
+    aaSorting: [
+      [12, 'desc'],
+      [9, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
   var archivedTravelerAoColumns = [
@@ -294,13 +289,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: archivedTravelerAoColumns,
-    aaSorting: [[3, 'desc'], [11, 'desc']],
+    aaSorting: [
+      [3, 'desc'],
+      [11, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -350,7 +351,7 @@ $(function() {
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
+        $('#modal .modal-body').append(AddBinder.formatItemUpdate(data));
       });
       $('#modal .modal-footer').html(
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
@@ -405,7 +406,7 @@ $(function() {
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
+        $('#modal .modal-body').append(AddBinder.formatItemUpdate(data));
       });
       $('#modal .modal-footer').html(
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
@@ -423,78 +424,7 @@ $(function() {
 
   $('#add-to-binder').click(function() {
     var activeTable = $('.tab-pane.active table').dataTable();
-    var selected = fnGetSelected(activeTable, 'row-selected');
-    var travelers = [];
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No traveler has been selected!');
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html('Add the ' + selected.length + ' travelers? ');
-      $('#modal .modal-body').empty();
-      modalScroll(true);
-      selected.forEach(function(row) {
-        var data = activeTable.fnGetData(row);
-        travelers.push(data._id);
-        $('#modal .modal-body').append(formatItemUpdate(data));
-      });
-      $('#modal .modal-body').append(
-        '<h3 id="select"> into selected binders </h3>'
-      );
-      $('#modal .modal-body').append(
-        '<table id="owned-binder-table" class="table table-bordered table-hover"></table>'
-      );
-      var binderAoColumns = [
-        selectColumn,
-        binderLinkColumn,
-        titleColumn,
-        tagsColumn,
-        createdOnColumn,
-        updatedOnColumn,
-      ];
-      fnAddFilterFoot('#owned-binder-table', binderAoColumns);
-      var ownedBinderTable = $('#owned-binder-table').dataTable({
-        sAjaxSource: '/ownedbinders/json',
-        sAjaxDataProp: '',
-        bAutoWidth: false,
-        iDisplayLength: 5,
-        oLanguage: {
-          sLoadingRecords: 'Please wait - loading data from the server ...',
-        },
-        bDeferRender: true,
-        aoColumns: binderAoColumns,
-        aaSorting: [[4, 'desc'], [5, 'desc']],
-        sDom: sDomNoTNoR,
-      });
-      selectEvent();
-      filterEvent();
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        $('#submit').prop('disabled', true);
-        $('#return').prop('disabled', true);
-        var binders = [];
-        var selectedRow = fnGetSelected(ownedBinderTable, 'row-selected');
-        if (selectedRow.length === 0) {
-          $('#modal #select')
-            .text('Please select binder!')
-            .addClass('text-warning');
-          $('#submit').prop('disabled', false);
-          $('#return').prop('disabled', false);
-        } else {
-          selectedRow.forEach(function(row) {
-            var data = ownedBinderTable.fnGetData(row);
-            binders.push(data._id);
-          });
-          addTravelers(travelers, binders);
-        }
-      });
-    }
+    AddBinder.addModal(activeTable);
   });
 
   $('button.transfer').click(function() {
@@ -515,7 +445,7 @@ $(function() {
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
+        $('#modal .modal-body').append(AddBinder.formatItemUpdate(data));
       });
       $('#modal .modal-body').append('<h5>to the following user</h5>');
       $('#modal .modal-body').append(
