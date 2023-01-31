@@ -2,6 +2,8 @@
 /*global prefix: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false*/
 /*global selectColumn: false, titleColumn: false, createdOnColumn: false, updatedOnColumn: false, filledByColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false, createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn: false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false, deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, ownerColumn: false, deadlineColumn: /*global travelerLinkColumn: false, titleColumn: false, ownerColumn: false, deviceColumn: false, createdOnColumn: false, sharedWithColumn: false, sharedGroupColumn: false, fnAddFilterFoot: false, createdByColumn: false, createdOnColumn: false, sDomNoTools: false, filterEvent: false, Holder: false*/
 
+import * as AddBinder from './lib/binder.js';
+
 function noneSelectedModal() {
   $('#modalLabel').html('Alert');
   $('#modal .modal-body').html('No traveler has been selected!');
@@ -44,7 +46,10 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
@@ -86,6 +91,11 @@ $(function() {
   $('button.deselect-all').click(function() {
     var activeTable = $('.table.active table').dataTable();
     fnDeselect(activeTable, 'row-selected', 'select-row');
+  });
+
+  $('#add-to-binder').click(function() {
+    const fromTable = $('#public-travelers-table').dataTable();
+    AddBinder.addModal(fromTable);
   });
 
   // binding events
