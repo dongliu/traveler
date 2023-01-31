@@ -12,7 +12,7 @@ block head
 
 block content
   .container(style="margin-top: 10px")
-    h3 #{binder.title}
+    h3 !{binder.title}
       != ' '
       .btn-group
         button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
@@ -32,7 +32,7 @@ block content
         button.btn.btn-primary#report
           i.fa.fa-table.fa-large
           | &nbsp;Generate report
-    h4 #{binder.description}
+    h4 !{binder.description}
     #details.collapse.out
       h4 Owner: #{binder.owner || binder.createdBy}
       h4 Status:
