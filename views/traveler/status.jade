@@ -1,0 +1,31 @@
+if (locals.traveler.status !== undefined)
+  h4 Status:
+    case locals.traveler.status
+      when 1
+        = ' '
+        span active
+      when 1.5
+        = ' '
+        span submitted
+      when 2
+        = ' '
+        span completed
+      when 3
+        = ' '
+        span frozen
+      when 4
+        = ' '
+        span archived
+      when 0
+        = ' '
+        span initialized
+      default
+        = ' '
+    if (locals.traveler.status > 0)
+      = '; '
+      span
+      em#finished-input #{traveler.finishedInput}
+      = ' inputs finished out of '
+      span
+      em #{traveler.totalInput}
+      = ' inputs'
