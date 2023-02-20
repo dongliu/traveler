@@ -67,19 +67,22 @@ module.exports.load = function() {
 
   // Load configuration files
   const { configPath } = this;
-  module.exports.ad = loadConfig(`../${configPath}/ad.json`);
-  module.exports.api = loadConfig(`../${configPath}/api.json`);
-  module.exports.app = loadConfig(`../${configPath}/app.json`);
-  module.exports.auth = loadConfig(`../${configPath}/auth.json`);
-  module.exports.alias = loadConfig(`../${configPath}/alias.json`);
-  module.exports.mongo = loadConfig(`../${configPath}/mongo.json`);
-  module.exports.service = loadConfig(`../${configPath}/service.json`);
-  module.exports.ui = loadConfig(`../${configPath}/ui.json`);
+  const relativePath = `${__dirname}/../${configPath}`;
+  module.exports.ad = loadConfig(`${relativePath}/ad.json`);
+  module.exports.api = loadConfig(`${relativePath}/api.json`);
+  module.exports.app = loadConfig(`${relativePath}/app.json`);
+  module.exports.auth = loadConfig(`${relativePath}/auth.json`);
+  module.exports.alias = loadConfig(`${relativePath}/alias.json`);
+  module.exports.mongo = loadConfig(`${relativePath}/mongo.json`);
+  module.exports.service = loadConfig(`${relativePath}/service.json`);
+  module.exports.ui = loadConfig(`${relativePath}/ui.json`);
   module.exports.mqtt = optionalRequire(
     `../${configPath}/mqtt.json`,
     `To configure copy and edit: \`cp config/mqtt_optional-change.json ${configPath}/mqtt.json\``
   );
-  module.exports.travelerPackageFile = loadConfig('../package.json');
+  module.exports.travelerPackageFile = loadConfig(
+    `${__dirname}/../package.json`
+  );
 
   if (process.env.TRAVELER_UPLOAD_REL_PATH) {
     module.exports.uploadPath = process.env.TRAVELER_UPLOAD_REL_PATH;
