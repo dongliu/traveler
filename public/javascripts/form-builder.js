@@ -24,9 +24,6 @@ const mce_content = {
 };
 
 let initHtml = '';
-const showSavedText = 'Show saved';
-const unsavedText = 'Rendering unsaved version of the form.';
-const showUnsavedText = 'Show unsaved';
 
 /**
  * send request with data, and exec cb on response
@@ -194,63 +191,6 @@ function prependSpanIfNotExists(element, sectionName) {
   }
 }
 
-function autosaveWipOnDone() {
-  cleanBeforeSave();
-
-  wipHtml = $('#output').html();
-  data = { wipHtml: wipHtml };
-  var path = window.location.pathname;
-  path += 'wip';
-
-  $.ajax({
-    url: path,
-    type: 'PUT',
-    async: true,
-    data: JSON.stringify(data),
-    contentType: 'application/json',
-    timeout: 1500,
-    processData: false,
-  })
-    .done(function(data, textStatus, request) {
-      if (
-        $('#togglewip').size() &&
-        $('#togglewip')[0].innerText === showUnsavedText
-      ) {
-        $('#wipHtmlStatus').html(unsavedText);
-        $('#togglewip')[0].innerText = showSavedText;
-      }
-    })
-    .fail(function(error) {
-      if (error.status == 200) {
-        // No changes to autosave.
-        return;
-      }
-
-      var href = window.location.pathname;
-      $('form#output').fadeTo('slow', 1);
-
-      if (error.status == 0) {
-        modal_error_html = 'Connection to server could not be established.';
-      } else if (error.status == 401) {
-        modal_error_html = 'Session expired.';
-      } else {
-        modal_error_html =
-          'Error Code: ' + error.status + '<br/> Message: ' + error.statusText;
-      }
-
-      modalAlert('Autosave failed', modal_error_html);
-
-      // Do not display edit buttons when the form is no longer connected to a valid session.
-      cleanBeforeSave();
-      $('#output').off('mouseenter', '.control-group-wrap');
-      $('#footer-buttons').html(
-        '<h3>Session/Connection Lost. This page can be used to display lost changes. Reopen form in a <a href="' +
-          href +
-          '" target="_blank">new tab</a>.<h3>'
-      );
-    });
-}
-
 function done_button(view, $out) {
   return function(e) {
     e.preventDefault();
@@ -293,7 +233,6 @@ function done_button(view, $out) {
 
     updateSectionNumbers();
     $out.closest('.control-group-wrap').removeAttr('data-status');
-    autosaveWipOnDone();
   };
 }
 
@@ -1033,12 +972,10 @@ function file_edit($cgr) {
   let required = false;
   let userkey = '';
   let help = '';
-  let filetype = '';
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     required = $('input', $cgr).prop('required');
     userkey = $('.controls input', $cgr).data('userkey');
-    filetype = $('.controls input', $cgr).data('filetype');
     help = $('.controls span.help-block', $cgr).text();
   }
 
@@ -1046,15 +983,12 @@ function file_edit($cgr) {
   const $label = $(spec.label());
   const $required = $(spec.required());
   const $userkey = $(spec.userkey());
-  const $filetype = $(spec.filetype());
-
   const $help = $(spec.help());
   const $done = $(spec.done());
   const $edit = $('<div class="well spec"></div>').append(
     $label,
     $required,
     $userkey,
-    $filetype,
     $help,
     $done
   );
@@ -1073,14 +1007,12 @@ function file_edit($cgr) {
     label,
     required,
     userkey,
-    filetype,
     help,
   };
 
   $('input', $label).val(label);
   $('input', $required).prop('checked', required);
   $('input', $userkey).val(userkey);
-  $('input', $filetype).val(filetype);
   $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
@@ -1159,7 +1091,6 @@ function rich_edit($cgr) {
       const resultParent = $rich[0];
       addSectionNumberToRichInstruction(resultParent);
       updateSectionNumbers();
-      autosaveWipOnDone();
     }
   });
 }
@@ -1184,8 +1115,7 @@ function init() {
       }
     });
 
-  // Fetch innitial html
-  initHtml = $('<div>' + html + '</div>').html();
+  initHtml = $('#output').html();
 
   $('span.time').each(function() {
     $(this).text(
@@ -1308,7 +1238,6 @@ function binding_events() {
         placeholder: 'ui-state-highlight',
         update() {
           updateSectionNumbers();
-          autosaveWipOnDone();
         },
       });
     } else {
@@ -1353,7 +1282,6 @@ function binding_events() {
       }
       $cgr.closest('.control-group-wrap').remove();
       updateSectionNumbers();
-      autosaveWipOnDone();
     }
   );
 
@@ -1380,7 +1308,6 @@ function binding_events() {
       .closest('.control-group-wrap')
       .after(cloned);
     updateSectionNumbers();
-    autosaveWipOnDone();
   });
 
   $('#output').on('click', '.control-focus a.btn[title="edit"]', function(e) {
@@ -1609,7 +1536,7 @@ function binding_events() {
     let priorVersionsTable = null;
     let discrepancyTable;
     if (released_form_version_mgmt) {
-      $('#modalLabel').html('Form Release');
+      $('#modalLabel').html('Archive previously released form(s)');
       $('#modal .modal-body').append(
         '<h4>Prior version(s) of this form:</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
       );
@@ -1744,22 +1671,6 @@ function binding_events() {
       },
       'status'
     );
-  });
-
-  $('#togglewip').on('click', function(e, s) {
-    btnText = e.target.innerText;
-
-    if (btnText == showSavedText) {
-      $('#wipHtmlStatus').html(
-        'Showing saved version of the form. Please note, editing any field will override the unsaved version of this form.'
-      );
-      e.target.innerText = showUnsavedText;
-      $('#output').html(html);
-    } else {
-      $('#wipHtmlStatus').html(unsavedText);
-      e.target.innerText = showSavedText;
-      $('#output').html(wipHtml);
-    }
   });
 }
 

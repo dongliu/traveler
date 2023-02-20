@@ -343,31 +343,14 @@ figcaption {
   padding: 8px 14px;
   border: 1px solid #e5e5e5;
 }
-
-#nav-parent:hover {
-  background-color: #ff7f00;
-}
-
-#nav-parent {
+.bs-docs-sidenav > li > h4 {
   padding: 8px 14px;
   margin: 0 0 -1px;
   width: 190px \9;
   display: block;
   background-color: #ff9024;
   color: white;
-  border-radius: 6px 6px 0 0;
 }
-
-#nav-parent > h4 {
-  display: inline;
-}
-
-#nav-parent > span {
-  float: right;
-  font-size: x-large;
-  font-weight: bolder;
-}
-
 .bs-docs-sidenav > li:first-child > a,
 .bs-docs-sidenav > li:first-child > h4 {
   -webkit-border-radius: 6px 6px 0 0;
@@ -417,12 +400,6 @@ figcaption {
   position: absolute;
   top: auto;
   bottom: 270px;
-}
-
-.nav-child {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.5s ease-out;
 }
 
 /**

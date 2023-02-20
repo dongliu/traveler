@@ -31,17 +31,11 @@ function createSideNav() {
     '<ul class="nav nav-list nav-stacked affix bs-docs-sidenav" data-offset-top="0"></ul>'
   );
   var i;
-  var nav_parent_id = 'nav-parent';
-  var nav_list_child_class = 'nav-child';
   if ($legend.length > 1) {
-    $affix.append(
-      '<li id="' + nav_parent_id + '"><h4>' + title + '</h4><span></span></li>'
-    );
+    $affix.append('<li><h4>' + title + '</h4></li>');
     for (i = 0; i < $legend.length; i += 1) {
       $affix.append(
-        '<li class="' +
-          nav_list_child_class +
-          '"><a href="#' +
+        '<li><a href="#' +
           $legend[i].id +
           '">' +
           $legend[i].textContent +
@@ -52,30 +46,6 @@ function createSideNav() {
     $('body').attr('data-spy', 'scroll');
     $('body').attr('data-target', '#affixlist');
   }
-
-  var parent = document.getElementById(nav_parent_id);
-
-  parent.addEventListener('click', function() {
-    var header = document.getElementById(nav_parent_id);
-    var expansion = header.getElementsByTagName('span')[0];
-
-    var children = document.getElementsByClassName(nav_list_child_class);
-
-    for (i = 0; i < children.length; i++) {
-      var child = children[i];
-
-      if (child.style.maxHeight) {
-        child.style.maxHeight = null;
-        expansion.innerHTML = '+';
-      } else {
-        child.style.maxHeight = child.scrollHeight + 'px';
-        expansion.innerHTML = '-';
-      }
-    }
-  });
-
-  // Expand by default.
-  parent.click();
 }
 
 function history(found) {
