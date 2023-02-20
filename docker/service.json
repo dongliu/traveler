@@ -8,5 +8,8 @@
     "travelers": "https://controls.frib.msu.edu/traveler1/api.php?resource=travelers",
     "devices": "https://controls.frib.msu.edu/traveler1/api.php?resource=travelers&device=",
     "assigned": "https://controls.frib.msu.edu/traveler1/showForm.php?assigned="
+  },
+  "cdb" : {
+    "web_portal_url": "URL to home page of CDB. example: https://cdb.aps.anl.gov/cdb"
   }
 }
