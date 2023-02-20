@@ -415,7 +415,7 @@ module.exports = function(app) {
     }
   );
 
-  app.put(
+  app.post(
     '/apis/travelers/:id/data/upload',
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
@@ -447,7 +447,7 @@ module.exports = function(app) {
     }
   );
 
-  app.put(
+  app.post(
     '/apis/travelers/:id/data/',
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
