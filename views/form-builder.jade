@@ -20,6 +20,8 @@ block content
     var released_form_version_mgmt = !{JSON.stringify(released_form_version_mgmt)};
     var formStatus = !{JSON.stringify(locals.status)} || 0;
     var formType = !{JSON.stringify(locals.formType)} || 'normal';
+    var html = `!{html}`
+    var wipHtml = `!{wipHtml}`
   .container
     #message
     #modal.modal.modal-lg.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -82,12 +84,22 @@ block content
                       textarea#comment(name="comment", cols="40", rows="10")
                   .btn-group
                     button.btn.btn-primary#submit-review(data-toggle='tooltip', title='Report review result') Report
-
     .well-large
       form.form-horizontal#output
         != html
   .button-footer.container
     //- edit controls available for draft
+    if wipHtml
+      div#wipHtmlStatus Rendering unsaved version of the form.
+      .btn-group
+        button.btn#togglewip Show saved
+    .well-large
+      form.form-horizontal#output
+        if (wipHtml)
+          != wipHtml
+        else
+          != html 
+  .button-footer.container#footer-buttons
     if (status === 0)
       .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs

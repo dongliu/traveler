@@ -121,6 +121,8 @@ function cloneTraveler(source, req, res) {
     forms: source.forms,
     activeForm: source.activeForm,
     mapping: source.mapping,
+    labels: source.labels,
+    types: source.types,
     data: [],
     comments: [],
     totalInput: source.totalInput,
@@ -1196,7 +1198,7 @@ module.exports = function(app) {
         });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
-        mqttUtilities.postTravelerDataChangedMessage(data);
+        mqttUtilities.postTravelerDataChangedMessage(data, doc);
         doc.data.push(data._id);
         // update the finishe input number by reset
         return resetTouched(doc, function() {
@@ -1310,9 +1312,10 @@ module.exports = function(app) {
           logger.error(dataErr);
           return res.status(500).send(dataErr.message);
         }
-        doc.data.push(data._id);
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
+        mqttUtilities.postTravelerDataChangedMessage(data, doc);
+        doc.data.push(data._id);
         return doc.save(function(saveErr) {
           if (saveErr) {
             logger.error(saveErr);
@@ -1339,7 +1342,7 @@ module.exports = function(app) {
       if (data.inputType === 'file') {
         fs.exists(data.file.path, function(exists) {
           if (exists) {
-            return res.sendFile(path.resolve(data.file.path));
+            return res.download(path.resolve(data.file.path), data.value);
           }
           return res.status(410).send('gone');
         });

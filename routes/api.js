@@ -1,24 +1,86 @@
-/*eslint max-nested-callbacks: [1, 4], complexity: [2, 20]*/
+/* eslint max-nested-callbacks: [1, 4], complexity: [2, 20] */
 
-var fs = require('fs');
-var mongoose = require('mongoose');
-var basic = require('basic-auth');
-var routesUtilities = require('../utilities/routes.js');
-var _ = require('lodash');
-var form = require('../model/form');
-var reqUtils = require('../lib/req-utils');
-var logger = require('../lib/loggers').getLogger();
+const fs = require('fs');
+const mongoose = require('mongoose');
+const cheerio = require('cheerio');
+const basic = require('basic-auth');
+const _ = require('lodash');
+const multer = require('multer');
+const routesUtilities = require('../utilities/routes');
+const form = require('../model/form');
+const reqUtils = require('../lib/req-utils');
+const logger = require('../lib/loggers').getLogger();
+const mqttUtilities = require('../utilities/mqtt');
+const { DataError } = require('../lib/error');
+const config = require('../config/config');
 
-var Form = mongoose.model('Form');
-var ReleasedForm = mongoose.model('ReleasedForm');
-var FormContentRef = mongoose.model('FormContent');
-var Traveler = mongoose.model('Traveler');
-var Binder = mongoose.model('Binder');
-var TravelerData = mongoose.model('TravelerData');
-var TravelerNote = mongoose.model('TravelerNote');
-var Log = mongoose.model('Log');
+const upload = multer(config.multerConfig);
 
-var WRITE_API_USER = 'api_write';
+const { stateTransition } = require('../model/traveler');
+
+const Form = mongoose.model('Form');
+const ReleasedForm = mongoose.model('ReleasedForm');
+const Traveler = mongoose.model('Traveler');
+const Binder = mongoose.model('Binder');
+const TravelerData = mongoose.model('TravelerData');
+const TravelerNote = mongoose.model('TravelerNote');
+const Log = mongoose.model('Log');
+
+const WRITE_API_USER = 'api_write';
+
+const FILE_UPLOAD_INPUT_TYPE = 'file';
+const UPLOAD_API_INPUT_TYPES = [FILE_UPLOAD_INPUT_TYPE];
+const ALLOWED_API_INPUT_TYPES = [
+  'checkbox',
+  'radio',
+  'text',
+  'textarea',
+  'number',
+  'date',
+  'datetime-local',
+  'email',
+  'tel',
+  'time',
+  'url',
+  'text',
+];
+
+// Allowed file types when extension is not specified on form.
+const DEFAULT_ALLOWED_UPLOAD_FILE_EXT = [
+  // Image
+  'tif',
+  'tiff',
+  'webp',
+  'svg',
+  'png',
+  'jpg',
+  'jpeg',
+  'ico',
+  'gif',
+  'bmp',
+  'avif',
+  // Text
+  'css',
+  'csv',
+  'htm',
+  'html',
+  'ics',
+  'odt',
+  'php',
+  'rtf',
+  'txt',
+  'xml',
+  // application/pdf
+  'pdf',
+  // application/vnd.ms-excel
+  'xls',
+  // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  'xlsx',
+  // application/vnd.ms-xpsdocument
+  'xps',
+  // application/oxps
+  'oxps',
+];
 
 /**
  * Checks if the api user who is logged in has write access.
@@ -28,14 +90,22 @@ var WRITE_API_USER = 'api_write';
  * @param {function} next  - Callback to be called when successful
  * @returns {*|ServerResponse} error when no permissions exist for writing
  */
-function checkWritePermissions(req, res, next) {
-  var credentials = basic(req);
+function checkSystemWritePermissions(req, res, next) {
+  const credentials = basic(req);
   if (credentials.name !== WRITE_API_USER) {
     return res.status(401).json({
-      error: 'Write permissions are needed to create a form',
+      error: 'Insufficient write privilages',
     });
-  } else {
+  }
+  return next();
+}
+
+function checkSystemOrUserWritePermissions(req, res, next) {
+  if (req.user) {
+    // Ldap user logged in (permission needs to be verified to specific entitiy being updated)
     next();
+  } else {
+    checkSystemWritePermissions(req, res, next);
   }
 }
 
@@ -59,9 +129,8 @@ function performMongoResponse(err, data, res, successCB) {
   }
   if (successCB === undefined) {
     return res.status(200).json(data);
-  } else {
-    successCB();
   }
+  return successCB();
 }
 
 /**
@@ -103,7 +172,7 @@ function performFindEntityReferencedContentsByParentEntityId(
 
 module.exports = function(app) {
   app.get('/apis/travelers/', function(req, res) {
-    var search = {
+    const search = {
       archived: {
         $ne: true,
       },
@@ -124,7 +193,7 @@ module.exports = function(app) {
       };
     }
     if (req.query.hasOwnProperty('userkey')) {
-      search['mapping.' + req.query.userkey] = {
+      search[`mapping.${req.query.userkey}`] = {
         $exists: true,
       };
     }
@@ -139,7 +208,7 @@ module.exports = function(app) {
   });
 
   app.get('/apis/tags/travelers/', function(req, res) {
-    var search = {
+    const search = {
       archived: {
         $ne: true,
       },
@@ -156,16 +225,16 @@ module.exports = function(app) {
           console.error(err);
           return res.status(500).send(err.message);
         }
-        var output = [];
+        let output = [];
         travelers.forEach(function(t) {
           output = _.union(output, t.tags);
         });
-        res.status(200).json(output);
+        return res.status(200).json(output);
       });
   });
 
   app.get('/apis/keys/travelers/', function(req, res) {
-    var search = {
+    const search = {
       archived: {
         $ne: true,
       },
@@ -182,16 +251,16 @@ module.exports = function(app) {
           console.error(err);
           return res.status(500).send(err.message);
         }
-        var output = [];
+        let output = [];
         travelers.forEach(function(t) {
           output = _.union(output, _.keys(t.mapping));
         });
-        res.status(200).json(output);
+        return res.status(200).json(output);
       });
   });
 
   app.get('/apis/forms/', function(req, res) {
-    var search = {
+    const search = {
       archived: {
         $ne: true,
       },
@@ -202,7 +271,7 @@ module.exports = function(app) {
       };
     }
     if (req.query.hasOwnProperty('userkey')) {
-      search['mapping.' + req.query.userkey] = {
+      search[`mapping.${req.query.userkey}`] = {
         $exists: true,
       };
     }
@@ -229,6 +298,12 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/apis/releasedForms/:id/', function(req, res) {
+    ReleasedForm.findById(req.params.id, function(err, releasedForms) {
+      performMongoResponse(err, releasedForms, res);
+    });
+  });
+
   app.get('/apis/binders/', function(req, res) {
     Binder.find({}, function(err, binders) {
       performMongoResponse(err, binders, res);
@@ -247,11 +322,11 @@ module.exports = function(app) {
       ['binderTitle', 'description', 'userName'],
       true
     ),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
-      var binderTitle = req.body.binderTitle;
-      var userName = req.body.userName;
-      var description = req.body.description;
+      const { binderTitle } = req.body;
+      const { userName } = req.body;
+      const { description } = req.body;
 
       routesUtilities.binder.createBinder(
         binderTitle,
@@ -269,11 +344,11 @@ module.exports = function(app) {
   app.post(
     '/apis/addWork/binders/:id/',
     routesUtilities.filterBody(['travelerIds', 'userName'], true),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       Binder.findById(req.params.id, function(err, binder) {
         performMongoResponse(err, binder, res, function() {
-          var userName = req.body.userName;
+          const { userName } = req.body;
           routesUtilities.binder.addWork(binder, userName, req, res);
         });
       });
@@ -283,12 +358,12 @@ module.exports = function(app) {
   app.post(
     '/apis/removeWork/binders/:id/',
     routesUtilities.filterBody(['workId', 'userName'], true),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
       Binder.findById(req.params.id, function(err, binder) {
         performMongoResponse(err, binder, res, function() {
-          var userName = req.body.userName;
-          var workId = req.body.workId;
+          const { userName } = req.body;
+          const { workId } = req.body;
           routesUtilities.binder.deleteWork(binder, workId, userName, req, res);
         });
       });
@@ -300,6 +375,266 @@ module.exports = function(app) {
       performMongoResponse(travelerErr, traveler, res);
     });
   });
+
+  app.put(
+    '/apis/travelers/:id/status/',
+    reqUtils.exist('id', Traveler),
+    reqUtils.archived('id', false),
+    checkSystemWritePermissions,
+    function(req, res) {
+      const doc = req[req.params.id];
+
+      if ([1, 1.5, 2, 3, 4].indexOf(req.body.status) === -1) {
+        return res.status(400).send('invalid status');
+      }
+
+      if (doc.status === req.body.status) {
+        return res.status(204).send();
+      }
+
+      const target = _.find(stateTransition, function(t) {
+        return t.from === doc.status;
+      });
+
+      if (target.to.indexOf(req.body.status) === -1) {
+        return res.status(400).send('invalid status change');
+      }
+
+      doc.status = req.body.status;
+      // user id
+      doc.updatedBy = req.body.userId;
+      doc.updatedOn = Date.now();
+      mqttUtilities.postTravelerStatusChangedMessage(doc);
+      return doc.save(function(saveErr, newDoc) {
+        if (saveErr) {
+          logger.error(saveErr);
+          return res.status(500).send(saveErr.message);
+        }
+        return res.status(200).json(newDoc);
+      });
+    }
+  );
+
+  app.put(
+    '/apis/travelers/:id/data/upload',
+    reqUtils.exist('id', Traveler),
+    reqUtils.archived('id', false),
+    reqUtils.status('id', [1]),
+    checkSystemOrUserWritePermissions,
+    upload,
+    reqUtils.filter('body', ['name', 'userId']),
+    reqUtils.hasAll('body', ['name']),
+    reqUtils.sanitize('body', ['name', 'userId']),
+    function(req, res) {
+      performDataEntryVerifyAndSave(req, res, UPLOAD_API_INPUT_TYPES, function(
+        errReq,
+        errRes,
+        errStatus,
+        msg
+      ) {
+        // Cleanup uploaded data
+        if (!errReq.files.isEmpty) {
+          const file = errReq.files.fileName;
+          // Remove file
+          fs.unlink(file.path, err => {
+            if (err) {
+              console.error(err);
+            }
+          });
+        }
+        return errRes.status(errStatus).send(msg);
+      });
+    }
+  );
+
+  app.put(
+    '/apis/travelers/:id/data/',
+    reqUtils.exist('id', Traveler),
+    reqUtils.archived('id', false),
+    reqUtils.status('id', [1]),
+    checkSystemOrUserWritePermissions,
+    reqUtils.filter('body', ['name', 'value', 'userId']),
+    reqUtils.hasAll('body', ['name', 'value']),
+    reqUtils.sanitize('body', ['name', 'value', 'userId']),
+    function(req, res) {
+      return performDataEntryVerifyAndSave(
+        req,
+        res,
+        ALLOWED_API_INPUT_TYPES,
+        function(errReq, errRes, errStatus, msg) {
+          return errRes.status(errStatus).send(msg);
+        }
+      );
+    }
+  );
+
+  // eslint-disable-next-line complexity
+  function performDataEntryVerifyAndSave(req, res, allowed_input_types, next) {
+    const traveler = req[req.params.id];
+    const fieldName = req.body.name;
+    let fieldValue = req.body.value;
+    let file;
+    let inputUserId = req.body.userId;
+    // TODO: if this is a user api auth case, then authorize check should be put into checkSystemOrUserWritePermissions
+    // too much for this function
+    if (req.user) {
+      // Standard User execution
+      if (inputUserId !== undefined) {
+        return next(
+          req,
+          res,
+          500,
+          'Insuffient privilates to specify user Id. Remove parameter and try again.'
+        );
+      }
+      inputUserId = req.user.id;
+
+      if (!reqUtils.canWrite(req, traveler)) {
+        return next(
+          req,
+          res,
+          401,
+          'User does not have sufficient privilages for updating the traveler.'
+        );
+      }
+    }
+    // System account execution
+    if (!inputUserId) {
+      return next(req, res, 500, 'User id must be specified for this request.');
+    }
+
+    // Verification against html is too much to me
+    // Fetch inputType
+    const traveler_html = traveler.forms[0].html;
+    const result = cheerio.load(traveler_html);
+    const inputs = result('input, textarea');
+    let inputType;
+    let error = '';
+    let input;
+
+    for (let i = 0; i < inputs.length; i += 1) {
+      input = result(inputs[i]);
+      const ittrInputName = input.attr('name');
+      let ittrInputType = input.attr('type');
+
+      if (ittrInputName === fieldName) {
+        if (ittrInputType === undefined) {
+          ittrInputType = input[0].name;
+        }
+        inputType = ittrInputType;
+
+        if (inputType === 'radio') {
+          const allowed_val = input.attr('value');
+          if (allowed_val === fieldValue) {
+            error = undefined;
+            break;
+          } else if (error.length === 0) {
+            error = `Allowed value needs to be specified: ${allowed_val}`;
+          } else {
+            error += `, ${allowed_val}`;
+          }
+        } else {
+          break;
+        }
+      }
+    }
+
+    if (error) {
+      return next(req, res, 500, error);
+    }
+
+    if (inputType === undefined) {
+      return next(req, res, 500, 'Input name provided was not found.');
+    }
+
+    if (allowed_input_types.indexOf(inputType) === -1) {
+      return next(
+        req,
+        res,
+        500,
+        `${inputType} type entry is not supported by the API.`
+      );
+    }
+
+    if (inputType === FILE_UPLOAD_INPUT_TYPE) {
+      if (req.files.isEmpty || req.files.fileName === undefined) {
+        return next(
+          req,
+          res,
+          500,
+          'File upload not specified or failed to upload.'
+        );
+      }
+
+      file = req.files.fileName;
+      // TODO verify allowed file type.
+      const inputSpecifiedType = input[0].attribs['data-filetype'];
+      if (inputSpecifiedType) {
+        // file type specified for input
+        if (inputSpecifiedType !== file.extension) {
+          return next(
+            req,
+            res,
+            500,
+            `${file.extension} file extension uploaded, ${inputSpecifiedType} file extension required.`
+          );
+        }
+      } else if (
+        DEFAULT_ALLOWED_UPLOAD_FILE_EXT.indexOf(file.extension) === -1
+      ) {
+        return next(
+          req,
+          res,
+          500,
+          `${file.extension} file extension is not allowed for this upload.`
+        );
+      }
+
+      fieldValue = file.originalname;
+    }
+
+    const data = new TravelerData({
+      traveler: traveler._id,
+      name: fieldName,
+      value: fieldValue,
+      inputType,
+      inputBy: inputUserId,
+      inputOn: Date.now(),
+    });
+
+    if (file) {
+      data.file = {
+        path: file.path,
+        encoding: file.encoding,
+        mimetype: file.mimetype,
+      };
+    }
+
+    return data.save(function(dataErr, savedData) {
+      if (dataErr) {
+        logger.error(dataErr.message);
+        if (dataErr instanceof DataError) {
+          return next(req, res, dataErr.status, dataErr.message);
+        }
+        return next(req, res, 500, dataErr.message);
+      }
+      traveler.updatedBy = inputUserId;
+      traveler.updatedOn = Date.now();
+      mqttUtilities.postTravelerDataChangedMessage(data, traveler);
+      traveler.data.push(data._id);
+      // update the finished input number by reset
+      return routesUtilities.traveler.resetTouched(traveler, function() {
+        // save traveler
+        traveler.save(function(saveErr) {
+          if (saveErr) {
+            logger.error(saveErr);
+            return next(req, res, 500, saveErr.message);
+          }
+          return res.status(201).json(savedData);
+        });
+      });
+    });
+  }
 
   /**
    * get the latest value for the given name from the data list
@@ -315,7 +650,7 @@ module.exports = function(app) {
       return null;
     }
 
-    var found = data.filter(function(d) {
+    const found = data.filter(function(d) {
       return d.name === name;
     });
     // get the latest value from history
@@ -340,11 +675,11 @@ module.exports = function(app) {
    * @return {Object}         the json representation
    */
   function retrieveKeyvalue(traveler, props, cb) {
-    var output = {};
+    const output = {};
     props.forEach(function(p) {
       output[p] = traveler[p];
     });
-    var mapping = traveler.mapping;
+    const { mapping } = traveler;
     TravelerData.find(
       {
         _id: {
@@ -356,7 +691,7 @@ module.exports = function(app) {
       if (dataErr) {
         return cb(dataErr);
       }
-      var userDefined = {};
+      const userDefined = {};
       _.mapKeys(mapping, function(name, key) {
         userDefined[key] = dataForName(name, docs);
       });
@@ -374,12 +709,12 @@ module.exports = function(app) {
    * @return {Object}         the json representation
    */
   function retrieveKeyLableValue(traveler, props, cb) {
-    var output = {};
+    const output = {};
     props.forEach(function(p) {
       output[p] = traveler[p];
     });
-    var mapping = traveler.mapping;
-    var labels = traveler.labels;
+    const { mapping } = traveler;
+    const { labels } = traveler;
     TravelerData.find(
       {
         _id: {
@@ -391,7 +726,7 @@ module.exports = function(app) {
       if (dataErr) {
         return cb(dataErr);
       }
-      var userDefined = {};
+      const userDefined = {};
       _.mapKeys(mapping, function(name, key) {
         userDefined[key] = {};
         userDefined[key].value = dataForName(name, docs);
@@ -435,8 +770,8 @@ module.exports = function(app) {
   });
 
   app.get('/apis/travelers/:id/data/', function(req, res) {
-    var travelerId = req.params.id;
-    var travelerDataKeys = 'name value inputType inputBy inputOn';
+    const travelerId = req.params.id;
+    const travelerDataKeys = 'name value inputType inputBy inputOn';
     performFindEntityReferencedContentsByParentEntityId(
       Traveler,
       travelerId,
@@ -448,8 +783,8 @@ module.exports = function(app) {
   });
 
   app.get('/apis/travelers/:id/notes/', function(req, res) {
-    var travelerId = req.params.id;
-    var noteDataKeys = 'name value inputBy inputOn';
+    const travelerId = req.params.id;
+    const noteDataKeys = 'name value inputBy inputOn';
     performFindEntityReferencedContentsByParentEntityId(
       Traveler,
       travelerId,
@@ -466,7 +801,7 @@ module.exports = function(app) {
     }
 
     // retrieve all log data in one find
-    Log.find(
+    return Log.find(
       {
         _id: {
           $in: traveler.discrepancyLogs,
@@ -486,9 +821,9 @@ module.exports = function(app) {
   app.post(
     '/apis/archived/traveler/:id/',
     routesUtilities.filterBody(['archived'], true),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
-      var archivedStatus = req.body.archived;
+      const archivedStatus = req.body.archived;
 
       Traveler.findById(req.params.id, function(travelerErr, traveler) {
         performMongoResponse(travelerErr, traveler, res, function() {
@@ -510,7 +845,7 @@ module.exports = function(app) {
     req,
     res
   ) {
-    let traveler = req[req.params.id];
+    const traveler = req[req.params.id];
     retrieveLogs(traveler, function(err, output) {
       if (err) {
         return res.status(500).send(err.message);
@@ -546,18 +881,18 @@ module.exports = function(app) {
   app.post(
     '/apis/create/form/',
     routesUtilities.filterBody(['formName', 'userName', 'html'], true),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
-      var formName = req.body.formName;
-      var userName = req.body.userName;
-      var html = req.body.html;
-      var formType = req.body.formType;
+      const { formName } = req.body;
+      const { userName } = req.body;
+      const { html } = req.body;
+      const { formType } = req.body;
       form.createForm(
         {
           title: formName,
           createdBy: userName,
-          html: html,
-          formType: formType,
+          html,
+          formType,
         },
         function(err, newForm) {
           performMongoResponse(err, newForm, res, function() {
@@ -575,17 +910,18 @@ module.exports = function(app) {
       true,
       ['devices']
     ),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
+      let status;
       try {
-        var status = parseFloat(req.body.status);
+        status = parseFloat(req.body.status);
       } catch (ex) {
         return res.status(400).json({
           error: 'Status provided was of invalid type. Expected: Float.',
         });
       }
 
-      Traveler.findById(req.params.id, function(travelerErr, traveler) {
+      return Traveler.findById(req.params.id, function(travelerErr, traveler) {
         performMongoResponse(travelerErr, traveler, res, function() {
           routesUtilities.traveler.updateTravelerStatus(
             req,
@@ -594,7 +930,7 @@ module.exports = function(app) {
             status,
             false,
             function() {
-              var deadline = req.body.deadline;
+              const { deadline } = req.body;
               if (deadline === '') {
                 traveler.deadline = undefined;
               } else {
@@ -626,15 +962,15 @@ module.exports = function(app) {
       ['formId', 'title', 'userName', 'devices'],
       true
     ),
-    checkWritePermissions,
+    checkSystemWritePermissions,
     function(req, res) {
-      ReleasedForm.findById(req.body.formId, function(formErr, form) {
-        performMongoResponse(formErr, form, res, function() {
-          var title = req.body.title;
-          var userName = req.body.userName;
-          var devices = req.body.devices;
+      ReleasedForm.findById(req.body.formId, function(formErr, foundForm) {
+        performMongoResponse(formErr, foundForm, res, function() {
+          const { title } = req.body;
+          const { userName } = req.body;
+          const { devices } = req.body;
           routesUtilities.traveler.createTraveler(
-            form,
+            foundForm,
             title,
             userName,
             devices,
