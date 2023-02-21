@@ -20,6 +20,9 @@ node_modules/
 *.sublime-workspace
 *.idea
 
+# vscode
+.vscode
+
 # system related #
 .DS_Store
 
@@ -41,6 +44,10 @@ config/auth.json
 config/mongo.json
 config/app.json
 config/alias.json
+
+docker/server.crt
+docker/server.csr
+docker/server.key
 
 # npm stuff #
 npm-debug.log*

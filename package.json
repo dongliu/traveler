@@ -1,14 +1,14 @@
 {
   "name": "traveler",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "private": true,
   "scripts": {
     "start": "node app"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/AdvancedPhotonSource/traveler.git",
-    "release": "3.0.0"
+    "url": "https://github.com/dongliu/traveler.git",
+    "release": "3.1.0"
   },
   "dependencies": {
     "basic-auth": "1.0.0",
@@ -63,8 +63,7 @@
   },
   "lint-staged": {
     "*.js": [
-      "prettier --write",
-      "eslint"
+      "prettier --write"
     ]
   }
 }

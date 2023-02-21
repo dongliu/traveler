@@ -968,27 +968,32 @@ function number_edit($cgr) {
 
 function file_edit($cgr) {
   $('#output .well.spec').remove();
-  let label = 'label';
-  let required = false;
-  let userkey = '';
-  let help = '';
+  var label = 'label';
+  var required = false;
+  var userkey = '';
+  var help = '';
+  var filetype = '';
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     required = $('input', $cgr).prop('required');
     userkey = $('.controls input', $cgr).data('userkey');
+    filetype = $('.controls input', $cgr).data('filetype');
     help = $('.controls span.help-block', $cgr).text();
   }
 
-  const $upload = $(input.upload());
-  const $label = $(spec.label());
-  const $required = $(spec.required());
-  const $userkey = $(spec.userkey());
-  const $help = $(spec.help());
-  const $done = $(spec.done());
-  const $edit = $('<div class="well spec"></div>').append(
+  var $upload = $(input.upload());
+  var $label = $(spec.label());
+  var $required = $(spec.required());
+  var $userkey = $(spec.userkey());
+  var $filetype = $(spec.filetype());
+
+  var $help = $(spec.help());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append(
     $label,
     $required,
     $userkey,
+    $filetype,
     $help,
     $done
   );
@@ -1004,15 +1009,17 @@ function file_edit($cgr) {
   }
 
   const model = {
-    label,
-    required,
-    userkey,
-    help,
+    label: label,
+    required: required,
+    userkey: userkey,
+    filetype: filetype,
+    help: help,
   };
 
   $('input', $label).val(label);
   $('input', $required).prop('checked', required);
   $('input', $userkey).val(userkey);
+  $('input', $filetype).val(filetype);
   $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
@@ -1536,7 +1543,7 @@ function binding_events() {
     let priorVersionsTable = null;
     let discrepancyTable;
     if (released_form_version_mgmt) {
-      $('#modalLabel').html('Archive previously released form(s)');
+      $('#modalLabel').html('Form Release');
       $('#modal .modal-body').append(
         '<h4>Prior version(s) of this form:</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
       );
