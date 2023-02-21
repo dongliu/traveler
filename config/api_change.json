@@ -5,6 +5,5 @@
   },
   "app_port": "3443",
   "ssl_key": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.key)",
-  "ssl_cert": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.pem)",
-  "api_key_expiration_in_days": 30
+  "ssl_cert": "FOR HTTPS OPTIONAL REMOVABLE VARIABLE (ex: ssl/node.pem)"
 }

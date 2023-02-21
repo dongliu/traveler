@@ -26,7 +26,6 @@ const formContent = new Schema({
   html: String,
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
-  types: Schema.Types.Mixed,
   formType: {
     type: String,
     default: 'normal',

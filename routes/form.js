@@ -22,8 +22,6 @@ const User = mongoose.model('User');
 const Group = mongoose.model('Group');
 const { stateTransition } = require('../model/form');
 
-const { FormError } = require('../lib/error');
-
 const logger = require('../lib/loggers').getLogger();
 
 function checkReviewer(form, userid) {
@@ -374,7 +372,6 @@ module.exports = function(app) {
             id: req.params.id,
             title: form.title,
             html: form.html,
-            wipHtml: form.wipHtml,
             status: form.status,
             statusText: formModel.statusMap[`${form.status}`],
             _v: form._v,
@@ -912,7 +909,6 @@ module.exports = function(app) {
       const doc = req[req.params.id];
       if (req.body.hasOwnProperty('html')) {
         doc.html = req.body.html;
-        doc.wipHtml = undefined;
       }
       if (req.body.hasOwnProperty('title')) {
         if (reqUtils.isOwner(req, doc)) {
@@ -939,44 +935,6 @@ module.exports = function(app) {
       } catch (error) {
         return res.status(500).send(error.message);
       }
-    }
-  );
-
-  app.put(
-    '/forms/:id/wip',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Form),
-    reqUtils.canWriteMw('id'),
-    reqUtils.status('id', [0]),
-    reqUtils.filter('body', ['wipHtml']),
-    reqUtils.sanitize('body', ['wipHtml']),
-    function(req, res) {
-      if (!req.is('json')) {
-        return res.status(415).send('json request expected');
-      }
-      const doc = req[req.params.id];
-
-      if (req.body.hasOwnProperty('wipHtml')) {
-        doc.wipHtml = req.body.wipHtml;
-
-        // No changes were made after html is santitized.
-        if (doc.html === doc.wipHtml) {
-          return res.json(undefined);
-        }
-      }
-
-      return doc
-        .save()
-        .then(function(newDoc) {
-          return res.json(newDoc);
-        })
-        .catch(function(saveErr) {
-          logger.error(saveErr.message);
-          if (saveErr instanceof FormError) {
-            return res.status(saveErr.status).send(saveErr.message);
-          }
-          return res.status(500).send(saveErr.message);
-        });
     }
   );
 
