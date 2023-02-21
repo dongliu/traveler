@@ -1,23 +1,15 @@
-/* jslint es5: true */
+/*jslint es5: true*/
 
-const mongoose = require('mongoose');
-const appConfig = require('../config/config').app;
+var mongoose = require('mongoose');
+var appConfig = require('../config/config').app;
+var Schema = mongoose.Schema;
+var ObjectId = Schema.Types.ObjectId;
 
-const { Schema } = mongoose;
-const { ObjectId } = Schema.Types;
-
-const share = require('./share');
-const { DataError } = require('../lib/error');
+var share = require('./share.js');
+var DataError = require('../lib/error').DataError;
 
 require('./binder');
-
-const Binder = mongoose.model('Binder');
-
-const TIME_PART_REG_EX = '([0-1][0-9]|2[0-4]):([0-5][0-9])';
-const TIME_REG_EX = `^${TIME_PART_REG_EX}$`;
-const DATE_REG_EX_START = '^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][0-9]|3[0-1])';
-const DATE_REG_EX = `${DATE_REG_EX_START}$`;
-const DATETIME_REG_EX = `${DATE_REG_EX_START}T${TIME_PART_REG_EX}$`;
+var Binder = mongoose.model('Binder');
 
 /**
  * A form can become active, inactive, and reactive. The form's activated date
@@ -27,14 +19,13 @@ const DATETIME_REG_EX = `${DATE_REG_EX_START}T${TIME_PART_REG_EX}$`;
  * alias : a name for convenience to distinguish forms.
  * mapping : user-key -> name
  * labels: name -> label
- * types: name -> input types
  * inputs : list of input names in the form
  * Mapping and inputs are decided by the form snapshot when a traveler is
  * created from it. They are within form because they will be never changed once
  * created.
  */
 
-const form = new Schema({
+var form = new Schema({
   html: String,
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
@@ -47,12 +38,12 @@ const form = new Schema({
   alias: String,
 });
 
-const user = new Schema({
+var user = new Schema({
   _id: String,
   username: String,
 });
 
-const logData = new Schema({
+var logData = new Schema({
   name: String,
   value: Schema.Types.Mixed,
   file: {
@@ -64,7 +55,7 @@ const logData = new Schema({
 
 // a log is an array of log data collected in a form.
 // the data is submitted in one request, which is different from traveler data.
-const log = new Schema({
+var log = new Schema({
   referenceForm: { type: ObjectId, ref: 'Form' },
   records: [logData],
   inputBy: String,
@@ -89,7 +80,7 @@ const statusMap = {
   '4': 'archived',
 };
 
-const stateTransition = [
+var stateTransition = [
   {
     from: 0,
     to: [1, 4],
@@ -118,7 +109,7 @@ const stateTransition = [
  *               | -1 // no access
  */
 
-const traveler = new Schema({
+var traveler = new Schema({
   title: String,
   description: String,
   devices: [String],
@@ -155,7 +146,6 @@ const traveler = new Schema({
   discrepancyForms: [form],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
-  types: Schema.Types.Mixed,
   // local id of active form in forms
   activeForm: String,
   // local id of the active discrepancy form in discrepancyForms
@@ -205,10 +195,13 @@ function updateBinderProgress(travelerDoc) {
   }).exec(function(err, binders) {
     if (err) {
       return console.error(
-        `cannot find binders for traveler ${travelerDoc._id}, error: ${err.message}`
+        'cannot find binders for traveler ' +
+          travelerDoc._id +
+          ', error: ' +
+          err.message
       );
     }
-    return binders.forEach(function(binder) {
+    binders.forEach(function(binder) {
       binder.updateWorkProgress(travelerDoc);
       binder.updateProgress();
     });
@@ -216,14 +209,14 @@ function updateBinderProgress(travelerDoc) {
 }
 
 traveler.pre('save', function(next) {
-  const modifiedPaths = this.modifiedPaths();
+  var modifiedPaths = this.modifiedPaths();
   // keep it so that we can refer at post save
   this.wasModifiedPaths = modifiedPaths;
   next();
 });
 
 traveler.post('save', function(obj) {
-  const modifiedPaths = this.wasModifiedPaths;
+  var modifiedPaths = this.wasModifiedPaths;
   if (
     modifiedPaths.indexOf('totalInput') !== -1 ||
     modifiedPaths.indexOf('finishedInput') !== -1 ||
@@ -240,7 +233,7 @@ traveler.post('save', function(obj) {
  *       | 'number'
  */
 
-const travelerData = new Schema({
+var travelerData = new Schema({
   traveler: ObjectId,
   name: String,
   value: Schema.Types.Mixed,
@@ -255,42 +248,17 @@ const travelerData = new Schema({
 });
 
 travelerData.pre('save', function validateNumber(next) {
-  if (this.inputType === 'number' && typeof this.value !== 'number') {
-    return next(new DataError(`value "${this.value}" is not a number`, 400));
+  if (this.inputType === 'number') {
+    if (typeof this.value !== this.inputType) {
+      return next(
+        new DataError('value "' + this.value + '" is not a number', 400)
+      );
+    }
   }
-
-  if (
-    this.inputType === 'checkbox' &&
-    (this.value === true || this.value === false) === false
-  ) {
-    return next(new DataError(`value "${this.value}" is not a boolean`, 400));
-  }
-
-  if (
-    this.inputType === 'datetime-local' &&
-    this.value.match(DATETIME_REG_EX) === null
-  ) {
-    return next(
-      new DataError(`${this.value} does not match format yyyy-mm-ddThh:mm`, 400)
-    );
-  }
-
-  if (this.inputType === 'date' && this.value.match(DATE_REG_EX) === null) {
-    return next(
-      new DataError(`${this.value} does not match format yyyy-mm-dd`, 400)
-    );
-  }
-
-  if (this.inputType === 'time' && this.value.match(TIME_REG_EX) === null) {
-    return next(
-      new DataError(`${this.value} does not match format hh:mm`, 400)
-    );
-  } // url
-
-  return next();
+  next();
 });
 
-const travelerNote = new Schema({
+var travelerNote = new Schema({
   traveler: ObjectId,
   name: String,
   value: String,
@@ -298,16 +266,16 @@ const travelerNote = new Schema({
   inputOn: Date,
 });
 
-const Traveler = mongoose.model('Traveler', traveler);
-const TravelerData = mongoose.model('TravelerData', travelerData);
-const TravelerNote = mongoose.model('TravelerNote', travelerNote);
-const Log = mongoose.model('Log', log);
+var Traveler = mongoose.model('Traveler', traveler);
+var TravelerData = mongoose.model('TravelerData', travelerData);
+var TravelerNote = mongoose.model('TravelerNote', travelerNote);
+var Log = mongoose.model('Log', log);
 
 module.exports = {
-  Traveler,
-  TravelerData,
-  TravelerNote,
-  Log,
-  statusMap,
-  stateTransition,
+  Traveler: Traveler,
+  TravelerData: TravelerData,
+  TravelerNote: TravelerNote,
+  Log: Log,
+  statusMap: statusMap,
+  stateTransition: stateTransition,
 };

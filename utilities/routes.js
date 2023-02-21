@@ -4,28 +4,21 @@
 /**
  * The purpose of this file is to store all functions and utilities that are used by multiple routes.
  */
-const _ = require('lodash');
-const cheer = require('cheerio');
-const config = require('../config/config');
+var config = require('../config/config.js');
 
-const { Traveler } = require('../model/traveler');
-const { TravelerData } = require('../model/traveler');
-const { Binder } = require('../model/binder');
-const logger = require('../lib/loggers').getLogger();
-
-const defaultDevice = require('./devices/default');
-const cdbDevice = require('./devices/cdb');
+var Traveler = require('../model/traveler').Traveler;
+var Binder = require('../model/binder').Binder;
+var _ = require('lodash');
+var cheer = require('cheerio');
 
 const formStatusMap = require('../model/released-form').statusMap;
 
-const { TravelerError } = require('../lib/error');
+var TravelerError = require('../lib/error').TravelerError;
 
-let devicesLib;
+var devices = require('./devices/default.js');
 // Override devices for a specific component system.
 if (config.service.device_application === 'cdb') {
-  devicesLib = cdbDevice;
-} else {
-  devicesLib = defaultDevice;
+  devices = require('./devices/cdb.js');
 }
 
 function filterBody(strings, findAll) {
@@ -33,84 +26,80 @@ function filterBody(strings, findAll) {
 }
 
 function filterBodyWithOptional(requiredStrings, findAll, optionalStrings) {
-  let strings = requiredStrings;
+  var strings = requiredStrings;
   if (optionalStrings !== undefined) {
     strings = requiredStrings.concat(optionalStrings);
   }
 
   return function(req, res, next) {
-    let foundCount = 0;
-    Object.keys(req.body).forEach(function(k) {
-      const index = strings.indexOf(k);
-      if (index !== -1) {
-        foundCount = foundCount + 1;
-      } else {
-        req.body[k] = null;
+    var k;
+    var foundCount = 0;
+    for (k in req.body) {
+      if (req.body.hasOwnProperty(k)) {
+        var index = strings.indexOf(k);
+        if (index !== -1) {
+          foundCount = foundCount + 1;
+        } else {
+          req.body[k] = null;
+        }
       }
-    });
+    }
     if (!findAll && foundCount > 0) {
-      return next();
+      next();
+    } else if (findAll && foundCount >= requiredStrings.length) {
+      next();
+    } else {
+      var error;
+      if (findAll) {
+        error = 'Cannot find all the required parameters: ' + strings;
+      } else if (!findAll) {
+        error = 'Cannot find any of the required parameters: ' + strings;
+      }
+      return res.send(500, error);
     }
-
-    if (findAll && foundCount >= requiredStrings.length) {
-      return next();
-    }
-
-    let error;
-    if (findAll) {
-      error = `Cannot find all the required parameters: ${strings}`;
-    } else if (!findAll) {
-      error = `Cannot find any of the required parameters: ${strings}`;
-    }
-    return res.send(500, error);
   };
 }
 
 function checkUserRole(req, role) {
-  let roles;
-  if (req.user) {
-    // API session
-    roles = req.user.roles;
-  } else {
-    // Web session
-    roles = req.session.roles;
-  }
-
-  if (roles !== undefined && roles.indexOf(role) !== -1) {
+  if (
+    req.session.roles !== undefined &&
+    req.session.roles.indexOf(role) !== -1
+  ) {
     return true;
+  } else {
+    return false;
   }
-  return false;
 }
 
 function getRenderObject(req, extraAttributes) {
-  const renderObject = {
+  var renderObject = {
     prefix: req.proxied ? req.proxied_prefix : '',
     viewConfig: config.viewConfig,
     roles: req.session.roles,
     helper: {
-      upperCaseFirstLetter(text) {
+      upperCaseFirstLetter: function(text) {
         return text.charAt(0).toUpperCase() + text.slice(1);
       },
     },
   };
   if (extraAttributes !== undefined) {
-    Object.keys(extraAttributes).forEach(function(key) {
+    for (var key in extraAttributes) {
       renderObject[key] = extraAttributes[key];
-    });
+    }
   }
   return renderObject;
 }
 
 function getDeviceValue(value) {
   return new Promise(function(resolve) {
-    let deviceIndex = 0;
+    var deviceIndex = 0;
     processNextDevice();
 
     function processNextDevice() {
       if (value.length > deviceIndex) {
-        devicesLib.getDeviceValue(value[deviceIndex], function(curDeviceValue) {
+        devices.getDeviceValue(value[deviceIndex], function(curDeviceValue) {
           value[deviceIndex] = curDeviceValue;
-          deviceIndex += 1;
+          deviceIndex++;
           processNextDevice();
         });
       } else {
@@ -121,18 +110,17 @@ function getDeviceValue(value) {
 }
 
 function deviceRemovalAllowed() {
-  return devicesLib.devicesRemovalAllowed;
+  return devices.devicesRemovalAllowed;
 }
 
-function addInputName(name, list) {
-  if (list.indexOf(name) === -1) {
-    list.push(name);
-  }
-}
-
-const binder = {
-  createBinder(title, description, createdBy, newBinderResultCallback) {
-    const binderToCreate = {};
+var binder = {
+  createBinder: function(
+    title,
+    description,
+    createdBy,
+    newBinderResultCallback
+  ) {
+    var binderToCreate = {};
     binderToCreate.title = title;
     binderToCreate.description = description;
     binderToCreate.createdBy = createdBy;
@@ -140,20 +128,20 @@ const binder = {
     new Binder(binderToCreate).save(newBinderResultCallback);
   },
 
-  deleteWork(tBinder, workId, userId, req, res) {
-    const work = tBinder.works.id(workId);
+  deleteWork: function(binder, workId, userId, req, res) {
+    var work = binder.works.id(workId);
 
     if (!work) {
       return res
         .status(404)
-        .send(`Work ${req.params.wid} not found in the binder.`);
+        .send('Work ' + req.params.wid + ' not found in the binder.');
     }
 
     work.remove();
-    tBinder.updatedBy = userId;
-    tBinder.updatedOn = Date.now();
+    binder.updatedBy = userId;
+    binder.updatedOn = Date.now();
 
-    return tBinder.updateProgress(function(err, newPackage) {
+    binder.updateProgress(function(err, newPackage) {
       if (err) {
         console.log(err);
         return res.status(500).send(err.message);
@@ -161,12 +149,12 @@ const binder = {
       return res.json(newPackage);
     });
   },
-  addWork(tBinder, userId, req, res) {
-    const tids = req.body.travelerIds;
-    const pids = req.body.binders;
-    let ids;
-    let type;
-    let model;
+  addWork: function(binder, userId, req, res) {
+    var tids = req.body.travelerIds;
+    var pids = req.body.binders;
+    var ids;
+    var type;
+    var model;
     if (tids) {
       if (tids.length === 0) {
         return res.send(204);
@@ -183,10 +171,10 @@ const binder = {
       ids = pids;
     }
 
-    const { works } = tBinder;
-    const added = [];
+    var works = binder.works;
+    var added = [];
 
-    return model
+    model
       .find({
         _id: {
           $in: ids,
@@ -203,11 +191,11 @@ const binder = {
         }
 
         items.forEach(function(item) {
-          if (type === 'binder' && item.id === tBinder.id) {
+          if (type === 'binder' && item.id === binder.id) {
             // do not add itself as a work
             return;
           }
-          let newWork;
+          var newWork;
           if (!works.id(item._id)) {
             newWork = {
               _id: item._id,
@@ -224,19 +212,23 @@ const binder = {
             } else if (item.status === 0) {
               newWork.finished = 0;
               newWork.inProgress = 0;
-            } else if (type === 'traveler') {
-              newWork.finished = 0;
-              if (item.totalInput === 0) {
-                newWork.inProgress = 1;
-              } else {
-                newWork.inProgress = item.finishedInput / item.totalInput;
-              }
-            } else if (item.totalValue === 0) {
-              newWork.finished = 0;
-              newWork.inProgress = 1;
             } else {
-              newWork.finished = item.finishedValue / item.totalValue;
-              newWork.inProgress = item.inProgressValue / item.totalValue;
+              if (type === 'traveler') {
+                newWork.finished = 0;
+                if (item.totalInput === 0) {
+                  newWork.inProgress = 1;
+                } else {
+                  newWork.inProgress = item.finishedInput / item.totalInput;
+                }
+              } else {
+                if (item.totalValue === 0) {
+                  newWork.finished = 0;
+                  newWork.inProgress = 1;
+                } else {
+                  newWork.finished = item.finishedValue / item.totalValue;
+                  newWork.inProgress = item.inProgressValue / item.totalValue;
+                }
+              }
             }
 
             works.push(newWork);
@@ -248,11 +240,11 @@ const binder = {
           return res.send(204);
         }
 
-        tBinder.updatedOn = Date.now();
-        tBinder.updatedBy = userId;
+        binder.updatedOn = Date.now();
+        binder.updatedBy = userId;
 
         // update the totalValue, finishedValue, and finishedValue
-        return tBinder.updateProgress(function(saveErr, newBinder) {
+        binder.updateProgress(function(saveErr, newBinder) {
           if (saveErr) {
             console.error(saveErr);
             return res.send(500, saveErr.message);
@@ -282,24 +274,23 @@ function addBase(base, traveler) {
   traveler.activeForm = traveler.forms[0]._id;
   traveler.mapping = base.mapping;
   traveler.labels = base.labels;
-  traveler.types = base.types;
   traveler.totalInput = _.size(base.labels);
 }
-const traveler = {
+var traveler = {
   /**
    * get the map of input name -> label in the form
    * @param  {String} html form html
    * @return {Object}     the map of input name -> label
    */
-  inputLabels(html) {
-    const $ = cheer.load(html);
-    const inputs = $('input, textarea');
-    let lastInputName = '';
-    let i;
-    let input;
-    let inputName = '';
-    let label = '';
-    const map = {};
+  inputLabels: function(html) {
+    var $ = cheer.load(html);
+    var inputs = $('input, textarea');
+    var lastInputName = '';
+    var i;
+    var input;
+    var inputName = '';
+    var label = '';
+    var map = {};
     for (i = 0; i < inputs.length; i += 1) {
       input = $(inputs[i]);
       inputName = input.attr('name');
@@ -324,11 +315,16 @@ const traveler = {
     }
     return map;
   },
-  createTraveler(form, title, userId, devices, newTravelerCallBack) {
+  createTraveler: function(
+    form,
+    title,
+    userName,
+    devices,
+    newTravelerCallBack
+  ) {
     if (
       form.formType &&
-      form.formType !== 'normal' &&
-      form.formType !== 'normal_discrepancy'
+      form.formType !== 'normal' && form.formType !== 'normal_discrepancy'
     ) {
       return newTravelerCallBack(
         new TravelerError(
@@ -338,7 +334,7 @@ const traveler = {
       );
     }
 
-    if (formStatusMap[`${form.status}`] !== 'released') {
+    if (formStatusMap['' + form.status] !== 'released') {
       return newTravelerCallBack(
         new TravelerError(
           `cannot create a traveler from a non-released form ${form.id}`,
@@ -347,13 +343,13 @@ const traveler = {
       );
     }
 
-    const newTraveler = new Traveler({
-      title,
+    var traveler = new Traveler({
+      title: title,
       description: '',
-      devices,
+      devices: devices,
       tags: form.base.tags,
       status: 0,
-      createdBy: userId,
+      createdBy: userName,
       createdOn: Date.now(),
       sharedWith: [],
       referenceReleasedForm: form._id,
@@ -369,20 +365,27 @@ const traveler = {
     // if (!(_.isObject(form.base.labels) && _.size(form.base.labels) > 0)) {
     //   form.base.labels = this.inputLabels(form.base.html);
     // }
-    addBase(form.base, newTraveler);
+    addBase(form.base, traveler);
     if (form.discrepancy) {
-      addDiscrepancy(form.discrepancy, newTraveler);
+      addDiscrepancy(form.discrepancy, traveler);
     }
-    return newTraveler.save(newTravelerCallBack);
+    traveler.save(newTravelerCallBack);
   },
-  changeArchivedState(tTraveler, archived) {
-    tTraveler.archived = archived;
+  changeArchivedState: function(traveler, archived) {
+    traveler.archived = archived;
 
-    if (tTraveler.archived) {
-      tTraveler.archivedOn = Date.now();
+    if (traveler.archived) {
+      traveler.archivedOn = Date.now();
     }
   },
-  updateTravelerStatus(req, res, travelerDoc, status, isSession, onSuccess) {
+  updateTravelerStatus: function(
+    req,
+    res,
+    travelerDoc,
+    status,
+    isSession,
+    onSuccess
+  ) {
     if (isSession) {
       if (status === 1.5) {
         if (!traveler.canWriteActive(req, travelerDoc)) {
@@ -391,61 +394,66 @@ const traveler = {
             'You are not authorized to access this resource'
           );
         }
-      } else if (travelerDoc.createdBy !== req.session.userid) {
-        return res.send(403, 'You are not authorized to access this resource');
+      } else {
+        if (travelerDoc.createdBy !== req.session.userid) {
+          return res.send(
+            403,
+            'You are not authorized to access this resource'
+          );
+        }
       }
     }
 
-    if (travelerDoc.status === status) {
+    if (travelerDoc.status == status) {
       // Nothing to update
-      return onSuccess();
+      onSuccess();
+    } else {
+      switch (status) {
+        case 1:
+          if ([0, 1.5, 3].indexOf(travelerDoc.status) !== -1) {
+            travelerDoc.status = status;
+          } else {
+            return res.send(
+              400,
+              'cannot start to work from the current status'
+            );
+          }
+          break;
+        case 1.5:
+          if ([1].indexOf(travelerDoc.status) !== -1) {
+            travelerDoc.status = status;
+          } else {
+            return res.send(400, 'cannot complete from the current status');
+          }
+          break;
+        case 2:
+          if ([1, 1.5].indexOf(travelerDoc.status) !== -1) {
+            travelerDoc.status = 2;
+          } else {
+            return res.send(400, 'cannot complete from the current status');
+          }
+          break;
+        case 3:
+          if ([1].indexOf(travelerDoc.status) !== -1) {
+            travelerDoc.status = 3;
+          } else {
+            return res.send(400, 'cannot freeze from the current status');
+          }
+      }
+      onSuccess();
     }
-    switch (status) {
-      case 1:
-        if ([0, 1.5, 3].indexOf(travelerDoc.status) !== -1) {
-          travelerDoc.status = status;
-        } else {
-          return res.send(400, 'cannot start to work from the current status');
-        }
-        break;
-      case 1.5:
-        if ([1].indexOf(travelerDoc.status) !== -1) {
-          travelerDoc.status = status;
-        } else {
-          return res.send(400, 'cannot complete from the current status');
-        }
-        break;
-      case 2:
-        if ([1, 1.5].indexOf(travelerDoc.status) !== -1) {
-          travelerDoc.status = 2;
-        } else {
-          return res.send(400, 'cannot complete from the current status');
-        }
-        break;
-      case 3:
-        if ([1].indexOf(travelerDoc.status) !== -1) {
-          travelerDoc.status = 3;
-        } else {
-          return res.send(400, 'cannot freeze from the current status');
-        }
-        break;
-      default:
-        return res.send(400, 'invalid target status');
-    }
-    return onSuccess();
   },
-  canWriteActive(req, travelerDoc) {
+  canWriteActive: function(req, travelerDoc) {
     if (traveler.canWrite(req, travelerDoc)) {
       return true;
-    }
-    if (checkUserRole(req, 'write_active_travelers')) {
+    } else if (checkUserRole(req, 'write_active_travelers')) {
       return true;
     }
 
     return false;
   },
-  canWrite(req, travelerDoc) {
-    if (req.session === undefined) {
+  canWrite: function(req, travelerDoc) {
+    if (req.session == undefined) {
       return false;
     }
 
@@ -459,7 +467,7 @@ const traveler = {
     ) {
       return true;
     }
-    let i;
+    var i;
     if (travelerDoc.sharedGroup) {
       for (i = 0; i < req.session.memberOf.length; i += 1) {
         if (
@@ -472,55 +480,15 @@ const traveler = {
     }
     return false;
   },
-  resetTouched(doc, cb) {
-    TravelerData.find(
-      {
-        _id: {
-          $in: doc.data,
-        },
-      },
-      'name'
-    ).exec(function(dataErr, data) {
-      if (dataErr) {
-        logger.error(dataErr);
-        return cb(dataErr);
-      }
-      // reset the touched input name list and the finished input number
-      logger.info(`reset the touched inputs for traveler ${doc._id}`);
-      let labels = {};
-      let activeForm;
-      if (doc.forms.length === 1) {
-        [activeForm] = doc.forms;
-      } else {
-        activeForm = doc.forms.id(doc.activeForm);
-      }
-
-      if (!(activeForm.labels && _.size(activeForm.labels) > 0)) {
-        activeForm.labels = traveler.inputLabels(activeForm.html);
-      }
-      labels = activeForm.labels;
-      // empty the current touched input list
-      doc.touchedInputs = [];
-      data.forEach(function(d) {
-        // check if the data is for the active form
-        if (labels.hasOwnProperty(d.name)) {
-          addInputName(d.name, doc.touchedInputs);
-        }
-      });
-      // finished input
-      doc.finishedInput = doc.touchedInputs.length;
-      return cb();
-    });
-  },
 };
 
 module.exports = {
-  filterBody,
-  filterBodyWithOptional,
-  checkUserRole,
-  getRenderObject,
-  getDeviceValue,
-  deviceRemovalAllowed,
-  traveler,
-  binder,
+  filterBody: filterBody,
+  filterBodyWithOptional: filterBodyWithOptional,
+  checkUserRole: checkUserRole,
+  getRenderObject: getRenderObject,
+  getDeviceValue: getDeviceValue,
+  deviceRemovalAllowed: deviceRemovalAllowed,
+  traveler: traveler,
+  binder: binder,
 };

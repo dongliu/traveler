@@ -23,7 +23,6 @@ status := 0 // editable draft
 ***** */
 // mapping : user-key -> name
 // labels : name -> label
-// types: name -> input type
 
 const stateTransition = [
   {
@@ -78,8 +77,6 @@ const form = new Schema({
   sharedGroup: [share.group],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
-  types: Schema.Types.Mixed,
-  wipHtml: String,
   html: String,
   formType: {
     type: String,
@@ -97,7 +94,6 @@ form.pre('save', function(next) {
   if (doc.isNew || doc.isModified('html')) {
     const mapping = {};
     const labels = {};
-    const types = {};
     const $ = cheerio.load(doc.html);
     const inputs = $('input, textarea');
     let lastInputName = '';
@@ -105,11 +101,9 @@ form.pre('save', function(next) {
     let inputName = '';
     let label = '';
     let userkey = '';
-    let inputType = '';
     for (let i = 0; i < inputs.length; i += 1) {
       const input = $(inputs[i]);
       inputName = input.attr('name');
-      inputType = input.attr('type');
       label = input
         .closest('.control-group')
         .children('.control-label')
@@ -151,7 +145,6 @@ form.pre('save', function(next) {
         }
       } else {
         labels[inputName] = label;
-        types[inputName] = inputType;
         // add user key mapping if userkey is not null or empty
         if (userkey) {
           if (mapping.hasOwnProperty(userkey)) {
@@ -167,7 +160,6 @@ form.pre('save', function(next) {
     }
     doc.mapping = mapping;
     doc.labels = labels;
-    doc.types = types;
   }
   return next();
 });

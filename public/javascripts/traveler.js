@@ -636,51 +636,20 @@ $(function() {
         $cgw.find('.controls')
       );
     }
-
-    var valid_type = false;
-    var file_type_attribute = $this[0].attributes['data-filetype'];
-    var file_type = undefined;
-
-    if (file_type_attribute !== undefined) {
-      file_type = file_type_attribute.value;
-
-      if (file_type == undefined || file_type.length == 0) {
-        file_type = undefined;
-      }
-    }
-
-    if (file_type != undefined) {
-      var ext_list = file.name.split('.');
-
-      if (ext_list.length !== 0) {
-        var ext = ext_list.pop();
-        ext = ext.toLowerCase();
-        file_type = file_type.toLowerCase();
-
-        valid_type = ext === file_type;
-      }
-    } else {
-      valid_type =
+    if (
+      !(
         /^(image|text)\//i.test(file.type) ||
         file.type === 'application/pdf' ||
         file.type === 'application/vnd.ms-excel' ||
         file.type ===
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
         file.type === 'application/vnd.ms-xpsdocument' ||
-        file.type === 'application/oxps';
-    }
-
-    if (!valid_type) {
-      var validation_text = ' is not allowed to upload for this input';
-
-      if (file_type !== undefined) {
-        validation_text = ext + validation_text;
-        validation_text += ' (Specify a file of type "' + file_type + '").';
-      } else {
-        validation_text = file.type + validation_text;
-      }
-
-      $validation.html('<p class="text-error">' + validation_text + '</p>');
+        file.type === 'application/oxps'
+      )
+    ) {
+      $validation.html(
+        '<p class="text-error">' + file.type + ' is not allowed to upload</p>'
+      );
       $cgw.children('.control-group-buttons').remove();
       return;
     }

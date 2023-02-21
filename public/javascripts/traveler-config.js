@@ -101,7 +101,7 @@ $(function() {
       $this.parent().remove();
     });
 
-  let devices;
+  var devices;
 
   $('#add').click(function(e) {
     e.preventDefault();
@@ -132,23 +132,23 @@ $(function() {
         });
         devices.initialize();
       }
+    } else if (!devices) {
+      devices = [];
     }
 
-    if (showCCDB) {
-      $('#newDevice').typeahead(
-        {
-          minLength: 1,
-          highlight: true,
-          hint: true,
-        },
-        {
-          name: 'devices',
-          limit: 20,
-          display: 'inventoryId',
-          source: devices,
-        }
-      );
-    }
+    $('#newDevice').typeahead(
+      {
+        minLength: 1,
+        highlight: true,
+        hint: true,
+      },
+      {
+        name: 'devices',
+        limit: 20,
+        display: 'inventoryId',
+        source: devices,
+      }
+    );
 
     $('#confirm').click(function(confirmE) {
       confirmE.preventDefault();

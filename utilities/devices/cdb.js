@@ -13,10 +13,10 @@
  * }
  */
 
-const request = require('request');
-const config = require('../../config/config');
+var config = require('./../../config/config.js');
+var request = require('request');
 
-const webPortalUrl = config.service.cdb?.web_portal_url;
+var webPortalUrl = config.service.cdb.web_portal_url;
 
 const PORTAL_PATH_FOR_ITEM = '/views/item/view.xhtml?id=REPLACE_ID';
 
@@ -29,7 +29,7 @@ const ITEM_INVENTORY_DOMAIN_NAME = 'Inventory';
  * @returns {void}
  */
 function performServiceRequest(fullUrl, cb) {
-  console.log(`Performing API Request: ${fullUrl}`);
+  console.log('Performing API Request: ' + fullUrl);
   request(
     {
       strictSSL: false,
@@ -58,7 +58,7 @@ function performServiceRequest(fullUrl, cb) {
  * @returns {void}
  */
 function getItemById(id, cb) {
-  const fullUrl = `${webPortalUrl}/api/Items/ById/${id}`;
+  var fullUrl = webPortalUrl + '/api/Items/ById/' + id;
   performServiceRequest(fullUrl, cb);
 }
 
@@ -70,9 +70,9 @@ function getItemById(id, cb) {
  * @returns {void}
  */
 function getCDBEntityReference(valueOrig, cb) {
-  const value = valueOrig.split(':');
-  const id = value[1];
-  const entityType = value[0];
+  var value = valueOrig.split(':');
+  var id = value[1];
+  var entityType = value[0];
 
   /**
    * Generates a proper displayValue depending on the data resulting from the request.
@@ -85,12 +85,12 @@ function getCDBEntityReference(valueOrig, cb) {
    */
   function performErrorChecking(data, error) {
     return new Promise(function(resolve) {
-      let displayValue;
+      var displayValue;
       if (error) {
         displayValue = valueOrig;
       } else if (data.exception) {
         console.error(data.message);
-        displayValue = `Error: ${data.message}`;
+        displayValue = 'Error: ' + data.message;
       }
       resolve(displayValue);
     });
@@ -104,8 +104,8 @@ function getCDBEntityReference(valueOrig, cb) {
    */
   function constructFinalUrl(urlPath, displayValue) {
     urlPath = urlPath.replace('REPLACE_ID', id);
-    const url = webPortalUrl + urlPath;
-    let result = `<a target='_blank' href='${url}'>`;
+    var url = webPortalUrl + urlPath;
+    var result = "<a target='_blank' href='" + url + "'>";
     result += displayValue;
     result += '</a>';
     cb(result);
@@ -121,20 +121,19 @@ function getCDBEntityReference(valueOrig, cb) {
     performErrorChecking(data, error).then(function(displayValue) {
       if (displayValue === undefined) {
         switch (data.domain.name) {
-          case ITEM_INVENTORY_DOMAIN_NAME: {
-            const inventoryItem = data;
-            const { catalogItem } = inventoryItem;
-            displayValue = `${catalogItem.name} [${inventoryItem.name}]`;
+          case ITEM_INVENTORY_DOMAIN_NAME:
+            let inventoryItem = data;
+            let catalogItem = inventoryItem.catalogItem;
+            displayValue = catalogItem.name + ' [' + inventoryItem.name + ']';
 
             if (inventoryItem.qrId) {
-              displayValue += ` (QRID: ${inventoryItem.qrId})`;
+              displayValue += ' (QRID: ' + inventoryItem.qrId + ')';
             }
 
             finishItemResponse(displayValue);
             break;
-          }
           default:
-            displayValue = `Item: ${data.name}`;
+            displayValue = 'Item: ' + data.name;
             finishItemResponse(displayValue);
         }
       } else {
