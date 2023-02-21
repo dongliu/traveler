@@ -28,10 +28,11 @@ block content
         button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
-      .btn-group
-        a.btn.btn-info#all-travelers(href='#{prefix}/publictravelers/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public travelers')
-          i.fa.fa-institution.fa-lg
-          | &nbsp;All public travelers
+      if (viewConfig.showPublicTravelers)
+        .btn-group
+          a.btn.btn-info#all-travelers(href='#{prefix}/publictravelers/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public travelers')
+            i.fa.fa-institution.fa-lg
+            | &nbsp;All public travelers
       if (viewConfig.showCCDB)
         .btn-group.dropdown
           a#ref.btn.btn-info.dropdown-toggle(data-toggle='dropdown')
