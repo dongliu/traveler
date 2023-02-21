@@ -18,9 +18,9 @@ function ajax401(prefix) {
     if (jqXHR.status >= 400) {
       if (jqXHR.status === 401) {
         $('#message').append(
-          '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Session expired. Please click <a href="' +
+          '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Please click <a href="' +
             prefix +
-            '/login" target="_blank">traveler log in</a></div>'
+            '/login" target="" + linkTarget>traveler log in</a>, and then save the changes on this page.</div>'
         );
       } else {
         $('#message').append(

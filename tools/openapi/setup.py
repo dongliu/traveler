@@ -9,7 +9,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 setup(name='Traveler-API',
-      version='1.6.0',
+      version='1.5.1.dev1',
       packages=find_packages(),
       py_modules=["traveler_api_factory"],
       install_requires=['python-dateutil',

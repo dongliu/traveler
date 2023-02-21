@@ -37,4 +37,4 @@ cp -rv travelerApi ../
 cd ..
 
 # Clean up
-rm -rf $GEN_OUT_DIR
+rm $GEN_OUT_DIR -rf
