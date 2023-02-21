@@ -24,7 +24,7 @@
  * */
 
 const fs = require('fs');
-const optionalRequire = require("optional-require")(require)
+const optionalRequire = require('optional-require')(require);
 
 module.exports.configPath = '';
 module.exports.uploadPath = '';
@@ -42,7 +42,7 @@ module.exports.ui = '';
 function getPath(desiredPath, defaultPath) {
   // Check to see that desired path exists.
   try {
-    var stat = fs.statSync(desiredPath);
+    const stat = fs.statSync(desiredPath);
     if (stat !== null) {
       return desiredPath;
     }
@@ -50,6 +50,11 @@ function getPath(desiredPath, defaultPath) {
     // Desired path was not found -- default
     return defaultPath;
   }
+  return defaultPath;
+}
+
+function loadConfig(path) {
+  return JSON.parse(fs.readFileSync(path));
 }
 
 module.exports.load = function() {
@@ -61,18 +66,23 @@ module.exports.load = function() {
   }
 
   // Load configuration files
-  var configPath = this.configPath;
-  module.exports.ad = require('../' + configPath + '/ad.json');
-  module.exports.api = require('../' + configPath + '/api.json');
-  module.exports.app = require('../' + configPath + '/app.json');
-  module.exports.auth = require('../' + configPath + '/auth.json');
-  module.exports.alias = require('../' + configPath + '/alias.json');
-  module.exports.mongo = require('../' + configPath + '/mongo.json');
-  module.exports.service = require('../' + configPath + '/service.json');
-  module.exports.ui = require('../' + configPath + '/ui.json');
-  module.exports.mqtt = optionalRequire('../' + configPath + '/mqtt.json',
-      "To configure copy and edit: `cp config/mqtt_optional-change.json " + configPath + '/mqtt.json`');
-  module.exports.travelerPackageFile = require('../package.json');
+  const { configPath } = this;
+  const relativePath = `${__dirname}/../${configPath}`;
+  module.exports.ad = loadConfig(`${relativePath}/ad.json`);
+  module.exports.api = loadConfig(`${relativePath}/api.json`);
+  module.exports.app = loadConfig(`${relativePath}/app.json`);
+  module.exports.auth = loadConfig(`${relativePath}/auth.json`);
+  module.exports.alias = loadConfig(`${relativePath}/alias.json`);
+  module.exports.mongo = loadConfig(`${relativePath}/mongo.json`);
+  module.exports.service = loadConfig(`${relativePath}/service.json`);
+  module.exports.ui = loadConfig(`${relativePath}/ui.json`);
+  module.exports.mqtt = optionalRequire(
+    `../${configPath}/mqtt.json`,
+    `To configure copy and edit: \`cp config/mqtt_optional-change.json ${configPath}/mqtt.json\``
+  );
+  module.exports.travelerPackageFile = loadConfig(
+    `${__dirname}/../package.json`
+  );
 
   if (process.env.TRAVELER_UPLOAD_REL_PATH) {
     module.exports.uploadPath = process.env.TRAVELER_UPLOAD_REL_PATH;
@@ -82,8 +92,14 @@ module.exports.load = function() {
     module.exports.uploadPath = getPath('../data/traveler-uploads', 'uploads');
   }
 
+  module.exports.multerConfig = {
+    dest: module.exports.uploadPath,
+    limits: {
+      fileSize: (module.exports.app.upload_size || 10) * 1024 * 1024,
+    },
+  };
   // Load view configuration
-  var viewConfig = {};
+  const viewConfig = {};
   viewConfig.showDevice = false;
   viewConfig.shareUsers = true;
   viewConfig.shareGroups = true;
@@ -91,6 +107,7 @@ module.exports.load = function() {
   viewConfig.linkTarget = '_blank';
   viewConfig.showBinderValue = false;
   viewConfig.showCCDB = this.service.device_application === 'devices';
+  viewConfig.showPublicTravelers = true;
 
   if (this.service.device !== undefined) {
     viewConfig.showDevice = true;
@@ -112,6 +129,9 @@ module.exports.load = function() {
   }
   if (this.app.link_target) {
     viewConfig.linkTarget = this.app.link_target;
+  }
+  if (this.app.public_travelers_page !== undefined) {
+    viewConfig.showPublicTravelers = this.app.public_travelers_page;
   }
   if (
     this.travelerPackageFile.repository &&

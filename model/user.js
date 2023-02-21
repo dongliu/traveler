@@ -21,6 +21,8 @@ const user = new Schema({
     type: Boolean,
     default: false,
   },
+  apiKey: String,
+  apiKeyExpiration: Date,
 });
 
 const group = new Schema({
