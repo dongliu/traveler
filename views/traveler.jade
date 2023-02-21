@@ -32,7 +32,7 @@ block content
         if (locals.traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
         if (locals.traveler.status !== undefined)
-          if (locals.isOwner != undefined && (locals.isOwner || isAdmin))
+          if ((locals.isOwner != undefined && locals.isOwner) || isAdmin || isManager)
             case locals.traveler.status
               when 0
                 .btn-group
@@ -43,7 +43,7 @@ block content
                 .btn-group
                   button.btn.btn-primary#complete Submit for completion
               when 1.5
-                if (isAdmin)
+                if (isAdmin || isManager)
                   .btn-group
                     button.btn.btn-primary#approve Approve completion
                   .btn-group
@@ -52,7 +52,7 @@ block content
                   .btn-group
                     button.btn.btn-primary#resume Resume
               when 2
-                if (isAdmin)
+                if (isAdmin || isManager)
                   .btn-group
                     button.btn.btn-warning#more More work
                 .btn-group
