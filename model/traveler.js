@@ -19,6 +19,7 @@ var Binder = mongoose.model('Binder');
  * alias : a name for convenience to distinguish forms.
  * mapping : user-key -> name
  * labels: name -> label
+ * types: name -> input types
  * inputs : list of input names in the form
  * Mapping and inputs are decided by the form snapshot when a traveler is
  * created from it. They are within form because they will be never changed once
@@ -146,6 +147,7 @@ var traveler = new Schema({
   discrepancyForms: [form],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
+  types: Schema.Types.Mixed,
   // local id of active form in forms
   activeForm: String,
   // local id of the active discrepancy form in discrepancyForms
