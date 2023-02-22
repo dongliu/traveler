@@ -8,10 +8,11 @@ var _ = require('lodash');
 var form = require('../model/form');
 var reqUtils = require('../lib/req-utils');
 var logger = require('../lib/loggers').getLogger();
+const mqttUtilities = require('../utilities/mqtt.js');
+const DataError = require('../lib/error').DataError;
 
 var Form = mongoose.model('Form');
 var ReleasedForm = mongoose.model('ReleasedForm');
-var FormContentRef = mongoose.model('FormContent');
 var Traveler = mongoose.model('Traveler');
 var Binder = mongoose.model('Binder');
 var TravelerData = mongoose.model('TravelerData');
@@ -229,6 +230,12 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/apis/releasedForms/:id/', function(req, res) {
+    ReleasedForm.findById(req.params.id, function(err, releasedForms) {
+      performMongoResponse(err, releasedForms, res);
+    });
+  });
+
   app.get('/apis/binders/', function(req, res) {
     Binder.find({}, function(err, binders) {
       performMongoResponse(err, binders, res);
@@ -300,6 +307,93 @@ module.exports = function(app) {
       performMongoResponse(travelerErr, traveler, res);
     });
   });
+
+  app.put(
+    '/apis/travelers/:id/status/',
+    reqUtils.exist('id', Traveler),
+    reqUtils.archived('id', false),
+    checkWritePermissions,
+    function(req, res) {
+      var doc = req[req.params.id];
+
+      if ([1, 1.5, 2, 3, 4].indexOf(req.body.status) === -1) {
+        return res.status(400).send('invalid status');
+      }
+
+      if (doc.status === req.body.status) {
+        return res.status(204).send();
+      }
+
+      var stateTransition = require('../model/traveler').stateTransition;
+
+      var target = _.find(stateTransition, function(t) {
+        return t.from === doc.status;
+      });
+
+      if (target.to.indexOf(req.body.status) === -1) {
+        return res.status(400).send('invalid status change');
+      }
+
+      doc.status = req.body.status;
+      // user id
+      doc.updatedBy = req.body.userId;
+      doc.updatedOn = Date.now();
+      mqttUtilities.postTravelerStatusChangedMessage(doc);
+      doc.save(function(saveErr, newDoc) {
+        if (saveErr) {
+          logger.error(saveErr);
+          return res.status(500).send(saveErr.message);
+        }
+        return res.status(200).json(newDoc);
+      });
+    }
+  );
+
+  app.post(
+    '/apis/travelers/:id/data/',
+    reqUtils.exist('id', Traveler),
+    reqUtils.archived('id', false),
+    reqUtils.status('id', [1]),
+    checkWritePermissions,
+    reqUtils.filter('body', ['name', 'value', 'type', 'userId']),
+    reqUtils.hasAll('body', ['name', 'value', 'type']),
+    reqUtils.sanitize('body', ['name', 'value', 'type', 'userId']),
+    function(req, res) {
+      var doc = req[req.params.id];
+      var data = new TravelerData({
+        traveler: doc._id,
+        name: req.body.name,
+        value: req.body.value,
+        inputType: req.body.type,
+        inputBy: req.body.userId,
+        inputOn: Date.now(),
+      });
+      data.save(function(dataErr) {
+        if (dataErr) {
+          logger.error(dataErr.message);
+          if (dataErr instanceof DataError) {
+            return res.status(dataErr.status).send(dataErr.message);
+          }
+          return res.status(500).send(dataErr.message);
+        }
+        doc.updatedBy = req.body.userId;
+        doc.updatedOn = Date.now();
+        mqttUtilities.postTravelerDataChangedMessage(data);
+        doc.data.push(data._id);
+        // update the finished input number by reset
+        routesUtilities.traveler.resetTouched(doc, function() {
+          // save doc anyway
+          doc.save(function(saveErr) {
+            if (saveErr) {
+              logger.error(saveErr);
+              return res.status(500).send(saveErr.message);
+            }
+            return res.status(204).send();
+          });
+        });
+      });
+    }
+  );
 
   /**
    * get the latest value for the given name from the data list

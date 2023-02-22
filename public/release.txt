@@ -1,3 +1,19 @@
+APS 1.5.5
+- Ability to specify a custom/specific file type for file upload input at the form design stage (Allowing additional formats such as zip).
+- Retain the original file name when downloading an uploaded file from the server. 
+
+APS 1.5.4
+- Ability to archive previously released forms during form release. (@rfgunion)
+- Resolve missing prefix from some views (@rfgunion)
+- Add option for fetching travelers from API that were created from specific form id. 
+- Resolve issue with restoring a large db. 
+
+APS 1.5.3
+- Update the traveler naigator to be collapsible to reveal the discrepancy log. 
+
+APS 1.5.2
+- Update the process manager from forever to pm2.
+
 APS-1.5.1
 - Resolve issue with undefined exception when loading form for some users. 
 
