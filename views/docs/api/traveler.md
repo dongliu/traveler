@@ -1,7 +1,8 @@
 ### The details of a traveler
+
 - Method: GET
 - URL: https://hostname:port/apis/travelers/:id/
-where :id is the id of the traveler to be retrieved
+  where :id is the id of the traveler to be retrieved
 - Sample response:
 
 ```json
