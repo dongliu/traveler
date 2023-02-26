@@ -2,12 +2,12 @@
 
 The forms, travelers, and binders pages use tabs for different list of entities.
 In each tab, the entities are listed in a table. There are two places that a
-button can be placed on a tabbed page. If a button is located on top of the
-tabs, the button's action is applicable to all the tabs and tables inside the
-tabs. If a button is location **inside** a tab, then the button's action only is
-applicable to that tab and table.
+button can be placed on a tabbed page. On each list page, when a button is
+located on top of the tabs, the button's action is applicable to all the tabs
+and tables inside the tabs. When a button is location **inside** a tab, then the
+button's action only is applicable to that tab and table.
 
-A typical table has 6 areas each of which either hold a tool or display
+A typical table has 6 areas each of which either hold optional tools or display
 information.
 
 | area | location     | content                                                             |
@@ -21,3 +21,8 @@ information.
 
 </br>
 <img src="../images/data-tables.png" alt="the areas of a data table">
+
+Some tables have extra tools that allow a user to copy, export, or print the table. 
+
+</br>
+<img src="../images/data-table-tools.png" alt="data table tools" style="width:50%">

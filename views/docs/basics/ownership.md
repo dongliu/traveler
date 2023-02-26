@@ -1,44 +1,36 @@
 ### Ownership and access control
 
-The access control in the traveler application is both **role based** and also
-**attribute based**. With role based access control, some functionalities can be
-performed only by user with specific **roles**. E.g. only administrators can
-modify user roles. Only managers or administrations can release a form. With
-attribute based access control, a traveler entity can be configured to be
-readable or writable by various users or user groups.
+The traveler application impletes **role based** and **attribute based**. When a
+user tries to access a resource, both the user's roles in current session and
+the resource's access related atributes are considered. The access is granted if
+either the role or the attribute allows. 
+
+The default user's role is normal user. An admin user can assign or remove
+admin, manager, and reviewer roles to any user. Only admins can modify a user's
+roles. Only reviews can get or perform form reviewing tasks. An admin use or a
+manager user is capable to read or write all resources in the application. 
 
 The traveler application has three types of important entities: templates,
-travelers, and binders. Each entity has a owner. The **owner** is the user who
-creates the entity at the beginning. The ownership can be transferred to a
-different user by current owner. The owner has full privileges of an entity. The
-owner of an entity is responsible to **design**, **develop**, and **deliver**
-the entity. The owner, by default, has the privilege to configure important
-properties of the entity including, most importantly, the access control.
+travelers, and binders. Each entity has three attributes to control the access,
+the ownership, sharing, and public accessibility. 
 
-There are three levels of access control for an entity that its owner can
-configure. The first level is **public access**. An entity can be inaccessible,
-readable, or writable to any **authenticated** user. It an entity is publicly
-readable, then any authenticated user will be able to view the entity's details.
-The default value of public access for a new entity in the traveler application
-is configurable.
+There are three levels of access privileges: no access, read, and write. The details are listed in the following table. 
 
-The second level of access control is via **shared users**. The owner can add a
-user into the shared user list with read or write permission. The shared entity
-will also appear in the _shared entity_ tab of the user.
+| access privilege | details | 
+|----------|-----------------------------|
+| no access | rejected when trying to send a request to a resource |
+| read | view the representation of a resource, but will not be able to modify the resource | 
+| write | be able to view and modify the resource| 
 
-The third level of access control is via **shared groups**. The owner can add a
-group into the shared group list with read or write permission. If an entity is
-configured to the readable by a group named _a.b.c_ then all the members of the
-group will be able to view it when log in. The shared entity will also appear in
-the _group shared entity_ tab of the group members.
 
-Whether a user can read or write an entity is decided by the combination of the
-three levels of rules. The strong permissions override the weak ones. For
-example, an entity is readable by a group named _a.b.c_, and writable by a group
-named _a.b.c.d_, then a member of group _a.b.c.d_ will have both read and write
-permission. A member of group _a.b.c.e_ will have only read permission.
+Every entity has an owner. The **owner** is the user who creates the entity at the
+beginning. The ownership can be transferred to a different user by current owner
+or the admin. The owner has full privileges of an entity. The
+owner, by default, has the privilege to configure attributes of the
+entity including the sharing and public accessibility.
 
-In practice, the owner can share an entity with write permission to a few
-individual uses, and share it with a group with read permission. Or you can
-share an entity with read permission with a big group like _a.b.c_, and at the
-same time share it with write permission with a small group like _a.b.c.d_.
+The owner user can share an entity with other individual users or groups with
+read or write permission. The shared entity will also appear in the _shared
+entity_ tab or the _group shared entity_ tab of a user.
+
+The entity owner can configure an entity to be publicly readable or writable. All the public available entities are listed on the _all public forms_ or _all public travelers_ pages. 
