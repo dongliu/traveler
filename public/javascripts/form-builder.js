@@ -1545,7 +1545,7 @@ function binding_events() {
     if (released_form_version_mgmt) {
       $('#modalLabel').html('Form Release');
       $('#modal .modal-body').append(
-        '<h4>Prior version(s) of this form:</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
+        '<h4>Choose prior version(s) of this form to archive</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
       );
       const priorVersionsColumns = [
         selectColumn,
