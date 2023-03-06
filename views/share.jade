@@ -23,7 +23,7 @@ block content
       .modal-footer
     h3 Public access for #{type}
       = ' '
-      span.text-info #{title}
+      span.text-info !{title}
     form.form-inline(name='public')
       select(name='public')
         option(value='-1') no access
@@ -34,7 +34,7 @@ block content
     if (viewConfig.shareUsers)
       h3 Shared user list for #{type}
         = ' '
-        span.text-info #{title}
+        span.text-info !{title}
       //- .well
       form.form-inline(name='user')
         input#username.input(type='text', placeholder='Last, First', name='name')
@@ -57,7 +57,7 @@ block content
     if (viewConfig.shareGroups)
       h3 Shared group list for #{type}
         = ' '
-        span.text-info #{title}
+        span.text-info !{title}
       //- .well
       form.form-inline(name='group')
         input#groupname.input.input-xlarge(type='text', placeholder='Group Id', name='group')

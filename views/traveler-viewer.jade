@@ -11,7 +11,6 @@ block head
 
 block content
   script(type='text/javascript').
-    var title = !{JSON.stringify(traveler.title)};
     var traveler = !{JSON.stringify(traveler)};
   .container
     #message
@@ -22,7 +21,7 @@ block content
       .modal-footer
     .row
       .span9
-        h3 Traveler title:  #{traveler.title}
+        h3 Traveler title:  !{traveler.title}
         include ./traveler/status.jade 
         if (locals.traveler.devices && traveler.devices.length > 0)
           h4 Tags: !{traveler.devices}
