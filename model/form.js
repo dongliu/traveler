@@ -34,11 +34,10 @@ const stateTransition = [
     from: 0.5,
     to: [0, 1, 2],
   },
-  // do not archive approved forms
-  // {
-  //   from: 1,
-  //   to: [2],
-  // },
+  {
+    from: 1,
+    to: [2],
+  },
 ];
 
 const statusMap = {
