@@ -22,7 +22,7 @@ information.
 </br>
 <img src="../images/data-tables.png" alt="the areas of a data table">
 
-Some tables have extra tools that allow a user to copy, export, or print the table. 
+Some tables have extra tools that allow a user to copy, export, or print the table. The traveler application uses [the datatables js library](https://datatables.net/) for the tables in web UI. Many pages in the application are still on an older version of the library, and the tools are not supported by browsers due to the dependency on the flash technology. We are in the process of updating those pages to use the latest version of datatables library.   
 
 </br>
-<img src="../images/data-table-tools.png" alt="data table tools" style="width:50%">
+<img src="../images/data-table-tools.png" alt="data table tools" style="width:25%">
