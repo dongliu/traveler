@@ -1331,7 +1331,9 @@ function binding_events() {
       return;
     }
     if ($cgr.attr('data-status') === 'editing') {
-      // modalAlert('You are still editing it', '');
+      // close the edit well
+      $cgr.siblings('.spec').remove();
+      $cgr.removeAttr('data-status');
       return;
     }
     const type = $('span.fe-type', $cgr).text();
