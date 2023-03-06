@@ -18,7 +18,7 @@ publicAccess := 0 // for read or
 /** ****
 status := 0 // editable draft
         | 0.5 // submitted for reviewing
-        | 1 // review finished and released
+        | 1 // review finished and all approved and released
         | 2 // archived
 ***** */
 // mapping : user-key -> name
@@ -34,19 +34,17 @@ const stateTransition = [
     from: 0.5,
     to: [0, 1, 2],
   },
-  {
-    from: 1,
-    to: [2],
-  },
+  // do not archive approved forms
+  // {
+  //   from: 1,
+  //   to: [2],
+  // },
 ];
 
-/**
- * 1: the status was used for released before the release form feature
- */
 const statusMap = {
   '0': 'draft',
   '0.5': 'submitted for review',
-  '1': 'ready to release',
+  '1': 'approved and released',
   '2': 'archived',
 };
 
