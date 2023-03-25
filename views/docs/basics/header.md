@@ -2,11 +2,15 @@
 
 **Audience: all users**
 
-The traveler application is a web application to design, carry out, and
-organize electrical process documents, which we call [travelers](#traveler). It
-provides a web interface to edit and manage [forms/templates](#form).
-Furthermore, users can organize travelers by [binder](#binder). The application
-provides a simple HTTP [API](#api) to interact with the traveler
-application from other applications.
+The [travelers](#traveler) are electric documents created from predefined
+[templates](#form). A traveler lists the tasks in order to finish the work
+defined by the released work template. The user records data and notes when
+performing the tasks. Travelers can be grouped into working packages named
+[binders](#binder).
+
+
+Besides web based user interface, the traveler application provides a simple
+HTTP [API](#api) for other applications to operate templates, travelers, and
+binders.
 
 <img src="../images/traveler-flow.png" alt="traveler flow">
