@@ -107,15 +107,22 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         {
-          createdBy: req.session.userid,
+          $or: [
+            {
+              createdBy: req.session.userid,
+              owner: {
+                $exists: false,
+              },
+            },
+            {
+              owner: req.session.userid,
+            },
+          ],
           archived: {
             $ne: true,
           },
           status: {
             $in: [0.5],
-          },
-          owner: {
-            $exists: false,
           },
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
@@ -163,6 +170,7 @@ module.exports = function(app) {
       const forms = await Form.find(
         {
           owner: req.session.userid,
+          status: 0,
           archived: {
             $ne: true,
           },
