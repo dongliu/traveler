@@ -1,4 +1,4 @@
-### Ownership and access control
+### Ownership, roles, and access control
 
 The traveler application impletes **role based** and **attribute based**. When a
 user tries to access a resource, both the user's roles in current session and
