@@ -18,3 +18,16 @@ class="btn btn-primary">Release</button> button will appear on the template
 page. When the owner releases the approved template, a new released template is
 created. The approved template is listed on the approved and released template
 table. 
+
+#### Reviewer
+**Audience: admin and reviewer**
+
+A normal traveler user cannot review templates. The admin needs to add the
+reviewer role to the users who wants to perform the task. A reviewer sees <a
+href="/reviews/">Reviews</a> link on top of the traveler page. The reviews page
+list all the active templates under review. The reviewer can approve or request
+for more works for a template. A template needs to be approved by all the
+reviewers before release. A single rework request from any reviewer will
+terminate the review process, and the template becomes editable again. A review
+can request for more work for a template that s/he has approved before it is
+released by the template's owner. 

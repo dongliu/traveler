@@ -1,7 +1,7 @@
 ### Discrepancy template
 
-As the name suggests, the discrepancy template is for the quality assurance (QA)
-process. When the process specified in a traveler reaches the stage of
+As the name suggests, the discrepancy template is for a quality assurance (QA)
+like process. When the process specified in a traveler reaches the stage of
 completion or milestone, a QA personal will check if the data collected meets
 the expectation. If not, it is a discrepancy. In most cases, a discrepancy will
 require a correction. When a correction finishes, the traveler is updated, and
