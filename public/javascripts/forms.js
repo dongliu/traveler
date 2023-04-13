@@ -48,6 +48,7 @@ function cloneFromModal(activeTable, formTable) {
   if (
     base === 'archivedforms' ||
     base === 'sharedforms' ||
+    base === 'transferredforms' ||
     base === 'groupsharedforms' ||
     base === 'closedforms'
   ) {
