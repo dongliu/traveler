@@ -20,6 +20,7 @@ const ReleasedForm = mongoose.model('ReleasedForm');
 const FormContent = mongoose.model('FormContent');
 const User = mongoose.model('User');
 const Group = mongoose.model('Group');
+const History = mongoose.model('History');
 const { stateTransition } = require('../model/form');
 
 const logger = require('../lib/loggers').getLogger();
@@ -547,6 +548,47 @@ module.exports = function(app) {
           access: String(form.publicAccess),
         })
       );
+    }
+  );
+
+  app.get(
+    '/forms/:id/version-mgmt',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Form),
+    reqUtils.canWriteMw('id'),
+    reqUtils.status('id', [0, 0.5, 1, 2]),
+    function(req, res) {
+      const form = req[req.params.id];
+      return res.render(
+        'form-version-mgmt',
+        routesUtilities.getRenderObject(req, {
+          type: 'form',
+          id: req.params.id,
+          title: form.title,
+        })
+      );
+    }
+  );
+
+  app.get(
+    '/forms/:id/versions/json',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Form),
+    reqUtils.canWriteMw('id'),
+    async function(req, res) {
+      const form = req[req.params.id];
+      const updates = form.__updates;
+      try {
+        const result = await History.find({
+          _id: {
+            $in: updates,
+          },
+        }).exec();
+        res.status(200).json(result);
+      } catch (error) {
+        logger.error(error);
+        res.status(500).send(error.message);
+      }
     }
   );
 
