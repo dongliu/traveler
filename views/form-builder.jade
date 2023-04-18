@@ -137,7 +137,7 @@ block content
       button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
     if (status === 0)
       .btn-group
-        button.btn.btn-primary#submit(data-toggle='tooltip', title='Check and switch versions') Version control
+        a.btn.btn-primary#version(data-toggle='tooltip', title='Check and switch versions', href='./version-mgmt', target='#{viewConfig.linkTarget}') Version control
       .btn-group
         button.btn.btn-primary#submit(data-toggle='tooltip', title='Submit for review') Submit for review
     if (status === 0.5 && !isReviewer && allApproved)

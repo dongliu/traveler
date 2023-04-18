@@ -13,32 +13,31 @@ $(function() {
     Table.versionColumn,
     Table.longDateColumn('created', 'a'),
   ];
-  const versionTable = $('#version-table').dataTable({
+  const versionTable = $('#version-table').DataTable({
     ajax: {
       url: './versions/json',
       type: 'GET',
       dataSrc: function(response) {
         // filter all the changes with html and v change
-        const htmlUpdates = response.filter(update => {
+        const htmlUpdates = [];
+        response.forEach(update => {
           const changes = update.c;
-          let count = 0;
+          const found = { a: update.a };
           for (let i = 0; i < changes.length; i += 1) {
-            if (changes[i].p === 'html' || changes[i].p === '_v') {
-              count += 1;
-              if (count === 2) {
-                return true;
-              }
+            if (changes[i].p === 'html') {
+              found.html = changes[i].v;
+              continue;
+            }
+            if (changes[i].p === '_v') {
+              found._v = changes[i].v;
+              continue;
             }
           }
-          return false;
+          if (found.html !== undefined) {
+            htmlUpdates.push(found);
+          }
         });
-        return htmlUpdates.map(h => {
-          return {
-            a: h.a,
-            html: h.c.find(c => c.p === 'html').v,
-            _v: h.c.find(c => c.p === '_v').v,
-          };
-        });
+        return htmlUpdates;
       },
     },
     columns: versionColumns,
@@ -47,9 +46,15 @@ $(function() {
     sorting: [[2, 'desc']],
   });
 
-  $('tbody').on('click', 'input.radio-row', function(e) {
-    if (!$(this).prop('checked')) {
-      // load this row in the target view
+  $('#version-table tbody').on('click', 'input.radio-row', function(e) {
+    const that = $(this);
+    const data = versionTable.row(that.parents('tr')).data();
+    if (that.prop('name') === 'left') {
+      $('#left span.version').text(` version ${data._v}`);
+      $('#left-form').html(data.html);
+    } else {
+      $('#right span.version').text(` version ${data._v}`);
+      $('#right-form').html(data.html);
     }
   });
 
