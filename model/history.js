@@ -1,19 +1,20 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var Mixed = Schema.Types.Mixed;
-var ObjectId = Schema.Types.ObjectId;
-var assert = require('assert');
+const mongoose = require('mongoose');
 
-var debug = require('debug')('traveler:history');
-var _ = require('lodash');
+const { Schema } = mongoose;
+const { Mixed } = Schema.Types;
+const { ObjectId } = Schema.Types;
+const assert = require('assert');
+
+const debug = require('debug')('traveler:history');
+const _ = require('lodash');
 
 const VERSION_KEY = '_v';
 
-/**********
+/** ********
  * p: the property/path of an object
  * v: the change-to value of the property
- **********/
-var change = new Schema({
+ ********* */
+const change = new Schema({
   p: {
     type: String,
     required: true,
@@ -23,14 +24,14 @@ var change = new Schema({
   },
 });
 
-/**********
+/** ********
  * a: at, the date of the history
  * b: by, the author of the history
  * t: type, the object's type
  * i: id, the object's id
  * c: the array of changes
- **********/
-var history = new Schema({
+ ********* */
+const history = new Schema({
   a: {
     type: Date,
     required: true,
@@ -52,7 +53,7 @@ var history = new Schema({
   c: [change],
 });
 
-var History = mongoose.model('History', history);
+const History = mongoose.model('History', history);
 
 function addVersion(schema, options) {
   options = options || {};
@@ -129,29 +130,26 @@ function addHistory(schema, options) {
    * @param  {String}   userid the user making this update
    */
   schema.methods.saveWithHistory = function(userid) {
-    var doc = this;
-    var uid;
+    const doc = this;
+    let uid;
     if (!_.isNil(userid)) {
       if (_.isString(userid)) {
         uid = userid;
-      } else {
-        if (_.isString(userid.userid)) {
-          uid = userid.userid;
-        }
+      } else if (_.isString(userid.userid)) {
+        uid = userid.userid;
       }
     }
 
     assert.ok(uid, 'must specify user id');
 
     return new Promise(function(resolve, reject) {
-      var c = [];
-      var h;
+      const c = [];
       if (!doc.isModified()) {
         return resolve();
       }
-      debug('watched field: ' + options.fieldsToWatch);
+      debug(`watched field: ${options.fieldsToWatch}`);
       options.fieldsToWatch.forEach(function(field) {
-        debug(field + ' is modified ' + doc.isModified(field));
+        debug(`${field} is modified ${doc.isModified(field)}`);
         if (
           (doc.isNew && doc.get(field) !== undefined) ||
           doc.isModified(field)
@@ -165,10 +163,10 @@ function addHistory(schema, options) {
       if (c.length === 0) {
         return resolve();
       }
-      h = new History({
+      const h = new History({
         a: Date.now(),
         b: uid,
-        c: c,
+        c,
         t: doc.constructor.modelName,
         i: doc._id,
       });
@@ -189,7 +187,7 @@ function addHistory(schema, options) {
 }
 
 module.exports = {
-  History: History,
-  addHistory: addHistory,
-  addVersion: addVersion,
+  History,
+  addHistory,
+  addVersion,
 };
