@@ -1156,7 +1156,6 @@ module.exports = function(app) {
       f.updatedBy = req.session.userid;
       f.updatedOn = Date.now();
       // check if we need to increment the version
-      // in this case, no
       f.incrementVersion();
       try {
         await f.saveWithHistory(req.session.userid);
