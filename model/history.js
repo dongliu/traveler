@@ -65,7 +65,8 @@ function addVersion(schema, options) {
       return schema.path(field);
     })
     .reject(function(field) {
-      return _.includes(['__updates', '_id', '__v'], field);
+      // exclude history updates, id, mongoose version, history version key
+      return _.includes(['__updates', '_id', '__v', VERSION_KEY], field);
     })
     .value();
 
@@ -74,16 +75,20 @@ function addVersion(schema, options) {
   });
 
   schema.methods.incrementVersion = function() {
-    let doc = this;
-    let version = doc.get(VERSION_KEY) || 0;
+    const doc = this;
+    const version = doc.get(VERSION_KEY) || 0;
     debug(options.fieldsToVersion);
-    options.fieldsToVersion.forEach(function(field) {
-      debug(field + ' is modified ' + doc.isModified(field));
-      if ((doc.isNew && doc.get(field)) || doc.isModified(field)) {
+    for (let i = 0; i < options.fieldsToVersion.length; i += 1) {
+      const field = options.fieldsToVersion[i];
+      debug(`${field} is modified ${doc.isModified(field)}`);
+      if (
+        (doc.isNew && doc.get(field) !== undefined) ||
+        doc.isModified(field)
+      ) {
         doc.set(VERSION_KEY, version + 1);
         return;
       }
-    });
+    }
   };
 }
 
