@@ -65,14 +65,7 @@ const releasedForm = new Schema({
 });
 
 releasedForm.plugin(addVersion, {
-  fieldsToVersion: [
-    'title',
-    'description',
-    'tags',
-    'status',
-    'base',
-    'discrepancy',
-  ],
+  fieldsToVersion: ['title', 'description', 'base', 'discrepancy'],
 });
 
 releasedForm.plugin(addHistory, {
