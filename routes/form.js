@@ -872,7 +872,7 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
-    function(req, res) {
+    async function(req, res) {
       const doc = req[req.params.id];
       const form = {};
       form.html = reqUtils.sanitizeText(doc.html);
@@ -886,19 +886,21 @@ module.exports = function(app) {
       form.sharedWith = [];
       form.tags = doc.tags;
 
-      new Form(form).save(function(saveErr, newform) {
-        if (saveErr) {
-          logger.error(saveErr);
-          return res.status(500).send(saveErr.message);
-        }
+      try {
+        const newForm = await new Form(form).saveWithHistory(
+          req.session.userid
+        );
         const url = `${
           req.proxied ? authConfig.proxied_service : authConfig.service
-        }/forms/${newform.id}/`;
+        }/forms/${newForm.id}/`;
         res.set('Location', url);
         return res
           .status(201)
           .send(`You can see the new form at <a href="${url}">${url}</a>`);
-      });
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
