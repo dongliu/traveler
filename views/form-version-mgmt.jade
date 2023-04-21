@@ -10,19 +10,25 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  .container
-    .row
-      .span4#list
+  .container-fluid
+    #message
+    .row-fluid
+      .span3#list
         h4 Versions with template updates
         table#version-table.table.table-bordered.table-hover
-      .span4#left
-        h4 Left:
-          span.version
-        form.form-horizontal#left-form
-      .span4#right
-        h4 Right:
-          span.version
-        form.form-horizontal#right-form
+      .span9
+        .span6#left
+          h4 Left:
+            span.version
+          .btn-group
+            button.btn.btn-primary.use(data-toggle='tooltip', title='Create a new version', disabled) Use
+          form.form-horizontal#left-form
+        .span6#right
+          h4 Right:
+            span.version
+          .btn-group
+            button.btn.btn-primary.use(data-toggle='tooltip', title='Create a new version', disabled) Use
+          form.form-horizontal#right-form
 
 
 block js

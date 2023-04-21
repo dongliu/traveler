@@ -13,13 +13,15 @@ $(function() {
     Table.versionColumn,
     Table.longDateColumn('created', 'a'),
   ];
+
+  let latest = 0;
+  const htmlUpdates = [];
   const versionTable = $('#version-table').DataTable({
     ajax: {
       url: './versions/json',
       type: 'GET',
       dataSrc: function(response) {
         // filter all the changes with html and v change
-        const htmlUpdates = [];
         response.forEach(update => {
           const changes = update.c;
           const found = { a: update.a };
@@ -37,6 +39,7 @@ $(function() {
             htmlUpdates.push(found);
           }
         });
+        latest = htmlUpdates?.[htmlUpdates.length - 1]?._v || latest;
         return htmlUpdates;
       },
     },
@@ -49,16 +52,35 @@ $(function() {
   $('#version-table tbody').on('click', 'input.radio-row', function(e) {
     const that = $(this);
     const data = versionTable.row(that.parents('tr')).data();
-    if (that.prop('name') === 'left') {
-      $('#left span.version').text(` version ${data._v}`);
-      $('#left-form').html(data.html);
+    $(`#${that.prop('name')} span.version`).text(` version ${data._v}`);
+    $(`#${that.prop('name')}-form`).html(data.html);
+    if (data._v < latest) {
+      $(`#${that.prop('name')} .btn.use`).prop('disabled', false);
+      $(`#${that.prop('name')} .btn.use`).prop('_v', data._v);
     } else {
-      $('#right span.version').text(` version ${data._v}`);
-      $('#right-form').html(data.html);
+      $(`#${that.prop('name')} .btn.use`).prop('disabled', true);
     }
   });
 
-  $('#set').click(function() {
+  $('.btn.use').click(function() {
     // set the chosen version as the latest version
+    const version = $(this).prop('_v');
+    const html = htmlUpdates.find(u => u._v === version).html;
+    $.ajax({
+      url: './',
+      type: 'PUT',
+      async: true,
+      data: JSON.stringify({ html }),
+      contentType: 'application/json',
+      processData: false,
+    })
+      .done(function(responseData, textStatus, request) {
+        window.location.reload(true);
+      })
+      .fail(function() {
+        $('#message').append(
+          `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>failed to set a new version</div>`
+        );
+      });
   });
 });
