@@ -1096,7 +1096,9 @@ module.exports = function(app) {
               `A form with same title, type, and version was already released in ${existingForm._id}.`
             );
         }
-        const saveForm = await new ReleasedForm(releasedForm).save();
+        const saveForm = await new ReleasedForm(releasedForm).saveWithHistory(
+          req.session.userid
+        );
 
         // update the form status
         form.status = 1;
