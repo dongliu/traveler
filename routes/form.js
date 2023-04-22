@@ -840,30 +840,30 @@ module.exports = function(app) {
       );
     }, 'admin'),
     reqUtils.sanitize('body', ['html']),
-    function(req, res) {
+    async function(req, res) {
       const html = req.body.html || '';
-      formModel.createForm(
-        {
-          title: req.body.title,
-          formType: req.body.formType,
-          createdBy: req.session.userid,
-          html,
-        },
-        function(err, newform) {
-          if (err) {
-            logger.error(err);
-            return res.status(500).send(err.message);
+      try {
+        const newForm = await formModel.createFormWithHistory(
+          req.session.userid,
+          {
+            title: req.body.title,
+            formType: req.body.formType,
+            createdBy: req.session.userid,
+            html,
           }
-          const url = `${
-            req.proxied ? authConfig.proxied_service : authConfig.service
-          }/forms/${newform.id}/`;
+        );
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/forms/${newForm.id}/`;
 
-          res.set('Location', url);
-          return res.status(303).json({
-            location: url,
-          });
-        }
-      );
+        res.set('Location', url);
+        return res.status(303).json({
+          location: url,
+        });
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
