@@ -7,6 +7,7 @@ const assert = require('assert');
 
 const debug = require('debug')('traveler:history');
 const _ = require('lodash');
+const logger = require('../lib/loggers').getLogger();
 
 const VERSION_KEY = '_v';
 
@@ -127,9 +128,10 @@ function addHistory(schema, options) {
    * to update in order to get the modified check working properly for
    * embedded document. Otherwise, explicitly #markModified(path) to mark
    * modified of the path.
-   * @param  {String}   userid the user making this update
+   * @param  {String || any} userid the user making this update
+   * @returns {Promise<ReleasedForm>} a promise resolve the the doc or new doc or reject with error
    */
-  schema.methods.saveWithHistory = function(userid) {
+  schema.methods.saveWithHistory = async function(userid) {
     const doc = this;
     let uid;
     if (!_.isNil(userid)) {
@@ -142,47 +144,55 @@ function addHistory(schema, options) {
 
     assert.ok(uid, 'must specify user id');
 
-    return new Promise(function(resolve, reject) {
-      const c = [];
-      if (!doc.isModified()) {
-        return resolve();
+    const c = [];
+    if (!doc.isModified()) {
+      return doc;
+    }
+
+    debug(`watched field: ${options.fieldsToWatch}`);
+    options.fieldsToWatch.forEach(function(field) {
+      debug(`${field} is modified ${doc.isModified(field)}`);
+      if (
+        (doc.isNew && doc.get(field) !== undefined) ||
+        doc.isModified(field)
+      ) {
+        c.push({
+          p: field,
+          v: doc.get(field),
+        });
       }
-      debug(`watched field: ${options.fieldsToWatch}`);
-      options.fieldsToWatch.forEach(function(field) {
-        debug(`${field} is modified ${doc.isModified(field)}`);
-        if (
-          (doc.isNew && doc.get(field) !== undefined) ||
-          doc.isModified(field)
-        ) {
-          c.push({
-            p: field,
-            v: doc.get(field),
-          });
-        }
-      });
-      if (c.length === 0) {
-        return resolve();
-      }
-      const h = new History({
-        a: Date.now(),
-        b: uid,
-        c,
-        t: doc.constructor.modelName,
-        i: doc._id,
-      });
-      debug(h);
-      h.save()
-        .then(function(historyDoc) {
-          if (historyDoc) {
-            doc.__updates.push(historyDoc._id);
-          }
-          return doc.save();
-        })
-        .then(function(newDoc) {
-          resolve(newDoc);
-        })
-        .catch(reject);
     });
+    if (c.length === 0) {
+      return doc;
+    }
+    const h = new History({
+      a: Date.now(),
+      b: uid,
+      c,
+      t: doc.constructor.modelName,
+      i: doc._id,
+    });
+    debug(h);
+
+    let historyDoc;
+    try {
+      historyDoc = await h.save();
+    } catch (error) {
+      logger.error(error.message);
+      throw error;
+    }
+
+    if (historyDoc) {
+      doc.__updates.push(historyDoc._id);
+    }
+
+    try {
+      const newDoc = await doc.save();
+      return newDoc;
+    } catch (error) {
+      logger.error(error.message);
+      throw error;
+    }
   };
 }
 
