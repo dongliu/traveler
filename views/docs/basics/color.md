@@ -13,6 +13,7 @@ Each traveler or binder has an estimated progress. The progress is visualized by
 a bar. The bar color and corresponding entity status is listed in the following
 table.
 
+<!-- prettier-ignore -->
 | progress bar | status |
 | -------------| -----------|
 | <div class="progress" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:0%;"></div><div class="progress-value">0 / 7</div></div> | initialized |
@@ -20,12 +21,12 @@ table.
 | <div class="progress" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:85%;"></div><div class="progress-value">6 / 7</div></div> | submitted for completion approval or frozen |
 | <div class="progress" style="width: 100px;"><div class="bar bar-success" style="width:100%;"></div><div class="bar bar-info" style="width:0%;"></div><div class="progress-value"></div></div> | approved completion |
 
-
 <br/>
 
 Some progress bars have values on it. The formats of the value notations are
 listed in the following table.
 
+<!-- prettier-ignore -->
 | entity type | progress bar | values |
 | ----------- | ------------ | ------ |
 | traveler | <div class="progress active progress-striped" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:28%;"></div><div class="progress-value">2 / 7</div></div> | updated input number / total input number |
