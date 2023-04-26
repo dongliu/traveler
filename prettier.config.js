@@ -1,5 +1,13 @@
 module.exports = {
   trailingComma: 'es5',
   singleQuote: true,
-  editorconfig: true,
+  overrides: [
+    {
+      files: '*.md',
+      options: {
+        printWidth: 80,
+        proseWrap: 'always',
+      },
+    },
+  ],
 };
