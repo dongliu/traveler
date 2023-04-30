@@ -228,10 +228,24 @@ const createForm = function(json, newFormResultCallBack) {
   new Form(formToCreate).save(newFormResultCallBack);
 };
 
+const createFormWithHistory = function(uid, json) {
+  const formToCreate = {};
+  formToCreate.title = json.title;
+  formToCreate.createdBy = json.createdBy;
+  formToCreate.createdOn = Date.now();
+  formToCreate.updatedBy = json.createdBy;
+  formToCreate.updatedOn = Date.now();
+  formToCreate.html = json.html || '';
+  formToCreate.formType = json.formType || 'normal';
+  formToCreate.sharedWith = [];
+  return new Form(formToCreate).saveWithHistory(uid);
+};
+
 module.exports = {
   Form,
   FormFile,
   stateTransition,
   statusMap,
   createForm,
+  createFormWithHistory,
 };

@@ -139,7 +139,6 @@ module.exports = function(app) {
         f.archivedOn = Date.now();
       }
       // check if we need to increment the version
-      // in this case, no
       f.incrementVersion();
       try {
         await f.saveWithHistory(req.session.userid);
