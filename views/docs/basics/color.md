@@ -31,3 +31,16 @@ listed in the following table.
 | ----------- | ------------ | ------ |
 | traveler | <div class="progress active progress-striped" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:28%;"></div><div class="progress-value">2 / 7</div></div> | updated input number / total input number |
 | binder or entity in a binder | <div class="progress active progress-striped" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:25%;"></div><div class="progress-value">0 + 3 / 10</div></div> | finished value + in-progress value / total value |
+
+<br/>
+
+In a binder, a colored flag denotes the status of a work.
+
+<!-- prettier-ignore -->
+| flag | status |
+| -------------| -----------|
+| <i class="fa fa-flag fa-lg text-info"></i> | going well |
+| <i class="fa fa-flag fa-lg text-warning"></i> | not going well |
+| <i class="fa fa-flag fa-lg text-success"></i> | completed |
+| <i class="fa fa-flag fa-lg text-error"></i> | failure |
+| <i class="fa fa-flag fa-lg black"></i> | not active |
