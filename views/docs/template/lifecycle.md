@@ -1,6 +1,7 @@
-### States and life cycle of templates
+### States and life cycle of a template
 
-The following diagram shows the state transition of a template and a released template.
+The following diagram shows the state transition of a template and a released
+template.
 
 <figure align="center">
 <img src="../images/template-life.png" alt="template life cycle">
@@ -9,26 +10,27 @@ States and life cycle of templates
 </figcaption>
 </figure>
 
-There are two groups of templates: draft and released. A traveler can be created
-from only a released template. The traveler application support the review and
-approval process of templates.
+There are two groups of templates: draft and released. Only a released template
+can be used to create a traveler. The traveler application supports the review
+and approval process of templates.
 
-A template is editable after created. When a draft template is not needed any
-more, the owner can archive it. The owner can clone an archived template to
-generate a new draft template if some work needs to pick up later.
+A template is a draft and editable when created. When a draft template is not
+needed any more, the owner can archive it. The owner can clone an archived
+template to generate a new draft template if some work needs to be picked up
+later.
 
 When a draft template is ready for review, its owner can request one or more
-reviewers to check of the template is good to release. A reviewer can either
-approve or request for change. When changes are requested, the form becomes
-editable and the review process ends. All the reviewers must approve before a
-templated can be released. 
+reviewers to check if the template is good to release. A reviewer can either
+approve or request for change. When any reviewer requests a change, the review
+process ends and the form becomes editable. All the reviewers must approve
+before a template can be released.
 
-When a user release a template after a successful review process, a new released
-template is created. The user can choose to archive previously released
-templates from the same draft template maybe different versions. If the draft
+When a user releases a template after a successful review process, a new
+released template is created. The user can choose to archive previously released
+templates from the same draft template of different versions. If the draft
 template is a normal template, the user can choose to attach a released
-discrepancy template with it. 
+discrepancy template with it.
 
-A released template can be archived so that no new travelers can be created from
-it any more. This happens when the process is obsoleted or a new process is
-available. 
+A released template can be archived. Travelers can be created from an archived
+released template. This happens when the process is obsoleted or a new process
+is available.

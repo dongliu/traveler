@@ -1,5 +1,8 @@
 ### Normal templates
-A normal template supports instructive directions of text, diagrams, and
-formulas. It supports most common HTML input type, like numbers, date, short
-text, long text, radio button, checkbox, and file upload in order to collect
-data. It supports sections for better reference and organization.
+
+Most traveler use cases can be covered with normal templates. The user can
+define most common HTML input types, including numbers, date, short text, long
+text, radio button, checkbox, and file upload in a normal template. The user can
+also include instructive directions of text, diagrams, and formulas in a normal
+template. A normal template supports numbered sections for easy navigation and
+reference.

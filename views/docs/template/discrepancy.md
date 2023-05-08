@@ -1,14 +1,12 @@
 ### Discrepancy template
 
-As the name suggests, the discrepancy template is for a quality assurance (QA)
-like process. When the process specified in a traveler reaches the stage of
-completion or milestone, a QA personal will check if the data collected meets
-the expectation. If not, it is a discrepancy. In most cases, a discrepancy will
-require a correction. When a correction finishes, the traveler is updated, and
-the new result will be check again. By recording each instance of discrepancy,
-the team will have better understanding of the process, e.g. which part of the
-process is more error prone, which might lead to an improvement of the process.
+A discrepancy template can be used for a quality assurance (QA) like process. It
+is owned by the QA process owner, who has the responsibility to verify the
+result of a traveler. When a traveler is ready for quality assurance, a QA
+personal will check if the result meets the expectation. A discrepancy is logged
+if the work does not pass QA, which will be followed by a correction. The
+correction will be recorded in the traveler with data updates. Then a new QA
+iteration can be triggered.
 
-A traveler cannot be created from a released discrepancy template. In order to
-use a release discrepancy template, it has to be attached to a released normal
-template. 
+A released discrepancy template cannot used solely without being attached to a
+released normal template when creating a traveler.

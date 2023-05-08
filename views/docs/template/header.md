@@ -1,8 +1,8 @@
 ## Templates
 
-**Audience: traveler users, especially process owner**
+**Audience: traveler users, especially process template owner**
 
-Before create travelers, a user needs to design a template and release it in the
-traveler application. A traveler template mimics the paper traveler so that a
-process owner defines the sequence of actions, include action instructions if
-need, and specify the data to be collected in each step.
+Before creating travelers, a user needs to design a template and release it in
+the traveler application. A traveler template mimics the paper traveler so that
+a process owner defines the sequence of actions and specifies the data to be
+collected in each step.
