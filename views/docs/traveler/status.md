@@ -2,10 +2,13 @@
 
 **Audience: traveler owners and others with write permission**
 
-During the life cycle of a traveler, it can be in different statuses. The status decides the user's access of traveler artifacts. The transitions between different statuses, and allowed access are shown in the following diagram, where **r** for read and **w** for write.
+The allowed access of a traveler changes with its status. The transitions
+between statuses, and the allowed access at each status are shown in the
+following diagram, where **r** for read and **w** for write.
 <img src="../images/traveler-status.png" alt="the statues of a traveler">
 
-The details of the status, artifact, and corresponding allowed access for users with write permission including the owner are listed in the following table.
+The following table lists the status and corresponding allowed access for
+traveler data and traveler notes.
 
 | status                                        | artifact | allowed access    |
 | --------------------------------------------- | -------- | ----------------- |
@@ -17,14 +20,3 @@ The details of the status, artifact, and corresponding allowed access for users 
 | frozen, submitted for completion, or complete | notes    | read and write    |
 | archived                                      | data     | read only         |
 | archived                                      | notes    | read only         |
-
-<br/>
-The details of the allowed actions to trigger status changes and user types are listed in the following table.
-
-| user type                   | allowed actions |
-| --------------------------- | --------------- |
-| users with read permission  | no action       |
-| users with write permission | submit          |
-| owner                       | all actions     |
-
-</br>
