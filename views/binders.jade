@@ -28,6 +28,10 @@ block content
         a.btn.btn-info#all-binders(href='#{prefix}/publicbinders/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public binders')
           i.fa.fa-institution.fa-lg
           | &nbsp;All public binders
+      .btn-group
+        button.btn.btn-primary#add-to-binder(data-toggle='tooltip', title='add selected binders into a binder')
+          i.fa.fa-briefcase.fa-lg
+          | &nbsp;Add to binder
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
