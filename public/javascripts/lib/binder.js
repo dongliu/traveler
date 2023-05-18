@@ -31,22 +31,22 @@ export function addTravelers(travelers, binders) {
 
 export function addModal(fromTable) {
   const selected = fnGetSelected(fromTable, 'row-selected');
-  const travelers = [];
+  const items = [];
   if (selected.length === 0) {
     $('#modalLabel').html('Alert');
-    $('#modal .modal-body').html('No traveler has been selected!');
+    $('#modal .modal-body').html('No item has been selected!');
     $('#modal .modal-footer').html(
       '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
     );
     $('#modal').modal('show');
     return;
   }
-  $('#modalLabel').html(`Add the ${selected.length} travelers? `);
+  $('#modalLabel').html(`Add the ${selected.length} items? `);
   $('#modal .modal-body').empty();
   modalScroll(true);
   selected.forEach(function(row) {
     const data = fromTable.fnGetData(row);
-    travelers.push(data._id);
+    items.push(data._id);
     $('#modal .modal-body').append(formatItemUpdate(data));
   });
   $('#modal .modal-body').append(
@@ -102,7 +102,7 @@ export function addModal(fromTable) {
         const data = ownedBinderTable.fnGetData(row);
         binders.push(data._id);
       });
-      addTravelers(travelers, binders);
+      addTravelers(items, binders);
     }
   });
 }
