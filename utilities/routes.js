@@ -219,31 +219,9 @@ const binderUtil = {
               status: item.status || 0,
               value: item.value || 10,
             };
-            if (item.status === 2) {
-              newWork.finished = 1;
-              newWork.inProgress = 0;
-            } else if (item.status === 0) {
-              newWork.finished = 0;
-              newWork.inProgress = 0;
-            } else if (type === 'traveler') {
-              newWork.finished = 0;
-              if (item.totalInput === 0) {
-                newWork.inProgress = 1;
-              } else {
-                newWork.inProgress = item.finishedInput / item.totalInput;
-              }
-            } else if (item.totalValue === 0) {
-              // no value binder
-              newWork.finished = 0;
-              newWork.inProgress = 1;
-            } else {
-              // other binder
-              newWork.finished = item.finishedValue / item.totalValue;
-              newWork.inProgress = item.inProgressValue / item.totalValue;
-            }
-
             works.push(newWork);
             added.push(item.id);
+            binder.updateWorkProgress(item);
           }
         });
 
@@ -253,7 +231,6 @@ const binderUtil = {
 
         binder.updatedOn = Date.now();
         binder.updatedBy = userId;
-
         // update the totalValue, finishedValue, and finishedValue
         return binder.updateProgress(function(saveErr, newBinder) {
           if (saveErr) {
