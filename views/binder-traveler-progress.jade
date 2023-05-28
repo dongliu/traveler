@@ -1,4 +1,4 @@
-h4 Traveler :: total: #{binder.totalWork}; finished: #{binder.finishedWork}; in-progress: #{binder.totalWork-binder.finishedWork};
+h4 Work :: total: #{binder.totalWork}; finished: #{binder.finishedWork}; in-progress: #{binder.totalWork-binder.finishedWork};
 .progress(class=binder.status === 1 ? "active progress-striped" : undefined)
   .bar.bar-success(style="width: #{binder.finishedValue/binder.totalValue*100}%;")
   .bar.bar-info(style="width: #{binder.inProgressValue/binder.totalValue*100}%;")
