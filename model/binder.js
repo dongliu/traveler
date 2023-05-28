@@ -2,8 +2,8 @@
 const mongoose = require('mongoose');
 const appConfig = require('../config/config').app;
 
-const {Schema} = mongoose;
-const {ObjectId} = Schema.Types;
+const { Schema } = mongoose;
+const { ObjectId } = Schema.Types;
 
 const share = require('./share');
 const logger = require('../lib/loggers').getLogger();
@@ -169,9 +169,11 @@ function updateInputProgress(w, spec) {
   w.finishedInput = spec.finishedInput;
 }
 
+// update work status according to spec, but not saved
 binder.methods.updateWorkProgress = function(spec) {
   const w = this.works.id(spec._id);
   if (!w) {
+    logger.warn(`no work _id ${spec._id} in binder ${this._id}`);
     return;
   }
   updateInputProgress(w, spec);
@@ -208,8 +210,9 @@ binder.methods.updateWorkProgress = function(spec) {
   }
 };
 
+// update binder status and save
 binder.methods.updateProgress = function(cb) {
-  const {works} = this;
+  const { works } = this;
   let totalValue = 0;
   let finishedValue = 0;
   let inProgressValue = 0;
