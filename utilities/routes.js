@@ -190,14 +190,23 @@ const binderUtil = {
         }
 
         if (items.length === 0) {
-          return res.send(204);
+          return res.status(400).send('nothing to be added');
         }
 
         items.forEach(function(item) {
-          if (type === 'binder' && item.id === binder.id) {
-            // TODO check work loop
-            // do not add itself as a work
-            return;
+          if (type === 'binder') {
+            // skip the binder to be added into itself
+            if (item.id === binder.id) {
+              logger.warn(`binder ${item.id} cannot be added into itself`);
+              return;
+            }
+            // skip the binder if it contains other binders already
+            for (let i = 0; i < item.works.length; i += 1) {
+              if (item.works[i].refType === 'binder') {
+                logger.warn(`binder ${item.id} contains other binder`);
+                return;
+              }
+            }
           }
           let newWork;
           if (!works.id(item._id)) {
@@ -239,7 +248,7 @@ const binderUtil = {
         });
 
         if (added.length === 0) {
-          return res.send(204);
+          return res.send(400, 'no item added');
         }
 
         binder.updatedOn = Date.now();
