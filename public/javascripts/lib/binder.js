@@ -118,7 +118,7 @@ export function addModal(fromTable, type = 'traveler') {
         binders.push(data._id);
         $('#modal #progress').append(formatItemUpdate(data));
       });
-      addItems(items, binders);
+      addItems(items, binders, type);
     }
   });
 }
