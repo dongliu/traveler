@@ -726,7 +726,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['travelerIds', 'binders']),
+    reqUtils.filter('body', ['ids', 'type']),
+    reqUtils.hasAll('body', ['ids', 'type']),
     function(req, res) {
       routesUtilities.binder.addWork(
         req[req.params.id],
