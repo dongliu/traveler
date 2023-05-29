@@ -164,6 +164,18 @@ const binder = new Schema({
   },
 });
 
+const progressFields = [
+  'status',
+  'finishedInput',
+  'totalInput',
+  'finishedValue',
+  'inProgressValue',
+  'totalValue',
+  'finishedWork',
+  'inProgressWork',
+  'totalWork',
+];
+
 function updateInputProgress(w, spec) {
   w.totalInput = spec.totalInput;
   w.finishedInput = spec.finishedInput;
@@ -180,17 +192,21 @@ binder.methods.updateWorkProgress = function(spec) {
   if (w.status !== spec.status) {
     w.status = spec.status;
   }
+  // same for traveler or binder
   if (spec.status === 2) {
     w.finished = 1;
     w.inProgress = 0;
     return;
   }
 
-  if (spec.status === 0) {
+  // only apply to traveler work
+  if (spec.status === 0 && w.refType === 'traveler') {
     w.finished = 0;
     w.inProgress = 0;
     return;
   }
+
+  // active traveler
   if (w.refType === 'traveler') {
     work.finished = 0;
     if (spec.totalInput === 0) {
@@ -200,7 +216,7 @@ binder.methods.updateWorkProgress = function(spec) {
     }
     return;
   }
-  //  the binder
+  //  new or active binder
   if (spec.totalValue === 0) {
     w.finished = 0;
     w.inProgress = 1;
@@ -257,6 +273,51 @@ binder.methods.updateProgress = function(cb) {
     });
   }
 };
+
+/**
+ * update the progress of binders that include this binder
+ * @param  {Binder} child the binder document
+ * @return {undefined}
+ */
+function updateParentProgress(child) {
+  Binder.find({
+    archived: {
+      $ne: true,
+    },
+    works: {
+      $elemMatch: {
+        _id: child._id,
+      },
+    },
+  }).exec(function(err, binders) {
+    if (err) {
+      return logger.error(
+        `cannot find binders for traveler ${child._id}, error: ${err.message}`
+      );
+    }
+    binders.forEach(function(b) {
+      b.updateWorkProgress(child);
+      b.updateProgress();
+    });
+  });
+}
+
+binder.pre('save', function(next) {
+  const modifiedPaths = this.modifiedPaths();
+  // keep it so that we can refer at post save
+  this.wasModifiedPaths = modifiedPaths;
+  next();
+});
+
+binder.post('save', function(obj) {
+  const modifiedPaths = this.wasModifiedPaths;
+  const updateParent = modifiedPaths.some(
+    m => progressFields.indexOf(m) !== -1
+  );
+  if (updateParent) {
+    updateParentProgress(obj);
+  }
+});
 
 const Binder = mongoose.model('Binder', binder);
 
