@@ -1,6 +1,6 @@
 h4 Work :: total: #{binder.totalWork}; finished: #{binder.finishedWork}; in-progress: #{binder.totalWork-binder.finishedWork};
 .progress(class=binder.status === 1 ? "active progress-striped" : undefined)
-  .bar.bar-success(style="width: #{binder.finishedValue/binder.totalValue*100}%;")
-  .bar.bar-info(style="width: #{binder.inProgressValue/binder.totalValue*100}%;")
+  .bar.bar-success(style="width: #{binder.finishedWork/binder.totalWork*100}%;")
+  .bar.bar-info(style="width: #{binder.inProgressWork/binder.totalWork*100}%;")
   .progress-value #{binder.finishedWork} + #{binder.totalWork-binder.finishedWork} / #{binder.totalWork}
 br
