@@ -219,7 +219,7 @@ $(function() {
     priorityColumn,
     valueColumn,
     colorColumn,
-    travelerLinkColumn,
+    workLinkColumn,
     aliasColumn,
     addedByColumn,
     addedOnColumn,

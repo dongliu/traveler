@@ -905,6 +905,25 @@ const binderShareLinkColumn = {
   bSortable: false,
 };
 
+const workLinkColumn = {
+  sTitle: '',
+  mData(source, type, val) {
+    if (source.hasOwnProperty('url')) {
+      return `<a href="${source.url}" data-toggle="tooltip" title="go to the work"><i class="fa fa-edit fa-lg"></i></a>`;
+    }
+    if (source.hasOwnProperty('_id')) {
+      if (source.refType === 'traveler') {
+        return `<a href="${prefix}/travelers/${source._id}/" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>`;
+      }
+      if (source.refType === 'binder') {
+        return `<a href="${prefix}/binders/${source._id}/" target="${linkTarget}" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>`;
+      }
+    }
+    return 'unknown';
+  },
+  bSortable: false,
+};
+
 const deviceTravelerLinkColumn = {
   sTitle: '',
   mData: 'inventoryId',

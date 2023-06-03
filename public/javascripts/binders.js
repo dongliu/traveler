@@ -15,6 +15,8 @@ binderLinkColumn: false, tagsColumn: false, binderWorkProgressColumn: false,
 transferredOnColumn: false, ownerColumn: false*/
 /*global archiveFromModal, transferFromModal, modalScroll, Holder*/
 
+import * as AddBinder from './lib/binder.js';
+
 function formatItemUpdate(data) {
   return (
     '<div class="target" id="' +
@@ -65,13 +67,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: binderAoColumns,
-    aaSorting: [[10, 'desc'], [8, 'desc']],
+    aaSorting: [
+      [10, 'desc'],
+      [8, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -102,13 +110,20 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: transferredBinderAoColumns,
-    aaSorting: [[11, 'desc'], [9, 'desc'], [8, 'desc']],
+    aaSorting: [
+      [11, 'desc'],
+      [9, 'desc'],
+      [8, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -137,13 +152,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: sharedBinderAoColumns,
-    aaSorting: [[9, 'desc'], [7, 'desc']],
+    aaSorting: [
+      [9, 'desc'],
+      [7, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -173,13 +194,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: groupSharedBinderAoColumns,
-    aaSorting: [[8, 'desc'], [10, 'desc']],
+    aaSorting: [
+      [8, 'desc'],
+      [10, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -208,13 +235,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: archivedBinderAoColumns,
-    aaSorting: [[3, 'desc'], [9, 'desc']],
+    aaSorting: [
+      [3, 'desc'],
+      [9, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -322,6 +355,11 @@ $(function() {
         updateStatusFromModal(3, 'binders', activeTable, archivedBinderTable);
       });
     }
+  });
+
+  $('#add-to-binder').click(function() {
+    var activeTable = $('.tab-pane.active table').dataTable();
+    AddBinder.addModal(activeTable, 'binder');
   });
 
   // binding events
