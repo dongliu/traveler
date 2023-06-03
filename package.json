@@ -1,6 +1,6 @@
 {
   "name": "traveler",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": true,
   "scripts": {
     "start": "node app"
@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/dongliu/traveler.git",
-    "release": "3.1.0"
+    "release": "3.2.0"
   },
   "dependencies": {
     "basic-auth": "1.0.0",

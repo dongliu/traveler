@@ -32,7 +32,7 @@ block content
         .btn-group
           a.btn.btn-info#form-management(href='#{prefix}/form-management/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='manage #{viewConfig.terminology.form}s')
             i.fa.fa-suitcase.fa-lg
-            | &nbsp;Manage forms
+            | &nbsp;Manage #{viewConfig.terminology.form}s
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -55,7 +55,7 @@ block content
         li
           a(href='#submittedforms', data-toggle='tab') Under review #{viewConfig.terminology.form}s
         li
-          a(href='#closedforms', data-toggle='tab') Closed #{viewConfig.terminology.form} reviews
+          a(href='#closedforms', data-toggle='tab') Approved and released #{viewConfig.terminology.form}
         li
           a(href='#archivedforms', data-toggle='tab') Archived draft #{viewConfig.terminology.form}s
       .tab-content
