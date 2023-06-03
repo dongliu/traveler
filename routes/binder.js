@@ -636,12 +636,12 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Binder),
     reqUtils.canReadMw('id'),
-    function(req, res) {
-      var binder = req[req.params.id];
-      var works = binder.works;
+    async function getWorks(req, res) {
+      const binder = req[req.params.id];
+      const { works } = binder;
 
-      var tids = [];
-      var pids = [];
+      const tids = [];
+      const pids = [];
 
       works.forEach(function(w) {
         if (w.refType === 'traveler') {
@@ -651,72 +651,56 @@ module.exports = function(app) {
         }
       });
 
-      if (tids.length + pids.length === 0) {
-        return res.status(200).json([]);
-      }
-
-      var merged = [];
-
-      var tFinished = false;
-      var pFinished = false;
-
-      if (tids.length === 0) {
-        tFinished = true;
-      }
-
-      if (pids.length === 0) {
-        pFinished = true;
-      }
-
+      const merged = [];
       if (tids.length !== 0) {
-        Traveler.find(
-          {
-            _id: {
-              $in: tids,
+        try {
+          const travelers = await Traveler.find(
+            {
+              _id: {
+                $in: tids,
+              },
             },
-          },
-          'mapping devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput'
-        )
-          .lean()
-          .exec(function(err, travelers) {
-            if (err) {
-              console.error(err);
-              return res.status(500).send(err.message);
-            }
-            travelers.forEach(function(t) {
-              binder.updateWorkProgress(t);
-
-              // works has its own toJSON, therefore need to merge only the plain
-              // object
-              _.extend(t, works.id(t._id).toJSON());
-              merged.push(t);
-            });
-            tFinished = true;
-            // check if ready to respond
-            sendMerged(tFinished, pFinished, res, merged, binder);
+            'mapping devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput'
+          )
+            .lean()
+            .exec();
+          travelers.forEach(function(t) {
+            // works has its own toJSON, therefore need to merge only the plain object
+            _.extend(t, works.id(t._id).toJSON());
+            merged.push(t);
           });
+        } catch (error) {
+          res.status(500).send(error.message);
+        }
       }
 
       if (pids.length !== 0) {
-        Binder.find(
-          {
-            _id: {
-              $in: pids,
+        try {
+          const binders = await Binder.find(
+            {
+              _id: {
+                $in: pids,
+              },
             },
-          },
-          'tags status createdBy owner finishedValue inProgressValue totalValue finishedInput totalInput'
-        )
-          .lean()
-          .exec(function(err, binders) {
-            binders.forEach(function(p) {
-              binder.updateWorkProgress(p);
-              _.extend(p, works.id(p._id).toJSON());
-              merged.push(p);
-            });
-            pFinished = true;
-            sendMerged(tFinished, pFinished, res, merged, binder);
+            'tags status createdBy owner finishedValue inProgressValue totalValue finishedInput totalInput'
+          )
+            .lean()
+            .exec();
+          binders.forEach(function(b) {
+            _.extend(b, works.id(b._id).toJSON());
+            merged.push(b);
           });
+        } catch (error) {
+          res.status(500).send(error.message);
+        }
       }
+
+      return res.status(200).json({
+        works: merged,
+        inputProgress: inputProgressHtml({ binder: binder }),
+        travelerProgress: travelerProgressHtml({ binder: binder }),
+        valueProgress: valueProgressHtml({ binder: binder }),
+      });
     }
   );
 
@@ -726,7 +710,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['travelerIds', 'binders']),
+    reqUtils.filter('body', ['ids', 'type']),
+    reqUtils.hasAll('body', ['ids', 'type']),
     function(req, res) {
       routesUtilities.binder.addWork(
         req[req.params.id],

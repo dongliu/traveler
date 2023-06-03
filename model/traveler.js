@@ -180,7 +180,7 @@ var traveler = new Schema({
 });
 
 /**
- * update the progress of binders that inlude this traveler document
+ * update the progress of binders that include this traveler document
  * @param  {Traveler} travelerDoc the traveler document
  * @return {undefined}
  */

@@ -121,7 +121,7 @@ function addInputName(name, list) {
   }
 }
 
-var binder = {
+const binderUtil = {
   createBinder: function(
     title,
     description,
@@ -157,30 +157,25 @@ var binder = {
       return res.json(newPackage);
     });
   },
-  addWork: function(binder, userId, req, res) {
-    var tids = req.body.travelerIds;
-    var pids = req.body.binders;
-    var ids;
-    var type;
-    var model;
-    if (tids) {
-      if (tids.length === 0) {
-        return res.send(204);
-      }
-      type = 'traveler';
+  addWork(binder, userId, req, res) {
+    const { ids, type } = req.body;
+    if (!(ids instanceof Array)) {
+      return res.send(400, 'ids must be an array');
+    }
+    if (ids.length === 0) {
+      return res.send(204);
+    }
+    let model;
+    if (type === 'traveler') {
       model = Traveler;
-      ids = tids;
-    } else {
-      if (pids.length === 0) {
-        return res.send(204);
-      }
-      type = 'binder';
+    } else if (type === 'binder') {
       model = Binder;
-      ids = pids;
+    } else {
+      return res.send(400, `cannot handle ${type}`);
     }
 
-    var works = binder.works;
-    var added = [];
+    const { works } = binder;
+    const added = [];
 
     model
       .find({
@@ -195,15 +190,25 @@ var binder = {
         }
 
         if (items.length === 0) {
-          return res.send(204);
+          return res.status(400).send('nothing to be added');
         }
 
         items.forEach(function(item) {
-          if (type === 'binder' && item.id === binder.id) {
-            // do not add itself as a work
-            return;
+          if (type === 'binder') {
+            // skip the binder to be added into itself
+            if (item.id === binder.id) {
+              logger.warn(`binder ${item.id} cannot be added into itself`);
+              return;
+            }
+            // skip the binder if it contains other binders already
+            for (let i = 0; i < item.works.length; i += 1) {
+              if (item.works[i].refType === 'binder') {
+                logger.warn(`binder ${item.id} contains other binder`);
+                return;
+              }
+            }
           }
-          var newWork;
+          let newWork;
           if (!works.id(item._id)) {
             newWork = {
               _id: item._id,
@@ -214,47 +219,22 @@ var binder = {
               status: item.status || 0,
               value: item.value || 10,
             };
-            if (item.status === 2) {
-              newWork.finished = 1;
-              newWork.inProgress = 0;
-            } else if (item.status === 0) {
-              newWork.finished = 0;
-              newWork.inProgress = 0;
-            } else {
-              if (type === 'traveler') {
-                newWork.finished = 0;
-                if (item.totalInput === 0) {
-                  newWork.inProgress = 1;
-                } else {
-                  newWork.inProgress = item.finishedInput / item.totalInput;
-                }
-              } else {
-                if (item.totalValue === 0) {
-                  newWork.finished = 0;
-                  newWork.inProgress = 1;
-                } else {
-                  newWork.finished = item.finishedValue / item.totalValue;
-                  newWork.inProgress = item.inProgressValue / item.totalValue;
-                }
-              }
-            }
-
             works.push(newWork);
             added.push(item.id);
+            binder.updateWorkProgress(item);
           }
         });
 
         if (added.length === 0) {
-          return res.send(204);
+          return res.send(400, 'no item added');
         }
 
         binder.updatedOn = Date.now();
         binder.updatedBy = userId;
-
         // update the totalValue, finishedValue, and finishedValue
-        binder.updateProgress(function(saveErr, newBinder) {
+        return binder.updateProgress(function(saveErr, newBinder) {
           if (saveErr) {
-            console.error(saveErr);
+            logger.error(saveErr);
             return res.send(500, saveErr.message);
           }
           return res.json(200, newBinder);
@@ -534,5 +514,5 @@ module.exports = {
   getDeviceValue: getDeviceValue,
   deviceRemovalAllowed: deviceRemovalAllowed,
   traveler: traveler,
-  binder: binder,
+  binder: binderUtil,
 };
