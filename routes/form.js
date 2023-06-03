@@ -1150,7 +1150,7 @@ module.exports = function(app) {
       });
 
       debug(target);
-      if (target.to.indexOf(s) === -1) {
+      if (target === undefined || target.to.indexOf(s) === -1) {
         return res.status(400).send('invalid status change');
       }
 

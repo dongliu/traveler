@@ -533,7 +533,7 @@ module.exports = function(app) {
   /**
    * get the latest value for the given name from the data list
    * @param  {String} name input name
-   * @param  {Array} data an arrya of TravelerData
+   * @param  {Array} data an array of TravelerData
    * @return {Number|String|null}      the value for the given name
    */
   function dataForName(name, data) {
@@ -548,16 +548,19 @@ module.exports = function(app) {
       return d.name === name;
     });
     // get the latest value from history
-    if (found.length) {
-      found.sort(function(a, b) {
-        if (a.inputOn > b.inputOn) {
-          return -1;
-        }
-        return 1;
-      });
+    if (found.length === 0) {
+      return null;
+    }
+    if (found.length === 1) {
       return found[0].value;
     }
-    return null;
+    found.sort(function(a, b) {
+      if (a.inputOn > b.inputOn) {
+        return -1;
+      }
+      return 1;
+    });
+    return found[0].value;
   }
 
   /**
@@ -599,10 +602,9 @@ module.exports = function(app) {
    * in the give list, and the {key, label, value}'s in the mapping
    * @param  {Traveler} traveler the traveler mongoose object
    * @param  {Array} props    the list of properties to be included
-   * @param  {Function} cb    callback function
-   * @return {Object}         the json representation
+   * @return {Promise<any>}         the json representation
    */
-  function retrieveKeyLableValue(traveler, props, cb) {
+  async function retrieveKeyLabelValue(traveler, props) {
     const output = {};
     props.forEach(function(p) {
       output[p] = traveler[p];
@@ -619,37 +621,55 @@ module.exports = function(app) {
         traveler.activeDiscrepancyForm
       ).labels;
     }
-    TravelerData.find(
-      {
-        _id: {
-          $in: traveler.data,
+    let travelerData = [];
+    try {
+      travelerData = await TravelerData.find(
+        {
+          _id: {
+            $in: traveler.data,
+          },
         },
-      },
-      'name value inputOn inputType'
-    ).exec(function(dataErr, docs) {
-      if (dataErr) {
-        return cb(dataErr);
+        'name value inputOn inputType'
+      );
+    } catch (error) {
+      logger.error(error);
+      throw error;
+    }
+
+    const userDefined = {};
+    _.mapKeys(mapping, function(name, key) {
+      userDefined[key] = {};
+      userDefined[key].value = dataForName(name, travelerData);
+      if (_.isObject(labels)) {
+        userDefined[key].label = labels[name];
       }
-      const userDefined = {};
-      _.mapKeys(mapping, function(name, key) {
-        userDefined[key] = {};
-        userDefined[key].value = dataForName(name, docs);
-        if (_.isObject(labels)) {
-          userDefined[key].label = labels[name];
-        }
-      });
-      const discrepancy = {};
+    });
+    output.user_defined = userDefined;
+
+    const discrepancy = {};
+    if (traveler.discrepancyLogs.length > 0) {
+      let travelerLog = {};
+      try {
+        debug(traveler.discrepancyLogs);
+        travelerLog = await Log.findById(
+          traveler.discrepancyLogs[traveler.discrepancyLogs.length - 1]
+        );
+      } catch (error) {
+        logger.error(error);
+        throw error;
+      }
+      debug(travelerLog);
+      const { records } = travelerLog;
       _.mapKeys(discrepancyMapping, function(name, key) {
         discrepancy[key] = {};
-        discrepancy[key].value = dataForName(name, docs);
+        discrepancy[key].value = dataForName(name, records);
         if (_.isObject(discrepancyLabels)) {
           discrepancy[key].label = discrepancyLabels[name];
         }
       });
-      output.user_defined = userDefined;
-      output.discrepancy = discrepancy;
-      return cb(null, output);
-    });
+    }
+    output.discrepancy = discrepancy;
+    return output;
   }
 
   function retrieveLogs(traveler, cb) {
@@ -698,17 +718,19 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     reqUtils.canReadMw('id'),
-    function(req, res) {
-      retrieveKeyLableValue(
-        req[req.params.id],
-        ['id', 'title', 'status', 'tags', 'devices'],
-        function(err, output) {
-          if (err) {
-            return res.status(500).send(err.message);
-          }
-          return res.status(200).json(output);
-        }
-      );
+    async function(req, res) {
+      try {
+        const output = await retrieveKeyLabelValue(req[req.params.id], [
+          'id',
+          'title',
+          'status',
+          'tags',
+          'devices',
+        ]);
+        return res.status(200).json(output);
+      } catch (error) {
+        return res.status(500).send(error.message);
+      }
     }
   );
 

@@ -77,7 +77,7 @@ function constructTable(table, travelers, colMap) {
   }
 
   constructControl('#system-keys', systemColumns);
-  constructControl('#descrepancy-keys', discrepancyKeys);
+  constructControl('#discrepancy-keys', discrepancyKeys);
   constructControl('#user-keys', userKeys);
 
   // draw the table

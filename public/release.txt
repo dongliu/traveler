@@ -1,3 +1,19 @@
+release v3.2.0
+- node.js version 14
+- express.js version 4.17
+- max request body size option and default to 1MB
+- template review process, details see the user manual 
+- a print view and style for traveler
+- an alias option to rewrite request path
+- json stringify injected variables 
+- import a template's HTML in the builder
+- start using datatable 1.12 for traveler report tools, details see the user manual
+- new reviewer role
+- fix inline edit encoding issue 
+- template version control, details see the user manual
+- fix traveler report to include latest discrepancy record
+- update user manual for template and traveler
+
 APS 1.5.5
 - Ability to specify a custom/specific file type for file upload input at the form design stage (Allowing additional formats such as zip).
 - Retain the original file name when downloading an uploaded file from the server. 

@@ -1331,7 +1331,9 @@ function binding_events() {
       return;
     }
     if ($cgr.attr('data-status') === 'editing') {
-      // modalAlert('You are still editing it', '');
+      // close the edit well
+      $cgr.siblings('.spec').remove();
+      $cgr.removeAttr('data-status');
       return;
     }
     const type = $('span.fe-type', $cgr).text();
@@ -1545,7 +1547,7 @@ function binding_events() {
     if (released_form_version_mgmt) {
       $('#modalLabel').html('Form Release');
       $('#modal .modal-body').append(
-        '<h4>Prior version(s) of this form:</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
+        '<h4>Choose prior version(s) of this form to archive</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
       );
       const priorVersionsColumns = [
         selectColumn,
