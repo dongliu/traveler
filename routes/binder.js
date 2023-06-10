@@ -31,8 +31,8 @@ module.exports = function(app) {
   app.get('/binders/json', auth.ensureAuthenticated, function(req, res) {
     Binder.find({
       createdBy: req.session.userid,
-      archived: {
-        $ne: true,
+      status: {
+        $ne: 3,
       },
       owner: {
         $exists: false,
@@ -369,8 +369,8 @@ module.exports = function(app) {
   ) {
     Binder.find({
       owner: req.session.userid,
-      archived: {
-        $ne: true,
+      status: {
+        $ne: 3,
       },
     }).exec(function(err, binders) {
       if (err) {
@@ -428,8 +428,8 @@ module.exports = function(app) {
         _id: {
           $in: me.binders,
         },
-        archived: {
-          $ne: true,
+        status: {
+          $ne: 3,
         },
       }).exec(function(pErr, binders) {
         if (pErr) {
@@ -488,7 +488,7 @@ module.exports = function(app) {
   ) {
     Binder.find({
       createdBy: req.session.userid,
-      archived: true,
+      status: 3,
     }).exec(function(err, binders) {
       if (err) {
         console.error(err);
@@ -497,41 +497,6 @@ module.exports = function(app) {
       return res.status(200).json(binders);
     });
   });
-
-  app.put(
-    '/binders/:id/archived',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Binder),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.filter('body', ['archived']),
-    function(req, res) {
-      var doc = req[req.params.id];
-      if (doc.archived === req.body.archived) {
-        return res.status(204).send();
-      }
-
-      doc.archived = req.body.archived;
-
-      if (doc.archived) {
-        doc.archivedOn = Date.now();
-      }
-
-      doc.save(function(saveErr, newDoc) {
-        if (saveErr) {
-          console.error(saveErr);
-          return res.status(500).send(saveErr.message);
-        }
-        return res
-          .status(200)
-          .send(
-            'Binder ' +
-              req.params.id +
-              ' archived state set to ' +
-              newDoc.archived
-          );
-      });
-    }
-  );
 
   app.put(
     '/binders/:id/owner',
@@ -580,10 +545,10 @@ module.exports = function(app) {
     reqUtils.filter('body', ['status']),
     reqUtils.hasAll('body', ['status']),
     function(req, res) {
-      var p = req[req.params.id];
-      var s = req.body.status;
+      const p = req[req.params.id];
+      const s = req.body.status;
 
-      if ([1, 2].indexOf(s) === -1) {
+      if ([1, 2, 3].indexOf(s) === -1) {
         return res.status(400).send('invalid status');
       }
 
@@ -594,25 +559,21 @@ module.exports = function(app) {
       if (s === 1) {
         if ([0, 2].indexOf(p.status) === -1) {
           return res.status(400).send('invalid status change');
-        } else {
-          p.status = s;
         }
       }
 
       if (s === 2) {
         if ([1].indexOf(p.status) === -1) {
           return res.status(400).send('invalid status change');
-        } else {
-          p.status = s;
         }
       }
-
+      p.status = s;
       p.save(function(err) {
         if (err) {
           console.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).send('status updated to ' + s);
+        return res.status(200).send(`status updated to ${s}`);
       });
     }
   );
@@ -821,8 +782,8 @@ module.exports = function(app) {
       publicAccess: {
         $in: [0, 1],
       },
-      archived: {
-        $ne: true,
+      status: {
+        $ne: 3,
       },
     }).exec(function(err, binders) {
       if (err) {
