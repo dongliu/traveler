@@ -18,6 +18,7 @@ tagsColumn: false, sDomNoTNoR: false*/
 /*global archiveFromModal, transferFromModal, modalScroll*/
 
 import * as AddBinder from './lib/binder.js';
+import * as Modal from './lib/modal.js';
 
 function noneSelectedModal() {
   $('#modalLabel').html('Alert');
@@ -351,7 +352,7 @@ $(function() {
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(AddBinder.formatItemUpdate(data));
+        $('#modal .modal-body').append(Modal.formatItemUpdate(data));
       });
       $('#modal .modal-footer').html(
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
@@ -406,7 +407,7 @@ $(function() {
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(AddBinder.formatItemUpdate(data));
+        $('#modal .modal-body').append(Modal.formatItemUpdate(data));
       });
       $('#modal .modal-footer').html(
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
@@ -445,7 +446,7 @@ $(function() {
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(AddBinder.formatItemUpdate(data));
+        $('#modal .modal-body').append(Modal.formatItemUpdate(data));
       });
       $('#modal .modal-body').append('<h5>to the following user</h5>');
       $('#modal .modal-body').append(
