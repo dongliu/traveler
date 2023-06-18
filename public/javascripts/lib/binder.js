@@ -1,14 +1,9 @@
+/* eslint-disable import/extensions */
 /* global fnGetSelected, modalScroll, formatItemUpdate, selectColumn, binderLinkColumn, 
     titleColumn, tagsColumn, createdOnColumn, updatedOnColumn, fnAddFilterFoot, 
     sDomNoTNoR, selectEvent, filterEvent, moment */
 
-export function formatItemUpdate(data) {
-  return `<div class="target" id="${data._id}"><b>${
-    data.title
-  }</b>, created ${moment(data.createdOn).fromNow()}${
-    data.updatedOn ? `, updated ${moment(data.updatedOn).fromNow()}` : ''
-  }</div>`;
-}
+import * as Modal from './modal.js';
 
 export function addItems(items, binders, type = 'traveler') {
   let number = $('#modal #progress div.target').length;
@@ -61,7 +56,7 @@ export function addModal(fromTable, type = 'traveler') {
   selected.forEach(function(row) {
     const data = fromTable.fnGetData(row);
     items.push(data._id);
-    $('#modal .modal-body').append(formatItemUpdate(data));
+    $('#modal .modal-body').append(Modal.formatItemUpdate(data));
   });
   $('#modal .modal-body').append(
     '<h3 id="select"> into following binders </h3>'
@@ -116,7 +111,7 @@ export function addModal(fromTable, type = 'traveler') {
       selectedRow.forEach(function(row) {
         const data = ownedBinderTable.fnGetData(row);
         binders.push(data._id);
-        $('#modal #progress').append(formatItemUpdate(data));
+        $('#modal #progress').append(Modal.formatItemUpdate(data));
       });
       addItems(items, binders, type);
     }

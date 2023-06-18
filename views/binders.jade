@@ -16,14 +16,14 @@ block content
         a.btn.btn-primary#new(href='#{prefix}/binders/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create a new binder')
           i.fa.fa-paperclip.fa-lg
           | &nbsp;New Binder
-      //- .btn-group
-        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected binder')
-          i.fa.fa-copy.fa-lg
-          | &nbsp;Clone
       .btn-group
         button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
+      //- .btn-group
+      //-         button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected binders, only the owner can see them after archived.')
+      //-           i.fa.fa-archive.fa-lg
+      //-           | &nbsp;Archive
       .btn-group
         a.btn.btn-info#all-binders(href='#{prefix}/publicbinders/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public binders')
           i.fa.fa-institution.fa-lg

@@ -16,6 +16,7 @@ transferredOnColumn: false, ownerColumn: false*/
 /*global archiveFromModal, transferFromModal, modalScroll, Holder*/
 
 import * as AddBinder from './lib/binder.js';
+import * as Modal from './lib/modal.js';
 
 function formatItemUpdate(data) {
   return (
@@ -328,33 +329,8 @@ $(function() {
   });
 
   $('button.archive').click(function() {
-    var activeTable = $('.tab-pane.active table').dataTable();
-    var selected = fnGetSelected(activeTable, 'row-selected');
-    modalScroll(false);
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No work binder has been selected!');
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html(
-        'Archive the following ' + selected.length + ' work binders? '
-      );
-      $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
-        var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
-      });
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        updateStatusFromModal(3, 'binders', activeTable, archivedBinderTable);
-      });
-    }
+    const activeTable = $('.tab-pane.active table').dataTable();
+    Modal.archive('binder', 3, activeTable, archivedBinderTable);
   });
 
   $('#add-to-binder').click(function() {

@@ -105,7 +105,6 @@ const binder = new Schema({
   clonedFrom: ObjectId,
   updatedBy: String,
   updatedOn: Date,
-  archivedOn: Date,
   owner: String,
   transferredOn: Date,
   deadline: Date,
@@ -157,10 +156,6 @@ const binder = new Schema({
     type: Number,
     default: 0,
     min: 0,
-  },
-  archived: {
-    type: Boolean,
-    default: false,
   },
 });
 
@@ -281,8 +276,8 @@ binder.methods.updateProgress = function(cb) {
  */
 function updateParentProgress(child) {
   Binder.find({
-    archived: {
-      $ne: true,
+    status: {
+      $ne: 3,
     },
     works: {
       $elemMatch: {

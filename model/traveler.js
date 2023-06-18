@@ -186,8 +186,8 @@ var traveler = new Schema({
  */
 function updateBinderProgress(travelerDoc) {
   Binder.find({
-    archived: {
-      $ne: true,
+    status: {
+      $ne: 3,
     },
     works: {
       $elemMatch: {
