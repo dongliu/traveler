@@ -218,7 +218,7 @@ $(function() {
     sequenceColumn,
     colorColumn,
     workLinkColumn,
-    aliasColumn,
+    titleColumn,
     addedByColumn,
     addedOnColumn,
     ownerColumn,

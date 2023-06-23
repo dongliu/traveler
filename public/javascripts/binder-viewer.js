@@ -23,7 +23,7 @@ $(function() {
     workLinkColumn,
     sColumn,
     cColumn,
-    aliasColumn,
+    titleColumn,
     ownerColumn,
     deviceColumn,
     tagsColumn,
