@@ -22,8 +22,6 @@ $(function() {
     selectColumn,
     workLinkColumn,
     sColumn,
-    pColumn,
-    vColumn,
     cColumn,
     aliasColumn,
     ownerColumn,
