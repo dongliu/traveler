@@ -1,7 +1,7 @@
 /* eslint-disable import/extensions */
-/* global fnGetSelected, modalScroll, formatItemUpdate, selectColumn, binderLinkColumn, 
+/* global fnGetSelected, selectColumn, binderLinkColumn, 
     titleColumn, tagsColumn, createdOnColumn, updatedOnColumn, fnAddFilterFoot, 
-    sDomNoTNoR, selectEvent, filterEvent, moment */
+    sDomNoTNoR, selectEvent, filterEvent */
 
 import * as Modal from './modal.js';
 
@@ -52,7 +52,7 @@ export function addModal(fromTable, type = 'traveler') {
   }
   $('#modalLabel').html(`Add the ${selected.length} ${type}(s)`);
   $('#modal .modal-body').empty();
-  modalScroll(true);
+  Modal.modalScroll(true);
   selected.forEach(function(row) {
     const data = fromTable.fnGetData(row);
     items.push(data._id);
@@ -75,7 +75,7 @@ export function addModal(fromTable, type = 'traveler') {
   ];
   fnAddFilterFoot('#owned-binder-table', binderAoColumns);
   const ownedBinderTable = $('#owned-binder-table').dataTable({
-    sAjaxSource: '/ownedbinders/json',
+    sAjaxSource: '/writablebinders/json',
     sAjaxDataProp: '',
     bAutoWidth: false,
     iDisplayLength: 5,

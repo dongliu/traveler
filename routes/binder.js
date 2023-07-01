@@ -381,10 +381,13 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/ownedbinders/json', auth.ensureAuthenticated, function(req, res) {
-    var search = {
-      archived: {
-        $ne: true,
+  app.get('/writablebinders/json', auth.ensureAuthenticated, function(
+    req,
+    res
+  ) {
+    const search = {
+      status: {
+        $ne: 3,
       },
       $or: [
         {
@@ -395,6 +398,9 @@ module.exports = function(app) {
         },
         {
           owner: req.session.userid,
+        },
+        {
+          publicAccess: 1,
         },
       ],
     };

@@ -1,6 +1,4 @@
-/* global fnGetSelected, modalScroll, formatItemUpdate, selectColumn, binderLinkColumn, 
-    titleColumn, tagsColumn, createdOnColumn, updatedOnColumn, fnAddFilterFoot, 
-    sDomNoTNoR, selectEvent, filterEvent, moment */
+/* global fnGetSelected, moment */
 
 export function formatItemUpdate(data) {
   return `<div class="target" id="${data._id}"><b>${
@@ -17,6 +15,16 @@ export function noneSelectedModal() {
     '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
   );
   $('#modal').modal('show');
+}
+
+export function modalScroll(scroll) {
+  if (scroll) {
+    $('#modal .modal-body').removeClass('modal-body-visible');
+    $('#modal .modal-body').addClass('modal-body-scroll');
+  } else {
+    $('#modal .modal-body').removeClass('modal-body-scroll');
+    $('#modal .modal-body').addClass('modal-body-visible');
+  }
 }
 
 export function updateStatusFromModal(type, status, ...tables) {
