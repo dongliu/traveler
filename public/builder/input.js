@@ -153,7 +153,7 @@
     buf.push(
       '<div rv-data-required="model.required" rv-data-userkey="model.userkey" class="control-group radio-group"><div class="control-label"><span class="control-number"></span>' +
         (null == (jade.interp = ' ') ? '' : jade.interp) +
-        '<span class="model-label">{ model.label }</span></div><div class="controls"></div></div>'
+        '<span class="model-label">{ model.label }</span></div><div class="controls"><div class="radios"></div><span class="help-block">{ model.help }</span></div></div>'
     );
     return buf.join('');
   };
