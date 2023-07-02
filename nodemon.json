@@ -2,6 +2,7 @@
   "restartable": "rs",
   "ignore": [
     ".git",
+    "template.js",
     "node_modules/**/node_modules",
     "public",
     "builderview",
