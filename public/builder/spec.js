@@ -120,6 +120,11 @@
     return '<div class="control-group"><div class="control-label">Figure caption</div><div class="controls"><input type="text" disabled="disabled" name="figcaption"/></div></div>';
   };
 
+  // filetype.jade compiled template
+  exports['filetype'] = function tmpl_filetype() {
+    return '<div class="control-group"><div class="control-label">File type</div><div class="controls"><input type="text" name="filetype"/><span class="help">Leave blank for default file formats (PDF, excel & image/text formats). Specify for a specific file format (ex: zip)</span></div></div>';
+  };
+
   // generic_text_input.jade compiled template
   exports['generic_text_input'] = function tmpl_generic_text_input(locals) {
     var buf = [];
@@ -211,10 +216,6 @@
   // userkey.jade compiled template
   exports['userkey'] = function tmpl_userkey() {
     return '<div class="control-group"><div class="control-label">User defined key</div><div class="controls"><input type="text" name="userkey" pattern="[a-zA-Z_0-9]{1,30}"/><span class="help-inline">Only letter, number, and "_" allowed (Example: MagMeas_1)</span></div></div>';
-  };
-
-  exports['filetype'] = function tmpl_filetype() {
-    return '<div class="control-group"><div class="control-label">File type</div><div class="controls"><input type="text" name="filetype" /><span class="help-inline">Leave blank for default file formats (PDF, excel & image/text formats). Specify for a specific file format (ex: zip)</span></div></div>';
   };
 
   // width.jade compiled template

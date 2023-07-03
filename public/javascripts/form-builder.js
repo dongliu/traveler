@@ -312,7 +312,7 @@ function binding($edit, $out, model, $done) {
 }
 
 /**
- * add the count th radio button in the model to the $raido_group with spec in the #radio_value_spec
+ * add the count to radio button in the model to the $raido_group with spec in the #radio_value_spec
  * @param {$} $radio_group      the radio group object
  * @param {$} $radio_value_spec the radio value/text spec object
  * @param {$} $done             the done button object
@@ -339,7 +339,7 @@ function add_radio($radio_group, $radio_value_spec, $done, count, model) {
     'rv-text',
     `model.radio_text_${count}`
   );
-  $radio_group.find('.controls').append($radio_button_control);
+  $radio_group.find('.controls .radios').append($radio_button_control);
 
   // Add button and handler to remove radio button
   $($radio_text)
@@ -381,6 +381,7 @@ function radio_edit($cgr) {
   let label = 'label';
   let userkey = '';
   let required = false;
+  let help = '';
   // get all input components
   const $radio_group = $(input.radiogroup());
   const $buttons = $(input.button());
@@ -389,6 +390,7 @@ function radio_edit($cgr) {
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $required = $(spec.required());
+  const $help = $(spec.help());
 
   const $add_radio_button = $(spec.add_radio_button());
   const $radio_value_spec = $('<div class="radio-value-spec"></div>');
@@ -399,6 +401,7 @@ function radio_edit($cgr) {
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     const inputs = $cgr.find('.controls').find('input');
+    help = $('.controls span.help-block', $cgr).text();
     if (inputs.length > 0) {
       radio_group_name = inputs[0].name;
       userkey = $(inputs[0]).data('userkey');
@@ -415,6 +418,7 @@ function radio_edit($cgr) {
     $label,
     $userkey,
     $required,
+    $help,
     $add_radio_button,
     $radio_value_spec,
     $done
@@ -429,10 +433,12 @@ function radio_edit($cgr) {
     userkey,
     required,
     name: radio_group_name,
+    help,
   };
   $('input', $label).val(label);
   $('input', $userkey).val(userkey);
   $('input', $required).prop('checked', required);
+  $('input', $help).val(help);
 
   // add all the radio buttons
   if ($cgr) {
