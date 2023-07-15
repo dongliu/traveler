@@ -216,11 +216,9 @@ $(function() {
   var workAoColumns = [
     removeColumn,
     sequenceColumn,
-    priorityColumn,
-    valueColumn,
     colorColumn,
     workLinkColumn,
-    aliasColumn,
+    titleColumn,
     addedByColumn,
     addedOnColumn,
     ownerColumn,

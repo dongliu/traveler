@@ -212,7 +212,6 @@ const binderUtil = {
           if (!works.id(item._id)) {
             newWork = {
               _id: item._id,
-              alias: item.title,
               refType: type,
               addedOn: Date.now(),
               addedBy: userId,

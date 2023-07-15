@@ -19,7 +19,6 @@ const logger = require('../lib/loggers').getLogger();
  */
 
 const work = new Schema({
-  alias: String,
   refType: {
     type: String,
     required: true,

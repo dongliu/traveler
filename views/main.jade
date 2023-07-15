@@ -35,45 +35,6 @@ block content
           h2 Organize
           //var shareUsers = !{viewConfig.shareUsers};
                 var shareGroups = !{viewConfig.shareGroups};
-      if (! (!viewConfig.shareUsers && !viewConfig.shareGroups && !viewConfig.transferOwnership))
-        hr.soften
-        h2 Ownership
-        .row-fluid
-          if (viewConfig.transferOwnership)
-            .span4
-              h2.text-info
-                i.fa.fa-user.fa-4x
-              h3 Take Responsibility
-              p.main-byline The owner is responsible to take part in and oversee the process from plan to delivery. The ownership is transferable.
-          if (viewConfig.shareGroups || viewConfig.shareUsers)
-            .span4
-              h2.text-info
-                i.fa.fa-user-plus.fa-4x
-              h3 Share for Collaboration
-              p.main-byline The owner shares items with colleagues and groups of colleagues in the organization. Sharing brings connection, transparency, and attention.
-          .span4
-            h2.text-info
-              i.fa.fa-users.fa-4x
-            h3 Powered by Co-workers
-            p.main-byline Accomplished works are recorded and traceable. Co-workers are acknowledged.
-      hr.soften
-      h2 Performance
-      .row-fluid
-        .span4
-          h2.text-info
-            i.fa.fa-sort-numeric-asc.fa-4x
-          h3 Prioritize Works
-          p.main-byline Works are organized by sequence and priorities.
-        .span4
-          h2.text-info
-            i.fa.fa-flag.fa-4x
-          h3 Attention
-          p.main-byline Works can be assigned to different levels of attentions. This helps identify the bottlenecks.
-        .span4
-          h2.text-info
-            i.fa.fa-diamond.fa-4x
-          h3 Earn Values
-          p.main-byline Every piece of work has a value. The earned and in-progress values are tracked.
       hr.soften
 
 block js
