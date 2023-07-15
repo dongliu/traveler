@@ -627,7 +627,7 @@ module.exports = function(app) {
                 $in: tids,
               },
             },
-            'mapping devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput'
+            'title mapping devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput'
           )
             .lean()
             .exec();
@@ -649,7 +649,7 @@ module.exports = function(app) {
                 $in: pids,
               },
             },
-            'tags status createdBy owner finishedValue inProgressValue totalValue finishedInput totalInput'
+            'title tags status createdBy owner finishedValue inProgressValue totalValue finishedInput totalInput'
           )
             .lean()
             .exec();
@@ -664,9 +664,9 @@ module.exports = function(app) {
 
       return res.status(200).json({
         works: merged,
-        inputProgress: inputProgressHtml({ binder: binder }),
-        travelerProgress: travelerProgressHtml({ binder: binder }),
-        valueProgress: valueProgressHtml({ binder: binder }),
+        inputProgress: inputProgressHtml({ binder }),
+        travelerProgress: travelerProgressHtml({ binder }),
+        valueProgress: valueProgressHtml({ binder }),
       });
     }
   );
