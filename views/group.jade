@@ -25,12 +25,15 @@ block content
     form.form-inline#form
       input#groupid(type="hidden", value="#{group._id}")
       label(for='displayName') Display Name:
-      input#displayName.input(name='displayName', value='#{group.name}')
+      != ' '
+      input.input#displayName(name='displayName', value='#{group.name}', type='text')
+      != ' '
       .btn-group
-        button#btnDisplayName.btn.btn-info(data-toggle='collapse', data-target='#save') Save
+        button.btn.btn-info#btnDisplayName(data-toggle='collapse', data-target='#save') Save
       .well
-        input#username.input(name='username', placeholder='Last, First')
-        button#addusertogroup.btn.btn-info(data-target='#add') Add User to Group
+        input.input#username(name='username', placeholder='Last, First', type='text')
+        != ' '
+        button.btn.btn-info#addusertogroup(data-target='#add') Add User to Group
     .btn-group
       button.btn.btn-primary#btnRemoveMembers(data-target='#remove') Remove Selected User(s) from Group
     table.table.table-bordered.table-hover#members-table
