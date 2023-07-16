@@ -397,6 +397,22 @@ module.exports = function(app) {
         {
           publicAccess: 1,
         },
+        {
+          sharedWith: {
+            $elemMatch: {
+              _id: req.session.userid,
+              access: 1,
+            },
+          },
+        },
+        {
+          sharedGroup: {
+            $elemMatch: {
+              _id: { $in: req.session.memberOf },
+              access: 1,
+            },
+          },
+        },
       ],
     };
 
@@ -724,10 +740,6 @@ module.exports = function(app) {
       const binder = req[req.params.id];
       const { works } = binder;
       const updates = req.body;
-      // let wid;
-      // let work;
-      // let prop;
-      // let u;
       let valueChanged = false;
       Object.keys(updates).forEach(wid => {
         const work = works.id(wid);
