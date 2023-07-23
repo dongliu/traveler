@@ -19,23 +19,24 @@ block content
         h3#modalLabel
       .modal-body
       .modal-footer
-    .row
-      .span9
-        h3 Group id: #{group._id}
-        #validation.well.hide
-        form.form-inline#form
-          input#groupid(type="hidden", value="#{group._id}")
-          label(for='displayName') Display Name:
-          input#displayName.input(name='displayName', value='#{group.name}')
-          .btn-group
-            button#btnDisplayName.btn.btn-info(data-toggle='collapse', data-target='#save') Save
-          .well
-            input#username.input(name='username', placeholder='Last, First')
-            button#addusertogroup.btn.btn-info(data-target='#add') Add User to Group
-        h4 #{group.members.length} Member(s):
-        button#btnRemoveMembers.btn.btn-info(data-target='#remove') Remove Selected User(s) from Group
-        table#members-table.table.table-bordered.table-hover
-      .span3.sidebar
+
+    h3 Group id: #{group._id}
+    #validation.well.hide
+    form.form-inline#form
+      input#groupid(type="hidden", value="#{group._id}")
+      label(for='displayName') Display Name:
+      != ' '
+      input.input#displayName(name='displayName', value='#{group.name}', type='text')
+      != ' '
+      .btn-group
+        button.btn.btn-info#btnDisplayName(data-toggle='collapse', data-target='#save') Save
+      .well
+        input.input#username(name='username', placeholder='Last, First', type='text')
+        != ' '
+        button.btn.btn-info#addusertogroup(data-target='#add') Add User to Group
+    .btn-group
+      button.btn.btn-primary#btnRemoveMembers(data-target='#remove') Remove Selected User(s) from Group
+    table.table.table-bordered.table-hover#members-table
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

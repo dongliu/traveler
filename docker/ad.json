@@ -5,8 +5,6 @@
   "searchBase": "dc=example,dc=org",
   "searchFilter": "(&(objectClass=inetOrgPerson)(uid=_id))",
   "nameFilter": "(&(objectClass=inetOrgPerson)(displayName=_name))",
-  "groupSearchBase": "dc=example",
-  "groupSearchFilter": "(&(objectClass=group)(uid=_id))",
   "objAttributes": ["uid", "displayName", "ou", "mail", "homephone"],
   "memberAttributes": ["uid", "displayName", "ou", "mail", "homephone", "memberOf"],
   "groupAttributes": ["uid","displayName","mail"],
@@ -23,6 +21,6 @@
   },
 
   "shareUsers": true,
-  "shareGroups": false,
+  "shareGroups": true,
   "transferOwnership": true
 }
