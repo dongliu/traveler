@@ -1,27 +1,31 @@
-/*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable func-names */
+/* eslint-disable consistent-return */
+/* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
-var auth = require('../lib/auth');
-var authConfig = require('../config/config').auth;
-var mongoose = require('mongoose');
-var _ = require('lodash');
-var reqUtils = require('../lib/req-utils');
-var shareLib = require('../lib/share');
-var routesUtilities = require('../utilities/routes');
-var jade = require('jade');
-var valueProgressHtml = jade.compileFile(
-  __dirname + '/../views/binder-value-progress.jade'
+const mongoose = require('mongoose');
+const _ = require('lodash');
+const jade = require('jade');
+const auth = require('../lib/auth');
+const authConfig = require('../config/config').auth;
+const reqUtils = require('../lib/req-utils');
+const shareLib = require('../lib/share');
+const routesUtilities = require('../utilities/routes');
+
+const valueProgressHtml = jade.compileFile(
+  `${__dirname}/../views/binder-value-progress.jade`
 );
-var travelerProgressHtml = jade.compileFile(
-  __dirname + '/../views/binder-traveler-progress.jade'
+const travelerProgressHtml = jade.compileFile(
+  `${__dirname}/../views/binder-traveler-progress.jade`
 );
-var inputProgressHtml = jade.compileFile(
-  __dirname + '/../views/binder-input-progress.jade'
+const inputProgressHtml = jade.compileFile(
+  `${__dirname}/../views/binder-input-progress.jade`
 );
 
-var User = mongoose.model('User');
-var Group = mongoose.model('Group');
-var Binder = mongoose.model('Binder');
-var Traveler = mongoose.model('Traveler');
+const User = mongoose.model('User');
+const Group = mongoose.model('Group');
+const Binder = mongoose.model('Binder');
+const Traveler = mongoose.model('Traveler');
 
 module.exports = function(app) {
   app.get('/binders/', auth.ensureAuthenticated, function(req, res) {
@@ -69,7 +73,7 @@ module.exports = function(app) {
     reqUtils.filter('body', ['newtag']),
     reqUtils.sanitize('body', ['newtag']),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.tags.addToSet(req.body.newtag);
@@ -89,7 +93,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.canWriteMw('id'),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.tags.pull(req.params.tag);
@@ -112,13 +116,12 @@ module.exports = function(app) {
     reqUtils.filter('body', ['title', 'description']),
     reqUtils.sanitize('body', ['title', 'description']),
     function(req, res) {
-      var k;
-      var doc = req[req.params.id];
-      for (k in req.body) {
-        if (req.body.hasOwnProperty(k) && req.body[k] !== null) {
+      const doc = req[req.params.id];
+      Object.keys(req.body).forEach(k => {
+        if (req.body[k] !== null) {
           doc[k] = req.body[k];
         }
-      }
+      });
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
       doc.save(function(saveErr) {
@@ -137,7 +140,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.isOwnerMw('id'),
     function(req, res) {
-      var binder = req[req.params.id];
+      const binder = req[req.params.id];
       return res.render(
         'share',
         routesUtilities.getRenderObject(req, {
@@ -157,8 +160,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.isOwnerMw('id'),
     function(req, res) {
-      var binder = req[req.params.id];
-      var access = req.body.access;
+      const binder = req[req.params.id];
+      let { access } = req.body;
       if (['-1', '0', '1'].indexOf(access) === -1) {
         return res.status(400).send('not valid value');
       }
@@ -174,7 +177,7 @@ module.exports = function(app) {
         }
         return res
           .status(200)
-          .send('public access is set to ' + req.body.access);
+          .send(`public access is set to ${req.body.access}`);
       });
     }
   );
@@ -185,7 +188,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.canReadMw('id'),
     function(req, res) {
-      var binder = req[req.params.id];
+      const binder = req[req.params.id];
       if (req.params.list === 'users') {
         return res.status(200).json(binder.sharedWith || []);
       }
@@ -202,8 +205,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.isOwnerMw('id'),
     function(req, res) {
-      var binder = req[req.params.id];
-      var share = -2;
+      const binder = req[req.params.id];
+      let share = -2;
       if (req.params.list === 'users') {
         if (req.body.name) {
           share = reqUtils.getSharedWith(binder.sharedWith, req.body.name);
@@ -228,7 +231,7 @@ module.exports = function(app) {
           .status(400)
           .send(
             req.body.name ||
-              req.body.id + ' is already in the ' + req.params.list + ' list.'
+              `${req.body.id} is already in the ${req.params.list} list.`
           );
       }
 
@@ -245,8 +248,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.isOwnerMw('id'),
     function(req, res) {
-      var binder = req[req.params.id];
-      var share;
+      const binder = req[req.params.id];
+      let share;
       if (req.params.list === 'users') {
         share = binder.sharedWith.id(req.params.shareid);
       }
@@ -258,7 +261,7 @@ module.exports = function(app) {
         // the user should in the list
         return res
           .status(404)
-          .send('cannot find ' + req.params.shareid + ' in the list.');
+          .send(`cannot find ${req.params.shareid} in the list.`);
       }
 
       // change the access
@@ -273,7 +276,7 @@ module.exports = function(app) {
           return res.status(500).send(saveErr.message);
         }
         // check consistency of user's traveler list
-        var Target;
+        let Target;
         if (req.params.list === 'users') {
           Target = User;
         }
@@ -293,7 +296,7 @@ module.exports = function(app) {
             }
             if (!target) {
               console.error(
-                'The user/group ' + req.params.userid + ' is not in the db'
+                `The user/group ${req.params.userid} is not in the db`
               );
             }
           }
@@ -309,7 +312,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.isOwnerMw('id'),
     function(req, res) {
-      var binder = req[req.params.id];
+      const binder = req[req.params.id];
       shareLib.removeShare(req, res, binder);
     }
   );
@@ -325,7 +328,7 @@ module.exports = function(app) {
     reqUtils.hasAll('body', ['title']),
     reqUtils.sanitize('body', ['title', 'description']),
     function(req, res) {
-      var binder = {};
+      const binder = {};
       if (req.body.works && _.isArray(req.body.works)) {
         binder.works = req.body.works;
       } else {
@@ -343,22 +346,14 @@ module.exports = function(app) {
           console.error(err);
           return res.status(500).send(err.message);
         }
-        var url =
-          (req.proxied ? authConfig.proxied_service : authConfig.service) +
-          '/binders/' +
-          newPackage.id +
-          '/';
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/binders/${newPackage.id}/`;
 
         res.set('Location', url);
         return res
           .status(201)
-          .send(
-            'You can access the new binder at <a href="' +
-              url +
-              '">' +
-              url +
-              '</a>'
-          );
+          .send(`You can access the new binder at <a href="${url}">${url}</a>`);
       });
     }
   );
@@ -401,6 +396,22 @@ module.exports = function(app) {
         },
         {
           publicAccess: 1,
+        },
+        {
+          sharedWith: {
+            $elemMatch: {
+              _id: req.session.userid,
+              access: 1,
+            },
+          },
+        },
+        {
+          sharedGroup: {
+            $elemMatch: {
+              _id: { $in: req.session.memberOf },
+              access: 1,
+            },
+          },
         },
       ],
     };
@@ -463,9 +474,9 @@ module.exports = function(app) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      var binderIds = [];
-      var i;
-      var j;
+      const binderIds = [];
+      let i;
+      let j;
       // merge the binders arrays
       for (i = 0; i < groups.length; i += 1) {
         for (j = 0; j < groups[i].binders.length; j += 1) {
@@ -512,7 +523,7 @@ module.exports = function(app) {
     reqUtils.status('id', [0, 1]),
     reqUtils.filter('body', ['name']),
     function(req, res) {
-      var doc = req[req.params.id];
+      const doc = req[req.params.id];
       shareLib.changeOwner(req, res, doc);
     }
   );
@@ -591,9 +602,9 @@ module.exports = function(app) {
       }
       res.status(200).json({
         works: merged,
-        inputProgress: inputProgressHtml({ binder: binder }),
-        travelerProgress: travelerProgressHtml({ binder: binder }),
-        valueProgress: valueProgressHtml({ binder: binder }),
+        inputProgress: inputProgressHtml({ binder }),
+        travelerProgress: travelerProgressHtml({ binder }),
+        valueProgress: valueProgressHtml({ binder }),
       });
     }
   }
@@ -696,13 +707,13 @@ module.exports = function(app) {
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [0, 1]),
     function(req, res) {
-      var p = req[req.params.id];
-      var work = p.works.id(req.params.wid);
+      const p = req[req.params.id];
+      const work = p.works.id(req.params.wid);
 
       if (!work) {
         return res
           .status(404)
-          .send('Work ' + req.params.wid + ' not found in the binder.');
+          .send(`Work ${req.params.wid} not found in the binder.`);
       }
 
       work.remove();
@@ -726,47 +737,36 @@ module.exports = function(app) {
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [0, 1]),
     function(req, res) {
-      var binder = req[req.params.id];
-      var works = binder.works;
-      var updates = req.body;
-      var wid;
-      var work;
-      var prop;
-      var u;
-      var valueChanged = false;
-      for (wid in updates) {
-        if (!updates.hasOwnProperty(wid)) {
-          continue;
-        }
-        work = works.id(wid);
+      const binder = req[req.params.id];
+      const { works } = binder;
+      const updates = req.body;
+      let valueChanged = false;
+      Object.keys(updates).forEach(wid => {
+        const work = works.id(wid);
         if (!work) {
-          continue;
+          return;
         }
-
-        u = updates[wid];
-        for (prop in u) {
-          if (!u.hasOwnProperty(prop)) {
-            continue;
-          }
-          if (work[prop] !== u[prop]) {
-            if (prop === 'value') {
+        const u = updates[wid];
+        Object.keys(u).forEach(p => {
+          if (work[p] !== u[p]) {
+            if (p === 'value') {
               valueChanged = true;
             }
-            work[prop] = u[prop];
+            work[p] = u[p];
           }
-        }
-      }
+        });
+      });
 
       if (!binder.isModified()) {
         return res.status(204).send();
       }
 
-      var cb = function(err, newWP) {
+      const cb = function(err, newWP) {
         if (err) {
           console.error(err);
           return res
             .status(500)
-            .send('cannot save the updates to binder ' + binder._id);
+            .send(`cannot save the updates to binder ${binder._id}`);
         }
         res.status(200).json(newWP.works);
       };
