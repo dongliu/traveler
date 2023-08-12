@@ -16,10 +16,10 @@ You can quickly set up a standalone environment for the traveler application [wi
 
 ## Development
 ### Source style and Lint
+We use `eslint` and `prettier` for style and linting. 
 
 ## User manual
-
-We use `eslint` and `prettier` for style and linting. 
+See https://dongliu.github.io/traveler/ for details.
 # License
 
 [MIT](https://github.com/dongliu/traveler/blob/master/LICENSE.md)
