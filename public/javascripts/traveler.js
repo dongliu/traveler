@@ -41,12 +41,12 @@ function notes(found) {
     for (i = 0; i < found.length; i += 1) {
       output =
         output +
-        '<dt><b>' +
+        '<div class="note"><dt><b>' +
         found[i].inputBy +
         ' noted ' +
         livespan(found[i].inputOn, false) +
         '</b>: </dt>';
-      output = output + '<dd>' + found[i].value + '</dd>';
+      output = output + '<dd>' + found[i].value + '</dd></div>';
     }
   }
   return output + '</dl>';
@@ -166,6 +166,10 @@ function loadDiscrepancyLog(discrepancyForm) {
   DiscrepancyFormLoader.setForm(discrepancyForm);
   DiscrepancyFormLoader.renderLogs();
   DiscrepancyFormLoader.retrieveLogs();
+}
+
+function editButton() {
+  return '<div class="pull-right note-update-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="fa fa-edit fa-lg"></i></a></div></div>';
 }
 
 $(function() {
@@ -322,21 +326,21 @@ $(function() {
               .closest('.controls')
               .find('.input-notes dl')
               .prepend(
-                '<dt><b>You noted ' +
+                '<div class="note"><dt><b>You noted ' +
                   livespan(timestamp) +
                   '</b>: </dt><dd>' +
                   value +
-                  '</dd>'
+                  '</dd></div>'
               );
           } else {
             $that
               .closest('.controls')
               .append(
-                '<div class="input-notes"><dl><dt><b>You noted ' +
+                '<div class="input-notes"><dl><div class="note"><dt><b>You noted ' +
                   livespan(timestamp) +
                   '</b>: </dt><dd>' +
                   value +
-                  '</dd></dl></div>'
+                  '</dd></div></dl></div>'
               );
           }
 
@@ -472,6 +476,25 @@ $(function() {
     if ($(this).hasClass('control-focus')) {
       $(this).removeClass('control-focus');
     }
+  });
+
+  // render note edit
+  $('#form').on('mouseenter', '.note', function(e) {
+    e.preventDefault();
+    const $this = $(this);
+    $this.addClass('note-focus');
+    if ($('.note-update-buttons', $this).length) {
+      $('.note-update-buttons', $this).show();
+    } else {
+      $(this).prepend(editButton());
+    }
+  });
+
+  $('#form').on('mouseleave', '.note', function(e) {
+    e.preventDefault();
+    const $this = $(this);
+    $this.removeClass('note-focus');
+    $('.note-update-buttons', $this).hide();
   });
 
   // Safari web browser will not recognize input event for radio and checkbox.
