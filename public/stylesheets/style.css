@@ -302,6 +302,7 @@ figcaption {
   margin-top: 10px;
   margin-bottom: 0;
   display: block;
+  white-space: pre-wrap;
   color: #595959;
   background-color: #f5f6ce;
 }
