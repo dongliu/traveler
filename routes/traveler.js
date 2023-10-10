@@ -1253,7 +1253,7 @@ module.exports = function(app) {
             logger.error(saveErr);
             return res.status(500).send(saveErr.message);
           }
-          return res.status(204).send();
+          return res.status(200).json(note);
         });
       });
     }

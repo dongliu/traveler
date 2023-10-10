@@ -337,7 +337,9 @@ $(function() {
               .closest('.controls')
               .find('.input-notes dl')
               .prepend(
-                '<div class="note"><dt><b>You noted ' +
+                '<div class="note" id="' +
+                  data._id +
+                  '"><dt><b>You noted ' +
                   livespan(timestamp, false) +
                   '</b>: </dt><dd>' +
                   value +
