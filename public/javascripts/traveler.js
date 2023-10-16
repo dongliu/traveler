@@ -41,12 +41,23 @@ function notes(found) {
     for (i = 0; i < found.length; i += 1) {
       output =
         output +
-        '<dt><b>' +
+        '<div class="note" id=' +
+        found[i]._id +
+        ' data-owner=' +
         found[i].inputBy +
-        ' noted ' +
-        livespan(found[i].inputOn, false) +
-        '</b>: </dt>';
-      output = output + '<dd>' + found[i].value + '</dd>';
+        '><dt><b>' +
+        found[i].inputBy +
+        ' created on ' +
+        livespan(found[i].inputOn, false);
+      if (found[i].updatedBy) {
+        output +=
+          ', updated on ' +
+          livespan(found[i].updatedOn, false) +
+          ' by ' +
+          found[i].updatedBy;
+      }
+      output += '</b>: </dt>';
+      output = output + '<dd>' + found[i].value + '</dd></div>';
     }
   }
   return output + '</dl>';
@@ -166,6 +177,10 @@ function loadDiscrepancyLog(discrepancyForm) {
   DiscrepancyFormLoader.setForm(discrepancyForm);
   DiscrepancyFormLoader.renderLogs();
   DiscrepancyFormLoader.retrieveLogs();
+}
+
+function editButton() {
+  return '<div class="pull-right note-update-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="fa fa-edit fa-lg"></i></a></div></div>';
 }
 
 $(function() {
@@ -308,7 +323,7 @@ $(function() {
           var timestamp = jqXHR.getResponseHeader('Date');
           $('#message').append(
             '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' +
-              livespan(timestamp) +
+              livespan(timestamp, false) +
               '</div>'
           );
           var $notes_number = $that
@@ -322,21 +337,23 @@ $(function() {
               .closest('.controls')
               .find('.input-notes dl')
               .prepend(
-                '<dt><b>You noted ' +
-                  livespan(timestamp) +
+                '<div class="note" id="' +
+                  data._id +
+                  '"><dt><b>You noted ' +
+                  livespan(timestamp, false) +
                   '</b>: </dt><dd>' +
                   value +
-                  '</dd>'
+                  '</dd></div>'
               );
           } else {
             $that
               .closest('.controls')
               .append(
-                '<div class="input-notes"><dl><dt><b>You noted ' +
-                  livespan(timestamp) +
+                '<div class="input-notes"><dl><div class="note"><dt><b>You noted ' +
+                  livespan(timestamp, false) +
                   '</b>: </dt><dd>' +
                   value +
-                  '</dd></dl></div>'
+                  '</dd></div></dl></div>'
               );
           }
 
@@ -474,6 +491,119 @@ $(function() {
     }
   });
 
+  // render note edit
+  $('#form').on('mouseenter', '.note', function(e) {
+    e.preventDefault();
+    const $this = $(this);
+    $this.addClass('note-focus');
+    if ($('.note-update-buttons', $this).length) {
+      $('.note-update-buttons', $this).show();
+    } else {
+      $(this).prepend(editButton());
+    }
+  });
+
+  $('#form').on('mouseleave', '.note', function(e) {
+    e.preventDefault();
+    const $this = $(this);
+    $this.removeClass('note-focus');
+    $('.note-update-buttons', $this).hide();
+  });
+
+  $('#form').on('click', '.note-focus a.btn[title="edit"]', function(e) {
+    e.preventDefault();
+    const $that = $(this);
+    const pre = $that
+      .closest('.note')
+      .find('dd')
+      .text();
+    const id = $that.closest('.note').prop('id');
+    $('#modalLabel').html('Edit note');
+    $('#modal .modal-body').html(
+      '<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Note: </label><div class="controls"><textarea name="note-content" rows=5>' +
+        pre +
+        '</textarea></div></div></form>'
+    );
+    $('#modal .modal-footer').html(
+      '<button value="update" class="btn btn-primary" data-dismiss="modal">Update</button><button value="delete" class="btn btn-warning" data-dismiss="modal">Delete</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
+    );
+    $('#modal').modal('show');
+    $('#modal button[value="update"]').click(function() {
+      e.preventDefault();
+      const value = $('#modal textarea[name="note-content"]').val();
+      $.ajax({
+        url: '/traveler-notes/' + id,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          value: value,
+        }),
+      })
+        .done(function(data, status, jqXHR) {
+          const timestamp = data.inputOn;
+          $('#message').append(
+            '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' +
+              livespan(timestamp, false) +
+              '</div>'
+          );
+          $that
+            .closest('.controls')
+            .find('.input-notes dl .note[id = ' + id + ']')
+            .html(
+              '<dt><b>You updated ' +
+                livespan(timestamp, false) +
+                '</b>: </dt><dd>' +
+                value +
+                '</dd>'
+            );
+        })
+        .fail(function(jqXHR) {
+          if (jqXHR.status !== 401) {
+            $('#message').append(
+              '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' +
+                jqXHR.responseText +
+                '</div>'
+            );
+            $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          }
+        });
+    });
+
+    $('#modal button[value="delete"]').click(function() {
+      e.preventDefault();
+      $.ajax({
+        url: '/traveler-notes/' + id,
+        type: 'DELETE',
+      })
+        .done(function(data, status, jqXHR) {
+          const timestamp = jqXHR.getResponseHeader('Date');
+          $('#message').append(
+            '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note deleted ' +
+              livespan(timestamp, false) +
+              '</div>'
+          );
+          const $notes_number = $that
+            .closest('.controls')
+            .find('a.notes-number span.badge');
+          $notes_number.text(parseInt($notes_number.text(), 10) - 1);
+          $that
+            .closest('.controls')
+            .find('.input-notes dl .note[id = ' + id + ']')
+            .remove();
+        })
+        .fail(function(jqXHR) {
+          if (jqXHR.status !== 401) {
+            $('#message').append(
+              '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot delete the note: ' +
+                jqXHR.responseText +
+                '</div>'
+            );
+            $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          }
+        });
+    });
+  });
+
   // Safari web browser will not recognize input event for radio and checkbox.
   $('#form input[type="radio"], input[type="checkbox"]').on(
     'click',
@@ -545,7 +675,7 @@ $(function() {
         var timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append(
           '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved ' +
-            livespan(timestamp) +
+            livespan(timestamp, false) +
             '</div>'
         );
         var $history = $this
@@ -723,7 +853,7 @@ $(function() {
         var timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append(
           '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' +
-            livespan(timestamp) +
+            livespan(timestamp, false) +
             '</div>'
         );
         var $history = $this
@@ -746,7 +876,7 @@ $(function() {
             '">' +
             input.files[0].name +
             '</a></strong> uploaded by you ' +
-            livespan(timestamp) +
+            livespan(timestamp, false) +
             '; ' +
             $history.html()
         );
