@@ -264,6 +264,10 @@ ul.dropdown-menu input[type='checkbox'] {
   background-color: #f5f5f5;
 }
 
+.note-focus {
+  background-color: #e5cc11;
+}
+
 .input-changed {
   border: 1px solid #c09853;
   box-shadow: 0 0 5px rgba(192, 152, 83, 1);
@@ -298,6 +302,7 @@ figcaption {
   margin-top: 10px;
   margin-bottom: 0;
   display: block;
+  white-space: pre-wrap;
   color: #595959;
   background-color: #f5f6ce;
 }

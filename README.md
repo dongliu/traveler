@@ -19,7 +19,7 @@ You can quickly set up a standalone environment for the traveler application [wi
 We use `eslint` and `prettier` for style and linting. 
 
 ## User manual
-See https://dongliu.github.io/traveler/ for details.
+See https://dongliu.github.io/traveler-doc/manual for details.
 # License
 
 [MIT](https://github.com/dongliu/traveler/blob/master/LICENSE.md)

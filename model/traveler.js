@@ -265,7 +265,9 @@ var travelerNote = new Schema({
   name: String,
   value: String,
   inputBy: String,
+  updatedBy: String,
   inputOn: Date,
+  updatedOn: Date,
 });
 
 var Traveler = mongoose.model('Traveler', traveler);

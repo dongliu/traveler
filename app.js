@@ -169,6 +169,7 @@ require('./routes/main')(app);
 require('./routes/form')(app);
 require('./routes/form-management')(app);
 require('./routes/traveler')(app);
+require('./routes/traveler-note')(app);
 require('./routes/binder')(app);
 require('./routes/report')(app);
 require('./routes/admin')(app);

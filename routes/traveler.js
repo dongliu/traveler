@@ -1205,7 +1205,7 @@ module.exports = function(app) {
             $in: doc.notes,
           },
         },
-        'name value inputBy inputOn'
+        'name value inputBy inputOn updatedBy updatedOn'
       ).exec(function(noteErr, docs) {
         if (noteErr) {
           logger.error(noteErr);
@@ -1232,7 +1232,9 @@ module.exports = function(app) {
         name: req.body.name,
         value: req.body.value,
         inputBy: req.session.userid,
+        updatedBy: req.session.userid,
         inputOn: Date.now(),
+        updatedOn: Date.now(),
       });
       note.save(function(noteErr) {
         if (noteErr) {
@@ -1251,7 +1253,7 @@ module.exports = function(app) {
             logger.error(saveErr);
             return res.status(500).send(saveErr.message);
           }
-          return res.status(204).send();
+          return res.status(200).json(note);
         });
       });
     }
