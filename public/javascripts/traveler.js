@@ -349,7 +349,9 @@ $(function() {
             $that
               .closest('.controls')
               .append(
-                '<div class="input-notes"><dl><div class="note"><dt><b>You noted ' +
+                '<div class="input-notes"><dl><div class="note" id="' +
+                  data._id +
+                  '"><dt><b>You noted ' +
                   livespan(timestamp, false) +
                   '</b>: </dt><dd>' +
                   value +
