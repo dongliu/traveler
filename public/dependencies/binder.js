@@ -170,7 +170,8 @@ Binder.PropertyAccessor.bindTo = function(obj) {
 Binder.TypeRegistry = {
   string: {
     format: function(value) {
-      return value == null ? '' : String(value);
+      // unescape
+      return value == null ? '' : _.unescape(String(value));
     },
     parse: function(value) {
       return value ? value : null;
