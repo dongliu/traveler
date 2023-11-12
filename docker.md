@@ -62,6 +62,8 @@ You can run with `docker-compose up -d` in a detached mode. Then you can run `do
 
 ## rebulid without cache
 
+When the `Dockerfile` is updated, e.g., using a new node.js version, run the following command to rebuild the image.
+
 ```
 docker-compose build --no-cache
 ```
