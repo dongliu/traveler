@@ -1,218 +1,297 @@
-(function() {
-  var root = this,
-    exports = {};
-
-  // The jade runtime:
-  var jade = (exports.jade = (function(exports) {
-    Array.isArray ||
-      (Array.isArray = function(arr) {
-        return '[object Array]' == Object.prototype.toString.call(arr);
-      }),
-      Object.keys ||
-        (Object.keys = function(obj) {
-          var arr = [];
-          for (var key in obj) obj.hasOwnProperty(key) && arr.push(key);
-          return arr;
-        }),
-      (exports.merge = function merge(a, b) {
-        var ac = a['class'],
-          bc = b['class'];
-        if (ac || bc)
-          (ac = ac || []),
-            (bc = bc || []),
-            Array.isArray(ac) || (ac = [ac]),
-            Array.isArray(bc) || (bc = [bc]),
-            (ac = ac.filter(nulls)),
-            (bc = bc.filter(nulls)),
-            (a['class'] = ac.concat(bc).join(' '));
-        for (var key in b) key != 'class' && (a[key] = b[key]);
-        return a;
-      });
-    function nulls(val) {
-      return val != null;
+(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    if (typeof root === 'undefined' || root !== Object(root)) {
+      throw new Error('templatizer: window does not exist or is not an object');
     }
-    return (
-      (exports.attrs = function attrs(obj, escaped) {
-        var buf = [],
-          terse = obj.terse;
-        delete obj.terse;
-        var keys = Object.keys(obj),
-          len = keys.length;
-        if (len) {
-          buf.push('');
-          for (var i = 0; i < len; ++i) {
-            var key = keys[i],
-              val = obj[key];
-            'boolean' == typeof val || null == val
-              ? val &&
-                (terse ? buf.push(key) : buf.push(key + '="' + key + '"'))
-              : 0 == key.indexOf('data') && 'string' != typeof val
-              ? buf.push(key + "='" + JSON.stringify(val) + "'")
-              : 'class' == key && Array.isArray(val)
-              ? buf.push(key + '="' + exports.escape(val.join(' ')) + '"')
-              : escaped && escaped[key]
-              ? buf.push(key + '="' + exports.escape(val) + '"')
-              : buf.push(key + '="' + val + '"');
+    root.input = factory();
+  }
+})(this, function() {
+  var jade = (function() {
+    function n(n) {
+      return null != n && '' !== n;
+    }
+    function t(e) {
+      return (Array.isArray(e)
+        ? e.map(t)
+        : e && 'object' == typeof e
+        ? Object.keys(e).filter(function(n) {
+            return e[n];
+          })
+        : [e]
+      )
+        .filter(n)
+        .join(' ');
+    }
+    function e(n) {
+      return i[n] || n;
+    }
+    function r(n) {
+      var t = String(n).replace(o, e);
+      return t === '' + n ? n : t;
+    }
+    var a = {};
+    (a.merge = function t(e, r) {
+      if (1 === arguments.length) {
+        for (var a = e[0], i = 1; i < e.length; i++) a = t(a, e[i]);
+        return a;
+      }
+      var o = e.class,
+        s = r.class;
+      (o || s) &&
+        ((o = o || []),
+        (s = s || []),
+        Array.isArray(o) || (o = [o]),
+        Array.isArray(s) || (s = [s]),
+        (e.class = o.concat(s).filter(n)));
+      for (var f in r) 'class' != f && (e[f] = r[f]);
+      return e;
+    }),
+      (a.joinClasses = t),
+      (a.cls = function(n, e) {
+        for (var r = [], i = 0; i < n.length; i++)
+          e && e[i] ? r.push(a.escape(t([n[i]]))) : r.push(t(n[i]));
+        var o = t(r);
+        return o.length ? ' class="' + o + '"' : '';
+      }),
+      (a.style = function(n) {
+        return n && 'object' == typeof n
+          ? Object.keys(n)
+              .map(function(t) {
+                return t + ':' + n[t];
+              })
+              .join(';')
+          : n;
+      }),
+      (a.attr = function(n, t, e, r) {
+        return (
+          'style' === n && (t = a.style(t)),
+          'boolean' == typeof t || null == t
+            ? t
+              ? ' ' + (r ? n : n + '="' + n + '"')
+              : ''
+            : 0 == n.indexOf('data') && 'string' != typeof t
+            ? (-1 !== JSON.stringify(t).indexOf('&') &&
+                console.warn(
+                  'Since Jade 2.0.0, ampersands (`&`) in data attributes will be escaped to `&amp;`'
+                ),
+              t &&
+                'function' == typeof t.toISOString &&
+                console.warn(
+                  'Jade will eliminate the double quotes around dates in ISO form after 2.0.0'
+                ),
+              ' ' + n + "='" + JSON.stringify(t).replace(/'/g, '&apos;') + "'")
+            : e
+            ? (t &&
+                'function' == typeof t.toISOString &&
+                console.warn(
+                  'Jade will stringify dates in ISO form after 2.0.0'
+                ),
+              ' ' + n + '="' + a.escape(t) + '"')
+            : (t &&
+                'function' == typeof t.toISOString &&
+                console.warn(
+                  'Jade will stringify dates in ISO form after 2.0.0'
+                ),
+              ' ' + n + '="' + t + '"')
+        );
+      }),
+      (a.attrs = function(n, e) {
+        var r = [],
+          i = Object.keys(n);
+        if (i.length)
+          for (var o = 0; o < i.length; ++o) {
+            var s = i[o],
+              f = n[s];
+            'class' == s
+              ? (f = t(f)) && r.push(' ' + s + '="' + f + '"')
+              : r.push(a.attr(s, f, !1, e));
           }
+        return r.join('');
+      });
+    var i = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' },
+      o = /[&<>"]/g;
+    return (
+      (a.escape = r),
+      (a.rethrow = function n(t, e, r, a) {
+        if (!(t instanceof Error)) throw t;
+        if (!(('undefined' == typeof window && e) || a))
+          throw ((t.message += ' on line ' + r), t);
+        try {
+          a = a || require('fs').readFileSync(e, 'utf8');
+        } catch (e) {
+          n(t, null, r);
         }
-        return buf.join(' ');
-      }),
-      (exports.escape = function escape(html) {
-        return String(html)
-          .replace(/&(?!(\w+|\#\d+);)/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      }),
-      (exports.rethrow = function rethrow(err, filename, lineno) {
-        if (!filename) throw err;
-        var context = 3,
-          str = require('fs').readFileSync(filename, 'utf8'),
-          lines = str.split('\n'),
-          start = Math.max(lineno - context, 0),
-          end = Math.min(lines.length, lineno + context),
-          context = lines
-            .slice(start, end)
-            .map(function(line, i) {
-              var curr = i + start + 1;
-              return (curr == lineno ? '  > ' : '    ') + curr + '| ' + line;
+        var i = 3,
+          o = a.split('\n'),
+          s = Math.max(r - i, 0),
+          f = Math.min(o.length, r + i),
+          i = o
+            .slice(s, f)
+            .map(function(n, t) {
+              var e = t + s + 1;
+              return (e == r ? '  > ' : '    ') + e + '| ' + n;
             })
             .join('\n');
-        throw ((err.path = filename),
-        (err.message =
-          (filename || 'Jade') +
-          ':' +
-          lineno +
-          '\n' +
-          context +
-          '\n\n' +
-          err.message),
-        err);
+        throw ((t.path = e),
+        (t.message = (e || 'Jade') + ':' + r + '\n' + i + '\n\n' + t.message),
+        t);
       }),
-      exports
+      (a.DebugItem = function(n, t) {
+        (this.lineno = n), (this.filename = t);
+      }),
+      a
     );
-  })({}));
+  })();
 
-  // create our folder objects
+  var templatizer = {};
 
   // button.jade compiled template
-  exports['button'] = function tmpl_button() {
+  templatizer['button'] = function tmpl_button() {
     return '<div class="pull-right control-group-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="fa fa-edit fa-lg"></i></a><a data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="fa fa-copy fa-lg"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="fa fa-trash-o fa-lg"></i></a></div></div>';
   };
 
   // checkbox.jade compiled template
-  exports['checkbox'] = function tmpl_checkbox(locals) {
+  templatizer['checkbox'] = function tmpl_checkbox(locals) {
     var buf = [];
+    var jade_mixins = {};
+    var jade_interp;
     buf.push(
       '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
-        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        (null == (jade_interp = ' ') ? '' : jade_interp) +
         '<span class="model-label">{ model.label }</span></div><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-required="model.required" rv-data-userkey="model.userkey"/><span>{ model.checkbox_text }</span></label></div></div>'
     );
     return buf.join('');
   };
 
+  // checkbox_member.jade compiled template
+  templatizer['checkbox_member'] = function tmpl_checkbox_member() {
+    return '<label class="checkbox"><input type="checkbox" disabled="disabled"/><span class="checkbox_text"></span></label>';
+  };
+
+  // checkbox_set.jade compiled template
+  templatizer['checkbox_set'] = function tmpl_checkbox_set(locals) {
+    var buf = [];
+    var jade_mixins = {};
+    var jade_interp;
+    buf.push(
+      '<div rv-data-required="model.required" rv-data-userkey="model.userkey" class="control-group checkbox-set"><div class="control-label"><span class="control-number"></span>' +
+        (null == (jade_interp = ' ') ? '' : jade_interp) +
+        '<span class="model-label">{ model.label }</span></div><div class="controls"><fieldset class="checkboxes"></fieldset><span class="help-block">{ model.help }</span></div></div>'
+    );
+    return buf.join('');
+  };
+
   // figure.jade compiled template
-  exports['figure'] = function tmpl_figure() {
+  templatizer['figure'] = function tmpl_figure() {
     return '<div class="control-group output-control-group"><div class="controls"><figure><img src="" rv-alt="model.alt" rv-height="model.height" rv-width="model.width"/><figcaption>{ model.figcaption }</figcaption></figure></div></div>';
   };
 
   // hold.jade compiled template
-  exports['hold'] = function tmpl_hold() {
+  templatizer['hold'] = function tmpl_hold() {
     return '<div class="control-group output-control-group"><h4 class="holder">The flow is currently hold by&nbsp;<span>{ model.holder }</span></h4><div class="form-actions"><button type="submit" class="btn btn-primary">Continue</button></div></div>';
   };
 
   // number.jade compiled template
-  exports['number'] = function tmpl_number(locals) {
+  templatizer['number'] = function tmpl_number(locals) {
     var buf = [];
+    var jade_mixins = {};
+    var jade_interp;
     buf.push(
       '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
-        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        (null == (jade_interp = ' ') ? '' : jade_interp) +
         '<span class="model-label">{ model.label }</span></div><div class="controls"><input type="number" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey" rv-min="model.min" rv-max="model.max" step="any"/><span rv-if="model.range" class="help-inline">{ model.range }</span><span class="help-block">{ model.help }</span></div></div>'
     );
     return buf.join('');
   };
 
   // numberunit.jade compiled template
-  exports['numberunit'] = function tmpl_numberunit() {
+  templatizer['numberunit'] = function tmpl_numberunit() {
     return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><div class="input-append"><input type="text" disabled="disabled" rv-placeholder="model.placeholder"/><span class="add-on">{ model.unit }</span></div><span class="help-block"></span></div></div>';
   };
 
   // other.jade compiled template
-  exports['other'] = function tmpl_other() {
+  templatizer['other'] = function tmpl_other() {
     return '<div class="control-group output-control-group"><div class="control-label"><span>{ model.label }</span></div><div class="controls"><input rv-type="model.type" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey"/><span class="help-block">{ model.help }</span></div></div>';
   };
 
   // radio_button.jade compiled template
-  exports['radio_button'] = function tmpl_radio_button() {
+  templatizer['radio_button'] = function tmpl_radio_button() {
     return '<label class="radio"><input type="radio" rv-value="model.radio_text" disabled="disabled" rv-name="model.name" rv-required="model.required" rv-data-userkey="model.userkey"/><span class="radio_text">{ model.radio_text }</span></label>';
   };
 
   // radiogroup.jade compiled template
-  exports['radiogroup'] = function tmpl_radiogroup(locals) {
+  templatizer['radiogroup'] = function tmpl_radiogroup(locals) {
     var buf = [];
+    var jade_mixins = {};
+    var jade_interp;
     buf.push(
       '<div rv-data-required="model.required" rv-data-userkey="model.userkey" class="control-group radio-group"><div class="control-label"><span class="control-number"></span>' +
-        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        (null == (jade_interp = ' ') ? '' : jade_interp) +
         '<span class="model-label">{ model.label }</span></div><div class="controls"><div class="radios"></div><span class="help-block">{ model.help }</span></div></div>'
     );
     return buf.join('');
   };
 
   // rich.jade compiled template
-  exports['rich'] = function tmpl_rich() {
+  templatizer['rich'] = function tmpl_rich() {
     return '<div class="control-group output-control-group"><div class="tinymce"></div></div>';
   };
 
   // section.jade compiled template
-  exports['section'] = function tmpl_section(locals) {
+  templatizer['section'] = function tmpl_section(locals) {
     var buf = [];
+    var jade_mixins = {};
+    var jade_interp;
     buf.push(
       '<div class="control-group output-control-group"><legend> <span class="section-number"></span>' +
-        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        (null == (jade_interp = ' ') ? '' : jade_interp) +
         '<span class="label-text">{ model.legend }</span></legend></div>'
     );
     return buf.join('');
   };
 
   // text.jade compiled template
-  exports['text'] = function tmpl_text(locals) {
+  templatizer['text'] = function tmpl_text(locals) {
     var buf = [];
+    var jade_mixins = {};
+    var jade_interp;
     buf.push(
       '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
-        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        (null == (jade_interp = ' ') ? '' : jade_interp) +
         '<span class="model-label">{ model.label }</span></div><div class="controls"><input type="text" disabled="disabled" rv-placeholder="model.placeholder" rv-required="model.required" rv-data-userkey="model.userkey"/><span class="help-block">{ model.help }</span></div></div>'
     );
     return buf.join('');
   };
 
   // textarea.jade compiled template
-  exports['textarea'] = function tmpl_textarea(locals) {
+  templatizer['textarea'] = function tmpl_textarea(locals) {
     var buf = [];
+    var jade_mixins = {};
+    var jade_interp;
     buf.push(
       '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
-        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        (null == (jade_interp = ' ') ? '' : jade_interp) +
         '<span class="model-label">{ model.label }</span></div><div class="controls"><textarea disabled="disabled" rv-placeholder="model.placeholder" rv-rows="model.rows" rv-required="model.required" rv-data-userkey="model.userkey"></textarea><span class="help-block">{ model.help }</span></div></div>'
     );
     return buf.join('');
   };
 
   // upload.jade compiled template
-  exports['upload'] = function tmpl_upload(locals) {
+  templatizer['upload'] = function tmpl_upload(locals) {
     var buf = [];
+    var jade_mixins = {};
+    var jade_interp;
     buf.push(
       '<div class="control-group output-control-group"><div class="control-label"><span class="control-number"></span>' +
-        (null == (jade.interp = ' ') ? '' : jade.interp) +
+        (null == (jade_interp = ' ') ? '' : jade_interp) +
         '<span class="model-label">{ model.label }</span></div><div class="controls"><input type="file" rv-required="model.required" rv-data-userkey="model.userkey" rv-data-filetype="model.filetype" disabled="disabled"/><span class="help-block">{ model.help }</span></div></div>'
     );
     return buf.join('');
   };
 
-  // attach to window or export with commonJS
-  if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-    module.exports = exports;
-  } else if (typeof define === 'function' && define.amd) {
-    define(exports);
-  } else {
-    root.input = exports;
-  }
-})();
+  return templatizer;
+});
