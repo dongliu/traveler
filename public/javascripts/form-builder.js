@@ -7,6 +7,8 @@
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
+import { checkbox_set_edit } from './lib/checkbox-set.js';
+
 const mce_content = {
   selector: 'textarea.tinymce',
   content_css: '/bootstrap/css/bootstrap.css',
@@ -224,7 +226,7 @@ function done_button(view, $out) {
       }
     });
 
-    // assign id to legent, id is used for side nav
+    // assign id to legend, id is used for side nav
     $('legend', $out).each(function() {
       if (!$(this).attr('id')) {
         $(this).attr('id', UID.generateShort());
@@ -1159,6 +1161,12 @@ function working() {
   $('#add-checkbox').click(function(e) {
     e.preventDefault();
     checkbox_edit();
+    scrollToBottom();
+  });
+
+  $('#add-checkbox-set').click(function(e) {
+    e.preventDefault();
+    checkbox_set_edit();
     scrollToBottom();
   });
 

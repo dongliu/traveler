@@ -5,72 +5,81 @@
 
 import { add_new_cgr, binding } from './form-builder-shared.js';
 
-export function add_radio(
-  $radio_group,
-  $radio_value_spec,
+export function add_checkbox(
+  $checkbox_set,
+  $checkbox_value_spec,
   $done,
   count,
   model
 ) {
   // Add radio button text configuration screen
-  const $radio_text = $(
-    spec.generic_text_input({ label: `Radio button ${count} value` })
+  const $checkbox_text = $(
+    spec.generic_text_input({ label: `Checkbox ${count} text` })
   );
-  $('input', $radio_text).attr('name', `radio_text_${count}`);
-  $($radio_value_spec).append($radio_text);
+  $('input', $checkbox_text).attr('name', `checkbox_${count}_text`);
+  $($checkbox_value_spec).append($checkbox_text);
+  const $userkey = $(
+    spec.generic_text_input({ label: `Checkbox ${count} userkey` })
+  );
+  $('input', $userkey).attr('name', `checkbox_${count}_userkey`);
+  $($checkbox_value_spec).append($userkey);
 
-  // Add radio button input control
-  const $radio_button_control = $(input.radio_button());
-  $('input', $radio_button_control).attr(
+  // Add checkbox input control
+  const $checkbox_control = $(input.checkbox_member());
+  $('input', $checkbox_control).attr(
     'rv-value',
-    `model.radio_text_${count}`
+    `model.checkbox_${count}_text`
   );
-  $('span.radio_text', $radio_button_control).attr(
+  $('input', $checkbox_control).attr(
+    'rv-data-userkey',
+    `model.checkbox_${count}_userkey`
+  );
+  $('span.checkbox_text', $checkbox_control).attr(
     'rv-text',
-    `model.radio_text_${count}`
+    `model.checkbox_${count}_text`
   );
-  $radio_group.find('.controls .radios').append($radio_button_control);
+  $checkbox_set.find('.controls .checkboxes').append($checkbox_control);
 
   // Add button and handler to remove radio button
-  $($radio_text)
+  $($checkbox_text)
     .find('.controls')
     .append(
-      '<button value="remove-radio-button" class="btn btn-warning">-</button>'
+      '<button value="remove-checkbox" class="btn btn-warning">-</button>'
     );
-  $radio_text.on('click', 'button[value="remove-radio-button"]', function(e) {
+  $checkbox_text.on('click', 'button[value="remove-checkbox"]', function(e) {
     e.preventDefault();
 
-    const value = $(e.delegateTarget)
-      .find('input')
-      .val();
-    const name = $(e.delegateTarget)
-      .find('input')
-      .prop('name');
-    const radio = $radio_group
-      .find(`input[type="radio"][value="${value}"]`)
+    const text_input = $checkbox_text.find('input');
+    const value = text_input.val();
+    const checkbox = $checkbox_set
+      .find(`input[type="checkbox"][value="${value}"]`)
       .parent();
-    model[name] = undefined;
-    radio.remove();
-    e.delegateTarget.remove();
+    const text_model = text_input.prop('name');
+    model[text_model] = undefined;
+    const key_model = $userkey.prop('name');
+    model[key_model] = undefined;
+    checkbox.remove();
+    $checkbox_text.remove();
+    $userkey.remove();
   });
 
-  let radio_text = `radio_text_${count}`;
+  let checkbox_text = `checkbox_${count}`;
 
-  if (model[`radio_text_${count}`]) {
-    radio_text = model[`radio_text_${count}`];
+  if (model[`checkbox_${count}_text`]) {
+    checkbox_text = model[`checkbox_${count}_text`];
   }
 
-  $('input', $radio_text).val(radio_text);
+  $('input', $checkbox_text).val(checkbox_text);
+
+  if (model[`checkbox_${count}_userkey`]) {
+    $('input', $userkey).val(model[`checkbox_${count}_userkey`]);
+  }
 }
 
 export function checkbox_set_edit($cgr) {
   $('#output .well.spec').remove();
 
-  let checkbox_set_name;
-
   let label = 'label';
-  let userkey = '';
-  let required = false;
   let help = '';
   // get all input components
   const $checkbox_set = $(input.checkbox_set());
@@ -78,8 +87,6 @@ export function checkbox_set_edit($cgr) {
 
   // get configuration (spec) view components
   const $label = $(spec.label());
-  const $userkey = $(spec.userkey());
-  const $required = $(spec.required());
   const $help = $(spec.help());
 
   const $add_checkbox_button = $(spec.add_checkbox_button());
@@ -90,30 +97,17 @@ export function checkbox_set_edit($cgr) {
 
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
-    const inputs = $cgr.find('.controls').find('input');
     help = $('.controls span.help-block', $cgr).text();
     // TBD: how to define user key and required?
     // if we want to have a single user key for the fieldset then the fieldset should be submitted
-    // as an array, which requires binding changes
-
+    // as an array, which requires binding changes.
+    // We can allow each checkbox to have a user key
     // the required for a fieldset cannot be defined
-
-    // if (inputs.length > 0) {
-    //   checkbox_set_name = inputs[0].name;
-    //   userkey = $(inputs[0]).data('userkey');
-    //   required = $(inputs[0]).prop('required');
-    // }
   }
-
-  // if (!checkbox_set_name) {
-  //   checkbox_set_name = UID.generateShort();
-  // }
 
   // Assign components to the configure view
   const $edit = $('<div class="well spec"></div>').append(
     $label,
-    // $userkey,
-    // $required,
     $help,
     $add_checkbox_button,
     $checkbox_value_spec,
@@ -121,24 +115,19 @@ export function checkbox_set_edit($cgr) {
   );
 
   const $new_cgr = $(
-    '<div class="control-group-wrap" data-status="editing"><span class="fe-type">radio</span></div>'
+    '<div class="control-group-wrap" data-status="editing"><span class="fe-type">checkbox-set</span></div>'
   ).append($checkbox_set);
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
   const model = {
     label,
-    // userkey,
-    // required,
-    name: checkbox_set_name,
     help,
   };
   $('input', $label).val(label);
-  // $('input', $userkey).val(userkey);
-  // $('input', $required).prop('checked', required);
   $('input', $help).val(help);
 
   // render the checkboxes
   if ($cgr) {
-    // load the radio buttons for edit mode
+    // load the checkboxes for edit mode
     const checkboxes = $cgr.find('.controls').find('input');
     // $.map(checkboxes, function(button, i) {
     //   model[`radio_text_${i}`] = $(button).prop('value');
@@ -155,18 +144,16 @@ export function checkbox_set_edit($cgr) {
     //   checkbox_count += 1;
     // }
   } else {
-    // Add initial radio button
-    // model[
-    //   `radio_text_${checkbox_count}`
-    // ] = `radio_text_${checkbox_count}`;
-    // add_radio(
-    //   $checkbox_set,
-    //   $checkbox_value_spec,
-    //   $done,
-    //   checkbox_count,
-    //   model
-    // );
-    // checkbox_count += 1;
+    // Add the first
+    model[`checkbox_${checkbox_count}_text`] = `checkbox_${checkbox_count}`;
+    add_checkbox(
+      $checkbox_set,
+      $checkbox_value_spec,
+      $done,
+      checkbox_count,
+      model
+    );
+    checkbox_count += 1;
   }
 
   let checkbox_set_view = binding($edit, $checkbox_set, model, $done);
@@ -176,8 +163,10 @@ export function checkbox_set_edit($cgr) {
   // Add functionality for adding and removing radio buttons in the group
   $add_checkbox_button.on('click', 'button', function(e) {
     e.preventDefault();
-    model[`radio_text_${checkbox_count}`] = `radio_text_${checkbox_count}`;
-    add_radio(
+    model[`checkbox_${checkbox_count}`] = {
+      text: `checkbox_${checkbox_count}`,
+    };
+    add_checkbox(
       $checkbox_set,
       $checkbox_value_spec,
       $done,
