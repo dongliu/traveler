@@ -46,6 +46,8 @@ export function add_checkbox(
     .append(
       '<button value="remove-checkbox" class="btn btn-warning">-</button>'
     );
+  // TODO: remove by value is not reliable because value can be the same
+  // we do not have a way to validate the value yet.
   $checkbox_text.on('click', 'button[value="remove-checkbox"]', function(e) {
     e.preventDefault();
 
@@ -98,11 +100,6 @@ export function checkbox_set_edit($cgr) {
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     help = $('.controls span.help-block', $cgr).text();
-    // TBD: how to define user key and required?
-    // if we want to have a single user key for the fieldset then the fieldset should be submitted
-    // as an array, which requires binding changes.
-    // We can allow each checkbox to have a user key
-    // the required for a fieldset cannot be defined
   }
 
   // Assign components to the configure view
