@@ -1358,6 +1358,9 @@ function binding_events() {
       case 'checkbox':
         checkbox_edit($cgr);
         break;
+      case 'checkbox-set':
+        checkbox_set_edit($cgr);
+        break;
       case 'radio':
         radio_edit($cgr);
         break;
@@ -1383,7 +1386,7 @@ function binding_events() {
         other_edit($cgr);
         break;
       default:
-        console.log('type not implemented.');
+        console.log('input type not implemented.');
     }
   });
 

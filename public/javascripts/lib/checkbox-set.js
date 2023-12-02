@@ -12,7 +12,7 @@ export function add_checkbox(
   count,
   model
 ) {
-  // Add radio button text configuration screen
+  // Add checkbox spec
   const $checkbox_text = $(
     spec.generic_text_input({ label: `Checkbox ${count} text` })
   );
@@ -129,20 +129,25 @@ export function checkbox_set_edit($cgr) {
   if ($cgr) {
     // load the checkboxes for edit mode
     const checkboxes = $cgr.find('.controls').find('input');
-    // $.map(checkboxes, function(button, i) {
-    //   model[`radio_text_${i}`] = $(button).prop('value');
-    // });
-    // const length = checkboxes.size();
-    // for (let i = 0; i < length; i += 1) {
-    //   add_radio(
-    //     $checkbox_set,
-    //     $checkbox_value_spec,
-    //     $done,
-    //     checkbox_count,
-    //     model
-    //   );
-    //   checkbox_count += 1;
-    // }
+    $.map(checkboxes, function(checkbox, count) {
+      const $checkbox = $(checkbox);
+      model[`checkbox_${count}_text`] = $checkbox.prop('value');
+      const userkey = $checkbox.data('userkey');
+      if (userkey) {
+        model[`checkbox_${count}_userkey`] = userkey;
+      }
+    });
+    const length = checkboxes.size();
+    for (let i = 0; i < length; i += 1) {
+      add_checkbox(
+        $checkbox_set,
+        $checkbox_value_spec,
+        $done,
+        checkbox_count,
+        model
+      );
+      checkbox_count += 1;
+    }
   } else {
     // Add the first
     model[`checkbox_${checkbox_count}_text`] = `checkbox_${checkbox_count}`;
@@ -160,12 +165,10 @@ export function checkbox_set_edit($cgr) {
 
   $add_checkbox_button.unbind('click');
 
-  // Add functionality for adding and removing radio buttons in the group
+  // Add functionality for adding and removing checkbox in the group
   $add_checkbox_button.on('click', 'button', function(e) {
     e.preventDefault();
-    model[`checkbox_${checkbox_count}`] = {
-      text: `checkbox_${checkbox_count}`,
-    };
+    model[`checkbox_${checkbox_count}_text`] = `checkbox_${checkbox_count}`;
     add_checkbox(
       $checkbox_set,
       $checkbox_value_spec,
