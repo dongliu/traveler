@@ -194,7 +194,7 @@
       buf.push(
         '<div class="control-group"><div class="control-label">' +
           jade.escape((jade_interp = label) == null ? '' : jade_interp) +
-          '</div><div class="controls"><input type="text" name="radio_text"/></div></div>'
+          '</div><div class="controls"><input type="text"/></div></div>'
       );
     }.call(
       this,

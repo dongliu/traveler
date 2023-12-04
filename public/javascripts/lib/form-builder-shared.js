@@ -1,6 +1,6 @@
 /* eslint-disable func-names */
 /* eslint-disable no-param-reassign */
-/* global rivets, UID, input, spec */
+/* global rivets, UID */
 
 export function userkey_error($userkey, msg) {
   if (!$userkey.closest('.control-group').hasClass('error')) {
@@ -23,7 +23,21 @@ export function rangeText(min, max) {
   return output.join(', ') || null;
 }
 
-export function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
+/**
+ * Add a new control group to the default output or another location. A new checkbox can be added into a checkbox set
+ * @param {*} $cgr the existing control group if any
+ * @param {*} $new_cgr the new control group to add or replace the existing one
+ * @param {*} $buttons the editing buttons associated with the control group
+ * @param {*} $spec the spec controls
+ * @param {*} $target the place to add the control group default to the output, can be a special location like the checkbox set
+ */
+export function add_new_cgr(
+  $cgr,
+  $new_cgr,
+  $buttons,
+  $spec,
+  $target = $('#output')
+) {
   $new_cgr.prepend($buttons.hide());
   if ($cgr) {
     if ($('span.fe-type', $cgr).text() !== 'radio') {
@@ -37,10 +51,10 @@ export function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
     $('legend', $new_cgr).attr('id', $('legend', $cgr).attr('id'));
 
     $cgr.replaceWith($new_cgr);
-    $new_cgr.after($edit);
+    $new_cgr.after($spec);
   } else {
-    $('#output').append($new_cgr);
-    $('#output').append($edit);
+    $target.append($new_cgr);
+    $('#output').append($spec);
   }
 }
 

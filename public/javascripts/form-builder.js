@@ -1276,6 +1276,7 @@ function binding_events() {
     // check if it is normal edit mode
     $('.control-group-wrap', '#output').removeClass('control-focus');
     $('.control-group-buttons', '#output').hide();
+    // not adjust location
     if ($('#adjust').text() === 'Adjust location') {
       if (!$(this).hasClass('control-focus')) {
         $(this).addClass('control-focus');
@@ -1386,7 +1387,7 @@ function binding_events() {
         other_edit($cgr);
         break;
       default:
-        console.log('input type not implemented.');
+        console.log(`input type ${type} not implemented.`);
     }
   });
 

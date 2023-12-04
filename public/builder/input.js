@@ -167,6 +167,11 @@
     return buf.join('');
   };
 
+  // checkbox_in_set.jade compiled template
+  templatizer['checkbox_in_set'] = function tmpl_checkbox_in_set() {
+    return '<div class="control-group output-control-group"><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-data-userkey="model.userkey"/><span>{ model.checkbox_text }</span></label></div></div>';
+  };
+
   // checkbox_member.jade compiled template
   templatizer['checkbox_member'] = function tmpl_checkbox_member() {
     return '<label class="checkbox"><input type="checkbox" disabled="disabled"/><span class="checkbox_text"></span></label>';
@@ -178,11 +183,16 @@
     var jade_mixins = {};
     var jade_interp;
     buf.push(
-      '<div rv-data-required="model.required" rv-data-userkey="model.userkey" class="control-group checkbox-set"><div class="control-label"><span class="control-number"></span>' +
+      '<div class="control-group checkbox-set"><div class="control-label"><span class="control-number"></span>' +
         (null == (jade_interp = ' ') ? '' : jade_interp) +
-        '<span class="model-label">{ model.label }</span></div><div class="controls"><fieldset class="checkboxes"></fieldset><span class="help-block">{ model.help }</span></div></div>'
+        '<span class="model-label">{ model.label }</span></div><div class="controls"><div class="checkbox-set-controls"></div><span class="help-block">{ model.help }</span></div></div>'
     );
     return buf.join('');
+  };
+
+  // checkbox_set_button.jade compiled template
+  templatizer['checkbox_set_button'] = function tmpl_checkbox_set_button() {
+    return '<div class="pull-right checkbox-set-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="fa fa-edit fa-lg"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="fa fa-trash-o fa-lg"></i></a></div></div>';
   };
 
   // figure.jade compiled template
