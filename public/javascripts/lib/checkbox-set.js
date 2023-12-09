@@ -30,6 +30,7 @@ export function checkbox_set_edit($cgr) {
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     help = $('.controls span.help-block', $cgr).text();
+    // add existing checkboxes into div.checkbox-set-controls of $checkbox_set
   }
 
   // Assign components to the configure view
