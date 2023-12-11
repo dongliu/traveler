@@ -331,6 +331,10 @@ figcaption {
   margin-left: 0px;
 }
 
+.checkbox-set-controls .control-group {
+  margin-bottom: 0px;
+}
+
 /**
  * Sidenav for sections
  */
