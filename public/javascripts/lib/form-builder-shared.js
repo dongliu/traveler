@@ -38,7 +38,9 @@ export function add_new_cgr(
   $spec,
   $target = $('#output')
 ) {
-  $new_cgr.prepend($buttons.hide());
+  if ($buttons) {
+    $new_cgr.prepend($buttons.hide());
+  }
   if ($cgr) {
     if ($('span.fe-type', $cgr).text() !== 'radio') {
       // reserve important attributes that are not covered but rivet model binding like unique name
@@ -54,7 +56,7 @@ export function add_new_cgr(
     $new_cgr.after($spec);
   } else {
     $target.append($new_cgr);
-    $('#output').append($spec);
+    $target.append($spec);
   }
 }
 
@@ -91,7 +93,7 @@ export function updateSectionNumbers() {
     });
 }
 
-export function done_button(view, $out) {
+export function done_button(view, $rendered) {
   return function(e) {
     e.preventDefault();
     // validate the userkey according to current form
@@ -118,25 +120,27 @@ export function done_button(view, $out) {
       .closest('.spec')
       .remove();
     // assign unique name if not yet
-    $('input, textarea', $out).each(function() {
+    $('input, textarea', $rendered).each(function() {
       if (!$(this).attr('name')) {
         $(this).attr('name', UID.generateShort());
       }
     });
 
     // assign id to legent, id is used for side nav
-    $('legend', $out).each(function() {
+    $('legend', $rendered).each(function() {
       if (!$(this).attr('id')) {
         $(this).attr('id', UID.generateShort());
       }
     });
 
     updateSectionNumbers();
-    $out.closest('.control-group-wrap').removeAttr('data-status');
+    $rendered
+      .closest('.control-group-wrap, .checkbox-in-set')
+      .removeAttr('data-status');
   };
 }
 
-export function binding($edit, $out, model, $done) {
+export function binding($edit, $rendered, model, $done) {
   $('input:text', $edit).on('input', function() {
     model[$(this).attr('name')] = $(this)
       .val()
@@ -179,13 +183,13 @@ export function binding($edit, $out, model, $done) {
     model[$(this).attr('name')] = $(this).prop('checked');
   });
 
-  const view = rivets.bind($out, {
+  const view = rivets.bind($rendered, {
     model,
   });
 
   // clean all click handlers to the $done button first
   $done.unbind('click');
-  $done.click(done_button(view, $out));
+  $done.click(done_button(view, $rendered));
 
   return view;
 }

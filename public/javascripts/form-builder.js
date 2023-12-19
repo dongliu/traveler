@@ -7,7 +7,10 @@
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
-import { checkbox_set_edit } from './lib/checkbox-set.js';
+import {
+  checkbox_set_edit,
+  binding_checkbox_set_events,
+} from './lib/checkbox-set.js';
 
 const mce_content = {
   selector: 'textarea.tinymce',
@@ -1239,6 +1242,7 @@ function cleanBeforeSave() {
   // clean control-focus class and .control-group-buttons element
   $('#output .control-focus').removeClass('control-focus');
   $('#output .control-group-buttons').remove();
+  $('#output .checkbox-set-buttons').remove();
   // clean status
   $('#output .control-group-wrap').removeAttr('data-status');
   // remove tinymce
@@ -1711,4 +1715,6 @@ $(function() {
     working();
   }
   binding_events();
+  // checkbox set specific events
+  binding_checkbox_set_events();
 });

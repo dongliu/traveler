@@ -68,3 +68,50 @@ export function checkbox_set_edit($cgr) {
     add_checkbox($checkbox_set_controls);
   });
 }
+
+export function binding_checkbox_set_events() {
+  $('#output').on(
+    'mouseenter',
+    '.control-group-wrap[data-status="editing"] .checkbox-in-set',
+    function(e) {
+      e.preventDefault();
+      if ($('.checkbox-set-buttons', $(this)).length > 0) {
+        $('.checkbox-set-buttons', $(this)).show();
+      } else {
+        $(this).append(input.checkbox_set_button());
+      }
+    }
+  );
+
+  $('#output').on(
+    'mouseleave',
+    '.control-group-wrap[data-status="editing"] .checkbox-in-set',
+    function(e) {
+      e.preventDefault();
+      $('.checkbox-set-buttons', $(this)).hide();
+    }
+  );
+
+  $('#output').on(
+    'click',
+    '.checkbox-in-set a.btn.btn-warning[title="remove the checkbox"]',
+    function(e) {
+      e.preventDefault();
+      const $checkbox = $(this).closest('.checkbox-in-set');
+      $checkbox.remove();
+    }
+  );
+
+  $('#output').on(
+    'click',
+    '.checkbox-in-set a.btn.btn-info[title="edit the checkbox"]',
+    function(e) {
+      e.preventDefault();
+      const $this = $(this);
+      $('.checkbox-set-buttons', $this).hide();
+      const $checkbox = $this.closest('.checkbox-in-set');
+      const $target = $this.closest('.checkbox-set-controls');
+      checkbox_edit($checkbox, $target);
+    }
+  );
+}

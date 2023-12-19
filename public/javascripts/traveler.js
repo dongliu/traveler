@@ -247,6 +247,7 @@ $(function() {
       dataType: 'json',
     })
       .done(function(data) {
+        // notes append to input/textarea not .controls
         $('#form .controls').each(function(index, controlsElement) {
           var inputElements = $(controlsElement).find('input,textarea');
           if (inputElements.length) {
