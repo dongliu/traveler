@@ -172,11 +172,6 @@
     return '<div class="control-group output-control-group"><div class="controls"><label class="checkbox"><input type="checkbox" disabled="disabled" rv-data-userkey="model.userkey"/><span>{ model.checkbox_text }</span></label></div></div>';
   };
 
-  // checkbox_member.jade compiled template
-  templatizer['checkbox_member'] = function tmpl_checkbox_member() {
-    return '<label class="checkbox"><input type="checkbox" disabled="disabled"/><span class="checkbox_text"></span></label>';
-  };
-
   // checkbox_set.jade compiled template
   templatizer['checkbox_set'] = function tmpl_checkbox_set(locals) {
     var buf = [];
@@ -192,7 +187,7 @@
 
   // checkbox_set_button.jade compiled template
   templatizer['checkbox_set_button'] = function tmpl_checkbox_set_button() {
-    return '<div class="pull-right checkbox-set-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="fa fa-edit fa-lg"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="fa fa-trash-o fa-lg"></i></a></div></div>';
+    return '<div class="checkbox-set-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit the checkbox" class="btn btn-info">Edit</a><a data-toggle="tooltip" title="remove the checkbox" class="btn btn-warning">Remove</a></div></div>';
   };
 
   // figure.jade compiled template
