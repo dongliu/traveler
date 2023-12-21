@@ -249,7 +249,12 @@ $(function() {
       .done(function(data) {
         // notes append to input/textarea not .controls
         $('#form .controls').each(function(index, controlsElement) {
-          var inputElements = $(controlsElement).find('input,textarea');
+          const $controlsElement = $(controlsElement);
+          if ($controlsElement.children('.checkbox-set-controls').length > 0) {
+            // skip the checkbox set
+            return;
+          }
+          var inputElements = $controlsElement.find('input,textarea');
           if (inputElements.length) {
             var element = inputElements[0];
             var found = data.filter(function(e) {
@@ -725,7 +730,7 @@ $(function() {
   $('#form').on('click', 'button[value="reset"]', function(e) {
     e.preventDefault();
     var $this = $(this);
-    var inputs = $this.closest('.control-group-wrap').find('input,textarea');
+    var inputs = $this.closest('.controls').find('input,textarea');
     var i;
     for (i = 0; i < inputs.length; i += 1) {
       if (binder.accessor.target[inputs[i].name] === undefined) {
