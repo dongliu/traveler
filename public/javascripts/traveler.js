@@ -394,7 +394,12 @@ $(function() {
   })
     .done(function(data) {
       $('#form .controls').each(function(index, controlsElement) {
-        var inputElements = $(controlsElement).find('input,textarea');
+        const $controlsElement = $(controlsElement);
+        if ($controlsElement.children('.checkbox-set-controls').length > 0) {
+          // skip the checkbox set
+          return;
+        }
+        var inputElements = $controlsElement.find('input,textarea');
         var currentValue;
         if (inputElements.length) {
           var element = inputElements[0];
@@ -619,18 +624,18 @@ $(function() {
 
   function formInputMade() {
     var $this = $(this);
-    var inputs = $this.closest('.control-group-wrap').find('input,textarea');
+    var inputs = $this.closest('.controls').find('input,textarea');
     var i;
     for (i = 0; i < inputs.length; i += 1) {
       markValidity(inputs[i]);
     }
-    var $cgw = $this.closest('.control-group-wrap');
+    var $controls = $this.closest('.controls');
     $('#form input,textarea')
       .not($(inputs))
       .prop('disabled', true);
     $('#complete').prop('disabled', true);
-    if ($cgw.children('.control-group-buttons').length === 0) {
-      $cgw.prepend(
+    if ($controls.children('.control-group-buttons').length === 0) {
+      $controls.prepend(
         '<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>'
       );
     }
@@ -640,7 +645,7 @@ $(function() {
     e.preventDefault();
     // ajax to save the current value
     var $this = $(this);
-    var inputs = $this.closest('.control-group-wrap').find('input,textarea');
+    var inputs = $this.closest('.controls').find('input,textarea');
     var input = inputs[0];
     if (inputs[0].type === 'radio') {
       for (var i = 0; i < inputs.size(); i++) {
@@ -681,15 +686,13 @@ $(function() {
             livespan(timestamp, false) +
             '</div>'
         );
-        var $history = $this
-          .closest('.control-group-wrap')
-          .find('.input-history');
+        var $history = $this.closest('.controls').find('.input-history');
         if ($history.length > 0) {
           $history = $($history[0]);
         } else {
           incrementFinished();
           $history = $('<div class="input-history"/>').appendTo(
-            $this.closest('.control-group-wrap').find('.controls')
+            $this.closest('.controls')
           );
         }
         var historyRecord = generateHistoryRecordHtml(
