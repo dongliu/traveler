@@ -7,63 +7,9 @@ livespan, Modernizr, createSideNav, generateHistoryRecordHtml
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
-function fileHistory(found) {
-  var i;
-  var output = '';
-  var link;
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      link = prefix + '/data/' + found[i]._id;
-      output =
-        output +
-        '<strong><a href=' +
-        link +
-        ' target="' +
-        linkTarget +
-        '" download=' +
-        found[i].value +
-        '>' +
-        found[i].value +
-        '</a></strong> uploaded by ' +
-        found[i].inputBy +
-        ' ' +
-        livespan(found[i].inputOn, false) +
-        '; ';
-    }
-  }
-  return output;
-}
+import { renderHistory } from './lib/traveler.js';
 
-function notes(found) {
-  var i;
-  var output = '<dl>';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output =
-        output +
-        '<div class="note" id=' +
-        found[i]._id +
-        ' data-owner=' +
-        found[i].inputBy +
-        '><dt><b>' +
-        found[i].inputBy +
-        ' created on ' +
-        livespan(found[i].inputOn, false);
-      if (found[i].updatedBy) {
-        output +=
-          ', updated on ' +
-          livespan(found[i].updatedOn, false) +
-          ' by ' +
-          found[i].updatedBy;
-      }
-      output += '</b>: </dt>';
-      output = output + '<dd>' + found[i].value + '</dd></div>';
-    }
-  }
-  return output + '</dl>';
-}
-
-// temparary solution for the dirty forms
+// temporary solution for the dirty forms
 function cleanForm() {
   $('.control-group-buttons').remove();
 }
@@ -240,61 +186,7 @@ $(function() {
 
   var binder = new Binder.FormBinder(document.forms[0]);
 
-  function renderNotes() {
-    $.ajax({
-      url: './notes/',
-      type: 'GET',
-      dataType: 'json',
-    })
-      .done(function(data) {
-        // notes append to input/textarea not .controls
-        $('#form .controls').each(function(index, controlsElement) {
-          const $controlsElement = $(controlsElement);
-          if ($controlsElement.children('.checkbox-set-controls').length > 0) {
-            // skip the checkbox set
-            return;
-          }
-          var inputElements = $controlsElement.find('input,textarea');
-          if (inputElements.length) {
-            var element = inputElements[0];
-            var found = data.filter(function(e) {
-              return e.name === element.name;
-            });
-            $(element)
-              .closest('.controls')
-              .append(
-                '<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' +
-                  found.length +
-                  '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>'
-              );
-            if (found.length) {
-              found.sort(function(a, b) {
-                if (a.inputOn > b.inputOn) {
-                  return -1;
-                }
-                return 1;
-              });
-              $(element)
-                .closest('.controls')
-                .append(
-                  '<div class="input-notes" style="display: none;">' +
-                    notes(found) +
-                    '</div>'
-                );
-            }
-          }
-        });
-      })
-      .fail(function(jqXHR) {
-        if (jqXHR.status !== 401) {
-          $('#message').append(
-            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>'
-          );
-          $(window).scrollTop($('#message div:last-child').offset().top - 40);
-        }
-      })
-      .always();
-  }
+  renderHistory(binder, travelerStatus);
 
   $('#form').on('click', 'a.new-note', function(e) {
     e.preventDefault();
@@ -391,89 +283,6 @@ $(function() {
       $input_notes.show();
     }
   });
-
-  $.ajax({
-    url: './data/',
-    type: 'GET',
-    dataType: 'json',
-  })
-    .done(function(data) {
-      $('#form .controls').each(function(index, controlsElement) {
-        const $controlsElement = $(controlsElement);
-        if ($controlsElement.children('.checkbox-set-controls').length > 0) {
-          // skip the checkbox set
-          return;
-        }
-        var inputElements = $controlsElement.find('input,textarea');
-        var currentValue;
-        if (inputElements.length) {
-          var element = inputElements[0];
-          var found = data.filter(function(e) {
-            return e.name === element.name;
-          });
-          if (found.length) {
-            found.sort(function(a, b) {
-              if (a.inputOn > b.inputOn) {
-                return -1;
-              }
-              return 1;
-            });
-            if (element.type === 'file') {
-              $(element)
-                .closest('.controls')
-                .append(
-                  '<div class="input-history"><b>history</b>: ' +
-                    fileHistory(found) +
-                    '</div>'
-                );
-            } else {
-              currentValue = found[0].value;
-              if (found[0].inputType === 'radio') {
-                // Update element to match the value
-                for (var i = 0; i < inputElements.size(); i++) {
-                  var ittrInput = inputElements[i];
-                  if (ittrInput.value === currentValue) {
-                    element = ittrInput;
-                    break;
-                  }
-                }
-              } else if (element.type === 'number') {
-                // Patch to support appropriate stepping validation for input numbers.
-                element.step = 'any';
-              }
-              binder.deserializeFieldFromValue(element, currentValue);
-              binder.accessor.set(element.name, currentValue);
-              $(element)
-                .closest('.controls')
-                .append(
-                  '<div class="input-history"><b>history</b>: ' +
-                    history(found) +
-                    '</div>'
-                );
-            }
-          }
-        }
-      });
-
-      // check if active here
-      if (travelerStatus === 1) {
-        $('#form input,textarea').prop('disabled', false);
-      }
-
-      markFormValidity(document.getElementById('form'));
-
-      // load the notes here
-      renderNotes();
-    })
-    .fail(function(jqXHR) {
-      if (jqXHR.status !== 401) {
-        $('#message').append(
-          '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>'
-        );
-        $(window).scrollTop($('#message div:last-child').offset().top - 40);
-      }
-    })
-    .always();
 
   $('#complete').click(completeClick);
   $('#complete2').click(completeClick);
