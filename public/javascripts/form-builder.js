@@ -7,6 +7,11 @@
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
+import {
+  checkbox_set_edit,
+  binding_checkbox_set_events,
+} from './lib/checkbox-set.js';
+
 const mce_content = {
   selector: 'textarea.tinymce',
   content_css: '/bootstrap/css/bootstrap.css',
@@ -224,7 +229,7 @@ function done_button(view, $out) {
       }
     });
 
-    // assign id to legent, id is used for side nav
+    // assign id to legend, id is used for side nav
     $('legend', $out).each(function() {
       if (!$(this).attr('id')) {
         $(this).attr('id', UID.generateShort());
@@ -1162,6 +1167,12 @@ function working() {
     scrollToBottom();
   });
 
+  $('#add-checkbox-set').click(function(e) {
+    e.preventDefault();
+    checkbox_set_edit();
+    scrollToBottom();
+  });
+
   $('#add-radio').click(function(e) {
     e.preventDefault();
     radio_edit();
@@ -1231,6 +1242,7 @@ function cleanBeforeSave() {
   // clean control-focus class and .control-group-buttons element
   $('#output .control-focus').removeClass('control-focus');
   $('#output .control-group-buttons').remove();
+  $('#output .checkbox-set-buttons').remove();
   // clean status
   $('#output .control-group-wrap').removeAttr('data-status');
   // remove tinymce
@@ -1268,6 +1280,7 @@ function binding_events() {
     // check if it is normal edit mode
     $('.control-group-wrap', '#output').removeClass('control-focus');
     $('.control-group-buttons', '#output').hide();
+    // not adjust location
     if ($('#adjust').text() === 'Adjust location') {
       if (!$(this).hasClass('control-focus')) {
         $(this).addClass('control-focus');
@@ -1350,6 +1363,9 @@ function binding_events() {
       case 'checkbox':
         checkbox_edit($cgr);
         break;
+      case 'checkbox-set':
+        checkbox_set_edit($cgr);
+        break;
       case 'radio':
         radio_edit($cgr);
         break;
@@ -1375,7 +1391,7 @@ function binding_events() {
         other_edit($cgr);
         break;
       default:
-        console.log('type not implemented.');
+        console.log(`input type ${type} not implemented.`);
     }
   });
 
@@ -1699,4 +1715,6 @@ $(function() {
     working();
   }
   binding_events();
+  // checkbox set specific events
+  binding_checkbox_set_events();
 });

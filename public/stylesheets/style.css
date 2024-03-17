@@ -326,6 +326,15 @@ figcaption {
   padding-right: 10px;
 }
 
+/* checkbox set */ 
+.checkbox-set-controls .controls {
+  margin-left: 0px;
+}
+
+.checkbox-set-controls .control-group {
+  margin-bottom: 0px;
+}
+
 /**
  * Sidenav for sections
  */

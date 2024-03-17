@@ -95,6 +95,8 @@ block content
         ul.dropdown-menu
           li#add-checkbox
             a Checkbox
+          li#add-checkbox-set
+            a Checkbox set
           li#add-radio
             a Radio
           li#add-text
@@ -164,4 +166,4 @@ block js
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-explorer.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/form-builder.js')
+  script(type='module', src='#{prefix}/javascripts/form-builder.js')
