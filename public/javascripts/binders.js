@@ -333,17 +333,6 @@ $(function() {
     Modal.archive('binder', 3, activeTable, archivedBinderTable);
   });
 
-  $('button#dearchive').click(function() {
-    const activeTable = $('.tab-pane.active table').dataTable();
-    Modal.dearchive(
-      'binder',
-      activeTable,
-      archivedBinderTable,
-      binderTable,
-      transferredBinderTable
-    );
-  });
-
   $('#add-to-binder').click(function() {
     var activeTable = $('.tab-pane.active table').dataTable();
     AddBinder.addModal(activeTable, 'binder');
