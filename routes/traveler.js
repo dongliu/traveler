@@ -1030,7 +1030,7 @@ module.exports = function(app) {
           .send('You are not authorized to change the status. ');
       }
 
-      // admin and manager can request more work or archive a complted traveler
+      // admin and manager can request more work or archive a completed traveler
       if (
         doc.status === 2 &&
         (req.body.status === 4 || req.body.status === 1) &&
