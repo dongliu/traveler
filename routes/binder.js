@@ -565,7 +565,7 @@ module.exports = function(app) {
       const p = req[req.params.id];
       const s = req.body.status;
 
-      if ([1, 2, 3].indexOf(s) === -1) {
+      if ([0, 1, 2, 3].indexOf(s) === -1) {
         return res.status(400).send('invalid status');
       }
 
