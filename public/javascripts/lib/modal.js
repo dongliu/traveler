@@ -60,7 +60,7 @@ export function updateStatusFromModal(type, status, ...tables) {
   });
 }
 
-export function archive(type, status, fromTable, updateTable) {
+export function archive(type, status, fromTable, ...updateTables) {
   const selected = fnGetSelected(fromTable, 'row-selected');
   modalScroll(false);
   if (selected.length === 0) {
@@ -79,7 +79,31 @@ export function archive(type, status, fromTable, updateTable) {
     );
     $('#modal').modal('show');
     $('#submit').click(function() {
-      updateStatusFromModal(type, status, fromTable, updateTable);
+      updateStatusFromModal(type, status, fromTable, ...updateTables);
+    });
+  }
+}
+
+export function dearchive(type, status, fromTable, ...updateTables) {
+  const selected = fnGetSelected(fromTable, 'row-selected');
+  modalScroll(false);
+  if (selected.length === 0) {
+    noneSelectedModal();
+  } else {
+    $('#modalLabel').html(
+      `De-archive the following ${selected.length} ${type}(s)? `
+    );
+    $('#modal .modal-body').empty();
+    selected.forEach(function(row) {
+      const data = fromTable.fnGetData(row);
+      $('#modal .modal-body').append(formatItemUpdate(data));
+    });
+    $('#modal .modal-footer').html(
+      '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+    );
+    $('#modal').modal('show');
+    $('#submit').click(function() {
+      updateStatusFromModal(type, status, fromTable, ...updateTables);
     });
   }
 }
