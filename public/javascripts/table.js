@@ -1253,12 +1253,12 @@ const useridNoLinkColumn = {
   bFilter: true,
 };
 
-const userNameColumn = {
-  sTitle: 'Full name',
-  mData: 'username',
+const useridLinkColumn = {
+  sTitle: 'User id',
+  mData: '_id',
   sDefaultContent: '',
-  mRender(data, type, full) {
-    return `<a href = "${prefix}/users?name=${data}">${data}</a>`;
+  mRender(data) {
+    return `<a target="${linkTarget}" href = "${prefix}/users/${data}" title = "user details">${data}</a>`;
   },
   bFilter: true,
 };
