@@ -97,7 +97,7 @@ $(function() {
 
   var userColumns = [
     selectColumn,
-    useridColumn,
+    useridLinkColumn,
     fullNameNoLinkColumn,
     rolesColumn,
     lastVisitedOnColumn,
