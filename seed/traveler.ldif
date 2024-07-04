@@ -1,0 +1,77 @@
+# already seeded by the image
+## Entry 2: cn=admin,dc=example,dc=org
+# dn: cn=admin,dc=example,dc=org
+# cn: admin
+# description: LDAP administrator
+# objectclass: simpleSecurityObject
+# objectclass: organizationalRole
+# userpassword: {SSHA}+N8JmNzC8TkE7xqj6E448cipsLh1Ni43
+
+
+# Entry 3: uid=dong,dc=example,dc=org
+dn: uid=dong,dc=example,dc=org
+cn: Dong Liu
+displayname: Dong Liu
+employeenumber: 1000
+employeetype: Engineer
+givenname: Dong
+homephone: 2061234567
+mail: dong@example.com
+o: Traveler
+objectclass: inetOrgPerson
+objectclass: top
+ou: Engineering
+sn: Liu
+uid: dong
+userpassword: password
+
+# Entry 4: uid=bob,dc=example,dc=org
+dn: uid=bob,dc=example,dc=org
+cn: Bob Dalesio
+displayname: Bob Dalesio
+employeenumber: 1001
+employeetype: Engineer
+givenname: Bob
+homephone: 2061234567
+mail: bob@example.com
+o: Traveler
+objectclass: inetOrgPerson
+objectclass: top
+ou: Engineering
+sn: Dalesio
+uid: bob
+userpassword: password
+
+# Entry 5: uid=guobao,dc=example,dc=org
+dn: uid=guobao,dc=example,dc=org
+cn: Guobao Shen
+displayname: Guobao Shen
+employeenumber: 1002
+employeetype: Engineer
+givenname: Guobao
+homephone: 2061234567
+mail: guobao@example.com
+o: Traveler
+objectclass: inetOrgPerson
+objectclass: top
+ou: Engineering
+sn: Shen
+uid: guobao
+userpassword: password
+
+# Entry 6: uid=dariusz,dc=example,dc=org
+dn: uid=dariusz,dc=example,dc=org
+cn: Dariusz Jarosz
+displayname: Dariusz Jarosz
+employeenumber: 1003
+employeetype: Engineer
+givenname: Dariusz
+homephone: 2061234567
+mail: dariusz@example.com
+o: Traveler
+objectclass: inetOrgPerson
+objectclass: top
+ou: Engineering
+sn: Jarosz
+uid: dariusz
+userpassword: password

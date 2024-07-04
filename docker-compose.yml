@@ -1,9 +1,12 @@
-version: "3"
-networks:
-  default:
-    external: true
-    name: traveler-dev
 services:
+  mongo:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=traveler
+      - MONGO_INITDB_ROOT_PASSWORD=travelerpassword
+      - MONGO_INITDB_DATABASE=traveler
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
   web:
     build: .
     volumes:
@@ -22,3 +25,23 @@ services:
       - TRAVELER_CONFIG_REL_PATH=docker
       - DEBUG=traveler:*
       - DEBUG_COLORS=true
+    depends_on:
+      # - mongo
+      mongo:
+       condition: service_healthy
+  ldap-service:
+    image: osixia/openldap:1.2.1
+    command: --copy-service
+    volumes:
+      - ./seed:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    # ports:
+    #   - 389:389
+  phpldapadmin:
+    image: osixia/phpldapadmin:0.7.1
+    restart: unless-stopped
+    ports:
+      - 6443:443
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=ldap-service
+    depends_on:
+      - ldap-service
