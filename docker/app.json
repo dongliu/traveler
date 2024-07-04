@@ -2,10 +2,6 @@
   "org_name": "Lab",
   "app_port": "3001",
   "top_bar_urls": [
-    {
-      "text": "Link",
-      "url": "https://your.link.here"
-    }
   ],
   "link_target": "_blank",
   "deployment_name": "development",
