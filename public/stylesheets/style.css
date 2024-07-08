@@ -668,3 +668,7 @@ ul.pagination > li:last-child > span {
   -moz-border-radius-topright: 4px;
   -moz-border-radius-bottomright: 4px;
 }
+
+.caps {
+  text-transform: capitalize;
+}
