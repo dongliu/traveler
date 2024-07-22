@@ -39,7 +39,7 @@ block content
     if ((status === 0 || status === 0.5 || status === 1 ) && review)
       h4 Reviews
       if (allApproved)
-        p All reviewers has approved, the template was released
+        p All reviewers has approved, the template is ready for release
       #reviews.accordion
         .accordion-group
           .accordion-heading
@@ -140,6 +140,8 @@ block content
     if (status === 0)
       .btn-group
         button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
+    .btn-group
+      button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the template') Archive
     if (status === 0)
       //- .btn-group
         a.btn.btn-primary#version(data-toggle='tooltip', title='Check and switch versions', href='./version-mgmt', target='#{viewConfig.linkTarget}') Version control
