@@ -34,9 +34,7 @@ module.exports = function(app) {
           },
         },
         'title formType status tags _v __review'
-      )
-        .sort([['requestedOn', -1]])
-        .exec();
+      ).sort([['requestedOn', -1]]).exec();
       return res.status(200).json(forms);
     } catch (error) {
       debug(`error: ${error}`);
