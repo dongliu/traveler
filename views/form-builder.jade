@@ -3,9 +3,9 @@ extends layout
 block head
   meta(charset='urf-8')
   if (typeof id == 'undefined')
-    title #{orgName} - new form
+    title #{orgName} - new template
   else
-    title #{orgName} - form - !{title}
+    title #{orgName} - template - !{title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -37,7 +37,7 @@ block content
     if ((status === 0 || status === 0.5 || status === 1 ) && review)
       h4 Reviews
       if (allApproved)
-        p All reviewers has approved, the form is ready for release
+        p All reviewers has approved, the template is ready for release
       #reviews.accordion
         .accordion-group
           .accordion-heading
@@ -126,17 +126,17 @@ block content
       .btn-group
         button.btn.btn-primary#save Save
     .btn-group
-      a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
+      a.btn.btn-info#preview(data-toggle='tooltip', title='the template needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
     if (status === 0)
       .btn-group
-        button.btn.btn-primary#import(data-toggle='tooltip', title='import the content of a form') Import
+        button.btn.btn-primary#import(data-toggle='tooltip', title='import the content of a template') Import
       .btn-group
-        button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
+        button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current template') Save as
     if (status === 0)
       .btn-group
         button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
     .btn-group
-      button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
+      button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the template') Archive
     if (status === 0)
       .btn-group
         a.btn.btn-primary#version(data-toggle='tooltip', title='Check and switch versions', href='./version-mgmt', target='#{viewConfig.linkTarget}') Version control
