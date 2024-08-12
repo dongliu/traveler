@@ -24,11 +24,21 @@ module.exports = function(app) {
       return res.status(403).send('not authorized to view reviews');
     }
     try {
-      // after upton change, review request is only tracked in form document
-      // not in the user's review list anymore
+      // const me = await User.findOne(
+      //   {
+      //     _id: req.session.userid,
+      //   },
+      //   'reviews'
+      // ).exec();
+      // if (!me) {
+      //   return res.status(400).send('cannot identify the current user');
+      // }
       const forms = await Form.find(
         {
           '__review.reviewRequests._id': req.session.userid,
+          // _id: {
+            // $in: me.reviews,
+          // },
           archived: {
             $ne: true,
           },

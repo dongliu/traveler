@@ -362,6 +362,7 @@ $(function() {
   const closedFormAoColumns = [
     selectColumn,
     formLinkColumn,
+    editFormLinkColumn,
     titleColumn,
     formStatusColumn,
     docNoColumn,
