@@ -474,7 +474,16 @@ const formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender(data) {
-    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
+    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>`;
+  },
+  bSortable: false,
+};
+
+const editFormLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender(data) {
+    return `<form action="${prefix}/forms/${data}/edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');"><button class="btn btn-link" type="submit" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></button></form>`;
   },
   bSortable: false,
 };

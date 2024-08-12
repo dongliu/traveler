@@ -30,20 +30,21 @@ module.exports = function(app) {
       return res.status(403).send('only reviewer allowed');
     }
     try {
-      const me = await User.findOne(
-        {
-          _id: req.session.userid,
-        },
-        'reviews'
-      ).exec();
-      if (!me) {
-        return res.status(400).send('cannot identify the current user');
-      }
+      // const me = await User.findOne(
+      //   {
+      //     _id: req.session.userid,
+      //   },
+      //   'reviews'
+      // ).exec();
+      // if (!me) {
+      //   return res.status(400).send('cannot identify the current user');
+      // }
       const forms = await Form.find(
         {
-          _id: {
-            $in: me.reviews,
-          },
+          '__review.reviewRequests._id': req.session.userid,
+          // _id: {
+            // $in: me.reviews,
+          // },
           archived: {
             $ne: true,
           },
