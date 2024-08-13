@@ -20,11 +20,15 @@ block content
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
-      //- .btn-group
-      //-   button.btn.btn-info#reload
-      //-     i.fa.fa-refresh.fa-lg
-      //-     | &nbsp;Reload all tables
-      if (isAdmin)
+      .btn-group
+        a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
+          i.fa.fa-institution.fa-lg
+          | &nbsp;All public #{viewConfig.terminology.form}s
+      .btn-group
+        button.btn.btn-info#reload
+          i.fa.fa-refresh.fa-lg
+          | &nbsp;Reload all tables
+      if (locals && locals.userid && locals.roles && (locals.roles.indexOf('admin') !== -1))
         .btn-group
           a.btn.btn-info#form-management(href='#{prefix}/form-management/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='manage #{viewConfig.terminology.form}s')
             i.fa.fa-suitcase.fa-lg

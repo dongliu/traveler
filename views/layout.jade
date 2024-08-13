@@ -17,11 +17,9 @@ html
       var userid = !{JSON.stringify(locals.userid)};
       var prefix = !{JSON.stringify(prefix)};
 
-      var isAdmin = !{isAdmin};
-      var isManager = !{isManager};
-      var isReviwer = !{isReviwer};
-    block bodyJs
-
+    - var isAdmin = locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1
+    - var isManager = locals && locals.userid && locals.roles && locals.roles.indexOf('manager') !== -1
+    - var isReviwer = locals && locals.userid && locals.roles && locals.roles.indexOf('reviewer') !== -1
     .navbar.navbar-fixed-top
       .navbar-inner
         .container-fluid
@@ -50,19 +48,9 @@ html
                 a(href='#{prefix}/binders/') Binders
               if (isReviwer)
                 li
-                  a(href='#{prefix}/forms/').caps Draft #{viewConfig.terminology.form}s
-                li
-                  a(href='#{prefix}/releasedforms/').caps Released #{viewConfig.terminology.form}s
-                li
-                  a(href='#{prefix}/travelers/') Travelers
-                li
-                  a(href='#{prefix}/binders/') Binders
-                if (isReviwer)
-                  li
-                    a(href='#{prefix}/reviews/') My Reviews
-                li
-                  a(href='#{prefix}/docs/', target='#{viewConfig.linkTarget}') Documents
-
+                  a(href='#{prefix}/reviews/') Reviews
+              li
+                a(href='#{prefix}/docs/', target='#{viewConfig.linkTarget}') Documents
               if (locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1)
                 li
                   a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin

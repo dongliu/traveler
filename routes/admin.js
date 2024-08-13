@@ -8,21 +8,12 @@ const { Roles } = require('../lib/role.js');
 const rolesHtml = jade.compileFile(`${__dirname}/../views/roles.jade`);
 
 module.exports = function(app) {
-  app.get(
-    '/admin/',
-    auth.ensureAuthenticated,
-    reqUtils.requireAdmin(),
-    function(req, res) {
-      const supportedRoles = Object.keys(config.permission).filter(role =>
-        Roles.includes(role)
-      );
-      return res.render(
-        'admin',
-        routesUtilities.getRenderObject(req, {
-          supportedRoles,
-          rolesHtml: rolesHtml({ supportedRoles }),
-        })
-      );
+  app.get('/admin/', auth.ensureAuthenticated, function(req, res) {
+    if (
+      res.locals.roles === undefined ||
+      res.locals.roles.indexOf('admin') === -1
+    ) {
+      return res.status(403).send('only admin allowed');
     }
   );
 };
