@@ -6,7 +6,7 @@ module.exports = function(app) {
     res.render(
       'main',
       routesUtilities.getRenderObject(req, {
-        roles: req.session.roles,
+        roles: res.locals.roles,
       })
     );
   });

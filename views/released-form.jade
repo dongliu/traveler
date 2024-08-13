@@ -36,7 +36,7 @@ block content
     .btn-group(data-toggle='buttons-radio')
       button.btn.btn-info#show-validation Show validation
       button.btn.btn-info#hide-validation.active Hide validation
-    if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
+    if (locals && locals.userid && locals.roles && (locals.roles.indexOf('admin') !== -1 || locals.roles.indexOf('manager') !== -1))
       if (status === 1)
         .btn-group
           button.btn.btn-warning#obsolete(data-toggle='tooltip', title='Obsolete the released template') Obsolete
