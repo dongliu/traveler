@@ -5,6 +5,8 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=traveler
       - MONGO_INITDB_ROOT_PASSWORD=travelerpassword
       - MONGO_INITDB_DATABASE=traveler
+    ports:
+     - 27017:27017
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
   web:
@@ -34,8 +36,8 @@ services:
     command: --copy-service
     volumes:
       - ./seed:/container/service/slapd/assets/config/bootstrap/ldif/custom
-    # ports:
-    #   - 389:389
+    ports:
+      - 389:389
   phpldapadmin:
     image: osixia/phpldapadmin:0.7.1
     restart: unless-stopped
@@ -45,3 +47,14 @@ services:
       - PHPLDAPADMIN_LDAP_HOSTS=ldap-service
     depends_on:
       - ldap-service
+  mongo-express:
+    image: mongo-express:latest
+    restart: unless-stopped
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongo
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=traveler
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=travelerpassword

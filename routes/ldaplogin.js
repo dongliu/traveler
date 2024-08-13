@@ -3,6 +3,7 @@
  */
 var config = require('../config/config.js');
 var auth = require('../lib/auth');
+const { login } = require('../lib/auth/ldap.js');
 var routesUtilities = require('../utilities/routes.js');
 
 module.exports = function(app) {
@@ -10,7 +11,7 @@ module.exports = function(app) {
     res.render('ldaplogin', routesUtilities.getRenderObject(req));
   });
 
-  app.post('/ldaplogin/', auth.ensureAuthenticated, function(req, res) {
+  app.post('/ldaplogin/', login, function(req, res) {
     res.render(
       'ldaplogin',
       routesUtilities.getRenderObject(req, {

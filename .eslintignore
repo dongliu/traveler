@@ -1,7 +1,0 @@
-etc
-sbin
-!public
-public/*
-!public/javascripts
-public/javascripts/*
-!public/javascripts/lib
