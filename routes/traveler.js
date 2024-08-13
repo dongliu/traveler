@@ -1171,7 +1171,7 @@ module.exports = function(app) {
         }
         doc.manPower.addToSet({
           _id: req.session.userid,
-          username: req.session.username,
+          username: res.locals.username,
         });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
@@ -1244,7 +1244,7 @@ module.exports = function(app) {
         doc.notes.push(note._id);
         doc.manPower.addToSet({
           _id: req.session.userid,
-          username: req.session.username,
+          username: res.locals.username,
         });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();

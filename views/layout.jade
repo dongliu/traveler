@@ -11,12 +11,12 @@ html
       var shareGroups = !{JSON.stringify(viewConfig.shareGroups)};
       var linkTarget = !{JSON.stringify(viewConfig.linkTarget)} || '_blank';
       var showCCDB = !{JSON.stringify(viewConfig.showCCDB)};
-      var userid = !{JSON.stringify(locals.session.userid)};
+      var userid = !{JSON.stringify(locals.userid)};
       var prefix = !{JSON.stringify(prefix)};
 
-    - var isAdmin = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1
-    - var isManager = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('manager') !== -1
-    - var isReviwer = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('reviewer') !== -1
+    - var isAdmin = locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1
+    - var isManager = locals && locals.userid && locals.roles && locals.roles.indexOf('manager') !== -1
+    - var isReviwer = locals && locals.userid && locals.roles && locals.roles.indexOf('reviewer') !== -1
     .navbar.navbar-fixed-top
       .navbar-inner
         .container-fluid
@@ -48,15 +48,15 @@ html
                   a(href='#{prefix}/reviews/') Reviews
               li
                 a(href='#{prefix}/docs/', target='#{viewConfig.linkTarget}') Documents
-              if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
+              if (locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1)
                 li
                   a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
             ul.nav.pull-right
-              if (locals.session && locals.session.userid)
+              if (locals && locals.userid)
                 li
-                  img.user(title='#{session.username}', data-src='holder.js/27x40?size=20&text=#{session.username.substr(0, 1).toUpperCase()}')
+                  img.user(title='#{locals.username}', data-src='holder.js/27x40?size=20&text=#{locals.username.substr(0, 1).toUpperCase()}')
                 li.dropdown
-                  a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
+                  a.dropdown-toggle(href='#', data-toggle='dropdown') #{locals.username}
                     b.caret
                   ul.dropdown-menu
                     li

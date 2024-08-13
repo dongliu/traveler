@@ -11,8 +11,8 @@ const Form = mongoose.model('Form');
 module.exports = function(app) {
   app.get('/reviews/', auth.ensureAuthenticated, function(req, res) {
     if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf(Reviewer) === -1
+      res.locals.roles === undefined ||
+      res.locals.roles.indexOf(Reviewer) === -1
     ) {
       return res.status(403).send('only reviewer allowed');
     }
@@ -24,8 +24,8 @@ module.exports = function(app) {
     res
   ) {
     if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf(Reviewer) === -1
+      res.locals.roles === undefined ||
+      res.locals.roles.indexOf(Reviewer) === -1
     ) {
       return res.status(403).send('only reviewer allowed');
     }
@@ -43,14 +43,16 @@ module.exports = function(app) {
         {
           '__review.reviewRequests._id': req.session.userid,
           // _id: {
-            // $in: me.reviews,
+          // $in: me.reviews,
           // },
           archived: {
             $ne: true,
           },
         },
         'title formType status tags _v __review'
-      ).sort([['requestedOn', -1]]).exec();
+      )
+        .sort([['requestedOn', -1]])
+        .exec();
       return res.status(200).json(forms);
     } catch (error) {
       debug(`error: ${error}`);
