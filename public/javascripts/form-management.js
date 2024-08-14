@@ -3,7 +3,7 @@ global moment, ajax401, disableAjaxCache, prefix, updateAjaxURL, Holder,
 selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn,
 keysColumn, fnAddFilterFoot, sDomNoTools, reviewersColumn, firstReviewRequestedOnColumn,
 fnGetSelected, selectEvent, filterEvent, formShareLinkColumn, formStatusColumn,
-formTypeColumn, versionColumn, releasedFormStatusColumn,
+formTypeColumn, versionColumn, docNoColumn, releasedFormStatusColumn,
 releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
 archivedByColumn, archivedOnColumn, releasedFormLinkColumn
 */
@@ -64,6 +64,7 @@ $(function() {
     formShareLinkColumn,
     titleColumn,
     formTypeColumn,
+    docNoColumn,
     versionColumn,
     formStatusColumn,
     tagsColumn,

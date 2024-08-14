@@ -783,6 +783,13 @@ const titleColumn = {
   bFilter: true,
 };
 
+const docNoColumn = {
+  sTitle: 'Doc No',
+  sDefaultContent: '',
+  mData: 'documentNumber',
+  bFilter: true,
+};
+
 const versionColumn = {
   sTitle: 'Ver',
   mData: '_v',
