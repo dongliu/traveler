@@ -14,14 +14,18 @@ block content
       .control-group
         .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} title
         .controls
-          input(type='text', name='title', required)
+          input(type='text', name='title', required, value="#{form && form.title || ''}")
       if (locals.roles && locals.roles.indexOf('admin') !== -1)
         .control-group
           .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} type
           .controls
             select(name='formType', required)
-              option(value='normal') normal
-              option(value='discrepancy') discrepancy
+              option(value='normal' selected=form && form.formType == 'normal') normal
+              option(value='discrepancy' selected=form && form.formType == "discrepancy") discrepancy
+      .control-group
+        .control-label Document number
+        .controls
+          input(type='text', maxlength=20, name='documentNumber', required, value="#{form && form.documentNumber || ''}")
       .control-group
         .controls
           .btn-group

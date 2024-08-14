@@ -62,7 +62,7 @@ const releasedForm = new Schema({
   discrepancy: { type: formContent, default: null },
   // ver format: base_v[:discrepancy_v]
   ver: String,
-  documentNumber: String,
+  documentNumber: String
 });
 
 releasedForm.plugin(addVersion, {

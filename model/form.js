@@ -82,9 +82,10 @@ const form = new Schema({
     default: 'normal',
     enum: ['normal', 'discrepancy'],
   },
-  documentNumber: { type: String, unique: true },
-  versionNotes: String,
+  documentNumber: {type: String, unique: true}
 });
+
+
 
 /**
  * pre save middleware to add or update the mapping

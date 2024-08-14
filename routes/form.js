@@ -147,13 +147,19 @@ module.exports = function (app) {
           archived: {
             $ne: true,
           },
-          'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
-        ).exec();
-        return res.status(200).json(forms);
-      } catch (error) {
-        logger.error(error);
-        return res.status(500).send(error.message);
-      }
+          status: {
+            $in: [1],
+          },
+          owner: {
+            $exists: false,
+          },
+        },
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
+      ).exec();
+      return res.status(200).json(forms);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
     }
   );
 
@@ -305,7 +311,7 @@ module.exports = function (app) {
     try {
       const forms = await Form.find(
         search,
-        'title formType status tags updatedBy updatedOn _v'
+        'title formType status tags updatedBy updatedOn _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -413,7 +419,7 @@ module.exports = function (app) {
     async (req, res) => {
 
       const form = req[req.params.id];
-      await ReleasedForm.updateMany({'base._id': form._id}, {$set: {status: 2}});
+      await ReleasedForm.updateMany({ 'base._id': form._id }, { $set: { status: 2 } });
       form.status = 0;
       form.save();
       return res.status(200).redirect(`/forms/${form._id}/`);
@@ -854,13 +860,7 @@ module.exports = function (app) {
         });
       } catch (error) {
         if (error && error.code === 11000) {
-          return res.render(
-            'form-new',
-            routesUtilities.getRenderObject(req, {
-              error: 'Document ID already exists.',
-              form: req.body,
-            })
-          );
+          return res.render('form-new', routesUtilities.getRenderObject(req, { error: "Document ID already exists.", form: req.body }));
         }
         logger.error(error);
         return res.status(500).send(error.message);

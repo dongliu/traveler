@@ -1,12 +1,12 @@
-/* global ajax401, disableAjaxCache, prefix, updateAjaxURL,
- travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, editFormLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
- updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn,
- fnAddFilterFoot, sDomNoTools, createdByColumn, createdOnColumn,
- fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
- transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
- versionColumn, docNoColumn, releasedFormLinkColumn, releasedFormStatusColumn,
- releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
- transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn */
+/*
+global moment, ajax401, disableAjaxCache, prefix, updateAjaxURL, Holder,
+selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn,
+keysColumn, fnAddFilterFoot, sDomNoTools, reviewersColumn, firstReviewRequestedOnColumn,
+fnGetSelected, selectEvent, filterEvent, formShareLinkColumn, formStatusColumn,
+formTypeColumn, versionColumn, docNoColumn, releasedFormStatusColumn,
+releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
+archivedByColumn, archivedOnColumn, releasedFormLinkColumn
+*/
 
 import { initTableIfExists } from './lib/table.js';
 
@@ -81,6 +81,9 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
+    formTypeColumn,
+    docNoColumn,
+    versionColumn,
     formStatusColumn,
     docNoColumn,
     versionColumn,

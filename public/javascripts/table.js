@@ -790,13 +790,6 @@ const docNoColumn = {
   bFilter: true,
 };
 
-const travelerVersionColumn = {
-  sTitle: 'Ver',
-  sDefaultContent: '',
-  mData: 'referenceReleasedFormVer',
-  bFilter: true,
-};
-
 const versionColumn = {
   sTitle: 'Ver',
   mData: '_v',
