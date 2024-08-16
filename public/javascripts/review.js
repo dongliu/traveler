@@ -193,7 +193,7 @@ $(function() {
 
   const reviewAoColumns = [
     selectColumn,
-    reviewerIdColumn,
+    userIdColumn,
     requestedOnColumn,
     reviewResultColumn,
   ];
