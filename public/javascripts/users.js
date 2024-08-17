@@ -118,8 +118,6 @@ $(function() {
         contentType: 'application/json',
         data: JSON.stringify({
           name: uid,
-          manager: $('#manager').prop('checked'),
-          admin: $('#admin').prop('checked'),
         }),
         success: function(data, status, jqXHR) {
           $('#message').append(
