@@ -25,12 +25,37 @@ block content
           a(href='#groups', data-toggle='tab') Groups
       .tab-content
         #users.tab-pane.active
-          form.form-inline
-            input#username.input(type='text', placeholder='Last, First', name='name')
-            != ' '
-            button.btn.btn-primary#add(type='submit') Add
+          .well
+            form.form-inline
+              input#username.input(type='text', placeholder='Last, First', name='name')
+              != ' '
+              label.checkbox.inline
+                input#manager(type='checkbox', value='manager')
+                | manager
+              != ' '
+              label.checkbox.inline
+                input#reviwer(type='checkbox', value='reviewer')
+                | reviewer
+              != ' '
+              label.checkbox.inline
+                input#admin(type='checkbox', value='admin')
+                | admin
+              != ' '
+              label.checkbox.inline
+                input#read-form(type='checkbox', value='read_all_forms')
+                | read_all_forms
+              != ' '
+              label.checkbox.inline
+                input#write-traveler(type='checkbox', value='write_active_travelers')
+                | write_active_travelers
+              != ' '
+              button.btn.btn-primary#add(type='submit') Add
           h3 User list
           .btn-toolbar
+            .btn-group
+              button.btn.btn-info#user-modify
+                i.fa.fa-wrench.fa-lg
+                | &nbsp;Modify role
             .btn-group
               button.btn.btn-warning#user-update
                 i.fa.fa-refresh.fa-lg
