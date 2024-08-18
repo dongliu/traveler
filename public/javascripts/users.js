@@ -1,4 +1,4 @@
-/* global selectColumn: false, useridLinkColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, fnAddFilterFoot: false */
+/* global selectColumn: false, useridLinkColumn: false, ownershipColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, fnAddFilterFoot: false */
 /* global updateAjaxURL: false, prefix: false, Holder: false */
 /* global travelerGlobal: false */
 
@@ -98,6 +98,7 @@ $(function() {
   const userColumns = [
     selectColumn,
     useridLinkColumn,
+    ownershipColumn,
     fullNameNoLinkColumn,
     rolesColumn,
     lastVisitedOnColumn,
@@ -122,7 +123,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: userColumns,
-    aaSorting: [[4, 'desc']],
+    aaSorting: [[5, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#users-table', userColumns);
