@@ -28,9 +28,7 @@ block content
         dt Last visited on
         dd #{user.lastVisitedOn}
         dt Roles
-        dd#roles
-          for role in user.roles 
-            h5= role
+        dd #{user.roles}
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
