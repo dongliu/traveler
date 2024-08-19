@@ -1353,7 +1353,7 @@ const rolesColumn = {
 const ownershipColumn = {
   sTitle: 'Manage ownership',
   mData(source) {
-    return `<a href="${prefix}/users/${source._id}/ownership/" target="${linkTarget}" data-toggle="tooltip" title="manage ownership"><i class="fa fa-user fa-lg"></i></a>`;
+    return `<a href="${prefix}/users/${source._id}/ownership" target="${linkTarget}" data-toggle="tooltip" title="manage ownership"><i class="fa fa-user fa-lg"></i></a>`;
   },
   bSortable: false,
 };

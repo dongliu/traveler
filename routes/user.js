@@ -336,6 +336,29 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/users/:id/ownership', auth.ensureAuthenticated, function(req, res) {
+    User.findOne({
+      _id: req.params.id,
+    }).exec(function(err, user) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({
+          error: err.mesage,
+        });
+      }
+      if (user) {
+        return res.render(
+          'ownership',
+          routesUtilities.getRenderObject(req, {
+            user,
+            myRoles: req.session.roles,
+          })
+        );
+      }
+      return res.status(404).send(`${req.params.name} not found`);
+    });
+  });
+
   app.get('/users/:id/refresh', auth.ensureAuthenticated, function(req, res) {
     if (
       req.session.roles === undefined ||

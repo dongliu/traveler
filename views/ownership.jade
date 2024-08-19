@@ -1,0 +1,67 @@
+extends layout
+
+block head
+  title Manage ownership of #{user.name}
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  .container-fluid
+    .btn-toolbar
+      
+    #message
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+      .modal-header
+        h3#modalLabel
+      .modal-body.modal-body-visible
+      .modal-footer
+    .btn-toolbar
+      .btn-group
+        button.btn.btn-info.reload
+          i.fa.fa-refresh.fa-lg
+          | &nbsp;Reload table
+      .btn-group
+        button.btn.btn-info.select-all(data-toggle='tooltip', title='select all the rows in the current view')
+          i.fa.fa-list.fa-lg
+          | &nbsp;Select all
+      .btn-group
+        button.btn.btn-info.deselect-all(data-toggle='tooltip', title='deselect all the rows')
+          i.fa.fa-list.fa-lg
+          | &nbsp;Select none
+      .btn-group
+        button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
+          i.fa.fa-user.fa-lg
+          | &nbsp;Transfer ownership
+    div
+      ul.nav.nav-tabs
+        li.active
+          a(href='#travelers', data-toggle='tab') Travelers
+        li
+          a(href='#binders', data-toggle='tab') Binders
+
+      .tab-content
+        #travelers.tab-pane.active
+          table#traveler-table.table.table-bordered.table-hover
+        #binders.tab-pane.active
+          table#binder-table.table.table-bordered.table-hover
+
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
+  script(type='module', src='#{prefix}/javascripts/ownership.js')
