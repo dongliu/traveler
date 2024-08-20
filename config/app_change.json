@@ -20,5 +20,9 @@
   "default_form_public_access": -1,
   "default_traveler_public_access": 0,
   "default_binder_public_access": 0,
-  "released_form_version_mgmt": 0
+  "released_form_version_mgmt": 0,
+  "smtp_host": "smtp.example.com",
+  "smtp_port": 25,
+  "smtp_ssl": true,
+  "smtp_tls": true
 }
