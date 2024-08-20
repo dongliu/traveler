@@ -21,6 +21,8 @@ services:
       - "3001:3001"
       - "3002:3002"
       # - "3443:3443"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     command: nodemon app.js
     environment:
