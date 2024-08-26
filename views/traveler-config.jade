@@ -65,7 +65,7 @@ block content
           = ' '
           button.btn.btn-small.btn-warning.removeLocation
             i.fa.fa-trash-o.fa-lg
-    h4 Devices
+    h4 Serial Numbers
     ul#devices
       each device in traveler.devices
         li
@@ -75,7 +75,7 @@ block content
             i.fa.fa-trash-o.fa-lg
     br
     .btn-group
-      button.btn.btn-primary#add Add device
+      button.btn.btn-primary#add Add Serial Number
     h4 Tags
     ul#tags.tag-list
       each tag in traveler.tags
@@ -89,11 +89,11 @@ block content
       button.btn.btn-primary#add-tag
         i.fa.fa-tag.fa-lg
         | &nbsp;Add tag
-    br
-    br
-    if (viewConfig.showCCDB)
-      .btn-group
-          a.btn.btn-info(href='#{prefix}/devices/', target='#{viewConfig.linkTarget}') Browse devices
+    //- br
+    //- br
+    //- if (viewConfig.showCCDB)
+    //-   .btn-group
+    //-       a.btn.btn-info(href='#{prefix}/devices/', target='#{viewConfig.linkTarget}') Browse devices
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

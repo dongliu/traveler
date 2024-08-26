@@ -28,7 +28,7 @@ block content
         h3 Traveler title:  !{traveler.title}
         include ./traveler/status.jade
         if (locals.traveler.devices && traveler.devices.length > 0)
-          h4 Devices: !{traveler.devices}
+          h4 Serial Numbers: !{traveler.devices}
         if (locals.traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
         if (locals.traveler.status !== undefined)
