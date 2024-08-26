@@ -22,6 +22,7 @@ const Group = mongoose.model('Group');
 const History = mongoose.model('History');
 const { stateTransition } = require('../model/form');
 const { releaseForm } = require('../lib/form');
+const { sendNotification } = require('../lib/email');
 
 const logger = require('../lib/loggers').getLogger();
 
@@ -1058,22 +1059,18 @@ module.exports = function (app) {
         return res.status(400).send('invalid status change');
       }
 
-      if (s === 0.5 && f.__review != null) {
-        const reviewLink = `${req.protocol}://${req.get('host')}/forms/${
-          f._id
-        }/`;
-        const users = await Promise.all(
-          f.__review.reviewRequests.map(user => User.findOne({ _id: user._id }))
-        );
+      if(s === 0.5) {
+        const reviewLink = `${req.protocol}://${req.get('host')}/forms/${f._id}/`
+        const users = await Promise.all(f.__review.reviewRequests.map(user => User.findOne({_id: user._id})));
         const emails = users.map(user => user.email);
         sendNotification({
           recipients: emails,
-          subject: 'New Review Request',
+          subject: "New Review Request",
           text: `You have been asked to review the following template: ${f.title}
-    Go to this link to complete the review:
+    Go to this link to complete the review: 
     ${reviewLink}`,
-          html: `You have been asked to review the following template: ${f.title}<br/>Go to this link to complete the review:<br/><a href="${reviewLink}">${reviewLink}</a>`,
-        });
+          html: `You have been asked to review the following template: ${f.title}<br/>Go to this link to complete the review:<br/><a href="${reviewLink}">${reviewLink}</a>`
+        })
       }
 
       f.status = s;
