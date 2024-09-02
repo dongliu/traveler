@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title Manage ownership of #{user.name}
+  title Manage ownership for #{user.name}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -11,8 +11,9 @@ block head
 
 block content
   .container-fluid
-    .btn-toolbar
-      
+    h3 Manage ownership for #{user.name} (
+      span.userid #{user._id}
+      | )
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header

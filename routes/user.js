@@ -337,6 +337,14 @@ module.exports = function(app) {
   });
 
   app.get('/users/:id/ownership', auth.ensureAuthenticated, function(req, res) {
+    if (
+      req.session.roles === undefined ||
+      req.session.roles.indexOf('admin') === -1
+    ) {
+      return res
+        .status(403)
+        .send('You are not authorized to access this resource. ');
+    }
     User.findOne({
       _id: req.params.id,
     }).exec(function(err, user) {
