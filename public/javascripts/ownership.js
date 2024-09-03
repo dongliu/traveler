@@ -1,16 +1,16 @@
-/* global moment: false, ajax401: false, prefix: false, updateAjaxURL: false,
-disableAjaxCache: false, travelerGlobal: false, Holder: false */
+/* eslint-disable import/extensions */
+/* global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache:
+false, travelerGlobal: false, Holder: false */
 /* global selectColumn: false, titleColumn: false, createdOnColumn: false,
 updatedOnColumn: false, filledByColumn: false, sharedWithColumn: false,
 sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
-createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn:
-false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn:
-false, deviceColumn: false, fnGetSelected: false, selectEvent: false,
-filterEvent: false, ownerColumn: false, deadlineColumn: false,
-travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false,
-tagsColumn: false, sDomNoTNoR: false, keysColumn: false */
+createdOnColumn: false, travelerConfigLinkColumn: false,
+travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false,
+deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent:
+false, deadlineColumn: false, travelerProgressColumn: false, tagsColumn: false,
+keysColumn: false, fnSelectAll: false, fnDeselect: false */
 
-/* global archiveFromModal, transferFromModal, modalScroll */
+/* global transferFromModal, modalScroll */
 
 // import * as AddBinder from './lib/binder.js';
 import * as Modal from './lib/modal.js';
@@ -83,21 +83,6 @@ $(function() {
 
   // show the tab in hash when loaded
   showHash();
-
-  // // add state for tab changes
-  // $('.nav-tabs a').on('click', function() {
-  //   if (
-  //     !$(this)
-  //       .parent()
-  //       .hasClass('active')
-  //   ) {
-  //     window.history.pushState(
-  //       null,
-  //       `FRIB traveler :: ${ this.text }`,
-  //       this.href
-  //     );
-  //   }
-  // });
 
   // show the tab when back and forward
   window.onhashchange = function() {
