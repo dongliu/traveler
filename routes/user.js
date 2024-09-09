@@ -20,6 +20,7 @@ const auth = require('../lib/auth');
 const authConfig = config.auth;
 const routesUtilities = require('../utilities/routes');
 const { Traveler } = require('../model/traveler');
+const { Binder } = require('../model/binder');
 
 const pending_photo = {};
 const options = {
@@ -408,6 +409,48 @@ module.exports = function(app) {
           .lean()
           .exec();
         return res.status(200).json(travelers);
+      } catch (error) {
+        logger.err(error);
+        return res.status(500).json({ error: error.message });
+      }
+    }
+  );
+
+  app.get(
+    '/users/:id/binders/json',
+    auth.ensureAuthenticated,
+    auth.verifyRole(Admin),
+    async function(req, res) {
+      try {
+        const user = await User.findOne({
+          _id: req.params.id,
+        }).exec();
+        if (_.isEmpty(user)) {
+          return res.status(404).send({
+            error: `resource identified by ${req.params.id} not found`,
+          });
+        }
+        const search = {
+          status: {
+            // not archived
+            $ne: 3,
+          },
+          $or: [
+            {
+              createdBy: req.params.id,
+              owner: {
+                $exists: false,
+              },
+            },
+            {
+              owner: req.params.id,
+            },
+          ],
+        };
+        const binders = await Binder.find(search)
+          .lean()
+          .exec();
+        return res.status(200).json(binders);
       } catch (error) {
         logger.err(error);
         return res.status(500).json({ error: error.message });

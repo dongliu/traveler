@@ -81,6 +81,48 @@ $(function() {
     sDom: sDomNoTools,
   });
 
+  const binderAoColumns = [
+    selectColumn,
+    binderConfigLinkColumn,
+    binderShareLinkColumn,
+    binderLinkColumn,
+    titleColumn,
+    tagsColumn,
+    sharedWithColumn,
+    sharedGroupColumn,
+    createdOnColumn,
+    updatedByColumn,
+    updatedOnColumn,
+    binderWorkProgressColumn,
+  ];
+  fnAddFilterFoot('#binder-table', binderAoColumns);
+  const binderTable = $('#binder-table').dataTable({
+    sAjaxSource: `/users/${userId}/binders/json`,
+    sAjaxDataProp: '',
+    fnDrawCallback() {
+      Holder.run({
+        images: 'img.user',
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: binderAoColumns,
+    aaSorting: [
+      [10, 'desc'],
+      [8, 'desc'],
+    ],
+    sDom: sDomNoTools,
+  });
+
   // show the tab in hash when loaded
   showHash();
 
