@@ -145,6 +145,10 @@ block content
     if (status === 0.5 && !isReviewer && allApproved)
       .btn-group
         button.btn.btn-primary#release(data-toggle='tooltip', title='Release') Release
+    if(isAdmin && status === 1)
+      .btn-group
+        form(action="${prefix}/forms/${data}/edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');" style="margin: 0;")
+          button.btn.btn-primary(type="submit") Revise
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
