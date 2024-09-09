@@ -416,11 +416,13 @@ module.exports = function (app) {
     '/forms/:id/edit',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
+    reqUtils.requireAdmin(),
     async (req, res) => {
 
       const form = req[req.params.id];
       await ReleasedForm.updateMany({ 'base._id': form._id }, { $set: { status: 2 } });
       form.status = 0;
+      form.incrementVersion({force: true});
       form.save();
       return res.status(200).redirect(`/forms/${form._id}/`);
     });
@@ -1068,7 +1070,7 @@ module.exports = function (app) {
         return res.status(400).send('invalid status change');
       }
 
-      if(s === 0.5) {
+      if(s === 0.5 && f.__review != null) {
         const reviewLink = `${req.protocol}://${req.get('host')}/forms/${f._id}/`
         const users = await Promise.all(f.__review.reviewRequests.map(user => User.findOne({_id: user._id})));
         const emails = users.map(user => user.email);
