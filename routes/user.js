@@ -133,7 +133,7 @@ function addUser(req, res) {
       storeUser(req, res, ldapUser);
     });
   } else {
-    const nameFilter = ad.nameFilter.replace('_name', req.body.name);
+    const nameFilter = ad.searchFilter.replace('_id', req.body.name);
     const opts = {
       filter: nameFilter,
       attributes: ad.objAttributes,

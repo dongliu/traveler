@@ -56,7 +56,7 @@ module.exports = function (app) {
             $exists: false,
           },
         },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -92,7 +92,7 @@ module.exports = function (app) {
             },
           ],
         },
-        'title formType status updatedOn'
+        'title formType status updatedOn documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -127,7 +127,7 @@ module.exports = function (app) {
             $in: [0.5],
           },
         },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -155,7 +155,7 @@ module.exports = function (app) {
             $exists: false,
           },
         },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -177,7 +177,7 @@ module.exports = function (app) {
             $ne: true,
           },
         },
-        'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup'
+        'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -193,7 +193,7 @@ module.exports = function (app) {
     try {
       const forms = await Form.find(
         {},
-        'title formType status tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup'
+        'title formType status tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup _v documentNumber'
       )
         .lean()
         .exec();
@@ -227,7 +227,7 @@ module.exports = function (app) {
             $ne: true,
           },
         },
-        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
+        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -269,7 +269,7 @@ module.exports = function (app) {
             $ne: true,
           },
         },
-        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
+        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -312,7 +312,7 @@ module.exports = function (app) {
     try {
       const forms = await Form.find(
         search,
-        'title formType status tags updatedBy updatedOn _v'
+        'title formType status tags updatedBy updatedOn _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -384,6 +384,7 @@ module.exports = function (app) {
             status: form.status,
             statusText: formModel.statusMap[`${form.status}`],
             _v: form._v,
+            documentNumber: form.documentNumber,
             formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
             isReviewer,
@@ -420,7 +421,7 @@ module.exports = function (app) {
     async (req, res) => {
 
       const form = req[req.params.id];
-      await ReleasedForm.updateMany({'base._id': form._id}, {$set: {status: 2}});
+      await ReleasedForm.updateMany({ 'base._id': form._id }, { $set: { status: 2 } });
       form.status = 0;
       form.incrementVersion({force: true});
       form.saveWithHistory(req.session.userid);
@@ -845,8 +846,8 @@ module.exports = function (app) {
   app.post(
     '/forms/',
     auth.ensureAuthenticated,
-    reqUtils.filter('body', ['title', 'formType', 'html']),
-    reqUtils.hasAll('body', ['title']),
+    reqUtils.filter('body', ['title', 'formType', 'documentNumber', 'html']),
+    reqUtils.hasAll('body', ['title', 'documentNumber']),
     auth.requireRoles(req => {
       return (
         req.body.hasOwnProperty('formType') &&
@@ -862,6 +863,7 @@ module.exports = function (app) {
           {
             title: req.body.title,
             formType: req.body.formType,
+            documentNumber: req.body.documentNumber,
             createdBy: req.session.userid,
             html,
           }
@@ -874,6 +876,9 @@ module.exports = function (app) {
           location: url,
         });
       } catch (error) {
+        if (error && error.code === 11000) {
+          return res.render('form-new', routesUtilities.getRenderObject(req, { error: "Document ID already exists.", form: req.body }));
+        }
         logger.error(error);
         return res.status(500).send(error.message);
       }
@@ -1051,7 +1056,6 @@ module.exports = function (app) {
       if ([0, 0.5, 1, 2].indexOf(s) === -1) {
         return res.status(400).send('invalid status');
       }
-
       if (v !== f._v) {
         return res.status(400).send(`the current version is ${f._v}`);
       }

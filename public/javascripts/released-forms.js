@@ -113,6 +113,7 @@ $(function() {
     releasedFormStatusColumn,
     formTypeColumn,
     releasedFormVersionColumn,
+    docNoColumn,
     tagsColumn,
     releasedByColumn,
     releasedOnColumn,
@@ -151,6 +152,7 @@ $(function() {
     formTypeColumn,
     tagsColumn,
     releasedFormVersionColumn,
+    docNoColumn,
     archivedByColumn,
     archivedOnColumn,
   ];
