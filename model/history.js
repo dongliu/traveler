@@ -73,7 +73,7 @@ function addVersion(schema, options) {
     .value();
 
   schema.add({
-    _v: { type: Number, default: 0 },
+    _v: { type: Number, default: 1 },
   });
 
   schema.methods.incrementVersion = function(incrOptions) {
