@@ -82,10 +82,8 @@ const form = new Schema({
     default: 'normal',
     enum: ['normal', 'discrepancy'],
   },
-  documentNumber: {type: String, unique: true}
+  versionNotes: String,
 });
-
-
 
 /**
  * pre save middleware to add or update the mapping
@@ -194,6 +192,7 @@ form.plugin(addHistory, {
     'publicAccess',
     'html',
     '_v',
+    'versionNotes',
   ],
 });
 
