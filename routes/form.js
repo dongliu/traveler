@@ -34,16 +34,16 @@ function checkReviewer(form, userid) {
   );
 }
 
-module.exports = function (app) {
-  app.get('/forms/', auth.ensureAuthenticated, function (req, res) {
+module.exports = function(app) {
+  app.get('/forms/', auth.ensureAuthenticated, function(req, res) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/releasedforms/', auth.ensureAuthenticated, function (req, res) {
+  app.get('/releasedforms/', auth.ensureAuthenticated, function(req, res) {
     res.render('released-forms', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/forms/json', auth.ensureAuthenticated, async function (req, res) {
+  app.get('/forms/json', auth.ensureAuthenticated, async function(req, res) {
     try {
       const forms = await Form.find(
         {
@@ -65,7 +65,7 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/myforms/json', auth.ensureAuthenticated, async function (req, res) {
+  app.get('/myforms/json', auth.ensureAuthenticated, async function(req, res) {
     try {
       const me = await User.findOne(
         {
@@ -102,7 +102,7 @@ module.exports = function (app) {
   });
 
   // forms owned by the user that are under review
-  app.get('/submittedforms/json', auth.ensureAuthenticated, async function (
+  app.get('/submittedforms/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
@@ -137,7 +137,7 @@ module.exports = function (app) {
   });
 
   // forms owned by the user that are under review
-  app.get('/closedforms/json', auth.ensureAuthenticated, async function (
+  app.get('/closedforms/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
@@ -164,7 +164,7 @@ module.exports = function (app) {
     }
   );
 
-  app.get('/transferredforms/json', auth.ensureAuthenticated, async function (
+  app.get('/transferredforms/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
@@ -186,7 +186,7 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/allforms/json', auth.ensureAuthenticated, async function (req, res) {
+  app.get('/allforms/json', auth.ensureAuthenticated, async function(req, res) {
     if (!routesUtilities.checkUserRole(req, 'read_all_forms')) {
       return res.status(401).json('You are not authorized to view all forms.');
     }
@@ -204,7 +204,7 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/sharedforms/json', auth.ensureAuthenticated, async function (
+  app.get('/sharedforms/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
@@ -236,7 +236,7 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/groupsharedforms/json', auth.ensureAuthenticated, async function (
+  app.get('/groupsharedforms/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
@@ -278,7 +278,7 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/archivedforms/json', auth.ensureAuthenticated, async function (
+  app.get('/archivedforms/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
@@ -321,11 +321,11 @@ module.exports = function (app) {
     }
   );
 
-  app.get('/publicforms/', auth.ensureAuthenticated, function (req, res) {
+  app.get('/publicforms/', auth.ensureAuthenticated, function(req, res) {
     res.render('public-forms', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/publicforms/json', auth.ensureAuthenticated, async function (
+  app.get('/publicforms/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
@@ -345,7 +345,7 @@ module.exports = function (app) {
     }
   });
 
-  app.get('/forms/new', auth.ensureAuthenticated, function (req, res) {
+  app.get('/forms/new', auth.ensureAuthenticated, function(req, res) {
     return res.render('form-new', routesUtilities.getRenderObject(req));
   });
 
@@ -365,7 +365,8 @@ module.exports = function (app) {
 
       if (form.archived) {
         return res.redirect(
-          `${req.proxied ? authConfig.proxied_service : authConfig.service
+          `${
+            req.proxied ? authConfig.proxied_service : authConfig.service
           }/forms/${req.params.id}/preview`
         );
       }
@@ -397,7 +398,8 @@ module.exports = function (app) {
       }
 
       return res.redirect(
-        `${req.proxied ? authConfig.proxied_service : authConfig.service
+        `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
         }/forms/${req.params.id}/preview`
       );
     }
@@ -408,7 +410,7 @@ module.exports = function (app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
-    function (req, res) {
+    function(req, res) {
       return res.status(200).json(req[req.params.id]);
     }
   );
@@ -419,21 +421,24 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.requireAdmin(),
     async (req, res) => {
-
       const form = req[req.params.id];
-      await ReleasedForm.updateMany({ 'base._id': form._id }, { $set: { status: 2 } });
+      await ReleasedForm.updateMany(
+        { 'base._id': form._id },
+        { $set: { status: 2 } }
+      );
       form.status = 0;
-      form.incrementVersion({force: true});
-      form.save();
+      form.incrementVersion({ force: true });
+      form.saveWithHistory(req.session.userid);
       return res.status(200).redirect(`/forms/${form._id}/`);
-    });
+    }
+  );
 
   app.get(
     '/forms/:id/released/json',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
-    async function (req, res) {
+    async function(req, res) {
       const baseIds = [req.params.id];
       const parentFormId = req[req.params.id].clonedFrom;
       if (parentFormId) {
@@ -459,7 +464,7 @@ module.exports = function (app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
-    async function (req, res) {
+    async function(req, res) {
       const doc = req[req.params.id];
       if (_.isEmpty(req.files)) {
         return res.status(400).send('Expect One uploaded file');
@@ -483,8 +488,9 @@ module.exports = function (app) {
       });
       try {
         const newFile = await file.save();
-        const url = `${req.proxied ? authConfig.proxied_service : authConfig.service
-          }/formfiles/${newFile.id}`;
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/formfiles/${newFile.id}`;
         res.set('Location', url);
         return res
           .status(201)
@@ -502,7 +508,7 @@ module.exports = function (app) {
     '/formfiles/:id',
     auth.ensureAuthenticated,
     reqUtils.exist('id', FormFile),
-    function (req, res) {
+    function(req, res) {
       const data = req[req.params.id];
       if (data.inputType === 'file') {
         return res.sendFile(path.resolve(data.file.path));
@@ -516,7 +522,7 @@ module.exports = function (app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
-    function (req, res) {
+    function(req, res) {
       const form = req[req.params.id];
       return res.render(
         'form-viewer',
@@ -535,7 +541,7 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     reqUtils.archived('id', false),
-    function (req, res) {
+    function(req, res) {
       const doc = req[req.params.id];
       return res.render(
         'form-config',
@@ -552,7 +558,7 @@ module.exports = function (app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
-    function (req, res) {
+    function(req, res) {
       const form = req[req.params.id];
       return res.render(
         'share',
@@ -572,7 +578,7 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [0, 0.5, 1, 2]),
-    function (req, res) {
+    function(req, res) {
       const form = req[req.params.id];
       return res.render(
         'form-version-mgmt',
@@ -590,7 +596,7 @@ module.exports = function (app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
-    async function (req, res) {
+    async function(req, res) {
       const form = req[req.params.id];
       const updates = form.__updates;
       try {
@@ -614,7 +620,7 @@ module.exports = function (app) {
     reqUtils.isOwnerMw('id'),
     // only available when under review
     reqUtils.status('id', [0.5]),
-    function (req, res) {
+    function(req, res) {
       const form = req[req.params.id];
       return res.render(
         'review',
@@ -632,7 +638,7 @@ module.exports = function (app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
-    function (req, res) {
+    function(req, res) {
       const form = req[req.params.id];
       return res.status(200).json(form.__review || {});
     }
@@ -646,7 +652,7 @@ module.exports = function (app) {
     reqUtils.isOwnerMw('id'),
     // only available when under review
     reqUtils.status('id', [0.5]),
-    async function (req, res) {
+    async function(req, res) {
       const form = req[req.params.id];
       await reviewLib.addReviewRequest(req, res, form);
     }
@@ -660,7 +666,7 @@ module.exports = function (app) {
     reqUtils.isOwnerMw('id'),
     // only available when under review
     reqUtils.status('id', [0.5]),
-    async function (req, res) {
+    async function(req, res) {
       const form = req[req.params.id];
       await reviewLib.removeReviewRequest(req, res, form);
     }
@@ -673,14 +679,14 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     // only available when under review
     reqUtils.status('id', [0.5]),
-    function (req, res, next) {
+    function(req, res, next) {
       const isReviewer = checkReviewer(req[req.params.id], req.session.userid);
       if (!isReviewer) {
         return res.status(401).send('only reviewer can submit');
       }
       return next();
     },
-    async function (req, res) {
+    async function(req, res) {
       const form = req[req.params.id];
       await reviewLib.addReviewResult(req, res, form);
     }
@@ -692,7 +698,7 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['access']),
-    async function (req, res) {
+    async function(req, res) {
       const form = req[req.params.id];
       let { access } = req.body;
       if (['-1', '0', '1'].indexOf(access) === -1) {
@@ -706,7 +712,7 @@ module.exports = function (app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
-    function (req, res) {
+    function(req, res) {
       const form = req[req.params.id];
       if (req.params.list === 'users') {
         return res.status(200).json(form.sharedWith || []);
@@ -723,7 +729,7 @@ module.exports = function (app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
-    function (req, res) {
+    function(req, res) {
       const form = req[req.params.id];
       let share = -2;
       if (req.params.list === 'users') {
@@ -750,7 +756,7 @@ module.exports = function (app) {
           .status(400)
           .send(
             req.body.name ||
-            `${req.body.id} is already in the ${req.params.list} list.`
+              `${req.body.id} is already in the ${req.params.list} list.`
           );
       }
 
@@ -765,7 +771,7 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['access']),
-    async function (req, res) {
+    async function(req, res) {
       const form = req[req.params.id];
       let share;
       if (req.params.list === 'users') {
@@ -823,7 +829,7 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     auth.ensureAuthenticated,
-    function (req, res) {
+    function(req, res) {
       const form = req[req.params.id];
       shareLib.removeShare(req, res, form);
     }
@@ -841,7 +847,7 @@ module.exports = function (app) {
       );
     }, 'admin'),
     reqUtils.sanitize('body', ['html']),
-    async function (req, res) {
+    async function(req, res) {
       const html = req.body.html || '';
       try {
         const newForm = await formModel.createFormWithHistory(
@@ -854,8 +860,9 @@ module.exports = function (app) {
             html,
           }
         );
-        const url = `${req.proxied ? authConfig.proxied_service : authConfig.service
-          }/forms/${newForm.id}/`;
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/forms/${newForm.id}/`;
 
         res.set('Location', url);
         return res.status(303).json({
@@ -863,7 +870,13 @@ module.exports = function (app) {
         });
       } catch (error) {
         if (error && error.code === 11000) {
-          return res.render('form-new', routesUtilities.getRenderObject(req, { error: "Document ID already exists.", form: req.body }));
+          return res.render(
+            'form-new',
+            routesUtilities.getRenderObject(req, {
+              error: 'Document ID already exists.',
+              form: req.body,
+            })
+          );
         }
         logger.error(error);
         return res.status(500).send(error.message);
@@ -876,7 +889,7 @@ module.exports = function (app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
-    async function (req, res) {
+    async function(req, res) {
       const doc = req[req.params.id];
       const form = {};
       form.html = reqUtils.sanitizeText(doc.html);
@@ -895,8 +908,9 @@ module.exports = function (app) {
         const newForm = await new Form(form).saveWithHistory(
           req.session.userid
         );
-        const url = `${req.proxied ? authConfig.proxied_service : authConfig.service
-          }/forms/${newForm.id}/`;
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/forms/${newForm.id}/`;
         res.set('Location', url);
         return res
           .status(201)
@@ -914,7 +928,7 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['archived']),
-    async function (req, res) {
+    async function(req, res) {
       const doc = req[req.params.id];
       if (doc.archived === req.body.archived) {
         return res.status(204).send();
@@ -944,7 +958,7 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     reqUtils.filter('body', ['name']),
-    function (req, res) {
+    function(req, res) {
       const doc = req[req.params.id];
       shareLib.changeOwner(req, res, doc);
     }
@@ -956,9 +970,9 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [0]),
-    reqUtils.filter('body', ['html', 'title', 'description']),
-    reqUtils.sanitize('body', ['html', 'title', 'description']),
-    async function (req, res) {
+    reqUtils.filter('body', ['html', 'title', 'description', 'notes']),
+    reqUtils.sanitize('body', ['html', 'title', 'description', 'notes']),
+    async function(req, res) {
       if (!req.is('json')) {
         return res.status(415).send('json request expected');
       }
@@ -1009,7 +1023,7 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     // owner decide if release
     reqUtils.isOwnerMw('id'),
-    function (req, res, next) {
+    function(req, res, next) {
       if (req[req.params.id].status !== 0.5) {
         return res
           .status(400)
@@ -1017,7 +1031,7 @@ module.exports = function (app) {
       }
       return next();
     },
-    function (req, res, next) {
+    function(req, res, next) {
       if (!req[req.params.id].allApproved) {
         return res
           .status(400)
@@ -1052,7 +1066,7 @@ module.exports = function (app) {
         return res.status(204).send();
       }
 
-      const target = _.find(stateTransition, function (t) {
+      const target = _.find(stateTransition, function(t) {
         return t.from === f.status;
       });
 
@@ -1061,18 +1075,22 @@ module.exports = function (app) {
         return res.status(400).send('invalid status change');
       }
 
-      if(s === 0.5 && f.__review != null) {
-        const reviewLink = `${req.protocol}://${req.get('host')}/forms/${f._id}/`
-        const users = await Promise.all(f.__review.reviewRequests.map(user => User.findOne({_id: user._id})));
+      if (s === 0.5 && f.__review != null) {
+        const reviewLink = `${req.protocol}://${req.get('host')}/forms/${
+          f._id
+        }/`;
+        const users = await Promise.all(
+          f.__review.reviewRequests.map(user => User.findOne({ _id: user._id }))
+        );
         const emails = users.map(user => user.email);
         sendNotification({
           recipients: emails,
-          subject: "New Review Request",
+          subject: 'New Review Request',
           text: `You have been asked to review the following template: ${f.title}
     Go to this link to complete the review: 
     ${reviewLink}`,
-          html: `You have been asked to review the following template: ${f.title}<br/>Go to this link to complete the review:<br/><a href="${reviewLink}">${reviewLink}</a>`
-        })
+          html: `You have been asked to review the following template: ${f.title}<br/>Go to this link to complete the review:<br/><a href="${reviewLink}">${reviewLink}</a>`,
+        });
       }
 
       f.status = s;

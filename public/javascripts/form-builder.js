@@ -68,7 +68,7 @@ function sendRequest(data, cb, option) {
     contentType: 'application/json',
     processData: false,
   })
-    .done(function (responseData, textStatus, request) {
+    .done(function(responseData, textStatus, request) {
       const timestamp = request.getResponseHeader('Date');
       if (responseData.location) {
         $('#message').append(
@@ -86,7 +86,7 @@ function sendRequest(data, cb, option) {
         cb();
       }
     })
-    .fail(function () {
+    .fail(function() {
       $('form#output').fadeTo('slow', 1);
     });
 }
@@ -104,12 +104,12 @@ function archive_prior_released_forms(target) {
       contentType: 'application/json',
       processData: false,
     })
-      .done(function (data) {
+      .done(function(data) {
         $('#message').append(
           `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>${data}</div>`
         );
       })
-      .fail(function (data) {
+      .fail(function(data) {
         $('#message').append(
           `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>${data}</div>`
         );
@@ -134,7 +134,7 @@ function updateSectionNumbers() {
   // assign the sequence number to all legend
   $('#output')
     .find('legend, .control-label, .rich-instruction')
-    .each(function () {
+    .each(function() {
       if ($(this).is('legend')) {
         sectionNumber += 1;
         // reset control number
@@ -163,7 +163,7 @@ function updateSectionNumbers() {
 function addSectionNumbers() {
   $('#output')
     .find('legend, .control-label, .tinymce')
-    .each(function () {
+    .each(function() {
       if ($(this).is('legend')) {
         prependSpanIfNotExists(this, 'section-number');
       } else if ($(this).is('div.tinymce')) {
@@ -198,7 +198,7 @@ function prependSpanIfNotExists(element, sectionName) {
 }
 
 function done_button(view, $out) {
-  return function (e) {
+  return function(e) {
     e.preventDefault();
     // validate the userkey according to current form
     const userKeyInput = $('.well.spec input[name="userkey"]');
@@ -224,14 +224,14 @@ function done_button(view, $out) {
       .closest('.spec')
       .remove();
     // assign unique name if not yet
-    $('input, textarea', $out).each(function () {
+    $('input, textarea', $out).each(function() {
       if (!$(this).attr('name')) {
         $(this).attr('name', UID.generateShort());
       }
     });
 
     // assign id to legend, id is used for side nav
-    $('legend', $out).each(function () {
+    $('legend', $out).each(function() {
       if (!$(this).attr('id')) {
         $(this).attr('id', UID.generateShort());
       }
@@ -264,7 +264,7 @@ function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
 }
 
 function binding($edit, $out, model, $done) {
-  $('input:text', $edit).on('input', function () {
+  $('input:text', $edit).on('input', function() {
     model[$(this).attr('name')] = $(this)
       .val()
       .trim();
@@ -284,7 +284,7 @@ function binding($edit, $out, model, $done) {
     }
   });
 
-  $('input[type="number"]', $edit).on('input', function () {
+  $('input[type="number"]', $edit).on('input', function() {
     const val = $(this)
       .val()
       .trim();
@@ -298,11 +298,11 @@ function binding($edit, $out, model, $done) {
     }
   });
 
-  $('select', $edit).change(function () {
+  $('select', $edit).change(function() {
     model[$(this).attr('name')] = $(this).val();
   });
 
-  $('input:checkbox', $edit).change(function () {
+  $('input:checkbox', $edit).change(function() {
     model[$(this).attr('name')] = $(this).prop('checked');
   });
 
@@ -353,7 +353,7 @@ function add_radio($radio_group, $radio_value_spec, $done, count, model) {
     .append(
       '<button value="remove-radio-button" class="btn btn-warning">-</button>'
     );
-  $radio_text.on('click', 'button[value="remove-radio-button"]', function (e) {
+  $radio_text.on('click', 'button[value="remove-radio-button"]', function(e) {
     e.preventDefault();
 
     const value = $(e.delegateTarget)
@@ -450,7 +450,7 @@ function radio_edit($cgr) {
   if ($cgr) {
     // load the radio buttons for edit mode
     const radio_buttons = $cgr.find('.controls').find('input');
-    $.map(radio_buttons, function (button, i) {
+    $.map(radio_buttons, function(button, i) {
       model[`radio_text_${i}`] = $(button).prop('value');
     });
     const length = radio_buttons.size();
@@ -484,7 +484,7 @@ function radio_edit($cgr) {
   $add_radio_button.unbind('click');
 
   // Add functionality for adding and removing radio buttons in the group
-  $add_radio_button.on('click', 'button', function (e) {
+  $add_radio_button.on('click', 'button', function(e) {
     e.preventDefault();
     model[
       `radio_text_${radio_button_count}`
@@ -630,7 +630,7 @@ function figure_edit($cgr) {
   add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   // need a handler here for the $done button if no image exist or updated
-  $done.click(function (e) {
+  $done.click(function(e) {
     e.preventDefault();
     $edit.remove();
     $new_cgr.remove();
@@ -658,7 +658,7 @@ function figure_edit($cgr) {
   }
 
   // handle image upload here
-  $('input:file', $file).change(function (e) {
+  $('input:file', $file).change(function(e) {
     e.preventDefault();
     const file = this.files[0];
     if (file === undefined) {
@@ -701,7 +701,7 @@ function figure_edit($cgr) {
     }
   });
 
-  $file.on('click', 'button[value="upload"]', function (e) {
+  $file.on('click', 'button[value="upload"]', function(e) {
     e.preventDefault();
     // ajax to save the current value
     const $this = $(this);
@@ -718,7 +718,7 @@ function figure_edit($cgr) {
       contentType: false, // important for jqXHR
       data,
     })
-      .done(function (res, status, jqXHR) {
+      .done(function(res, status, jqXHR) {
         const location = jqXHR.getResponseHeader('Location');
         const timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append(
@@ -755,19 +755,19 @@ function figure_edit($cgr) {
 
         binding($edit, $figure, model, $done);
       })
-      .fail(function (jqXHR) {
+      .fail(function(jqXHR) {
         if (jqXHR.status !== 401) {
           $('#message').append(
             `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ${jqXHR.responseText ||
-            'unknown'}</div>`
+              'unknown'}</div>`
           );
           $(window).scrollTop($('#message div:last-child').offset().top - 40);
         }
       })
-      .always(function () { });
+      .always(function() {});
   });
 
-  $file.on('click', 'button[value="cancel"]', function (e) {
+  $file.on('click', 'button[value="cancel"]', function(e) {
     e.preventDefault();
     $(this)
       .closest('.file-upload-buttons')
@@ -1092,7 +1092,7 @@ function rich_edit($cgr) {
   }
   $('textarea', $rich_textarea).html(html);
   tinymce.init(mce_content);
-  $done.click(function (e) {
+  $done.click(function(e) {
     e.preventDefault();
     const content = tinymce.activeEditor.getContent();
     if (content === '') {
@@ -1117,7 +1117,7 @@ function rich_edit($cgr) {
 function init() {
   $('#output')
     .find('img')
-    .each(function () {
+    .each(function() {
       const $this = $(this);
       if ($this.attr('name')) {
         if ($this.attr('src') === undefined) {
@@ -1135,10 +1135,9 @@ function init() {
     });
 
   initHtml = $('#output').html();
-  // initNotes = $('#version-notes').val();
-  initNotes = '';
+  initNotes = $('#version-notes').val();
 
-  $('span.time').each(function () {
+  $('span.time').each(function() {
     $(this).text(
       moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a')
     );
@@ -1146,7 +1145,7 @@ function init() {
   // update every 30 seconds
   // $.livestamp.interval(30 * 1000);
 
-  rivets.binders.required = function (el, value) {
+  rivets.binders.required = function(el, value) {
     const attrToSet = 'required';
 
     if (value) {
@@ -1164,67 +1163,67 @@ function scrollToBottom() {
 }
 
 function working() {
-  $('#add-checkbox').click(function (e) {
+  $('#add-checkbox').click(function(e) {
     e.preventDefault();
     checkbox_edit();
     scrollToBottom();
   });
 
-  $('#add-checkbox-set').click(function (e) {
+  $('#add-checkbox-set').click(function(e) {
     e.preventDefault();
     checkbox_set_edit();
     scrollToBottom();
   });
 
-  $('#add-radio').click(function (e) {
+  $('#add-radio').click(function(e) {
     e.preventDefault();
     radio_edit();
     scrollToBottom();
   });
 
-  $('#add-text').click(function (e) {
+  $('#add-text').click(function(e) {
     e.preventDefault();
     text_edit();
     scrollToBottom();
   });
 
-  $('#add-figure').click(function (e) {
+  $('#add-figure').click(function(e) {
     e.preventDefault();
     figure_edit();
     scrollToBottom();
   });
 
-  $('#add-par').click(function (e) {
+  $('#add-par').click(function(e) {
     e.preventDefault();
     textarea_edit();
     scrollToBottom();
   });
 
-  $('#add-number').click(function (e) {
+  $('#add-number').click(function(e) {
     e.preventDefault();
     number_edit();
     scrollToBottom();
   });
 
-  $('#add-file').click(function (e) {
+  $('#add-file').click(function(e) {
     e.preventDefault();
     file_edit();
     scrollToBottom();
   });
 
-  $('#add-rich').click(function (e) {
+  $('#add-rich').click(function(e) {
     e.preventDefault();
     rich_edit();
     scrollToBottom();
   });
 
-  $('#add-section').click(function (e) {
+  $('#add-section').click(function(e) {
     e.preventDefault();
     section_edit();
     scrollToBottom();
   });
 
-  $('#add-other').click(function (e) {
+  $('#add-other').click(function(e) {
     e.preventDefault();
     other_edit();
     scrollToBottom();
@@ -1253,7 +1252,7 @@ function cleanBeforeSave() {
 }
 
 function binding_events() {
-  $('#adjust').click(function (e) {
+  $('#adjust').click(function(e) {
     e.preventDefault();
     if ($(this).text() === 'Adjust location') {
       $(this).text('Done');
@@ -1278,7 +1277,7 @@ function binding_events() {
       $('#output').sortable('destroy');
     }
   });
-  $('#output').on('mouseenter', '.control-group-wrap', function (e) {
+  $('#output').on('mouseenter', '.control-group-wrap', function(e) {
     e.preventDefault();
     // check if it is normal edit mode
     $('.control-group-wrap', '#output').removeClass('control-focus');
@@ -1299,7 +1298,7 @@ function binding_events() {
   $('#output').on(
     'click',
     '.control-focus a.btn.btn-warning[title="remove"]',
-    function (e) {
+    function(e) {
       e.preventDefault();
       const $cgr = $(this).closest('.control-group-wrap');
       if ($('.control-group-wrap[data-status="editing"]').length) {
@@ -1314,7 +1313,7 @@ function binding_events() {
     }
   );
 
-  $('#output').on('click', '.control-focus a.btn[title="duplicate"]', function (
+  $('#output').on('click', '.control-focus a.btn[title="duplicate"]', function(
     e
   ) {
     e.preventDefault();
@@ -1339,7 +1338,7 @@ function binding_events() {
     updateSectionNumbers();
   });
 
-  $('#output').on('click', '.control-focus a.btn[title="edit"]', function (e) {
+  $('#output').on('click', '.control-focus a.btn[title="edit"]', function(e) {
     e.preventDefault();
     const $cgr = $(this).closest('.control-group-wrap');
     if (
@@ -1398,7 +1397,7 @@ function binding_events() {
     }
   });
 
-  $('#save').click(function (e) {
+  $('#save').click(function(e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
       modalAlert(
@@ -1409,8 +1408,7 @@ function binding_events() {
     }
     cleanBeforeSave();
     const html = $('#output').html();
-    // const notes = $('#version-notes').val();
-    const notes = '';
+    const notes = $('#version-notes').val();
     // var path = window.location.pathname;
     if (html !== initHtml || notes !== initNotes) {
       sendRequest(
@@ -1418,14 +1416,14 @@ function binding_events() {
           html,
           notes,
         },
-        function () {
+        function() {
           window.location.reload(true);
         }
       );
     }
   });
 
-  $('#numbering').click(function (e) {
+  $('#numbering').click(function(e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
       modalAlert(
@@ -1439,7 +1437,7 @@ function binding_events() {
     updateSectionNumbers();
   });
 
-  $('#preview').click(function (e) {
+  $('#preview').click(function(e) {
     if ($('#output .well.spec').length) {
       e.preventDefault();
       modalAlert(
@@ -1459,7 +1457,7 @@ function binding_events() {
     }
   });
 
-  $('#import').click(function (e) {
+  $('#import').click(function(e) {
     if ($('#output .well.spec').length) {
       e.preventDefault();
       modalAlert(
@@ -1480,17 +1478,17 @@ function binding_events() {
     );
     $('#modal').modal('show');
     FormExplorer.init('.released-forms', '.my-forms', '.form-preview');
-    $('#modal button[value="confirm"]').click(function () {
+    $('#modal button[value="confirm"]').click(function() {
       const html = FormExplorer.getHtml();
       if (html !== null) {
         $('#output').append(html);
         // generate unique name
-        $('input, textarea').each(function () {
+        $('input, textarea').each(function() {
           $(this).attr('name', UID.generateShort());
         });
 
         // assign id to legent, id is used for side nav
-        $('legend').each(function () {
+        $('legend').each(function() {
           $(this).attr('id', UID.generateShort());
         });
 
@@ -1499,7 +1497,7 @@ function binding_events() {
     });
   });
 
-  $('#saveas').click(function (e) {
+  $('#saveas').click(function(e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
       modalAlert();
@@ -1516,7 +1514,7 @@ function binding_events() {
       '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
     );
     $('#modal').modal('show');
-    $('#modal button[value="confirm"]').click(function () {
+    $('#modal button[value="confirm"]').click(function() {
       const title = $('#new-title').val();
       sendRequest(
         {
@@ -1530,7 +1528,7 @@ function binding_events() {
     });
   });
 
-  $('#submit').click(function (e) {
+  $('#submit').click(function(e) {
     e.preventDefault();
     if ($('#output .well.spec').length) {
       modalAlert(
@@ -1555,15 +1553,15 @@ function binding_events() {
         status: 0.5,
         version: Number($('#version').text()),
       },
-      function () {
+      function() {
         // window.location.reload(true);
-        window.location.href += "review/";
+        window.location.href += 'review/';
       },
       'status'
     );
   });
 
-  $('#release').click(function () {
+  $('#release').click(function() {
     $('#release').attr('disabled', true);
     $('#modal .modal-body').empty();
     const defaultTitle = $('#formtitle').text();
@@ -1646,7 +1644,7 @@ function binding_events() {
       '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
     );
     $('#modal').modal('show');
-    $('#modal button[value="confirm"]').click(function () {
+    $('#modal button[value="confirm"]').click(function() {
       if (priorVersionsTable) {
         // get all selected forms
         const selected = fnGetSelectedInPage(
@@ -1655,7 +1653,7 @@ function binding_events() {
           false
         );
         const target = {};
-        $(selected).each(function (s) {
+        $(selected).each(function(s) {
           const data = priorVersionsTable.fnGetData(s);
           target[data._id] = { version: data.ver, status: 2 };
         });
@@ -1683,7 +1681,7 @@ function binding_events() {
     });
   });
 
-  $('#submit-review').on('click', function (e) {
+  $('#submit-review').on('click', function(e) {
     e.preventDefault();
     sendRequest(
       {
@@ -1691,20 +1689,20 @@ function binding_events() {
         comment: $('#comment').val(),
         v: $('#version').text(),
       },
-      function () {
+      function() {
         window.location.reload(true);
       },
       'review'
     );
   });
 
-  $('#obsolete, #archive').click(function () {
+  $('#obsolete, #archive').click(function() {
     sendRequest(
       {
         status: 2,
         version: Number($('#version').text()),
       },
-      function () {
+      function() {
         window.location.reload(true);
       },
       'status'
@@ -1712,7 +1710,7 @@ function binding_events() {
   });
 }
 
-$(function () {
+$(function() {
   updateAjaxURL(prefix);
   ajax401(prefix);
   disableAjaxCache();
