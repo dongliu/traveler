@@ -390,6 +390,7 @@ module.exports = function (app) {
             allApproved,
             review: form.__review,
             released_form_version_mgmt: config.app.released_form_version_mgmt,
+            versionNotes: form.versionNotes
           })
         );
       }
@@ -422,7 +423,7 @@ module.exports = function (app) {
       await ReleasedForm.updateMany({'base._id': form._id}, {$set: {status: 2}});
       form.status = 0;
       form.incrementVersion({force: true});
-      form.save();
+      form.saveWithHistory(req.session.userid);
       return res.status(200).redirect(`/forms/${form._id}/`);
     });
 
@@ -963,8 +964,8 @@ module.exports = function (app) {
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [0]),
-    reqUtils.filter('body', ['html', 'title', 'description']),
-    reqUtils.sanitize('body', ['html', 'title', 'description']),
+    reqUtils.filter('body', ['html', 'title', 'description', 'notes']),
+    reqUtils.sanitize('body', ['html', 'title', 'description', 'notes']),
     async function (req, res) {
       if (!req.is('json')) {
         return res.status(415).send('json request expected');
@@ -987,6 +988,10 @@ module.exports = function (app) {
         } else {
           req.send(403, 'not authorized to access this resource');
         }
+      }
+
+      if (req.body.hasOwnProperty('notes')) {
+        doc.versionNotes = req.body.notes;
       }
 
       doc.updatedBy = req.session.userid;

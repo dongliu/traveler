@@ -82,6 +82,7 @@ const form = new Schema({
     default: 'normal',
     enum: ['normal', 'discrepancy'],
   },
+  versionNotes: String
 });
 
 /**
@@ -191,6 +192,7 @@ form.plugin(addHistory, {
     'publicAccess',
     'html',
     '_v',
+    'versionNotes'
   ],
 });
 

@@ -88,6 +88,9 @@ block content
         != html
   .button-footer.container
     //- edit controls available for draft
+    label
+      b Version Notes
+    textarea#version-notes(placeholder="Version Notes" style="width: 100%;" rows=3 disabled=status !== 0)= versionNotes
     if (status === 0)
       .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
@@ -147,7 +150,7 @@ block content
         button.btn.btn-primary#release(data-toggle='tooltip', title='Release') Release
     if(isAdmin && status === 1)
       .btn-group
-        form(action="${prefix}/forms/${data}/edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');" style="margin: 0;")
+        form(action="./edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');" style="margin: 0;")
           button.btn.btn-primary(type="submit") Revise
 
 block js

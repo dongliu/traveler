@@ -138,8 +138,6 @@ module.exports = function(app) {
         f.archivedBy = req.session.userid;
         f.archivedOn = Date.now();
       }
-      // check if we need to increment the version
-      // f.incrementVersion();
       try {
         await f.saveWithHistory(req.session.userid);
         return res
