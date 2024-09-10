@@ -337,6 +337,7 @@ var traveler = {
       sharedWith: [],
       referenceReleasedForm: form._id,
       referenceReleasedFormVer: form.ver,
+      documentNumber: form.documentNumber,
       forms: [],
       data: [],
       comments: [],
