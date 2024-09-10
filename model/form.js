@@ -82,6 +82,8 @@ const form = new Schema({
     default: 'normal',
     enum: ['normal', 'discrepancy'],
   },
+  documentNumber: { type: String, unique: true },
+  versionNotes: String,
 });
 
 /**
@@ -216,6 +218,7 @@ const FormFile = mongoose.model('FormFile', formFile);
 const createForm = function(json, newFormResultCallBack) {
   const formToCreate = {};
   formToCreate.title = json.title;
+  formToCreate.documentNumber = json.documentNumber;
   formToCreate.createdBy = json.createdBy;
   formToCreate.createdOn = Date.now();
   formToCreate.updatedBy = json.createdBy;
@@ -229,6 +232,7 @@ const createForm = function(json, newFormResultCallBack) {
 const createFormWithHistory = function(uid, json) {
   const formToCreate = {};
   formToCreate.title = json.title;
+  formToCreate.documentNumber = json.documentNumber;
   formToCreate.createdBy = json.createdBy;
   formToCreate.createdOn = Date.now();
   formToCreate.updatedBy = json.createdBy;
