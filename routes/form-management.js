@@ -91,6 +91,7 @@ module.exports = function(app) {
           formType: releasedForm.formType,
           status: releasedForm.status,
           statusText: statusMap[`${releasedForm.status}`],
+          documentNumber: releasedForm.documentNumber,
           ver: releasedForm.ver,
           base: releasedForm.base,
           discrepancy: releasedForm.discrepancy,
