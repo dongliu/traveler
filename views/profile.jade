@@ -11,10 +11,8 @@ block head
 
 block content
   .container(style="margin-top: 10px")
-    #message
+    h3 My profile 
     #profile.well
-      //- img(src="#{prefix}/adusers/#{user._id}/photo", data-src='holder.js/27x40?size=20&text=#{user._id.substr(0, 1).toUpperCase()}')
-      //- img(src="#{prefix}/adusers/#{user._id}/photo")
       dl
         dt Name
         dd #{user.name}
@@ -30,19 +28,8 @@ block content
         dd #{user.lastVisitedOn}
         dt Roles
         dd #{user.roles}
-        //- dt Notice
-        //- dd
-          form.form-inline
-            label.checkbox
-              if (user.subscribe)
-                input#sub(type='checkbox', checked)
-              else
-                input#sub(type='checkbox')
-              | subscribe &nbsp
-            button#modify.btn(type='submit') Modify
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/profile.js')
