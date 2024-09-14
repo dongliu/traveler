@@ -1253,12 +1253,12 @@ const useridNoLinkColumn = {
   bFilter: true,
 };
 
-const userNameColumn = {
-  sTitle: 'Full name',
-  mData: 'username',
+const useridLinkColumn = {
+  sTitle: 'User id',
+  mData: '_id',
   sDefaultContent: '',
-  mRender(data, type, full) {
-    return `<a href = "${prefix}/users?name=${data}">${data}</a>`;
+  mRender(data) {
+    return `<a target="${linkTarget}" href = "${prefix}/users/${data}" title = "user details">${data}</a>`;
   },
   bFilter: true,
 };
@@ -1348,6 +1348,14 @@ const rolesColumn = {
     return data.join();
   },
   bFilter: true,
+};
+
+const ownershipColumn = {
+  sTitle: 'Manage ownership',
+  mData(source) {
+    return `<a href="${prefix}/users/${source._id}/ownership" target="${linkTarget}" data-toggle="tooltip" title="manage ownership"><i class="fa fa-user fa-lg"></i></a>`;
+  },
+  bSortable: false,
 };
 
 const lastVisitedOnColumn = dateColumn('Last visited', 'lastVisitedOn');

@@ -10,14 +10,10 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  script(type='text/javascript').
-    var roles = !{JSON.stringify(user.roles)};
   .container(style="margin-top: 10px")
-    //- a.btn.btn-primary(href="/users") users
     #message
+    h3 Profile for #{user.name}
     #profile.well
-      //- img(src='#{prefix}/adusers/#{user._id}/photo', data-src='holder.js/27x40?size=20&text=#{user._id.substr(0, 1).toUpperCase()}')
-      //- img(src='#{prefix}/adusers/#{user._id}/photo')
       dl
         dt Name
         dd #{user.name}
@@ -31,27 +27,11 @@ block content
         dd #{user.mobile}
         dt Last visited on
         dd #{user.lastVisitedOn}
-        //- dt Notice subscribed
-        //- dd #{user.subscribe}
         dt Roles
-        dd#roles
-          label.checkbox.inline
-            input(type='checkbox', value='manager')
-            | manager
-          label.checkbox.inline
-            input#reviwer(type='checkbox', value='reviewer')
-            | reviewer
-          label.checkbox.inline
-            input(type='checkbox', value='admin')
-            | admin
-      if (myRoles.indexOf('admin') !== -1)
-        button#modify.btn.btn-primary(type='submit') Modify
-        = ' '
-      button#cacel.btn(onclick="window.open('', '_self', '');window.close(); return false;") Close window
+        dd #{user.roles}
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/user.js')

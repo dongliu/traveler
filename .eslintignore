@@ -1,7 +1,7 @@
 etc
 sbin
-!public
-public/*
-!public/javascripts
-public/javascripts/*
-!public/javascripts/lib
+# !public
+# public/*
+# !public/javascripts
+# public/javascripts/*
+# !public/javascripts/lib

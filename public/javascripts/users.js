@@ -1,9 +1,9 @@
-/*global selectColumn: false, useridColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, fnAddFilterFoot: false*/
-/*global updateAjaxURL: false, prefix: false, Holder: false*/
-/*global travelerGlobal: false*/
+/* global selectColumn: false, useridLinkColumn: false, ownershipColumn: false, fullNameNoLinkColumn: false, rolesColumn: false, lastVisitedOnColumn: false, fnGetSelected: false, selectEvent: false, filterEvent: false, sDomNoTools: false, fnAddFilterFoot: false */
+/* global updateAjaxURL: false, prefix: false, Holder: false */
+/* global travelerGlobal: false */
 
 function inArray(name, ao) {
-  var i;
+  let i;
   for (i = 0; i < ao.length; i += 1) {
     if (ao[i].name === name) {
       return true;
@@ -14,11 +14,11 @@ function inArray(name, ao) {
 
 function updateFromModal(cb) {
   $('#remove').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
+  let number = $('#modal .modal-body div').length;
   $('#modal .modal-body div').each(function() {
-    var that = this;
+    const that = this;
     $.ajax({
-      url: '/users/' + that.id + '/refresh',
+      url: `/users/${that.id}/refresh`,
       type: 'GET',
     })
       .done(function() {
@@ -26,7 +26,7 @@ function updateFromModal(cb) {
         $(that).addClass('text-success');
       })
       .fail(function(jqXHR) {
-        $(that).append(' : ' + jqXHR.responseText);
+        $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
       .always(function() {
@@ -42,19 +42,19 @@ function updateFromModal(cb) {
 
 function modifyRolesFromModal(cb) {
   $('#remove').prop('disabled', true);
-  var number = $('#modal .modal-body div').length;
-  var roles = [];
+  let number = $('#modal .modal-body div').length;
+  const roles = [];
   $('#modal-roles input:checked').each(function() {
     roles.push($(this).val());
   });
   $('#modal .modal-body div').each(function() {
-    var that = this;
+    const that = this;
     $.ajax({
-      url: '/users/' + that.id,
+      url: `/users/${that.id}`,
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
-        roles: roles,
+        roles,
       }),
     })
       .done(function() {
@@ -62,7 +62,7 @@ function modifyRolesFromModal(cb) {
         $(that).addClass('text-success');
       })
       .fail(function(jqXHR) {
-        $(that).append(' : ' + jqXHR.responseText);
+        $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
       .always(function() {
@@ -95,18 +95,19 @@ $(function() {
     }
   );
 
-  var userColumns = [
+  const userColumns = [
     selectColumn,
-    useridColumn,
+    useridLinkColumn,
+    ownershipColumn,
     fullNameNoLinkColumn,
     rolesColumn,
     lastVisitedOnColumn,
   ];
 
-  var userTable = $('#users-table').dataTable({
+  const userTable = $('#users-table').dataTable({
     sAjaxSource: '/users/json',
     sAjaxDataProp: '',
-    fnInitComplete: function() {
+    fnInitComplete() {
       Holder.run({
         images: 'img.user',
       });
@@ -122,7 +123,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: userColumns,
-    aaSorting: [[4, 'desc']],
+    aaSorting: [[5, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#users-table', userColumns);
@@ -131,23 +132,19 @@ $(function() {
 
   $('#add').click(function(e) {
     e.preventDefault();
-    var name = $('#username').val();
+    const name = $('#username').val();
     if (inArray(name, userTable.fnGetData())) {
-      //show message
+      // show message
       $('#message').append(
-        '<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The user named <strong>' +
-          name +
-          '</strong> is already in the user list. </div>'
+        `<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The user named <strong>${name}</strong> is already in the user list. </div>`
       );
     } else {
-      let user = travelerGlobal.usernames.get(name);
+      const user = travelerGlobal.usernames.get(name);
       if (user === null) {
-        console.error(
-          'Unknown user ' + name + '.  Please select from the list.'
-        );
+        console.error(`Unknown user ${name}.  Please select from the list.`);
         return;
       }
-      let uid = user[0].sAMAccountName;
+      const uid = user[0].sAMAccountName;
       $.ajax({
         url: '/users/',
         type: 'POST',
@@ -157,19 +154,15 @@ $(function() {
           manager: $('#manager').prop('checked'),
           admin: $('#admin').prop('checked'),
         }),
-        success: function(data, status, jqXHR) {
+        success(data, status, jqXHR) {
           $('#message').append(
-            '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' +
-              jqXHR.responseText +
-              '</div>'
+            `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>${jqXHR.responseText}</div>`
           );
           userTable.fnReloadAjax();
         },
-        error: function(jqXHR) {
+        error(jqXHR) {
           $('#message').append(
-            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ' +
-              jqXHR.responseText +
-              '</div>'
+            `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ${jqXHR.responseText}</div>`
           );
         },
       });
@@ -178,18 +171,16 @@ $(function() {
   });
 
   $('#user-update').click(function() {
-    var selected = fnGetSelected(userTable, 'row-selected');
+    const selected = fnGetSelected(userTable, 'row-selected');
     if (selected.length) {
       $('#modalLabel').html(
-        'Update the following ' +
-          selected.length +
-          ' users from the application? '
+        `Update the following ${selected.length} users from the application? `
       );
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
-        var data = userTable.fnGetData(row);
+        const data = userTable.fnGetData(row);
         $('#modal .modal-body').append(
-          '<div id="' + data._id + '">' + data.name + '</div>'
+          `<div id="${data._id}">${data.name}</div>`
         );
       });
       $('#modal .modal-footer').html(
@@ -214,10 +205,10 @@ $(function() {
   });
 
   $('#user-modify').click(function() {
-    var selected = fnGetSelected(userTable, 'row-selected');
+    const selected = fnGetSelected(userTable, 'row-selected');
     if (selected.length) {
       $('#modalLabel').html(
-        'Modify the following ' + selected.length + " users' role? "
+        `Modify the following ${selected.length} users' role? `
       );
       $('#modal .modal-body').empty();
       $('#modal .modal-body').append(
@@ -225,14 +216,12 @@ $(function() {
           '<label class="checkbox"><input id="modal-manager" type="checkbox" value="manager">manager</label> ' +
           '<label class="checkbox"><input id="modal-reviewer" type="checkbox" value="reviewer">reviewer</label> ' +
           '<label class="checkbox"><input id="modal-admin" type="checkbox" value="admin">admin</label> ' +
-          '<label class="checkbox"><input id="read_all_forms" type="checkbox" value="read_all_forms">read_all_forms</label> ' +
-          '<label class="checkbox"><input id="write_active_travelers" type="checkbox" value="write_active_travelers">write_active_travelers</label> ' +
           '</form>'
       );
       selected.forEach(function(row) {
-        var data = userTable.fnGetData(row);
+        const data = userTable.fnGetData(row);
         $('#modal .modal-body').append(
-          '<div id="' + data._id + '">' + data.name + '</div>'
+          `<div id="${data._id}">${data.name}</div>`
         );
       });
       $('#modal .modal-footer').html(

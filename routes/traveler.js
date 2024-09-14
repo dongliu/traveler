@@ -906,8 +906,8 @@ module.exports = function(app) {
     '/travelers/:id/owner',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.status('id', [0, 1, 1.5]),
+    reqUtils.isOwnerOrAdminMw('id'),
+    reqUtils.status('id', [0, 1, 1.5, 2, 3]),
     reqUtils.filter('body', ['name']),
     function(req, res) {
       const doc = req[req.params.id];
