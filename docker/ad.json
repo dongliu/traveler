@@ -3,8 +3,8 @@
   "searchBase": "OU=CAM - USERS,ou=CAM,dc=bnl,dc=gov",
   "searchFilter": "(sAMAccountName=_id)",
   "nameFilter": "(displayName=_name)",
-  "objAttributes": ["uid", "displayName", "ou", "mail", "homephone"],
-  "memberAttributes": ["uid", "displayName", "ou", "mail", "homephone", "memberOf"],
+  "objAttributes": ["uid", "sAMAccountName", "displayName", "ou", "mail", "homephone"],
+  "memberAttributes": ["uid", "sAMAccountName", "displayName", "ou", "mail", "homephone", "memberOf"],
   "groupAttributes": ["uid","displayName","mail"],
   "rawAttributes": ["jpegPhoto"],
   "defaultKeys": {
@@ -14,8 +14,7 @@
     "company": "o",
     "thumbnailPhoto": "jpegPhoto",
     "uid": "uid",
-    "telephoneNumber": "homephone",
-    "sAMAccountName": "uid"
+    "telephoneNumber": "homephone"
   },
 
   "shareUsers": true,
