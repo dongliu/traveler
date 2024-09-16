@@ -16,8 +16,7 @@
     "company": "o",
     "thumbnailPhoto": "jpegPhoto",
     "uid": "uid",
-    "telephoneNumber": "homephone",
-    "sAMAccountName": "uid"
+    "telephoneNumber": "homephone"
   },
 
   "shareUsers": true,
