@@ -83,9 +83,11 @@ function cloneFromModal(activeTable, formTable) {
         $(that).addClass('text-error');
       })
       .always(function() {
+        $('#submit').prop('disabled', false);
+        $('#return').prop('disabled', false);
+
         number = number - 1;
         if (number === 0 && success) {
-          $('#return').prop('disabled', false);
           formTable.fnReloadAjax();
         }
       });
