@@ -90,9 +90,9 @@ block content
         != html
   .button-footer.container
     //- edit controls available for draft
-    label
-      b Version Notes
-    textarea#version-notes(placeholder="Version Notes" style="width: 100%;" rows=3 disabled=status !== 0)= versionNotes
+    //- label
+    //-   b Version Notes
+    //- textarea#version-notes(placeholder="Version Notes" style="width: 100%;" rows=3 disabled=status !== 0)= versionNotes
     if (status === 0)
       .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
