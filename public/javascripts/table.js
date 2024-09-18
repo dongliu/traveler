@@ -1130,7 +1130,7 @@ const binderValueProgressColumn = {
 };
 
 const deviceColumn = {
-  sTitle: 'Devices',
+  sTitle: 'Serial Numbers',
   mData(source, type, val) {
     return source.devices || [];
   },
