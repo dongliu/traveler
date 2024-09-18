@@ -1135,7 +1135,8 @@ function init() {
     });
 
   initHtml = $('#output').html();
-  initNotes = $('#version-notes').val();
+  // initNotes = $('#version-notes').val();
+  initNotes = '';
 
   $('span.time').each(function() {
     $(this).text(
@@ -1408,7 +1409,8 @@ function binding_events() {
     }
     cleanBeforeSave();
     const html = $('#output').html();
-    const notes = $('#version-notes').val();
+    // const notes = $('#version-notes').val();
+    const notes = '';
     // var path = window.location.pathname;
     if (html !== initHtml || notes !== initNotes) {
       sendRequest(
