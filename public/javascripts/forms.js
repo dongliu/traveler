@@ -61,12 +61,15 @@ function cloneFromModal(activeTable, formTable) {
   $('#modal .modal-body div.target').each(function() {
     const that = this;
     let success = false;
+    const title = $('input#name', $(that)).val();
+    const documentNumber = $('input#docNo', $(that)).val();
     $.ajax({
       url: `/${base}/${that.id}/clone`,
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
-        title: $('input', $(that)).val(),
+        title,
+        documentNumber,
       }),
     })
       .done(function() {
@@ -100,7 +103,7 @@ function formatItemUpdate(data) {
 }
 
 function cloneItem(data) {
-  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" value="${data.title} clone"></div>`;
+  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" id="title" value="${data.title} clone"><br> and document number: <input type="text" id="docNo"></div>`;
 }
 
 $(function() {

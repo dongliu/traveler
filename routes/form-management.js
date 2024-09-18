@@ -160,6 +160,9 @@ module.exports = function(app) {
       const clonedForm = {};
       clonedForm.html = reqUtils.sanitizeText(base.html);
       clonedForm.title = reqUtils.sanitizeText(req.body.title);
+      clonedForm.documentNumber = reqUtils.sanitizeText(
+        req.body.documentNumber
+      );
       clonedForm.createdBy = req.session.userid;
       clonedForm.createdOn = Date.now();
       clonedForm.updatedBy = req.session.userid;
