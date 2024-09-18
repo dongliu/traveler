@@ -1032,7 +1032,7 @@ module.exports = function(app) {
       return next();
     },
     function(req, res, next) {
-      if (!req[req.params.id].allApproved) {
+      if (!req[req.params.id].allApproved()) {
         return res
           .status(400)
           .send(`${req[req.params.id].id} was not approved by all reviewers`);
