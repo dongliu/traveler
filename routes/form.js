@@ -908,6 +908,7 @@ module.exports = function(app) {
       const form = {};
       form.html = reqUtils.sanitizeText(doc.html);
       form.title = reqUtils.sanitizeText(req.body.title);
+      form.documentNumber = reqUtils.sanitizeText(req.body.documentNumber);
       form.createdBy = req.session.userid;
       form.createdOn = Date.now();
       form.updatedBy = req.session.userid;
