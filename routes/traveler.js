@@ -449,6 +449,9 @@ module.exports = function(app) {
               'traveler',
               routesUtilities.getRenderObject(req, {
                 isOwner: reqUtils.isOwner(req, doc),
+                canStart: doc.sharedWith.some(
+                  doc => doc._id === req.session.userid
+                ),
                 traveler: doc,
                 formHTML:
                   doc.forms.length === 1
