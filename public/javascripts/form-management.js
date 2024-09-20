@@ -48,6 +48,9 @@ function cloneFromModal(activeTable, formTable) {
         $('#return').prop('disabled', false);
 
         number = number - 1;
+        $('#submit').prop('disabled', false);
+        $('#return').prop('disabled', false);
+
         if (number === 0 && success) {
           formTable.fnReloadAjax();
         }

@@ -64,7 +64,7 @@ function cloneFromModal(activeTable, formTable) {
   $('#modal .modal-body div.target').each(function() {
     const that = this;
     let success = false;
-    const title = $('input#name', $(that)).val();
+    const title = $('input#title', $(that)).val();
     const documentNumber = $('input#docNo', $(that)).val();
     $.ajax({
       url: `/${base}/${that.id}/clone`,
