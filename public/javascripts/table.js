@@ -716,7 +716,7 @@ const archivedByColumn = personColumn('Archived by', 'archivedBy');
 const deadlineColumn = dateColumn('Deadline', 'deadline');
 
 const tagsColumn = {
-  sTitle: 'Tags',
+  sTitle: 'Part Number',
   sDefaultContent: '',
   mData(source, type, val) {
     return source.tags || [];
