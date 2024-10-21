@@ -929,7 +929,8 @@ module.exports = function(app) {
       const doc = req[req.params.id];
       if (
         reqUtils.isOwner(req, doc) ||
-        routesUtilities.checkUserRole(req, 'admin')
+        routesUtilities.checkUserRole(req, 'admin') ||
+        reqUtils.canWrite(req, doc)
       ) {
         return res.render(
           'traveler-config',
