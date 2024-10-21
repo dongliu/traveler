@@ -84,7 +84,7 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    formTypeColumn,
+    // formTypeColumn,
     docNoColumn,
     versionColumn,
     formStatusColumn,
@@ -119,10 +119,37 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: closedFormAoColumns,
-    aaSorting: [
-      [9, 'desc'],
-      [8, 'desc'],
+    aoColumns: formAoColumns,
+    aaSorting: [[11, 'desc']],
+    sDom: sDomNoTools,
+  });
+  fnAddFilterFoot('#submitted-form-table', formAoColumns);
+
+  const releasedFormAoColumns = [
+    selectColumn,
+    releasedFormLinkColumn,
+    titleColumn,
+    // formTypeColumn,
+    releasedFormStatusColumn,
+    releasedFormVersionColumn,
+    tagsColumn,
+    releasedByColumn,
+    releasedOnColumn,
+  ];
+  const releasedFormTable = $('#released-form-table').dataTable({
+    sAjaxSource: '/released-forms/json',
+    sAjaxDataProp: '',
+    fnDrawCallback() {
+      Holder.run({
+        images: 'img.user',
+      });
+    },
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
     ],
     sDom: sDomNoTools,
   };
@@ -134,8 +161,7 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    docNoColumn,
-    versionColumn,
+    // formTypeColumn,
     tagsColumn,
     updatedByColumn,
     updatedOnColumn,
