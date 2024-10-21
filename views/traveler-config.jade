@@ -29,14 +29,6 @@ block content
         span#description.editable !{traveler.description}
       = ' '
       button.btn.btn-primary.editable Edit
-    h4 Deviation/Waiver Report:
-      = ' '
-      if (locals.traveler.dwr == undefined)
-        span#dwr.editable No DWR
-      else
-        span#dwr.editable !{traveler.dwr}
-      = ' '
-      button.btn.btn-primary.editable Edit
     //- h4 Deadline:
     //-   = ' '
     //-   span.form-inline
