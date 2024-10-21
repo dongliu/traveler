@@ -33,7 +33,7 @@ block content
       p Updated by #{form.updatedBy} on
         = ' '
         span.time #{form.updatedOn}
-    h4 Tags
+    h4 Part Number
     ul#tags.tag-list
       each tag in form.tags
         li
@@ -45,7 +45,7 @@ block content
     .btn-group
       button.btn.btn-primary#add-tag
         i.fa.fa-tag.fa-lg
-        | &nbsp;Add tag
+        | &nbsp;Add part number
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
