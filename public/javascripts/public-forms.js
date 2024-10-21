@@ -54,7 +54,7 @@ $(function() {
     releasedFormCloneColumn,
     titleColumn,
     releasedFormStatusColumn,
-    formTypeColumn,
+    // formTypeColumn,
     releasedFormVersionColumn,
     tagsColumn,
     releasedByColumn,

@@ -15,13 +15,14 @@ block content
         .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} title
         .controls
           input(type='text', name='title', required, value="#{form && form.title || ''}")
-      if (locals.roles && locals.roles.indexOf('admin') !== -1)
-        .control-group
-          .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} type
-          .controls
-            select(name='formType', required)
-              option(value='normal' selected=form && form.formType == 'normal') normal
-              option(value='discrepancy' selected=form && form.formType == "discrepancy") discrepancy
+          input(type="hidden" name="formType" value="normal")
+      //- if (locals.roles && locals.roles.indexOf('admin') !== -1)
+      //-   .control-group
+      //-     .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} type
+      //-     .controls
+      //-       select(name='formType', required)
+      //-         option(value='normal' selected=form && form.formType == 'normal') normal
+      //-         option(value='discrepancy' selected=form && form.formType == "discrepancy") discrepancy
       .control-group
         .control-label Document number
         .controls
