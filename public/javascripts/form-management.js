@@ -91,10 +91,9 @@ $(function() {
     docNoColumn,
     versionColumn,
     tagsColumn,
-    createdOnColumn,
-    updatedByColumn,
-    updatedOnColumn,
-    sharedWithColumn,
+    // keysColumn,
+    reviewersColumn,
+    firstReviewRequestedOnColumn,
   ];
 
   if (shareGroups) {
