@@ -81,10 +81,10 @@ block content
               a(href='#{prefix}/released-forms/#{locals.traveler.referenceReleasedForm}/', target='#{viewConfig.linkTarget}') Released #{viewConfig.terminology.form}
           if (locals.traveler.description !== undefined)
             h4 Description: #{traveler.description}
-          if (locals.traveler.deadline !== undefined)
-            p Deadline:
-              = ' '
-              span.time #{traveler.deadline}
+          //- if (locals.traveler.deadline !== undefined)
+          //-   p Deadline:
+          //-     = ' '
+          //-     span.time #{traveler.deadline}
           p Created by #{traveler.createdBy}
             = ' '
             if (locals.traveler.clonedBy !== undefined)
