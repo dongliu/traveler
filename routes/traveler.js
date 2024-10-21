@@ -27,6 +27,7 @@ const Log = mongoose.model('Log');
 
 const { TravelerError } = require('../lib/error');
 const { stateTransition } = require('../model/traveler');
+const { sendNotification } = require('../lib/email');
 const logger = require('../lib/loggers').getLogger();
 
 function createTraveler(form, req, res) {
@@ -1056,6 +1057,20 @@ module.exports = function(app) {
         if (saveErr) {
           logger.error(saveErr);
           return res.status(500).send(saveErr.message);
+        }
+        if (doc.status === 1.5) {
+          User.findById(doc.createdBy).then(user => {
+            const travelerLink = `${req.protocol}://${req.get(
+              'host'
+            )}/travelers/${doc._id}/`;
+            sendNotification({
+              recipients: user.email,
+              subject: 'Traveler Completed',
+              html: `The traveler "${doc.title}" has been submitted for completion. <br/>
+              Please review the traveler at this link: <br/>
+              <a href="${travelerLink}">${travelerLink}</a>`,
+            });
+          });
         }
         return res.status(200).send(`status updated to ${req.body.status}`);
       });
