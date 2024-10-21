@@ -157,7 +157,7 @@ module.exports = function(app) {
           $exists: false,
         },
       },
-      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping documentNumber'
+      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping documentNumber referenceReleasedFormVer'
     )
       .lean()
       .exec(function(err, docs) {
@@ -180,7 +180,7 @@ module.exports = function(app) {
           $ne: true,
         },
       },
-      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput documentNumber'
+      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
     )
       .lean()
       .exec(function(err, travelers) {
@@ -218,7 +218,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput documentNumber'
+        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
       )
         .lean()
         .exec(function(tErr, travelers) {
@@ -264,7 +264,7 @@ module.exports = function(app) {
             $in: travelerIds,
           },
         },
-        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput documentNumber'
+        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
       )
         .lean()
         .exec(function(tErr, travelers) {
@@ -371,7 +371,7 @@ module.exports = function(app) {
     };
     Traveler.find(
       search,
-      'title description status devices locations archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput documentNumber'
+      'title description status devices locations archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
     )
       .lean()
       .exec(function(err, travelers) {
