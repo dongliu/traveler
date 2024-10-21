@@ -1063,6 +1063,21 @@ module.exports = function(app) {
               <a href="${travelerLink}">${travelerLink}</a>`,
             });
           });
+        } else if (doc.status == 1 && oldStatus == 1.5) {
+          const workerIds = doc.manPower.map(user => user._id);
+          User.find({ _id: { $in: workerIds } }).then(users => {
+            const travelerLink = `${req.protocol}://${req.get(
+              'host'
+            )}/travelers/${doc._id}/`;
+            const emails = users.map(user => user.email);
+            sendNotification({
+              recipients: emails,
+              subject: 'Traveler Rejected',
+              html: `The traveler "${doc.title}" was sent back for more work. <br/>
+              Please visit the traveler at this link: <br/>
+              <a href="${travelerLink}">${travelerLink}</a>`,
+            });
+          });
         }
         return res.status(200).send(`status updated to ${req.body.status}`);
       });
