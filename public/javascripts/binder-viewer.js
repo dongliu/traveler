@@ -27,7 +27,7 @@ $(function() {
     ownerColumn,
     deviceColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     manPowerColumn,
     travelerProgressColumn,
   ];
