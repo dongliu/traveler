@@ -29,7 +29,7 @@ $(function() {
     sharedWithColumn,
     sharedGroupColumn,
     createdOnColumn,
-    deadlineColumn,
+    // deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,

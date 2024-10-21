@@ -29,14 +29,14 @@ block content
         span#description.editable !{traveler.description}
       = ' '
       button.btn.btn-primary.editable Edit
-    h4 Deadline:
-      = ' '
-      span.form-inline
-        if (locals.traveler.deadline == undefined)
-          input#deadline(type='date')
-        else
-          input#deadline(type='date', value='#{traveler.deadline}')
-        = ' '
+    //- h4 Deadline:
+    //-   = ' '
+    //-   span.form-inline
+    //-     if (locals.traveler.deadline == undefined)
+    //-       input#deadline(type='date')
+    //-     else
+    //-       input#deadline(type='date', value='#{traveler.deadline}')
+    //-     = ' '
     p Created on
       = ' '
       span.time #{traveler.createdOn}
