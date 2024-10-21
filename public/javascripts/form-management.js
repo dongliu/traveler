@@ -70,7 +70,7 @@ $(function() {
     versionColumn,
     formStatusColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     reviewersColumn,
     firstReviewRequestedOnColumn,
   ];

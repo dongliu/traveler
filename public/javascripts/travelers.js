@@ -92,7 +92,7 @@ $(function() {
     statusColumn,
     deviceColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     sharedWithColumn,
     sharedGroupColumn,
     createdOnColumn,
