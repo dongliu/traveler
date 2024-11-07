@@ -40,7 +40,7 @@ block content
         input#username.input(type='text', placeholder='Last, First', name='name')
         != ' '
         label.checkbox
-          input#access(type='checkbox', name='access', value='write')
+          input#access(type='checkbox', name='access', value='write', checked)
           | Write
         != ' '
         button.btn.btn-primary#add(type='submit', disabled) Add to share
@@ -63,7 +63,7 @@ block content
         input#groupname.input.input-xlarge(type='text', placeholder='Group Id', name='group')
         != ' '
         label.checkbox
-          input#groupaccess(type='checkbox', name='access', value='write')
+          input#groupaccess(type='checkbox', name='access', value='write', checked)
           | Write
         != ' '
         button.btn.btn-primary#addgroup(type='submit', disabled) Add to share
