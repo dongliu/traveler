@@ -20,10 +20,10 @@ block content
       //-   a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
       //-     i.fa.fa-institution.fa-lg
       //-     | &nbsp;All public #{viewConfig.terminology.form}s
-      //- .btn-group
-      //-   button.btn.btn-info#reload
-      //-     i.fa.fa-refresh.fa-lg
-      //-     | &nbsp;Reload all tables
+      .btn-group
+        button.btn.btn-info#reload
+          i.fa.fa-refresh.fa-lg
+          | &nbsp;Reload all tables
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
