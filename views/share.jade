@@ -40,7 +40,10 @@ block content
       form.form-inline(name='user')
         input#username.input(type='text', placeholder='Last, First', name='name')
         != ' '
-        input#access(type='hidden', name='access', value='write', checked)
+        label.checkbox
+          input#access(type='checkbox', name='access', value='write', checked)
+          | Write
+        != ' '
         button.btn.btn-primary#add(type='submit', disabled) Add to share
       .btn-toolbar
         .btn-group
@@ -60,7 +63,10 @@ block content
       form.form-inline(name='group')
         input#groupname.input.input-xlarge(type='text', placeholder='Group Id', name='group')
         != ' '
-        input#groupaccess(type='hidden', name='access', value='write', checked)
+        label.checkbox
+          input#groupaccess(type='checkbox', name='access', value='write', checked)
+          | Write
+        != ' '
         button.btn.btn-primary#addgroup(type='submit', disabled) Add to share
       .btn-toolbar
         .btn-group
