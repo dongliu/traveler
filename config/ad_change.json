@@ -47,5 +47,5 @@
   "ldapsRejectUnauthorized": true,
   "shareUsers": true,
   "shareGroups": true,
-  "transferOwnership": true
+  "transferOwnership": false
 }
