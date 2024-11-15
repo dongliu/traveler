@@ -183,6 +183,7 @@ $(function() {
 
   var sharedTravelerAoColumns = [
     selectColumn,
+    travelerConfigLinkColumn,
     travelerLinkColumn,
     titleColumn,
     docNoColumn,
