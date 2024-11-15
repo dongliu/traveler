@@ -66,7 +66,7 @@ block content
         if (isReviewer && status === 0.5)
           .accordion-group
             .accordion-heading
-              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Add a new review
+              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Complete a review
             #new-review.accordion-body.collapse
               .accordion-inner
                 form.form-horizontal#review
@@ -83,7 +83,7 @@ block content
                     .controls
                       textarea#comment(name="comment", cols="40", rows="10")
                   .btn-group
-                    button.btn.btn-primary#submit-review(data-toggle='tooltip', title='Report review result') Report
+                    button.btn.btn-primary#submit-review(data-toggle='tooltip', title='Report review result') Submit
 
     .well-large
       form.form-horizontal#output
