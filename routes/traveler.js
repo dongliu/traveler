@@ -999,7 +999,7 @@ module.exports = function(app) {
     '/travelers/:id/status',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.canWriteMw('id'),
+    reqUtils.isOwnerOrAdminMw('id'),
     reqUtils.archived('id', false),
     function(req, res) {
       const doc = req[req.params.id];
@@ -1102,7 +1102,7 @@ module.exports = function(app) {
     '/travelers/:id/devices/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
+    reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     reqUtils.filter('body', ['newdevice']),
@@ -1135,7 +1135,7 @@ module.exports = function(app) {
     '/travelers/:id/devices/:number',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
+    reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     function(req, res) {
