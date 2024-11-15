@@ -9,7 +9,7 @@ function cleanDeviceForm() {
     .remove();
   $('#add').removeAttr('disabled');
 }
-
+``;
 function cleanTagForm() {
   $('#new-tag')
     .closest('li')
@@ -39,6 +39,7 @@ $(function() {
   var initValue = {
     title: $('#title').html(),
     description: $('#description').html(),
+    dwr: $('#dwr').html(),
   };
 
   Editable.binding($, initValue);

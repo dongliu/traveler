@@ -178,6 +178,7 @@ var traveler = new Schema({
     type: Boolean,
     default: false,
   },
+  dwr: Schema.Types.String,
 });
 
 /**
