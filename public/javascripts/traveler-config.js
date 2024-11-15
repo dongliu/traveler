@@ -9,7 +9,7 @@ function cleanDeviceForm() {
     .remove();
   $('#add').removeAttr('disabled');
 }
-
+``;
 function cleanTagForm() {
   $('#new-tag')
     .closest('li')
