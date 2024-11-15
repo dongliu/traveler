@@ -952,8 +952,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['title', 'description', 'deadline']),
-    reqUtils.sanitize('body', ['title', 'description', 'deadline']),
+    reqUtils.filter('body', ['title', 'description', 'deadline', 'dwr']),
+    reqUtils.sanitize('body', ['title', 'description', 'deadline', 'dwr']),
     function(req, res) {
       const doc = req[req.params.id];
       if (
