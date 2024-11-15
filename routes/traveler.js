@@ -996,7 +996,7 @@ module.exports = function(app) {
     '/travelers/:id/status',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.canWriteMw('id'),
+    reqUtils.isOwnerOrAdminMw('id'),
     reqUtils.archived('id', false),
     function(req, res) {
       const doc = req[req.params.id];
