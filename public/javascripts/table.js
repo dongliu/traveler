@@ -1255,7 +1255,7 @@ const sharedGroupColumn = {
     return '';
   },
   bFilter: true,
-  bVisible: shareGroups || false,
+  bVisible: false,
 };
 
 const statusColumn = {
