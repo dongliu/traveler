@@ -46,9 +46,9 @@ block content
         if (viewConfig.transferOwnership)
           li
             a(href='#transferredforms', data-toggle='tab') Transferred draft #{viewConfig.terminology.form}s
-        if (viewConfig.shareUsers)
-          li
-            a(href='#sharedfroms', data-toggle='tab') Shared draft #{viewConfig.terminology.form}s
+        //- if (viewConfig.shareUsers)
+        //-   li
+        //-     a(href='#sharedfroms', data-toggle='tab') Shared draft #{viewConfig.terminology.form}s
         if (viewConfig.shareGroups)
           li
             a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s
