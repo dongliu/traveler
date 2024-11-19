@@ -958,6 +958,7 @@ module.exports = function(app) {
       const doc = req[req.params.id];
       if (
         reqUtils.isOwner(req, doc) ||
+        reqUtils.canWrite(req, doc) ||
         routesUtilities.checkUserRole(req, 'admin')
       ) {
         Object.keys(req.body).forEach(k => {
