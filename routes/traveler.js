@@ -956,7 +956,11 @@ module.exports = function(app) {
     reqUtils.sanitize('body', ['title', 'description', 'deadline', 'dwr']),
     function(req, res) {
       const doc = req[req.params.id];
-      if (reqUtils.isOwner(req, doc) || reqUtils.canWrite(req, doc)) {
+      if (
+        reqUtils.isOwner(req, doc) ||
+        reqUtils.canWrite(req, doc) ||
+        routesUtilities.checkUserRole(req, 'admin')
+      ) {
         Object.keys(req.body).forEach(k => {
           doc[k] = req.body[k];
         });
