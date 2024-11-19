@@ -27,6 +27,7 @@ block content
       .span9
         h3 Traveler title:  !{traveler.title}
         h4 Document No.:    !{traveler.documentNumber}
+        h4 Part No.:        !{traveler.tags.join(', ')}
         include ./traveler/status.jade
         if (locals.traveler.devices && traveler.devices.length > 0)
           h4 Serial Numbers: !{traveler.devices}
