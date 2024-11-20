@@ -15,20 +15,16 @@ block content
     #message
     h3 Title:
       = ' '
-      if (locals.traveler.title == undefined)
-        span#title.editable No title
-      else
-        span#title.editable !{traveler.title}
-      = ' '
-      button.btn.btn-primary.editable Edit
+      span#title(class=(locals.isOwner || isAdmin ? "editable" : "")) !{traveler.title || "No title"}
+      if (locals.isOwner || isAdmin)
+        = ' '
+        button.btn.btn-primary.editable Edit
     h4 Part Description:
       = ' '
-      if (locals.traveler.description == undefined)
-        span#description.editable No description
-      else
-        span#description.editable !{traveler.description}
-      = ' '
-      button.btn.btn-primary.editable Edit
+      span#description(class=(locals.isOwner || isAdmin ? "editable" : "")) !{traveler.description || "No description"}
+      if (locals.isOwner || isAdmin)
+        = ' '
+        button.btn.btn-primary.editable Edit
     h4 Deviation/Waiver Report:
       = ' '
       if (locals.traveler.dwr == undefined)
@@ -89,14 +85,16 @@ block content
       each tag in traveler.tags
         li
           span.tag #{tag}
-          = ' '
-          button.btn.btn-small.btn-warning.remove-tag
-            i.fa.fa-trash-o.fa-lg
+          if (locals.isOwner || isAdmin)
+            = ' '
+            button.btn.btn-small.btn-warning.remove-tag
+              i.fa.fa-trash-o.fa-lg
     br
-    .btn-group
-      button.btn.btn-primary#add-tag
-        i.fa.fa-tag.fa-lg
-        | &nbsp;Add part number
+    if (locals.isOwner || isAdmin)
+      .btn-group
+        button.btn.btn-primary#add-tag
+          i.fa.fa-tag.fa-lg
+          | &nbsp;Add part number
     //- br
     //- br
     //- if (viewConfig.showCCDB)
