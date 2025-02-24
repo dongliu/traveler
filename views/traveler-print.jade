@@ -11,8 +11,10 @@ html
   block content
     script(type='text/javascript').
       var traveler = !{JSON.stringify(traveler)};
+      var travelerStatus = !{JSON.stringify(traveler.status)};
       var prefix = '!{prefix}';
       var title = '!{traveler.title}'
+      var linkTarget = !{JSON.stringify(viewConfig.linkTarget)} || '_blank';
     .container
       .row
         .span10#print-control
