@@ -11,8 +11,6 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  script(type='text/javascript').
-    var prefix = '!{prefix}';
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -22,11 +20,11 @@ block content
       .modal-footer
     h3 Title:
       = ' '
-      span#title.editable #{form.title}
+      span#title.editable !{form.title}
       button.btn.btn-primary.editable Edit
     h4 Description:
       = ' '
-      span#description.editable #{form.description}
+      span#description.editable !{form.description}
       button.btn.btn-small.btn-primary.editable Edit
     p Created on
       = ' '
@@ -58,4 +56,4 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/form-config.js')
+  script(type='module', src='#{prefix}/javascripts/form-config.js')

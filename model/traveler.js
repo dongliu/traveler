@@ -19,6 +19,7 @@ var Binder = mongoose.model('Binder');
  * alias : a name for convenience to distinguish forms.
  * mapping : user-key -> name
  * labels: name -> label
+ * types: name -> input types
  * inputs : list of input names in the form
  * Mapping and inputs are decided by the form snapshot when a traveler is
  * created from it. They are within form because they will be never changed once
@@ -146,6 +147,7 @@ var traveler = new Schema({
   discrepancyForms: [form],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
+  types: Schema.Types.Mixed,
   // local id of active form in forms
   activeForm: String,
   // local id of the active discrepancy form in discrepancyForms
@@ -178,14 +180,14 @@ var traveler = new Schema({
 });
 
 /**
- * update the progress of binders that inlude this traveler document
+ * update the progress of binders that include this traveler document
  * @param  {Traveler} travelerDoc the traveler document
  * @return {undefined}
  */
 function updateBinderProgress(travelerDoc) {
   Binder.find({
-    archived: {
-      $ne: true,
+    status: {
+      $ne: 3,
     },
     works: {
       $elemMatch: {
@@ -263,7 +265,9 @@ var travelerNote = new Schema({
   name: String,
   value: String,
   inputBy: String,
+  updatedBy: String,
   inputOn: Date,
+  updatedOn: Date,
 });
 
 var Traveler = mongoose.model('Traveler', traveler);

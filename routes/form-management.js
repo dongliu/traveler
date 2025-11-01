@@ -139,7 +139,6 @@ module.exports = function(app) {
         f.archivedOn = Date.now();
       }
       // check if we need to increment the version
-      // in this case, no
       f.incrementVersion();
       try {
         await f.saveWithHistory(req.session.userid);
@@ -222,6 +221,15 @@ module.exports = function(app) {
         }
         return res.status(200).json(forms);
       });
+    }
+  );
+
+  app.get(
+    '/released-forms/:id/json',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', ReleasedForm),
+    function(req, res) {
+      return res.status(200).json(req[req.params.id]);
     }
   );
 };

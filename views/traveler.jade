@@ -11,12 +11,11 @@ block head
 
 block content
   script(type='text/javascript').
-    var traveler = !{JSON.stringify(traveler)}
+    var traveler = !{JSON.stringify(traveler)};
     var travelerStatus = !{JSON.stringify(traveler.status)};
     var finishedInput = !{JSON.stringify(traveler.finishedInput)};
     var totalInput = !{JSON.stringify(traveler.totalInput)};
-    var title = '!{traveler.title}'
-    var prefix = '!{prefix}';
+    var title = !{JSON.stringify(traveler.title)};
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -26,39 +25,14 @@ block content
       .modal-footer
     .row
       .span9
-        h3 Traveler title:  #{traveler.title}
-        if (locals.traveler.status !== undefined)
-          h4 Status:
-            case locals.traveler.status
-              when 1
-                = ' '
-                span active
-              when 1.5
-                = ' '
-                span submitted
-              when 2
-                = ' '
-                span completed
-              when 3
-                = ' '
-                span frozen
-              when 0
-                = ' '
-                span initialized
-            if (locals.traveler.status > 0)
-              = '; '
-              span
-                em#finished-input #{traveler.finishedInput}
-              = ' inputs finished out of '
-              span
-                em #{traveler.totalInput}
-              = ' inputs'
+        h3 Traveler title:  !{traveler.title}
+        include ./traveler/status.jade
         if (locals.traveler.devices && traveler.devices.length > 0)
           h4 Devices: !{traveler.devices}
         if (locals.traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
         if (locals.traveler.status !== undefined)
-          if (locals.isOwner != undefined && (locals.isOwner || isAdmin))
+          if ((locals.isOwner != undefined && locals.isOwner) || isAdmin || isManager)
             case locals.traveler.status
               when 0
                 .btn-group
@@ -69,7 +43,7 @@ block content
                 .btn-group
                   button.btn.btn-primary#complete Submit for completion
               when 1.5
-                if (isAdmin)
+                if (isAdmin || isManager)
                   .btn-group
                     button.btn.btn-primary#approve Approve completion
                   .btn-group
@@ -78,9 +52,11 @@ block content
                   .btn-group
                     button.btn.btn-primary#resume Resume
               when 2
-                if (isAdmin)
+                if (isAdmin || isManager)
                   .btn-group
                     button.btn.btn-warning#more More work
+                .btn-group
+                  a.btn.btn-primary#pdf(data-toggle='tooltip', title='create pdf in print view', href='print', target='#{viewConfig.linkTarget}') Create PDF
         if (locals.traveler.status !== undefined && locals.traveler.status > 0)
           //- .btn-group
           //-   button.btn.btn-info#update-progress Update progress
@@ -100,7 +76,7 @@ block content
         #details.collapse.out
           if (locals.traveler.referenceReleasedForm)
             h4
-              span Created from: 
+              span Created from:
               a(href='#{prefix}/released-forms/#{locals.traveler.referenceReleasedForm}/', target='#{viewConfig.linkTarget}') Released #{viewConfig.terminology.form}
           if (locals.traveler.description !== undefined)
             h4 Description: #{traveler.description}
@@ -144,6 +120,7 @@ block content
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
@@ -151,11 +128,10 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
   script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler-discrepancy-form-loader.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/traveler.js')
+  script(type='module', src='#{prefix}/javascripts/traveler.js')

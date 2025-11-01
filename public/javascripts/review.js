@@ -117,6 +117,12 @@ function addTo(data, table, list) {
     );
     return;
   }
+  if (!data.uid) {
+    $('#message').append(
+      `<div class="alert"><button class="close" data-dismiss="alert">x</button>${list} id is empty. </div>`
+    );
+    return;
+  }
   if (inArray(data.name, table.fnGetData())) {
     const { name } = data;
     // show message
@@ -151,6 +157,7 @@ $(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
+  let userSelected;
 
   $('span.time').each(function() {
     if ($(this).text()) {
@@ -178,13 +185,15 @@ $(function() {
     }
   );
 
-  $('#username').on('typeahead:select', function() {
+  $('#username').on('typeahead:select', function(e, suggestion) {
+    // set the selected user object
+    userSelected = suggestion;
     $('#add').attr('disabled', false);
   });
 
   const reviewAoColumns = [
     selectColumn,
-    reviewerIdColumn,
+    userIdColumn,
     requestedOnColumn,
     reviewResultColumn,
   ];
@@ -203,15 +212,17 @@ $(function() {
   selectEvent();
   filterEvent();
 
-  $('#add').click(function(e) {
+  $('#add').on('click', function(e) {
     e.preventDefault();
     const data = {};
-    data.name = $('#username').val();
+    // retrieve the selected user and set data with uid
+    data.name = userSelected.displayName;
+    data.uid = userSelected.uid;
     addTo(data, reviewTable, 'users');
     $('form[name="user"]')[0].reset();
   });
 
-  $('#review-remove').click(function() {
+  $('#review-remove').on('click', function() {
     remove(reviewTable);
   });
 

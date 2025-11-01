@@ -97,7 +97,6 @@ prependPathIfDirExists() {
 
 prependPathIfDirExists $TRAVELER_SUPPORT_DIR/mongodb/$HOST_ARCH/bin
 prependPathIfDirExists $TRAVELER_SUPPORT_DIR/nodejs/$HOST_ARCH/bin
-prependPathIfDirExists $TRAVELER_SUPPORT_DIR/nodejs/node_modules/forever/bin
 
 # Done 
 cd $currentDir

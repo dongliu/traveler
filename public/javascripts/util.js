@@ -97,9 +97,7 @@ function livespan(stamp, live = true) {
     return '<span data-livestamp="' + stamp + '"></span>';
   } else {
     return (
-      '<span>' +
-      moment(stamp).format('dddd, MMMM Do YYYY, h:mm:ss a') +
-      '</span>'
+      '<span>' + moment(stamp).format('MMM D YYYY, HH:mm:ss ZZ') + '</span>'
     );
   }
 }

@@ -7,6 +7,11 @@
 
 /* eslint max-nested-callbacks: [2, 4], complexity: [2, 20] */
 
+import {
+  checkbox_set_edit,
+  binding_checkbox_set_events,
+} from './lib/checkbox-set.js';
+
 const mce_content = {
   selector: 'textarea.tinymce',
   content_css: '/bootstrap/css/bootstrap.css',
@@ -224,7 +229,7 @@ function done_button(view, $out) {
       }
     });
 
-    // assign id to legent, id is used for side nav
+    // assign id to legend, id is used for side nav
     $('legend', $out).each(function() {
       if (!$(this).attr('id')) {
         $(this).attr('id', UID.generateShort());
@@ -312,7 +317,7 @@ function binding($edit, $out, model, $done) {
 }
 
 /**
- * add the count th radio button in the model to the $raido_group with spec in the #radio_value_spec
+ * add the count to radio button in the model to the $raido_group with spec in the #radio_value_spec
  * @param {$} $radio_group      the radio group object
  * @param {$} $radio_value_spec the radio value/text spec object
  * @param {$} $done             the done button object
@@ -339,7 +344,7 @@ function add_radio($radio_group, $radio_value_spec, $done, count, model) {
     'rv-text',
     `model.radio_text_${count}`
   );
-  $radio_group.find('.controls').append($radio_button_control);
+  $radio_group.find('.controls .radios').append($radio_button_control);
 
   // Add button and handler to remove radio button
   $($radio_text)
@@ -381,6 +386,7 @@ function radio_edit($cgr) {
   let label = 'label';
   let userkey = '';
   let required = false;
+  let help = '';
   // get all input components
   const $radio_group = $(input.radiogroup());
   const $buttons = $(input.button());
@@ -389,6 +395,7 @@ function radio_edit($cgr) {
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $required = $(spec.required());
+  const $help = $(spec.help());
 
   const $add_radio_button = $(spec.add_radio_button());
   const $radio_value_spec = $('<div class="radio-value-spec"></div>');
@@ -399,6 +406,7 @@ function radio_edit($cgr) {
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     const inputs = $cgr.find('.controls').find('input');
+    help = $('.controls span.help-block', $cgr).text();
     if (inputs.length > 0) {
       radio_group_name = inputs[0].name;
       userkey = $(inputs[0]).data('userkey');
@@ -415,6 +423,7 @@ function radio_edit($cgr) {
     $label,
     $userkey,
     $required,
+    $help,
     $add_radio_button,
     $radio_value_spec,
     $done
@@ -429,10 +438,12 @@ function radio_edit($cgr) {
     userkey,
     required,
     name: radio_group_name,
+    help,
   };
   $('input', $label).val(label);
   $('input', $userkey).val(userkey);
   $('input', $required).prop('checked', required);
+  $('input', $help).val(help);
 
   // add all the radio buttons
   if ($cgr) {
@@ -907,8 +918,12 @@ function number_edit($cgr) {
     placeholder = $('.controls input', $cgr).attr('placeholder');
     help = $('.controls span.help-block', $cgr).text();
     required = $('input', $cgr).prop('required');
-    min = Number($('input', $cgr).prop('min'));
-    max = Number($('input', $cgr).prop('max'));
+    if ($('input', $cgr).prop('min')) {
+      min = Number($('input', $cgr).prop('min'));
+    }
+    if ($('input', $cgr).prop('max')) {
+      max = Number($('input', $cgr).prop('max'));
+    }
     range = rangeText(min, max);
   }
 
@@ -953,35 +968,43 @@ function number_edit($cgr) {
   $('input', $placeholder).val(placeholder);
   $('input', $help).val(help);
   $('input', $required).prop('checked', required);
-  $('input', $min).val(min);
-  $('input', $max).val(max);
-
+  if (min !== null) {
+    $('input', $min).val(min);
+  }
+  if (max !== null) {
+    $('input', $max).val(max);
+  }
   binding($edit, $number, model, $done);
 }
 
 function file_edit($cgr) {
   $('#output .well.spec').remove();
-  let label = 'label';
-  let required = false;
-  let userkey = '';
-  let help = '';
+  var label = 'label';
+  var required = false;
+  var userkey = '';
+  var help = '';
+  var filetype = '';
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     required = $('input', $cgr).prop('required');
     userkey = $('.controls input', $cgr).data('userkey');
+    filetype = $('.controls input', $cgr).data('filetype');
     help = $('.controls span.help-block', $cgr).text();
   }
 
-  const $upload = $(input.upload());
-  const $label = $(spec.label());
-  const $required = $(spec.required());
-  const $userkey = $(spec.userkey());
-  const $help = $(spec.help());
-  const $done = $(spec.done());
-  const $edit = $('<div class="well spec"></div>').append(
+  var $upload = $(input.upload());
+  var $label = $(spec.label());
+  var $required = $(spec.required());
+  var $userkey = $(spec.userkey());
+  var $filetype = $(spec.filetype());
+
+  var $help = $(spec.help());
+  var $done = $(spec.done());
+  var $edit = $('<div class="well spec"></div>').append(
     $label,
     $required,
     $userkey,
+    $filetype,
     $help,
     $done
   );
@@ -997,15 +1020,17 @@ function file_edit($cgr) {
   }
 
   const model = {
-    label,
-    required,
-    userkey,
-    help,
+    label: label,
+    required: required,
+    userkey: userkey,
+    filetype: filetype,
+    help: help,
   };
 
   $('input', $label).val(label);
   $('input', $required).prop('checked', required);
   $('input', $userkey).val(userkey);
+  $('input', $filetype).val(filetype);
   $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
@@ -1142,6 +1167,12 @@ function working() {
     scrollToBottom();
   });
 
+  $('#add-checkbox-set').click(function(e) {
+    e.preventDefault();
+    checkbox_set_edit();
+    scrollToBottom();
+  });
+
   $('#add-radio').click(function(e) {
     e.preventDefault();
     radio_edit();
@@ -1211,6 +1242,7 @@ function cleanBeforeSave() {
   // clean control-focus class and .control-group-buttons element
   $('#output .control-focus').removeClass('control-focus');
   $('#output .control-group-buttons').remove();
+  $('#output .checkbox-set-buttons').remove();
   // clean status
   $('#output .control-group-wrap').removeAttr('data-status');
   // remove tinymce
@@ -1248,6 +1280,7 @@ function binding_events() {
     // check if it is normal edit mode
     $('.control-group-wrap', '#output').removeClass('control-focus');
     $('.control-group-buttons', '#output').hide();
+    // not adjust location
     if ($('#adjust').text() === 'Adjust location') {
       if (!$(this).hasClass('control-focus')) {
         $(this).addClass('control-focus');
@@ -1317,7 +1350,9 @@ function binding_events() {
       return;
     }
     if ($cgr.attr('data-status') === 'editing') {
-      // modalAlert('You are still editing it', '');
+      // close the edit well
+      $cgr.siblings('.spec').remove();
+      $cgr.removeAttr('data-status');
       return;
     }
     const type = $('span.fe-type', $cgr).text();
@@ -1327,6 +1362,9 @@ function binding_events() {
         break;
       case 'checkbox':
         checkbox_edit($cgr);
+        break;
+      case 'checkbox-set':
+        checkbox_set_edit($cgr);
         break;
       case 'radio':
         radio_edit($cgr);
@@ -1353,7 +1391,7 @@ function binding_events() {
         other_edit($cgr);
         break;
       default:
-        console.log('type not implemented.');
+        console.log(`input type ${type} not implemented.`);
     }
   });
 
@@ -1413,6 +1451,46 @@ function binding_events() {
         'The form has been changed. Please save it before this action.'
       );
     }
+  });
+
+  $('#import').click(function(e) {
+    if ($('#output .well.spec').length) {
+      e.preventDefault();
+      modalAlert(
+        'Save changes first',
+        'The form has been changed. Please save it before this action.'
+      );
+      return;
+    }
+    cleanBeforeSave();
+    $('#modalLabel').html('Form importer');
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append(
+      '<div class="container-fluid"> <div class="row-fluid"> <div class="span4 form-list"> <ul class="nav nav-tabs"> <li class="active"><a href="#my-forms" data-toggle="tab">My forms</a></li> <li><a href="#released-forms" data-toggle="tab">Released forms</a></li> </ul> <div class="tab-content"> <div id="my-forms" class="tab-pane active"> <table class="my-forms table table-bordered table-hover"></table> </div> <div id="released-forms" class="tab-pane"> <table class="released-forms table table-bordered table-hover"></table> </div> </div> </div> <div class="span8 form-preview"> </div> </div> </div>'
+    );
+
+    $('#modal .modal-footer').html(
+      '<button value="confirm" class="btn btn-primary" data-dismiss="modal">Import</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
+    );
+    $('#modal').modal('show');
+    FormExplorer.init('.released-forms', '.my-forms', '.form-preview');
+    $('#modal button[value="confirm"]').click(function() {
+      const html = FormExplorer.getHtml();
+      if (html !== null) {
+        $('#output').append(html);
+        // generate unique name
+        $('input, textarea').each(function() {
+          $(this).attr('name', UID.generateShort());
+        });
+
+        // assign id to legent, id is used for side nav
+        $('legend').each(function() {
+          $(this).attr('id', UID.generateShort());
+        });
+
+        updateSectionNumbers();
+      }
+    });
   });
 
   $('#saveas').click(function(e) {
@@ -1489,9 +1567,9 @@ function binding_events() {
     let priorVersionsTable = null;
     let discrepancyTable;
     if (released_form_version_mgmt) {
-      $('#modalLabel').html('Archive previously released form(s)');
+      $('#modalLabel').html('Form Release');
       $('#modal .modal-body').append(
-        '<h4>Prior version(s) of this form:</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
+        '<h4>Choose prior version(s) of this form to archive</h4> <table id="prior_versions" class="table table-bordered table-hover"> </table>'
       );
       const priorVersionsColumns = [
         selectColumn,
@@ -1516,8 +1594,11 @@ function binding_events() {
             images: 'img.user',
           });
         },
+        fnInitComplete() {
+          fnSelectAll(priorVersionsTable, 'row-selected', 'select-row', true);
+        },
       });
-      selectMultiEvent(priorVersionsTable);
+      selectMultiEvent('#prior_versions');
       filterEvent();
     }
 
@@ -1551,7 +1632,7 @@ function binding_events() {
         aaSorting: [[3, 'desc']],
         sDom: sDomPage,
       });
-      selectOneEvent(discrepancyTable);
+      selectOneEvent('#discrepancy');
       filterEvent();
     }
     $('#modal .modal-footer').html(
@@ -1630,8 +1711,10 @@ $(function() {
   disableAjaxCache();
 
   init();
-  if (formStatus === 0 || formStatus === 0.5) {
+  if (formStatus === 0) {
     working();
   }
   binding_events();
+  // checkbox set specific events
+  binding_checkbox_set_events();
 });

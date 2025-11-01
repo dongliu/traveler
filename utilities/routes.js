@@ -7,9 +7,11 @@
 var config = require('../config/config.js');
 
 var Traveler = require('../model/traveler').Traveler;
+const TravelerData = require('../model/traveler').TravelerData;
 var Binder = require('../model/binder').Binder;
 var _ = require('lodash');
 var cheer = require('cheerio');
+const logger = require('../lib/loggers').getLogger();
 
 const formStatusMap = require('../model/released-form').statusMap;
 
@@ -113,7 +115,13 @@ function deviceRemovalAllowed() {
   return devices.devicesRemovalAllowed;
 }
 
-var binder = {
+function addInputName(name, list) {
+  if (list.indexOf(name) === -1) {
+    list.push(name);
+  }
+}
+
+const binderUtil = {
   createBinder: function(
     title,
     description,
@@ -149,30 +157,25 @@ var binder = {
       return res.json(newPackage);
     });
   },
-  addWork: function(binder, userId, req, res) {
-    var tids = req.body.travelerIds;
-    var pids = req.body.binders;
-    var ids;
-    var type;
-    var model;
-    if (tids) {
-      if (tids.length === 0) {
-        return res.send(204);
-      }
-      type = 'traveler';
+  addWork(binder, userId, req, res) {
+    const { ids, type } = req.body;
+    if (!(ids instanceof Array)) {
+      return res.send(400, 'ids must be an array');
+    }
+    if (ids.length === 0) {
+      return res.send(204);
+    }
+    let model;
+    if (type === 'traveler') {
       model = Traveler;
-      ids = tids;
-    } else {
-      if (pids.length === 0) {
-        return res.send(204);
-      }
-      type = 'binder';
+    } else if (type === 'binder') {
       model = Binder;
-      ids = pids;
+    } else {
+      return res.send(400, `cannot handle ${type}`);
     }
 
-    var works = binder.works;
-    var added = [];
+    const { works } = binder;
+    const added = [];
 
     model
       .find({
@@ -187,66 +190,50 @@ var binder = {
         }
 
         if (items.length === 0) {
-          return res.send(204);
+          return res.status(400).send('nothing to be added');
         }
 
         items.forEach(function(item) {
-          if (type === 'binder' && item.id === binder.id) {
-            // do not add itself as a work
-            return;
+          if (type === 'binder') {
+            // skip the binder to be added into itself
+            if (item.id === binder.id) {
+              logger.warn(`binder ${item.id} cannot be added into itself`);
+              return;
+            }
+            // skip the binder if it contains other binders already
+            for (let i = 0; i < item.works.length; i += 1) {
+              if (item.works[i].refType === 'binder') {
+                logger.warn(`binder ${item.id} contains other binder`);
+                return;
+              }
+            }
           }
-          var newWork;
+          let newWork;
           if (!works.id(item._id)) {
             newWork = {
               _id: item._id,
-              alias: item.title,
               refType: type,
               addedOn: Date.now(),
               addedBy: userId,
               status: item.status || 0,
               value: item.value || 10,
             };
-            if (item.status === 2) {
-              newWork.finished = 1;
-              newWork.inProgress = 0;
-            } else if (item.status === 0) {
-              newWork.finished = 0;
-              newWork.inProgress = 0;
-            } else {
-              if (type === 'traveler') {
-                newWork.finished = 0;
-                if (item.totalInput === 0) {
-                  newWork.inProgress = 1;
-                } else {
-                  newWork.inProgress = item.finishedInput / item.totalInput;
-                }
-              } else {
-                if (item.totalValue === 0) {
-                  newWork.finished = 0;
-                  newWork.inProgress = 1;
-                } else {
-                  newWork.finished = item.finishedValue / item.totalValue;
-                  newWork.inProgress = item.inProgressValue / item.totalValue;
-                }
-              }
-            }
-
             works.push(newWork);
             added.push(item.id);
+            binder.updateWorkProgress(item);
           }
         });
 
         if (added.length === 0) {
-          return res.send(204);
+          return res.send(400, 'no item added');
         }
 
         binder.updatedOn = Date.now();
         binder.updatedBy = userId;
-
         // update the totalValue, finishedValue, and finishedValue
-        binder.updateProgress(function(saveErr, newBinder) {
+        return binder.updateProgress(function(saveErr, newBinder) {
           if (saveErr) {
-            console.error(saveErr);
+            logger.error(saveErr);
             return res.send(500, saveErr.message);
           }
           return res.json(200, newBinder);
@@ -274,6 +261,7 @@ function addBase(base, traveler) {
   traveler.activeForm = traveler.forms[0]._id;
   traveler.mapping = base.mapping;
   traveler.labels = base.labels;
+  traveler.types = base.types;
   traveler.totalInput = _.size(base.labels);
 }
 var traveler = {
@@ -315,16 +303,11 @@ var traveler = {
     }
     return map;
   },
-  createTraveler: function(
-    form,
-    title,
-    userName,
-    devices,
-    newTravelerCallBack
-  ) {
+  createTraveler: function(form, title, userId, devices, newTravelerCallBack) {
     if (
       form.formType &&
-      form.formType !== 'normal' && form.formType !== 'normal_discrepancy'
+      form.formType !== 'normal' &&
+      form.formType !== 'normal_discrepancy'
     ) {
       return newTravelerCallBack(
         new TravelerError(
@@ -349,7 +332,7 @@ var traveler = {
       devices: devices,
       tags: form.base.tags,
       status: 0,
-      createdBy: userName,
+      createdBy: userId,
       createdOn: Date.now(),
       sharedWith: [],
       referenceReleasedForm: form._id,
@@ -480,6 +463,46 @@ var traveler = {
     }
     return false;
   },
+  resetTouched: function(doc, cb) {
+    TravelerData.find(
+      {
+        _id: {
+          $in: doc.data,
+        },
+      },
+      'name'
+    ).exec(function(dataErr, data) {
+      if (dataErr) {
+        logger.error(dataErr);
+        return cb(dataErr);
+      }
+      // reset the touched input name list and the finished input number
+      logger.info('reset the touched inputs for traveler ' + doc._id);
+      var labels = {};
+      var activeForm;
+      if (doc.forms.length === 1) {
+        activeForm = doc.forms[0];
+      } else {
+        activeForm = doc.forms.id(doc.activeForm);
+      }
+
+      if (!(activeForm.labels && _.size(activeForm.labels) > 0)) {
+        activeForm.labels = traveler.inputLabels(activeForm.html);
+      }
+      labels = activeForm.labels;
+      // empty the current touched input list
+      doc.touchedInputs = [];
+      data.forEach(function(d) {
+        // check if the data is for the active form
+        if (labels.hasOwnProperty(d.name)) {
+          addInputName(d.name, doc.touchedInputs);
+        }
+      });
+      // finished input
+      doc.finishedInput = doc.touchedInputs.length;
+      cb();
+    });
+  },
 };
 
 module.exports = {
@@ -490,5 +513,5 @@ module.exports = {
   getDeviceValue: getDeviceValue,
   deviceRemovalAllowed: deviceRemovalAllowed,
   traveler: traveler,
-  binder: binder,
+  binder: binderUtil,
 };

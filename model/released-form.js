@@ -26,6 +26,7 @@ const formContent = new Schema({
   html: String,
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
+  types: Schema.Types.Mixed,
   formType: {
     type: String,
     default: 'normal',
@@ -64,14 +65,7 @@ const releasedForm = new Schema({
 });
 
 releasedForm.plugin(addVersion, {
-  fieldsToVersion: [
-    'title',
-    'description',
-    'tags',
-    'status',
-    'base',
-    'discrepancy',
-  ],
+  fieldsToVersion: ['title', 'description', 'base', 'discrepancy'],
 });
 
 releasedForm.plugin(addHistory, {

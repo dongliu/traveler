@@ -1,0 +1,18 @@
+body {
+  font: 12pt Georgia, 'Times New Roman', Times, serif;
+  line-height: 1.2;
+  background: #fff !important;
+  color: #000;
+}
+
+.control-group-wrap {
+  page-break-inside: avoid;
+}
+
+.fe-type {
+  display: none;
+}
+
+.new-note {
+  display: none;
+}
