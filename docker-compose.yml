@@ -8,9 +8,9 @@ services:
     build: .
     volumes:
       - .:/app
-      # exclude the node_modules
+      # comment next line to exclude the node_modules
       - /app/node_modules
-      # exclude the docker configuration
+      # comment next line to exclude the docker configuration
       # - /app/docker
     ports:
       - "3001:3001"

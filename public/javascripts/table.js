@@ -23,8 +23,8 @@ function selectEvent() {
   });
 }
 
-function selectMultiEvent(oTable) {
-  $(oTable.$('tbody')).on('click', 'input.select-row', function(e) {
+function selectMultiEvent(table) {
+  $(`${table} tbody`).on('click', 'input.select-row', function(e) {
     const tr = $(e.target).closest('tr');
     if ($(tr).hasClass('row-selected')) {
       $(tr).removeClass('row-selected');
@@ -34,18 +34,20 @@ function selectMultiEvent(oTable) {
   });
 }
 
-function selectOneEvent(oTable) {
-  $('tbody').on('click', 'input.select-row', function(e) {
-    const tr = $(e.target).closest('tr');
-    if ($(tr).hasClass('row-selected')) {
-      $(tr).removeClass('row-selected');
-    } else {
-      oTable.$('tr.row-selected').removeClass('row-selected');
-      oTable
-        .$('input.select-row')
+function selectOneEvent(table) {
+  $(`${table} tbody`).on('click', 'input.select-row', function(e) {
+    if ($(this).prop('checked')) {
+      $(`${table} tr.row-selected`).removeClass('row-selected');
+      $(`${table} input.select-row`)
         .not(this)
         .prop('checked', false);
-      $(tr).addClass('row-selected');
+      $(e.target)
+        .closest('tr')
+        .addClass('row-selected');
+    } else {
+      $(e.target)
+        .closest('tr')
+        .removeClass('row-selected');
     }
   });
 }
@@ -106,7 +108,7 @@ function personColumn(title, key) {
       if (data) {
         return `<img class="user" data-src="holder.js/27x40?size=20&text=${data
           .substr(0, 1)
-          .toUpperCase()}" src="${prefix}/adusers/${data}/photo" title="${data}">`;
+          .toUpperCase()}">`;
       }
       return '';
     },
@@ -395,6 +397,16 @@ const previewColumn = {
   sWidth: '25px',
 };
 
+const formExploreColumn = {
+  sTitle: '',
+  mData: '_id',
+  bSortable: false,
+  mRender(data) {
+    return `<a data-toggle="tooltip" title="show the form" class="preview" id="${data}"><i class="fa fa-eye fa-lg"></i></a>`;
+  },
+  sWidth: '25px',
+};
+
 const removeColumn = {
   sTitle: '',
   mData: '_id',
@@ -419,6 +431,16 @@ const formColumn = {
   mData: '_id',
   mRender(data) {
     return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
+  },
+  bSortable: false,
+  sWidth: '45px',
+};
+
+const releasedFormColumn = {
+  sTitle: 'Link',
+  mData: '_id',
+  mRender(data) {
+    return `<a href="${prefix}/released-forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the released form"><i class="fa fa-edit fa-lg"></i></a>`;
   },
   bSortable: false,
   sWidth: '45px',
@@ -596,9 +618,7 @@ const reviewRequestedByColumn = {
       request.requestedBy
     }"><img class="user" data-src="holder.js/27x40?size=20&text=${request.requestedBy
       .substr(0, 1)
-      .toUpperCase()}" src="${prefix}/adusers/${
-      request.requestedBy
-    }/photo" title="${request.requestedBy}"></a>`;
+      .toUpperCase()}" title="${request.requestedBy}"></a>`;
   },
   bFilter: true,
 };
@@ -618,7 +638,7 @@ const reviewersColumn = {
         if (type === 'filter' || type === 'sort') {
           return r._id;
         }
-        return `<a target="${linkTarget}" href="/users/${r._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${r._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${r._id}/photo" title="${r._id}"></a>`;
+        return `<a target="${linkTarget}" href="/users/${r._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${r._id.substr(0, 1).toUpperCase()}" title="${r._id}"></a>`;
       });
       if (type === 'filter' || type === 'sort') {
         return reviews.join('; ');
@@ -664,7 +684,7 @@ const ownerColumn = {
     if (owner) {
       return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
         .substr(0, 1)
-        .toUpperCase()}" src="${prefix}/adusers/${owner}/photo" title="${owner}"></a>`;
+        .toUpperCase()}" title="${owner}"></a>`;
     }
     return '';
   },
@@ -881,6 +901,25 @@ const binderShareLinkColumn = {
       return `<a href="${prefix}/binders/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the binder" class="text-success"><i class="fa fa-users fa-lg"></i></a>`;
     }
     return `<a href="${prefix}/binders/${source._id}/share/" target="${linkTarget}" data-toggle="tooltip" title="share the binder"><i class="fa fa-users fa-lg"></i></a>`;
+  },
+  bSortable: false,
+};
+
+const workLinkColumn = {
+  sTitle: '',
+  mData(source, type, val) {
+    if (source.hasOwnProperty('url')) {
+      return `<a href="${source.url}" data-toggle="tooltip" title="go to the work"><i class="fa fa-edit fa-lg"></i></a>`;
+    }
+    if (source.hasOwnProperty('_id')) {
+      if (source.refType === 'traveler') {
+        return `<a href="${prefix}/travelers/${source._id}/" data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>`;
+      }
+      if (source.refType === 'binder') {
+        return `<a href="${prefix}/binders/${source._id}/" target="${linkTarget}" data-toggle="tooltip" title="go to the binder"><i class="fa fa-eye fa-lg"></i></a>`;
+      }
+    }
+    return 'unknown';
   },
   bSortable: false,
 };
@@ -1103,7 +1142,7 @@ function usersColumn(title, prop) {
           if (type === 'filter' || type === 'sort') {
             return u.username;
           }
-          return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${u._id}/photo" title="${u.username}"></a>`;
+          return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
         });
         if (type === 'filter' || type === 'sort') {
           return names.join('; ');
@@ -1131,7 +1170,7 @@ function usersFilteredColumn(title, filter) {
         if (type === 'filter' || type === 'sort') {
           return u.username;
         }
-        return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}" src="${prefix}/adusers/${u._id}/photo" title="${u.username}"></a>`;
+        return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
       });
       if (type === 'filter' || type === 'sort') {
         return names.join('; ');
@@ -1214,12 +1253,12 @@ const useridNoLinkColumn = {
   bFilter: true,
 };
 
-const userNameColumn = {
-  sTitle: 'Full name',
-  mData: 'username',
+const useridLinkColumn = {
+  sTitle: 'User id',
+  mData: '_id',
   sDefaultContent: '',
-  mRender(data, type, full) {
-    return `<a href = "${prefix}/users?name=${data}">${data}</a>`;
+  mRender(data) {
+    return `<a target="${linkTarget}" href = "${prefix}/users/${data}" title = "user details">${data}</a>`;
   },
   bFilter: true,
 };
@@ -1309,6 +1348,14 @@ const rolesColumn = {
     return data.join();
   },
   bFilter: true,
+};
+
+const ownershipColumn = {
+  sTitle: 'Manage ownership',
+  mData(source) {
+    return `<a href="${prefix}/users/${source._id}/ownership" target="${linkTarget}" data-toggle="tooltip" title="manage ownership"><i class="fa fa-user fa-lg"></i></a>`;
+  },
+  bSortable: false,
 };
 
 const lastVisitedOnColumn = dateColumn('Last visited', 'lastVisitedOn');
@@ -1485,6 +1532,8 @@ const oTableTools = {
 
 const sDom =
   "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
+const Dom =
+  "<'row-fluid'<'span6'<'control-group'B>>><'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
 const sDom2i =
   "<'row-fluid'<'span6'<'control-group'T>>><'row-fluid'<'span3'l><'span3'i><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>";
 const sDom2i1p =

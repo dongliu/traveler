@@ -7,52 +7,9 @@ livespan, Modernizr, createSideNav, generateHistoryRecordHtml
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
-function fileHistory(found) {
-  var i;
-  var output = '';
-  var link;
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      link = prefix + '/data/' + found[i]._id;
-      output =
-        output +
-        '<strong><a href=' +
-        link +
-        ' target="' +
-        linkTarget +
-        '" download=' +
-        found[i].value +
-        '>' +
-        found[i].value +
-        '</a></strong> uploaded by ' +
-        found[i].inputBy +
-        ' ' +
-        livespan(found[i].inputOn, false) +
-        '; ';
-    }
-  }
-  return output;
-}
+import { renderHistory } from './lib/traveler.js';
 
-function notes(found) {
-  var i;
-  var output = '<dl>';
-  if (found.length > 0) {
-    for (i = 0; i < found.length; i += 1) {
-      output =
-        output +
-        '<dt><b>' +
-        found[i].inputBy +
-        ' noted ' +
-        livespan(found[i].inputOn, false) +
-        '</b>: </dt>';
-      output = output + '<dd>' + found[i].value + '</dd>';
-    }
-  }
-  return output + '</dl>';
-}
-
-// temparary solution for the dirty forms
+// temporary solution for the dirty forms
 function cleanForm() {
   $('.control-group-buttons').remove();
 }
@@ -168,6 +125,10 @@ function loadDiscrepancyLog(discrepancyForm) {
   DiscrepancyFormLoader.retrieveLogs();
 }
 
+function editButton() {
+  return '<div class="pull-right note-update-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="fa fa-edit fa-lg"></i></a></div></div>';
+}
+
 $(function() {
   ajax401(prefix);
 
@@ -225,55 +186,7 @@ $(function() {
 
   var binder = new Binder.FormBinder(document.forms[0]);
 
-  function renderNotes() {
-    $.ajax({
-      url: './notes/',
-      type: 'GET',
-      dataType: 'json',
-    })
-      .done(function(data) {
-        $('#form .controls').each(function(index, controlsElement) {
-          var inputElements = $(controlsElement).find('input,textarea');
-          if (inputElements.length) {
-            var element = inputElements[0];
-            var found = data.filter(function(e) {
-              return e.name === element.name;
-            });
-            $(element)
-              .closest('.controls')
-              .append(
-                '<div class="note-buttons"><b>notes</b>: <a class="notes-number" href="#" data-toggle="tooltip" title="show/hide notes"><span class="badge badge-info">' +
-                  found.length +
-                  '</span></a> <a class="new-note" href="#" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a></div>'
-              );
-            if (found.length) {
-              found.sort(function(a, b) {
-                if (a.inputOn > b.inputOn) {
-                  return -1;
-                }
-                return 1;
-              });
-              $(element)
-                .closest('.controls')
-                .append(
-                  '<div class="input-notes" style="display: none;">' +
-                    notes(found) +
-                    '</div>'
-                );
-            }
-          }
-        });
-      })
-      .fail(function(jqXHR) {
-        if (jqXHR.status !== 401) {
-          $('#message').append(
-            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>'
-          );
-          $(window).scrollTop($('#message div:last-child').offset().top - 40);
-        }
-      })
-      .always();
-  }
+  renderHistory(binder, travelerStatus);
 
   $('#form').on('click', 'a.new-note', function(e) {
     e.preventDefault();
@@ -308,7 +221,7 @@ $(function() {
           var timestamp = jqXHR.getResponseHeader('Date');
           $('#message').append(
             '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' +
-              livespan(timestamp) +
+              livespan(timestamp, false) +
               '</div>'
           );
           var $notes_number = $that
@@ -322,21 +235,25 @@ $(function() {
               .closest('.controls')
               .find('.input-notes dl')
               .prepend(
-                '<dt><b>You noted ' +
-                  livespan(timestamp) +
+                '<div class="note" id="' +
+                  data._id +
+                  '"><dt><b>You noted ' +
+                  livespan(timestamp, false) +
                   '</b>: </dt><dd>' +
                   value +
-                  '</dd>'
+                  '</dd></div>'
               );
           } else {
             $that
               .closest('.controls')
               .append(
-                '<div class="input-notes"><dl><dt><b>You noted ' +
-                  livespan(timestamp) +
+                '<div class="input-notes"><dl><div class="note" id="' +
+                  data._id +
+                  '"><dt><b>You noted ' +
+                  livespan(timestamp, false) +
                   '</b>: </dt><dd>' +
                   value +
-                  '</dd></dl></div>'
+                  '</dd></div></dl></div>'
               );
           }
 
@@ -367,84 +284,6 @@ $(function() {
     }
   });
 
-  $.ajax({
-    url: './data/',
-    type: 'GET',
-    dataType: 'json',
-  })
-    .done(function(data) {
-      $('#form .controls').each(function(index, controlsElement) {
-        var inputElements = $(controlsElement).find('input,textarea');
-        var currentValue;
-        if (inputElements.length) {
-          var element = inputElements[0];
-          var found = data.filter(function(e) {
-            return e.name === element.name;
-          });
-          if (found.length) {
-            found.sort(function(a, b) {
-              if (a.inputOn > b.inputOn) {
-                return -1;
-              }
-              return 1;
-            });
-            if (element.type === 'file') {
-              $(element)
-                .closest('.controls')
-                .append(
-                  '<div class="input-history"><b>history</b>: ' +
-                    fileHistory(found) +
-                    '</div>'
-                );
-            } else {
-              currentValue = found[0].value;
-              if (found[0].inputType === 'radio') {
-                // Update element to match the value
-                for (var i = 0; i < inputElements.size(); i++) {
-                  var ittrInput = inputElements[i];
-                  if (ittrInput.value === currentValue) {
-                    element = ittrInput;
-                    break;
-                  }
-                }
-              } else if (element.type === 'number') {
-                // Patch to support appropriate stepping validation for input numbers.
-                element.step = 'any';
-              }
-              binder.deserializeFieldFromValue(element, currentValue);
-              binder.accessor.set(element.name, currentValue);
-              $(element)
-                .closest('.controls')
-                .append(
-                  '<div class="input-history"><b>history</b>: ' +
-                    history(found) +
-                    '</div>'
-                );
-            }
-          }
-        }
-      });
-
-      // check if active here
-      if (travelerStatus === 1) {
-        $('#form input,textarea').prop('disabled', false);
-      }
-
-      markFormValidity(document.getElementById('form'));
-
-      // load the notes here
-      renderNotes();
-    })
-    .fail(function(jqXHR) {
-      if (jqXHR.status !== 401) {
-        $('#message').append(
-          '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot get saved traveler data</div>'
-        );
-        $(window).scrollTop($('#message div:last-child').offset().top - 40);
-      }
-    })
-    .always();
-
   $('#complete').click(completeClick);
   $('#complete2').click(completeClick);
 
@@ -474,6 +313,119 @@ $(function() {
     }
   });
 
+  // render note edit
+  $('#form').on('mouseenter', '.note', function(e) {
+    e.preventDefault();
+    const $this = $(this);
+    $this.addClass('note-focus');
+    if ($('.note-update-buttons', $this).length) {
+      $('.note-update-buttons', $this).show();
+    } else {
+      $(this).prepend(editButton());
+    }
+  });
+
+  $('#form').on('mouseleave', '.note', function(e) {
+    e.preventDefault();
+    const $this = $(this);
+    $this.removeClass('note-focus');
+    $('.note-update-buttons', $this).hide();
+  });
+
+  $('#form').on('click', '.note-focus a.btn[title="edit"]', function(e) {
+    e.preventDefault();
+    const $that = $(this);
+    const pre = $that
+      .closest('.note')
+      .find('dd')
+      .text();
+    const id = $that.closest('.note').prop('id');
+    $('#modalLabel').html('Edit note');
+    $('#modal .modal-body').html(
+      '<form class="form-horizontal" id="modalform"><div class="control-group"><label class="control-label">Note: </label><div class="controls"><textarea name="note-content" rows=5>' +
+        pre +
+        '</textarea></div></div></form>'
+    );
+    $('#modal .modal-footer').html(
+      '<button value="update" class="btn btn-primary" data-dismiss="modal">Update</button><button value="delete" class="btn btn-warning" data-dismiss="modal">Delete</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
+    );
+    $('#modal').modal('show');
+    $('#modal button[value="update"]').click(function() {
+      e.preventDefault();
+      const value = $('#modal textarea[name="note-content"]').val();
+      $.ajax({
+        url: '/traveler-notes/' + id,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          value: value,
+        }),
+      })
+        .done(function(data, status, jqXHR) {
+          const timestamp = data.inputOn;
+          $('#message').append(
+            '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note saved ' +
+              livespan(timestamp, false) +
+              '</div>'
+          );
+          $that
+            .closest('.controls')
+            .find('.input-notes dl .note[id = ' + id + ']')
+            .html(
+              '<dt><b>You updated ' +
+                livespan(timestamp, false) +
+                '</b>: </dt><dd>' +
+                value +
+                '</dd>'
+            );
+        })
+        .fail(function(jqXHR) {
+          if (jqXHR.status !== 401) {
+            $('#message').append(
+              '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot save the note: ' +
+                jqXHR.responseText +
+                '</div>'
+            );
+            $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          }
+        });
+    });
+
+    $('#modal button[value="delete"]').click(function() {
+      e.preventDefault();
+      $.ajax({
+        url: '/traveler-notes/' + id,
+        type: 'DELETE',
+      })
+        .done(function(data, status, jqXHR) {
+          const timestamp = jqXHR.getResponseHeader('Date');
+          $('#message').append(
+            '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Note deleted ' +
+              livespan(timestamp, false) +
+              '</div>'
+          );
+          const $notes_number = $that
+            .closest('.controls')
+            .find('a.notes-number span.badge');
+          $notes_number.text(parseInt($notes_number.text(), 10) - 1);
+          $that
+            .closest('.controls')
+            .find('.input-notes dl .note[id = ' + id + ']')
+            .remove();
+        })
+        .fail(function(jqXHR) {
+          if (jqXHR.status !== 401) {
+            $('#message').append(
+              '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot delete the note: ' +
+                jqXHR.responseText +
+                '</div>'
+            );
+            $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          }
+        });
+    });
+  });
+
   // Safari web browser will not recognize input event for radio and checkbox.
   $('#form input[type="radio"], input[type="checkbox"]').on(
     'click',
@@ -486,18 +438,18 @@ $(function() {
 
   function formInputMade() {
     var $this = $(this);
-    var inputs = $this.closest('.control-group-wrap').find('input,textarea');
+    var inputs = $this.closest('.controls').find('input,textarea');
     var i;
     for (i = 0; i < inputs.length; i += 1) {
       markValidity(inputs[i]);
     }
-    var $cgw = $this.closest('.control-group-wrap');
+    var $controls = $this.closest('.controls');
     $('#form input,textarea')
       .not($(inputs))
       .prop('disabled', true);
     $('#complete').prop('disabled', true);
-    if ($cgw.children('.control-group-buttons').length === 0) {
-      $cgw.prepend(
+    if ($controls.children('.control-group-buttons').length === 0) {
+      $controls.prepend(
         '<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>'
       );
     }
@@ -507,7 +459,7 @@ $(function() {
     e.preventDefault();
     // ajax to save the current value
     var $this = $(this);
-    var inputs = $this.closest('.control-group-wrap').find('input,textarea');
+    var inputs = $this.closest('.controls').find('input,textarea');
     var input = inputs[0];
     if (inputs[0].type === 'radio') {
       for (var i = 0; i < inputs.size(); i++) {
@@ -545,18 +497,16 @@ $(function() {
         var timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append(
           '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved ' +
-            livespan(timestamp) +
+            livespan(timestamp, false) +
             '</div>'
         );
-        var $history = $this
-          .closest('.control-group-wrap')
-          .find('.input-history');
+        var $history = $this.closest('.controls').find('.input-history');
         if ($history.length > 0) {
           $history = $($history[0]);
         } else {
           incrementFinished();
           $history = $('<div class="input-history"/>').appendTo(
-            $this.closest('.control-group-wrap').find('.controls')
+            $this.closest('.controls')
           );
         }
         var historyRecord = generateHistoryRecordHtml(
@@ -589,7 +539,7 @@ $(function() {
   $('#form').on('click', 'button[value="reset"]', function(e) {
     e.preventDefault();
     var $this = $(this);
-    var inputs = $this.closest('.control-group-wrap').find('input,textarea');
+    var inputs = $this.closest('.controls').find('input,textarea');
     var i;
     for (i = 0; i < inputs.length; i += 1) {
       if (binder.accessor.target[inputs[i].name] === undefined) {
@@ -636,20 +586,51 @@ $(function() {
         $cgw.find('.controls')
       );
     }
-    if (
-      !(
+
+    var valid_type = false;
+    var file_type_attribute = $this[0].attributes['data-filetype'];
+    var file_type = undefined;
+
+    if (file_type_attribute !== undefined) {
+      file_type = file_type_attribute.value;
+
+      if (file_type == undefined || file_type.length == 0) {
+        file_type = undefined;
+      }
+    }
+
+    if (file_type != undefined) {
+      var ext_list = file.name.split('.');
+
+      if (ext_list.length !== 0) {
+        var ext = ext_list.pop();
+        ext = ext.toLowerCase();
+        file_type = file_type.toLowerCase();
+
+        valid_type = ext === file_type;
+      }
+    } else {
+      valid_type =
         /^(image|text)\//i.test(file.type) ||
         file.type === 'application/pdf' ||
         file.type === 'application/vnd.ms-excel' ||
         file.type ===
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
         file.type === 'application/vnd.ms-xpsdocument' ||
-        file.type === 'application/oxps'
-      )
-    ) {
-      $validation.html(
-        '<p class="text-error">' + file.type + ' is not allowed to upload</p>'
-      );
+        file.type === 'application/oxps';
+    }
+
+    if (!valid_type) {
+      var validation_text = ' is not allowed to upload for this input';
+
+      if (file_type !== undefined) {
+        validation_text = ext + validation_text;
+        validation_text += ' (Specify a file of type "' + file_type + '").';
+      } else {
+        validation_text = file.type + validation_text;
+      }
+
+      $validation.html('<p class="text-error">' + validation_text + '</p>');
       $cgw.children('.control-group-buttons').remove();
       return;
     }
@@ -692,7 +673,7 @@ $(function() {
         var timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append(
           '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' +
-            livespan(timestamp) +
+            livespan(timestamp, false) +
             '</div>'
         );
         var $history = $this
@@ -715,7 +696,7 @@ $(function() {
             '">' +
             input.files[0].name +
             '</a></strong> uploaded by you ' +
-            livespan(timestamp) +
+            livespan(timestamp, false) +
             '; ' +
             $history.html()
         );

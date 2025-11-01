@@ -12,8 +12,7 @@ block head
 
 block content
   script(type='text/javascript').
-    var prefix = '!{prefix}';
-    var access = !{access};
+    var access = !{JSON.stringify(access)};
 
   .container(style="margin-top: 10px")
     #message

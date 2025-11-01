@@ -1,14 +1,14 @@
 {
-  "name": "traveler-aps",
-  "version": "1.5.1",
+  "name": "traveler",
+  "version": "3.2.0",
   "private": true,
   "scripts": {
     "start": "node app"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/AdvancedPhotonSource/traveler.git",
-    "release": "APS-1.5.1"
+    "url": "https://github.com/dongliu/traveler.git",
+    "release": "3.2.0"
   },
   "dependencies": {
     "basic-auth": "1.0.0",
@@ -21,6 +21,7 @@
     "express": "^4.17.1",
     "express-session": "1.15.6",
     "express-slash": "1.0.0",
+    "express-urlrewrite": "^2.0.0",
     "file-stream-rotator": "^0.5.7",
     "helmet": "^4.6.0",
     "jade": "1.10.0",
@@ -37,15 +38,15 @@
     "request": "2.34.0",
     "sanitize-html": "^1.20.0",
     "serve-favicon": "2.5.0",
-    "templatizer": "0.2.10",
     "tinymce": "^5.10.1",
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
     "acorn": "^7.4.1",
     "chai": "^4.2.0",
-    "eslint": "^7.32.0",
-    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-import": "^2.24.2",
     "husky": "^3.1.0",
@@ -53,7 +54,8 @@
     "mocha": "^5.2.0",
     "prettier": "^1.19.1",
     "sinon": "^7.2.3",
-    "supports-color": "^9.0.2"
+    "supports-color": "^9.0.2",
+    "templatizer": "^1.5.4"
   },
   "husky": {
     "hooks": {
@@ -62,8 +64,7 @@
   },
   "lint-staged": {
     "*.js": [
-      "prettier --write",
-      "eslint"
+      "prettier --write"
     ]
   }
 }

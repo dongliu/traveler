@@ -15,6 +15,9 @@ binderLinkColumn: false, tagsColumn: false, binderWorkProgressColumn: false,
 transferredOnColumn: false, ownerColumn: false*/
 /*global archiveFromModal, transferFromModal, modalScroll, Holder*/
 
+import * as AddBinder from './lib/binder.js';
+import * as Modal from './lib/modal.js';
+
 function formatItemUpdate(data) {
   return (
     '<div class="target" id="' +
@@ -65,13 +68,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: binderAoColumns,
-    aaSorting: [[10, 'desc'], [8, 'desc']],
+    aaSorting: [
+      [10, 'desc'],
+      [8, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -102,13 +111,20 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: transferredBinderAoColumns,
-    aaSorting: [[11, 'desc'], [9, 'desc'], [8, 'desc']],
+    aaSorting: [
+      [11, 'desc'],
+      [9, 'desc'],
+      [8, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -137,13 +153,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: sharedBinderAoColumns,
-    aaSorting: [[9, 'desc'], [7, 'desc']],
+    aaSorting: [
+      [9, 'desc'],
+      [7, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -173,13 +195,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: groupSharedBinderAoColumns,
-    aaSorting: [[8, 'desc'], [10, 'desc']],
+    aaSorting: [
+      [8, 'desc'],
+      [10, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -208,13 +236,19 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
     aoColumns: archivedBinderAoColumns,
-    aaSorting: [[3, 'desc'], [9, 'desc']],
+    aaSorting: [
+      [3, 'desc'],
+      [9, 'desc'],
+    ],
     sDom: sDomNoTools,
   });
 
@@ -295,33 +329,25 @@ $(function() {
   });
 
   $('button.archive').click(function() {
+    const activeTable = $('.tab-pane.active table').dataTable();
+    Modal.archive('binder', 3, activeTable, archivedBinderTable);
+  });
+
+  $('button#dearchive').click(function() {
+    const activeTable = $('.tab-pane.active table').dataTable();
+    // dearchived binder always starts from a new status
+    Modal.dearchive(
+      'binder',
+      0,
+      activeTable,
+      binderTable,
+      transferredBinderTable
+    );
+  });
+
+  $('#add-to-binder').click(function() {
     var activeTable = $('.tab-pane.active table').dataTable();
-    var selected = fnGetSelected(activeTable, 'row-selected');
-    modalScroll(false);
-    if (selected.length === 0) {
-      $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No work binder has been selected!');
-      $('#modal .modal-footer').html(
-        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html(
-        'Archive the following ' + selected.length + ' work binders? '
-      );
-      $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
-        var data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
-      });
-      $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
-      );
-      $('#modal').modal('show');
-      $('#submit').click(function() {
-        updateStatusFromModal(3, 'binders', activeTable, archivedBinderTable);
-      });
-    }
+    AddBinder.addModal(activeTable, 'binder');
   });
 
   // binding events

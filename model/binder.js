@@ -2,8 +2,8 @@
 const mongoose = require('mongoose');
 const appConfig = require('../config/config').app;
 
-const {Schema} = mongoose;
-const {ObjectId} = Schema.Types;
+const { Schema } = mongoose;
+const { ObjectId } = Schema.Types;
 
 const share = require('./share');
 const logger = require('../lib/loggers').getLogger();
@@ -19,7 +19,6 @@ const logger = require('../lib/loggers').getLogger();
  */
 
 const work = new Schema({
-  alias: String,
   refType: {
     type: String,
     required: true,
@@ -105,7 +104,6 @@ const binder = new Schema({
   clonedFrom: ObjectId,
   updatedBy: String,
   updatedOn: Date,
-  archivedOn: Date,
   owner: String,
   transferredOn: Date,
   deadline: Date,
@@ -158,37 +156,51 @@ const binder = new Schema({
     default: 0,
     min: 0,
   },
-  archived: {
-    type: Boolean,
-    default: false,
-  },
 });
+
+const progressFields = [
+  'status',
+  'finishedInput',
+  'totalInput',
+  'finishedValue',
+  'inProgressValue',
+  'totalValue',
+  'finishedWork',
+  'inProgressWork',
+  'totalWork',
+];
 
 function updateInputProgress(w, spec) {
   w.totalInput = spec.totalInput;
   w.finishedInput = spec.finishedInput;
 }
 
+// update work status according to spec, but not saved
 binder.methods.updateWorkProgress = function(spec) {
   const w = this.works.id(spec._id);
   if (!w) {
+    logger.warn(`no work _id ${spec._id} in binder ${this._id}`);
     return;
   }
   updateInputProgress(w, spec);
   if (w.status !== spec.status) {
     w.status = spec.status;
   }
+  // same for traveler or binder
   if (spec.status === 2) {
     w.finished = 1;
     w.inProgress = 0;
     return;
   }
 
-  if (spec.status === 0) {
+  // only apply to traveler work
+  if (spec.status === 0 && w.refType === 'traveler') {
     w.finished = 0;
     w.inProgress = 0;
     return;
   }
+
+  // active traveler
   if (w.refType === 'traveler') {
     work.finished = 0;
     if (spec.totalInput === 0) {
@@ -198,7 +210,7 @@ binder.methods.updateWorkProgress = function(spec) {
     }
     return;
   }
-  //  the binder
+  //  new or active binder
   if (spec.totalValue === 0) {
     w.finished = 0;
     w.inProgress = 1;
@@ -208,8 +220,9 @@ binder.methods.updateWorkProgress = function(spec) {
   }
 };
 
+// update binder status and save
 binder.methods.updateProgress = function(cb) {
-  const {works} = this;
+  const { works } = this;
   let totalValue = 0;
   let finishedValue = 0;
   let inProgressValue = 0;
@@ -254,6 +267,51 @@ binder.methods.updateProgress = function(cb) {
     });
   }
 };
+
+/**
+ * update the progress of binders that include this binder
+ * @param  {Binder} child the binder document
+ * @return {undefined}
+ */
+function updateParentProgress(child) {
+  Binder.find({
+    status: {
+      $ne: 3,
+    },
+    works: {
+      $elemMatch: {
+        _id: child._id,
+      },
+    },
+  }).exec(function(err, binders) {
+    if (err) {
+      return logger.error(
+        `cannot find binders for traveler ${child._id}, error: ${err.message}`
+      );
+    }
+    binders.forEach(function(b) {
+      b.updateWorkProgress(child);
+      b.updateProgress();
+    });
+  });
+}
+
+binder.pre('save', function(next) {
+  const modifiedPaths = this.modifiedPaths();
+  // keep it so that we can refer at post save
+  this.wasModifiedPaths = modifiedPaths;
+  next();
+});
+
+binder.post('save', function(obj) {
+  const modifiedPaths = this.wasModifiedPaths;
+  const updateParent = modifiedPaths.some(
+    m => progressFields.indexOf(m) !== -1
+  );
+  if (updateParent) {
+    updateParentProgress(obj);
+  }
+});
 
 const Binder = mongoose.model('Binder', binder);
 

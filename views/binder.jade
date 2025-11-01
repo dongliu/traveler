@@ -11,10 +11,8 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  script(type='text/javascript').
-    var prefix = '!{prefix}';
   .container(style="margin-top: 10px")
-    h3 #{binder.title}
+    h3 !{binder.title}
       != ' '
       .btn-group
         button.btn.btn-info(data-toggle='collapse', data-target='#details') Details
@@ -34,7 +32,11 @@ block content
         button.btn.btn-primary#report
           i.fa.fa-table.fa-large
           | &nbsp;Generate report
-    h4 #{binder.description}
+      .btn-group
+          if ((locals.isOwner != undefined && locals.isOwner) || isAdmin || isManager)
+            a(href="config")
+              button.btn.btn-primary Configuration
+    h4 !{binder.description}
     #details.collapse.out
       h4 Owner: #{binder.owner || binder.createdBy}
       h4 Status:

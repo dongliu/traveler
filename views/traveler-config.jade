@@ -11,8 +11,6 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  script(type='text/javascript').
-    var prefix = '!{prefix}';
   .container
     #message
     h3 Title:
@@ -20,7 +18,7 @@ block content
       if (locals.traveler.title == undefined)
         span#title.editable No title
       else
-        span#title.editable #{traveler.title}
+        span#title.editable !{traveler.title}
       = ' '
       button.btn.btn-primary.editable Edit
     h4 Description:
@@ -28,7 +26,7 @@ block content
       if (locals.traveler.description == undefined)
         span#description.editable No description
       else
-        span#description.editable #{traveler.description}
+        span#description.editable !{traveler.description}
       = ' '
       button.btn.btn-primary.editable Edit
     h4 Deadline:
@@ -106,4 +104,4 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/traveler-config.js')
+  script(type='module', src='#{prefix}/javascripts/traveler-config.js')

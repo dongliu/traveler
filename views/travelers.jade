@@ -10,8 +10,6 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  script(type='text/javascript').
-    var prefix = '!{prefix}';
   .container-fluid
     .btn-toolbar
       .btn-group
@@ -146,4 +144,4 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/travelers.js')
+  script(type='module', src='#{prefix}/javascripts/travelers.js')

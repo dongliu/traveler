@@ -10,8 +10,6 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  script(type='text/javascript').
-    var prefix = '!{prefix}';
   .container-fluid
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -36,16 +34,12 @@ block content
                 | manager
               != ' '
               label.checkbox.inline
+                input#reviwer(type='checkbox', value='reviewer')
+                | reviewer
+              != ' '
+              label.checkbox.inline
                 input#admin(type='checkbox', value='admin')
                 | admin
-              != ' '
-              label.checkbox.inline
-                input#admin(type='checkbox', value='read_all_forms')
-                | read_all_forms
-              != ' '
-              label.checkbox.inline
-                input#admin(type='checkbox', value='write_all_travelers')
-                | write_active_travelers
               != ' '
               button.btn.btn-primary#add(type='submit') Add
           h3 User list

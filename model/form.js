@@ -18,11 +18,12 @@ publicAccess := 0 // for read or
 /** ****
 status := 0 // editable draft
         | 0.5 // submitted for reviewing
-        | 1 // review finished and released
+        | 1 // review finished and all approved and released
         | 2 // archived
 ***** */
 // mapping : user-key -> name
 // labels : name -> label
+// types: name -> input type
 
 const stateTransition = [
   {
@@ -39,13 +40,10 @@ const stateTransition = [
   },
 ];
 
-/**
- * 1: the status was used for released before the release form feature
- */
 const statusMap = {
   '0': 'draft',
   '0.5': 'submitted for review',
-  '1': 'ready to release',
+  '1': 'approved and released',
   '2': 'archived',
 };
 
@@ -77,6 +75,7 @@ const form = new Schema({
   sharedGroup: [share.group],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
+  types: Schema.Types.Mixed,
   html: String,
   formType: {
     type: String,
@@ -94,6 +93,7 @@ form.pre('save', function(next) {
   if (doc.isNew || doc.isModified('html')) {
     const mapping = {};
     const labels = {};
+    const types = {};
     const $ = cheerio.load(doc.html);
     const inputs = $('input, textarea');
     let lastInputName = '';
@@ -101,9 +101,11 @@ form.pre('save', function(next) {
     let inputName = '';
     let label = '';
     let userkey = '';
+    let inputType = '';
     for (let i = 0; i < inputs.length; i += 1) {
       const input = $(inputs[i]);
       inputName = input.attr('name');
+      inputType = input.attr('type');
       label = input
         .closest('.control-group')
         .children('.control-label')
@@ -145,6 +147,7 @@ form.pre('save', function(next) {
         }
       } else {
         labels[inputName] = label;
+        types[inputName] = inputType;
         // add user key mapping if userkey is not null or empty
         if (userkey) {
           if (mapping.hasOwnProperty(userkey)) {
@@ -160,6 +163,7 @@ form.pre('save', function(next) {
     }
     doc.mapping = mapping;
     doc.labels = labels;
+    doc.types = types;
   }
   return next();
 });
@@ -221,10 +225,24 @@ const createForm = function(json, newFormResultCallBack) {
   new Form(formToCreate).save(newFormResultCallBack);
 };
 
+const createFormWithHistory = function(uid, json) {
+  const formToCreate = {};
+  formToCreate.title = json.title;
+  formToCreate.createdBy = json.createdBy;
+  formToCreate.createdOn = Date.now();
+  formToCreate.updatedBy = json.createdBy;
+  formToCreate.updatedOn = Date.now();
+  formToCreate.html = json.html || '';
+  formToCreate.formType = json.formType || 'normal';
+  formToCreate.sharedWith = [];
+  return new Form(formToCreate).saveWithHistory(uid);
+};
+
 module.exports = {
   Form,
   FormFile,
   stateTransition,
   statusMap,
   createForm,
+  createFormWithHistory,
 };
