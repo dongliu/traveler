@@ -68,4 +68,4 @@ docker-compose build --no-cache
 
 ## clean the traveler docker image
 
-Run `docker image list` to see the images on your local. `docker image remove image_name` to clean the image from yoru local.
+Run `docker image list` to see the images on your local. `docker image remove image_name` to clean the image from your local.
