@@ -6,7 +6,7 @@ See <https://docs.docker.com/get-docker/> for instructions.
 
 After installation finished, start the docker desktop, configure it for CPU, memory, and storage that you want it to use on your machine.
 
-Check if the docker desktop has `docker-compose` installed on your machine. If not, you need to install docker compose, see <https://docs.docker.com/compose/install/>.
+Check if the docker desktop has `docker compose` installed on your machine. If not, you need to install docker compose, see <https://docs.docker.com/compose/install/>.
 
 ## create development network
 
@@ -33,7 +33,7 @@ See <https://github.com/dongliu/traveler-ldap> for open ldap and a php ldap admi
 The traveler application can be run by running
 
 ```
-docker-compose up
+docker compose up
 ```
 
 The traveler application can be accessed at <http://localhost:3001>
@@ -43,7 +43,7 @@ If you want to server the application or the api on https, add `ssl_key` and `ss
 When you run for the first time, docker will build the image for you. If the application does not start successfully, try
 
 ```
-docker-compose --verbose up
+docker compose --verbose up
 ```
 
 for detailed information. You should also check the logs of mongodb and open ldap service to see if there is an issue with those services. You can ssh into the running container with `docker exec -it traveler_web_1 /bin/sh`, where `traveler_web_1` is the running container name.
@@ -53,19 +53,19 @@ for detailed information. You should also check the logs of mongodb and open lda
 Run
 
 ```
-docker-compose down
+docker compose down
 ```
 
-to stop the appplication.
+to stop the application.
 
-You can run with `docker-compose up -d` in a detached mode. Then you can run `docker-compose logs -f` to check the application log.
+You can run with `docker compose up -d` in a detached mode. Then you can run `docker compose logs -f` to check the application log.
 
-## rebulid without cache
+## rebuild without cache
 
 When the `Dockerfile` is updated, e.g., using a new node.js version, run the following command to rebuild the image.
 
 ```
-docker-compose build --no-cache
+docker compose build --no-cache
 ```
 
 ## clean the traveler docker image
