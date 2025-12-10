@@ -28,6 +28,8 @@ See <https://github.com/dongliu/traveler-mongo> for mongodb and mongo express.
 
 See <https://github.com/dongliu/traveler-ldap> for open ldap and a php ldap admin web interface.
 
+see <https://github.com/dongliu/traveler-mail> for email support.
+
 ## build and run the application
 
 The traveler application can be run by running
