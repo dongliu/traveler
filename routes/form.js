@@ -56,7 +56,7 @@ module.exports = function(app) {
           //   $exists: false,
           // },
         },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -92,7 +92,7 @@ module.exports = function(app) {
             },
           ],
         },
-        'title formType status updatedOn documentNumber'
+        'title formType status updatedOn'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -127,7 +127,7 @@ module.exports = function(app) {
             $in: [0.5],
           },
         },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -155,7 +155,7 @@ module.exports = function(app) {
             $exists: false,
           },
         },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -177,7 +177,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup _v documentNumber'
+        'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -193,7 +193,7 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         {},
-        'title formType status tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup _v documentNumber'
+        'title formType status tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup'
       )
         .lean()
         .exec();
@@ -227,7 +227,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
+        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -269,7 +269,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
+        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -312,7 +312,7 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         search,
-        'title formType status tags updatedBy updatedOn _v documentNumber'
+        'title formType status tags updatedBy updatedOn _v'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -385,7 +385,6 @@ module.exports = function(app) {
             status: form.status,
             statusText: formModel.statusMap[`${form.status}`],
             _v: form._v,
-            documentNumber: form.documentNumber,
             formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
             isReviewer,
@@ -838,8 +837,8 @@ module.exports = function(app) {
   app.post(
     '/forms/',
     auth.ensureAuthenticated,
-    reqUtils.filter('body', ['title', 'formType', 'documentNumber', 'html']),
-    reqUtils.hasAll('body', ['title', 'documentNumber']),
+    reqUtils.filter('body', ['title', 'formType', 'html']),
+    reqUtils.hasAll('body', ['title']),
     auth.requireRoles(req => {
       return (
         req.body.hasOwnProperty('formType') &&
@@ -855,7 +854,6 @@ module.exports = function(app) {
           {
             title: req.body.title,
             formType: req.body.formType,
-            documentNumber: req.body.documentNumber,
             createdBy: req.session.userid,
             html,
           }
@@ -869,15 +867,6 @@ module.exports = function(app) {
           location: url,
         });
       } catch (error) {
-        if (error && error.code === 11000) {
-          return res.render(
-            'form-new',
-            routesUtilities.getRenderObject(req, {
-              error: 'Document ID already exists.',
-              form: req.body,
-            })
-          );
-        }
         logger.error(error);
         return res.status(500).send(error.message);
       }
@@ -1087,7 +1076,7 @@ module.exports = function(app) {
           recipients: emails,
           subject: 'New Review Request',
           text: `You have been asked to review the following template: ${f.title}
-    Go to this link to complete the review: 
+    Go to this link to complete the review:
     ${reviewLink}`,
           html: `You have been asked to review the following template: ${f.title}<br/>Go to this link to complete the review:<br/><a href="${reviewLink}">${reviewLink}</a>`,
         });
