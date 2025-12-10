@@ -30,6 +30,8 @@ See <https://github.com/dongliu/traveler-ldap> for open ldap and a php ldap admi
 
 see <https://github.com/dongliu/traveler-mail> for email support.
 
+## build and run the application
+
 Please follow the `README.md` in each of the repo for how to verify if the service is up and running. You can see the status containers from your docker desktop UI, and check the log if there is any issue.
 
 ## build and run the traveler application
