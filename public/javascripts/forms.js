@@ -1,10 +1,10 @@
 /* global ajax401, disableAjaxCache, prefix, updateAjaxURL,
- travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, editFormLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
+ travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
  updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn,
  fnAddFilterFoot, sDomNoTools, createdByColumn, createdOnColumn,
  fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
  transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
- versionColumn, docNoColumn, releasedFormLinkColumn, releasedFormStatusColumn,
+ versionColumn, releasedFormLinkColumn, releasedFormStatusColumn,
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
  transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn */
 
@@ -12,7 +12,7 @@ function travelFromModal() {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   let number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function () {
+  $('#modal .modal-body div.target').each(function() {
     const that = this;
     $.ajax({
       url: '/travelers/',
@@ -22,16 +22,16 @@ function travelFromModal() {
         form: this.id,
       }),
     })
-      .done(function () {
+      .done(function() {
         $(that).prepend('<i class="fa fa-check"></i>');
         $(that).addClass('text-success');
       })
-      .fail(function (jqXHR) {
+      .fail(function(jqXHR) {
         $(that).prepend('<i class="icon-question"></i>');
         $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
-      .always(function () {
+      .always(function() {
         number = number - 1;
         if (number === 0) {
           $('#return').prop('disabled', false);
@@ -58,7 +58,7 @@ function cloneFromModal(activeTable, formTable) {
   if (base === 'archived-released-forms') {
     base = 'released-forms';
   }
-  $('#modal .modal-body div.target').each(function () {
+  $('#modal .modal-body div.target').each(function() {
     const that = this;
     let success = false;
     $.ajax({
@@ -69,17 +69,17 @@ function cloneFromModal(activeTable, formTable) {
         title: $('input', $(that)).val(),
       }),
     })
-      .done(function () {
+      .done(function() {
         $(that).prepend('<i class="fa fa-check"></i>');
         $(that).addClass('text-success');
         success = true;
       })
-      .fail(function (jqXHR) {
+      .fail(function(jqXHR) {
         $(that).prepend('<i class="icon-question"></i>');
         $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
-      .always(function () {
+      .always(function() {
         number = number - 1;
         if (number === 0 && success) {
           $('#return').prop('disabled', false);
@@ -103,7 +103,7 @@ function cloneItem(data) {
   return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" value="${data.title} clone"></div>`;
 }
 
-$(function () {
+$(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
@@ -116,7 +116,6 @@ $(function () {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
-    docNoColumn,
     versionColumn,
     tagsColumn,
     keysColumn,
@@ -163,7 +162,6 @@ $(function () {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
-    docNoColumn,
     versionColumn,
     tagsColumn,
     keysColumn,
@@ -211,7 +209,6 @@ $(function () {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
-    docNoColumn,
     versionColumn,
     tagsColumn,
     keysColumn,
@@ -284,7 +281,6 @@ $(function () {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
-    docNoColumn,
     versionColumn,
     tagsColumn,
     keysColumn,
@@ -330,7 +326,6 @@ $(function () {
     titleColumn,
     formStatusColumn,
     formTypeColumn,
-    docNoColumn,
     versionColumn,
     tagsColumn,
     keysColumn,
@@ -375,7 +370,6 @@ $(function () {
     formLinkColumn,
     titleColumn,
     formTypeColumn,
-    docNoColumn,
     versionColumn,
     tagsColumn,
     keysColumn,
@@ -412,16 +406,16 @@ $(function () {
   showHash();
 
   // add state for tab changes
-  $('.nav-tabs a').on('click', function () {
+  $('.nav-tabs a').on('click', function() {
     window.history.pushState(null, `forms :: ${this.text}`, this.href);
   });
 
   // show the tab when back and forward
-  window.onhashchange = function () {
+  window.onhashchange = function() {
     showHash();
   };
 
-  $('#form-travel').click(function () {
+  $('#form-travel').click(function() {
     const activeTable = $('.tab-pane.active table').dataTable();
     const selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -436,7 +430,7 @@ $(function () {
         `Create travelers from the following ${selected.length} forms? `
       );
       $('#modal .modal-body').empty();
-      selected.forEach(function (row) {
+      selected.forEach(function(row) {
         const data = activeTable.fnGetData(row);
         $('#modal .modal-body').append(formatItemUpdate(data));
       });
@@ -444,13 +438,13 @@ $(function () {
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
-      $('#submit').click(function () {
+      $('#submit').click(function() {
         travelFromModal();
       });
     }
   });
 
-  $('button.transfer').click(function () {
+  $('button.transfer').click(function() {
     const activeTable = $('.tab-pane.active table').dataTable();
     const selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -465,7 +459,7 @@ $(function () {
         `Transfer the following ${selected.length} forms? `
       );
       $('#modal .modal-body').empty();
-      selected.forEach(function (row) {
+      selected.forEach(function(row) {
         const data = activeTable.fnGetData(row);
         $('#modal .modal-body').append(formatItemUpdate(data));
       });
@@ -492,13 +486,13 @@ $(function () {
           source: travelerGlobal.usernames,
         }
       );
-      $('#submit').click(function () {
+      $('#submit').click(function() {
         transferFromModal($('#username').val(), 'forms', activeTable);
       });
     }
   });
 
-  $('#clone').click(function () {
+  $('#clone').click(function() {
     const activeTable = $('.tab-pane.active table').dataTable();
     const selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
@@ -511,7 +505,7 @@ $(function () {
     } else {
       $('#modalLabel').html(`Clone the following ${selected.length} form(s)? `);
       $('#modal .modal-body').empty();
-      selected.forEach(function (row) {
+      selected.forEach(function(row) {
         const data = activeTable.fnGetData(row);
         $('#modal .modal-body').append(cloneItem(data));
       });
@@ -519,13 +513,13 @@ $(function () {
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
-      $('#submit').click(function () {
+      $('#submit').click(function() {
         cloneFromModal(activeTable, formTable);
       });
     }
   });
 
-  $('#reload').click(function () {
+  $('#reload').click(function() {
     formTable.fnReloadAjax();
     transferredFormTable.fnReloadAjax();
     sharedFormTable.fnReloadAjax();
