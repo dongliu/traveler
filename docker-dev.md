@@ -1,4 +1,4 @@
-Follow this instruction to set up a local development environment for traveler.
+Follow this instruction to set up a local development for traveler.
 
 ## install docker on your dev environment
 
@@ -29,8 +29,6 @@ See <https://github.com/dongliu/traveler-mongo> for mongodb and mongo express.
 See <https://github.com/dongliu/traveler-ldap> for open ldap and a php ldap admin web interface.
 
 see <https://github.com/dongliu/traveler-mail> for email support.
-
-## build and run the application
 
 Please follow the `README.md` in each of the repo for how to verify if the service is up and running. You can see the status containers from your docker desktop UI, and check the log if there is any issue.
 
