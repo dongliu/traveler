@@ -1,4 +1,4 @@
-Follow this instruction to set up a local development for traveler.
+Follow this instruction to set up a local development environment for traveler.
 
 ## install docker on your dev environment
 
