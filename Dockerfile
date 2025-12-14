@@ -1,12 +1,12 @@
 FROM node:20-alpine
 WORKDIR /app
 COPY package.json .
-COPY package-lock.json .
 
 # RUN apk update && \
 #     apk add openssl
 
 RUN rm -rf node_modules
+RUN rm -rf package-lock.json
 
 # Add Tini, see https://github.com/krallin/tini for why
 RUN apk add --no-cache tini
