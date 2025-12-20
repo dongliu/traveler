@@ -3,7 +3,8 @@
   "version": "3.2.0",
   "private": true,
   "scripts": {
-    "start": "node app"
+    "start": "node app",
+    "unit": "mocha test-unit/**/*.test.js"
   },
   "repository": {
     "type": "git",
