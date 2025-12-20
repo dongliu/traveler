@@ -5,7 +5,6 @@
     "review_forms"
   ],
   "admin": [
-    "manage_users",
-    "approve_travelers"
+    "manage_users"
   ]
 }
