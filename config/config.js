@@ -59,10 +59,10 @@ module.exports.load = function() {
   } else {
     module.exports.configPath = getPath('../etc/traveler-config', 'config');
   }
-
   // Load configuration files
   var configPath = this.configPath;
   module.exports.ad = require('../' + configPath + '/ad.json');
+  module.exports.permission = require('../' + configPath + '/permission.json');
   module.exports.api = require('../' + configPath + '/api.json');
   module.exports.app = require('../' + configPath + '/app.json');
   module.exports.auth = require('../' + configPath + '/auth.json');

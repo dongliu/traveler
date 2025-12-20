@@ -1,0 +1,10 @@
+{
+  "user": [
+    "read_all_forms",
+    "write_active_travelers",
+    "review_forms"
+  ],
+  "admin": [
+    "manage_users"
+  ]
+}
