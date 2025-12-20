@@ -9,7 +9,8 @@
     "inputview",
     "userphoto",
     "traveler_uploads",
-    "test",
+    "test-unit",
+    "test-integ",
     "sbin",
     "etc",
     "logs"
