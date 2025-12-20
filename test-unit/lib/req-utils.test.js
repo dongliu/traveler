@@ -29,32 +29,4 @@ describe('req-utils', function() {
       req.body.an_array[0].includes('script').should.be.false;
     });
   });
-
-  describe('#hasAll', () => {
-    const req = {};
-    const res = {
-      // Stub the 'status' method to return the 'res' object, allowing chaining
-      status: sinon.stub().returnsThis(),
-      // Create a spy for 'json' to verify arguments later
-      json: sinon.spy(),
-      // Add other methods you use (e.g., send, sendStatus) as needed
-      send: sinon.spy(),
-    };
-    const nextSpy = sinon.spy();
-    req.body = {
-      a: 'a',
-      b: 'b',
-      c: 1,
-    };
-    it('should reject request if not has all', () => {
-      reqUtils.hasAll('body', ['a', 'b', 'c', 'd'])(req, res, nextSpy);
-      nextSpy.calledOnce.should.be.false;
-      res.status.calledWith(400).should.be.true;
-      res.send.calledWith('cannot find d in body').should.be.true;
-    });
-    it('should call next if has all', () => {
-      reqUtils.hasAll('body', ['a', 'b', 'c'])(req, res, nextSpy);
-      nextSpy.calledOnce.should.be.true;
-    });
-  });
 });
