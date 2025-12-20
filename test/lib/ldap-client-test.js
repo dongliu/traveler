@@ -1,13 +1,13 @@
 /*global describe, it*/
 /*eslint max-nested-callbacks: [2, 4]*/
-var ad = require('../../config/ad.json');
+var ad = require('../../docker/ad.json');
 var ldapClient = require('../../lib/ldap-client');
 require('chai').should();
 
 describe('ldap-client', function() {
   describe('#search()', function() {
     it('should get a valid user', function(done) {
-      var searchFilter = ad.searchFilter.replace('_id', 'liud');
+      var searchFilter = ad.searchFilter.replace('_id', 'dong');
       var opts = {
         filter: searchFilter,
         attributes: ad.objAttributes,
