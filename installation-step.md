@@ -112,3 +112,13 @@ Check if traveler script is properly created by
 cat /etc/systemd/system/pm2-traveler.service
 ```
 Reboot the box and the traveler application should start.
+
+### add the first admin user
+We need to grant the admin role to a user who can manager other users with that permission. This can be done via mongo in shell like
+```shell
+mongo
+> use traveler
+> db.users.find()
+> db.users.update({id:'user'}, {$push:{roles: 'admin'}})
+> db.users.find()
+```
