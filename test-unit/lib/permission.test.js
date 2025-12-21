@@ -1,13 +1,16 @@
-/*global describe, it, before, after*/
 require('chai').should();
-// var sinon = require('sinon');
 
 describe('permission', () => {
   let permissionLib;
+  const configPath = require.resolve('../../config/config.js');
+  const permissionPath = require.resolve('../../lib/permission.js');
   before(() => {
     process.env.TRAVELER_CONFIG_REL_PATH = 'docker';
+    delete require.cache[configPath];
+    delete require.cache[permissionPath];
     const config = require('../../config/config.js');
     config.load();
+    console.log(config.configPath);
     permissionLib = require('../../lib/permission.js');
   });
   describe('getPermission', () => {
@@ -18,8 +21,5 @@ describe('permission', () => {
       permission.should.include(permissionLib.Read_all_forms);
       permission.should.not.include(permissionLib.Manage_users);
     });
-  });
-  after(() => {
-    process.env.TRAVELER_CONFIG_REL_PATH = '';
   });
 });
