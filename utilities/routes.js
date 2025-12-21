@@ -37,7 +37,7 @@ function filterBodyWithOptional(requiredStrings, findAll, optionalStrings) {
     var k;
     var foundCount = 0;
     for (k in req.body) {
-      if (req.body.hasOwnProperty(k)) {
+      if (Object.hasOwn(req.body, k)) {
         var index = strings.indexOf(k);
         if (index !== -1) {
           foundCount = foundCount + 1;
