@@ -29,18 +29,21 @@ block content
             form.form-inline
               input#username.input(type='text', placeholder='Last, First', name='name')
               != ' '
-              label.checkbox.inline
-                input#manager(type='checkbox', value='manager')
-                | manager
-              != ' '
-              label.checkbox.inline
-                input#reviwer(type='checkbox', value='reviewer')
-                | reviewer
-              != ' '
-              label.checkbox.inline
-                input#admin(type='checkbox', value='admin')
-                | admin
-              != ' '
+              if (supportedRoles.indexOf('manager') != -1)
+                label.checkbox.inline
+                  input#manager(type='checkbox', value='manager')
+                  | manager
+                != ' '
+              if (supportedRoles.indexOf('reviewer') != -1)
+                label.checkbox.inline
+                  input#reviwer(type='checkbox', value='reviewer')
+                  | reviewer
+                != ' '
+              if (supportedRoles.indexOf('admin') != -1)
+                label.checkbox.inline
+                  input#admin(type='checkbox', value='admin')
+                  | admin
+                != ' '
               button.btn.btn-primary#add(type='submit') Add
           h3 User list
           .btn-toolbar
