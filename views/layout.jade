@@ -2,7 +2,7 @@ doctype html
 html
   - var isAdmin = locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1
   - var isManager = locals && locals.userid && locals.roles && locals.roles.indexOf('manager') !== -1
-  - var isReviwer = locals && locals.userid && locals.roles && locals.roles.indexOf('reviewer') !== -1
+  - var isReviwer = locals && locals.userid && locals.permissions && locals.permissions.indexOf('review_forms') !== -1
   head
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
@@ -59,7 +59,7 @@ html
               if (locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1)
                 li
                   a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
-                  
+
             ul.nav.pull-right
               if (locals && locals.userid)
                 li
