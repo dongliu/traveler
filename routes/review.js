@@ -3,18 +3,15 @@ const mongoose = require('mongoose');
 const auth = require('../lib/auth');
 const routesUtilities = require('../utilities/routes');
 
-const { Reviewer } = require('../lib/role');
+const { Review_forms } = require('../lib/permission');
 
 const User = mongoose.model('User');
 const Form = mongoose.model('Form');
 
 module.exports = function(app) {
   app.get('/reviews/', auth.ensureAuthenticated, function(req, res) {
-    if (
-      res.locals.roles === undefined ||
-      res.locals.roles.indexOf(Reviewer) === -1
-    ) {
-      return res.status(403).send('only reviewer allowed');
+    if (!routesUtilities.hasPermission(req, Review_forms)) {
+      return res.status(403).send('not authorized to view reviews');
     }
     return res.render('reviews', routesUtilities.getRenderObject(req));
   });
@@ -23,11 +20,8 @@ module.exports = function(app) {
     req,
     res
   ) {
-    if (
-      res.locals.roles === undefined ||
-      res.locals.roles.indexOf(Reviewer) === -1
-    ) {
-      return res.status(403).send('only reviewer allowed');
+    if (!routesUtilities.hasPermission(req, Review_forms)) {
+      return res.status(403).send('not authorized to view reviews');
     }
     try {
       // const me = await User.findOne(
