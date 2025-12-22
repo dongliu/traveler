@@ -28,6 +28,7 @@ const Log = mongoose.model('Log');
 const { TravelerError } = require('../lib/error');
 const { stateTransition } = require('../model/traveler');
 const { sendNotification } = require('../lib/email');
+const { Approve_travelers } = require('../lib/permission');
 const logger = require('../lib/loggers').getLogger();
 
 function createTraveler(form, req, res) {
@@ -927,11 +928,7 @@ module.exports = function(app) {
     reqUtils.archived('id', false),
     function(req, res) {
       const doc = req[req.params.id];
-      if (
-        reqUtils.isOwner(req, doc) ||
-        routesUtilities.checkUserRole(req, 'admin') ||
-        reqUtils.canWrite(req, doc)
-      ) {
+      if (reqUtils.isOwner(req, doc) || reqUtils.canWrite(req, doc)) {
         return res.render(
           'traveler-config',
           routesUtilities.getRenderObject(req, {
@@ -956,11 +953,7 @@ module.exports = function(app) {
     reqUtils.sanitize('body', ['title', 'description', 'deadline', 'dwr']),
     function(req, res) {
       const doc = req[req.params.id];
-      if (
-        reqUtils.isOwner(req, doc) ||
-        reqUtils.canWrite(req, doc) ||
-        routesUtilities.checkUserRole(req, 'admin')
-      ) {
+      if (reqUtils.isOwner(req, doc) || reqUtils.canWrite(req, doc)) {
         Object.keys(req.body).forEach(k => {
           doc[k] = req.body[k];
         });

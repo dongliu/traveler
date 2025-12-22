@@ -23,6 +23,7 @@ const History = mongoose.model('History');
 const { stateTransition } = require('../model/form');
 const { releaseForm } = require('../lib/form');
 const { sendNotification } = require('../lib/email');
+const { Read_all_forms } = require('../lib/permission');
 
 const logger = require('../lib/loggers').getLogger();
 
@@ -187,7 +188,7 @@ module.exports = function(app) {
   });
 
   app.get('/allforms/json', auth.ensureAuthenticated, async function(req, res) {
-    if (!routesUtilities.checkUserRole(req, 'read_all_forms')) {
+    if (!routesUtilities.hasPermission(req, Read_all_forms)) {
       return res.status(401).json('You are not authorized to view all forms.');
     }
     try {
