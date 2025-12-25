@@ -9,6 +9,10 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
+block bodyJs
+  script(type='text/javascript').
+    var rolesHtml = !{JSON.stringify(rolesHtml)};
+
 block content
   .container-fluid
     #message

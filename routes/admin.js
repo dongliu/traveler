@@ -1,6 +1,10 @@
+const jade = require('jade');
+
 var auth = require('../lib/auth');
 var routesUtilities = require('../utilities/routes.js');
 const config = require('../config/config.js');
+
+const rolesHtml = jade.compileFile(`${__dirname}/../views/roles.jade`);
 
 module.exports = function(app) {
   app.get('/admin/', auth.ensureAuthenticated, function(req, res) {
@@ -13,7 +17,10 @@ module.exports = function(app) {
     const supportedRoles = Object.keys(config.permission);
     return res.render(
       'admin',
-      routesUtilities.getRenderObject(req, { supportedRoles })
+      routesUtilities.getRenderObject(req, {
+        supportedRoles,
+        rolesHtml: rolesHtml({ supportedRoles }),
+      })
     );
   });
 };
