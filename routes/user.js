@@ -222,34 +222,32 @@ module.exports = function(app) {
     });
   });
 
-  app.post('/users/', auth.ensureAuthenticated, function(req, res) {
-    if (
-      res.locals.roles === undefined ||
-      res.locals.roles.indexOf('admin') === -1
-    ) {
-      return res.status(403).send('only admin allowed');
-    }
-
-    if (!req.body.name) {
-      return res.status(400).send('need to know name');
-    }
-
-    // check if already in db
-    User.findOne({
-      name: req.body.name,
-    }).exec(function(err, user) {
-      if (err) {
-        return res.status(500).send(err.message);
+  app.post(
+    '/users/',
+    auth.ensureAuthenticated,
+    reqUtilities.requireAdmin(),
+    function(req, res) {
+      if (!req.body.name) {
+        return res.status(400).send('need to know name');
       }
 
-  app.get('/users/json', auth.ensureAuthenticated, function(req, res) {
-    if (
-      res.locals.roles === undefined ||
-      res.locals.roles.indexOf('admin') === -1
-    ) {
-      return res
-        .status(403)
-        .send('You are not authorized to access this resource. ');
+      // check if already in db
+      User.findOne({
+        name: req.body.name,
+      }).exec(function(err, user) {
+        if (err) {
+          return res.status(500).send(err.message);
+        }
+        if (user) {
+          const url = `${
+            req.proxied ? authConfig.proxied_service : authConfig.service
+          }/users/${user._id}`;
+          return res
+            .status(200)
+            .send(`The user is at <a target="_blank" href="${url}">${url}</a>`);
+        }
+        addUser(req, res);
+      });
     }
   );
 
@@ -293,30 +291,14 @@ module.exports = function(app) {
     });
   });
 
-  app.put('/users/:id', auth.ensureAuthenticated, function(req, res) {
-    if (
-      res.locals.roles === undefined ||
-      res.locals.roles.indexOf('admin') === -1
-    ) {
-      return res
-        .status(403)
-        .send('You are not authorized to access this resource. ');
-    }
-    if (!req.is('json')) {
-      return res.status(415).json({
-        error: 'json request expected.',
-      });
-    }
-    User.findOneAndUpdate(
-      {
-        _id: req.params.id,
-      },
-      req.body
-    ).exec(function(err) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({
-          error: err.message,
+  app.put(
+    '/users/:id',
+    auth.ensureAuthenticated,
+    reqUtilities.requireAdmin(),
+    function(req, res) {
+      if (!req.is('json')) {
+        return res.status(415).json({
+          error: 'json request expected.',
         });
       }
       User.findOneAndUpdate(
