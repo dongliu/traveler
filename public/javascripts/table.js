@@ -577,7 +577,7 @@ const formShareLinkColumn = {
 const formReviewLinkColumn = {
   sTitle: '',
   mData(source) {
-    return `<a href="${prefix}/forms/${source._id}/review/" target="${linkTarget}" data-toggle="tooltip" title="reviews for the form"><i class="fa fa-eye fa-lg"></i></a>`;
+    return `<a href="${prefix}/forms/${source._id}/review/" target="${linkTarget}" data-toggle="tooltip" title="reviews for the form"><i class="fa fa-comments fa-lg"></i></a>`;
   },
   bSortable: false,
 };
