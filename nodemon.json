@@ -22,5 +22,5 @@
   "env": {
     "NODE_ENV": "development"
   },
-  "ext": "js,json,cjs,mjs"
+  "ext": "js,json,cjs,mjs,jade"
 }
