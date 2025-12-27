@@ -265,7 +265,7 @@ function fnSetColumnsVis(oTableLocal, columns, show) {
 function fnAddFilterFoot(sTable, aoColumns) {
   const tr = $('<tr role="row">');
   aoColumns.forEach(function(c) {
-    if (c.bFilter) {
+    if (c.bFilter && c.bVisible) {
       tr.append(
         `<th><input type="text" placeholder="${c.sTitle}" style="width:80%;" autocomplete="off"></th>`
       );
@@ -1255,7 +1255,7 @@ const sharedGroupColumn = {
     return '';
   },
   bFilter: true,
-  bVisible: false,
+  bVisible: shareGroups || false,
 };
 
 const statusColumn = {
