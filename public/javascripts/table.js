@@ -265,7 +265,7 @@ function fnSetColumnsVis(oTableLocal, columns, show) {
 function fnAddFilterFoot(sTable, aoColumns) {
   const tr = $('<tr role="row">');
   aoColumns.forEach(function(c) {
-    if (c.bFilter && c.bVisible) {
+    if (c.bFilter && c.bVisible !== false) {
       tr.append(
         `<th><input type="text" placeholder="${c.sTitle}" style="width:80%;" autocomplete="off"></th>`
       );
