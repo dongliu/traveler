@@ -134,13 +134,14 @@ $(function() {
     updatedOnColumn,
     updatedByColumn,
     sharedWithColumn,
+    // sharedGroupColumn,
   ];
 
   if (shareGroups) {
     formAoColumns.push(sharedGroupColumn);
   }
 
-  const formTableConfig = {
+  const formTable = $('#form-table').dataTable({
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -250,7 +251,7 @@ $(function() {
     sharedFormAoColumns.push(sharedGroupColumn);
   }
 
-  const sharedFormTableConfig = {
+  const sharedFormTable = $('#shared-form-table').dataTable({
     sAjaxSource: '/sharedforms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -325,13 +326,14 @@ $(function() {
     updatedOnColumn,
     updatedByColumn,
     sharedWithColumn,
+    // sharedGroupColumn,
   ];
 
   if (shareGroups) {
     submittedFormAoColumns.push(sharedGroupColumn);
   }
 
-  const submittedFormTableConfig = {
+  const submittedFormTable = $('#submitted-form-table').dataTable({
     sAjaxSource: '/submittedforms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -379,13 +381,14 @@ $(function() {
     updatedOnColumn,
     updatedByColumn,
     sharedWithColumn,
+    // sharedGroupColumn,
   ];
 
   if (shareGroups) {
     closedFormAoColumns.push(sharedGroupColumn);
   }
 
-  const closedFormTableConfig = {
+  const closedFormTable = $('#closed-form-table').dataTable({
     sAjaxSource: '/closedforms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
