@@ -1,6 +1,5 @@
-/* eslint-disable import/extensions */
-/* global fnGetSelected, selectColumn, binderLinkColumn, 
-    titleColumn, tagsColumn, createdOnColumn, updatedOnColumn, fnAddFilterFoot, 
+/* global fnGetSelected, selectColumn, binderLinkColumn,
+    titleColumn, tagsColumn, createdOnColumn, updatedOnColumn, fnAddFilterFoot,
     sDomNoTNoR, selectEvent, filterEvent */
 
 import * as Modal from './modal.js';

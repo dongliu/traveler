@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable import/extensions */
 /* eslint-disable func-names */
 /* eslint-disable no-param-reassign */
 /* global input, spec */
