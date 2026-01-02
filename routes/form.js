@@ -48,14 +48,14 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         {
-          createdBy: req.session.userid,
+          // createdBy: req.session.userid,
           archived: {
             $ne: true,
           },
           status: 0,
-          owner: {
-            $exists: false,
-          },
+          // owner: {
+          //   $exists: false,
+          // },
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
