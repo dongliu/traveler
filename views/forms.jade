@@ -47,10 +47,11 @@ block content
         //-     a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s
         li
           a(href='#submittedforms', data-toggle='tab') Under review #{viewConfig.terminology.form}s
-        li
-          a(href='#closedforms', data-toggle='tab') Released #{viewConfig.terminology.form}
-        li
-          a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
+        if (isAdmin)
+          li
+            a(href='#closedforms', data-toggle='tab') Approved and released #{viewConfig.terminology.form}
+          li
+            a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
@@ -105,7 +106,7 @@ block content
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
           table#submitted-form-table.table.table-bordered.table-hover
-        //- if (isAdmin)
+        if (isAdmin)
           //- the table for forms going through review release flow
           #closedforms.tab-pane
             h3 The templates in this table were reviewed and released
