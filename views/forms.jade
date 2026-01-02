@@ -20,10 +20,6 @@ block content
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
-      //- .btn-group
-      //-   a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
-      //-     i.fa.fa-institution.fa-lg
-      //-     | &nbsp;All public #{viewConfig.terminology.form}s
       .btn-group
         button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
@@ -42,22 +38,19 @@ block content
     div
       ul.nav.nav-tabs
         li.active
-          a(href='#forms', data-toggle='tab') My draft #{viewConfig.terminology.form}s
-        if (viewConfig.transferOwnership)
-          li
-            a(href='#transferredforms', data-toggle='tab') Transferred draft #{viewConfig.terminology.form}s
-        //- if (viewConfig.shareUsers)
+          a(href='#forms', data-toggle='tab') Draft #{viewConfig.terminology.form}s
+        //- if (viewConfig.transferOwnership)
         //-   li
-        //-     a(href='#sharedfroms', data-toggle='tab') Shared draft #{viewConfig.terminology.form}s
-        if (viewConfig.shareGroups)
-          li
-            a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s
+        //-     a(href='#transferredforms', data-toggle='tab') Transferred draft #{viewConfig.terminology.form}s
+        //- if (viewConfig.shareGroups)
+        //-   li
+        //-     a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s
         li
           a(href='#submittedforms', data-toggle='tab') Under review #{viewConfig.terminology.form}s
         li
-          a(href='#closedforms', data-toggle='tab') Approved and released #{viewConfig.terminology.form}
+          a(href='#closedforms', data-toggle='tab') Released #{viewConfig.terminology.form}
         li
-          a(href='#archivedforms', data-toggle='tab') Archived draft #{viewConfig.terminology.form}s
+          a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
