@@ -12,6 +12,7 @@ export default [
   {
     files: ['**/public/**/*.js'],
     languageOptions: {
+      sourceType: 'module',
       globals: { ...globals.browser, ...globals.jquery },
     },
   },
