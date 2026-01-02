@@ -125,23 +125,20 @@ $(function() {
     formShareLinkColumn,
     titleColumn,
     formStatusColumn,
-    // formTypeColumn,
     docNoColumn,
     versionColumn,
     tagsColumn,
-    // keysColumn,
     createdOnColumn,
     updatedOnColumn,
     updatedByColumn,
     sharedWithColumn,
-    // sharedGroupColumn,
   ];
 
   if (shareGroups) {
     formAoColumns.push(sharedGroupColumn);
   }
 
-  const formTable = $('#form-table').dataTable({
+  const formTableConfig = {
     sAjaxSource: '/forms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -179,11 +176,9 @@ $(function() {
     formShareLinkColumn,
     titleColumn,
     formStatusColumn,
-    // formTypeColumn,
     docNoColumn,
     versionColumn,
     tagsColumn,
-    // keysColumn,
     createdByColumn,
     createdOnColumn,
     transferredOnColumn,
@@ -251,7 +246,7 @@ $(function() {
     sharedFormAoColumns.push(sharedGroupColumn);
   }
 
-  const sharedFormTable = $('#shared-form-table').dataTable({
+  const sharedFormTableConfig = {
     sAjaxSource: '/sharedforms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -317,23 +312,20 @@ $(function() {
     formReviewLinkColumn,
     titleColumn,
     formStatusColumn,
-    // formTypeColumn,
     docNoColumn,
     versionColumn,
     tagsColumn,
-    // keysColumn,
     createdOnColumn,
     updatedOnColumn,
     updatedByColumn,
     sharedWithColumn,
-    // sharedGroupColumn,
   ];
 
   if (shareGroups) {
     submittedFormAoColumns.push(sharedGroupColumn);
   }
 
-  const submittedFormTable = $('#submitted-form-table').dataTable({
+  const submittedFormTableConfig = {
     sAjaxSource: '/submittedforms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -372,23 +364,20 @@ $(function() {
     formLinkColumn,
     titleColumn,
     formStatusColumn,
-    // formTypeColumn,
     docNoColumn,
     versionColumn,
     tagsColumn,
-    // keysColumn,
     createdOnColumn,
     updatedOnColumn,
     updatedByColumn,
     sharedWithColumn,
-    // sharedGroupColumn,
   ];
 
   if (shareGroups) {
     closedFormAoColumns.push(sharedGroupColumn);
   }
 
-  const closedFormTable = $('#closed-form-table').dataTable({
+  const closedFormTableConfig = {
     sAjaxSource: '/closedforms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -422,11 +411,9 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    // formTypeColumn,
     docNoColumn,
     versionColumn,
     tagsColumn,
-    // keysColumn,
     updatedByColumn,
     updatedOnColumn,
   ];
@@ -567,20 +554,16 @@ $(function() {
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
-      $('#submit').click(function() {
-        cloneFromModal(activeTable, formTable);
+      $('#submit').on('click', function() {
+        cloneFromModal(activeTable, $('#form-table').dataTable());
       });
     }
   });
 
-  $('#reload').click(function() {
-    formTable.fnReloadAjax();
-    transferredFormTable.fnReloadAjax();
-    sharedFormTable.fnReloadAjax();
-    groupSharedFormTable.fnReloadAjax();
-    submittedFormTable.fnReloadAjax();
-    closedFormTable.fnReloadAjax();
-    archivedFormTable.fnReloadAjax();
+  $('#reload').on('click', function() {
+    tables.forEach(function(table) {
+      table.fnReloadAjax();
+    });
   });
   // binding events
   selectEvent();
