@@ -20,11 +20,11 @@ block content
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
-      .btn-group
-        button.btn.btn-info#reload
-          i.fa.fa-refresh.fa-lg
-          | &nbsp;Reload all tables
-      if (locals && locals.userid && locals.roles && (locals.roles.indexOf('admin') !== -1))
+      //- .btn-group
+      //-   button.btn.btn-info#reload
+      //-     i.fa.fa-refresh.fa-lg
+      //-     | &nbsp;Reload all tables
+      if (isAdmin)
         .btn-group
           a.btn.btn-info#form-management(href='#{prefix}/form-management/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='manage #{viewConfig.terminology.form}s')
             i.fa.fa-suitcase.fa-lg
@@ -65,34 +65,34 @@ block content
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
           table#form-table.table.table-bordered.table-hover
-        if (viewConfig.transferOwnership)
-          #transferredforms.tab-pane
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-              .btn-group
-                button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
-                  i.fa.fa-user.fa-lg
-                  | &nbsp;Transfer ownership
-            table#transferred-form-table.table.table-bordered.table-hover
-        if (viewConfig.shareUsers)
-          #sharedfroms.tab-pane
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-            table#shared-form-table.table.table-bordered.table-hover
-        if (viewConfig.shareGroups)
-          #groupsharedfroms.tab-pane
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-            table#group-shared-form-table.table.table-bordered.table-hover
+        //- if (viewConfig.transferOwnership)
+        //-   #transferredforms.tab-pane
+        //-     .btn-toolbar
+        //-       .btn-group
+        //-         button.btn.btn-info.reload
+        //-           i.fa.fa-refresh.fa-lg
+        //-           | &nbsp;Reload table
+        //-       .btn-group
+        //-         button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
+        //-           i.fa.fa-user.fa-lg
+        //-           | &nbsp;Transfer ownership
+        //-     table#transferred-form-table.table.table-bordered.table-hover
+        //- if (viewConfig.shareUsers)
+        //-   #sharedfroms.tab-pane
+        //-     .btn-toolbar
+        //-       .btn-group
+        //-         button.btn.btn-info.reload
+        //-           i.fa.fa-refresh.fa-lg
+        //-           | &nbsp;Reload table
+        //-     table#shared-form-table.table.table-bordered.table-hover
+        //- if (viewConfig.shareGroups)
+        //-   #groupsharedfroms.tab-pane
+        //-     .btn-toolbar
+        //-       .btn-group
+        //-         button.btn.btn-info.reload
+        //-           i.fa.fa-refresh.fa-lg
+        //-           | &nbsp;Reload table
+        //-     table#group-shared-form-table.table.table-bordered.table-hover
         //- the table for under review forms
         #submittedforms.tab-pane
           .btn-toolbar
@@ -139,6 +139,6 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/forms.js')
+  script(type='module', src='#{prefix}/javascripts/forms.js')
 
 
