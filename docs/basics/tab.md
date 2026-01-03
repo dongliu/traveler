@@ -19,9 +19,7 @@ display information.
 | 5    | bottom left  | the numbers of entries out of the total number shown in the view    |
 | 6    | bottom right | pagination controls                                                 |
 
-<p/>
-
-<img src="../images/data-tables.png" alt="the areas of a data table">
+<img src="{{ "/assets/img/data-tables.png" | relative_url }}" alt="the areas of a data table">
 
 Some tables have extra tools that allow a user to copy, export, or print the
 table. The traveler application uses

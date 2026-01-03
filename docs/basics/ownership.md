@@ -17,7 +17,6 @@ sharing, and public accessibility.
 There are three levels of access privileges: no access, read, and write. The
 details are listed in the following table.
 
-<!-- prettier-ignore -->
 | access privilege | details | 
 |----------|-----------------------------|
 | no access | rejected when requesting to access an entity |

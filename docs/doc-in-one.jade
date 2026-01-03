@@ -18,14 +18,32 @@ block content
     .row
       .span9
         h4
-         i updated on 05/14/2023
+         i updated on 01/02/2026
         section#how-to-use
-          h2 How to use this document
-          p Each section starts with an audience statement. If you are not the target audience, please feel free to skip that section.
+          include:marked ./audience.md
         section#basics
-          include ./basics.jade
+          include:marked ./basics/header.md
+          include:marked ./basics/template.md
+          include:marked ./basics/traveler.md
+          include:marked ./basics/binder.md
+          include:marked ./basics/login.md
+          include:marked ./basics/ownership.md
+          include:marked ./basics/tab.md
+          include:marked ./basics/print.md
+          include:marked ./basics/color.md
         section#templates
-          include ./templates.jade
+          include:marked ./template/header.md
+          include:marked ./template/normal.md
+          include:marked ./template/discrepancy.md
+          include:marked ./template/lifecycle.md
+          include:marked ./template/tab.md
+          include:marked ./template/builder.md
+          include:marked ./template/clone.md
+          include:marked ./template/transfer.md
+          include:marked ./template/version-control.md
+          include:marked ./template/review.md
+        section#released-template
+          include:marked ./released_template/header.md
         section#travelers
           include ./travelers.jade
         section#binders
@@ -33,7 +51,7 @@ block content
         section#api
           include ./api.jade
         section#faq
-          include ./faq.jade
+          include:marked ./faq.md
         section#contact
           include:marked ./contact.md
 
@@ -42,7 +60,9 @@ block content
           li
             a(href='#basics') Basics
           li
-            a(href='#templates') Templates
+            a(href='#templates') Draft Templates
+          li
+            a(href='#released-template') Released Templates
           li
             a(href='#travelers') Travelers
           li
