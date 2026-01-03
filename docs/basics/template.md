@@ -8,7 +8,7 @@ and inputs.
 A user can design a template in a WYSIWYG (what you see is what you get) editor.
 Each template has a life cycle, and can be managed by users with special roles.
 Users can only create travelers from the released templates. The
-[templates section](#forms) describes the details of how to work with templates.
+[draft templates section](#draft-template) describes the details of how to work with templates.
 
 There are two types of templates --- normal templates and discrepancy templates.
 A normal template defines a sequence of actions and data points to collect. A

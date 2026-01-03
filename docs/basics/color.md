@@ -13,7 +13,6 @@ Each traveler or binder has an estimated progress. The progress is visualized by
 a bar. The bar color and corresponding entity status is listed in the following
 table.
 
-<!-- prettier-ignore -->
 | progress bar | status |
 | -------------| -----------|
 | <div class="progress" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:0%;"></div><div class="progress-value">0 / 7</div></div> | initialized |
@@ -26,7 +25,6 @@ table.
 Some progress bars have values on it. The formats of the value notations are
 listed in the following table.
 
-<!-- prettier-ignore -->
 | entity type | progress bar | values |
 | ----------- | ------------ | ------ |
 | traveler | <div class="progress active progress-striped" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:28%;"></div><div class="progress-value">2 / 7</div></div> | updated input number / total input number |
@@ -36,7 +34,6 @@ listed in the following table.
 
 In a binder, a colored flag denotes the status of a work.
 
-<!-- prettier-ignore -->
 | flag | status |
 | -------------| -----------|
 | <i class="fa fa-flag fa-lg text-info"></i> | going well |

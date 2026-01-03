@@ -1,4 +1,4 @@
-### Update the data and notes in a traveler
+### Update the data
 
 **Audience: traveler users with write permission**
 
@@ -22,8 +22,3 @@ saved on the server, there will be a
 message on the top of the page. If something is wrong, then an 
 <div class="alert alert-error"><button class="close">x</button>Error</div>
 message will appear.
-
-In order to add a new note, click the
-<a class="new-note" data-toggle="tooltip" title="new note"><i class="fa fa-file-o fa-lg"></i></a>
-icon. Click the <span class="badge badge-info">n</span> icon to show/hide the
-notes.

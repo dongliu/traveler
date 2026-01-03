@@ -15,4 +15,4 @@ e.g. the input validation rules like min and max value of a number. The user can
 button. In order to record the change, a new version is created for the
 template.
 
-<img src="../images/version-control.png" alt="version control">
+<img src="{{ "/assets/img/version-control.png" | relative_url }}" alt="version control">

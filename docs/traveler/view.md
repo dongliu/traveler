@@ -4,9 +4,9 @@
 
 The user can directly load the traveler in the browser with a traveler's URL. If
 the user has only read permission of the traveler, the browser will redirect to
-a read-only view. On the travelers page, click on the
+a read-only view. On the travelers table, click on the
 <a data-toggle="tooltip" title="go to the traveler"><i class="fa fa-edit fa-lg"></i></a>
-icon in order to the traveler page.
+icon in order to load the traveler page.
 
 In a traveler page, the top line is the traveler's title. Below the title is the
 traveler status, and progress. The progress tells the number of inputs updated

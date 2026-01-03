@@ -25,7 +25,7 @@ table.
 
 A normal traveler user cannot review templates. The admin needs to add the
 reviewer role to the users who want to perform the task. A reviewer sees <a
-href="/reviews/">Reviews</a> link on top of the traveler page. The reviews page
+href="{{ "/reviews/" | relative_url }}">Reviews</a> link on top of the traveler page. The reviews page
 lists all the active templates under review. The reviewer can approve or request
 for more works for a template. A template needs to be approved by all the
 reviewers before release. A single rework request from any reviewer will
