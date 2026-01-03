@@ -11,67 +11,38 @@ block head
 block content
   //- header
   .container
-    include:marked ./hero.md
-    h4
-      i updated on 01/02/2026
+    .hero-unit
+      include:marked ./docs/hero.md
 
   .container
     .row
       .span9
+        h4
+         i updated on 05/14/2023
         section#how-to-use
-          include:marked ./audience.md
+          h2 How to use this document
+          p Each section starts with an audience statement. If you are not the target audience, please feel free to skip that section.
         section#basics
-          include:marked ./basics/header.md
-          include:marked ./basics/template.md
-          include:marked ./basics/traveler.md
-          include:marked ./basics/binder.md
-          include:marked ./basics/login.md
-          include:marked ./basics/ownership.md
-          include:marked ./basics/tab.md
-          include:marked ./basics/print.md
-          include:marked ./basics/color.md
+          include ./docs/basics.jade
         section#templates
-          include:marked ./template/header.md
-          include:marked ./template/normal.md
-          include:marked ./template/discrepancy.md
-          include:marked ./template/lifecycle.md
-          include:marked ./template/tab.md
-          include:marked ./template/builder.md
-          include:marked ./template/clone.md
-          include:marked ./template/transfer.md
-          include:marked ./template/version-control.md
-          include:marked ./template/review.md
-        section#released-template
-          include:marked ./released_template/header.md
-          include:marked ./released_template/revision.md
+          include ./docs/templates.jade
         section#travelers
-          include:marked ./traveler/header.md
-          include:marked ./traveler/create.md
-          include:marked ./traveler/status.md
-          include:marked ./traveler/update-status.md
-          include:marked ./traveler/tab.md
-          include:marked ./traveler/view.md
-          include:marked ./traveler/update.md
-          include:marked ./traveler/update-note.md
-          include:marked ./traveler/config.md
-          include:marked ./traveler/manage-forms.md
+          include ./docs/travelers.jade
         section#binders
-          include ./binders.jade
+          include ./docs/binders.jade
         section#api
-          include ./api.jade
+          include ./docs/api.jade
         section#faq
-          include:marked ./faq.md
+          include ./docs/faq.jade
         section#contact
-          include:marked ./contact.md
+          include:marked ./docs/contact.md
 
       .span3.sidebar
         ul#affixlist.nav.nav-list.nav-stacked.bs-docs-sidenav
           li
             a(href='#basics') Basics
           li
-            a(href='#templates') Draft Templates
-          li
-            a(href='#released-template') Released Templates
+            a(href='#templates') Templates
           li
             a(href='#travelers') Travelers
           li
