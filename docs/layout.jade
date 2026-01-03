@@ -60,23 +60,6 @@ html
                 li
                   a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
 
-            ul.nav.pull-right
-              if (locals && locals.userid)
-                li
-                  img.user(title='#{locals.username}', data-src='holder.js/27x40?size=20&text=#{locals.username.substr(0, 1).toUpperCase()}')
-                li.dropdown
-                  a.dropdown-toggle(href='#', data-toggle='dropdown') #{locals.username}
-                    b.caret
-                  ul.dropdown-menu
-                    li
-                      a(href='#{prefix}/profile', target='#{viewConfig.linkTarget}') Profile
-                    li
-                      a(href='#{prefix}/logout') Log out
-              else
-                li
-                  i.fa.fa-user.fa-3x
-                li
-                  a(href='#{prefix}/login') Log in
     block content
     .container-fluid
       h6.text-right
