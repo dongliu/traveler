@@ -101,7 +101,7 @@ if (app.get('env') === 'production') {
 }
 
 app.set('port', process.env.PORT || appSettings.app_port);
-app.set('views', `${__dirname}/views`);
+app.set('views', [`${__dirname}/views`, `${__dirname}/docs`]);
 app.set('view engine', 'jade');
 if (app.get('env') === 'production') {
   app.use(

@@ -1,0 +1,85 @@
+doctype html
+html
+  - var isAdmin = locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1
+  - var isManager = locals && locals.userid && locals.roles && locals.roles.indexOf('manager') !== -1
+  - var isReviwer = locals && locals.userid && locals.permissions && locals.permissions.indexOf('review_forms') !== -1
+  head
+    meta(http-equiv='X-UA-Compatible', content='IE=Edge')
+    block head
+  body
+    script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
+    script(type='text/javascript').
+      var terminology = !{JSON.stringify(viewConfig.terminology)};
+      var shareUsers = !{JSON.stringify(viewConfig.shareUsers)};
+      var shareGroups = !{JSON.stringify(viewConfig.shareGroups)};
+      var linkTarget = !{JSON.stringify(viewConfig.linkTarget)} || '_blank';
+      var showCCDB = !{JSON.stringify(viewConfig.showCCDB)};
+      var userid = !{JSON.stringify(locals.userid)};
+      var prefix = !{JSON.stringify(prefix)};
+
+      var isAdmin = !{isAdmin};
+      var isManager = !{isManager};
+      var isReviwer = !{isReviwer};
+    block bodyJs
+
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          .nav-collapse.collapse
+            ul.nav
+              li
+                - var appName = "Traveler"
+                if (viewConfig.deploymentName)
+                    - appName += " - " + viewConfig.deploymentName
+                a(href='#{prefix}/') #{appName}
+              if (viewConfig.topBarUrls)
+                each url in viewConfig.topBarUrls
+                  li
+                    a(href=url.url, target='_blank') #{url.text}
+
+              block links
+                li
+                  a(href='#{prefix}/forms/').caps Draft #{viewConfig.terminology.form}s
+                li
+                  a(href='#{prefix}/releasedforms/').caps Released #{viewConfig.terminology.form}s
+                li
+                  a(href='#{prefix}/travelers/') Travelers
+                li
+                  a(href='#{prefix}/binders/') Binders
+                if (isReviwer)
+                  li
+                    a(href='#{prefix}/reviews/') My Reviews
+                li
+                  a(href='#{prefix}/docs/', target='#{viewConfig.linkTarget}') Documents
+
+              if (locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1)
+                li
+                  a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
+
+            ul.nav.pull-right
+              if (locals && locals.userid)
+                li
+                  img.user(title='#{locals.username}', data-src='holder.js/27x40?size=20&text=#{locals.username.substr(0, 1).toUpperCase()}')
+                li.dropdown
+                  a.dropdown-toggle(href='#', data-toggle='dropdown') #{locals.username}
+                    b.caret
+                  ul.dropdown-menu
+                    li
+                      a(href='#{prefix}/profile', target='#{viewConfig.linkTarget}') Profile
+                    li
+                      a(href='#{prefix}/logout') Log out
+              else
+                li
+                  i.fa.fa-user.fa-3x
+                li
+                  a(href='#{prefix}/login') Log in
+    block content
+    .container-fluid
+      h6.text-right
+        a(href='https://github.com/dongliu/traveler', target='_blank') Release #{viewConfig.appVersion}
+    block js
+
