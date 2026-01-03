@@ -12,4 +12,4 @@ When a page contains unsaved content and the session has expired, an error
 message will appear on the top of the page when the user tries to save. Log in
 the application in a **new** tab or page, and then save the change again. Do not
 close or navigate away from the page that contains the unsaved changes,
-otherwise the unsaved changes will be lost
+otherwise the unsaved changes will be lost.
