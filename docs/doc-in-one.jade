@@ -45,7 +45,16 @@ block content
         section#released-template
           include:marked ./released_template/header.md
         section#travelers
-          include ./travelers.jade
+          include:marked ./traveler/header.md
+          include:marked ./traveler/create.md
+          include:marked ./traveler/status.md
+          include:marked ./traveler/update-status.md
+          include:marked ./traveler/tab.md
+          include:marked ./traveler/view.md
+          include:marked ./traveler/update.md
+          include:marked ./traveler/update-note.md
+          include:marked ./traveler/config.md
+          include:marked ./traveler/manage-forms.md
         section#binders
           include ./binders.jade
         section#api
