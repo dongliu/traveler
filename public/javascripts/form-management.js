@@ -65,12 +65,10 @@ $(function() {
     formConfigLinkColumn,
     formShareLinkColumn,
     titleColumn,
-    // formTypeColumn,
     docNoColumn,
     versionColumn,
     formStatusColumn,
     tagsColumn,
-    // keysColumn,
     reviewersColumn,
     firstReviewRequestedOnColumn,
   ];
@@ -94,7 +92,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[11, 'desc']],
+    aaSorting: [[10, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#submitted-form-table', formAoColumns);
@@ -103,7 +101,6 @@ $(function() {
     selectColumn,
     releasedFormLinkColumn,
     titleColumn,
-    // formTypeColumn,
     releasedFormStatusColumn,
     releasedFormVersionColumn,
     tagsColumn,
@@ -130,7 +127,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: releasedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
@@ -139,7 +136,6 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    // formTypeColumn,
     tagsColumn,
     releasedFormStatusColumn,
     releasedFormVersionColumn,
@@ -166,7 +162,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
