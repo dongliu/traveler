@@ -84,14 +84,12 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    // formTypeColumn,
     docNoColumn,
     versionColumn,
     formStatusColumn,
     docNoColumn,
     versionColumn,
     tagsColumn,
-    // keysColumn,
     reviewersColumn,
     firstReviewRequestedOnColumn,
   ];
@@ -120,7 +118,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [[11, 'desc']],
+    aaSorting: [[10, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#submitted-form-table', formAoColumns);
@@ -129,7 +127,6 @@ $(function() {
     selectColumn,
     releasedFormLinkColumn,
     titleColumn,
-    // formTypeColumn,
     releasedFormStatusColumn,
     releasedFormVersionColumn,
     tagsColumn,
@@ -151,6 +148,12 @@ $(function() {
       [10, 50, 100, -1],
       [10, 50, 100, 'All'],
     ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: releasedFormAoColumns,
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   };
   initTableIfExists($('#closed-form-table'), closedFormTableConfig, tables);
@@ -161,7 +164,6 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    // formTypeColumn,
     tagsColumn,
     updatedByColumn,
     updatedOnColumn,
@@ -186,7 +188,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[6, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   };
   initTableIfExists($('#archived-form-table'), archivedFormTableConfig, tables);
