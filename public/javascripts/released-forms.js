@@ -114,7 +114,6 @@ $(function() {
     releasedFormLinkColumn,
     titleColumn,
     releasedFormStatusColumn,
-    // formTypeColumn,
     releasedFormVersionColumn,
     docNoColumn,
     tagsColumn,
