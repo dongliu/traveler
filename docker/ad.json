@@ -21,5 +21,6 @@
 
   "shareUsers": true,
   "shareGroups": false,
+  "publicAccess": false,
   "transferOwnership": false
 }

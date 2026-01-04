@@ -693,34 +693,36 @@ module.exports = function(app) {
     }
   );
 
-  app.put(
-    '/forms/:id/share/public',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Form),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.filter('body', ['access']),
-    async function(req, res) {
-      const form = req[req.params.id];
-      let { access } = req.body;
-      if (['-1', '0', '1'].indexOf(access) === -1) {
-        return res.status(400).send('not valid value');
+  if (config.ad.publicAccess) {
+    app.put(
+      '/forms/:id/share/public',
+      auth.ensureAuthenticated,
+      reqUtils.exist('id', Form),
+      reqUtils.isOwnerMw('id'),
+      reqUtils.filter('body', ['access']),
+      async function(req, res) {
+        const form = req[req.params.id];
+        let { access } = req.body;
+        if (['-1', '0', '1'].indexOf(access) === -1) {
+          return res.status(400).send('not valid value');
+        }
+        access = Number(access);
+        if (form.publicAccess === access) {
+          return res.status(204).send();
+        }
+        form.publicAccess = access;
+        try {
+          await form.save();
+          return res
+            .status(200)
+            .send(`public access is set to ${req.body.access}`);
+        } catch (error) {
+          logger.error(error);
+          return res.status(500).send(error.message);
+        }
       }
-      access = Number(access);
-      if (form.publicAccess === access) {
-        return res.status(204).send();
-      }
-      form.publicAccess = access;
-      try {
-        await form.save();
-        return res
-          .status(200)
-          .send(`public access is set to ${req.body.access}`);
-      } catch (error) {
-        logger.error(error);
-        return res.status(500).send(error.message);
-      }
-    }
-  );
+    );
+  }
 
   app.get(
     '/forms/:id/share/:list/json',

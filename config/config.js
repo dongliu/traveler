@@ -126,6 +126,8 @@ module.exports.load = function() {
     viewConfig.appVersion = this.travelerPackageFile.version;
   }
   viewConfig.terminology = this.ui.terminology;
+  viewConfig.publicAccess =
+    this.ad.publicAccess === undefined ? true : this.ad.publicAccess;
 
   module.exports.viewConfig = viewConfig;
 };
