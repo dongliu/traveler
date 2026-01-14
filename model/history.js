@@ -73,12 +73,20 @@ function addVersion(schema, options) {
     .value();
 
   schema.add({
-    _v: { type: Number, default: 0 },
+    _v: { type: Number, default: 1 },
   });
 
-  schema.methods.incrementVersion = function() {
+  schema.methods.incrementVersion = function(incrOptions) {
+    const force = incrOptions.force || false;
+
     const doc = this;
     const version = doc.get(VERSION_KEY) || 0;
+
+    if(force) {
+      doc.set(VERSION_KEY, version + 1);
+      return;
+    }
+
     debug(options.fieldsToVersion);
     for (let i = 0; i < options.fieldsToVersion.length; i += 1) {
       const field = options.fieldsToVersion[i];

@@ -49,7 +49,7 @@ module.exports = function(app) {
       {
         status: 1,
       },
-      'title formType status tags ver releasedOn releasedBy'
+      'title formType status tags ver releasedOn releasedBy documentNumber'
     ).exec(function(err, forms) {
       if (err) {
         logger.error(err);
@@ -67,7 +67,7 @@ module.exports = function(app) {
       {
         status: 2,
       },
-      'title formType status tags ver archivedOn archivedBy'
+      'title formType status tags ver archivedOn archivedBy documentNumber'
     ).exec(function(err, forms) {
       if (err) {
         logger.error(err);
@@ -91,6 +91,7 @@ module.exports = function(app) {
           formType: releasedForm.formType,
           status: releasedForm.status,
           statusText: statusMap[`${releasedForm.status}`],
+          documentNumber: releasedForm.documentNumber,
           ver: releasedForm.ver,
           base: releasedForm.base,
           discrepancy: releasedForm.discrepancy,
@@ -138,8 +139,6 @@ module.exports = function(app) {
         f.archivedBy = req.session.userid;
         f.archivedOn = Date.now();
       }
-      // check if we need to increment the version
-      f.incrementVersion();
       try {
         await f.saveWithHistory(req.session.userid);
         return res
@@ -161,6 +160,9 @@ module.exports = function(app) {
       const clonedForm = {};
       clonedForm.html = reqUtils.sanitizeText(base.html);
       clonedForm.title = reqUtils.sanitizeText(req.body.title);
+      clonedForm.documentNumber = reqUtils.sanitizeText(
+        req.body.documentNumber
+      );
       clonedForm.createdBy = req.session.userid;
       clonedForm.createdOn = Date.now();
       clonedForm.updatedBy = req.session.userid;

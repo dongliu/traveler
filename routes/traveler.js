@@ -27,6 +27,7 @@ const Log = mongoose.model('Log');
 
 const { TravelerError } = require('../lib/error');
 const { stateTransition } = require('../model/traveler');
+const { sendNotification } = require('../lib/email');
 const logger = require('../lib/loggers').getLogger();
 
 function createTraveler(form, req, res) {
@@ -71,6 +72,7 @@ function cloneTraveler(source, req, res) {
     sharedWith: source.sharedWith,
     sharedGroup: source.sharedGroup,
     referenceForm: source.referenceForm,
+    documentNumber: source.documentNumber,
     forms: source.forms,
     activeForm: source.activeForm,
     mapping: source.mapping,
@@ -155,7 +157,7 @@ module.exports = function(app) {
           $exists: false,
         },
       },
-      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping'
+      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping documentNumber referenceReleasedFormVer'
     )
       .lean()
       .exec(function(err, docs) {
@@ -178,7 +180,7 @@ module.exports = function(app) {
           $ne: true,
         },
       },
-      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput'
+      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
     )
       .lean()
       .exec(function(err, travelers) {
@@ -216,7 +218,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
+        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
       )
         .lean()
         .exec(function(tErr, travelers) {
@@ -262,7 +264,7 @@ module.exports = function(app) {
             $in: travelerIds,
           },
         },
-        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
+        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
       )
         .lean()
         .exec(function(tErr, travelers) {
@@ -369,7 +371,7 @@ module.exports = function(app) {
     };
     Traveler.find(
       search,
-      'title description status devices locations archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput'
+      'title description status devices locations archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
     )
       .lean()
       .exec(function(err, travelers) {
@@ -448,6 +450,9 @@ module.exports = function(app) {
               'traveler',
               routesUtilities.getRenderObject(req, {
                 isOwner: reqUtils.isOwner(req, doc),
+                canStart: doc.sharedWith.some(
+                  doc => doc._id === req.session.userid
+                ),
                 traveler: doc,
                 formHTML:
                   doc.forms.length === 1
@@ -924,7 +929,8 @@ module.exports = function(app) {
       const doc = req[req.params.id];
       if (
         reqUtils.isOwner(req, doc) ||
-        routesUtilities.checkUserRole(req, 'admin')
+        routesUtilities.checkUserRole(req, 'admin') ||
+        reqUtils.canWrite(req, doc)
       ) {
         return res.render(
           'traveler-config',
@@ -946,12 +952,13 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['title', 'description', 'deadline']),
-    reqUtils.sanitize('body', ['title', 'description', 'deadline']),
+    reqUtils.filter('body', ['title', 'description', 'deadline', 'dwr']),
+    reqUtils.sanitize('body', ['title', 'description', 'deadline', 'dwr']),
     function(req, res) {
       const doc = req[req.params.id];
       if (
         reqUtils.isOwner(req, doc) ||
+        reqUtils.canWrite(req, doc) ||
         routesUtilities.checkUserRole(req, 'admin')
       ) {
         Object.keys(req.body).forEach(k => {
@@ -1044,6 +1051,7 @@ module.exports = function(app) {
           .send('You are not authorized to change the status. ');
       }
 
+      const oldStatus = doc.status;
       doc.status = req.body.status;
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
@@ -1052,6 +1060,35 @@ module.exports = function(app) {
         if (saveErr) {
           logger.error(saveErr);
           return res.status(500).send(saveErr.message);
+        }
+        if (doc.status === 1.5) {
+          User.findById(doc.createdBy).then(user => {
+            const travelerLink = `${req.protocol}://${req.get(
+              'host'
+            )}/travelers/${doc._id}/`;
+            sendNotification({
+              recipients: user.email,
+              subject: 'Traveler Completed',
+              html: `The traveler "${doc.title}" has been submitted for completion. <br/>
+              Please review the traveler at this link: <br/>
+              <a href="${travelerLink}">${travelerLink}</a>`,
+            });
+          });
+        } else if (doc.status == 1 && oldStatus == 1.5) {
+          const workerIds = doc.manPower.map(user => user._id);
+          User.find({ _id: { $in: workerIds } }).then(users => {
+            const travelerLink = `${req.protocol}://${req.get(
+              'host'
+            )}/travelers/${doc._id}/`;
+            const emails = users.map(user => user.email);
+            sendNotification({
+              recipients: emails,
+              subject: 'Traveler Rejected',
+              html: `The traveler "${doc.title}" was sent back for more work. <br/>
+              Please visit the traveler at this link: <br/>
+              <a href="${travelerLink}">${travelerLink}</a>`,
+            });
+          });
         }
         return res.status(200).send(`status updated to ${req.body.status}`);
       });
@@ -1066,7 +1103,7 @@ module.exports = function(app) {
     '/travelers/:id/devices/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
+    reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     reqUtils.filter('body', ['newdevice']),
@@ -1099,7 +1136,7 @@ module.exports = function(app) {
     '/travelers/:id/devices/:number',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
+    reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     function(req, res) {
@@ -1171,7 +1208,7 @@ module.exports = function(app) {
         }
         doc.manPower.addToSet({
           _id: req.session.userid,
-          username: req.session.username,
+          username: res.locals.username,
         });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();
@@ -1244,7 +1281,7 @@ module.exports = function(app) {
         doc.notes.push(note._id);
         doc.manPower.addToSet({
           _id: req.session.userid,
-          username: req.session.username,
+          username: res.locals.username,
         });
         doc.updatedBy = req.session.userid;
         doc.updatedOn = Date.now();

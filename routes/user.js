@@ -137,7 +137,7 @@ function addUser(req, res) {
       storeUser(req, res, ldapUser);
     });
   } else {
-    const nameFilter = ad.nameFilter.replace('_name', req.body.name);
+    const nameFilter = ad.searchFilter.replace('_id', req.body.name);
     const opts = {
       filter: nameFilter,
       attributes: ad.objAttributes,
@@ -213,7 +213,7 @@ module.exports = function(app) {
           'user',
           routesUtilities.getRenderObject(req, {
             user,
-            myRoles: req.session.roles,
+            myRoles: res.locals.roles,
           })
         );
       }
@@ -223,8 +223,8 @@ module.exports = function(app) {
 
   app.post('/users/', auth.ensureAuthenticated, function(req, res) {
     if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf('admin') === -1
+      res.locals.roles === undefined ||
+      res.locals.roles.indexOf('admin') === -1
     ) {
       return res.status(403).send('only admin allowed');
     }
@@ -254,8 +254,8 @@ module.exports = function(app) {
 
   app.get('/users/json', auth.ensureAuthenticated, function(req, res) {
     if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf('admin') === -1
+      res.locals.roles === undefined ||
+      res.locals.roles.indexOf('admin') === -1
     ) {
       return res
         .status(403)
@@ -285,7 +285,7 @@ module.exports = function(app) {
           'user',
           routesUtilities.getRenderObject(req, {
             user,
-            myRoles: req.session.roles,
+            myRoles: res.locals.roles,
           })
         );
       }
@@ -297,8 +297,8 @@ module.exports = function(app) {
 
   app.put('/users/:id', auth.ensureAuthenticated, function(req, res) {
     if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf('admin') === -1
+      res.locals.roles === undefined ||
+      res.locals.roles.indexOf('admin') === -1
     ) {
       return res
         .status(403)
@@ -460,8 +460,8 @@ module.exports = function(app) {
 
   app.get('/users/:id/refresh', auth.ensureAuthenticated, function(req, res) {
     if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf('admin') === -1
+      res.locals.roles === undefined ||
+      res.locals.roles.indexOf('admin') === -1
     ) {
       return res
         .status(403)

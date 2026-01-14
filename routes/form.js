@@ -17,11 +17,12 @@ const reviewLib = require('../lib/review');
 const Form = mongoose.model('Form');
 const FormFile = mongoose.model('FormFile');
 const ReleasedForm = mongoose.model('ReleasedForm');
-const FormContent = mongoose.model('FormContent');
 const User = mongoose.model('User');
 const Group = mongoose.model('Group');
 const History = mongoose.model('History');
 const { stateTransition } = require('../model/form');
+const { releaseForm } = require('../lib/form');
+const { sendNotification } = require('../lib/email');
 
 const logger = require('../lib/loggers').getLogger();
 
@@ -55,7 +56,7 @@ module.exports = function(app) {
             $exists: false,
           },
         },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -91,7 +92,7 @@ module.exports = function(app) {
             },
           ],
         },
-        'title formType status updatedOn'
+        'title formType status updatedOn documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -126,7 +127,7 @@ module.exports = function(app) {
             $in: [0.5],
           },
         },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -154,7 +155,7 @@ module.exports = function(app) {
             $exists: false,
           },
         },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
+        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -176,7 +177,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup'
+        'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -192,7 +193,7 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         {},
-        'title formType status tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup'
+        'title formType status tags createdBy createdOn updatedBy updatedOn sharedWith sharedGroup _v documentNumber'
       )
         .lean()
         .exec();
@@ -226,7 +227,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
+        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -268,7 +269,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
+        'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -311,7 +312,7 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         search,
-        'title formType status tags updatedBy updatedOn _v'
+        'title formType status tags updatedBy updatedOn _v documentNumber'
       ).exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -384,12 +385,14 @@ module.exports = function(app) {
             status: form.status,
             statusText: formModel.statusMap[`${form.status}`],
             _v: form._v,
+            documentNumber: form.documentNumber,
             formType: form.formType,
             prefix: req.proxied ? req.proxied_prefix : '',
             isReviewer,
             allApproved,
             review: form.__review,
             released_form_version_mgmt: config.app.released_form_version_mgmt,
+            versionNotes: form.versionNotes,
           })
         );
       }
@@ -409,6 +412,24 @@ module.exports = function(app) {
     reqUtils.canReadMw('id'),
     function(req, res) {
       return res.status(200).json(req[req.params.id]);
+    }
+  );
+
+  app.post(
+    '/forms/:id/edit',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Form),
+    reqUtils.requireAdmin(),
+    async (req, res) => {
+      const form = req[req.params.id];
+      await ReleasedForm.updateMany(
+        { 'base._id': form._id },
+        { $set: { status: 2 } }
+      );
+      form.status = 0;
+      form.incrementVersion({ force: true });
+      form.saveWithHistory(req.session.userid);
+      return res.status(200).redirect(`/forms/${form._id}/`);
     }
   );
 
@@ -831,8 +852,8 @@ module.exports = function(app) {
   app.post(
     '/forms/',
     auth.ensureAuthenticated,
-    reqUtils.filter('body', ['title', 'formType', 'html']),
-    reqUtils.hasAll('body', ['title']),
+    reqUtils.filter('body', ['title', 'formType', 'documentNumber', 'html']),
+    reqUtils.hasAll('body', ['title', 'documentNumber']),
     auth.requireRoles(req => {
       return (
         req.body.hasOwnProperty('formType') &&
@@ -848,6 +869,7 @@ module.exports = function(app) {
           {
             title: req.body.title,
             formType: req.body.formType,
+            documentNumber: req.body.documentNumber,
             createdBy: req.session.userid,
             html,
           }
@@ -861,6 +883,15 @@ module.exports = function(app) {
           location: url,
         });
       } catch (error) {
+        if (error && error.code === 11000) {
+          return res.render(
+            'form-new',
+            routesUtilities.getRenderObject(req, {
+              error: 'Document ID already exists.',
+              form: req.body,
+            })
+          );
+        }
         logger.error(error);
         return res.status(500).send(error.message);
       }
@@ -877,6 +908,7 @@ module.exports = function(app) {
       const form = {};
       form.html = reqUtils.sanitizeText(doc.html);
       form.title = reqUtils.sanitizeText(req.body.title);
+      form.documentNumber = reqUtils.sanitizeText(req.body.documentNumber);
       form.createdBy = req.session.userid;
       form.createdOn = Date.now();
       form.updatedBy = req.session.userid;
@@ -952,8 +984,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [0]),
-    reqUtils.filter('body', ['html', 'title', 'description']),
-    reqUtils.sanitize('body', ['html', 'title', 'description']),
+    reqUtils.filter('body', ['html', 'title', 'description', 'notes']),
+    reqUtils.sanitize('body', ['html', 'title', 'description', 'notes']),
     async function(req, res) {
       if (!req.is('json')) {
         return res.status(415).send('json request expected');
@@ -978,9 +1010,13 @@ module.exports = function(app) {
         }
       }
 
+      if (req.body.hasOwnProperty('notes')) {
+        doc.versionNotes = req.body.notes;
+      }
+
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      doc.incrementVersion();
+      // doc.incrementVersion();
       try {
         const newDoc = await doc.saveWithHistory(req.session.userid);
         return res.json(newDoc);
@@ -1010,114 +1046,14 @@ module.exports = function(app) {
       return next();
     },
     function(req, res, next) {
-      if (!req[req.params.id].allApproved) {
+      if (!req[req.params.id].allApproved()) {
         return res
           .status(400)
           .send(`${req[req.params.id].id} was not approved by all reviewers`);
       }
       return next();
     },
-    // if the base form is normal then load the released discrepancy form
-    function(req, res, next) {
-      debug(req.body.discrepancyFormId);
-      debug(req[req.params.id].formType);
-      if (
-        req[req.params.id].formType === 'normal' &&
-        req.body.discrepancyFormId
-      ) {
-        reqUtils.existSource('discrepancyFormId', 'body', ReleasedForm)(
-          req,
-          res,
-          next
-        );
-      } else {
-        next();
-      }
-    },
-    // check the discrepancy form type
-    function(req, res, next) {
-      debug(req[req.body.discrepancyFormId]);
-      if (
-        req[req.body.discrepancyFormId] &&
-        req[req.body.discrepancyFormId].formType !== 'discrepancy'
-      ) {
-        return res
-          .status(400)
-          .send(
-            `${req[req.body.discrepancyFormId].id} is not a discrepancy form`
-          );
-      }
-
-      if (
-        req[req.body.discrepancyFormId] &&
-        req[req.body.discrepancyFormId].status !== 1
-      ) {
-        return res
-          .status(400)
-          .send(`${req[req.body.discrepancyFormId].id} is not released`);
-      }
-      return next();
-    },
-    async function releaseForm(req, res) {
-      const releasedForm = {};
-      const form = req[req.params.id];
-      const discrepancyForm = req[req.body.discrepancyFormId];
-      releasedForm.title = req.body.title || form.title;
-      releasedForm.description = req.body.description || form.description;
-      releasedForm.tags = form.tags;
-      releasedForm.formType = form.formType;
-      releasedForm.base = new FormContent(form);
-      releasedForm.ver = `${releasedForm.base._v}`;
-      if (discrepancyForm) {
-        // update formType
-        releasedForm.formType = 'normal_discrepancy';
-        releasedForm.discrepancy = discrepancyForm.base;
-        releasedForm.ver += `:${discrepancyForm.base._v}`;
-      }
-      releasedForm.releasedBy = req.session.userid;
-      releasedForm.releasedOn = Date.now();
-
-      // check if there is already a released form with the same name and
-      // version
-      try {
-        const existingForm = await ReleasedForm.findOne({
-          title: releasedForm.title,
-          formType: releasedForm.formType,
-          ver: releasedForm.ver,
-          // only search the active released form, not archived
-          // remove this condition if including the archive released form
-          status: 1,
-        });
-        debug(`find existing form: ${existingForm}`);
-        if (existingForm) {
-          return res
-            .status(400)
-            .send(
-              `A form with same title, type, and version was already released in ${existingForm._id}.`
-            );
-        }
-        const saveForm = await new ReleasedForm(releasedForm).saveWithHistory(
-          req.session.userid
-        );
-
-        // update the form status
-        form.status = 1;
-        form.updatedBy = req.session.userid;
-        form.updatedOn = Date.now();
-        await form.save();
-
-        // close the review requests
-        await form.closeReviewRequests();
-        const url = `${
-          req.proxied ? authConfig.proxied_service : authConfig.service
-        }/released-forms/${saveForm._id}/`;
-        return res.status(201).json({
-          location: url,
-        });
-      } catch (error) {
-        return res.status(500).send(error.message);
-      }
-    }
+    releaseForm
   );
 
   app.put(
@@ -1135,7 +1071,6 @@ module.exports = function(app) {
       if ([0, 0.5, 1, 2].indexOf(s) === -1) {
         return res.status(400).send('invalid status');
       }
-
       if (v !== f._v) {
         return res.status(400).send(`the current version is ${f._v}`);
       }
@@ -1154,11 +1089,29 @@ module.exports = function(app) {
         return res.status(400).send('invalid status change');
       }
 
+      if (s === 0.5 && f.__review != null) {
+        const reviewLink = `${req.protocol}://${req.get('host')}/forms/${
+          f._id
+        }/`;
+        const users = await Promise.all(
+          f.__review.reviewRequests.map(user => User.findOne({ _id: user._id }))
+        );
+        const emails = users.map(user => user.email);
+        sendNotification({
+          recipients: emails,
+          subject: 'New Review Request',
+          text: `You have been asked to review the following template: ${f.title}
+    Go to this link to complete the review:
+    ${reviewLink}`,
+          html: `You have been asked to review the following template: ${f.title}<br/>Go to this link to complete the review:<br/><a href="${reviewLink}">${reviewLink}</a>`,
+        });
+      }
+
       f.status = s;
       f.updatedBy = req.session.userid;
       f.updatedOn = Date.now();
       // check if we need to increment the version
-      f.incrementVersion();
+      // f.incrementVersion();
       try {
         await f.saveWithHistory(req.session.userid);
         return res.status(200).send(`status updated to ${s}`);

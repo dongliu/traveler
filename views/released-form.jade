@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title #{orgName} - forms - #{id} - preview
+  title #{orgName} - templates - #{id} - preview
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -36,10 +36,10 @@ block content
     .btn-group(data-toggle='buttons-radio')
       button.btn.btn-info#show-validation Show validation
       button.btn.btn-info#hide-validation.active Hide validation
-    if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1 || locals.session.roles.indexOf('manager') !== -1))
+    if (locals && locals.userid && locals.roles && (locals.roles.indexOf('admin') !== -1 || locals.roles.indexOf('manager') !== -1))
       if (status === 1)
         .btn-group
-          button.btn.btn-warning#obsolete(data-toggle='tooltip', title='Obsolete the released form') Obsolete
+          button.btn.btn-warning#obsolete(data-toggle='tooltip', title='Obsolete the released template') Obsolete
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
