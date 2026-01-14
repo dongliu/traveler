@@ -143,6 +143,7 @@ var traveler = new Schema({
   referenceDiscrepancyForm: ObjectId,
   referenceReleasedForm: ObjectId,
   referenceReleasedFormVer: String,
+  documentNumber: String,
   forms: [form],
   discrepancyForms: [form],
   mapping: Schema.Types.Mixed,
@@ -177,6 +178,7 @@ var traveler = new Schema({
     type: Boolean,
     default: false,
   },
+  dwr: Schema.Types.String,
 });
 
 /**

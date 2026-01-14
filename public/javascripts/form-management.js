@@ -3,7 +3,7 @@ global moment, ajax401, disableAjaxCache, prefix, updateAjaxURL, Holder,
 selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn,
 keysColumn, fnAddFilterFoot, sDomNoTools, reviewersColumn, firstReviewRequestedOnColumn,
 fnGetSelected, selectEvent, filterEvent, formShareLinkColumn, formStatusColumn,
-formTypeColumn, versionColumn, releasedFormStatusColumn,
+formTypeColumn, versionColumn, docNoColumn, releasedFormStatusColumn,
 releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
 archivedByColumn, archivedOnColumn, releasedFormLinkColumn
 */
@@ -31,8 +31,10 @@ function cloneFromModal(formTable) {
       })
       .always(function() {
         number = number - 1;
+        $('#submit').prop('disabled', false);
+        $('#return').prop('disabled', false);
+
         if (number === 0 && success) {
-          $('#return').prop('disabled', false);
           formTable.fnReloadAjax();
         }
       });
@@ -63,11 +65,12 @@ $(function() {
     formConfigLinkColumn,
     formShareLinkColumn,
     titleColumn,
-    formTypeColumn,
+    // formTypeColumn,
+    docNoColumn,
     versionColumn,
     formStatusColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     reviewersColumn,
     firstReviewRequestedOnColumn,
   ];
@@ -100,7 +103,7 @@ $(function() {
     selectColumn,
     releasedFormLinkColumn,
     titleColumn,
-    formTypeColumn,
+    // formTypeColumn,
     releasedFormStatusColumn,
     releasedFormVersionColumn,
     tagsColumn,
@@ -136,7 +139,7 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    formTypeColumn,
+    // formTypeColumn,
     tagsColumn,
     releasedFormStatusColumn,
     releasedFormVersionColumn,

@@ -64,8 +64,8 @@ function filterBodyWithOptional(requiredStrings, findAll, optionalStrings) {
 
 function checkUserRole(req, role) {
   if (
-    req.session.roles !== undefined &&
-    req.session.roles.indexOf(role) !== -1
+    req.res.locals.roles !== undefined &&
+    req.res.locals.roles.indexOf(role) !== -1
   ) {
     return true;
   } else {
@@ -77,7 +77,7 @@ function getRenderObject(req, extraAttributes) {
   var renderObject = {
     prefix: req.proxied ? req.proxied_prefix : '',
     viewConfig: config.viewConfig,
-    roles: req.session.roles,
+    roles: req.res.locals.roles,
     helper: {
       upperCaseFirstLetter: function(text) {
         return text.charAt(0).toUpperCase() + text.slice(1);
@@ -337,6 +337,7 @@ var traveler = {
       sharedWith: [],
       referenceReleasedForm: form._id,
       referenceReleasedFormVer: form.ver,
+      documentNumber: form.documentNumber,
       forms: [],
       data: [],
       comments: [],

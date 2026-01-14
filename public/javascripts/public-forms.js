@@ -17,7 +17,7 @@ $(function() {
     titleColumn,
     formStatusColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     createdByColumn,
     createdOnColumn,
     ownerColumn,
@@ -35,7 +35,10 @@ $(function() {
     },
     bAutoWidth: false,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
@@ -51,7 +54,7 @@ $(function() {
     releasedFormCloneColumn,
     titleColumn,
     releasedFormStatusColumn,
-    formTypeColumn,
+    // formTypeColumn,
     releasedFormVersionColumn,
     tagsColumn,
     releasedByColumn,
@@ -68,7 +71,10 @@ $(function() {
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },

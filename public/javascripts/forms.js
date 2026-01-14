@@ -1,10 +1,10 @@
 /* global ajax401, disableAjaxCache, prefix, updateAjaxURL,
- travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
+ travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, editFormLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
  updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn,
  fnAddFilterFoot, sDomNoTools, createdByColumn, createdOnColumn,
  fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
  transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
- versionColumn, releasedFormLinkColumn, releasedFormStatusColumn,
+ versionColumn, docNoColumn, releasedFormLinkColumn, releasedFormStatusColumn,
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
  transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn */
 
@@ -61,12 +61,15 @@ function cloneFromModal(activeTable, formTable) {
   $('#modal .modal-body div.target').each(function() {
     const that = this;
     let success = false;
+    const title = $('input#title', $(that)).val();
+    const documentNumber = $('input#docNo', $(that)).val();
     $.ajax({
       url: `/${base}/${that.id}/clone`,
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
-        title: $('input', $(that)).val(),
+        title,
+        documentNumber,
       }),
     })
       .done(function() {
@@ -80,9 +83,11 @@ function cloneFromModal(activeTable, formTable) {
         $(that).addClass('text-error');
       })
       .always(function() {
+        $('#submit').prop('disabled', false);
+        $('#return').prop('disabled', false);
+
         number = number - 1;
         if (number === 0 && success) {
-          $('#return').prop('disabled', false);
           formTable.fnReloadAjax();
         }
       });
@@ -100,7 +105,7 @@ function formatItemUpdate(data) {
 }
 
 function cloneItem(data) {
-  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" value="${data.title} clone"></div>`;
+  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" id="title" value="${data.title} clone"><br> and document number: <input type="text" id="docNo"></div>`;
 }
 
 $(function() {
@@ -115,10 +120,11 @@ $(function() {
     formShareLinkColumn,
     titleColumn,
     formStatusColumn,
-    formTypeColumn,
+    // formTypeColumn,
+    docNoColumn,
     versionColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     createdOnColumn,
     updatedOnColumn,
     updatedByColumn,
@@ -161,10 +167,11 @@ $(function() {
     formShareLinkColumn,
     titleColumn,
     formStatusColumn,
-    formTypeColumn,
+    // formTypeColumn,
+    docNoColumn,
     versionColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     createdByColumn,
     createdOnColumn,
     transferredOnColumn,
@@ -208,10 +215,11 @@ $(function() {
     formLinkColumn,
     titleColumn,
     formStatusColumn,
-    formTypeColumn,
+    // formTypeColumn,
+    docNoColumn,
     versionColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     ownerColumn,
     updatedByColumn,
     updatedOnColumn,
@@ -280,10 +288,11 @@ $(function() {
     formReviewLinkColumn,
     titleColumn,
     formStatusColumn,
-    formTypeColumn,
+    // formTypeColumn,
+    docNoColumn,
     versionColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     createdOnColumn,
     updatedOnColumn,
     updatedByColumn,
@@ -325,10 +334,11 @@ $(function() {
     formLinkColumn,
     titleColumn,
     formStatusColumn,
-    formTypeColumn,
+    // formTypeColumn,
+    docNoColumn,
     versionColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     createdOnColumn,
     updatedOnColumn,
     updatedByColumn,
@@ -369,10 +379,11 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    formTypeColumn,
+    // formTypeColumn,
+    docNoColumn,
     versionColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     updatedByColumn,
     updatedOnColumn,
   ];

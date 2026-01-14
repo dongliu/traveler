@@ -474,7 +474,16 @@ const formLinkColumn = {
   sTitle: '',
   mData: '_id',
   mRender(data) {
-    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></a>`;
+    return `<a href="${prefix}/forms/${data}/" target="${linkTarget}" data-toggle="tooltip" title="go to the form"><i class="fa fa-eye fa-lg"></i></a>`;
+  },
+  bSortable: false,
+};
+
+const editFormLinkColumn = {
+  sTitle: '',
+  mData: '_id',
+  mRender(data) {
+    return `<form action="${prefix}/forms/${data}/edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');"><button class="btn btn-link" type="submit" data-toggle="tooltip" title="go to the form"><i class="fa fa-edit fa-lg"></i></button></form>`;
   },
   bSortable: false,
 };
@@ -707,7 +716,7 @@ const archivedByColumn = personColumn('Archived by', 'archivedBy');
 const deadlineColumn = dateColumn('Deadline', 'deadline');
 
 const tagsColumn = {
-  sTitle: 'Tags',
+  sTitle: 'Part Number',
   sDefaultContent: '',
   mData(source, type, val) {
     return source.tags || [];
@@ -771,6 +780,20 @@ const titleColumn = {
   sTitle: 'Title',
   sDefaultContent: '',
   mData: 'title',
+  bFilter: true,
+};
+
+const docNoColumn = {
+  sTitle: 'Doc No',
+  sDefaultContent: '',
+  mData: 'documentNumber',
+  bFilter: true,
+};
+
+const travelerVersionColumn = {
+  sTitle: 'Ver',
+  sDefaultContent: '',
+  mData: 'referenceReleasedFormVer',
   bFilter: true,
 };
 
@@ -1114,7 +1137,7 @@ const binderValueProgressColumn = {
 };
 
 const deviceColumn = {
-  sTitle: 'Devices',
+  sTitle: 'Serial Numbers',
   mData(source, type, val) {
     return source.devices || [];
   },
@@ -1232,6 +1255,7 @@ const sharedGroupColumn = {
     return '';
   },
   bFilter: true,
+  bVisible: false,
 };
 
 const statusColumn = {

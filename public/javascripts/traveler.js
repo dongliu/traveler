@@ -617,7 +617,8 @@ $(function() {
         file.type ===
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
         file.type === 'application/vnd.ms-xpsdocument' ||
-        file.type === 'application/oxps';
+        file.type === 'application/oxps' ||
+        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     }
 
     if (!valid_type) {

@@ -16,7 +16,7 @@ const user = new Schema({
   travelers: [ObjectId],
   binders: [ObjectId],
   // form reviews
-  reviews: [ObjectId],
+  // reviews: [ObjectId],
   subscribe: {
     type: Boolean,
     default: false,

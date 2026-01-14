@@ -35,15 +35,15 @@ html
           h3 Traveler title:  !{traveler.title}
           include ./traveler/status.jade
           if (locals.traveler.devices && traveler.devices.length > 0)
-            h4 Tags: !{traveler.devices}
+            h4 Part Number: !{traveler.devices}
           #validation.well.hide
           #details.hide
             if (locals.traveler.description !== undefined)
               h4 Description: #{traveler.description}
-            if (locals.traveler.deadline !== undefined)
-              p Deadline:
-                = ' '
-                span.time #{traveler.deadline}
+            //- if (locals.traveler.deadline !== undefined)
+            //-   p Deadline:
+            //-     = ' '
+            //-     span.time #{traveler.deadline}
             p Created by #{traveler.createdBy}
               = ' '
               if (locals.traveler.clonedBy !== undefined)

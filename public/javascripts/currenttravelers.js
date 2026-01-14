@@ -130,7 +130,7 @@ $(function() {
     sharedGroupColumn,
     createdByColumn,
     createdOnColumn,
-    deadlineColumn,
+    // deadlineColumn,
     updatedByColumn,
     updatedOnColumn,
     progressColumn,
@@ -140,7 +140,10 @@ $(function() {
     aaData: [],
     // bAutoWidth: false,
     aoColumns: currentTravelerAoColumns,
-    aaSorting: [[7, 'desc'], [9, 'desc']],
+    aaSorting: [
+      [7, 'desc'],
+      [9, 'desc'],
+    ],
     sDom: sDom,
     oTableTools: oTableTools,
   });

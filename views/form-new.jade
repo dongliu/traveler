@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='urf-8')
-  title #{orgName} Traveler - new form
+  title #{orgName} Traveler - new template
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -14,20 +14,29 @@ block content
       .control-group
         .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} title
         .controls
-          input(type='text', name='title', required)
-      if (locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
-        .control-group
-          .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} type
-          .controls
-            select(name='formType', required)
-              option(value='normal') normal
-              option(value='discrepancy') discrepancy
+          input(type='text', name='title', required, value="#{form && form.title || ''}")
+          input(type="hidden" name="formType" value="normal")
+      //- if (locals.roles && locals.roles.indexOf('admin') !== -1)
+      //-   .control-group
+      //-     .control-label #{helper.upperCaseFirstLetter(viewConfig.terminology.form)} type
+      //-     .controls
+      //-       select(name='formType', required)
+      //-         option(value='normal' selected=form && form.formType == 'normal') normal
+      //-         option(value='discrepancy' selected=form && form.formType == "discrepancy") discrepancy
+      .control-group
+        .control-label Document number
+        .controls
+          input(type='text', maxlength=20, name='documentNumber', required, value="#{form && form.documentNumber || ''}")
       .control-group
         .controls
           .btn-group
             button.btn.btn-primary(type='submit') Confirm
           .btn-group
             button.btn(onclick='window.open("", "_self", ""); window.close(); return false;') Cancel
+      if (locals.error)
+        .control-group
+            .controls
+              .text-warning #{error}
 
 
 block js

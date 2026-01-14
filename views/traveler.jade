@@ -26,13 +26,15 @@ block content
     .row
       .span9
         h3 Traveler title:  !{traveler.title}
+        h4 Document No.:    !{traveler.documentNumber}
+        h4 Part No.:        !{traveler.tags.join(', ')}
         include ./traveler/status.jade
         if (locals.traveler.devices && traveler.devices.length > 0)
-          h4 Devices: !{traveler.devices}
+          h4 Serial Numbers: !{traveler.devices}
         if (locals.traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
         if (locals.traveler.status !== undefined)
-          if ((locals.isOwner != undefined && locals.isOwner) || isAdmin || isManager)
+          if ((locals.isOwner != undefined && locals.isOwner) || isAdmin || isManager || canStart)
             case locals.traveler.status
               when 0
                 .btn-group
@@ -80,10 +82,10 @@ block content
               a(href='#{prefix}/released-forms/#{locals.traveler.referenceReleasedForm}/', target='#{viewConfig.linkTarget}') Released #{viewConfig.terminology.form}
           if (locals.traveler.description !== undefined)
             h4 Description: #{traveler.description}
-          if (locals.traveler.deadline !== undefined)
-            p Deadline:
-              = ' '
-              span.time #{traveler.deadline}
+          //- if (locals.traveler.deadline !== undefined)
+          //-   p Deadline:
+          //-     = ' '
+          //-     span.time #{traveler.deadline}
           p Created by #{traveler.createdBy}
             = ' '
             if (locals.traveler.clonedBy !== undefined)

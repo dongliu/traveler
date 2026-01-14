@@ -3,9 +3,9 @@ extends layout
 block head
   meta(charset='urf-8')
   if (typeof id == 'undefined')
-    title #{orgName} - new form
+    title #{orgName} - new template
   else
-    title #{orgName} - form - !{title}
+    title #{orgName} - template - !{title}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -28,16 +28,18 @@ block content
       .modal-body
       .modal-footer
     h3#formtitle !{title}
-    p Type:
-      | &nbsp;#{formType}
+    //- p Type:
+    //-   | &nbsp;#{formType}
     p Status:
       | &nbsp;#{statusText}
+    p Document Number:&nbsp;
+      span#doc-number.text-monospace #{documentNumber} 
     p Version:&nbsp;
       span#version #{_v}
     if ((status === 0 || status === 0.5 || status === 1 ) && review)
       h4 Reviews
       if (allApproved)
-        p All reviewers has approved, the form is ready for release
+        p All reviewers has approved, the template is ready for release
       #reviews.accordion
         .accordion-group
           .accordion-heading
@@ -64,7 +66,7 @@ block content
         if (isReviewer && status === 0.5)
           .accordion-group
             .accordion-heading
-              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Add a new review
+              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Complete a review
             #new-review.accordion-body.collapse
               .accordion-inner
                 form.form-horizontal#review
@@ -75,19 +77,22 @@ block content
                         span Approve
                       label.radio
                         input#non-approve(type="radio" name="result" value="2")
-                        span Rework
+                        span Reject
                   .control-group
                     .control-label comment
                     .controls
                       textarea#comment(name="comment", cols="40", rows="10")
                   .btn-group
-                    button.btn.btn-primary#submit-review(data-toggle='tooltip', title='Report review result') Report
+                    button.btn.btn-primary#submit-review(data-toggle='tooltip', title='Report review result') Submit
 
     .well-large
       form.form-horizontal#output
         != html
   .button-footer.container
     //- edit controls available for draft
+    //- label
+    //-   b Version Notes
+    //- textarea#version-notes(placeholder="Version Notes" style="width: 100%;" rows=3 disabled=status !== 0)= versionNotes
     if (status === 0)
       .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
@@ -126,17 +131,17 @@ block content
       .btn-group
         button.btn.btn-primary#save Save
     .btn-group
-      a.btn.btn-info#preview(data-toggle='tooltip', title='the form needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
+      a.btn.btn-info#preview(data-toggle='tooltip', title='the template needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
     if (status === 0)
       .btn-group
-        button.btn.btn-primary#import(data-toggle='tooltip', title='import the content of a form') Import
+        button.btn.btn-primary#import(data-toggle='tooltip', title='import the content of a template') Import
       .btn-group
-        button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current form') Save as
+        button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current template') Save as
     if (status === 0)
       .btn-group
         button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
     .btn-group
-      button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the form') Archive
+      button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the template') Archive
     if (status === 0)
       .btn-group
         a.btn.btn-primary#version(data-toggle='tooltip', title='Check and switch versions', href='./version-mgmt', target='#{viewConfig.linkTarget}') Version control
@@ -145,6 +150,10 @@ block content
     if (status === 0.5 && !isReviewer && allApproved)
       .btn-group
         button.btn.btn-primary#release(data-toggle='tooltip', title='Release') Release
+    if(isAdmin && status === 1)
+      .btn-group
+        form(action="./edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');" style="margin: 0;")
+          button.btn.btn-primary(type="submit") Revise
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

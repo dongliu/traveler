@@ -2,8 +2,11 @@ FROM node:20-alpine
 WORKDIR /app
 COPY package.json .
 COPY package-lock.json .
+
 # RUN apk update && \
 #     apk add openssl
+
+RUN rm -rf node_modules
 
 # Add Tini, see https://github.com/krallin/tini for why
 RUN apk add --no-cache tini
@@ -13,7 +16,7 @@ ENTRYPOINT ["/sbin/tini", "--"]
 EXPOSE 3001
 # api port if https enabled
 # EXPOSE 3443
-RUN npm install --only=prod
+RUN npm install --omit=dev
 RUN npm install -g nodemon@2
 COPY . .
 # RUN bower install

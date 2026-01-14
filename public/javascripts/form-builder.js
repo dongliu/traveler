@@ -29,6 +29,7 @@ const mce_content = {
 };
 
 let initHtml = '';
+let initNotes = '';
 
 /**
  * send request with data, and exec cb on response
@@ -1134,6 +1135,8 @@ function init() {
     });
 
   initHtml = $('#output').html();
+  // initNotes = $('#version-notes').val();
+  initNotes = '';
 
   $('span.time').each(function() {
     $(this).text(
@@ -1406,11 +1409,14 @@ function binding_events() {
     }
     cleanBeforeSave();
     const html = $('#output').html();
+    // const notes = $('#version-notes').val();
+    const notes = '';
     // var path = window.location.pathname;
-    if (html !== initHtml) {
+    if (html !== initHtml || notes !== initNotes) {
       sendRequest(
         {
           html,
+          notes,
         },
         function() {
           window.location.reload(true);
@@ -1550,7 +1556,8 @@ function binding_events() {
         version: Number($('#version').text()),
       },
       function() {
-        window.location.reload(true);
+        // window.location.reload(true);
+        window.location.href += 'review/';
       },
       'status'
     );

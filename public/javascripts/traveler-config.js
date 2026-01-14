@@ -26,80 +26,82 @@ $(function() {
       moment($(this).text()).format('dddd, MMMM Do YYYY, h:mm:ss a')
     );
   });
-  if ($('#deadline').attr('value')) {
-    $('#deadline').val(
-      moment($('#deadline').attr('value')).format('YYYY-MM-DD')
-    );
-  }
-  if (!Modernizr.inputtypes.date) {
-    $('#deadline').datepicker({
-      format: 'yyyy-mm-dd',
-    });
-  }
+  // if ($('#deadline').attr('value')) {
+  //   $('#deadline').val(
+  //     moment($('#deadline').attr('value')).format('YYYY-MM-DD')
+  //   );
+  // }
+  // if (!Modernizr.inputtypes.date) {
+  //   $('#deadline').datepicker({
+  //     format: 'yyyy-mm-dd',
+  //   });
+  // }
   var initValue = {
     title: $('#title').html(),
     description: $('#description').html(),
+    dwr: $('#dwr').html(),
   };
 
   Editable.binding($, initValue);
 
-  var deadline = $('#deadline').val();
+  // var deadline = $('#deadline').val();
+  var deadline = undefined;
 
-  $('#deadline').change(function() {
-    var $dl = $(this).parent();
-    if ($dl.children('.buttons').length === 0) {
-      $dl.append(
-        '<span class="buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></span>'
-      );
-    }
-  });
+  // $('#deadline').change(function() {
+  //   var $dl = $(this).parent();
+  //   if ($dl.children('.buttons').length === 0) {
+  //     $dl.append(
+  //       '<span class="buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></span>'
+  //     );
+  //   }
+  // });
 
-  $('#deadline')
-    .parent()
-    .on('click', 'button[value="save"]', function(e) {
-      e.preventDefault();
-      var $this = $(this);
-      var $input = $this
-        .closest('.form-inline')
-        .children('input')
-        .first();
-      $.ajax({
-        url: './config',
-        type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify({
-          deadline: moment($input.val()).utc(),
-        }),
-      })
-        .done(function() {
-          deadline = $input.val();
-          $this.parent().remove();
-        })
-        .fail(function(jqXHR) {
-          $this.val(deadline);
-          if (jqXHR.status !== 401) {
-            $('#message').append(
-              '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config :  ' +
-                jqXHR.responseText +
-                '</div>'
-            );
-            $(window).scrollTop($('#message div:last-child').offset().top - 40);
-          }
-        });
-    });
+  // $('#deadline')
+  //   .parent()
+  //   .on('click', 'button[value="save"]', function(e) {
+  //     e.preventDefault();
+  //     var $this = $(this);
+  //     var $input = $this
+  //       .closest('.form-inline')
+  //       .children('input')
+  //       .first();
+  //     $.ajax({
+  //       url: './config',
+  //       type: 'PUT',
+  //       contentType: 'application/json',
+  //       data: JSON.stringify({
+  //         deadline: moment($input.val()).utc(),
+  //       }),
+  //     })
+  //       .done(function() {
+  //         deadline = $input.val();
+  //         $this.parent().remove();
+  //       })
+  //       .fail(function(jqXHR) {
+  //         $this.val(deadline);
+  //         if (jqXHR.status !== 401) {
+  //           $('#message').append(
+  //             '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the traveler config :  ' +
+  //               jqXHR.responseText +
+  //               '</div>'
+  //           );
+  //           $(window).scrollTop($('#message div:last-child').offset().top - 40);
+  //         }
+  //       });
+  //   });
 
-  $('#deadline')
-    .parent()
-    .on('click', 'button[value="reset"]', function(e) {
-      e.preventDefault();
-      var $this = $(this);
-      $this
-        .closest('.form-inline')
-        .children('input')
-        .first()
-        .val(deadline);
-      $this.parent().remove();
-    });
+  // $('#deadline')
+  //   .parent()
+  //   .on('click', 'button[value="reset"]', function(e) {
+  //     e.preventDefault();
+  //     var $this = $(this);
+  //     $this
+  //       .closest('.form-inline')
+  //       .children('input')
+  //       .first()
+  //       .val(deadline);
+  //     $this.parent().remove();
+  //   });
 
   var devices;
 

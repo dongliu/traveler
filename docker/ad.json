@@ -16,11 +16,10 @@
     "company": "o",
     "thumbnailPhoto": "jpegPhoto",
     "uid": "uid",
-    "telephoneNumber": "homephone",
-    "sAMAccountName": "uid"
+    "telephoneNumber": "homephone"
   },
 
   "shareUsers": true,
   "shareGroups": true,
-  "transferOwnership": true
+  "transferOwnership": false
 }

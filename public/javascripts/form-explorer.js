@@ -43,7 +43,7 @@ const FormExplorer = (function(parent, $) {
     const releasedColumns = [
       formExploreColumn,
       titleColumn,
-      formTypeColumn,
+      // formTypeColumn,
       releasedOnColumn,
       releasedFormColumn,
     ];
@@ -62,7 +62,7 @@ const FormExplorer = (function(parent, $) {
     const columns = [
       formExploreColumn,
       titleColumn,
-      formTypeColumn,
+      // formTypeColumn,
       updatedOnColumn,
       formColumn,
     ];

@@ -6,6 +6,7 @@ const favicon = require('serve-favicon');
 const morgan = require('morgan');
 const methodOverride = require('method-override');
 const expressSession = require('express-session');
+const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const errorHandler = require('errorhandler');
 const rewrite = require('express-urlrewrite');
@@ -59,7 +60,7 @@ if (mongoConfig.auth) {
   mongoOptions.auth = config.mongo.auth;
 }
 
-mongoose.connect(mongoAddress, mongoOptions);
+const mongoConnection = mongoose.connect(mongoAddress, mongoOptions);
 mongoose.connection.on('connected', function() {
   logger.info('Mongoose default connection opened.');
 });
@@ -129,6 +130,13 @@ app.use(
     secret: appSettings.cookie_sec || 'traveler_secret',
     resave: true,
     saveUninitialized: false,
+    store: MongoStore.create({
+      clientPromise: (async () => {
+        await mongoConnection;
+        return mongoose.connection.getClient();
+      })(),
+      collectionName: 'sessions',
+    }),
     cookie: {
       maxAge: appSettings.cookie_life || 28800000,
     },

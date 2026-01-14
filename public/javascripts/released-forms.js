@@ -59,12 +59,16 @@ function cloneFromModal(activeTable) {
   $('#modal .modal-body div.target').each(function() {
     const that = this;
     let success = false;
+    const title = $('input#title', $(that)).val();
+    const documentNumber = $('input#docNo', $(that)).val();
+
     $.ajax({
       url: `/${base}/${that.id}/clone`,
       type: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
-        title: $('input', $(that)).val(),
+        title,
+        documentNumber,
       }),
     })
       .done(function() {
@@ -79,9 +83,8 @@ function cloneFromModal(activeTable) {
       })
       .always(function() {
         number = number - 1;
-        if (number === 0 && success) {
-          $('#return').prop('disabled', false);
-        }
+        $('#submit').prop('disabled', false);
+        $('#return').prop('disabled', false);
       });
   });
 }
@@ -97,7 +100,7 @@ function formatItemUpdate(data) {
 }
 
 function cloneItem(data) {
-  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" value="${data.title} clone"></div>`;
+  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" id="title" value="${data.title} clone"><br> and document number: <input type="text" id="docNo"></div>`;
 }
 
 $(function() {
@@ -111,8 +114,9 @@ $(function() {
     releasedFormLinkColumn,
     titleColumn,
     releasedFormStatusColumn,
-    formTypeColumn,
+    // formTypeColumn,
     releasedFormVersionColumn,
+    docNoColumn,
     tagsColumn,
     releasedByColumn,
     releasedOnColumn,
@@ -148,9 +152,10 @@ $(function() {
     selectColumn,
     releasedFormLinkColumn,
     titleColumn,
-    formTypeColumn,
+    // formTypeColumn,
     tagsColumn,
     releasedFormVersionColumn,
+    docNoColumn,
     archivedByColumn,
     archivedOnColumn,
   ];

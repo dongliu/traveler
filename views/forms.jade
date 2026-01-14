@@ -1,7 +1,7 @@
 extends layout
 
 block head
-  title #{orgName} Forms
+  title #{orgName} Templates
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -20,15 +20,15 @@ block content
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
-      .btn-group
-        a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
-          i.fa.fa-institution.fa-lg
-          | &nbsp;All public #{viewConfig.terminology.form}s
+      //- .btn-group
+      //-   a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
+      //-     i.fa.fa-institution.fa-lg
+      //-     | &nbsp;All public #{viewConfig.terminology.form}s
       .btn-group
         button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
-      if (locals.session && locals.session.userid && locals.session.roles && (locals.session.roles.indexOf('admin') !== -1))
+      if (locals && locals.userid && locals.roles && (locals.roles.indexOf('admin') !== -1))
         .btn-group
           a.btn.btn-info#form-management(href='#{prefix}/form-management/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='manage #{viewConfig.terminology.form}s')
             i.fa.fa-suitcase.fa-lg
@@ -46,9 +46,9 @@ block content
         if (viewConfig.transferOwnership)
           li
             a(href='#transferredforms', data-toggle='tab') Transferred draft #{viewConfig.terminology.form}s
-        if (viewConfig.shareUsers)
-          li
-            a(href='#sharedfroms', data-toggle='tab') Shared draft #{viewConfig.terminology.form}s
+        //- if (viewConfig.shareUsers)
+        //-   li
+        //-     a(href='#sharedfroms', data-toggle='tab') Shared draft #{viewConfig.terminology.form}s
         if (viewConfig.shareGroups)
           li
             a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s

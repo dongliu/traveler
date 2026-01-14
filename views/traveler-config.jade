@@ -21,7 +21,7 @@ block content
         span#title.editable !{traveler.title}
       = ' '
       button.btn.btn-primary.editable Edit
-    h4 Description:
+    h4 Part Description:
       = ' '
       if (locals.traveler.description == undefined)
         span#description.editable No description
@@ -29,14 +29,22 @@ block content
         span#description.editable !{traveler.description}
       = ' '
       button.btn.btn-primary.editable Edit
-    h4 Deadline:
+    h4 Deviation/Waiver Report:
       = ' '
-      span.form-inline
-        if (locals.traveler.deadline == undefined)
-          input#deadline(type='date')
-        else
-          input#deadline(type='date', value='#{traveler.deadline}')
-        = ' '
+      if (locals.traveler.dwr == undefined)
+        span#dwr.editable No DWR
+      else
+        span#dwr.editable !{traveler.dwr}
+      = ' '
+      button.btn.btn-primary.editable Edit
+    //- h4 Deadline:
+    //-   = ' '
+    //-   span.form-inline
+    //-     if (locals.traveler.deadline == undefined)
+    //-       input#deadline(type='date')
+    //-     else
+    //-       input#deadline(type='date', value='#{traveler.deadline}')
+    //-     = ' '
     p Created on
       = ' '
       span.time #{traveler.createdOn}
@@ -65,7 +73,7 @@ block content
           = ' '
           button.btn.btn-small.btn-warning.removeLocation
             i.fa.fa-trash-o.fa-lg
-    h4 Devices
+    h4 Serial Numbers
     ul#devices
       each device in traveler.devices
         li
@@ -75,8 +83,8 @@ block content
             i.fa.fa-trash-o.fa-lg
     br
     .btn-group
-      button.btn.btn-primary#add Add device
-    h4 Tags
+      button.btn.btn-primary#add Add Serial Number
+    h4 Part Number
     ul#tags.tag-list
       each tag in traveler.tags
         li
@@ -88,12 +96,12 @@ block content
     .btn-group
       button.btn.btn-primary#add-tag
         i.fa.fa-tag.fa-lg
-        | &nbsp;Add tag
-    br
-    br
-    if (viewConfig.showCCDB)
-      .btn-group
-          a.btn.btn-info(href='#{prefix}/devices/', target='#{viewConfig.linkTarget}') Browse devices
+        | &nbsp;Add part number
+    //- br
+    //- br
+    //- if (viewConfig.showCCDB)
+    //-   .btn-group
+    //-       a.btn.btn-info(href='#{prefix}/devices/', target='#{viewConfig.linkTarget}') Browse devices
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

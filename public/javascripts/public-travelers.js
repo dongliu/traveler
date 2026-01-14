@@ -25,11 +25,11 @@ $(function() {
     statusColumn,
     deviceColumn,
     tagsColumn,
-    keysColumn,
+    // keysColumn,
     sharedWithColumn,
     sharedGroupColumn,
     createdOnColumn,
-    deadlineColumn,
+    // deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -57,8 +57,8 @@ $(function() {
     aoColumns: publicTravelersAoColumns,
     aaSorting: [
       // [3, 'desc']
-      [12, 'desc'],
-      [9, 'desc'],
+      [10, 'desc'],
+      [8, 'desc'],
     ],
     sDom: sDomNoTools,
   });
