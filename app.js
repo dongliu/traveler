@@ -81,6 +81,10 @@ adClient.getDefaultClient(function(client, ldapClientCleanup) {
   ldapClientCleanup();
 });
 
+// init email transporter
+const email = require('./lib/email');
+const emailTransport = email.init();
+
 // CAS client
 const auth = require('./lib/auth');
 
@@ -267,6 +271,9 @@ function cleanup() {
   server._connections = 0;
   apiserver._connections = 0;
   mongoose.connection.close();
+  if (emailTransport) {
+    emailTransport.close();
+  }
 
   server.close(function() {
     apiserver.close(function() {
