@@ -84,7 +84,6 @@ adClient.getDefaultClient(function(client, ldapClientCleanup) {
 // init email transporter
 const email = require('./lib/email');
 const emailTransport = email.init();
-email.verify();
 
 // CAS client
 const auth = require('./lib/auth');
@@ -274,7 +273,6 @@ function cleanup() {
   mongoose.connection.close();
   if (emailTransport) {
     emailTransport.close();
-    logger.info('email transport closed.');
   }
 
   server.close(function() {
