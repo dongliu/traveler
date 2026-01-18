@@ -65,23 +65,9 @@ async function removeReviewRequest(doc, id) {
 }
 
 async function closeReviewRequests(doc) {
-  // const requests = doc.__review.reviewRequests;
-  // const pull = { reviews: doc._id };
-  // let i;
-  // const actions = [];
-  // for (i = 0; i < requests.length; i += 1) {
-  //   actions.push(
-  //     User.findByIdAndUpdate(requests[i]._id, {
-  //       $pull: pull,
-  //     })
-  //   );
-  // }
-  // try {
-  //   await Promise.all(actions);
-  // } catch (error) {
-  //   logger.error(`request review db error: ${error}`);
-  //   throw error;
-  // }
+  // after upton change, this function does nothing
+  // it used to remove the review requests from reviewers' review list
+  return;
 }
 
 const Review = mongoose.model('Review', review);
@@ -108,9 +94,7 @@ function addReview(schema) {
       });
       const newDoc = await doc.save();
       debug(`doc saved as ${newDoc}`);
-      // reviewer.reviews.addToSet(newDoc._id);
-      // const newReviewer = await reviewer.save();
-      // debug(`reviewer saved as ${newReviewer}`);
+      // after upton change, do not add to reviewer's review list anymore
       return newDoc;
     } catch (error) {
       logger.error(`request review db error: ${error}`);
