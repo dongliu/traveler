@@ -19,7 +19,7 @@ $(function() {
   ];
   fnAddFilterFoot('#form-table', reviewFormsAoColumns);
   $('#form-table').dataTable({
-    sAjaxSource: '/reviews/forms/json',
+    sAjaxSource: '/reviews/forms/active/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
       Holder.run({
