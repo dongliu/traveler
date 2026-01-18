@@ -197,10 +197,6 @@ module.exports = function(app) {
         // set the released form's base form status to draft, status = 0
         baseForm.status = 0;
         baseForm.incrementVersion({ force: true });
-        // clear review requests for the next review request
-        if (baseForm.__review) {
-          baseForm.__review.reviewRequests = [];
-        }
         await baseForm.saveWithHistory(req.session.userid);
 
         return res.status(200).send({

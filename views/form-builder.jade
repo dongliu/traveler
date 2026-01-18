@@ -33,7 +33,7 @@ block content
     p Status:
       | &nbsp;#{statusText}
     p Document Number:&nbsp;
-      span#doc-number.text-monospace #{documentNumber} 
+      span#doc-number.text-monospace #{documentNumber}
     p Version:&nbsp;
       span#version #{_v}
     if ((status === 0 || status === 0.5 || status === 1 ) && review)
@@ -151,6 +151,7 @@ block content
       //- there will be no way to take actions on the button after auto release is implemented
       .btn-group
         button.btn.btn-primary#release(data-toggle='tooltip', title='Release') Release
+    //- there will be no way to take actions on the button when auto release is implemented
     if(isAdmin && status === 1)
       .btn-group
         form(action="./edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');" style="margin: 0;")
