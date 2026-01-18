@@ -18,7 +18,9 @@ const reviewRequest = new Schema({
   requestedBy: String,
 });
 
-// result: 1: approve 2: comment
+// result value
+// 1: approve
+// 2: comment
 const reviewResult = new Schema({
   reviewerId: {
     type: String,
@@ -61,23 +63,9 @@ async function removeReviewRequest(doc, id) {
 }
 
 async function closeReviewRequests(doc) {
-  // const requests = doc.__review.reviewRequests;
-  // const pull = { reviews: doc._id };
-  // let i;
-  // const actions = [];
-  // for (i = 0; i < requests.length; i += 1) {
-  //   actions.push(
-  //     User.findByIdAndUpdate(requests[i]._id, {
-  //       $pull: pull,
-  //     })
-  //   );
-  // }
-  // try {
-  //   await Promise.all(actions);
-  // } catch (error) {
-  //   logger.error(`request review db error: ${error}`);
-  //   throw error;
-  // }
+  // after upton change, this function does nothing
+  // it used to remove the review requests from reviewers' review list
+  return;
 }
 
 const Review = mongoose.model('Review', review);
@@ -104,9 +92,7 @@ function addReview(schema) {
       });
       const newDoc = await doc.save();
       debug(`doc saved as ${newDoc}`);
-      // reviewer.reviews.addToSet(newDoc._id);
-      // const newReviewer = await reviewer.save();
-      // debug(`reviewer saved as ${newReviewer}`);
+      // after upton change, do not add to reviewer's review list anymore
       return newDoc;
     } catch (error) {
       logger.error(`request review db error: ${error}`);
@@ -143,7 +129,7 @@ function addReview(schema) {
       // if rework (result = 2), then
       // 0. set doc status to 0
       // 1. remove doc from reviewer's review list
-      // 2. remove reviewer from reviewer list
+      // 2. remove reviewer from reviewer list, after which a new review request is needed
       if (result === '2') {
         doc.status = 0;
         closeReviewRequests(doc);
