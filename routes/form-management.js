@@ -150,6 +150,66 @@ module.exports = function(app) {
     }
   );
 
+  // revision a released form
+  // the body contains the current version
+  // check the current release form is still action, status = 1. if not, reject
+  // check if the version match, if not, reject
+  // find the base form by releasedForm.base._id
+  // set the base form status to draft, status = 0
+  // set the released form status to archived
+  // set the released form's base form status to draft, status = 0
+  app.put(
+    '/released-forms/:id/revision',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', ReleasedForm),
+    reqUtils.isOwnerOrAdminMw('id'),
+    reqUtils.filter('body', ['version']),
+    reqUtils.hasAll('body', ['version']),
+    async function revision(req, res) {
+      const releasedForm = req[req.params.id];
+      const v = req.body.version;
+
+      // check the released form is still active, status = 1
+      if (releasedForm.status !== 1) {
+        return res.status(400).send('released form is not active');
+      }
+
+      // check if the version match
+      if (v !== releasedForm.ver) {
+        return res
+          .status(400)
+          .send(`the current version is ${releasedForm.ver}`);
+      }
+
+      try {
+        // get the base form
+        const baseForm = await Form.findById(releasedForm.base._id).exec();
+        if (!baseForm) {
+          return res.status(404).send('base form not found');
+        }
+
+        // set the released form status to archived
+        releasedForm.status = 2;
+        releasedForm.archivedBy = req.session.userid;
+        releasedForm.archivedOn = Date.now();
+        await releasedForm.saveWithHistory(req.session.userid);
+
+        // set the released form's base form status to draft, status = 0
+        baseForm.status = 0;
+        baseForm.incrementVersion({ force: true });
+        await baseForm.saveWithHistory(req.session.userid);
+
+        return res.status(200).send({
+          message: 'form revision started successfully',
+          form_id: baseForm._id,
+        });
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
   app.post(
     '/released-forms/:id/clone',
     auth.ensureAuthenticated,

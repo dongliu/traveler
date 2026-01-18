@@ -6,7 +6,7 @@
  transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
  versionColumn, releasedFormLinkColumn, releasedFormStatusColumn,
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
- transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn */
+ transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn, docNoColumn */
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
