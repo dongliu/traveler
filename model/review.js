@@ -30,6 +30,8 @@ const reviewResult = new Schema({
     type: String,
     required: true,
   },
+  // v is the version of the document being reviewed
+  // when a document is showed with review results, only the results with v equal to document's current version should be shown
   v: Number,
   submittedOn: Date,
   comment: String,
@@ -165,6 +167,7 @@ function addReview(schema) {
       debug(
         `${i} : ${currentReviewResults[i].reviewerId} , ${currentReviewResults[i].result}`
       );
+      // get the latest result for each reviewer
       if (!approval.has(currentReviewResults[i].reviewerId)) {
         approval.set(
           currentReviewResults[i].reviewerId,
