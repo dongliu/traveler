@@ -1,12 +1,12 @@
-/*
-global moment, ajax401, disableAjaxCache, prefix, updateAjaxURL, Holder,
-selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn,
-keysColumn, fnAddFilterFoot, sDomNoTools, reviewersColumn, firstReviewRequestedOnColumn,
-fnGetSelected, selectEvent, filterEvent, formShareLinkColumn, formStatusColumn,
-formTypeColumn, versionColumn, docNoColumn, releasedFormStatusColumn,
-releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
-archivedByColumn, archivedOnColumn, releasedFormLinkColumn
-*/
+/* global ajax401, disableAjaxCache, prefix, updateAjaxURL,
+ travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, editFormLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
+ updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn,
+ fnAddFilterFoot, sDomNoTools, createdByColumn, createdOnColumn,
+ fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
+ transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
+ versionColumn, docNoColumn, releasedFormLinkColumn, releasedFormStatusColumn,
+ releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
+ transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn */
 
 import { initTableIfExists } from './lib/table.js';
 
@@ -48,9 +48,6 @@ function cloneFromModal(activeTable, formTable) {
         $('#return').prop('disabled', false);
 
         number = number - 1;
-        $('#submit').prop('disabled', false);
-        $('#return').prop('disabled', false);
-
         if (number === 0 && success) {
           formTable.fnReloadAjax();
         }
@@ -84,14 +81,14 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
-    docNoColumn,
-    versionColumn,
     formStatusColumn,
     docNoColumn,
     versionColumn,
     tagsColumn,
-    reviewersColumn,
-    firstReviewRequestedOnColumn,
+    createdOnColumn,
+    updatedByColumn,
+    updatedOnColumn,
+    sharedWithColumn,
   ];
 
   if (shareGroups) {
@@ -117,43 +114,11 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: formAoColumns,
-    aaSorting: [[10, 'desc']],
-    sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#submitted-form-table', formAoColumns);
-
-  const releasedFormAoColumns = [
-    selectColumn,
-    releasedFormLinkColumn,
-    titleColumn,
-    releasedFormStatusColumn,
-    releasedFormVersionColumn,
-    tagsColumn,
-    releasedByColumn,
-    releasedOnColumn,
-  ];
-  const releasedFormTable = $('#released-form-table').dataTable({
-    sAjaxSource: '/released-forms/json',
-    sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
-    bAutoWidth: false,
-    bProcessing: true,
-    iDisplayLength: 10,
-    aLengthMenu: [
-      [10, 50, 100, -1],
-      [10, 50, 100, 'All'],
+    aoColumns: closedFormAoColumns,
+    aaSorting: [
+      [9, 'desc'],
+      [8, 'desc'],
     ],
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-    },
-    bDeferRender: true,
-    aoColumns: releasedFormAoColumns,
-    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   };
   initTableIfExists($('#closed-form-table'), closedFormTableConfig, tables);
@@ -164,6 +129,8 @@ $(function() {
     selectColumn,
     formLinkColumn,
     titleColumn,
+    docNoColumn,
+    versionColumn,
     tagsColumn,
     updatedByColumn,
     updatedOnColumn,
@@ -188,7 +155,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[7, 'desc']],
+    aaSorting: [[6, 'desc']],
     sDom: sDomNoTools,
   };
   initTableIfExists($('#archived-form-table'), archivedFormTableConfig, tables);
