@@ -416,6 +416,7 @@ module.exports = function(app) {
     }
   );
 
+  // this rounte is not used anymore
   app.post(
     '/forms/:id/edit',
     auth.ensureAuthenticated,
@@ -429,6 +430,9 @@ module.exports = function(app) {
       );
       form.status = 0;
       form.incrementVersion({ force: true });
+      if (form.__review) {
+        form.__review.reviewRequests = [];
+      }
       form.saveWithHistory(req.session.userid);
       return res.status(200).redirect(`/forms/${form._id}/`);
     }
