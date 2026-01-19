@@ -138,30 +138,23 @@ module.exports = function(app) {
   });
 
   // forms owned by the user that are under review
-  app.get('/closedforms/json', auth.ensureAuthenticated, async function(
-    req,
-    res
-  ) {
-    try {
-      const forms = await Form.find(
-        {
-          createdBy: req.session.userid,
-          archived: {
-            $ne: true,
+  app.get(
+    '/closedforms/json',
+    auth.ensureAuthenticated,
+    reqUtils.requireAdmin(),
+    async function(req, res) {
+      try {
+        const forms = await Form.find(
+          {
+            status: 1,
           },
-          status: {
-            $in: [1],
-          },
-          owner: {
-            $exists: false,
-          },
-        },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
-      ).exec();
-      return res.status(200).json(forms);
-    } catch (error) {
-      logger.error(error);
-      return res.status(500).send(error.message);
+          'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
+        ).exec();
+        return res.status(200).json(forms);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
@@ -279,46 +272,24 @@ module.exports = function(app) {
     }
   });
 
-  app.get('/archivedforms/json', auth.ensureAuthenticated, async function(
-    req,
-    res
-  ) {
-    const search = {
-      $and: [
-        {
-          $or: [
-            {
-              createdBy: req.session.userid,
-              owner: {
-                $exists: false,
-              },
-            },
-            {
-              owner: req.session.userid,
-            },
-          ],
-        },
-        {
-          $or: [
-            {
-              archived: true,
-            },
-            {
-              status: 2,
-            },
-          ],
-        },
-      ],
-    };
-    try {
-      const forms = await Form.find(
-        search,
-        'title formType status tags updatedBy updatedOn _v documentNumber'
-      ).exec();
-      return res.status(200).json(forms);
-    } catch (error) {
-      logger.error(error);
-      return res.status(500).send(error.message);
+  app.get(
+    '/archivedforms/json',
+    auth.ensureAuthenticated,
+    reqUtils.requireAdmin(),
+    async function(req, res) {
+      const search = {
+        status: 2,
+      };
+      try {
+        const forms = await Form.find(
+          search,
+          'title formType status tags updatedBy updatedOn _v documentNumber'
+        ).exec();
+        return res.status(200).json(forms);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
