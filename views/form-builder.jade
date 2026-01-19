@@ -140,9 +140,6 @@ block content
     if (status === 0)
       .btn-group
         button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
-    if ( (status === 0 || status === 0.5 ) && isAdmin)
-      .btn-group
-        button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the template') Archive
     if (status === 0)
       //- .btn-group
         a.btn.btn-primary#version(data-toggle='tooltip', title='Check and switch versions', href='./version-mgmt', target='#{viewConfig.linkTarget}') Version control
@@ -156,6 +153,9 @@ block content
       .btn-group
         form(action="./edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');" style="margin: 0;")
           button.btn.btn-primary(type="submit") Revision
+    if ( (status === 0 || status === 0.5 ) && isAdmin)
+      .btn-group
+        button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the template') Archive
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
