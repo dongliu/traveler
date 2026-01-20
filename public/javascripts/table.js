@@ -103,12 +103,14 @@ function personColumn(title, key) {
     sDefaultContent: '',
     mRender(data, type) {
       if (type === 'sort' || type === 'filter') {
-        return data;
+        return data.name || data.id || data;
       }
       if (data) {
-        return `<img class="user" data-src="holder.js/27x40?size=20&text=${data
-          .substr(0, 1)
-          .toUpperCase()}">`;
+        if (data.name) {
+          return `<a href = "/users/${data._id}" target="${linkTarget}" >${data.name}</a>`;
+        }
+        return `<img class="user" data-src="holder.js/27x40?size=20&text=${data.id ||
+          data.substr(0, 1).toUpperCase()}">`;
       }
       return '';
     },
