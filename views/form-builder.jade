@@ -14,12 +14,13 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
+block bodyJs
   script(type='text/javascript').
     var id = !{JSON.stringify(id)};
     var released_form_version_mgmt = !{JSON.stringify(released_form_version_mgmt)};
     var formStatus = !{JSON.stringify(locals.status)} || 0;
     var formType = !{JSON.stringify(locals.formType)} || 'normal';
+block content
   .container
     #message
     #modal.modal.modal-lg.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
