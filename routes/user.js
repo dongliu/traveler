@@ -269,9 +269,12 @@ module.exports = function(app) {
   );
 
   app.get('/users/:id', auth.ensureAuthenticated, function(req, res) {
-    User.findOne({
-      _id: req.params.id,
-    }).exec(function(err, user) {
+    User.findOne(
+      {
+        _id: req.params.id,
+      },
+      '_id name email office phone mobile roles lastVisitedOn'
+    ).exec(function(err, user) {
       if (err) {
         console.error(err);
         return res.status(500).send(err.message);

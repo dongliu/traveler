@@ -50,12 +50,12 @@ const statusMap = {
 const form = new Schema({
   title: String,
   description: String,
-  createdBy: String,
+  createdBy: { type: String, ref: 'User' },
   createdOn: Date,
   clonedFrom: ObjectId,
-  updatedBy: String,
+  updatedBy: { type: String, ref: 'User' },
   updatedOn: Date,
-  owner: String,
+  owner: { type: String, ref: 'User' },
   tags: [String],
   status: {
     type: Number,
