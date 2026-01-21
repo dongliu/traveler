@@ -326,7 +326,7 @@ figcaption {
   padding-right: 10px;
 }
 
-/* checkbox set */ 
+/* checkbox set */
 .checkbox-set-controls .controls {
   margin-left: 0px;
 }
@@ -571,6 +571,8 @@ button.editable {
   border: double;
   border-color: white;
   border-radius: 9px;
+  float: left;
+  text-align: left;
 }
 
 .control-number {
@@ -580,6 +582,8 @@ button.editable {
   border: double;
   border-color: white;
   border-radius: 9px;
+  float: left;
+  text-align: left;
 }
 
 .rich-instruction {
@@ -594,6 +598,8 @@ button.editable {
   border-color: white;
   border-radius: 9px;
   height: fit-content;
+  float: left;
+  text-align: left;
 }
 
 /* patch bootstrap 2 */
