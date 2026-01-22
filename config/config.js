@@ -128,8 +128,14 @@ module.exports.load = function() {
   viewConfig.terminology = this.ui.terminology;
   viewConfig.publicAccess =
     this.ad.publicAccess === undefined ? true : this.ad.publicAccess;
+  // default true
   viewConfig.autoNumbering =
     this.app.auto_numbering === undefined ? true : this.app.auto_numbering;
-
+  // default false
+  viewConfig.defaultRequired =
+    this.app.default_required === undefined ? false : this.app.default_required;
+  // default true
+  viewConfig.userKey =
+    this.app.user_key === undefined ? true : this.app.user_key;
   module.exports.viewConfig = viewConfig;
 };
