@@ -21,6 +21,8 @@ block bodyJs
     var formStatus = !{JSON.stringify(locals.status)} || 0;
     var formType = !{JSON.stringify(locals.formType)} || 'normal';
     var autoNumbering = !{JSON.stringify(viewConfig.autoNumbering)};
+    var defaultRequired = !{JSON.stringify(viewConfig.defaultRequired)};
+    var userKey = !{JSON.stringify(viewConfig.userKey)};
 block content
   .container
     #message

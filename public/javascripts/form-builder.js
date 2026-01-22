@@ -232,6 +232,7 @@ function done_button(view, $out) {
       }
     }
     view.unbind();
+
     $(this)
       .closest('.spec')
       .remove();
@@ -239,6 +240,10 @@ function done_button(view, $out) {
     $('input, textarea', $out).each(function() {
       if (!$(this).attr('name')) {
         $(this).attr('name', UID.generateShort());
+      }
+      // if default required is true, set required attribute
+      if (defaultRequired === true) {
+        $(this).prop('required', true);
       }
     });
 
@@ -255,6 +260,18 @@ function done_button(view, $out) {
 }
 
 function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
+  // hide the required if default required in config is true
+  if (defaultRequired === true) {
+    $edit
+      .find('.control-group:has(.control-label:contains("Required"))')
+      .hide();
+  }
+  // hide the user defined key if user key in config is false
+  if (userKey === false) {
+    $edit
+      .find('.control-group:has(.control-label:contains("User defined key"))')
+      .hide();
+  }
   $new_cgr.prepend($buttons.hide());
   if ($cgr) {
     if ($('span.fe-type', $cgr).text() !== 'radio') {

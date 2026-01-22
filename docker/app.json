@@ -19,6 +19,8 @@
   "default_binder_public_access": 0,
   "released_form_version_mgmt": 1,
   "auto_numbering": false,
+  "default_required": true,
+  "user_key": false,
   "notification_email_address": "notification@exmaple.com",
   "smtp_host": "mail-service",
   "smtp_port": 1025,
