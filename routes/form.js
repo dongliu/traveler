@@ -131,7 +131,9 @@ module.exports = function(app) {
           },
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
-      ).exec();
+      )
+        .populate('updatedBy', 'name')
+        .exec();
       return res.status(200).json(forms);
     } catch (error) {
       logger.error(error);
