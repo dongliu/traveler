@@ -1167,6 +1167,9 @@ function usersColumn(title, prop) {
           if (type === 'filter' || type === 'sort') {
             return u.username;
           }
+          if (u.username) {
+            return `<a href = "/users/${u._id}" target="${linkTarget}" >${u.username}</a>`;
+          }
           return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
         });
         if (type === 'filter' || type === 'sort') {
