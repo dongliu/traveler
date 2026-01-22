@@ -128,6 +128,9 @@ function userkey_error($userkey, msg) {
 }
 
 function updateSectionNumbers() {
+  if (autoNumbering === false) {
+    return;
+  }
   let sectionNumber = 0;
   let instructionNumber = 0;
   let controlNumber = 0;
@@ -160,6 +163,12 @@ function updateSectionNumbers() {
     });
 }
 
+function resetNumbering() {
+  $('#output')
+    .find('.section-number, .rich-instruction-number, .control-number')
+    .empty();
+}
+
 function addSectionNumbers() {
   $('#output')
     .find('legend, .control-label, .tinymce')
@@ -176,6 +185,9 @@ function addSectionNumbers() {
 }
 
 function addSectionNumberToRichInstruction(richInstructionParent) {
+  if (autoNumbering === false) {
+    return;
+  }
   let target = richInstructionParent;
   if (richInstructionParent.className !== 'rich-instruction') {
     const tinymceChild = $(richInstructionParent).find('.tinymce')[0];
@@ -1426,6 +1438,9 @@ function binding_events() {
   });
 
   $('#numbering').click(function(e) {
+    if (autoNumbering === false) {
+      return;
+    }
     e.preventDefault();
     if ($('#output .well.spec').length) {
       modalAlert(
@@ -1437,6 +1452,10 @@ function binding_events() {
     cleanBeforeSave();
     addSectionNumbers();
     updateSectionNumbers();
+  });
+
+  $('#reset-numbering').click(function() {
+    resetNumbering();
   });
 
   $('#preview').click(function(e) {
