@@ -92,7 +92,7 @@ module.exports.load = function() {
   viewConfig.shareUsers = true;
   viewConfig.shareGroups = true;
   viewConfig.transferOwnership = true;
-  viewConfig.linkTarget = '_blank';
+  viewConfig.linkTarget = '_self';
   viewConfig.showBinderValue = false;
   viewConfig.showCCDB = this.service.device_application === 'devices';
 
