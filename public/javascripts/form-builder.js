@@ -1325,6 +1325,29 @@ function binding_events() {
     }
   });
 
+  $('#output').on('click', '.control-focus a.btn[title="number"]', function(e) {
+    e.preventDefault();
+    // const that = this;
+    const $cgr = $(this).closest('.control-group-wrap');
+    $('#modalLabel').html('Update the numbering');
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append('<input type="number"/>');
+    $('#modal .modal-footer').html(
+      '<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+    );
+    $('#modify').click(function(e) {
+      e.preventDefault();
+      $('#modify').prop('disabled', true);
+      $cgr
+        .find(
+          'span.control-number, span.section-number, span.rich-instruction-number'
+        )
+        .text($('#modal .modal-body input').val());
+      $('#modal').modal('hide');
+    });
+    $('#modal').modal('show');
+  });
+
   $('#output').on(
     'click',
     '.control-focus a.btn.btn-warning[title="remove"]',
