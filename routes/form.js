@@ -834,7 +834,14 @@ module.exports = function(app) {
   app.post(
     '/forms/',
     auth.ensureAuthenticated,
-    reqUtils.filter('body', ['title', 'formType', 'documentNumber', 'html']),
+    reqUtils.filter('body', [
+      'title',
+      'formType',
+      'documentNumber',
+      'description',
+      'partNumber',
+      'html',
+    ]),
     reqUtils.hasAll('body', ['title', 'documentNumber']),
     auth.requireRoles(req => {
       return (
@@ -842,19 +849,32 @@ module.exports = function(app) {
         req.body.formType === 'discrepancy'
       );
     }, 'admin'),
-    reqUtils.sanitize('body', ['html']),
+    reqUtils.sanitize('body', [
+      'html',
+      'title',
+      'documentNumber',
+      'description',
+      'partNumber',
+    ]),
     async function(req, res) {
       const html = req.body.html || '';
+      const formToCreate = {
+        title: req.body.title,
+        formType: req.body.formType,
+        documentNumber: req.body.documentNumber,
+        createdBy: req.session.userid,
+        html,
+      };
+      if (!_.isEmpty(req.body.partNumber)) {
+        formToCreate.tags = [req.body.partNumber];
+      }
+      if (!_.isEmpty(req.body.description)) {
+        formToCreate.description = req.body.description;
+      }
       try {
         const newForm = await formModel.createFormWithHistory(
           req.session.userid,
-          {
-            title: req.body.title,
-            formType: req.body.formType,
-            documentNumber: req.body.documentNumber,
-            createdBy: req.session.userid,
-            html,
-          }
+          formToCreate
         );
         const url = `${
           req.proxied ? authConfig.proxied_service : authConfig.service

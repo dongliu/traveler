@@ -28,6 +28,14 @@ block content
         .controls
           input(type='text', maxlength=20, name='documentNumber', required, value="#{form && form.documentNumber || ''}")
       .control-group
+        .control-label Description
+        .controls
+          input(type='text', maxlength=100, name='description', value="#{form && form.description || ''}")
+      .control-group
+        .control-label Part number
+        .controls
+          input(type='text', maxlength=20, name='partNumber', required, value="#{form && form.partNumber || ''}")
+      .control-group
         .controls
           .btn-group
             button.btn.btn-primary(type='submit') Save
