@@ -171,12 +171,12 @@ form.pre('save', function(next) {
 });
 
 /**
- * Check if a form should be rendered in builder
+ * Rendered in builder when the form is not archived
  * @returns true if rendered in builder view, other wise false
  */
 form.methods.isBuilder = function() {
   const doc = this;
-  return [0, 0.5, 1].includes(doc.status);
+  return [0, 0.5, 1].includes(doc.status) && doc.archived !== true;
 };
 
 form.plugin(addVersion, {
