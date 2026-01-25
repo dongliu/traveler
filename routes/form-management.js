@@ -68,13 +68,15 @@ module.exports = function(app) {
         status: 2,
       },
       'title formType status tags ver archivedOn archivedBy documentNumber'
-    ).exec(function(err, forms) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      return res.status(200).json(forms);
-    });
+    )
+      .populate('archivedBy', 'name')
+      .exec(function(err, forms) {
+        if (err) {
+          logger.error(err);
+          return res.status(500).send(err.message);
+        }
+        return res.status(200).json(forms);
+      });
   });
 
   app.get(
