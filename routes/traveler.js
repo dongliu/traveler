@@ -302,26 +302,40 @@ module.exports = function(app) {
     });
   });
 
-  /*  app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
-      var search = {
-        archived: {
-          $ne: true
-        }
+  app.get('/currenttravelers/json', auth.ensureAuthenticated, function(
+    req,
+    res
+  ) {
+    var search = {
+      archived: {
+        $ne: true,
+      },
+      status: {
+        $ne: 4,
+      },
+    };
+    if (req.query.hasOwnProperty('device')) {
+      search.devices = {
+        $in: [req.query.device],
       };
-      if (req.query.hasOwnProperty('device')) {
-        search.devices = {
-          $in: [req.query.device]
-        };
-      }
-      Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
+    }
+    Traveler.find(
+      search,
+      'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput'
+    )
+      .populate('createdBy', 'name')
+      .populate('updatedBy', 'name')
+      .lean()
+      .exec(function(err, travelers) {
         if (err) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
         return res.status(200).json(travelers);
       });
-    });
+  });
 
+  /*
     app.get('/currenttravelersinv1/json', auth.ensureAuthenticated, function (req, res) {
       var fullurl = config.legacy_traveler.travelers;
       if (req.query.hasOwnProperty('device')) {
