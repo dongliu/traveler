@@ -334,7 +334,7 @@ module.exports = function(app) {
     }
     Traveler.find(
       search,
-      'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer tags dwr devices'
+      'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer tags dwr devices manPower'
     )
       .populate('createdBy', 'name')
       .populate('updatedBy', 'name')
