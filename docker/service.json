@@ -1,5 +1,5 @@
 {
-  "device_application": "devices",
+  "device_application": "",
   "device": {
     "url": "https://controlsapp1/conf/rs/v0/component/physical"
   },
