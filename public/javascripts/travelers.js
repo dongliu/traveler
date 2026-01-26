@@ -86,14 +86,14 @@ $(function() {
     statusColumn,
     deviceColumn,
     tagsColumn,
-    sharedWithColumn,
+    createdByColumn,
     createdOnColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
   ];
   const travelerTableConfig = {
-    sAjaxSource: '/travelers/json',
+    sAjaxSource: '/currenttravelers/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
       Holder.run({
