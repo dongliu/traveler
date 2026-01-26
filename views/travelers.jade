@@ -28,7 +28,7 @@ block content
         button.btn.btn-info#reload
           i.fa.fa-refresh.fa-lg
           | &nbsp;Reload all tables
-      .btn-group
+      //- .btn-group
         a.btn.btn-info#all-travelers(href='#{prefix}/publictravelers/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public travelers')
           i.fa.fa-institution.fa-lg
           | &nbsp;All public travelers
@@ -55,14 +55,15 @@ block content
         if (viewConfig.transferOwnership)
           li
             a(href='#transferredtravelers', data-toggle='tab') Transferred travelers
-        if (viewConfig.shareUsers)
+        //- if (viewConfig.shareUsers)
           li
             a(href='#sharedtravelers', data-toggle='tab') Shared travelers
         if (viewConfig.shareGroups)
           li
             a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
-        li
-          a(href='#archivedtravelers', data-toggle='tab') Archived travelers
+        if (isAdmin)
+          li
+            a(href='#archivedtravelers', data-toggle='tab') Archived travelers
 
       .tab-content
         #travelers.tab-pane.active
@@ -105,7 +106,7 @@ block content
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
             table#transferred-traveler-table.table.table-bordered.table-hover
-        if (viewConfig.shareUsers)
+        //- if (viewConfig.shareUsers)
           #sharedtravelers.tab-pane
             .btn-toolbar
               .btn-group
@@ -121,13 +122,14 @@ block content
                   i.fa.fa-refresh.fa-lg
                   | &nbsp;Reload table
             table#group-shared-traveler-table.table.table-bordered.table-hover
-        #archivedtravelers.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#archived-traveler-table.table.table-bordered.table-hover
+        if (isAdmin)
+          #archivedtravelers.tab-pane
+            .btn-toolbar
+              .btn-group
+                button.btn.btn-info.reload
+                  i.fa.fa-refresh.fa-lg
+                  | &nbsp;Reload table
+            table#archived-traveler-table.table.table-bordered.table-hover
 
 
 block js
