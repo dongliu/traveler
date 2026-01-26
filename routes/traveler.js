@@ -139,6 +139,19 @@ function cloneTraveler(source, req, res) {
   });
 }
 
+// middleware to redirect to view
+function redirectPreview(req, res, next) {
+  const traveler = req[req.params.id];
+  if (traveler.status === 4 || reqUtils.canWrite(req, traveler) === false) {
+    return res.redirect(
+      `${
+        req.proxied ? authConfig.proxied_service : authConfig.service
+      }/travelers/${req.params.id}/view`
+    );
+  }
+  return next();
+}
+
 module.exports = function(app) {
   app.get('/travelers/', auth.ensureAuthenticated, function(req, res) {
     res.render('travelers', routesUtilities.getRenderObject(req));
@@ -321,7 +334,7 @@ module.exports = function(app) {
     }
     Traveler.find(
       search,
-      'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput'
+      'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer'
     )
       .populate('createdBy', 'name')
       .populate('updatedBy', 'name')
@@ -446,49 +459,33 @@ module.exports = function(app) {
     '/travelers/:id/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    redirectPreview,
     function getTraveler(req, res) {
       const doc = req[req.params.id];
-      if (doc.archived) {
-        return res.redirect(
-          `${
-            req.proxied ? authConfig.proxied_service : authConfig.service
-          }/travelers/${req.params.id}/view`
+      // if (reqUtils.canWrite(req, doc)) {
+      return routesUtilities.getDeviceValue(doc.devices).then(function(value) {
+        doc.devices = value;
+        return res.render(
+          'traveler',
+          routesUtilities.getRenderObject(req, {
+            isOwner: reqUtils.isOwner(req, doc),
+            canStart: doc.sharedWith.some(
+              doc => doc._id === req.session.userid
+            ),
+            traveler: doc,
+            formHTML:
+              doc.forms.length === 1
+                ? doc.forms[0].html
+                : doc.forms.id(doc.activeForm).html,
+          })
         );
-      }
+      });
+      // }
 
-      if (reqUtils.canWrite(req, doc)) {
-        return routesUtilities
-          .getDeviceValue(doc.devices)
-          .then(function(value) {
-            doc.devices = value;
-            return res.render(
-              'traveler',
-              routesUtilities.getRenderObject(req, {
-                isOwner: reqUtils.isOwner(req, doc),
-                canStart: doc.sharedWith.some(
-                  doc => doc._id === req.session.userid
-                ),
-                traveler: doc,
-                formHTML:
-                  doc.forms.length === 1
-                    ? doc.forms[0].html
-                    : doc.forms.id(doc.activeForm).html,
-              })
-            );
-          });
-      }
-
-      if (reqUtils.canRead(req, doc)) {
-        return res.redirect(
-          `${
-            req.proxied ? authConfig.proxied_service : authConfig.service
-          }/travelers/${req.params.id}/view`
-        );
-      }
-
-      return res
-        .status(403)
-        .send('You are not authorized to access this resource');
+      // return res
+      //   .status(403)
+      //   .send('You are not authorized to access this resource');
     }
   );
 
