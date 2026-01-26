@@ -39,7 +39,11 @@ function checkReviewer(form, userid) {
 function redirectPreview(req, res, next) {
   const form = req[req.params.id];
   if (form.isBuilder() === false || reqUtils.canWrite(req, form) === false) {
-    return res.redirect(`/forms/${req.params.id}/preview`);
+    return res.redirect(
+      `${req.proxied ? authConfig.proxied_service : authConfig.service}/forms/${
+        req.params.id
+      }/preview`
+    );
   }
   return next();
 }
