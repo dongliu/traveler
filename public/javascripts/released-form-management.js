@@ -6,13 +6,21 @@ $(function() {
    *
    * @param   {Object}  data    request body data
    * @param   {function}  cb    callback
+   * @param   {String}  option  request option
    *
    * @return  {void}
    */
-  function sendRequest(data, cb) {
-    var path = window.location.pathname;
-    var url = path + 'status';
-    var type = 'PUT';
+  function sendRequest(data, cb, option) {
+    const path = window.location.pathname;
+    let url;
+    if (option === 'revision') {
+      url = `${path}revision`;
+    } else if (option === 'status') {
+      url = `${path}status`;
+    } else {
+      url = path;
+    }
+    const type = 'PUT';
     $.ajax({
       url: url,
       type: type,
@@ -47,6 +55,18 @@ $(function() {
         window.location.reload(true);
       },
       'status'
+    );
+  });
+
+  $('#revision').click(function() {
+    sendRequest(
+      {
+        version: $('#version').text(),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      'revision'
     );
   });
 

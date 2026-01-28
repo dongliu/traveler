@@ -3,7 +3,8 @@
   "version": "3.2.0",
   "private": true,
   "scripts": {
-    "start": "node app"
+    "start": "node app",
+    "unit": "mocha test-unit/**/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@types/node": "^25.0.3",
     "acorn": "^7.4.1",
     "chai": "^4.2.0",
     "eslint": "^9.9.0",

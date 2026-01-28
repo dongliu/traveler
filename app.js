@@ -81,6 +81,11 @@ adClient.getDefaultClient(function(client, ldapClientCleanup) {
   ldapClientCleanup();
 });
 
+// init email transporter
+const email = require('./lib/email');
+const emailTransport = email.init();
+email.verify();
+
 // CAS client
 const auth = require('./lib/auth');
 
@@ -101,7 +106,7 @@ if (app.get('env') === 'production') {
 }
 
 app.set('port', process.env.PORT || appSettings.app_port);
-app.set('views', `${__dirname}/views`);
+app.set('views', [`${__dirname}/views`, `${__dirname}/docs`]);
 app.set('view engine', 'jade');
 if (app.get('env') === 'production') {
   app.use(
@@ -267,6 +272,10 @@ function cleanup() {
   server._connections = 0;
   apiserver._connections = 0;
   mongoose.connection.close();
+  if (emailTransport) {
+    emailTransport.close();
+    logger.info('email transport closed.');
+  }
 
   server.close(function() {
     apiserver.close(function() {

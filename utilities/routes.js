@@ -16,6 +16,7 @@ const logger = require('../lib/loggers').getLogger();
 const formStatusMap = require('../model/released-form').statusMap;
 
 var TravelerError = require('../lib/error').TravelerError;
+const { Write_active_travelers } = require('../lib/permission');
 
 var devices = require('./devices/default.js');
 // Override devices for a specific component system.
@@ -37,7 +38,7 @@ function filterBodyWithOptional(requiredStrings, findAll, optionalStrings) {
     var k;
     var foundCount = 0;
     for (k in req.body) {
-      if (req.body.hasOwnProperty(k)) {
+      if (Object.hasOwn(req.body, k)) {
         var index = strings.indexOf(k);
         if (index !== -1) {
           foundCount = foundCount + 1;
@@ -61,7 +62,12 @@ function filterBodyWithOptional(requiredStrings, findAll, optionalStrings) {
     }
   };
 }
-
+/**
+ * @deprecated use hadPermission instead
+ * @param {*} req
+ * @param {*} role
+ * @returns {Boolean}
+ */
 function checkUserRole(req, role) {
   if (
     req.res.locals.roles !== undefined &&
@@ -71,6 +77,19 @@ function checkUserRole(req, role) {
   } else {
     return false;
   }
+}
+
+/**
+ * check is a login user in the request has a specific permission
+ * @param {*} req
+ * @param {*} permission
+ * @returns
+ */
+function hasPermission(req, permission) {
+  if (req.res && req.res.locals && Array.isArray(req.res.locals.permissions)) {
+    return req.res.locals.permissions.indexOf(permission) !== -1;
+  }
+  return false;
 }
 
 function getRenderObject(req, extraAttributes) {
@@ -430,10 +449,9 @@ var traveler = {
   canWriteActive: function(req, travelerDoc) {
     if (traveler.canWrite(req, travelerDoc)) {
       return true;
-    } else if (checkUserRole(req, 'write_active_travelers')) {
+    } else if (hasPermission(req, Write_active_travelers)) {
       return true;
     }
-
     return false;
   },
   canWrite: function(req, travelerDoc) {
@@ -510,6 +528,7 @@ module.exports = {
   filterBody: filterBody,
   filterBodyWithOptional: filterBodyWithOptional,
   checkUserRole: checkUserRole,
+  hasPermission: hasPermission,
   getRenderObject: getRenderObject,
   getDeviceValue: getDeviceValue,
   deviceRemovalAllowed: deviceRemovalAllowed,

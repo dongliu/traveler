@@ -1,4 +1,3 @@
-/* eslint-disable import/extensions */
 /* global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache:
 false, travelerGlobal: false, Holder: false */
 /* global selectColumn: false, titleColumn: false, createdOnColumn: false,

@@ -13,10 +13,6 @@ block content
   .container-fluid
     .btn-toolbar
       .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/forms/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create new empty #{viewConfig.terminology.form}s')
-          i.fa.fa-file-o.fa-lg
-          | &nbsp;New #{viewConfig.terminology.form}
-      .btn-group
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
@@ -33,32 +29,16 @@ block content
     div
       ul.nav.nav-tabs
         li.active
-          a(href='#submitted-forms', data-toggle='tab') Submitted #{viewConfig.terminology.form}s for review
+          a(href='#closedforms', data-toggle='tab') Approved and released #{viewConfig.terminology.form}
         li
-          a(href='#released-forms', data-toggle='tab')  Released #{viewConfig.terminology.form}s
-        li
-          a(href='#archived-forms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
+          a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
       .tab-content
-        #submitted-forms.tab-pane.active
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#submitted-form-table.table.table-bordered.table-hover
-        #released-forms.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-          table#released-form-table.table.table-bordered.table-hover
-        #archived-forms.tab-pane
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
+        //- the table for forms going through review release flow
+        #closedforms.tab-pane.active
+          h4 The draft templates in this table were reviewed and released
+          table#closed-form-table.table.table-bordered.table-hover
+        #archivedforms.tab-pane
+          h4 The draft templates in this table were archived
           table#archived-form-table.table.table-bordered.table-hover
 
 
@@ -75,6 +55,6 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/form-management.js')
+  script(type='module', src='#{prefix}/javascripts/form-management.js')
 
 

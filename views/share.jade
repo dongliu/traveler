@@ -21,16 +21,17 @@ block content
         h3#modalLabel
       .modal-body
       .modal-footer
-    h3 Public access for #{type}
-      = ' '
-      span.text-info #{title}
-    form.form-inline(name='public')
-      select(name='public')
-        option(value='-1') no access
-        option(value='0') read
-        option(value='1') write
-      = ' '
-      button.btn.btn-primary(type='submit', disabled)#update Update
+    if (viewConfig.publicAccess)
+      h3 Public access for #{type}
+        = ' '
+        span.text-info #{title}
+      form.form-inline(name='public')
+        select(name='public')
+          option(value='-1') no access
+          option(value='0') read
+          option(value='1') write
+        = ' '
+        button.btn.btn-primary(type='submit', disabled)#update Update
     if (viewConfig.shareUsers)
       h3 Shared user list for #{type}
         = ' '

@@ -1,23 +1,37 @@
-/*
-global moment, ajax401, disableAjaxCache, prefix, updateAjaxURL, Holder,
-selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn,
-keysColumn, fnAddFilterFoot, sDomNoTools, reviewersColumn, firstReviewRequestedOnColumn,
-fnGetSelected, selectEvent, filterEvent, formShareLinkColumn, formStatusColumn,
-formTypeColumn, versionColumn, docNoColumn, releasedFormStatusColumn,
-releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
-archivedByColumn, archivedOnColumn, releasedFormLinkColumn
-*/
+/* global ajax401, disableAjaxCache, prefix, updateAjaxURL,
+ travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, editFormLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
+ updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn,
+ fnAddFilterFoot, sDomNoTools, createdByColumn, createdOnColumn,
+ fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
+ transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
+ versionColumn, docNoColumn, releasedFormLinkColumn, releasedFormStatusColumn,
+ releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
+ transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn */
 
-function cloneFromModal(formTable) {
+import { initTableIfExists } from './lib/table.js';
+
+function cloneFromModal(activeTable, formTable) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   let number = $('#modal .modal-body div.target').length;
+  let base = activeTable.fnSettings().sAjaxSource.split('/')[1];
+  if (base === 'archivedforms' || base === 'closedforms') {
+    base = 'forms';
+  }
+
   $('#modal .modal-body div.target').each(function() {
     const that = this;
     let success = false;
+    const title = $('input#title', $(that)).val();
+    const documentNumber = $('input#docNo', $(that)).val();
     $.ajax({
-      url: `/forms/${that.id}/clone`,
+      url: `/${base}/${that.id}/clone`,
       type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        title,
+        documentNumber,
+      }),
     })
       .done(function() {
         $(that).prepend('<i class="fa fa-check"></i>');
@@ -30,10 +44,10 @@ function cloneFromModal(formTable) {
         $(that).addClass('text-error');
       })
       .always(function() {
-        number = number - 1;
         $('#submit').prop('disabled', false);
         $('#return').prop('disabled', false);
 
+        number = number - 1;
         if (number === 0 && success) {
           formTable.fnReloadAjax();
         }
@@ -48,34 +62,41 @@ function showHash() {
 }
 
 function formatItemUpdate(data) {
-  return `<div class="target" id="${data._id}"><b>${
-    data.title
-  }</b>, created ${moment(data.createdOn).fromNow()}${
-    data.updatedOn ? `, updated ${moment(data.updatedOn).fromNow()}` : ''
-  }</div>`;
+  return `<div class="target" id="${data._id}"><b>${data.title}</b> </div>`;
+}
+
+function cloneItem(data) {
+  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" id="title" value="${data.title} clone"><br> and document number: <input type="text" id="docNo"></div>`;
 }
 
 $(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
-  const formAoColumns = [
+
+  const tables = [];
+
+  /* closed form table starts */
+  const closedFormAoColumns = [
     selectColumn,
     formLinkColumn,
-    formConfigLinkColumn,
-    formShareLinkColumn,
     titleColumn,
-    // formTypeColumn,
+    formStatusColumn,
     docNoColumn,
     versionColumn,
-    formStatusColumn,
     tagsColumn,
-    // keysColumn,
-    reviewersColumn,
-    firstReviewRequestedOnColumn,
+    createdOnColumn,
+    updatedByColumn,
+    updatedOnColumn,
+    sharedWithColumn,
   ];
-  const formTable = $('#submitted-form-table').dataTable({
-    sAjaxSource: '/submitted-forms/json',
+
+  if (shareGroups) {
+    closedFormAoColumns.push(sharedGroupColumn);
+  }
+
+  const closedFormTableConfig = {
+    sAjaxSource: '/closedforms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
       Holder.run({
@@ -93,61 +114,29 @@ $(function() {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
     bDeferRender: true,
-    aoColumns: formAoColumns,
-    aaSorting: [[11, 'desc']],
-    sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#submitted-form-table', formAoColumns);
-
-  const releasedFormAoColumns = [
-    selectColumn,
-    releasedFormLinkColumn,
-    titleColumn,
-    // formTypeColumn,
-    releasedFormStatusColumn,
-    releasedFormVersionColumn,
-    tagsColumn,
-    releasedByColumn,
-    releasedOnColumn,
-  ];
-  const releasedFormTable = $('#released-form-table').dataTable({
-    sAjaxSource: '/released-forms/json',
-    sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
-    bAutoWidth: false,
-    bProcessing: true,
-    iDisplayLength: 10,
-    aLengthMenu: [
-      [10, 50, 100, -1],
-      [10, 50, 100, 'All'],
+    aoColumns: closedFormAoColumns,
+    aaSorting: [
+      [9, 'desc'],
+      [8, 'desc'],
     ],
-    oLanguage: {
-      sLoadingRecords: 'Please wait - loading data from the server ...',
-    },
-    bDeferRender: true,
-    aoColumns: releasedFormAoColumns,
-    aaSorting: [[8, 'desc']],
     sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
+  };
+  initTableIfExists($('#closed-form-table'), closedFormTableConfig, tables);
+  /* submitted form table ends */
 
+  /* archieved form table starts */
   const archivedFormAoColumns = [
     selectColumn,
     formLinkColumn,
     titleColumn,
-    // formTypeColumn,
+    docNoColumn,
+    versionColumn,
     tagsColumn,
-    releasedFormStatusColumn,
-    releasedFormVersionColumn,
-    archivedByColumn,
-    archivedOnColumn,
+    updatedByColumn,
+    updatedOnColumn,
   ];
-  const archivedFormTable = $('#archived-form-table').dataTable({
-    sAjaxSource: '/archived-released-forms/json',
+  const archivedFormTableConfig = {
+    sAjaxSource: '/archivedforms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
       Holder.run({
@@ -166,10 +155,11 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [[6, 'desc']],
     sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#archived-form-table', archivedFormAoColumns);
+  };
+  initTableIfExists($('#archived-form-table'), archivedFormTableConfig, tables);
+  /* archived form table ends */
 
   // show the tab in hash
   showHash();
@@ -195,26 +185,26 @@ $(function() {
       );
       $('#modal').modal('show');
     } else {
-      $('#modalLabel').html(`Clone the following ${selected.length} forms? `);
+      $('#modalLabel').html(`Clone the following ${selected.length} form(s)? `);
       $('#modal .modal-body').empty();
       selected.forEach(function(row) {
         const data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
+        $('#modal .modal-body').append(cloneItem(data));
       });
       $('#modal .modal-footer').html(
         '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
-      $('#submit').click(function() {
-        cloneFromModal(formTable);
+      $('#submit').on('click', function() {
+        cloneFromModal(activeTable, $('#form-table').dataTable());
       });
     }
   });
 
-  $('#reload').click(function() {
-    formTable.fnReloadAjax();
-    releasedFormTable.fnReloadAjax();
-    archivedFormTable.fnReloadAjax();
+  $('#reload').on('click', function() {
+    tables.forEach(function(table) {
+      table.fnReloadAjax();
+    });
   });
   // binding events
   selectEvent();
