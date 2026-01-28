@@ -2,7 +2,7 @@ doctype html
 html
   - var isAdmin = locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1
   - var isManager = locals && locals.userid && locals.roles && locals.roles.indexOf('manager') !== -1
-  - var isReviwer = locals && locals.userid && locals.roles && locals.roles.indexOf('reviewer') !== -1
+  - var isReviwer = locals && locals.userid && locals.permissions && locals.permissions.indexOf('review_forms') !== -1
   head
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
@@ -20,7 +20,7 @@ html
       var isAdmin = !{isAdmin};
       var isManager = !{isManager};
       var isReviwer = !{isReviwer};
-
+    block bodyJs
 
     .navbar.navbar-fixed-top
       .navbar-inner
@@ -43,7 +43,7 @@ html
 
               block links
                 li
-                  a(href='#{prefix}/forms/').caps My #{viewConfig.terminology.form}s
+                  a(href='#{prefix}/forms/').caps Draft #{viewConfig.terminology.form}s
                 li
                   a(href='#{prefix}/releasedforms/').caps Released #{viewConfig.terminology.form}s
                 li
@@ -59,7 +59,6 @@ html
               if (locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1)
                 li
                   a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
-                  
             ul.nav.pull-right
               if (locals && locals.userid)
                 li

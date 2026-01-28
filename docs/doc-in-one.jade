@@ -1,0 +1,90 @@
+extends layout
+
+block head
+  title #{orgName} Traveler - user manual
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/doc.css')
+block content
+  //- header
+  .container
+    include:marked ./hero.md
+    h4
+      i updated on 01/02/2026
+
+  .container
+    .row
+      .span9
+        section#how-to-use
+          include:marked ./audience.md
+        section#basics
+          include:marked ./basics/header.md
+          include:marked ./basics/template.md
+          include:marked ./basics/traveler.md
+          include:marked ./basics/binder.md
+          include:marked ./basics/login.md
+          include:marked ./basics/ownership.md
+          include:marked ./basics/tab.md
+          include:marked ./basics/print.md
+          include:marked ./basics/color.md
+        section#templates
+          include:marked ./template/header.md
+          include:marked ./template/normal.md
+          include:marked ./template/discrepancy.md
+          include:marked ./template/lifecycle.md
+          include:marked ./template/tab.md
+          include:marked ./template/builder.md
+          include:marked ./template/clone.md
+          include:marked ./template/transfer.md
+          include:marked ./template/version-control.md
+          include:marked ./template/review.md
+        section#released-template
+          include:marked ./released_template/header.md
+          include:marked ./released_template/revision.md
+        section#travelers
+          include:marked ./traveler/header.md
+          include:marked ./traveler/create.md
+          include:marked ./traveler/status.md
+          include:marked ./traveler/update-status.md
+          include:marked ./traveler/tab.md
+          include:marked ./traveler/view.md
+          include:marked ./traveler/update.md
+          include:marked ./traveler/update-note.md
+          include:marked ./traveler/config.md
+          include:marked ./traveler/manage-forms.md
+        section#binders
+          include ./binders.jade
+        section#api
+          include ./api.jade
+        section#faq
+          include:marked ./faq.md
+        section#contact
+          include:marked ./contact.md
+
+      .span3.sidebar
+        ul#affixlist.nav.nav-list.nav-stacked.bs-docs-sidenav
+          li
+            a(href='#basics') Basics
+          li
+            a(href='#templates') Draft Templates
+          li
+            a(href='#released-template') Released Templates
+          li
+            a(href='#travelers') Travelers
+          li
+            a(href='#binders') Binders
+          li
+            a(href='#api') API
+          li
+            a(href='#faq') FAQ
+          li
+            a(href='#contact') Contact
+
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/docs.js')

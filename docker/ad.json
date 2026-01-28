@@ -20,6 +20,7 @@
   },
 
   "shareUsers": true,
-  "shareGroups": true,
+  "shareGroups": false,
+  "publicAccess": false,
   "transferOwnership": false
 }

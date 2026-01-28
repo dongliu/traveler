@@ -1,0 +1,7 @@
+form.form-inline#modal-roles
+  for role in supportedRoles
+    != ' '
+    label.checkbox
+      input(type="checkbox", value="#{role}")
+      | #{role}
+    //- != ' '

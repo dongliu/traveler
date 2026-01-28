@@ -36,10 +36,12 @@ block content
     .btn-group(data-toggle='buttons-radio')
       button.btn.btn-info#show-validation Show validation
       button.btn.btn-info#hide-validation.active Hide validation
-    if (locals && locals.userid && locals.roles && (locals.roles.indexOf('admin') !== -1 || locals.roles.indexOf('manager') !== -1))
+    if (isAdmin)
       if (status === 1)
         .btn-group
           button.btn.btn-warning#obsolete(data-toggle='tooltip', title='Obsolete the released template') Obsolete
+        .btn-group
+          button.btn.btn-warning#revision(data-toggle='tooltip', title='reversion the template') Start a revision
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

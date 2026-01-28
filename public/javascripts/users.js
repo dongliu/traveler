@@ -207,19 +207,9 @@ $(function() {
   $('#user-modify').click(function() {
     const selected = fnGetSelected(userTable, 'row-selected');
     if (selected.length) {
-      $('#modalLabel').html(
-        `Modify the following ${selected.length} users' role? `
-      );
+      $('#modalLabel').html(`Modify the following ${selected.length} users?`);
       $('#modal .modal-body').empty();
-      $('#modal .modal-body').append(
-        '<form id="modal-roles" class="form-inline">' +
-          '<label class="checkbox"><input id="modal-manager" type="checkbox" value="manager">manager</label> ' +
-          '<label class="checkbox"><input id="modal-reviewer" type="checkbox" value="reviewer">reviewer</label> ' +
-          '<label class="checkbox"><input id="modal-admin" type="checkbox" value="admin">admin</label> ' +
-          '<label class="checkbox"><input id="read_all_forms" type="checkbox" value="read_all_forms">read_all_forms</label> ' +
-          '<label class="checkbox"><input id="write_active_travelers" type="checkbox" value="write_active_travelers">write_active_travelers</label> ' +
-          '</form>'
-      );
+      $('#modal .modal-body').append(rolesHtml);
       selected.forEach(function(row) {
         const data = userTable.fnGetData(row);
         $('#modal .modal-body').append(

@@ -28,6 +28,7 @@ const Log = mongoose.model('Log');
 const { TravelerError } = require('../lib/error');
 const { stateTransition } = require('../model/traveler');
 const { sendNotification } = require('../lib/email');
+const { Approve_travelers } = require('../lib/permission');
 const logger = require('../lib/loggers').getLogger();
 
 function createTraveler(form, req, res) {
@@ -927,11 +928,7 @@ module.exports = function(app) {
     reqUtils.archived('id', false),
     function(req, res) {
       const doc = req[req.params.id];
-      if (
-        reqUtils.isOwner(req, doc) ||
-        routesUtilities.checkUserRole(req, 'admin') ||
-        reqUtils.canWrite(req, doc)
-      ) {
+      if (reqUtils.isOwner(req, doc) || reqUtils.canWrite(req, doc)) {
         return res.render(
           'traveler-config',
           routesUtilities.getRenderObject(req, {
@@ -956,11 +953,7 @@ module.exports = function(app) {
     reqUtils.sanitize('body', ['title', 'description', 'deadline', 'dwr']),
     function(req, res) {
       const doc = req[req.params.id];
-      if (
-        reqUtils.isOwner(req, doc) ||
-        reqUtils.canWrite(req, doc) ||
-        routesUtilities.checkUserRole(req, 'admin')
-      ) {
+      if (reqUtils.isOwner(req, doc) || reqUtils.canWrite(req, doc)) {
         Object.keys(req.body).forEach(k => {
           doc[k] = req.body[k];
         });
@@ -1022,29 +1015,22 @@ module.exports = function(app) {
         return res.status(400).send('invalid status change');
       }
 
-      // authorize status change
-      // admin and manager can approve completion or request more work for submitted traveler
+      // authorize approve or reject traveler
       if (
         doc.status === 1.5 &&
         (req.body.status === 2 || req.body.status === 1) &&
-        !(
-          routesUtilities.checkUserRole(req, 'admin') ||
-          routesUtilities.checkUserRole(req, 'manager')
-        )
+        !routesUtilities.hasPermission(req, Approve_travelers)
       ) {
         return res
           .status(403)
           .send('You are not authorized to change the status. ');
       }
 
-      // admin and manager can request more work or archive a completed traveler
+      // request more work or archive a completed traveler
       if (
         doc.status === 2 &&
         (req.body.status === 4 || req.body.status === 1) &&
-        !(
-          routesUtilities.checkUserRole(req, 'admin') ||
-          routesUtilities.checkUserRole(req, 'manager')
-        )
+        !routesUtilities.hasPermission(req, Approve_travelers)
       ) {
         return res
           .status(403)

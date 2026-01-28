@@ -1,0 +1,3 @@
+### Released template revision
+
+When there is a need to update a released template, the admin can initiate the revision process from the released template page by click the <button id="revision" data-toggle="tooltip" title="reversion the template" class="btn btn-warning">Start a revision</button> button. The original draft template will become editable on the Draft Template page. The template author can update it and then start a review and release process.

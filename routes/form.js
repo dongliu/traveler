@@ -23,6 +23,7 @@ const History = mongoose.model('History');
 const { stateTransition } = require('../model/form');
 const { releaseForm } = require('../lib/form');
 const { sendNotification } = require('../lib/email');
+const { Read_all_forms } = require('../lib/permission');
 
 const logger = require('../lib/loggers').getLogger();
 
@@ -47,14 +48,14 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         {
-          createdBy: req.session.userid,
+          // createdBy: req.session.userid,
           archived: {
             $ne: true,
           },
           status: 0,
-          owner: {
-            $exists: false,
-          },
+          // owner: {
+          //   $exists: false,
+          // },
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
@@ -137,32 +138,25 @@ module.exports = function(app) {
   });
 
   // forms owned by the user that are under review
-  app.get('/closedforms/json', auth.ensureAuthenticated, async function(
-    req,
-    res
-  ) {
-    try {
-      const forms = await Form.find(
-        {
-          createdBy: req.session.userid,
-          archived: {
-            $ne: true,
+  app.get(
+    '/closedforms/json',
+    auth.ensureAuthenticated,
+    reqUtils.requireAdmin(),
+    async function(req, res) {
+      try {
+        const forms = await Form.find(
+          {
+            status: 1,
           },
-          status: {
-            $in: [1],
-          },
-          owner: {
-            $exists: false,
-          },
-        },
-        'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
-      ).exec();
-      return res.status(200).json(forms);
-    } catch (error) {
-      logger.error(error);
-      return res.status(500).send(error.message);
+          'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
+        ).exec();
+        return res.status(200).json(forms);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
-  });
+  );
 
   app.get('/transferredforms/json', auth.ensureAuthenticated, async function(
     req,
@@ -187,7 +181,7 @@ module.exports = function(app) {
   });
 
   app.get('/allforms/json', auth.ensureAuthenticated, async function(req, res) {
-    if (!routesUtilities.checkUserRole(req, 'read_all_forms')) {
+    if (!routesUtilities.hasPermission(req, Read_all_forms)) {
       return res.status(401).json('You are not authorized to view all forms.');
     }
     try {
@@ -278,48 +272,26 @@ module.exports = function(app) {
     }
   });
 
-  app.get('/archivedforms/json', auth.ensureAuthenticated, async function(
-    req,
-    res
-  ) {
-    const search = {
-      $and: [
-        {
-          $or: [
-            {
-              createdBy: req.session.userid,
-              owner: {
-                $exists: false,
-              },
-            },
-            {
-              owner: req.session.userid,
-            },
-          ],
-        },
-        {
-          $or: [
-            {
-              archived: true,
-            },
-            {
-              status: 2,
-            },
-          ],
-        },
-      ],
-    };
-    try {
-      const forms = await Form.find(
-        search,
-        'title formType status tags updatedBy updatedOn _v documentNumber'
-      ).exec();
-      return res.status(200).json(forms);
-    } catch (error) {
-      logger.error(error);
-      return res.status(500).send(error.message);
+  app.get(
+    '/archivedforms/json',
+    auth.ensureAuthenticated,
+    reqUtils.requireAdmin(),
+    async function(req, res) {
+      const search = {
+        status: 2,
+      };
+      try {
+        const forms = await Form.find(
+          search,
+          'title formType status tags updatedBy updatedOn _v documentNumber'
+        ).exec();
+        return res.status(200).json(forms);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
-  });
+  );
 
   app.get('/publicforms/', auth.ensureAuthenticated, function(req, res) {
     res.render('public-forms', routesUtilities.getRenderObject(req));
@@ -415,6 +387,7 @@ module.exports = function(app) {
     }
   );
 
+  // this rounte is not used anymore
   app.post(
     '/forms/:id/edit',
     auth.ensureAuthenticated,
@@ -428,6 +401,9 @@ module.exports = function(app) {
       );
       form.status = 0;
       form.incrementVersion({ force: true });
+      if (form.__review) {
+        form.__review.reviewRequests = [];
+      }
       form.saveWithHistory(req.session.userid);
       return res.status(200).redirect(`/forms/${form._id}/`);
     }
@@ -692,34 +668,36 @@ module.exports = function(app) {
     }
   );
 
-  app.put(
-    '/forms/:id/share/public',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Form),
-    reqUtils.isOwnerMw('id'),
-    reqUtils.filter('body', ['access']),
-    async function(req, res) {
-      const form = req[req.params.id];
-      let { access } = req.body;
-      if (['-1', '0', '1'].indexOf(access) === -1) {
-        return res.status(400).send('not valid value');
+  if (config.ad.publicAccess) {
+    app.put(
+      '/forms/:id/share/public',
+      auth.ensureAuthenticated,
+      reqUtils.exist('id', Form),
+      reqUtils.isOwnerMw('id'),
+      reqUtils.filter('body', ['access']),
+      async function(req, res) {
+        const form = req[req.params.id];
+        let { access } = req.body;
+        if (['-1', '0', '1'].indexOf(access) === -1) {
+          return res.status(400).send('not valid value');
+        }
+        access = Number(access);
+        if (form.publicAccess === access) {
+          return res.status(204).send();
+        }
+        form.publicAccess = access;
+        try {
+          await form.save();
+          return res
+            .status(200)
+            .send(`public access is set to ${req.body.access}`);
+        } catch (error) {
+          logger.error(error);
+          return res.status(500).send(error.message);
+        }
       }
-      access = Number(access);
-      if (form.publicAccess === access) {
-        return res.status(204).send();
-      }
-      form.publicAccess = access;
-      try {
-        await form.save();
-        return res
-          .status(200)
-          .send(`public access is set to ${req.body.access}`);
-      } catch (error) {
-        logger.error(error);
-        return res.status(500).send(error.message);
-      }
-    }
-  );
+    );
+  }
 
   app.get(
     '/forms/:id/share/:list/json',

@@ -265,7 +265,7 @@ function fnSetColumnsVis(oTableLocal, columns, show) {
 function fnAddFilterFoot(sTable, aoColumns) {
   const tr = $('<tr role="row">');
   aoColumns.forEach(function(c) {
-    if (c.bFilter) {
+    if (c.bFilter && c.bVisible !== false) {
       tr.append(
         `<th><input type="text" placeholder="${c.sTitle}" style="width:80%;" autocomplete="off"></th>`
       );
@@ -577,7 +577,7 @@ const formShareLinkColumn = {
 const formReviewLinkColumn = {
   sTitle: '',
   mData(source) {
-    return `<a href="${prefix}/forms/${source._id}/review/" target="${linkTarget}" data-toggle="tooltip" title="reviews for the form"><i class="fa fa-eye fa-lg"></i></a>`;
+    return `<a href="${prefix}/forms/${source._id}/review/" target="${linkTarget}" data-toggle="tooltip" title="reviews for the form"><i class="fa fa-comments fa-lg"></i></a>`;
   },
   bSortable: false,
 };
@@ -1255,7 +1255,7 @@ const sharedGroupColumn = {
     return '';
   },
   bFilter: true,
-  bVisible: false,
+  bVisible: shareGroups || false,
 };
 
 const statusColumn = {
