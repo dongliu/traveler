@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const _ = require('lodash');
 const config = require('../config/config');
-const { Manager, Reviewer, Admin } = require('../lib/role');
+const { getSupportedRoles, Admin, Manager, Reviewer } = require('../lib/role');
 const logger = require('../lib/loggers').getLogger();
 
 const { ad } = config;
@@ -255,16 +255,26 @@ module.exports = function(app) {
     '/users/json',
     auth.ensureAuthenticated,
     reqUtilities.requireAdmin(),
-    function(req, res) {
-      User.find().exec(function(err, users) {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({
-            error: err.message,
+    async function(req, res) {
+      const supportedRoles = getSupportedRoles();
+      try {
+        const users = await User.find(
+          {},
+          '_id name roles lastVisitedOn'
+        ).exec();
+        // filter out unsupported roles
+        users.forEach(function(user) {
+          user.roles = user.roles.filter(function(role) {
+            return supportedRoles.includes(role);
           });
-        }
+        });
         res.json(users);
-      });
+      } catch (error) {
+        logger.error('Error finding users:', error);
+        return res.status(500).json({
+          error: 'Failed to retrieve users',
+        });
+      }
     }
   );
 
@@ -298,10 +308,17 @@ module.exports = function(app) {
     '/users/:id',
     auth.ensureAuthenticated,
     reqUtilities.requireAdmin(),
+    reqUtilities.filter('body', ['roles']),
+    reqUtilities.hasAll('body', ['roles']),
     function(req, res) {
       if (!req.is('json')) {
         return res.status(415).json({
           error: 'json request expected.',
+        });
+      }
+      if (req.body.roles.some(role => !getSupportedRoles().includes(role))) {
+        return res.status(400).json({
+          error: 'One or more roles are not supported.',
         });
       }
       User.findOneAndUpdate(

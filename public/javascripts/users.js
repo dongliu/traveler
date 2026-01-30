@@ -140,8 +140,10 @@ $(function() {
       );
     } else {
       const user = travelerGlobal.usernames.get(name);
-      if (user === null) {
-        console.error(`Unknown user ${name}.  Please select from the list.`);
+      if (user === null || user.length === 0) {
+        $('#message').append(
+          `<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Unknown user ${name}.  Please select from the list.</div>`
+        );
         return;
       }
       const uid = user[0].sAMAccountName;
