@@ -96,6 +96,20 @@ function longDateColumn(title, key) {
   };
 }
 
+function person(data) {
+  if (data?.name) {
+    return `<a href = "/users/${data._id || data.id}" target="${linkTarget}" >${
+      data.name
+    }</a>`;
+  }
+  const id = data?.id || data?._id || data;
+  if (id) {
+    return `<a href = "/users/${data._id ||
+      data.id}" target="${linkTarget}" >${id}</a>`;
+  }
+  return '';
+}
+
 function personColumn(title, key) {
   return {
     sTitle: title,
@@ -105,14 +119,7 @@ function personColumn(title, key) {
       if (type === 'sort' || type === 'filter') {
         return data.name || data.id || data;
       }
-      if (data) {
-        if (data.name) {
-          return `<a href = "/users/${data._id}" target="${linkTarget}" >${data.name}</a>`;
-        }
-        return `<img class="user" data-src="holder.js/27x40?size=20&text=${data.id ||
-          data.substr(0, 1).toUpperCase()}">`;
-      }
-      return '';
+      return person(data);
     },
     bFilter: true,
   };
@@ -625,11 +632,7 @@ const reviewRequestedByColumn = {
     if (!request) {
       return '';
     }
-    return `<a target="${linkTarget}" href="/users/${
-      request.requestedBy
-    }"><img class="user" data-src="holder.js/27x40?size=20&text=${request.requestedBy
-      .substr(0, 1)
-      .toUpperCase()}" title="${request.requestedBy}"></a>`;
+    return person(request.requestedBy);
   },
   bFilter: true,
 };
