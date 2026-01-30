@@ -15,7 +15,7 @@ const reviewRequest = new Schema({
     required: true,
   },
   requestedOn: Date,
-  requestedBy: String,
+  requestedBy: { type: String, ref: 'User' },
 });
 
 // result value
