@@ -308,10 +308,17 @@ module.exports = function(app) {
     '/users/:id',
     auth.ensureAuthenticated,
     reqUtilities.requireAdmin(),
+    reqUtilities.filter('body', ['roles']),
+    reqUtilities.hasAll('body', ['roles']),
     function(req, res) {
       if (!req.is('json')) {
         return res.status(415).json({
           error: 'json request expected.',
+        });
+      }
+      if (req.body.roles.some(role => !getSupportedRoles().includes(role))) {
+        return res.status(400).json({
+          error: 'One or more roles are not supported.',
         });
       }
       User.findOneAndUpdate(
