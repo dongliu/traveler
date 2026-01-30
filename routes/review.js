@@ -34,9 +34,7 @@ module.exports = function(app) {
           },
         },
         'title formType status tags _v __review'
-      )
-        .sort([['requestedOn', -1]])
-        .exec();
+      ).exec();
       return res.status(200).json(forms);
     } catch (error) {
       debug(`error: ${error}`);
@@ -62,7 +60,7 @@ module.exports = function(app) {
           },
           'title formType status tags _v __review'
         )
-          .sort([['requestedOn', -1]])
+          .populate('__review.reviewRequests.requestedBy', 'name')
           .exec();
         return res.status(200).json(forms);
       } catch (error) {

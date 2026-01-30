@@ -1,8 +1,10 @@
 /*
  global prefix, ajax401, updateAjaxURL, disableAjaxCache: false formLinkColumn,
- titleColumn, fnAddFilterFoot, sDomNoTools, filterEvent, formStatusColumn, tagsColumn, Holder,
+ titleColumn, sDomNoTools, filterEvent, formStatusColumn, tagsColumn, Holder,
  versionColumn, reviewRequestedByColumn, reviewRequestedOnColumn
  */
+
+import * as Table from './lib/table.js';
 
 $(function() {
   ajax401(prefix);
@@ -17,8 +19,7 @@ $(function() {
     reviewRequestedByColumn,
     reviewRequestedOnColumn,
   ];
-  fnAddFilterFoot('#form-table', reviewFormsAoColumns);
-  $('#form-table').dataTable({
+  const reviewTableConfig = {
     sAjaxSource: '/reviews/forms/active/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -37,9 +38,11 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: reviewFormsAoColumns,
-    aaSorting: [[5, 'desc']],
     sDom: sDomNoTools,
-  });
+  };
+  Table.sortByColumn(reviewTableConfig, reviewRequestedOnColumn, 'desc');
+  const tables = [];
+  Table.initTableIfExists($('#form-table'), reviewTableConfig, tables);
 
   // binding events
   filterEvent();
