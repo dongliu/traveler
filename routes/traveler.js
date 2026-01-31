@@ -18,6 +18,7 @@ const tag = require('../lib/tag');
 const { DataError } = require('../lib/error');
 
 const ReleasedForm = mongoose.model('ReleasedForm');
+const Form = mongoose.model('Form');
 const User = mongoose.model('User');
 const Group = mongoose.model('Group');
 const Traveler = mongoose.model('Traveler');
@@ -150,6 +151,51 @@ function redirectPreview(req, res, next) {
     );
   }
   return next();
+}
+
+/**
+ * When a traveler is submitted for approval, find the form from the form table
+ * with activeForm as id, populate the createdBy user with name and email,
+ * and send notification email to the user.
+ * @param {Object} traveler - the traveler object
+ * @param {Object} req - the request object (for building the link)
+ * @return {Promise<boolean>} true if email is sent, otherwise false
+ */
+async function submitForApproval(traveler, req) {
+  try {
+    // Find the form from the form table with activeForm as id
+    const form = await Form.findById(traveler.activeForm).populate(
+      'createdBy',
+      'name email'
+    );
+    if (!form) {
+      return false;
+    }
+
+    // Get the user who created the form
+    const user = form.createdBy;
+    if (!user || !user.email) {
+      return false;
+    }
+
+    // Build the traveler link
+    const travelerLink = `${req.protocol}://${req.get('host')}/travelers/${
+      traveler._id
+    }/`;
+
+    // Send notification email
+    return await sendNotification({
+      recipients: user.email,
+      subject: 'Traveler Submitted for Approval',
+      text: `The traveler "${traveler.title}" has been submitted for approval.\nPlease review the traveler at this link: \n${travelerLink}`,
+      html: `The traveler "${traveler.title}" has been submitted for approval. <br/>
+      Please review the traveler at this link: <br/>
+      <a href="${travelerLink}">${travelerLink}</a>`,
+    });
+  } catch (error) {
+    logger.error(error);
+    return false;
+  }
 }
 
 module.exports = function(app) {
@@ -463,7 +509,6 @@ module.exports = function(app) {
     redirectPreview,
     function getTraveler(req, res) {
       const doc = req[req.params.id];
-      // if (reqUtils.canWrite(req, doc)) {
       return routesUtilities.getDeviceValue(doc.devices).then(function(value) {
         doc.devices = value;
         return res.render(
@@ -481,11 +526,6 @@ module.exports = function(app) {
           })
         );
       });
-      // }
-
-      // return res
-      //   .status(403)
-      //   .send('You are not authorized to access this resource');
     }
   );
 
@@ -1059,18 +1099,7 @@ module.exports = function(app) {
           return res.status(500).send(saveErr.message);
         }
         if (doc.status === 1.5) {
-          User.findById(doc.createdBy).then(user => {
-            const travelerLink = `${req.protocol}://${req.get(
-              'host'
-            )}/travelers/${doc._id}/`;
-            sendNotification({
-              recipients: user.email,
-              subject: 'Traveler Completed',
-              html: `The traveler "${doc.title}" has been submitted for completion. <br/>
-              Please review the traveler at this link: <br/>
-              <a href="${travelerLink}">${travelerLink}</a>`,
-            });
-          });
+          submitForApproval(doc, req);
         } else if (doc.status == 1 && oldStatus == 1.5) {
           const workerIds = doc.manPower.map(user => user._id);
           User.find({ _id: { $in: workerIds } }).then(users => {
