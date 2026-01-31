@@ -11,6 +11,8 @@ var DataError = require('../lib/error').DataError;
 require('./binder');
 var Binder = mongoose.model('Binder');
 
+const { addReview } = require('./review');
+
 /**
  * A form can become active, inactive, and reactive. The form's activated date
  *   and the form's updated data can tell if the form has been updated since
@@ -180,6 +182,8 @@ var traveler = new Schema({
   },
   dwr: Schema.Types.String,
 });
+
+traveler.plugin(addReview);
 
 /**
  * update the progress of binders that include this traveler document
