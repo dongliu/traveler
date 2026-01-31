@@ -102,10 +102,9 @@ function person(data) {
       data.name
     }</a>`;
   }
-  const id = data?.id || data?._id || data;
+  const id = data?._id || data;
   if (id) {
-    return `<a href = "/users/${data._id ||
-      data.id}" target="${linkTarget}" >${id}</a>`;
+    return `<a href = "/users/${id}" target="${linkTarget}" >${id}</a>`;
   }
   return '';
 }
