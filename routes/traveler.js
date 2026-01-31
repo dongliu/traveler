@@ -178,6 +178,9 @@ async function submitForApproval(traveler, req) {
       return false;
     }
 
+    // add a review request
+    await traveler.requestReview(req.session.userid, user);
+
     // Build the traveler link
     const travelerLink = `${req.protocol}://${req.get('host')}/travelers/${
       traveler._id
