@@ -146,6 +146,13 @@ function addReview(schema) {
     }
   };
 
+  schema.methods.isReviewer = function(userid) {
+    const doc = this;
+    return (
+      doc.__review?.reviewRequests && doc.__review?.reviewRequests?.id(userid)
+    );
+  };
+
   schema.methods.allApproved = function() {
     const doc = this;
     if (!doc.__review) {

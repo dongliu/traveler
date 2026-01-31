@@ -27,14 +27,6 @@ const { Read_all_forms } = require('../lib/permission');
 
 const logger = require('../lib/loggers').getLogger();
 
-function checkReviewer(form, userid) {
-  return (
-    form.__review &&
-    form.__review.reviewRequests &&
-    form.__review.reviewRequests.id(userid)
-  );
-}
-
 // middleware to redirect to preview if the form is not for builder view
 function redirectPreview(req, res, next) {
   const form = req[req.params.id];
@@ -61,14 +53,10 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         {
-          // createdBy: req.session.userid,
           archived: {
             $ne: true,
           },
           status: 0,
-          // owner: {
-          //   $exists: false,
-          // },
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       )
@@ -117,7 +105,7 @@ module.exports = function(app) {
     }
   });
 
-  // forms owned by the user that are under review
+  // forms that are under review
   app.get('/submittedforms/json', auth.ensureAuthenticated, async function(
     req,
     res
@@ -125,17 +113,6 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         {
-          $or: [
-            {
-              createdBy: req.session.userid,
-              owner: {
-                $exists: false,
-              },
-            },
-            {
-              owner: req.session.userid,
-            },
-          ],
           archived: {
             $ne: true,
           },
@@ -352,7 +329,7 @@ module.exports = function(app) {
     redirectPreview,
     async function formBuilder(req, res) {
       const form = req[req.params.id];
-      const isReviewer = checkReviewer(form, req.session.userid);
+      const isReviewer = form.isReviewer(req.session.userid);
       const allApproved = form.allApproved();
       debug(`all approved: ${allApproved}`);
 
@@ -670,7 +647,8 @@ module.exports = function(app) {
     // only available when under review
     reqUtils.status('id', [0.5]),
     function(req, res, next) {
-      const isReviewer = checkReviewer(req[req.params.id], req.session.userid);
+      const form = req[req.params.id];
+      const isReviewer = form.isReviewer(req.session.userid);
       if (!isReviewer) {
         return res.status(401).send('only reviewer can submit');
       }
