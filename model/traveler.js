@@ -12,6 +12,7 @@ require('./binder');
 var Binder = mongoose.model('Binder');
 
 const { addReview } = require('./review');
+const { addVersion } = require('./history.js');
 
 /**
  * A form can become active, inactive, and reactive. The form's activated date
@@ -173,7 +174,7 @@ var traveler = new Schema({
     default: 0,
     min: 0,
   },
-  // list of inputs that have been touched accoring to the active form
+  // list of inputs that have been touched according to the active form
   // update with traveler data and active form
   touchedInputs: [String],
   archived: {
@@ -183,7 +184,11 @@ var traveler = new Schema({
   dwr: Schema.Types.String,
 });
 
+// support the review process of traveler
 traveler.plugin(addReview);
+
+// add version for review
+traveler.plugin(addVersion, {});
 
 /**
  * update the progress of binders that include this traveler document

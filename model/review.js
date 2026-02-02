@@ -20,7 +20,7 @@ const reviewRequest = new Schema({
 
 // result value
 // 1: approve
-// 2: comment
+// 2: reject, comment
 const reviewResult = new Schema({
   reviewerId: {
     type: String,
@@ -48,10 +48,12 @@ const review = new Schema({
   reviewResults: [reviewResult],
 });
 
-async function removeReviewRequest(doc, id) {
+async function removeReviewRequest(doc, id, save = true) {
   try {
     doc.__review.reviewRequests.id(id).remove();
-    await doc.save();
+    if (save) {
+      await doc.save();
+    }
     debug(`${id} removed from ${doc._id}`);
     // const pull = { reviews: doc._id };
     // await User.findByIdAndUpdate(id, {
@@ -132,6 +134,7 @@ function addReview(schema) {
       // 0. set doc status to 0
       // 1. remove doc from reviewer's review list
       // 2. remove reviewer from reviewer list, after which a new review request is needed
+      // otherwise, remove the reviewer from the request list
       if (result === '2') {
         doc.status = 0;
         closeReviewRequests(doc);
@@ -167,7 +170,8 @@ function addReview(schema) {
     debug(`has ${reviewResults.length} results`);
     debug(`has ${reviewRequests.length} requests`);
     // filter to the current version
-    const docVersion = doc._v;
+    // for traveler use referenceReleasedFormVer as the temporary version. this might need to be changed later
+    const docVersion = doc._v || 1;
     const currentReviewResults = reviewResults.filter(r => r.v === docVersion);
     // the last is the latest
     for (i = currentReviewResults.length - 1; i >= 0; i -= 1) {
