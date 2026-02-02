@@ -52,6 +52,17 @@ function complete() {
   setStatus(1.5);
 }
 
+function submitReview(reviewResult) {
+  $.ajax({
+    url: './review/results',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify(reviewResult),
+  }).done(function(responseData, textStatus, request) {
+    window.location.reload(true);
+  });
+}
+
 /**
  * save the data in the discrepancy form into the log
  * @param {Object} the log to save data into
@@ -433,7 +444,7 @@ $(function() {
   );
 
   $(
-    '#form input:not([type="file"]):not([type="radio"]):not([type="checkbox"]),textarea'
+    '#form input:not([type="file"]):not([type="radio"]):not([type="checkbox"]),#form textarea'
   ).on('input', formInputMade);
 
   function formInputMade() {
@@ -618,7 +629,8 @@ $(function() {
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
         file.type === 'application/vnd.ms-xpsdocument' ||
         file.type === 'application/oxps' ||
-        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        file.type ===
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     }
 
     if (!valid_type) {
@@ -745,7 +757,7 @@ $(function() {
     setStatus(1);
   });
 
-  $('#approve').click(function(e) {
+  $('button#approve').click(function(e) {
     e.preventDefault();
     setStatus(2);
   });
@@ -768,6 +780,15 @@ $(function() {
   $('#hide-validation').click(function() {
     $('#validation').hide();
     $('.validation').hide();
+  });
+
+  $('#submit-review').on('click', function(e) {
+    e.preventDefault();
+    submitReview({
+      result: $('#review input[name="result"]:checked').val(),
+      comment: $('#comment').val(),
+      v: traveler._v || 1,
+    });
   });
 
   $('#add-discrepancy').click(function() {
