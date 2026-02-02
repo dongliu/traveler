@@ -47,8 +47,8 @@ block content
       #reviews.accordion
         .accordion-group
           .accordion-heading
-            a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#review-results") Completed reviews
-          #review-results.accordion-body.collapse.in
+            a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#review-results") Completed review(s)
+          #review-results.accordion-body.collapse
             .accordion-inner
               each result in review.reviewResults
                 accordion(id="#{result._id}")
@@ -70,7 +70,7 @@ block content
         if (isReviewer && status === 0.5)
           .accordion-group
             .accordion-heading
-              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Complete a review
+              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Submit the review
             #new-review.accordion-body.collapse
               .accordion-inner
                 form.form-horizontal#review
