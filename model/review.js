@@ -131,12 +131,10 @@ function addReview(schema) {
       });
 
       // if rework (result = 2), then
-      // 0. set doc status to 0
       // 1. remove doc from reviewer's review list
       // 2. remove reviewer from reviewer list, after which a new review request is needed
-      // otherwise, remove the reviewer from the request list
       if (result === '2') {
-        doc.status = 0;
+        // doc.status = 0;
         closeReviewRequests(doc);
         doc.__review.reviewRequests = [];
       }
