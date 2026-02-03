@@ -1,8 +1,7 @@
 {
   "org_name": "EIC",
   "app_port": "3001",
-  "top_bar_urls": [
-  ],
+  "top_bar_urls": [],
   "link_target": "_self",
   "deployment_name": "development",
   "upload_dir": "../traveler_uploads/",
@@ -12,12 +11,15 @@
   "body_max_size": "1mb",
   "upload_size": 5,
   "alias": {
-    "/traveler/formfiles/*" : "/formfiles/$1"
+    "/traveler/formfiles/*": "/formfiles/$1"
   },
   "default_form_public_access": -1,
   "default_traveler_public_access": 0,
   "default_binder_public_access": 0,
   "released_form_version_mgmt": 1,
+  "auto_numbering": false,
+  "default_required": true,
+  "user_key": false,
   "notification_email_address": "notification@exmaple.com",
   "smtp_host": "mail-service",
   "smtp_port": 1025,

@@ -61,6 +61,9 @@ function addVersion(schema, options) {
   if (options.versionAll === true) {
     options.fieldsToVersion = Object.keys(schema.paths);
   }
+  if (!options.fieldsToVersion) {
+    options.fieldsToVersion = [];
+  }
   options.fieldsToVersion = _.chain([])
     .concat(options.fieldsToVersion)
     .filter(function(field) {
@@ -82,7 +85,7 @@ function addVersion(schema, options) {
     const doc = this;
     const version = doc.get(VERSION_KEY) || 0;
 
-    if(force) {
+    if (force) {
       doc.set(VERSION_KEY, version + 1);
       return;
     }

@@ -18,12 +18,15 @@ const tag = require('../lib/tag');
 const { DataError } = require('../lib/error');
 
 const ReleasedForm = mongoose.model('ReleasedForm');
+const Form = mongoose.model('Form');
 const User = mongoose.model('User');
 const Group = mongoose.model('Group');
 const Traveler = mongoose.model('Traveler');
 const TravelerData = mongoose.model('TravelerData');
 const TravelerNote = mongoose.model('TravelerNote');
 const Log = mongoose.model('Log');
+const reviewLib = require('../lib/review');
+const travelerLib = require('../lib/traveler');
 
 const { TravelerError } = require('../lib/error');
 const { stateTransition } = require('../model/traveler');
@@ -137,6 +140,19 @@ function cloneTraveler(source, req, res) {
       location: url,
     });
   });
+}
+
+// middleware to redirect to view
+function redirectPreview(req, res, next) {
+  const traveler = req[req.params.id];
+  if (traveler.status === 4 || reqUtils.canWrite(req, traveler) === false) {
+    return res.redirect(
+      `${
+        req.proxied ? authConfig.proxied_service : authConfig.service
+      }/travelers/${req.params.id}/view`
+    );
+  }
+  return next();
 }
 
 module.exports = function(app) {
@@ -302,26 +318,40 @@ module.exports = function(app) {
     });
   });
 
-  /*  app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
-      var search = {
-        archived: {
-          $ne: true
-        }
+  app.get('/currenttravelers/json', auth.ensureAuthenticated, function(
+    req,
+    res
+  ) {
+    var search = {
+      archived: {
+        $ne: true,
+      },
+      status: {
+        $ne: 4,
+      },
+    };
+    if (req.query.hasOwnProperty('device')) {
+      search.devices = {
+        $in: [req.query.device],
       };
-      if (req.query.hasOwnProperty('device')) {
-        search.devices = {
-          $in: [req.query.device]
-        };
-      }
-      Traveler.find(search, 'title status devices createdBy clonedBy createdOn deadline updatedBy updatedOn sharedWith sharedGroup finishedInput totalInput').lean().exec(function (err, travelers) {
+    }
+    Traveler.find(
+      search,
+      'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer tags dwr devices manPower'
+    )
+      .populate('createdBy', 'name')
+      .populate('updatedBy', 'name')
+      .lean()
+      .exec(function(err, travelers) {
         if (err) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
         return res.status(200).json(travelers);
       });
-    });
+  });
 
+  /*
     app.get('/currenttravelersinv1/json', auth.ensureAuthenticated, function (req, res) {
       var fullurl = config.legacy_traveler.travelers;
       if (req.query.hasOwnProperty('device')) {
@@ -432,49 +462,29 @@ module.exports = function(app) {
     '/travelers/:id/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    redirectPreview,
     function getTraveler(req, res) {
       const doc = req[req.params.id];
-      if (doc.archived) {
-        return res.redirect(
-          `${
-            req.proxied ? authConfig.proxied_service : authConfig.service
-          }/travelers/${req.params.id}/view`
+      return routesUtilities.getDeviceValue(doc.devices).then(function(value) {
+        doc.devices = value;
+        return res.render(
+          'traveler',
+          routesUtilities.getRenderObject(req, {
+            isOwner: reqUtils.isOwner(req, doc),
+            canStart: doc.sharedWith.some(
+              doc => doc._id === req.session.userid
+            ),
+            isReviewer: doc.isReviewer(req.session.userid),
+            traveler: doc,
+            review: doc.__review,
+            formHTML:
+              doc.forms.length === 1
+                ? doc.forms[0].html
+                : doc.forms.id(doc.activeForm).html,
+          })
         );
-      }
-
-      if (reqUtils.canWrite(req, doc)) {
-        return routesUtilities
-          .getDeviceValue(doc.devices)
-          .then(function(value) {
-            doc.devices = value;
-            return res.render(
-              'traveler',
-              routesUtilities.getRenderObject(req, {
-                isOwner: reqUtils.isOwner(req, doc),
-                canStart: doc.sharedWith.some(
-                  doc => doc._id === req.session.userid
-                ),
-                traveler: doc,
-                formHTML:
-                  doc.forms.length === 1
-                    ? doc.forms[0].html
-                    : doc.forms.id(doc.activeForm).html,
-              })
-            );
-          });
-      }
-
-      if (reqUtils.canRead(req, doc)) {
-        return res.redirect(
-          `${
-            req.proxied ? authConfig.proxied_service : authConfig.service
-          }/travelers/${req.params.id}/view`
-        );
-      }
-
-      return res
-        .status(403)
-        .send('You are not authorized to access this resource');
+      });
     }
   );
 
@@ -533,6 +543,27 @@ module.exports = function(app) {
           'data'
         )
       );
+    }
+  );
+
+  // add a new review request
+  app.post(
+    '/travelers/:id/review/results',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    // only available when under review
+    reqUtils.status('id', [1.5]),
+    function(req, res, next) {
+      const traveler = req[req.params.id];
+      const isReviewer = traveler.isReviewer(req.session.userid);
+      if (!isReviewer) {
+        return res.status(401).send('only reviewer can submit');
+      }
+      return next();
+    },
+    async function(req, res) {
+      const traveler = req[req.params.id];
+      await reviewLib.addReviewResult(req, res, traveler);
     }
   );
 
@@ -995,89 +1026,8 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
-    function(req, res) {
-      const doc = req[req.params.id];
-
-      if ([1, 1.5, 2, 3, 4].indexOf(req.body.status) === -1) {
-        return res.status(400).send('invalid status');
-      }
-
-      if (doc.status === req.body.status) {
-        return res.status(204).send();
-      }
-
-      const target = _.find(stateTransition, function(t) {
-        return t.from === doc.status;
-      });
-
-      debug(target);
-      if (target.to.indexOf(req.body.status) === -1) {
-        return res.status(400).send('invalid status change');
-      }
-
-      // authorize approve or reject traveler
-      if (
-        doc.status === 1.5 &&
-        (req.body.status === 2 || req.body.status === 1) &&
-        !routesUtilities.hasPermission(req, Approve_travelers)
-      ) {
-        return res
-          .status(403)
-          .send('You are not authorized to change the status. ');
-      }
-
-      // request more work or archive a completed traveler
-      if (
-        doc.status === 2 &&
-        (req.body.status === 4 || req.body.status === 1) &&
-        !routesUtilities.hasPermission(req, Approve_travelers)
-      ) {
-        return res
-          .status(403)
-          .send('You are not authorized to change the status. ');
-      }
-
-      const oldStatus = doc.status;
-      doc.status = req.body.status;
-      doc.updatedBy = req.session.userid;
-      doc.updatedOn = Date.now();
-      mqttUtilities.postTravelerStatusChangedMessage(doc);
-      return doc.save(function(saveErr) {
-        if (saveErr) {
-          logger.error(saveErr);
-          return res.status(500).send(saveErr.message);
-        }
-        if (doc.status === 1.5) {
-          User.findById(doc.createdBy).then(user => {
-            const travelerLink = `${req.protocol}://${req.get(
-              'host'
-            )}/travelers/${doc._id}/`;
-            sendNotification({
-              recipients: user.email,
-              subject: 'Traveler Completed',
-              html: `The traveler "${doc.title}" has been submitted for completion. <br/>
-              Please review the traveler at this link: <br/>
-              <a href="${travelerLink}">${travelerLink}</a>`,
-            });
-          });
-        } else if (doc.status == 1 && oldStatus == 1.5) {
-          const workerIds = doc.manPower.map(user => user._id);
-          User.find({ _id: { $in: workerIds } }).then(users => {
-            const travelerLink = `${req.protocol}://${req.get(
-              'host'
-            )}/travelers/${doc._id}/`;
-            const emails = users.map(user => user.email);
-            sendNotification({
-              recipients: emails,
-              subject: 'Traveler Rejected',
-              html: `The traveler "${doc.title}" was sent back for more work. <br/>
-              Please visit the traveler at this link: <br/>
-              <a href="${travelerLink}">${travelerLink}</a>`,
-            });
-          });
-        }
-        return res.status(200).send(`status updated to ${req.body.status}`);
-      });
+    function updateStatus(req, res) {
+      return travelerLib.updateStatus(req, res);
     }
   );
 

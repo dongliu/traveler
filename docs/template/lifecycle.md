@@ -15,22 +15,16 @@ can be used to create a traveler. The traveler application supports the review
 and approval process of templates.
 
 A template is a draft and editable when created. When a draft template is not
-needed any more, the owner can archive it. The owner can clone an archived
-template to generate a new draft template if some work needs to be picked up
-later.
+needed any more, it can be archived.
 
 When a draft template is ready for review, its owner can request one or more
-reviewers to check if the template is good to release. A reviewer can either
+reviewers to check if the template is ready to release. A reviewer can either
 approve or request for change. When any reviewer requests a change, the review
 process ends and the form becomes editable. All the reviewers must approve
 before a template can be released.
 
-When a user releases a template after a successful review process, a new
-released template is created. The user can choose to archive previously released
-templates from the same draft template of different versions. If the draft
-template is a normal template, the user can choose to attach a released
-discrepancy template with it.
-
-A released template can be archived. Travelers can be created from an archived
-released template. This happens when the process is obsoleted or a new process
-is available.
+When a template is released after a review process, a new released template is
+created. A released template can be archived. A released template can be updated
+by reversion. When a reversion starts, no traveler can be created from the old
+released template. The original draft template becomes editable, from where a
+new released template version can be created after a new review process.

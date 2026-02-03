@@ -11,6 +11,7 @@ const reqUtils = require('../lib/req-utils');
 const logger = require('../lib/loggers').getLogger();
 const config = require('../config/config');
 const { stateTransition } = require('../model/released-form');
+const { sendNotification } = require('../lib/email');
 
 const authConfig = config.auth;
 
@@ -68,13 +69,15 @@ module.exports = function(app) {
         status: 2,
       },
       'title formType status tags ver archivedOn archivedBy documentNumber'
-    ).exec(function(err, forms) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      return res.status(200).json(forms);
-    });
+    )
+      .populate('archivedBy', 'name')
+      .exec(function(err, forms) {
+        if (err) {
+          logger.error(err);
+          return res.status(500).send(err.message);
+        }
+        return res.status(200).json(forms);
+      });
   });
 
   app.get(
@@ -83,6 +86,7 @@ module.exports = function(app) {
     reqUtils.exist('id', ReleasedForm),
     function(req, res) {
       const releasedForm = req[req.params.id];
+
       return res.render(
         'released-form',
         routesUtilities.getRenderObject(req, {
@@ -97,6 +101,33 @@ module.exports = function(app) {
           discrepancy: releasedForm.discrepancy,
         })
       );
+    }
+  );
+
+  app.post(
+    '/released-forms/:id/notify',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', ReleasedForm),
+    reqUtils.hasAll('body', ['mail', 'name']),
+    async function(req, res) {
+      const releasedForm = req[req.params.id];
+      const href = `${req.protocol}://${req.get('host')}/released-forms/${
+        releasedForm._id
+      }/`;
+      const result = await sendNotification({
+        recipients: req.body.mail,
+        subject: `Please check out the released template ${releasedForm.title}`,
+        text: `Hi ${req.body.name}, ${res.locals.username} wants to notify you about the released template ${releasedForm.title} at ${href}.`,
+        html: `Hi ${req.body.name}, ${res.locals.username} wants to notify you about the released template <a href="${href}">${releasedForm.title}</a>`,
+      });
+      if (result) {
+        return res
+          .status(200)
+          .send(`Notification sent to ${req.body.name} successfully`);
+      }
+      return res
+        .status(500)
+        .send(`Error sending notification to ${req.body.name}`);
     }
   );
 

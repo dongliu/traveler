@@ -27,12 +27,17 @@ const { Read_all_forms } = require('../lib/permission');
 
 const logger = require('../lib/loggers').getLogger();
 
-function checkReviewer(form, userid) {
-  return (
-    form.__review &&
-    form.__review.reviewRequests &&
-    form.__review.reviewRequests.id(userid)
-  );
+// middleware to redirect to preview if the form is not for builder view
+function redirectPreview(req, res, next) {
+  const form = req[req.params.id];
+  if (form.isBuilder() === false || reqUtils.canWrite(req, form) === false) {
+    return res.redirect(
+      `${req.proxied ? authConfig.proxied_service : authConfig.service}/forms/${
+        req.params.id
+      }/preview`
+    );
+  }
+  return next();
 }
 
 module.exports = function(app) {
@@ -48,17 +53,15 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         {
-          // createdBy: req.session.userid,
           archived: {
             $ne: true,
           },
           status: 0,
-          // owner: {
-          //   $exists: false,
-          // },
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
-      ).exec();
+      )
+        .populate('updatedBy', 'name')
+        .exec();
       return res.status(200).json(forms);
     } catch (error) {
       logger.error(error);
@@ -102,7 +105,7 @@ module.exports = function(app) {
     }
   });
 
-  // forms owned by the user that are under review
+  // forms that are under review
   app.get('/submittedforms/json', auth.ensureAuthenticated, async function(
     req,
     res
@@ -110,17 +113,6 @@ module.exports = function(app) {
     try {
       const forms = await Form.find(
         {
-          $or: [
-            {
-              createdBy: req.session.userid,
-              owner: {
-                $exists: false,
-              },
-            },
-            {
-              owner: req.session.userid,
-            },
-          ],
           archived: {
             $ne: true,
           },
@@ -129,7 +121,9 @@ module.exports = function(app) {
           },
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
-      ).exec();
+      )
+        .populate('updatedBy', 'name')
+        .exec();
       return res.status(200).json(forms);
     } catch (error) {
       logger.error(error);
@@ -149,7 +143,9 @@ module.exports = function(app) {
             status: 1,
           },
           'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
-        ).exec();
+        )
+          .populate('updatedBy', 'name')
+          .exec();
         return res.status(200).json(forms);
       } catch (error) {
         logger.error(error);
@@ -172,7 +168,9 @@ module.exports = function(app) {
           },
         },
         'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup _v documentNumber'
-      ).exec();
+      )
+        .populate('updatedBy', 'name')
+        .exec();
       return res.status(200).json(forms);
     } catch (error) {
       logger.error(error);
@@ -284,7 +282,9 @@ module.exports = function(app) {
         const forms = await Form.find(
           search,
           'title formType status tags updatedBy updatedOn _v documentNumber'
-        ).exec();
+        )
+          .populate('updatedBy', 'name')
+          .exec();
         return res.status(200).json(forms);
       } catch (error) {
         logger.error(error);
@@ -325,54 +325,45 @@ module.exports = function(app) {
     '/forms/:id/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
-    function formBuilder(req, res) {
+    reqUtils.canReadMw('id'),
+    redirectPreview,
+    async function formBuilder(req, res) {
       const form = req[req.params.id];
-      const access = reqUtils.getAccess(req, form);
-
-      if (access === -1) {
-        return res
-          .status(403)
-          .send('you are not authorized to access this resource');
-      }
-
-      if (form.archived) {
-        return res.redirect(
-          `${
-            req.proxied ? authConfig.proxied_service : authConfig.service
-          }/forms/${req.params.id}/preview`
-        );
-      }
-
-      const isReviewer = checkReviewer(form, req.session.userid);
+      const isReviewer = form.isReviewer(req.session.userid);
       const allApproved = form.allApproved();
       debug(`all approved: ${allApproved}`);
 
-      if (access === 1 && form.isBuilder()) {
-        return res.render(
-          'form-builder',
-          routesUtilities.getRenderObject(req, {
-            id: req.params.id,
-            title: form.title,
-            html: form.html,
-            status: form.status,
-            statusText: formModel.statusMap[`${form.status}`],
-            _v: form._v,
-            documentNumber: form.documentNumber,
-            formType: form.formType,
-            prefix: req.proxied ? req.proxied_prefix : '',
-            isReviewer,
-            allApproved,
-            review: form.__review,
-            released_form_version_mgmt: config.app.released_form_version_mgmt,
-            versionNotes: form.versionNotes,
-          })
-        );
+      // populate reviewer names if any
+      if (form.__review?.reviewResults) {
+        const reviewResults = form.__review.reviewResults;
+        for (let i = 0; i < reviewResults.length; i += 1) {
+          const reviewResult = reviewResults[i];
+          const reviewer = await User.findById(reviewResult.reviewerId).exec();
+          if (reviewer) {
+            reviewResult.reviewerName = reviewer.name;
+          }
+        }
       }
 
-      return res.redirect(
-        `${
-          req.proxied ? authConfig.proxied_service : authConfig.service
-        }/forms/${req.params.id}/preview`
+      // if (access === 1 && form.isBuilder()) {
+      return res.render(
+        'form-builder',
+        routesUtilities.getRenderObject(req, {
+          id: req.params.id,
+          title: form.title,
+          html: form.html,
+          status: form.status,
+          statusText: formModel.statusMap[`${form.status}`],
+          _v: form._v,
+          documentNumber: form.documentNumber,
+          formType: form.formType,
+          prefix: req.proxied ? req.proxied_prefix : '',
+          isReviewer,
+          allApproved,
+          review: form.__review,
+          released_form_version_mgmt: config.app.released_form_version_mgmt,
+          versionNotes: form.versionNotes,
+        })
       );
     }
   );
@@ -387,7 +378,7 @@ module.exports = function(app) {
     }
   );
 
-  // this rounte is not used anymore
+  // this route is not used anymore
   app.post(
     '/forms/:id/edit',
     auth.ensureAuthenticated,
@@ -656,7 +647,8 @@ module.exports = function(app) {
     // only available when under review
     reqUtils.status('id', [0.5]),
     function(req, res, next) {
-      const isReviewer = checkReviewer(req[req.params.id], req.session.userid);
+      const form = req[req.params.id];
+      const isReviewer = form.isReviewer(req.session.userid);
       if (!isReviewer) {
         return res.status(401).send('only reviewer can submit');
       }
@@ -830,7 +822,14 @@ module.exports = function(app) {
   app.post(
     '/forms/',
     auth.ensureAuthenticated,
-    reqUtils.filter('body', ['title', 'formType', 'documentNumber', 'html']),
+    reqUtils.filter('body', [
+      'title',
+      'formType',
+      'documentNumber',
+      'description',
+      'partNumber',
+      'html',
+    ]),
     reqUtils.hasAll('body', ['title', 'documentNumber']),
     auth.requireRoles(req => {
       return (
@@ -838,19 +837,32 @@ module.exports = function(app) {
         req.body.formType === 'discrepancy'
       );
     }, 'admin'),
-    reqUtils.sanitize('body', ['html']),
+    reqUtils.sanitize('body', [
+      'html',
+      'title',
+      'documentNumber',
+      'description',
+      'partNumber',
+    ]),
     async function(req, res) {
       const html = req.body.html || '';
+      const formToCreate = {
+        title: req.body.title,
+        formType: req.body.formType,
+        documentNumber: req.body.documentNumber,
+        createdBy: req.session.userid,
+        html,
+      };
+      if (!_.isEmpty(req.body.partNumber)) {
+        formToCreate.tags = [req.body.partNumber];
+      }
+      if (!_.isEmpty(req.body.description)) {
+        formToCreate.description = req.body.description;
+      }
       try {
         const newForm = await formModel.createFormWithHistory(
           req.session.userid,
-          {
-            title: req.body.title,
-            formType: req.body.formType,
-            documentNumber: req.body.documentNumber,
-            createdBy: req.session.userid,
-            html,
-          }
+          formToCreate
         );
         const url = `${
           req.proxied ? authConfig.proxied_service : authConfig.service

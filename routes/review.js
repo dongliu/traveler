@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const auth = require('../lib/auth');
 const routesUtilities = require('../utilities/routes');
 
-const { Review_forms } = require('../lib/permission');
+const { Review_forms, Approve_travelers } = require('../lib/permission');
+const { Traveler } = require('../model/traveler');
 
 const User = mongoose.model('User');
 const Form = mongoose.model('Form');
@@ -34,9 +35,7 @@ module.exports = function(app) {
           },
         },
         'title formType status tags _v __review'
-      )
-        .sort([['requestedOn', -1]])
-        .exec();
+      ).exec();
       return res.status(200).json(forms);
     } catch (error) {
       debug(`error: ${error}`);
@@ -62,9 +61,37 @@ module.exports = function(app) {
           },
           'title formType status tags _v __review'
         )
-          .sort([['requestedOn', -1]])
+          .populate('__review.reviewRequests.requestedBy', 'name')
           .exec();
         return res.status(200).json(forms);
+      } catch (error) {
+        debug(`error: ${error}`);
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
+  app.get(
+    '/reviews/travelers/active/json',
+    auth.ensureAuthenticated,
+    async function(req, res) {
+      if (!routesUtilities.hasPermission(req, Approve_travelers)) {
+        return res.status(403).send('not authorized to view reviews');
+      }
+      try {
+        const travelers = await Traveler.find(
+          {
+            '__review.reviewRequests._id': req.session.userid,
+            status: 1.5,
+            archived: {
+              $ne: true,
+            },
+          },
+          'title devices tags documentNumber referenceReleasedFormVer __review'
+        )
+          .populate('__review.reviewRequests.requestedBy', 'name')
+          .exec();
+        return res.status(200).json(travelers);
       } catch (error) {
         debug(`error: ${error}`);
         return res.status(500).send(error.message);
