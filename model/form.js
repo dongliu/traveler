@@ -50,12 +50,12 @@ const statusMap = {
 const form = new Schema({
   title: String,
   description: String,
-  createdBy: String,
+  createdBy: { type: String, ref: 'User' },
   createdOn: Date,
   clonedFrom: ObjectId,
-  updatedBy: String,
+  updatedBy: { type: String, ref: 'User' },
   updatedOn: Date,
-  owner: String,
+  owner: { type: String, ref: 'User' },
   tags: [String],
   status: {
     type: Number,
@@ -171,12 +171,12 @@ form.pre('save', function(next) {
 });
 
 /**
- * Check if a form should be rendered in builder
+ * Rendered in builder when the form is not archived
  * @returns true if rendered in builder view, other wise false
  */
 form.methods.isBuilder = function() {
   const doc = this;
-  return [0, 0.5, 1].includes(doc.status);
+  return [0, 0.5, 1].includes(doc.status) && doc.archived !== true;
 };
 
 form.plugin(addVersion, {
@@ -233,6 +233,8 @@ const createFormWithHistory = function(uid, json) {
   const formToCreate = {};
   formToCreate.title = json.title;
   formToCreate.documentNumber = json.documentNumber;
+  formToCreate.description = json.description || '';
+  formToCreate.tags = json.tags || [];
   formToCreate.createdBy = json.createdBy;
   formToCreate.createdOn = Date.now();
   formToCreate.updatedBy = json.createdBy;

@@ -44,7 +44,7 @@ const formContent = new Schema({
 const releasedForm = new Schema({
   title: String,
   description: String,
-  releasedBy: String,
+  releasedBy: { type: String, ref: 'User' },
   releasedOn: Date,
   tags: [String],
   status: {
@@ -57,7 +57,7 @@ const releasedForm = new Schema({
     enum: ['normal', 'discrepancy', 'normal_discrepancy'],
   },
   archivedOn: Date,
-  archivedBy: String,
+  archivedBy: { type: String, ref: 'User' },
   base: formContent,
   discrepancy: { type: formContent, default: null },
   // ver format: base_v[:discrepancy_v]

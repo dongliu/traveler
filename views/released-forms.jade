@@ -11,19 +11,6 @@ block head
 
 block content
   .container-fluid
-    .btn-toolbar
-      .btn-group
-        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
-          i.fa.fa-copy.fa-lg
-          | &nbsp;Clone
-      //- .btn-group
-      //-   a.btn.btn-info#all-forms(href='#{prefix}/publicforms/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public #{viewConfig.terminology.form}s')
-      //-     i.fa.fa-institution.fa-lg
-      //-     | &nbsp;All public #{viewConfig.terminology.form}s
-      //- .btn-group
-      //-   button.btn.btn-info#reload
-      //-     i.fa.fa-refresh.fa-lg
-      //-     | &nbsp;Reload all tables
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -41,21 +28,12 @@ block content
         #released.tab-pane.active
           .btn-toolbar
             .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-            .btn-group
               button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
                 i.fa.fa-plane.fa-lg
                 | &nbsp;Travel
           table#released-form-table.table.table-bordered.table-hover
         if (isAdmin)
           #archived-released-forms.tab-pane
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
             table#archived-released-form-table.table.table-bordered.table-hover
 
 

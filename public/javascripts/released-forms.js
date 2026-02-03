@@ -117,7 +117,6 @@ $(function() {
     releasedFormVersionColumn,
     docNoColumn,
     tagsColumn,
-    releasedByColumn,
     releasedOnColumn,
   ];
   const releasedFormTable = $('#released-form-table').dataTable({
@@ -140,7 +139,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: releasedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
@@ -151,7 +150,6 @@ $(function() {
     selectColumn,
     releasedFormLinkColumn,
     titleColumn,
-    // formTypeColumn,
     tagsColumn,
     releasedFormVersionColumn,
     docNoColumn,

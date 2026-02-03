@@ -5,6 +5,8 @@ starting point to use the traveler application for most users.
 
 #### Template type
 
+**Note: this section depends on configuration**
+
 Log in the traveler application, and navigate to the <a href="/forms/">Forms or
 Templates</a> page. Then click the <a id="new" href="/forms/new" target="_blank"
 data-toggle="tooltip" title="create new empty forms" class="btn btn-primary"><i
@@ -27,6 +29,8 @@ the normal type for your first try.
 
 #### Template components
 
+**Note: this section depends on configuration**
+
 A new template has no inputs inside. The user can add new components, update the
 attributes of an existing component, duplicate a component, and adjust the
 location of a component.
@@ -35,6 +39,7 @@ location of a component.
 
 The template builder support 8 basic inputs types:
 
+<!-- prettier-ignore -->
 | input name | usage | properties |
 | ----------- | ----------- | ----------- |
 | Checkbox | specify a boolean value, true or false | Label, User defined key, Text, Required |
@@ -54,6 +59,7 @@ application. The details of the input properties are listed in the following
 table.
 <br>
 
+<!-- prettier-ignore -->
 | property name | usage | notes |
 | ------- | ------ |  -------- |
 | Label | appears in front of the input, short description | default as "label", SHOULD be short and unique in the template |
@@ -80,9 +86,8 @@ device, a user needs to hold a special key while using mouse to click on
 options. On a mobile device, a user needs to click on the element in order to
 reveal the options.
 
-Many find that a set of checkbox input has a better user experience, like [this
-example on
-MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/checkbox#try_it).
+Many find that a set of checkbox input has a better user experience, like
+[this example on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/checkbox#try_it).
 We use checkboxes to implement multiple choice in the traveler form builder.
 
 ##### Advanced components
@@ -131,6 +136,8 @@ class="fa fa-edit fa-lg"></i></a> button again.
 
 #### Sequence number
 
+**Note: this section depends on configuration**
+
 Sequence numbers are added automatically to the components. There are three
 levels of numbers: the section is the top level, the second is the rich
 instruction, and the third is the basic input.
@@ -147,7 +154,17 @@ version of the builder, there might not be numbers. The user can generate the
 numbers by clicking the <button class="btn btn-primary">Generate
 numbering</button> button.
 
+A sections and elements inside a template can be automatically numbered. Or the
+user can specify the numbers manually. When the auto numbering feature is
+disabled, a set of four buttons shows when hovering on a template component.
+
+<div class="btn-group"><a data-toggle="tooltip" title="number" class="btn btn-info"><i class="fa fa-sort-numeric-asc fa-lg"></i></a><a data-toggle="tooltip" title="edit" class="btn btn-primary"><i class="fa fa-edit fa-lg"></i></a><a data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="fa fa-copy fa-lg"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="fa fa-trash-o fa-lg"></i></a></div>
+
+Click the first button on the left to set the number of the current element.
+
 #### Adjust component location
+
+**Note: this section depends on configuration**
 
 Click the <button class="btn">Adjust location</button> to enter the location
 adjustment mode. The user can drag and drop a component to a different place.

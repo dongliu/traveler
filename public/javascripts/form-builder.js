@@ -128,6 +128,9 @@ function userkey_error($userkey, msg) {
 }
 
 function updateSectionNumbers() {
+  if (autoNumbering === false) {
+    return;
+  }
   let sectionNumber = 0;
   let instructionNumber = 0;
   let controlNumber = 0;
@@ -160,6 +163,12 @@ function updateSectionNumbers() {
     });
 }
 
+function resetNumbering() {
+  $('#output')
+    .find('.section-number, .rich-instruction-number, .control-number')
+    .empty();
+}
+
 function addSectionNumbers() {
   $('#output')
     .find('legend, .control-label, .tinymce')
@@ -176,6 +185,9 @@ function addSectionNumbers() {
 }
 
 function addSectionNumberToRichInstruction(richInstructionParent) {
+  if (autoNumbering === false) {
+    return;
+  }
   let target = richInstructionParent;
   if (richInstructionParent.className !== 'rich-instruction') {
     const tinymceChild = $(richInstructionParent).find('.tinymce')[0];
@@ -220,6 +232,7 @@ function done_button(view, $out) {
       }
     }
     view.unbind();
+
     $(this)
       .closest('.spec')
       .remove();
@@ -227,6 +240,10 @@ function done_button(view, $out) {
     $('input, textarea', $out).each(function() {
       if (!$(this).attr('name')) {
         $(this).attr('name', UID.generateShort());
+      }
+      // if default required is true, set required attribute
+      if (defaultRequired === true) {
+        $(this).prop('required', true);
       }
     });
 
@@ -243,6 +260,18 @@ function done_button(view, $out) {
 }
 
 function add_new_cgr($cgr, $new_cgr, $buttons, $edit) {
+  // hide the required if default required in config is true
+  if (defaultRequired === true) {
+    $edit
+      .find('.control-group:has(.control-label:contains("Required"))')
+      .hide();
+  }
+  // hide the user defined key if user key in config is false
+  if (userKey === false) {
+    $edit
+      .find('.control-group:has(.control-label:contains("User defined key"))')
+      .hide();
+  }
   $new_cgr.prepend($buttons.hide());
   if ($cgr) {
     if ($('span.fe-type', $cgr).text() !== 'radio') {
@@ -1296,6 +1325,29 @@ function binding_events() {
     }
   });
 
+  $('#output').on('click', '.control-focus a.btn[title="number"]', function(e) {
+    e.preventDefault();
+    // const that = this;
+    const $cgr = $(this).closest('.control-group-wrap');
+    $('#modalLabel').html('Update the numbering');
+    $('#modal .modal-body').empty();
+    $('#modal .modal-body').append('<input type="number"/>');
+    $('#modal .modal-footer').html(
+      '<button id="modify" class="btn btn-primary">Confirm</button><button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+    );
+    $('#modify').click(function(e) {
+      e.preventDefault();
+      $('#modify').prop('disabled', true);
+      $cgr
+        .find(
+          'span.control-number, span.section-number, span.rich-instruction-number'
+        )
+        .text($('#modal .modal-body input').val());
+      $('#modal').modal('hide');
+    });
+    $('#modal').modal('show');
+  });
+
   $('#output').on(
     'click',
     '.control-focus a.btn.btn-warning[title="remove"]',
@@ -1426,6 +1478,9 @@ function binding_events() {
   });
 
   $('#numbering').click(function(e) {
+    if (autoNumbering === false) {
+      return;
+    }
     e.preventDefault();
     if ($('#output .well.spec').length) {
       modalAlert(
@@ -1437,6 +1492,10 @@ function binding_events() {
     cleanBeforeSave();
     addSectionNumbers();
     updateSectionNumbers();
+  });
+
+  $('#reset-numbering').click(function() {
+    resetNumbering();
   });
 
   $('#preview').click(function(e) {

@@ -16,7 +16,7 @@ block content
     #message
     .row
       .span9
-        h3 #{title}
+        h3 !{title}
         h4 type: #{formType}
         h4 status: #{statusText}
         h4 version:&nbsp;
@@ -27,15 +27,20 @@ block content
               legend Discrepancy
             form.form-horizontal#discrepancy
               != discrepancy.html
-          .control-group#discrepancy-legend
+          //- .control-group#discrepancy-legend
               legend Base
           form.form-horizontal#output
             != base.html
         #validation.well.hide
       .span3.sidebar
-    .btn-group(data-toggle='buttons-radio')
+    //- .btn-group(data-toggle='buttons-radio')
       button.btn.btn-info#show-validation Show validation
       button.btn.btn-info#hide-validation.active Hide validation
+    .well
+      form.form-inline
+        input#username.input(type='text', placeholder='Last, First', name='name')
+        != ' '
+        button.btn.btn-primary#notify(type='submit', data-toggle='tooltip', title='Email the user about this template') Notify
     if (isAdmin)
       if (status === 1)
         .btn-group
@@ -51,6 +56,8 @@ block js
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-viewer.js')
   script(type='text/javascript', src='#{prefix}/javascripts/released-form-management.js')
-

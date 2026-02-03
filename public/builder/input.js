@@ -150,8 +150,32 @@
   var templatizer = {};
 
   // button.jade compiled template
-  templatizer['button'] = function tmpl_button() {
-    return '<div class="pull-right control-group-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="fa fa-edit fa-lg"></i></a><a data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="fa fa-copy fa-lg"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="fa fa-trash-o fa-lg"></i></a></div></div>';
+  templatizer['button'] = function tmpl_button(locals) {
+    var buf = [];
+    var jade_mixins = {};
+    var jade_interp;
+    var locals_for_with = locals || {};
+    (function(autoNumbering) {
+      buf.push(
+        '<div class="pull-right control-group-buttons"><div class="btn-group">'
+      );
+      if (autoNumbering === false) {
+        buf.push(
+          '<a data-toggle="tooltip" title="number" class="btn btn-info"><i class="fa fa-sort-numeric-asc fa-lg"></i></a>'
+        );
+      }
+      buf.push(
+        '<a data-toggle="tooltip" title="edit" class="btn btn-primary"><i class="fa fa-edit fa-lg"></i></a><a data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="fa fa-copy fa-lg"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="fa fa-trash-o fa-lg"></i></a></div></div>'
+      );
+    }.call(
+      this,
+      'autoNumbering' in locals_for_with
+        ? locals_for_with.autoNumbering
+        : typeof autoNumbering !== 'undefined'
+        ? autoNumbering
+        : undefined
+    ));
+    return buf.join('');
   };
 
   // checkbox.jade compiled template

@@ -11,6 +11,9 @@ var DataError = require('../lib/error').DataError;
 require('./binder');
 var Binder = mongoose.model('Binder');
 
+const { addReview } = require('./review');
+const { addVersion } = require('./history.js');
+
 /**
  * A form can become active, inactive, and reactive. The form's activated date
  *   and the form's updated data can tell if the form has been updated since
@@ -120,11 +123,11 @@ var traveler = new Schema({
     type: Number,
     default: 0,
   },
-  createdBy: String,
+  createdBy: { type: String, ref: 'User' },
   createdOn: Date,
-  clonedBy: String,
+  clonedBy: { type: String, ref: 'User' },
   clonedFrom: ObjectId,
-  updatedBy: String,
+  updatedBy: { type: String, ref: 'User' },
   updatedOn: Date,
   archivedOn: Date,
   owner: String,
@@ -141,7 +144,7 @@ var traveler = new Schema({
   referenceForm: ObjectId,
   // global object if of the discrepancy form
   referenceDiscrepancyForm: ObjectId,
-  referenceReleasedForm: ObjectId,
+  referenceReleasedForm: { type: ObjectId, ref: 'ReleasedForm' },
   referenceReleasedFormVer: String,
   documentNumber: String,
   forms: [form],
@@ -171,7 +174,7 @@ var traveler = new Schema({
     default: 0,
     min: 0,
   },
-  // list of inputs that have been touched accoring to the active form
+  // list of inputs that have been touched according to the active form
   // update with traveler data and active form
   touchedInputs: [String],
   archived: {
@@ -180,6 +183,12 @@ var traveler = new Schema({
   },
   dwr: Schema.Types.String,
 });
+
+// support the review process of traveler
+traveler.plugin(addReview);
+
+// add version for review
+traveler.plugin(addVersion, {});
 
 /**
  * update the progress of binders that include this traveler document

@@ -115,10 +115,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: closedFormAoColumns,
-    aaSorting: [
-      [9, 'desc'],
-      [8, 'desc'],
-    ],
+    aaSorting: [[9, 'desc']],
     sDom: sDomNoTools,
   };
   initTableIfExists($('#closed-form-table'), closedFormTableConfig, tables);
@@ -155,7 +152,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[6, 'desc']],
+    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
   };
   initTableIfExists($('#archived-form-table'), archivedFormTableConfig, tables);

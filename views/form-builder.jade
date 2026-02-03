@@ -14,15 +14,19 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
+block bodyJs
   script(type='text/javascript').
     var id = !{JSON.stringify(id)};
     var released_form_version_mgmt = !{JSON.stringify(released_form_version_mgmt)};
     var formStatus = !{JSON.stringify(locals.status)} || 0;
     var formType = !{JSON.stringify(locals.formType)} || 'normal';
+    var autoNumbering = !{JSON.stringify(viewConfig.autoNumbering)};
+    var defaultRequired = !{JSON.stringify(viewConfig.defaultRequired)};
+    var userKey = !{JSON.stringify(viewConfig.userKey)};
+block content
   .container
     #message
-    #modal.modal.modal-lg.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
+    #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
         h3#modalLabel
       .modal-body
@@ -43,14 +47,14 @@ block content
       #reviews.accordion
         .accordion-group
           .accordion-heading
-            a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#review-results") Reported reviews
-          #review-results.accordion-body.collapse.in
+            a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#review-results") Completed review(s)
+          #review-results.accordion-body.collapse
             .accordion-inner
               each result in review.reviewResults
                 accordion(id="#{result._id}")
                   .accordion-group
                     .accordion-heading
-                      a.accordion-toggle(data-toggle="collapse" data-parent="#{result._id}" href="\##{result._id}-comment") #{result.reviewerId}
+                      a.accordion-toggle(data-toggle="collapse" data-parent="#{result._id}" href="\##{result._id}-comment") #{result.reviewerName || result.reviewerId}
                         | &nbsp;
                         if (result.result === "1")
                           b approved
@@ -66,7 +70,7 @@ block content
         if (isReviewer && status === 0.5)
           .accordion-group
             .accordion-heading
-              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Complete a review
+              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Submit the review
             #new-review.accordion-body.collapse
               .accordion-inner
                 form.form-horizontal#review
@@ -100,24 +104,24 @@ block content
         ul.dropdown-menu
           li#add-checkbox
             a Checkbox
-          li#add-checkbox-set
+          //- li#add-checkbox-set
             a Checkbox set
-          li#add-radio
+          //- li#add-radio
             a Radio
           li#add-text
             a Text
           li#add-figure
             a Figure
-          li#add-par
+          //- li#add-par
             a Paragraph
-          li#add-number
+          //- li#add-number
             a Number
           li#add-file
             a Upload file
-          li#add-other
+          //- li#add-other
             a other types
       .btn-group.dropup
-        button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Advanced control
+        button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Operations
           span.caret
         ul.dropdown-menu
           //- li#add-grid
@@ -125,21 +129,24 @@ block content
           li#add-section
             a Section
           li#add-rich
-            a Rich instruction
+            a Instructions
       .btn-group
         button.btn#adjust Adjust location
       .btn-group
         button.btn.btn-primary#save Save
     .btn-group
       a.btn.btn-info#preview(data-toggle='tooltip', title='the template needs be saved first', href='preview', target='#{viewConfig.linkTarget}') Preview
-    if (status === 0)
-      .btn-group
+    //- if (status === 0)
+      //- .btn-group
         button.btn.btn-primary#import(data-toggle='tooltip', title='import the content of a template') Import
       .btn-group
         button.btn.btn-primary#saveas(data-toggle='tooltip', title='create a copy of current template') Save as
-    if (status === 0)
+    //- if (status === 0)
       .btn-group
         button.btn.btn-primary#numbering(data-toggle='tooltip', title='generate section numbers') Generate numbering
+    if (status === 0)
+      .btn-group
+        button.btn.btn-primary#reset-numbering(data-toggle='tooltip', title='reset section numbers') Reset numbering
     if (status === 0)
       //- .btn-group
         a.btn.btn-primary#version(data-toggle='tooltip', title='Check and switch versions', href='./version-mgmt', target='#{viewConfig.linkTarget}') Version control

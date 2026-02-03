@@ -1,8 +1,3 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false,
-frames: false, history: false, Image: false, location: false, name: false,
-navigator: false, Option: false, parent: false, screen: false, setInterval:
-false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false,
-History: false*/
 /*global moment: false, ajax401: false, prefix: false, updateAjaxURL: false,
 disableAjaxCache: false, travelerGlobal: false, Holder: false*/
 /*global selectColumn: false, titleColumn: false, createdOnColumn: false,
@@ -15,10 +10,12 @@ filterEvent: false, ownerColumn: false, deadlineColumn: false,
 travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false,
 tagsColumn: false, sDomNoTNoR: false*/
 
-/*global archiveFromModal, transferFromModal, modalScroll*/
+/*global archiveFromModal, transferFromModal, modalScroll, docNoColumn,
+travelerVersionColumn, fnSelectAll, fnDeselect, updateStatusFromModal */
 
 import * as AddBinder from './lib/binder.js';
 import * as Modal from './lib/modal.js';
+import * as Table from './lib/table.js';
 
 function noneSelectedModal() {
   $('#modalLabel').html('Alert');
@@ -29,11 +26,7 @@ function noneSelectedModal() {
   $('#modal').modal('show');
 }
 
-function cloneFromModal(
-  travelerTable,
-  sharedTravelerTable,
-  groupSharedTravelerTable
-) {
+function cloneFromModal(tables) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
   var number = $('#modal .modal-body div.target').length;
@@ -63,9 +56,9 @@ function cloneFromModal(
         if (number === 0) {
           $('#return').prop('disabled', false);
           if (success) {
-            travelerTable.fnReloadAjax();
-            sharedTravelerTable.fnReloadAjax();
-            groupSharedTravelerTable.fnReloadAjax();
+            tables.forEach(function(table) {
+              table.fnReloadAjax();
+            });
           }
         }
       });
@@ -82,10 +75,10 @@ $(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
+  const tables = [];
   var travelerAoColumns = [
     selectColumn,
     travelerConfigLinkColumn,
-    travelerShareLinkColumn,
     travelerLinkColumn,
     titleColumn,
     docNoColumn,
@@ -93,18 +86,14 @@ $(function() {
     statusColumn,
     deviceColumn,
     tagsColumn,
-    // keysColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
+    createdByColumn,
     createdOnColumn,
-    // deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
   ];
-  fnAddFilterFoot('#traveler-table', travelerAoColumns);
-  var travelerTable = $('#traveler-table').dataTable({
-    sAjaxSource: '/travelers/json',
+  const travelerTableConfig = {
+    sAjaxSource: '/currenttravelers/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
       Holder.run({
@@ -123,12 +112,11 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: travelerAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [14, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
-  });
+  };
+  Table.sortByColumn(travelerTableConfig, updatedOnColumn, 'desc');
+  Table.initTableIfExists($('#traveler-table'), travelerTableConfig, tables);
 
   /*transferred traveler table starts*/
   var transferredTravelerAoColumns = [
@@ -151,7 +139,7 @@ $(function() {
     updatedOnColumn,
     travelerProgressColumn,
   ];
-  var transferredTravelerTable = $('#transferred-traveler-table').dataTable({
+  const transferredTravelerTableConfig = {
     sAjaxSource: '/transferredtravelers/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -171,14 +159,16 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: transferredTravelerAoColumns,
-    aaSorting: [
-      [10, 'desc'],
-      [11, 'desc'],
-      [14, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#transferred-traveler-table', transferredTravelerAoColumns);
+  };
+  Table.sortByColumn(transferredTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.initTableIfExists(
+    $('#transferred-traveler-table'),
+    transferredTravelerTableConfig,
+    tables
+  );
+
   /*transferred traveler table ends*/
 
   var sharedTravelerAoColumns = [
@@ -195,13 +185,11 @@ $(function() {
     sharedGroupColumn,
     ownerColumn,
     createdOnColumn,
-    // deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
   ];
-  fnAddFilterFoot('#shared-traveler-table', sharedTravelerAoColumns);
-  var sharedTravelerTable = $('#shared-traveler-table').dataTable({
+  const sharedTravelerTableConfig = {
     sAjaxSource: '/sharedtravelers/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -221,12 +209,16 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: sharedTravelerAoColumns,
-    aaSorting: [
-      [12, 'desc'],
-      [9, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
-  });
+  };
+  Table.sortByColumn(sharedTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.initTableIfExists(
+    $('#shared-traveler-table'),
+    sharedTravelerTableConfig,
+    tables
+  );
+
   var groupSharedTravelerAoColumns = [
     selectColumn,
     travelerLinkColumn,
@@ -245,8 +237,7 @@ $(function() {
     updatedOnColumn,
     travelerProgressColumn,
   ];
-  fnAddFilterFoot('#group-shared-traveler-table', sharedTravelerAoColumns);
-  var groupSharedTravelerTable = $('#group-shared-traveler-table').dataTable({
+  const groupSharedTravelerTableConfig = {
     sAjaxSource: '/groupsharedtravelers/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -266,12 +257,16 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: groupSharedTravelerAoColumns,
-    aaSorting: [
-      [12, 'desc'],
-      [9, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
-  });
+  };
+  Table.sortByColumn(groupSharedTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.initTableIfExists(
+    $('#group-shared-traveler-table'),
+    groupSharedTravelerTableConfig,
+    tables
+  );
+
   var archivedTravelerAoColumns = [
     selectColumn,
     travelerLinkColumn,
@@ -289,8 +284,7 @@ $(function() {
     updatedOnColumn,
     travelerProgressColumn,
   ];
-  fnAddFilterFoot('#archived-traveler-table', archivedTravelerAoColumns);
-  var archivedTravelerTable = $('#archived-traveler-table').dataTable({
+  const archivedTravelerTableConfig = {
     sAjaxSource: '/archivedtravelers/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -310,12 +304,15 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedTravelerAoColumns,
-    aaSorting: [
-      [3, 'desc'],
-      [11, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
-  });
+  };
+  Table.sortByColumn(archivedTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.initTableIfExists(
+    $('#archived-traveler-table'),
+    archivedTravelerTableConfig,
+    tables
+  );
 
   // show the tab in hash when loaded
   showHash();
@@ -327,11 +324,7 @@ $(function() {
         .parent()
         .hasClass('active')
     ) {
-      window.history.pushState(
-        null,
-        'FRIB traveler :: ' + this.text,
-        this.href
-      );
+      window.history.pushState(null, 'traveler :: ' + this.text, this.href);
     }
   });
 
@@ -373,8 +366,8 @@ $(function() {
         updateStatusFromModal(
           4,
           'travelers',
-          activeTable,
-          archivedTravelerTable
+          activeTable
+          // archivedTravelerTable
         );
       });
     }
@@ -425,11 +418,7 @@ $(function() {
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        cloneFromModal(
-          travelerTable,
-          sharedTravelerTable,
-          groupSharedTravelerTable
-        );
+        cloneFromModal(tables);
       });
     }
   });
@@ -489,11 +478,9 @@ $(function() {
   });
 
   $('#reload').click(function() {
-    travelerTable.fnReloadAjax();
-    transferredTravelerTable.fnReloadAjax();
-    sharedTravelerTable.fnReloadAjax();
-    groupSharedTravelerTable.fnReloadAjax();
-    archivedTravelerTable.fnReloadAjax();
+    tables.forEach(function(table) {
+      table.fnReloadAjax();
+    });
   });
   // binding events
   selectEvent();

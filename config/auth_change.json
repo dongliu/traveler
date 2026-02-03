@@ -1,12 +1,12 @@
 {
   "type": "ldap or cas",
   "proxy": "intra-gw.nscl.msu.edu",
-  "cas": "https://liud-dev.nscl.msu.edu/cas",
-  "proxied_cas": "https://intra-gw.nscl.msu.edu/cas",
+  "cas": "cas url",
+  "proxied_cas": "proxied cas url",
   "service": "http://localhost:3001/",
   "login_service": "http://localhost:3001/login",
-  "proxied_service": "https://intra-gw.nscl.msu.edu/3001/",
-  "login_proxied_service": "https://intra-gw.nscl.msu.edu/3001/login",
+  "proxied_service": "proxied service url",
+  "login_proxied_service": "proxied login url",
 
   "default_roles": [
     "OPTIONAL: Please remove if no default role is desired. Role will only be assigned to new users.",

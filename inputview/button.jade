@@ -1,6 +1,9 @@
 .pull-right.control-group-buttons
   .btn-group
-    a.btn.btn-info(data-toggle='tooltip', title='edit')
+    if (autoNumbering === false)
+      a.btn.btn-info(data-toggle='tooltip', title='number')
+        i.fa.fa-sort-numeric-asc.fa-lg
+    a.btn.btn-primary(data-toggle='tooltip', title='edit')
       i.fa.fa-edit.fa-lg
     a.btn.btn-info(data-toggle='tooltip', title='duplicate')
       i.fa.fa-copy.fa-lg

@@ -22,6 +22,8 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#forms', data-toggle='tab') #{viewConfig.terminology.form}s
+        li
+          a(href='#travelers', data-toggle='tab') Travelers
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
@@ -30,6 +32,13 @@ block content
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
           table#form-table.table.table-bordered.table-hover
+        #travelers.tab-pane
+          .btn-toolbar
+            .btn-group
+              button.btn.btn-info.reload
+                i.fa.fa-refresh.fa-lg
+                | &nbsp;Reload table
+          table#traveler-table.table.table-bordered.table-hover
 
 
 block js
@@ -46,6 +55,4 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/reviews.js')
-
-
+  script(type='module', src='#{prefix}/javascripts/reviews.js')
