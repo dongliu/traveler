@@ -121,18 +121,6 @@ The first button is to show or hide the attribute panel for the component. The
 second is to create a new component same to the current component. The third is
 to remove the current component from the template.
 
-##### Numbering
-
-**Note: this section depends on configuration**
-
-A sections and elements inside a template can be automatically numbered. Or the
-user can specify the numbers manually. When the auto numbering feature is
-disabled, a set of four buttons shows when hovering on a template component.
-
-<div class="btn-group"><a data-toggle="tooltip" title="number" class="btn btn-info"><i class="fa fa-sort-numeric-asc fa-lg"></i></a><a data-toggle="tooltip" title="edit" class="btn btn-primary"><i class="fa fa-edit fa-lg"></i></a><a data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="fa fa-copy fa-lg"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="fa fa-trash-o fa-lg"></i></a></div>
-
-Click the first button on the left to set the number of the current element.
-
 #### Save changes
 
 Whenever you update the template by adding a new input, or updating an input's
@@ -147,6 +135,8 @@ clicking the <a data-toggle="tooltip" title="edit" class="btn btn-info"><i
 class="fa fa-edit fa-lg"></i></a> button again.
 
 #### Sequence number
+
+**Note: this section depends on configuration**
 
 Sequence numbers are added automatically to the components. There are three
 levels of numbers: the section is the top level, the second is the rich
@@ -163,6 +153,14 @@ numbers are updated automatically. For the templates created with an older
 version of the builder, there might not be numbers. The user can generate the
 numbers by clicking the <button class="btn btn-primary">Generate
 numbering</button> button.
+
+A sections and elements inside a template can be automatically numbered. Or the
+user can specify the numbers manually. When the auto numbering feature is
+disabled, a set of four buttons shows when hovering on a template component.
+
+<div class="btn-group"><a data-toggle="tooltip" title="number" class="btn btn-info"><i class="fa fa-sort-numeric-asc fa-lg"></i></a><a data-toggle="tooltip" title="edit" class="btn btn-primary"><i class="fa fa-edit fa-lg"></i></a><a data-toggle="tooltip" title="duplicate" class="btn btn-info"><i class="fa fa-copy fa-lg"></i></a><a data-toggle="tooltip" title="remove" class="btn btn-warning"><i class="fa fa-trash-o fa-lg"></i></a></div>
+
+Click the first button on the left to set the number of the current element.
 
 #### Adjust component location
 
