@@ -50,7 +50,7 @@ module.exports = function(app) {
       {
         status: 1,
       },
-      'title formType status tags ver releasedOn releasedBy documentNumber, base.createdBy'
+      'title formType status tags ver releasedOn releasedBy documentNumber base.createdBy'
     )
       .populate('base.createdBy', 'name')
       .exec(function(err, forms) {

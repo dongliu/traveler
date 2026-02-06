@@ -52,6 +52,12 @@ function removeFromModal(cb) {
     dataType: 'json',
   })
     .done(function(json) {
+      if (json.location) {
+        $('.modal-body').append(
+          `The removal triggered the release of the document, you can check the released document <a href="${json.location}">here</a>.`
+        );
+        return;
+      }
       json.forEach(function(id) {
         const item = $(`#${id}`);
         item.wrap('<del></del>');
