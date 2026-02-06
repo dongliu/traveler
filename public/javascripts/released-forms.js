@@ -117,6 +117,7 @@ $(function() {
     releasedFormVersionColumn,
     docNoColumn,
     tagsColumn,
+    releasedTemplatedOwnerColumn,
     releasedOnColumn,
   ];
   const releasedFormTable = $('#released-form-table').dataTable({

@@ -50,14 +50,16 @@ module.exports = function(app) {
       {
         status: 1,
       },
-      'title formType status tags ver releasedOn releasedBy documentNumber'
-    ).exec(function(err, forms) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      return res.status(200).json(forms);
-    });
+      'title formType status tags ver releasedOn releasedBy documentNumber, base.createdBy'
+    )
+      .populate('base.createdBy', 'name')
+      .exec(function(err, forms) {
+        if (err) {
+          logger.error(err);
+          return res.status(500).send(err.message);
+        }
+        return res.status(200).json(forms);
+      });
   });
 
   app.get('/archived-released-forms/json', auth.ensureAuthenticated, function(
