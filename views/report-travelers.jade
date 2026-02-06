@@ -19,30 +19,32 @@ block content
 
     h4 Format control
     table.table.table-bordered.table-striped
-      col(width="25%")
-      col(width="75%")
+      //- col(width="25%")
+      //- col(width="75%")
       thead
         tr
-          td
-            label.checkbox
+          td system defined keys
+            //- label.checkbox
               input.group(type="checkbox", data-toggle="#system-keys", checked)
               | system defined keys
-          td
+          //- td
             label.checkbox.inline-checkbox
               input.group(type="checkbox", data-toggle="#discrepancy-keys", checked)
               | discrepancy reporting ids
-          td
-            label.checkbox.inline-checkbox
-              input.group(type="checkbox", data-toggle="#user-keys", checked)
-              | user defined reporting ids
-            label.checkbox.inline-checkbox
-              input.labels(type="checkbox", checked)
-              | input labels
+          if (userKey)
+            td
+              label.checkbox.inline-checkbox
+                input.group(type="checkbox", data-toggle="#user-keys", checked)
+                | user defined reporting ids
+              label.checkbox.inline-checkbox
+                input.labels(type="checkbox", checked)
+                | input labels
       tbody
         tr
           td#system-keys
-          td#discrepancy-keys
-          td#user-keys
+          //- td#discrepancy-keys
+          if (userKey)
+            td#user-keys
 
     table#report-table.table.table-bordered.table-hover(data-travelers='#{JSON.stringify(tid)}')
 
@@ -53,4 +55,4 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/report.js')
-  
+
