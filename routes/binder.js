@@ -34,13 +34,13 @@ module.exports = function(app) {
 
   app.get('/binders/json', auth.ensureAuthenticated, function(req, res) {
     Binder.find({
-      createdBy: req.session.userid,
+      // createdBy: req.session.userid,
       status: {
         $ne: 3,
       },
-      owner: {
-        $exists: false,
-      },
+      // owner: {
+      //   $exists: false,
+      // },
     }).exec(function(err, docs) {
       if (err) {
         console.error(err);
@@ -504,7 +504,7 @@ module.exports = function(app) {
     res
   ) {
     Binder.find({
-      createdBy: req.session.userid,
+      // createdBy: req.session.userid,
       status: 3,
     }).exec(function(err, binders) {
       if (err) {

@@ -1,8 +1,3 @@
-/*global clearInterval: false, clearTimeout: false, document: false, event: false,
-frames: false, history: false, Image: false, location: false, name: false,
-navigator: false, Option: false, parent: false, screen: false, setInterval:
-false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false,
-History: false*/
 /*global ajax401: false, prefix: false, updateAjaxURL: false, disableAjaxCache:
 false, moment: false, travelerGlobal: false*/
 /*global selectColumn: false, titleColumn: false, createdOnColumn: false,
@@ -17,6 +12,7 @@ transferredOnColumn: false, ownerColumn: false*/
 
 import * as AddBinder from './lib/binder.js';
 import * as Modal from './lib/modal.js';
+import { initTableIfExists, sortByColumn } from './lib/table.js';
 
 function formatItemUpdate(data) {
   return (
@@ -42,7 +38,10 @@ $(function() {
   updateAjaxURL(prefix);
   disableAjaxCache();
 
-  var binderAoColumns = [
+  const tables = [];
+
+  // Binder Table Configuration
+  const binderAoColumns = [
     selectColumn,
     binderConfigLinkColumn,
     binderShareLinkColumn,
@@ -56,8 +55,7 @@ $(function() {
     updatedOnColumn,
     binderWorkProgressColumn,
   ];
-  fnAddFilterFoot('#binder-table', binderAoColumns);
-  var binderTable = $('#binder-table').dataTable({
+  const binderTableConfig = {
     sAjaxSource: '/binders/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -77,13 +75,17 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: binderAoColumns,
-    aaSorting: [
-      [10, 'desc'],
-      [8, 'desc'],
-    ],
     sDom: sDomNoTools,
-  });
+  };
+  sortByColumn(binderTableConfig, updatedOnColumn, 'desc');
+  // sortByColumn(binderTableConfig, createdOnColumn, 'desc');
+  const binderTable = initTableIfExists(
+    $('#binder-table'),
+    binderTableConfig,
+    tables
+  );
 
+  // Transferred Binder Table Configuration
   var transferredBinderAoColumns = [
     selectColumn,
     binderConfigLinkColumn,
@@ -99,8 +101,7 @@ $(function() {
     updatedOnColumn,
     binderWorkProgressColumn,
   ];
-  fnAddFilterFoot('#transferred-binder-table', transferredBinderAoColumns);
-  var transferredBinderTable = $('#transferred-binder-table').dataTable({
+  const transferredBinderTableConfig = {
     sAjaxSource: '/transferredbinders/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -120,14 +121,18 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: transferredBinderAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [9, 'desc'],
-      [8, 'desc'],
-    ],
     sDom: sDomNoTools,
-  });
+  };
+  sortByColumn(transferredBinderTableConfig, updatedOnColumn, 'desc');
+  // sortByColumn(transferredBinderTableConfig, updatedByColumn, 'desc');
+  // sortByColumn(transferredBinderTableConfig, transferredOnColumn, 'desc');
+  const transferredBinderTable = initTableIfExists(
+    $('#transferred-binder-table'),
+    transferredBinderTableConfig,
+    tables
+  );
 
+  // Shared Binder Table Configuration
   var sharedBinderAoColumns = [
     selectColumn,
     binderLinkColumn,
@@ -141,8 +146,7 @@ $(function() {
     updatedOnColumn,
     binderWorkProgressColumn,
   ];
-  fnAddFilterFoot('#shared-binder-table', sharedBinderAoColumns);
-  var sharedBinderTable = $('#shared-binder-table').dataTable({
+  const sharedBinderTableConfig = {
     sAjaxSource: '/sharedbinders/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -162,13 +166,17 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: sharedBinderAoColumns,
-    aaSorting: [
-      [9, 'desc'],
-      [7, 'desc'],
-    ],
     sDom: sDomNoTools,
-  });
+  };
+  sortByColumn(sharedBinderTableConfig, updatedOnColumn, 'desc');
+  // sortByColumn(sharedBinderTableConfig, createdOnColumn, 'desc');
+  const sharedBinderTable = initTableIfExists(
+    $('#shared-binder-table'),
+    sharedBinderTableConfig,
+    tables
+  );
 
+  // Group Shared Binder Table Configuration
   var groupSharedBinderAoColumns = [
     selectColumn,
     binderLinkColumn,
@@ -183,8 +191,7 @@ $(function() {
     updatedOnColumn,
     binderWorkProgressColumn,
   ];
-  fnAddFilterFoot('#group-shared-binder-table', groupSharedBinderAoColumns);
-  var groupSharedBinderTable = $('#group-shared-binder-table').dataTable({
+  const groupSharedBinderTableConfig = {
     sAjaxSource: '/groupsharedbinders/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -204,13 +211,17 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: groupSharedBinderAoColumns,
-    aaSorting: [
-      [8, 'desc'],
-      [10, 'desc'],
-    ],
     sDom: sDomNoTools,
-  });
+  };
+  // sortByColumn(groupSharedBinderTableConfig, createdOnColumn, 'desc');
+  sortByColumn(groupSharedBinderTableConfig, updatedOnColumn, 'desc');
+  const groupSharedBinderTable = initTableIfExists(
+    $('#group-shared-binder-table'),
+    groupSharedBinderTableConfig,
+    tables
+  );
 
+  // Archived Binder Table Configuration
   var archivedBinderAoColumns = [
     selectColumn,
     binderLinkColumn,
@@ -224,8 +235,7 @@ $(function() {
     updatedOnColumn,
     binderWorkProgressColumn,
   ];
-  fnAddFilterFoot('#archived-binder-table', archivedBinderAoColumns);
-  var archivedBinderTable = $('#archived-binder-table').dataTable({
+  const archivedBinderTableConfig = {
     sAjaxSource: '/archivedbinders/json',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
@@ -245,12 +255,15 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedBinderAoColumns,
-    aaSorting: [
-      [3, 'desc'],
-      [9, 'desc'],
-    ],
     sDom: sDomNoTools,
-  });
+  };
+  sortByColumn(archivedBinderTableConfig, archivedOnColumn, 'desc');
+  // sortByColumn(archivedBinderTableConfig, updatedOnColumn, 'desc');
+  const archivedBinderTable = initTableIfExists(
+    $('#archived-binder-table'),
+    archivedBinderTableConfig,
+    tables
+  );
 
   // show the tab in hash when loaded
   showHash();
