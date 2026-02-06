@@ -137,7 +137,7 @@ form.pre('save', function(next) {
           } else {
             return next(
               new FormError(
-                `inconsistent usekey "${userkey}"found for the same input name`,
+                `inconsistent userkey "${userkey}"found for the same input name`,
                 400
               )
             );
