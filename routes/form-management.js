@@ -237,6 +237,9 @@ module.exports = function(app) {
         return res.status(200).send({
           message: 'form revision started successfully',
           form_id: baseForm._id,
+          location: `${
+            req.proxied ? authConfig.proxied_service : authConfig.service
+          }/forms/${baseForm._id}/`,
         });
       } catch (error) {
         logger.error(error);
