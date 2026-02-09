@@ -27,7 +27,7 @@ function travelFromModal() {
         $(that).addClass('text-success');
       })
       .fail(function(jqXHR) {
-        $(that).prepend('<i class="icon-question"></i>');
+        $(that).prepend('<i class="icon-question-sign"></i>');
         $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
@@ -83,7 +83,7 @@ function cloneFromModal(activeTable) {
         success = true;
       })
       .fail(function(jqXHR) {
-        $(that).prepend('<i class="icon-question"></i>');
+        $(that).prepend('<i class="icon-question-sign"></i>');
         $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
