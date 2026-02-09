@@ -34,7 +34,13 @@ function travelFromModal() {
       .always(function() {
         number = number - 1;
         if (number === 0) {
-          $('#return').prop('disabled', false);
+          // $('#return').prop('disabled', false);
+          $('#modal .modal-body').append(
+            '<div class="alert alert-info">All requests have been processed. Now redirect to the travel list.</div>'
+          );
+          setTimeout(function() {
+            window.location.href = '/travelers/';
+          }, 1500);
         }
       });
   });
