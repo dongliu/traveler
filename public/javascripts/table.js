@@ -1197,7 +1197,7 @@ function usersColumn(title, prop) {
         if (type === 'filter' || type === 'sort') {
           return names.join('; ');
         }
-        return names.join(' ');
+        return names.join(' ; ');
       }
       return '';
     },
