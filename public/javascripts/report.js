@@ -33,7 +33,13 @@ function constructControl(target, columns) {
 }
 
 function constructTable(table, travelers, colMap) {
-  var systemColumns = [titleColumn, deviceColumn, statusColumn];
+  var systemColumns = [
+    titleColumn,
+    docNoColumn,
+    deviceColumn,
+    tagsColumn,
+    statusColumn,
+  ];
   var discrepancyColumns = [];
   var userColumns = [];
   var labelColIndex = [];
@@ -45,13 +51,13 @@ function constructTable(table, travelers, colMap) {
   var rows = [];
   var id;
   // get all user defined keys
-  for (id in travelers) {
-    userKeys = _.union(userKeys, _.keys(travelers[id].user_defined)).sort();
-    discrepancyKeys = _.union(
-      discrepancyKeys,
-      _.keys(travelers[id].discrepancy)
-    ).sort();
-  }
+  // for (id in travelers) {
+  //   userKeys = _.union(userKeys, _.keys(travelers[id].user_defined)).sort();
+  //   discrepancyKeys = _.union(
+  //     discrepancyKeys,
+  //     _.keys(travelers[id].discrepancy)
+  //   ).sort();
+  // }
   // add discrepancy keys to discrepancyColumns and colMap
   discrepancyKeys.forEach(function(key, index) {
     discrepancyColumns.push(keyValueColumn('discrepancy', key));
@@ -101,7 +107,7 @@ function constructTable(table, travelers, colMap) {
     });
   });
 
-  // register lable event hander
+  // register label event handler
   $('.inline-checkbox input.labels').on('input', function() {
     var show = $(this).prop('checked');
     labelColIndex.forEach(function(c) {

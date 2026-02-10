@@ -30,7 +30,7 @@ function sendRequest(data, cb, option) {
   }).done(function(data, textStatus, request) {
     var timestamp = request.getResponseHeader('Date');
     if (data.location) {
-      document.location.href = data.location;
+      return (document.location.href = data.location);
     } else {
       $('#message').append(
         '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>The changes were saved ' +

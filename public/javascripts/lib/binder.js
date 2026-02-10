@@ -24,7 +24,7 @@ export function addItems(items, binders, type = 'traveler') {
         success = true;
       })
       .fail(function(jqXHR) {
-        $(that).prepend('<i class="icon-question"></i>');
+        $(that).prepend('<i class="icon-question-sign"></i>');
         $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })

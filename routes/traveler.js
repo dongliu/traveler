@@ -763,6 +763,7 @@ module.exports = function(app) {
           'status',
           'tags',
           'devices',
+          'documentNumber',
         ]);
         return res.status(200).json(output);
       } catch (error) {

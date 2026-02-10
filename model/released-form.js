@@ -23,6 +23,7 @@ const statusMap = {
 
 const formContent = new Schema({
   // _id is the form _id
+  createdBy: { type: String, ref: 'User' },
   html: String,
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
