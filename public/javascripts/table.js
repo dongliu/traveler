@@ -695,9 +695,29 @@ const ownerColumn = {
       return owner;
     }
     if (owner) {
-      return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
-        .substr(0, 1)
-        .toUpperCase()}" title="${owner}"></a>`;
+      return person(owner);
+      // return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
+      //   .substr(0, 1)
+      //   .toUpperCase()}" title="${owner}"></a>`;
+    }
+    return '';
+  },
+  bFilter: true,
+};
+
+const releasedTemplatedOwnerColumn = {
+  sTitle: 'Owner',
+  sDefaultContent: '',
+  mData(source, type) {
+    const owner = source.base?.createdBy;
+    if (type === 'sort' || type === 'filter') {
+      if (owner) {
+        return owner.name || owner.id || owner;
+      }
+      return '';
+    }
+    if (owner) {
+      return person(owner);
     }
     return '';
   },
@@ -1177,7 +1197,7 @@ function usersColumn(title, prop) {
         if (type === 'filter' || type === 'sort') {
           return names.join('; ');
         }
-        return names.join(' ');
+        return names.join(' ; ');
       }
       return '';
     },

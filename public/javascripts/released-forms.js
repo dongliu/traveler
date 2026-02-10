@@ -27,14 +27,20 @@ function travelFromModal() {
         $(that).addClass('text-success');
       })
       .fail(function(jqXHR) {
-        $(that).prepend('<i class="icon-question"></i>');
+        $(that).prepend('<i class="icon-question-sign"></i>');
         $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
       .always(function() {
         number = number - 1;
         if (number === 0) {
-          $('#return').prop('disabled', false);
+          // $('#return').prop('disabled', false);
+          $('#modal .modal-body').append(
+            '<div class="alert alert-info">All requests have been processed. Now redirect to the travel list.</div>'
+          );
+          setTimeout(function() {
+            window.location.href = '/travelers/';
+          }, 1500);
         }
       });
   });
@@ -77,7 +83,7 @@ function cloneFromModal(activeTable) {
         success = true;
       })
       .fail(function(jqXHR) {
-        $(that).prepend('<i class="icon-question"></i>');
+        $(that).prepend('<i class="icon-question-sign"></i>');
         $(that).append(` : ${jqXHR.responseText}`);
         $(that).addClass('text-error');
       })
@@ -117,6 +123,7 @@ $(function() {
     releasedFormVersionColumn,
     docNoColumn,
     tagsColumn,
+    releasedTemplatedOwnerColumn,
     releasedOnColumn,
   ];
   const releasedFormTable = $('#released-form-table').dataTable({

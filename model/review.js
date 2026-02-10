@@ -48,18 +48,22 @@ const review = new Schema({
   reviewResults: [reviewResult],
 });
 
-async function removeReviewRequest(doc, id, save = true) {
+async function removeReviewRequest(doc, ids, save = true) {
   try {
-    doc.__review.reviewRequests.id(id).remove();
+    ids.forEach(id => {
+      doc.__review.reviewRequests.id(id).remove();
+    });
+    let newDoc = doc;
     if (save) {
-      await doc.save();
+      newDoc = await doc.save();
     }
-    debug(`${id} removed from ${doc._id}`);
+    debug(`${ids} removed from ${doc._id}`);
     // const pull = { reviews: doc._id };
     // await User.findByIdAndUpdate(id, {
     //   $pull: pull,
     // });
     // debug(`${doc._id} removed from user ${id}`);
+    return newDoc;
   } catch (error) {
     logger.error(`request review db error: ${error}`);
     throw error;
@@ -104,9 +108,9 @@ function addReview(schema) {
     }
   };
 
-  schema.methods.removeReviewRequest = async function(id) {
+  schema.methods.removeReviewRequest = async function(ids) {
     const doc = this;
-    await removeReviewRequest(doc, id);
+    return await removeReviewRequest(doc, ids);
   };
 
   schema.methods.closeReviewRequests = async function() {
