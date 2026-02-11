@@ -268,7 +268,6 @@ $(function() {
   );
 
   var archivedTravelerAoColumns = [
-    selectColumn,
     travelerLinkColumn,
     titleColumn,
     docNoColumn,

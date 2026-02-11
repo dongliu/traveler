@@ -6,7 +6,9 @@
  transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
  versionColumn, releasedFormLinkColumn, releasedFormStatusColumn,
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
- transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn, docNoColumn */
+ transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn, docNoColumn, releasedTemplatedOwnerColumn */
+
+import { initTableIfExists, sortByColumn } from './lib/table.js';
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
@@ -114,6 +116,8 @@ $(function() {
   updateAjaxURL(prefix);
   disableAjaxCache();
 
+  const tables = [];
+
   /* released form table starts */
   const releasedFormAoColumns = [
     selectColumn,
@@ -126,7 +130,7 @@ $(function() {
     releasedTemplatedOwnerColumn,
     releasedOnColumn,
   ];
-  const releasedFormTable = $('#released-form-table').dataTable({
+  const releasedFormTableConfig = {
     sAjaxSource: '/released-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -146,15 +150,14 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: releasedFormAoColumns,
-    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
-  });
-  fnAddFilterFoot('#released-form-table', releasedFormAoColumns);
+  };
+  sortByColumn(releasedFormTableConfig, releasedOnColumn, 'desc');
+  initTableIfExists($('#released-form-table'), releasedFormTableConfig, tables);
   /* released form table ends */
 
   /* archived released form table starts */
   const archivedReleasedFormAoColumns = [
-    selectColumn,
     releasedFormLinkColumn,
     titleColumn,
     tagsColumn,
@@ -163,9 +166,7 @@ $(function() {
     archivedByColumn,
     archivedOnColumn,
   ];
-  const archivedReleasedFormTable = $(
-    '#archived-released-form-table'
-  ).dataTable({
+  const archivedReleasedFormTableConfig = {
     sAjaxSource: '/archived-released-forms/json',
     sAjaxDataProp: '',
     fnDrawCallback() {
@@ -185,12 +186,13 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedReleasedFormAoColumns,
-    aaSorting: [[7, 'desc']],
     sDom: sDomNoTools,
-  });
-  fnAddFilterFoot(
-    '#archived-released-form-table',
-    archivedReleasedFormAoColumns
+  };
+  sortByColumn(archivedReleasedFormTableConfig, archivedOnColumn, 'desc');
+  initTableIfExists(
+    $('#archived-released-form-table'),
+    archivedReleasedFormTableConfig,
+    tables
   );
   /* archived released form table ends */
 
@@ -312,8 +314,9 @@ $(function() {
   });
 
   $('#reload').click(function() {
-    releasedFormTable.fnReloadAjax();
-    archivedReleasedFormTable.fnReloadAjax();
+    tables.forEach(function(table) {
+      table.fnReloadAjax();
+    });
   });
   // binding events
   selectEvent();
