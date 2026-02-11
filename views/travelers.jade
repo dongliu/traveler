@@ -12,7 +12,7 @@ block head
 block content
   .container-fluid
     .btn-toolbar
-      .btn-group
+      //- .btn-group
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected travelers')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
@@ -48,7 +48,7 @@ block content
       .tab-content
         #travelers.tab-pane.active
           .btn-toolbar
-            .btn-group
+            //- .btn-group
               button.btn.btn-info.reload
                 i.fa.fa-refresh.fa-lg
                 | &nbsp;Reload table
@@ -61,7 +61,7 @@ block content
         if (viewConfig.transferOwnership)
           #transferredtravelers.tab-pane
             .btn-toolbar
-              .btn-group
+              //- .btn-group
                 button.btn.btn-info.reload
                   i.fa.fa-refresh.fa-lg
                   | &nbsp;Reload table
@@ -77,7 +77,7 @@ block content
         if (viewConfig.shareGroups)
           #groupsharedtravelers.tab-pane
             .btn-toolbar
-              .btn-group
+              //- .btn-group
                 button.btn.btn-info.reload
                   i.fa.fa-refresh.fa-lg
                   | &nbsp;Reload table
@@ -85,7 +85,7 @@ block content
         if (isAdmin)
           #archivedtravelers.tab-pane
             .btn-toolbar
-              .btn-group
+              //- .btn-group
                 button.btn.btn-info.reload
                   i.fa.fa-refresh.fa-lg
                   | &nbsp;Reload table

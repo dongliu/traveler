@@ -195,7 +195,7 @@ module.exports = function(app) {
     '/released-forms/:id/revision',
     auth.ensureAuthenticated,
     reqUtils.exist('id', ReleasedForm),
-    reqUtils.isOwnerOrAdminMw('id'),
+    reqUtils.requireAdmin(),
     reqUtils.filter('body', ['version']),
     reqUtils.hasAll('body', ['version']),
     async function revision(req, res) {
