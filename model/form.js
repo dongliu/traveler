@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const cheerio = require('cheerio');
 const appConfig = require('../config/config').app;
+const logger = require('../lib/loggers').getLogger();
 
 const { Schema } = mongoose;
 const { ObjectId } = Schema.Types;
@@ -177,6 +178,30 @@ form.pre('save', function(next) {
 form.methods.isBuilder = function() {
   const doc = this;
   return [0, 0.5, 1].includes(doc.status) && doc.archived !== true;
+};
+
+/**
+ * Clean up history records and remove the form document
+ * @returns Promise
+ */
+form.methods.clean = async function() {
+  const doc = this;
+  try {
+    // remove the records in history if any
+    if (doc.__updates && doc.__updates.length > 0) {
+      await mongoose
+        .model('History')
+        .deleteMany({
+          _id: { $in: doc.__updates },
+        })
+        .exec();
+    }
+    // remove the form document
+    await doc.remove();
+  } catch (error) {
+    logger.error(`clean form error: ${error}`);
+    throw error;
+  }
 };
 
 form.plugin(addVersion, {

@@ -376,11 +376,7 @@ module.exports = function(app) {
     async function(req, res) {
       const form = req[req.params.id];
       try {
-        // remove the records in history if any
-        await History.deleteMany({
-          _id: { $in: form.__updates },
-        }).exec();
-        await form.remove();
+        await form.clean();
         return res.status(200).send(`${req.params.id} deleted`);
       } catch (error) {
         logger.error(error);
