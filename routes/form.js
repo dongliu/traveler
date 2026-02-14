@@ -368,6 +368,27 @@ module.exports = function(app) {
     }
   );
 
+  app.delete(
+    '/forms/:id/',
+    auth.ensureAuthenticated,
+    reqUtils.requireAdmin(),
+    reqUtils.exist('id', Form),
+    async function(req, res) {
+      const form = req[req.params.id];
+      try {
+        // remove the records in history if any
+        await History.deleteMany({
+          _id: { $in: form.__updates },
+        }).exec();
+        await form.remove();
+        return res.status(200).send(`${req.params.id} deleted`);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
   app.get(
     '/forms/:id/json',
     auth.ensureAuthenticated,
