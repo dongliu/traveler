@@ -910,6 +910,8 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
+    reqUtils.filter('body', ['title', 'documentNumber']),
+    reqUtils.hasAll('body', ['title', 'documentNumber']),
     async function(req, res) {
       const doc = req[req.params.id];
       const form = {};
