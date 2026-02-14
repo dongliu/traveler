@@ -22,9 +22,6 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#released', data-toggle='tab') Released #{viewConfig.terminology.form}s
-        if (isAdmin)
-          li
-            a(href='#archived-released-forms', data-toggle='tab') Archived released #{viewConfig.terminology.form}s
       .tab-content
         #released.tab-pane.active
           .btn-toolbar
@@ -33,9 +30,6 @@ block content
                 i.fa.fa-plane.fa-lg
                 | &nbsp;Travel
           table#released-form-table.table.table-bordered.table-hover
-        if (isAdmin)
-          #archived-released-forms.tab-pane
-            table#archived-released-form-table.table.table-bordered.table-hover
 
 
 block js
