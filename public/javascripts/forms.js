@@ -8,7 +8,7 @@
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
  transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn, shareGroups */
 
-import { initTableIfExists } from './lib/table.js';
+import { initTableIfExists, sortByColumn } from './lib/table.js';
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
@@ -137,7 +137,7 @@ function formatItemUpdate(data) {
 }
 
 function cloneItem(data) {
-  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" id="title" value="${data.title} clone"><br> and document number: <input type="text" id="docNo"></div>`;
+  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" id="title" value="${data.title} clone"><br> and document number: <input type="text" id="docNo" required></div>`;
 }
 
 $(function() {
@@ -187,13 +187,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [10, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
-
+  sortByColumn(formTableConfig, updatedOnColumn, 'desc');
   initTableIfExists($('#form-table'), formTableConfig, tables);
 
   /* form table ends */
