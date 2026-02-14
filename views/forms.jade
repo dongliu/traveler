@@ -20,11 +20,7 @@ block content
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
-      //- .btn-group
-      //-   button.btn.btn-info#reload
-      //-     i.fa.fa-refresh.fa-lg
-      //-     | &nbsp;Reload all tables
-      if (isAdmin)
+      //- if (isAdmin)
         .btn-group
           a.btn.btn-info#form-management(href='#{prefix}/form-management/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='manage #{viewConfig.terminology.form}s')
             i.fa.fa-suitcase.fa-lg
@@ -39,91 +35,25 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#forms', data-toggle='tab') Draft #{viewConfig.terminology.form}s
-        //- if (viewConfig.transferOwnership)
-        //-   li
-        //-     a(href='#transferredforms', data-toggle='tab') Transferred draft #{viewConfig.terminology.form}s
-        //- if (viewConfig.shareGroups)
-        //-   li
-        //-     a(href='#groupsharedfroms', data-toggle='tab') Group shared draft #{viewConfig.terminology.form}s
         li
           a(href='#submittedforms', data-toggle='tab') Under review #{viewConfig.terminology.form}s
-        //- if (isAdmin)
-          li
-            a(href='#closedforms', data-toggle='tab') Approved and released #{viewConfig.terminology.form}
-          li
-            a(href='#archivedforms', data-toggle='tab') Archived #{viewConfig.terminology.form}s
       .tab-content
         #forms.tab-pane.active
           .btn-toolbar
-            //- .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
             if (viewConfig.transferOwnership)
               .btn-group
                 button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
           table#form-table.table.table-bordered.table-hover
-        //- if (viewConfig.transferOwnership)
-        //-   #transferredforms.tab-pane
-        //-     .btn-toolbar
-        //-       .btn-group
-        //-         button.btn.btn-info.reload
-        //-           i.fa.fa-refresh.fa-lg
-        //-           | &nbsp;Reload table
-        //-       .btn-group
-        //-         button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
-        //-           i.fa.fa-user.fa-lg
-        //-           | &nbsp;Transfer ownership
-        //-     table#transferred-form-table.table.table-bordered.table-hover
-        //- if (viewConfig.shareUsers)
-        //-   #sharedfroms.tab-pane
-        //-     .btn-toolbar
-        //-       .btn-group
-        //-         button.btn.btn-info.reload
-        //-           i.fa.fa-refresh.fa-lg
-        //-           | &nbsp;Reload table
-        //-     table#shared-form-table.table.table-bordered.table-hover
-        //- if (viewConfig.shareGroups)
-        //-   #groupsharedfroms.tab-pane
-        //-     .btn-toolbar
-        //-       .btn-group
-        //-         button.btn.btn-info.reload
-        //-           i.fa.fa-refresh.fa-lg
-        //-           | &nbsp;Reload table
-        //-     table#group-shared-form-table.table.table-bordered.table-hover
-        //- the table for under review forms
         #submittedforms.tab-pane
           .btn-toolbar
-            //- .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
             if (viewConfig.transferOwnership)
               .btn-group
                 button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected forms to a coworker')
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
           table#submitted-form-table.table.table-bordered.table-hover
-        //- if (isAdmin)
-          //- the table for forms going through review release flow
-          #closedforms.tab-pane
-            h3 The templates in this table were reviewed and released
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-            table#closed-form-table.table.table-bordered.table-hover
-          #archivedforms.tab-pane
-            h3 The templates in this table were archived
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-            table#archived-form-table.table.table-bordered.table-hover
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
