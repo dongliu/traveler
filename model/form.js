@@ -152,7 +152,7 @@ form.pre('save', function(next) {
         types[inputName] = inputType;
         // add user key mapping if userkey is not null or empty
         if (userkey) {
-          if (mapping.hasOwnProperty(userkey)) {
+          if (Object.hasOwn(mapping, userkey)) {
             return next(
               new FormError(`duplicated input userkey "${userkey}"`, 400)
             );
