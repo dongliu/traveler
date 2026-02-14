@@ -16,10 +16,11 @@ block content
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
-      //- .btn-group
-        button.btn.btn-info#reload
-          i.fa.fa-refresh.fa-lg
-          | &nbsp;Reload all tables
+      if (isAdmin)
+        .btn-group
+          a.btn.btn-danger#delete(data-toggle='tooltip', title='delete selected #{viewConfig.terminology.form}s')
+            i.fa.fa-trash.fa-lg
+            | &nbsp;Delete
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
