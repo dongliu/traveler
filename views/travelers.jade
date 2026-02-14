@@ -24,6 +24,11 @@ block content
         button.btn.btn-primary#report(data-toggle='tooltip', title='generate report for selected travelers')
           i.fa.fa-table.fa-large
           | &nbsp;Generate report
+      if (isAdmin)
+        .btn-group
+          a.btn.btn-danger#delete(data-toggle='tooltip', title='delete selected travelers')
+            i.fa.fa-trash.fa-lg
+            | &nbsp;Delete
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header

@@ -11,6 +11,8 @@ var DataError = require('../lib/error').DataError;
 require('./binder');
 var Binder = mongoose.model('Binder');
 
+const logger = require('../lib/loggers').getLogger();
+
 const { addReview } = require('./review');
 const { addVersion } = require('./history.js');
 
@@ -189,6 +191,35 @@ traveler.plugin(addReview);
 
 // add version for review
 traveler.plugin(addVersion, {});
+
+/**
+ * Clean up traveler data and notes, and then remove the traveler itself
+ * @returns Promise
+ */
+traveler.methods.clean = async function() {
+  const doc = this;
+  try {
+    // remove the traveler data related to that traveler
+    await mongoose
+      .model('TravelerData')
+      .deleteMany({
+        traveler: doc._id,
+      })
+      .exec();
+    // remove the traveler notes related to that traveler
+    await mongoose
+      .model('TravelerNote')
+      .deleteMany({
+        traveler: doc._id,
+      })
+      .exec();
+    // remove the traveler
+    await doc.remove();
+  } catch (error) {
+    logger.error(`clean traveler error: ${error}`);
+    throw error;
+  }
+};
 
 /**
  * update the progress of binders that include this traveler document

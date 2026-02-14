@@ -1477,6 +1477,23 @@ module.exports = function(app) {
   );
 
   app.delete(
+    '/travelers/:id/',
+    auth.ensureAuthenticated,
+    reqUtils.requireAdmin(),
+    reqUtils.exist('id', Traveler),
+    async function(req, res) {
+      const traveler = req[req.params.id];
+      try {
+        await traveler.clean();
+        return res.status(200).send(`${req.params.id} deleted`);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
+  app.delete(
     '/travelers/:id/share/:list/:shareid',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
