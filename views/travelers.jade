@@ -41,17 +41,10 @@ block content
         if (viewConfig.shareGroups)
           li
             a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
-        if (isAdmin)
-          li
-            a(href='#archivedtravelers', data-toggle='tab') Archived travelers
 
       .tab-content
         #travelers.tab-pane.active
           .btn-toolbar
-            //- .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
             if (viewConfig.transferOwnership)
               .btn-group
                 button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
@@ -61,14 +54,6 @@ block content
         if (viewConfig.transferOwnership)
           #transferredtravelers.tab-pane
             .btn-toolbar
-              //- .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-              .btn-group
-                button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
-                  i.fa.fa-archive.fa-lg
-                  | &nbsp;Archive
               .btn-group
                 button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
                   i.fa.fa-user.fa-lg
@@ -77,20 +62,7 @@ block content
         if (viewConfig.shareGroups)
           #groupsharedtravelers.tab-pane
             .btn-toolbar
-              //- .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
             table#group-shared-traveler-table.table.table-bordered.table-hover
-        if (isAdmin)
-          #archivedtravelers.tab-pane
-            .btn-toolbar
-              //- .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-            table#archived-traveler-table.table.table-bordered.table-hover
-
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
