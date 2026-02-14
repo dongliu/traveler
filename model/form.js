@@ -83,7 +83,7 @@ const form = new Schema({
     default: 'normal',
     enum: ['normal', 'discrepancy'],
   },
-  documentNumber: { type: String, unique: true },
+  documentNumber: { type: String, unique: true, required: true, trim: true },
   versionNotes: String,
 });
 
