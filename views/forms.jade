@@ -20,6 +20,11 @@ block content
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
+      if (isAdmin)
+        .btn-group
+          a.btn.btn-danger#delete(data-toggle='tooltip', title='delete selected #{viewConfig.terminology.form}s')
+            i.fa.fa-trash.fa-lg
+            | &nbsp;Delete
       //- if (isAdmin)
         .btn-group
           a.btn.btn-info#form-management(href='#{prefix}/form-management/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='manage #{viewConfig.terminology.form}s')

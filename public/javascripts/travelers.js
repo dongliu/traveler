@@ -11,7 +11,7 @@ travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false,
 tagsColumn: false, sDomNoTNoR: false*/
 
 /*global archiveFromModal, transferFromModal, modalScroll, docNoColumn,
-travelerVersionColumn, fnSelectAll, fnDeselect, updateStatusFromModal */
+travelerVersionColumn, fnSelectAll, fnDeselect, updateStatusFromModal, createdByColumn */
 
 import * as AddBinder from './lib/binder.js';
 import * as Modal from './lib/modal.js';
