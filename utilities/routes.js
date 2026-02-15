@@ -513,7 +513,7 @@ var traveler = {
       doc.touchedInputs = [];
       data.forEach(function(d) {
         // check if the data is for the active form
-        if (labels.hasOwnProperty(d.name)) {
+        if (Object.hasOwn(labels, d.name)) {
           addInputName(d.name, doc.touchedInputs);
         }
       });
