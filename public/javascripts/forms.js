@@ -237,12 +237,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [12, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(transferredFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists(
     $('#transferred-form-table'),
     transferredFormTableConfig,
@@ -292,9 +290,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
-    aaSorting: [[10, 'desc']],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(sharedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists($('#shared-form-table'), sharedFormTableConfig, tables);
   /* shared form table ends */
 
@@ -320,9 +319,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: groupSharedFormAoColumns,
-    aaSorting: [[9, 'desc']],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(groupSharedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists(
     $('#group-shared-form-table'),
     groupSharedFormTableConfig,
@@ -371,12 +371,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: submittedFormAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [10, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(submittedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists(
     $('#submitted-form-table'),
     submittedFormTableConfig,
@@ -423,12 +421,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: closedFormAoColumns,
-    aaSorting: [
-      [9, 'desc'],
-      [8, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(closedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists($('#closed-form-table'), closedFormTableConfig, tables);
   /* submitted form table ends */
 
@@ -463,9 +459,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(archivedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists($('#archived-form-table'), archivedFormTableConfig, tables);
   /* archived form table ends */
 
