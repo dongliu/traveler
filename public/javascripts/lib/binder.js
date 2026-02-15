@@ -83,10 +83,7 @@ export function addModal(fromTable, type = 'traveler') {
     },
     bDeferRender: true,
     aoColumns: binderAoColumns,
-    aaSorting: [
-      [4, 'desc'],
-      [5, 'desc'],
-    ],
+    aaSorting: [[5, 'desc']],
     sDom: sDomNoTNoR,
   });
   selectEvent();
