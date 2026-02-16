@@ -329,8 +329,9 @@ module.exports = function(app) {
       status: {
         $ne: 4,
       },
+      inBinder: { $ne: true },
     };
-    if (req.query.hasOwnProperty('device')) {
+    if (Object.hasOwn(req.query, 'device')) {
       search.devices = {
         $in: [req.query.device],
       };
