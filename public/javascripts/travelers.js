@@ -111,26 +111,19 @@ $(function() {
     selectColumn,
     travelerConfigLinkColumn,
     travelerLinkColumn,
-    titleColumn,
     docNoColumn,
     travelerVersionColumn,
-    statusColumn,
-    deviceColumn,
+    titleColumn,
     tagsColumn,
-    createdByColumn,
-    createdOnColumn,
-    filledByColumn,
+    deviceColumn,
+    ownerColumn,
+    statusColumn,
     updatedOnColumn,
     travelerProgressColumn,
   ];
   const travelerTableConfig = {
     sAjaxSource: '/currenttravelers/json',
     sAjaxDataProp: '',
-    fnDrawCallback: function() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
