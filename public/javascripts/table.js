@@ -76,7 +76,7 @@ function dateColumn(title, key) {
       if (type === 'sort') {
         return source[key];
       }
-      return formatDate(source[key]);
+      return formatDateLong(source[key]);
     },
     sDefaultContent: '',
   };
@@ -696,9 +696,6 @@ const ownerColumn = {
     }
     if (owner) {
       return person(owner);
-      // return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
-      //   .substr(0, 1)
-      //   .toUpperCase()}" title="${owner}"></a>`;
     }
     return '';
   },
