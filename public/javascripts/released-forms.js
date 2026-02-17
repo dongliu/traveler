@@ -122,10 +122,9 @@ $(function() {
   const releasedFormAoColumns = [
     selectColumn,
     releasedFormLinkColumn,
-    titleColumn,
-    releasedFormStatusColumn,
-    releasedFormVersionColumn,
     docNoColumn,
+    releasedFormVersionColumn,
+    titleColumn,
     tagsColumn,
     releasedTemplatedOwnerColumn,
     releasedOnColumn,
@@ -133,11 +132,6 @@ $(function() {
   const releasedFormTableConfig = {
     sAjaxSource: '/released-forms/json',
     sAjaxDataProp: '',
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
