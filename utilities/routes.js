@@ -156,26 +156,43 @@ const binderUtil = {
     new Binder(binderToCreate).save(newBinderResultCallback);
   },
 
-  deleteWork: function(binder, workId, userId, req, res) {
-    var work = binder.works.id(workId);
+  async deleteWork(binder, workId, userId, req, res) {
+    try {
+      const work = binder.works.id(workId);
 
-    if (!work) {
-      return res
-        .status(404)
-        .send('Work ' + req.params.wid + ' not found in the binder.');
-    }
-
-    work.remove();
-    binder.updatedBy = userId;
-    binder.updatedOn = Date.now();
-
-    binder.updateProgress(function(err, newPackage) {
-      if (err) {
-        console.log(err);
-        return res.status(500).send(err.message);
+      if (!work) {
+        return res
+          .status(404)
+          .send('Work ' + req.params.wid + ' not found in the binder.');
       }
-      return res.json(newPackage);
-    });
+      // if this is a traveler, then update the inBinder field
+      let travelerDoc;
+      if (work.refType === 'traveler') {
+        travelerDoc = await Traveler.findById(work._id).exec();
+        travelerDoc.inBinder = false;
+      }
+
+      work.remove();
+      binder.updatedBy = userId;
+      binder.updatedOn = Date.now();
+
+      const newBinder = await new Promise((resolve, reject) => {
+        binder.updateProgress((err, newPackage) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(newPackage);
+          }
+        });
+      });
+      if (travelerDoc) {
+        await travelerDoc.save();
+      }
+      return res.json(newBinder);
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).send(error.message);
+    }
   },
   async addWork(binder, userId, req, res) {
     try {
