@@ -684,7 +684,7 @@ const firstReviewRequestedOnColumn = {
   },
 };
 
-const createdOnColumn = dateColumn('Created', 'createdOn');
+const createdOnColumn = longDateColumn('Created', 'createdOn');
 const createdByColumn = personColumn('Created by', 'createdBy');
 const ownerColumn = {
   sTitle: 'Owner',
