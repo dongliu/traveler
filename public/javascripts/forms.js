@@ -151,16 +151,12 @@ $(function() {
     selectColumn,
     formLinkColumn,
     formConfigLinkColumn,
-    formShareLinkColumn,
-    titleColumn,
-    formStatusColumn,
     docNoColumn,
     versionColumn,
+    titleColumn,
     tagsColumn,
-    createdOnColumn,
+    ownerColumn,
     updatedOnColumn,
-    updatedByColumn,
-    sharedWithColumn,
   ];
 
   if (shareGroups) {
@@ -335,16 +331,12 @@ $(function() {
     selectColumn,
     formLinkColumn,
     formConfigLinkColumn,
-    formReviewLinkColumn,
-    titleColumn,
-    formStatusColumn,
     docNoColumn,
     versionColumn,
+    titleColumn,
     tagsColumn,
-    createdOnColumn,
+    ownerColumn,
     updatedOnColumn,
-    updatedByColumn,
-    sharedWithColumn,
   ];
 
   if (shareGroups) {
