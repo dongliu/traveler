@@ -4,7 +4,7 @@
 
 import * as Modal from './modal.js';
 
-export function addItems(items, binders, type = 'traveler') {
+export function addItems(items, binders, type = 'traveler', cb) {
   let number = $('#modal #progress div.target').length;
   $('#modal #progress div.target').each(function() {
     const that = this;
@@ -32,6 +32,9 @@ export function addItems(items, binders, type = 'traveler') {
         number = number - 1;
         if (number === 0) {
           $('#return').prop('disabled', false);
+          if (cb) {
+            cb();
+          }
         }
       });
   });
@@ -103,13 +106,23 @@ export function addModal(fromTable, type = 'traveler') {
         .addClass('text-warning');
       $('#submit').prop('disabled', false);
       $('#return').prop('disabled', false);
-    } else {
-      selectedRow.forEach(function(row) {
-        const data = ownedBinderTable.fnGetData(row);
-        binders.push(data._id);
-        $('#modal #progress').append(Modal.formatItemUpdate(data));
-      });
-      addItems(items, binders, type);
+      return;
     }
+    if (selectedRow.length > 1) {
+      $('#modal #select')
+        .text('Please select only one binder!')
+        .addClass('text-warning');
+      $('#submit').prop('disabled', false);
+      $('#return').prop('disabled', false);
+      return;
+    }
+    selectedRow.forEach(function(row) {
+      const data = ownedBinderTable.fnGetData(row);
+      binders.push(data._id);
+      $('#modal #progress').append(Modal.formatItemUpdate(data));
+    });
+    addItems(items, binders, type, function() {
+      fromTable.fnReloadAjax();
+    });
   });
 }
