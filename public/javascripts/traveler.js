@@ -1,5 +1,5 @@
 /*
-global document, window, FormData, linkTarget, validationMessage, isValid,
+global linkTarget, validationMessage, isValid,
 moment, Binder, travelerStatus, finishedInput: writable, ajax401, prefix,
 DiscrepancyFormLoader, traveler, markValidity, markFormValidity, findById,
 livespan, Modernizr, createSideNav, generateHistoryRecordHtml

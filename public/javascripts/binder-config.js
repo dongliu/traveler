@@ -268,7 +268,7 @@ $(function() {
       '<div class="target" id="' +
         data._id +
         '"><b>' +
-        data.alias +
+        data.title +
         '</b>, added ' +
         moment(data.addedOn).fromNow() +
         '</div>'

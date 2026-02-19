@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-/* global formStatus, released_form_version_mgmt, selectColumn, titleColumn, versionColumn, releasedOnColumn, releasedByColumn, releasedFormLinkColumn, sDomPage, selectMultiEvent, filterEvent, fnAddFilterFoot, selectOneEvent, fnGetSelectedInPage, id  */
+/* global formStatus, released_form_version_mgmt, selectColumn, titleColumn, versionColumn, releasedOnColumn, releasedByColumn, releasedFormLinkColumn, sDomPage, selectMultiEvent, filterEvent, fnAddFilterFoot, selectOneEvent, fnGetSelectedInPage, id , defaultRequired, userKey, autoNumbering */
 
 /* global tinymce: false, rivets: false, UID: false, input: false, spec: false,
  ajax401: false, disableAjaxCache:false, prefix: false, updateAjaxURL: false,
@@ -1023,6 +1023,7 @@ function file_edit($cgr) {
   }
 
   var $upload = $(input.upload());
+  const $buttons = $(input.button());
   var $label = $(spec.label());
   var $required = $(spec.required());
   var $userkey = $(spec.userkey());
@@ -1041,13 +1042,7 @@ function file_edit($cgr) {
   const $new_cgr = $(
     '<div class="control-group-wrap" data-status="editing"><span class="fe-type">file</span></div>'
   ).append($upload);
-  if ($cgr) {
-    $cgr.replaceWith($new_cgr);
-    $new_cgr.after($edit);
-  } else {
-    $('#output').append($new_cgr);
-    $('#output').append($edit);
-  }
+  add_new_cgr($cgr, $new_cgr, $buttons, $edit);
 
   const model = {
     label: label,
@@ -1320,6 +1315,14 @@ function binding_events() {
           $('.control-group-buttons', $(this)).show();
         } else {
           $(this).prepend(input.button());
+        }
+        // if this is a figure, disable the numbering button
+        if ($(this).find('figure').length) {
+          $(this)
+            .find('a.btn[title="number"]')
+            .removeClass('btn-info')
+            .css('color', '#999')
+            .prop('disabled', true);
         }
       }
     }

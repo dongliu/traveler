@@ -6,9 +6,9 @@
  transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
  versionColumn, docNoColumn, releasedFormLinkColumn, releasedFormStatusColumn,
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
- transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn */
+ transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn, shareGroups */
 
-import { initTableIfExists } from './lib/table.js';
+import { initTableIfExists, sortByColumn } from './lib/table.js';
 
 function travelFromModal() {
   $('#submit').prop('disabled', true);
@@ -37,6 +37,35 @@ function travelFromModal() {
         number = number - 1;
         if (number === 0) {
           $('#return').prop('disabled', false);
+        }
+      });
+  });
+}
+
+function deleteFromModal(activeTable) {
+  $('#submit').prop('disabled', true);
+  $('#return').prop('disabled', true);
+  let number = $('#modal .modal-body div.target').length;
+  $('#modal .modal-body div.target').each(function() {
+    const that = this;
+    $.ajax({
+      url: `/forms/${that.id}/`,
+      type: 'DELETE',
+    })
+      .done(function() {
+        $(that).prepend('<i class="fa fa-check"></i>');
+        $(that).addClass('text-success');
+      })
+      .fail(function(jqXHR) {
+        $(that).prepend('<i class="icon-question-sign"></i>');
+        $(that).append(` : ${jqXHR.responseText}`);
+        $(that).addClass('text-error');
+      })
+      .always(function() {
+        number = number - 1;
+        if (number === 0) {
+          $('#return').prop('disabled', false);
+          activeTable.fnReloadAjax();
         }
       });
   });
@@ -108,7 +137,7 @@ function formatItemUpdate(data) {
 }
 
 function cloneItem(data) {
-  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" id="title" value="${data.title} clone"><br> and document number: <input type="text" id="docNo"></div>`;
+  return `<div class="target" id="${data._id}">clone <b>${data.title}</b> <br> with new title: <input type="text" id="title" value="${data.title} clone"><br> and document number: <input type="text" id="docNo" required></div>`;
 }
 
 $(function() {
@@ -122,16 +151,12 @@ $(function() {
     selectColumn,
     formLinkColumn,
     formConfigLinkColumn,
-    formShareLinkColumn,
-    titleColumn,
-    formStatusColumn,
     docNoColumn,
     versionColumn,
+    titleColumn,
     tagsColumn,
-    createdOnColumn,
+    ownerColumn,
     updatedOnColumn,
-    updatedByColumn,
-    sharedWithColumn,
   ];
 
   if (shareGroups) {
@@ -158,13 +183,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: formAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [10, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
-
+  sortByColumn(formTableConfig, updatedOnColumn, 'desc');
   initTableIfExists($('#form-table'), formTableConfig, tables);
 
   /* form table ends */
@@ -211,12 +233,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: transferredFormAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [12, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(transferredFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists(
     $('#transferred-form-table'),
     transferredFormTableConfig,
@@ -266,9 +286,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: sharedFormAoColumns,
-    aaSorting: [[10, 'desc']],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(sharedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists($('#shared-form-table'), sharedFormTableConfig, tables);
   /* shared form table ends */
 
@@ -294,9 +315,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: groupSharedFormAoColumns,
-    aaSorting: [[9, 'desc']],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(groupSharedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists(
     $('#group-shared-form-table'),
     groupSharedFormTableConfig,
@@ -309,16 +331,12 @@ $(function() {
     selectColumn,
     formLinkColumn,
     formConfigLinkColumn,
-    formReviewLinkColumn,
-    titleColumn,
-    formStatusColumn,
     docNoColumn,
     versionColumn,
+    titleColumn,
     tagsColumn,
-    createdOnColumn,
+    ownerColumn,
     updatedOnColumn,
-    updatedByColumn,
-    sharedWithColumn,
   ];
 
   if (shareGroups) {
@@ -345,12 +363,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: submittedFormAoColumns,
-    aaSorting: [
-      [11, 'desc'],
-      [10, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(submittedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists(
     $('#submitted-form-table'),
     submittedFormTableConfig,
@@ -397,12 +413,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: closedFormAoColumns,
-    aaSorting: [
-      [9, 'desc'],
-      [8, 'desc'],
-    ],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(closedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists($('#closed-form-table'), closedFormTableConfig, tables);
   /* submitted form table ends */
 
@@ -437,9 +451,10 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: archivedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [],
     sDom: sDomNoTools,
   };
+  sortByColumn(archivedFormTableConfig, updatedOnColumn, 'desc');
   initTableIfExists($('#archived-form-table'), archivedFormTableConfig, tables);
   /* archived form table ends */
 
@@ -461,7 +476,7 @@ $(function() {
     const selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No form has been selected!');
+      $('#modal .modal-body').html('No item has been selected!');
       $('#modal .modal-footer').html(
         '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
@@ -490,7 +505,7 @@ $(function() {
     const selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No form has been selected!');
+      $('#modal .modal-body').html('No item has been selected!');
       $('#modal .modal-footer').html(
         '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
@@ -538,7 +553,7 @@ $(function() {
     const selected = fnGetSelected(activeTable, 'row-selected');
     if (selected.length === 0) {
       $('#modalLabel').html('Alert');
-      $('#modal .modal-body').html('No form has been selected!');
+      $('#modal .modal-body').html('No item has been selected!');
       $('#modal .modal-footer').html(
         '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
@@ -556,6 +571,33 @@ $(function() {
       $('#modal').modal('show');
       $('#submit').on('click', function() {
         cloneFromModal(activeTable, $('#form-table').dataTable());
+      });
+    }
+  });
+
+  $('#delete').click(function() {
+    const activeTable = $('.tab-pane.active table').dataTable();
+    const selected = fnGetSelected(activeTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No item has been selected!');
+      $('#modal .modal-footer').html(
+        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html(`Delete following ${selected.length} items? `);
+      $('#modal .modal-body').empty();
+      selected.forEach(function(row) {
+        const data = activeTable.fnGetData(row);
+        $('#modal .modal-body').append(formatItemUpdate(data));
+      });
+      $('#modal .modal-footer').html(
+        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
+      $('#modal').modal('show');
+      $('#submit').click(function() {
+        deleteFromModal(activeTable);
       });
     }
   });

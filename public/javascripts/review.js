@@ -206,11 +206,6 @@ $(function() {
   const reviewTable = $('#review-table').dataTable({
     aaData: [],
     aoColumns: reviewAoColumns,
-    fnDrawCallback() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
     aaSorting: [[2, 'desc']],
     sDom: sDomNoTools,
   });

@@ -684,7 +684,7 @@ const firstReviewRequestedOnColumn = {
   },
 };
 
-const createdOnColumn = dateColumn('Created', 'createdOn');
+const createdOnColumn = longDateColumn('Created', 'createdOn');
 const createdByColumn = personColumn('Created by', 'createdBy');
 const ownerColumn = {
   sTitle: 'Owner',
@@ -696,9 +696,6 @@ const ownerColumn = {
     }
     if (owner) {
       return person(owner);
-      // return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
-      //   .substr(0, 1)
-      //   .toUpperCase()}" title="${owner}"></a>`;
     }
     return '';
   },
@@ -726,7 +723,7 @@ const releasedTemplatedOwnerColumn = {
 
 const clonedByColumn = personColumn('Cloned by', 'clonedBy');
 
-const updatedOnColumn = dateColumn('Updated', 'updatedOn');
+const updatedOnColumn = longDateColumn('Updated', 'updatedOn');
 const updatedByColumn = personColumn('Updated by', 'updatedBy');
 
 const releasedOnColumn = longDateColumn('Released', 'releasedOn');
