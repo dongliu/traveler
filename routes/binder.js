@@ -34,13 +34,9 @@ module.exports = function(app) {
 
   app.get('/binders/json', auth.ensureAuthenticated, function(req, res) {
     Binder.find({
-      // createdBy: req.session.userid,
       status: {
         $ne: 3,
       },
-      // owner: {
-      //   $exists: false,
-      // },
     }).exec(function(err, docs) {
       if (err) {
         console.error(err);
@@ -640,6 +636,7 @@ module.exports = function(app) {
             },
             'title mapping devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput'
           )
+            .populate('createdBy', 'name')
             .lean()
             .exec();
           travelers.forEach(function(t) {
@@ -707,26 +704,13 @@ module.exports = function(app) {
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [0, 1]),
     function(req, res) {
-      const p = req[req.params.id];
-      const work = p.works.id(req.params.wid);
-
-      if (!work) {
-        return res
-          .status(404)
-          .send(`Work ${req.params.wid} not found in the binder.`);
-      }
-
-      work.remove();
-      p.updatedBy = req.session.userid;
-      p.updatedOn = Date.now();
-
-      p.updateProgress(function(err, newPackage) {
-        if (err) {
-          console.log(err);
-          return res.status(500).send(err.message);
-        }
-        return res.json(newPackage);
-      });
+      routesUtilities.binder.deleteWork(
+        req[req.params.id],
+        req.params.wid,
+        req.session.userid,
+        req,
+        res
+      );
     }
   );
 

@@ -329,8 +329,9 @@ module.exports = function(app) {
       status: {
         $ne: 4,
       },
+      inBinder: { $ne: true },
     };
-    if (req.query.hasOwnProperty('device')) {
+    if (Object.hasOwn(req.query, 'device')) {
       search.devices = {
         $in: [req.query.device],
       };
@@ -1473,6 +1474,23 @@ module.exports = function(app) {
         );
         return res.status(200).json(share);
       });
+    }
+  );
+
+  app.delete(
+    '/travelers/:id/',
+    auth.ensureAuthenticated,
+    reqUtils.requireAdmin(),
+    reqUtils.exist('id', Traveler),
+    async function(req, res) {
+      const traveler = req[req.params.id];
+      try {
+        await traveler.clean();
+        return res.status(200).send(`${req.params.id} deleted`);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 

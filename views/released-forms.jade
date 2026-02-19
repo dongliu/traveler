@@ -17,13 +17,11 @@ block content
         h3#modalLabel
       .modal-body.modal-body-visible
       .modal-footer
+    br
     div
       ul.nav.nav-tabs
         li.active
           a(href='#released', data-toggle='tab') Released #{viewConfig.terminology.form}s
-        if (isAdmin)
-          li
-            a(href='#archived-released-forms', data-toggle='tab') Archived released #{viewConfig.terminology.form}s
       .tab-content
         #released.tab-pane.active
           .btn-toolbar
@@ -32,9 +30,6 @@ block content
                 i.fa.fa-plane.fa-lg
                 | &nbsp;Travel
           table#released-form-table.table.table-bordered.table-hover
-        if (isAdmin)
-          #archived-released-forms.tab-pane
-            table#archived-released-form-table.table.table-bordered.table-hover
 
 
 block js
@@ -51,4 +46,4 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/released-forms.js')
+  script(type='module', src='#{prefix}/javascripts/released-forms.js')

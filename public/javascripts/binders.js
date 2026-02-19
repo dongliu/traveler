@@ -44,25 +44,20 @@ $(function() {
   const binderAoColumns = [
     selectColumn,
     binderConfigLinkColumn,
-    binderShareLinkColumn,
+    // binderShareLinkColumn,
     binderLinkColumn,
-    titleColumn,
     tagsColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
+    titleColumn,
+    // sharedWithColumn,
+    // sharedGroupColumn,
     createdOnColumn,
-    updatedByColumn,
-    updatedOnColumn,
+    // updatedByColumn,
+    // updatedOnColumn,
     binderWorkProgressColumn,
   ];
   const binderTableConfig = {
     sAjaxSource: '/binders/json',
     sAjaxDataProp: '',
-    fnDrawCallback: function() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
     bAutoWidth: false,
     bProcessing: true,
     iDisplayLength: 10,
@@ -77,8 +72,8 @@ $(function() {
     aoColumns: binderAoColumns,
     sDom: sDomNoTools,
   };
-  sortByColumn(binderTableConfig, updatedOnColumn, 'desc');
-  // sortByColumn(binderTableConfig, createdOnColumn, 'desc');
+  // sortByColumn(binderTableConfig, updatedOnColumn, 'desc');
+  sortByColumn(binderTableConfig, createdOnColumn, 'desc');
   const binderTable = initTableIfExists(
     $('#binder-table'),
     binderTableConfig,

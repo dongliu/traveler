@@ -7,6 +7,7 @@ export function initTableIfExists($table, config, tables) {
   const newTable = $table.DataTable(config);
   fnAddFilterFoot($table, config.aoColumns);
   tables.push(newTable);
+  return newTable;
 }
 
 /**

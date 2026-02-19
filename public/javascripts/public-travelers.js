@@ -56,7 +56,6 @@ $(function() {
     bDeferRender: true,
     aoColumns: publicTravelersAoColumns,
     aaSorting: [
-      // [3, 'desc']
       [10, 'desc'],
       [8, 'desc'],
     ],

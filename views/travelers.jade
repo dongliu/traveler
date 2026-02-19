@@ -12,7 +12,7 @@ block head
 block content
   .container-fluid
     .btn-toolbar
-      .btn-group
+      //- .btn-group
         button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected travelers')
           i.fa.fa-copy.fa-lg
           | &nbsp;Clone
@@ -24,6 +24,11 @@ block content
         button.btn.btn-primary#report(data-toggle='tooltip', title='generate report for selected travelers')
           i.fa.fa-table.fa-large
           | &nbsp;Generate report
+      if (isAdmin)
+        .btn-group
+          a.btn.btn-danger#delete(data-toggle='tooltip', title='delete selected travelers')
+            i.fa.fa-trash.fa-lg
+            | &nbsp;Delete
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -41,17 +46,10 @@ block content
         if (viewConfig.shareGroups)
           li
             a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
-        if (isAdmin)
-          li
-            a(href='#archivedtravelers', data-toggle='tab') Archived travelers
 
       .tab-content
         #travelers.tab-pane.active
           .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
             if (viewConfig.transferOwnership)
               .btn-group
                 button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
@@ -62,14 +60,6 @@ block content
           #transferredtravelers.tab-pane
             .btn-toolbar
               .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-              .btn-group
-                button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected travelers, only the owner can see them after archived.')
-                  i.fa.fa-archive.fa-lg
-                  | &nbsp;Archive
-              .btn-group
                 button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected travelers to a coworker')
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
@@ -77,20 +67,7 @@ block content
         if (viewConfig.shareGroups)
           #groupsharedtravelers.tab-pane
             .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
             table#group-shared-traveler-table.table.table-bordered.table-hover
-        if (isAdmin)
-          #archivedtravelers.tab-pane
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-            table#archived-traveler-table.table.table-bordered.table-hover
-
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

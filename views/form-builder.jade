@@ -160,9 +160,6 @@ block content
       .btn-group
         form(action="./edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');" style="margin: 0;")
           button.btn.btn-primary(type="submit") Revision
-    if ( (status === 0 || status === 0.5 ) && isAdmin)
-      .btn-group
-        button.btn.btn-warning#archive(data-toggle='tooltip', title='archive the template') Archive
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')

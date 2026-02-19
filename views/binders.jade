@@ -16,22 +16,6 @@ block content
         a.btn.btn-primary#new(href='#{prefix}/binders/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create a new binder')
           i.fa.fa-paperclip.fa-lg
           | &nbsp;New Binder
-      //- .btn-group
-        button.btn.btn-info#reload
-          i.fa.fa-refresh.fa-lg
-          | &nbsp;Reload all tables
-      //- .btn-group
-      //-         button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected binders, only the owner can see them after archived.')
-      //-           i.fa.fa-archive.fa-lg
-      //-           | &nbsp;Archive
-      //- .btn-group
-        a.btn.btn-info#all-binders(href='#{prefix}/publicbinders/', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='see all public binders')
-          i.fa.fa-institution.fa-lg
-          | &nbsp;All public binders
-      .btn-group
-        button.btn.btn-primary#add-to-binder(data-toggle='tooltip', title='add selected binders into a binder')
-          i.fa.fa-briefcase.fa-lg
-          | &nbsp;Add to binder
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -42,79 +26,10 @@ block content
       ul.nav.nav-tabs
         li.active
           a(href='#binders', data-toggle='tab') Binders
-        //- if (viewConfig.transferOwnership)
-          li
-            a(href='#transferredbinders', data-toggle='tab') Transferred binders
-        //- if (viewConfig.shareUsers)
-          li
-            a(href='#sharedbinders', data-toggle='tab') Shared binders
-        //- if (viewConfig.shareGroups)
-          li
-            a(href='#groupsharedbinders', data-toggle='tab') Group shared binders
-        if (isAdmin)
-          li
-            a(href='#archivedbinders', data-toggle='tab') Archived binders
       .tab-content
         #binders.tab-pane.active
           .btn-toolbar
-            .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
-            //- .btn-group
-              button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected binders, only you can see them after archived.')
-                i.fa.fa-archive.fa-lg
-                | &nbsp;Archive
-            //- if (viewConfig.transferOwnership)
-              .btn-group
-                button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected binders to a coworker')
-                  i.fa.fa-user.fa-lg
-                  | &nbsp;Transfer ownership
           table#binder-table.table.table-bordered.table-hover
-        //- if (viewConfig.transferOwnership)
-          #transferredbinders.tab-pane
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-              .btn-group
-                button.btn.btn-warning.archive(data-toggle='tooltip', title='archive selected binders, only you can see them after archived.')
-                  i.fa.fa-archive.fa-lg
-                  | &nbsp;Archive
-              .btn-group
-                button.btn.btn-warning.transfer(data-toggle='tooltip', title='transfer the ownership of selected binders to a coworker')
-                  i.fa.fa-user.fa-lg
-                  | &nbsp;Transfer ownership
-            table#transferred-binder-table.table.table-bordered.table-hover
-        //- if (viewConfig.shareUsers)
-          #sharedbinders.tab-pane
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-            table#shared-binder-table.table.table-bordered.table-hover
-        //- if (viewConfig.shareGroups)
-          #groupsharedbinders.tab-pane
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-            table#group-shared-binder-table.table.table-bordered.table-hover
-        if (isAdmin)
-          #archivedbinders.tab-pane
-            .btn-toolbar
-              .btn-group
-                button.btn.btn-info.reload
-                  i.fa.fa-refresh.fa-lg
-                  | &nbsp;Reload table
-              .btn-group
-                button.btn.btn-primary#dearchive(data-toggle='tooltip', title='de-archive selected travelers')
-                  i.fa.fa-inbox.fa-lg
-                  | &nbsp;De-archive
-            table#archived-binder-table.table.table-bordered.table-hover
 
 
 block js
