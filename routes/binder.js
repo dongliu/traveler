@@ -636,6 +636,7 @@ module.exports = function(app) {
             },
             'title mapping devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput'
           )
+            .populate('createdBy', 'name')
             .lean()
             .exec();
           travelers.forEach(function(t) {
