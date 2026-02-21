@@ -11,24 +11,23 @@ block head
 
 block content
   .container-fluid
+    .btn-toolbar
+      .btn-group
+        button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
+          i.fa.fa-plane.fa-lg
+          | &nbsp;Travel
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
         h3#modalLabel
       .modal-body.modal-body-visible
       .modal-footer
-    br
     div
       ul.nav.nav-tabs
         li.active
           a(href='#released', data-toggle='tab') Released #{viewConfig.terminology.form}s
       .tab-content
         #released.tab-pane.active
-          .btn-toolbar
-            .btn-group
-              button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
-                i.fa.fa-plane.fa-lg
-                | &nbsp;Travel
           table#released-form-table.table.table-bordered.table-hover
 
 
