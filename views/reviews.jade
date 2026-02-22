@@ -9,7 +9,11 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
+prepend topBtn
+  .btn-group
+
 block underTopBtn
+    br
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -25,18 +29,8 @@ block underTopBtn
           a(href='#travelers', data-toggle='tab') Travelers
       .tab-content
         #forms.tab-pane.active
-          .btn-toolbar
-            //- .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
           table#form-table.table.table-bordered.table-hover
         #travelers.tab-pane
-          .btn-toolbar
-            //- .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
           table#traveler-table.table.table-bordered.table-hover
 
 
