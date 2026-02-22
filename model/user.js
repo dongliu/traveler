@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const { ObjectId } = Schema.Types;
 
+const debug = require('debug')('traveler:model:user');
+
 const MAX_VISIT_HISTORY = 30;
 
 const visit = new Schema({
@@ -33,28 +35,55 @@ const user = new Schema({
   visits: [visit],
 });
 
-user.methods.addVisit = function(location, method = 'GET') {
+user.methods.addVisit = async function(location, method = 'GET') {
   const user = this;
-  if (user.visits[0]?.location === location) {
-    user.visits[0].visitedOn = new Date();
+  debug(
+    `User ${
+      user._id
+    } visits ${location} with method ${method}, current visit history: ${user.visits
+      .map(v => v.location)
+      .join(', ')}`
+  );
+  const length = user.visits.length;
+  if (user.visits[length - 1]?.location === location) {
+    user.visits[length - 1].visitedOn = new Date();
+    await user.save();
     return;
   }
   const latest = { location, method, visitedOn: new Date() };
-  const update = { $push: { visits: { $each: [latest], $position: 0 } } };
+  const update = { $push: { visits: latest } };
   if (user.visits.length >= MAX_VISIT_HISTORY) {
-    update.$pop = { visits: 1 };
+    update.$pop = { visits: -1 };
   }
-  return user.update(update).exec();
+  await user.updateOne(update).exec();
+  debug(
+    `Visit history after update: ${user.visits.map(v => v.location).join(', ')}`
+  );
 };
 
-user.methods.back = function() {
+user.methods.back = async function() {
   const user = this;
-  if (user.visits.length < 2) {
+  debug(
+    `User ${
+      user._id
+    } tries to go back, current visit history: ${user.visits
+      .map(v => v.location)
+      .join(', ')}`
+  );
+  const length = user.visits.length;
+  if (length < 2) {
     return null;
   }
+  const backLocation = user.visits[length - 2].location;
   const update = { $pop: { visits: 1 } };
-  const backLocation = user.visits[0].location;
-  user.update(update).exec();
+  await user.updateOne(update).exec();
+  debug(
+    `User ${
+      user._id
+    } goes back to ${backLocation}, current visit history: ${user.visits
+      .map(v => v.location)
+      .join(', ')}`
+  );
   return backLocation;
 };
 

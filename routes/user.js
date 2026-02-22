@@ -350,7 +350,7 @@ module.exports = function(app) {
           _id: req.session.userid,
         }).exec();
         if (user) {
-          user.addVisit(req.body.location);
+          await user.addVisit(req.body.location, req.body.method);
           return res.status(204).send();
         }
         return res.status(404).send('user not found.');
@@ -370,7 +370,7 @@ module.exports = function(app) {
         _id: req.session.userid,
       }).exec();
       if (user) {
-        const location = user.back();
+        const location = await user.back();
         return res.status(200).json({ location });
       }
       return res.status(404).send('user not found.');
