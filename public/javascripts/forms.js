@@ -10,6 +10,8 @@
 
 import { initTableIfExists, sortByColumn } from './lib/table.js';
 
+import { addVisit, back } from './lib/tracking.js';
+
 function travelFromModal() {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
@@ -144,6 +146,20 @@ $(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
+  addVisit(
+    document.location.pathname +
+      document.location.search +
+      document.location.hash,
+    'GET'
+  );
+
+  $('#back').click(function() {
+    back();
+  });
+
+  $('#refresh').click(function() {
+    document.location.reload();
+  });
 
   const tables = [];
   /* form table starts */
