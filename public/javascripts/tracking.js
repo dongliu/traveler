@@ -1,4 +1,4 @@
-export function addVisit(location, method = 'GET') {
+function addVisit(location, method = 'GET') {
   $.ajax({
     url: '/users/visits',
     type: 'POST',
@@ -7,7 +7,7 @@ export function addVisit(location, method = 'GET') {
   });
 }
 
-export function back() {
+function back() {
   return $.ajax({
     url: '/users/visits/back',
     type: 'PUT',
@@ -35,3 +35,40 @@ export function back() {
     })
     .always();
 }
+
+$(function tracking() {
+  if (window.location.hash) {
+    $('.nav-tabs a[href=' + window.location.hash + ']').tab('show');
+  }
+  // update hash on tab changes
+  $('.nav-tabs a').on('click', function(e) {
+    window.location.hash = e.target.hash;
+  });
+
+  if ($('button#refresh').length === 0 || $('button#back').length === 0) {
+    return;
+  }
+  addVisit(
+    document.location.pathname +
+      document.location.search +
+      document.location.hash,
+    'GET'
+  );
+  $('#back').click(function() {
+    back();
+  });
+
+  $('#refresh').click(function() {
+    document.location.reload();
+  });
+
+  // add visit when hash changes
+  $(window).on('hashchange', function() {
+    addVisit(
+      document.location.pathname +
+        document.location.search +
+        document.location.hash,
+      'GET'
+    );
+  });
+});
