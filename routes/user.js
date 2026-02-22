@@ -361,6 +361,25 @@ module.exports = function(app) {
     }
   );
 
+  app.put('/users/visits/back', auth.ensureAuthenticated, async function goBack(
+    req,
+    res
+  ) {
+    try {
+      const user = await User.findOne({
+        _id: req.session.userid,
+      }).exec();
+      if (user) {
+        const location = user.back();
+        return res.status(200).json({ location });
+      }
+      return res.status(404).send('user not found.');
+    } catch (err) {
+      logger.error('Error going back in user visits:', err);
+      return res.status(500).send(err.message);
+    }
+  });
+
   // get from the db not ad
   app.get('/users/:id/json', auth.ensureAuthenticated, function(req, res) {
     User.findOne({
