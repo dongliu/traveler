@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   title #{orgName} Binder
@@ -9,13 +9,12 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
-  .container-fluid
-    .btn-toolbar
-      .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/binders/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create a new binder')
-          i.fa.fa-paperclip.fa-lg
-          | &nbsp;New Binder
+prepend topBtn
+  .btn-group
+    a.btn.btn-primary#new(href='#{prefix}/binders/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create a new binder')
+      i.fa.fa-paperclip.fa-lg
+      | &nbsp;New Binder
+block underTopBtn
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -46,4 +45,5 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
-  script(type='module', src='#{prefix}/javascripts/binders.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/binders.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/tracking.js')
