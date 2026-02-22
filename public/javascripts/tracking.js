@@ -44,7 +44,20 @@ function showHash() {
   }
 }
 
+function activeMenu() {
+  const currentPath = window.location.pathname;
+  const navLinks = $('.navbar.navbar-fixed-top .menu a');
+
+  navLinks.each(function setActive() {
+    const link = $(this);
+    if (link.attr('href') === currentPath) {
+      link.parent('li').addClass('active');
+    }
+  });
+}
+
 $(function tracking() {
+  activeMenu();
   showHash();
   // update hash on tab changes
   $('.nav-tabs a').on('click', function(e) {
