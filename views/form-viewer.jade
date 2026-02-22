@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   meta(charset='urf-8')
@@ -9,7 +9,7 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
+block underTopBtn
   script(type='text/javascript').
     var title = !{JSON.stringify(title)};
   .container
@@ -25,9 +25,7 @@ block content
       button.btn.btn-info#show-validation Show validation
       button.btn.btn-info#hide-validation.active Hide validation
 
-block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+append js
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-viewer.js')
