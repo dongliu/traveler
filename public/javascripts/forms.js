@@ -10,8 +10,6 @@
 
 import { initTableIfExists, sortByColumn } from './lib/table.js';
 
-import { addVisit, back } from './lib/tracking.js';
-
 function travelFromModal() {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
@@ -128,11 +126,11 @@ function cloneFromModal(activeTable, formTable) {
   });
 }
 
-function showHash() {
-  if (window.location.hash) {
-    $(`.nav-tabs a[href=${window.location.hash}]`).tab('show');
-  }
-}
+// function showHash() {
+//   if (window.location.hash) {
+//     $(`.nav-tabs a[href=${window.location.hash}]`).tab('show');
+//   }
+// }
 
 function formatItemUpdate(data) {
   return `<div class="target" id="${data._id}"><b>${data.title}</b> </div>`;
@@ -146,20 +144,6 @@ $(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
   disableAjaxCache();
-  addVisit(
-    document.location.pathname +
-      document.location.search +
-      document.location.hash,
-    'GET'
-  );
-
-  $('#back').click(function() {
-    back();
-  });
-
-  $('#refresh').click(function() {
-    document.location.reload();
-  });
 
   const tables = [];
   /* form table starts */
@@ -475,17 +459,17 @@ $(function() {
   /* archived form table ends */
 
   // show the tab in hash
-  showHash();
+  // showHash();
 
   // add state for tab changes
-  $('.nav-tabs a').on('click', function() {
-    window.history.pushState(null, `forms :: ${this.text}`, this.href);
+  $('.nav-tabs a').on('click', function(e) {
+    window.location.hash = e.target.hash;
   });
 
   // show the tab when back and forward
-  window.onhashchange = function() {
-    showHash();
-  };
+  // window.onhashchange = function() {
+  //   showHash();
+  // };
 
   $('#form-travel').click(function() {
     const activeTable = $('.tab-pane.active table').dataTable();
