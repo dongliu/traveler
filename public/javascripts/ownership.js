@@ -23,12 +23,6 @@ function noneSelectedModal() {
   $('#modal').modal('show');
 }
 
-function showHash() {
-  if (window.location.hash) {
-    $(`.nav-tabs a[href=${window.location.hash}]`).tab('show');
-  }
-}
-
 $(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
@@ -121,14 +115,6 @@ $(function() {
     ],
     sDom: sDomNoTools,
   });
-
-  // show the tab in hash when loaded
-  showHash();
-
-  // show the tab when back and forward
-  window.onhashchange = function() {
-    showHash();
-  };
 
   $('button.select-all').click(function() {
     const activeTable = $('.tab-pane.active table').dataTable();
