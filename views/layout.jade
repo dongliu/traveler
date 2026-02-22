@@ -30,7 +30,7 @@ html
             span.icon-bar
             span.icon-bar
           .nav-collapse.collapse
-            ul.nav
+            ul.nav.menu
               li
                 - var appName = "Traveler"
                 if (viewConfig.deploymentName)
@@ -43,9 +43,9 @@ html
 
               block links
                 li
-                  a(href='#{prefix}/forms/').caps Draft #{viewConfig.terminology.form}s
+                  a(href='#{prefix}/forms/') Draft #{viewConfig.terminology.form}s
                 li
-                  a(href='#{prefix}/releasedforms/').caps Released #{viewConfig.terminology.form}s
+                  a(href='#{prefix}/releasedforms/') Released #{viewConfig.terminology.form}s
                 li
                   a(href='#{prefix}/travelers/') Travelers
                 li
