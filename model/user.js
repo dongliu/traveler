@@ -51,9 +51,9 @@ user.methods.addVisit = async function(location, method = 'GET') {
     return;
   }
   const latest = { location, method, visitedOn: new Date() };
-  const update = { $push: { visits: latest } };
+  const update = { $push: { visits: { $each: [latest] } } };
   if (user.visits.length >= MAX_VISIT_HISTORY) {
-    update.$pop = { visits: -1 };
+    update.$push.visits.$slice = -MAX_VISIT_HISTORY;
   }
   await user.updateOne(update).exec();
   debug(
