@@ -33,16 +33,26 @@ function back() {
         $(window).scrollTop($('#message div:last-child').offset().top - 40);
       }
     })
-    .always();
+    .always(function() {
+      $('#back').prop('disabled', false);
+    });
 }
 
-$(function tracking() {
+function showHash() {
   if (window.location.hash) {
     $('.nav-tabs a[href=' + window.location.hash + ']').tab('show');
   }
+}
+
+$(function tracking() {
+  showHash();
   // update hash on tab changes
   $('.nav-tabs a').on('click', function(e) {
     window.location.hash = e.target.hash;
+  });
+
+  $(window).on('hashchange', function() {
+    showHash();
   });
 
   if ($('button#refresh').length === 0 || $('button#back').length === 0) {
@@ -54,7 +64,8 @@ $(function tracking() {
       document.location.hash,
     'GET'
   );
-  $('#back').click(function() {
+  $('#back').click(function(e) {
+    e.target.disabled = true;
     back();
   });
 
