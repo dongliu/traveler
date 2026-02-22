@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   title #{orgName} Admin
@@ -13,8 +13,11 @@ block bodyJs
   script(type='text/javascript').
     var rolesHtml = !{JSON.stringify(rolesHtml)};
 
-block content
-  .container-fluid
+prepend topBtn
+  .btn-group
+
+block underTopBtn
+    br
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -93,5 +96,6 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/users.js')
   script(type='text/javascript', src='#{prefix}/javascripts/groupnames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/groups.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/tracking.js')
 
 
