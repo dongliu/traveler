@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   title #{orgName} Travelers
@@ -9,27 +9,26 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
-  .container-fluid
-    .btn-toolbar
-      //- .btn-group
-        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected travelers')
-          i.fa.fa-copy.fa-lg
-          | &nbsp;Clone
-      .btn-group
-        button.btn.btn-primary#add-to-binder(data-toggle='tooltip', title='add selected travelers into a binder')
-          i.fa.fa-briefcase.fa-lg
-          | &nbsp;Add to binder
-      .btn-group
-        button.btn.btn-primary#report(data-toggle='tooltip', title='generate report for selected travelers')
-          i.fa.fa-table.fa-large
-          | &nbsp;Generate report
-      if (isAdmin)
-        .btn-group
-          a.btn.btn-danger#delete(data-toggle='tooltip', title='delete selected travelers')
-            i.fa.fa-trash.fa-lg
-            | &nbsp;Delete
-    #message
+prepend topBtn
+  .btn-group
+    button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected travelers')
+      i.fa.fa-copy.fa-lg
+      | &nbsp;Clone
+  .btn-group
+    button.btn.btn-primary#add-to-binder(data-toggle='tooltip', title='add selected travelers into a binder')
+      i.fa.fa-briefcase.fa-lg
+      | &nbsp;Add to binder
+  .btn-group
+    button.btn.btn-primary#report(data-toggle='tooltip', title='generate report for selected travelers')
+      i.fa.fa-table.fa-large
+      | &nbsp;Generate report
+  if (isAdmin)
+    .btn-group
+      a.btn.btn-danger#delete(data-toggle='tooltip', title='delete selected travelers')
+        i.fa.fa-trash.fa-lg
+        | &nbsp;Delete
+block underTopBtn
+  #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
         h3#modalLabel
@@ -84,3 +83,4 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
   script(type='module', src='#{prefix}/javascripts/travelers.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/tracking.js')

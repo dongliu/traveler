@@ -96,12 +96,6 @@ function deleteFromModal(tables) {
   });
 }
 
-function showHash() {
-  if (window.location.hash) {
-    $('.nav-tabs a[href=' + window.location.hash + ']').tab('show');
-  }
-}
-
 $(function() {
   ajax401(prefix);
   updateAjaxURL(prefix);
@@ -158,7 +152,6 @@ $(function() {
     sharedGroupColumn,
     createdOnColumn,
     transferredOnColumn,
-    // deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -256,7 +249,6 @@ $(function() {
     sharedGroupColumn,
     ownerColumn,
     createdOnColumn,
-    // deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -303,7 +295,6 @@ $(function() {
     sharedWithColumn,
     sharedGroupColumn,
     createdOnColumn,
-    // deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -337,25 +328,6 @@ $(function() {
     archivedTravelerTableConfig,
     tables
   );
-
-  // show the tab in hash when loaded
-  showHash();
-
-  // add state for tab changes
-  $('.nav-tabs a').on('click', function() {
-    if (
-      !$(this)
-        .parent()
-        .hasClass('active')
-    ) {
-      window.history.pushState(null, 'traveler :: ' + this.text, this.href);
-    }
-  });
-
-  // show the tab when back and forward
-  window.onhashchange = function() {
-    showHash();
-  };
 
   $('button.select-all').click(function() {
     var activeTable = $('.tab-pane.active table').dataTable();
