@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   title #{orgName} Templates
@@ -72,7 +72,7 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
-  //- script(type='module', src='#{prefix}/javascripts/lib/tracking.js')
   script(type='module', src='#{prefix}/javascripts/forms.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/tracking.js')
 
 

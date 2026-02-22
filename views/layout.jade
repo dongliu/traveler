@@ -77,22 +77,6 @@ html
                 li
                   a(href='#{prefix}/login') Log in
     block content
-      .container-fluid
-        .btn-toolbar
-          block topBtn
-            .btn-group
-              button.btn.btn-info#back(data-toggle='tooltip', title='go back')
-                i.fa.fa-step-backward.fa-lg
-                | &nbsp;Back
-            .btn-group
-              button.btn.btn-info#refresh(data-toggle='tooltip', title='refresh the page')
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Refresh
-            //- .btn-group
-              button.btn.btn-info#forward(data-toggle='tooltip', title='go forward')
-                i.fa.fa-step-forward.fa-lg
-                | &nbsp;Forward
-        block underTopBtn
     .container-fluid
       h6.text-right
         a(href='https://github.com/dongliu/traveler', target='_blank') Release #{viewConfig.appVersion}
