@@ -53,12 +53,12 @@ html
                 if (isReviwer)
                   li
                     a(href='#{prefix}/reviews/') Pending Reviews
+                if (locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1)
+                  li
+                    a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
                 li
                   a(href='#{prefix}/docs/', target='#{viewConfig.linkTarget}') Documents
 
-              if (locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1)
-                li
-                  a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
             ul.nav.pull-right
               if (locals && locals.userid)
                 li
