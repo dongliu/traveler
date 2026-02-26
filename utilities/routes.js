@@ -261,7 +261,7 @@ const binderUtil = {
         });
 
         if (added.length === 0) {
-          return res.send(400, 'no item added');
+          return res.send(400, 'no new item added');
         }
 
         binder.updatedOn = Date.now();
