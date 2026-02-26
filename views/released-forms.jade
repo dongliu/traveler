@@ -18,6 +18,11 @@ prepend topBtn
         button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
           i.fa.fa-plane.fa-lg
           | &nbsp;Travel
+      if (isAdmin)
+        .btn-group
+          a.btn.btn-danger#delete(data-toggle='tooltip', title='delete selected #{viewConfig.terminology.form}s')
+            i.fa.fa-trash.fa-lg
+            | &nbsp;Delete
 block underTopBtn
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')

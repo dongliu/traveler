@@ -106,6 +106,23 @@ module.exports = function(app) {
     }
   );
 
+  app.delete(
+    '/released-forms/:id/',
+    auth.ensureAuthenticated,
+    reqUtils.requireAdmin(),
+    reqUtils.exist('id', ReleasedForm),
+    async function(req, res) {
+      const doc = req[req.params.id];
+      try {
+        await doc.remove();
+        return res.status(200).send(`${req.params.id} deleted`);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
   app.post(
     '/released-forms/:id/notify',
     auth.ensureAuthenticated,
