@@ -325,6 +325,7 @@ $(function() {
     selectColumn,
     formLinkColumn,
     formConfigLinkColumn,
+    formReviewLinkColumn,
     docNoColumn,
     versionColumn,
     titleColumn,
