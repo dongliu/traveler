@@ -1,12 +1,14 @@
-/* global ajax401, disableAjaxCache, prefix, updateAjaxURL,
- travelerGlobal, Holder, selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn, tagsColumn, keysColumn, createdOnColumn,
- updatedOnColumn, updatedByColumn, sharedWithColumn, sharedGroupColumn,
- fnAddFilterFoot, sDomNoTools, createdByColumn, createdOnColumn,
- fnGetSelected, selectEvent, filterEvent, formShareLinkColumn,
- transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
- versionColumn, releasedFormLinkColumn, releasedFormStatusColumn,
- releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
- transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn, docNoColumn, releasedTemplatedOwnerColumn */
+/* global ajax401, disableAjaxCache, prefix, updateAjaxURL, travelerGlobal,
+ Holder, selectColumn, formLinkColumn, formConfigLinkColumn, titleColumn,
+ tagsColumn, keysColumn, createdOnColumn, updatedOnColumn, updatedByColumn,
+ sharedWithColumn, sharedGroupColumn, fnAddFilterFoot, sDomNoTools,
+ createdByColumn, createdOnColumn, fnGetSelected, selectEvent, filterEvent,
+ formShareLinkColumn, transferredOnColumn, ownerColumn, formStatusColumn,
+ formTypeColumn, versionColumn, releasedFormLinkColumn,
+ releasedFormStatusColumn, releasedFormVersionColumn, releasedByColumn,
+ releasedOnColumn, transferFromModal, archivedByColumn, archivedOnColumn,
+ formReviewLinkColumn, docNoColumn, releasedTemplatedOwnerColumn,
+ releasedOnHideColumn */
 
 import { initTableIfExists, sortByColumn } from './lib/table.js';
 
@@ -150,7 +152,7 @@ $(function() {
     titleColumn,
     tagsColumn,
     releasedTemplatedOwnerColumn,
-    releasedOnColumn,
+    releasedOnHideColumn,
   ];
   const releasedFormTableConfig = {
     sAjaxSource: '/released-forms/json',
@@ -169,7 +171,7 @@ $(function() {
     aoColumns: releasedFormAoColumns,
     sDom: sDomNoTools,
   };
-  sortByColumn(releasedFormTableConfig, releasedOnColumn, 'desc');
+  sortByColumn(releasedFormTableConfig, releasedOnHideColumn, 'desc');
   initTableIfExists($('#released-form-table'), releasedFormTableConfig, tables);
   /* released form table ends */
 
