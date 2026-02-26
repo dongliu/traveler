@@ -60,7 +60,7 @@ module.exports = function(app) {
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       )
-        .populate('updatedBy', 'name')
+        .populate('createdBy', 'name')
         .exec();
       return res.status(200).json(forms);
     } catch (error) {
@@ -122,7 +122,7 @@ module.exports = function(app) {
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       )
-        .populate('updatedBy', 'name')
+        .populate('createdBy', 'name')
         .exec();
       return res.status(200).json(forms);
     } catch (error) {
