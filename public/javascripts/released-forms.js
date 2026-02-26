@@ -97,6 +97,35 @@ function cloneFromModal(activeTable) {
   });
 }
 
+function deleteFromModal(activeTable) {
+  $('#submit').prop('disabled', true);
+  $('#return').prop('disabled', true);
+  let number = $('#modal .modal-body div.target').length;
+  $('#modal .modal-body div.target').each(function() {
+    const that = this;
+    $.ajax({
+      url: `/released-forms/${that.id}/`,
+      type: 'DELETE',
+    })
+      .done(function() {
+        $(that).prepend('<i class="fa fa-check"></i>');
+        $(that).addClass('text-success');
+      })
+      .fail(function(jqXHR) {
+        $(that).prepend('<i class="icon-question-sign"></i>');
+        $(that).append(` : ${jqXHR.responseText}`);
+        $(that).addClass('text-error');
+      })
+      .always(function() {
+        number = number - 1;
+        if (number === 0) {
+          $('#return').prop('disabled', false);
+          activeTable.fnReloadAjax();
+        }
+      });
+  });
+}
+
 function formatItemUpdate(data) {
   return `<div class="target" id="${data._id}"><b>${data.title}</b> </div>`;
 }
@@ -284,6 +313,33 @@ $(function() {
       $('#modal').modal('show');
       $('#submit').click(function() {
         cloneFromModal(activeTable);
+      });
+    }
+  });
+
+  $('#delete').click(function() {
+    const activeTable = $('.tab-pane.active table').dataTable();
+    const selected = fnGetSelected(activeTable, 'row-selected');
+    if (selected.length === 0) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('No item has been selected!');
+      $('#modal .modal-footer').html(
+        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
+      $('#modal').modal('show');
+    } else {
+      $('#modalLabel').html(`Delete following ${selected.length} items? `);
+      $('#modal .modal-body').empty();
+      selected.forEach(function(row) {
+        const data = activeTable.fnGetData(row);
+        $('#modal .modal-body').append(formatItemUpdate(data));
+      });
+      $('#modal .modal-footer').html(
+        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
+      $('#modal').modal('show');
+      $('#submit').click(function() {
+        deleteFromModal(activeTable);
       });
     }
   });
