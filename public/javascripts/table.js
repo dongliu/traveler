@@ -82,7 +82,7 @@ function dateColumn(title, key) {
   };
 }
 
-function longDateColumn(title, key) {
+function longDateColumn(title, key, visible = true) {
   return {
     sTitle: title,
     mData(source, type, val) {
@@ -93,6 +93,7 @@ function longDateColumn(title, key) {
     },
     sDefaultContent: '',
     bFilter: true,
+    bVisible: visible,
   };
 }
 
@@ -273,7 +274,10 @@ function fnSetColumnsVis(oTableLocal, columns, show) {
 function fnAddFilterFoot(sTable, aoColumns) {
   const tr = $('<tr role="row">');
   aoColumns.forEach(function(c) {
-    if (c.bFilter && c.bVisible !== false) {
+    if (c.bVisible === false) {
+      return;
+    }
+    if (c.bFilter) {
       tr.append(
         `<th><input type="text" placeholder="${c.sTitle}" style="width:80%;" autocomplete="off"></th>`
       );
@@ -724,6 +728,7 @@ const releasedTemplatedOwnerColumn = {
 const clonedByColumn = personColumn('Cloned by', 'clonedBy');
 
 const updatedOnColumn = longDateColumn('Updated', 'updatedOn');
+const updatedOnHideColumn = longDateColumn('Updated', 'updatedOn', false);
 const updatedByColumn = personColumn('Updated by', 'updatedBy');
 
 const releasedOnColumn = longDateColumn('Released', 'releasedOn');
