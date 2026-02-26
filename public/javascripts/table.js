@@ -732,6 +732,7 @@ const updatedOnHideColumn = longDateColumn('Updated', 'updatedOn', false);
 const updatedByColumn = personColumn('Updated by', 'updatedBy');
 
 const releasedOnColumn = longDateColumn('Released', 'releasedOn');
+const releasedOnHideColumn = longDateColumn('Released', 'releasedOn', false);
 const releasedByColumn = personColumn('Released by', 'releasedBy');
 
 const transferredOnColumn = dateColumn('transferred', 'transferredOn');
