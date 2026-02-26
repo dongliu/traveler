@@ -247,10 +247,10 @@ const binderUtil = {
           if (item.inBinder === true) {
             logger.warn(`traveler ${item.id} is already in a binder`);
             return;
-          } else {
-            item.inBinder = true;
-            addedTravelers.push(item);
           }
+        } else {
+          item.inBinder = true;
+          addedTravelers.push(item);
         }
         debug(
           `should add work ${item.id} of type ${type} into binder ${binder.id} after in binder check`
