@@ -11,6 +11,10 @@ block head
 
 prepend topBtn
       .btn-group
+        button.btn.btn-primary#clone(data-toggle='tooltip', title='clone selected #{viewConfig.terminology.form}')
+          i.fa.fa-copy.fa-lg
+          | &nbsp;Clone
+      .btn-group
         button.btn.btn-primary#form-travel(data-toggle='tooltip', title='create travelers from selected #{viewConfig.terminology.form}')
           i.fa.fa-plane.fa-lg
           | &nbsp;Travel
