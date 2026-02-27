@@ -86,12 +86,6 @@ function cloneFromModal(activeTable, formTable) {
   });
 }
 
-function showHash() {
-  if (window.location.hash) {
-    $(`.nav-tabs a[href=${window.location.hash}]`).tab('show');
-  }
-}
-
 function formatItemUpdate(data) {
   return `<div class="target" id="${data._id}"><b>${data.title}</b> </div>`;
 }
@@ -188,19 +182,6 @@ $(function() {
   };
   initTableIfExists($('#archived-form-table'), archivedFormTableConfig, tables);
   /* archived form table ends */
-
-  // show the tab in hash
-  showHash();
-
-  // add state for tab changes
-  $('.nav-tabs a').on('click', function() {
-    window.history.pushState(null, `forms :: ${this.text}`, this.href);
-  });
-
-  // show the tab when back and forward
-  window.onhashchange = function() {
-    showHash();
-  };
 
   $('#clone').click(function() {
     const activeTable = $('.tab-pane.active table').dataTable();

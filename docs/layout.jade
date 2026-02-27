@@ -7,22 +7,6 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
   body
-    script(type='text/javascript', src='#{prefix}/dependencies/holder.js')
-    script(type='text/javascript').
-      var terminology = !{JSON.stringify(viewConfig.terminology)};
-      var shareUsers = !{JSON.stringify(viewConfig.shareUsers)};
-      var shareGroups = !{JSON.stringify(viewConfig.shareGroups)};
-      var linkTarget = !{JSON.stringify(viewConfig.linkTarget)} || '_blank';
-      var showCCDB = !{JSON.stringify(viewConfig.showCCDB)};
-      var publicAccess = !{JSON.stringify(viewConfig.publicAccess)};
-      var userid = !{JSON.stringify(locals.userid)};
-      var prefix = !{JSON.stringify(prefix)};
-
-      var isAdmin = !{isAdmin};
-      var isManager = !{isManager};
-      var isReviwer = !{isReviwer};
-    block bodyJs
-
     .navbar.navbar-fixed-top
       .navbar-inner
         .container-fluid

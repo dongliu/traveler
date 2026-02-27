@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   title Manage ownership for #{user.name}
@@ -9,7 +9,7 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
+block underTopBtn
   .container-fluid
     h3 Manage ownership for #{user.name} (
       span.userid #{user._id}
@@ -21,10 +21,6 @@ block content
       .modal-body.modal-body-visible
       .modal-footer
     .btn-toolbar
-      //- .btn-group
-        button.btn.btn-info.reload
-          i.fa.fa-refresh.fa-lg
-          | &nbsp;Reload table
       .btn-group
         button.btn.btn-info.select-all(data-toggle='tooltip', title='select all the rows in the current view')
           i.fa.fa-list.fa-lg
@@ -51,18 +47,5 @@ block content
           table#binder-table.table.table-bordered.table-hover
 
 
-block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
+append js
   script(type='module', src='#{prefix}/javascripts/ownership.js')

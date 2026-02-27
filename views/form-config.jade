@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   meta(charset='urf-8')
@@ -9,8 +9,10 @@ block head
   link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+prepend topBtn
+  .btn-group
 
-block content
+block underTopBtn
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -47,13 +49,7 @@ block content
         i.fa.fa-tag.fa-lg
         | &nbsp;Add part number
 
-block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+append js
   script(type='text/javascript', src='#{prefix}/jquery/jquery.jeditable.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='module', src='#{prefix}/javascripts/form-config.js')

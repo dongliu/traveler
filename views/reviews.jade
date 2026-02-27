@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   title #{orgName} Reviews
@@ -9,8 +9,11 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
-  .container-fluid
+prepend topBtn
+  .btn-group
+
+block underTopBtn
+    br
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -26,33 +29,10 @@ block content
           a(href='#travelers', data-toggle='tab') Travelers
       .tab-content
         #forms.tab-pane.active
-          .btn-toolbar
-            //- .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
           table#form-table.table.table-bordered.table-hover
         #travelers.tab-pane
-          .btn-toolbar
-            //- .btn-group
-              button.btn.btn-info.reload
-                i.fa.fa-refresh.fa-lg
-                | &nbsp;Reload table
           table#traveler-table.table.table-bordered.table-hover
 
 
-block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
+append js
   script(type='module', src='#{prefix}/javascripts/reviews.js')

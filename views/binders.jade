@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   title #{orgName} Binder
@@ -9,13 +9,12 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
-  .container-fluid
-    .btn-toolbar
-      .btn-group
-        a.btn.btn-primary#new(href='#{prefix}/binders/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create a new binder')
-          i.fa.fa-paperclip.fa-lg
-          | &nbsp;New Binder
+prepend topBtn
+  .btn-group
+    a.btn.btn-primary#new(href='#{prefix}/binders/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create a new binder')
+      i.fa.fa-paperclip.fa-lg
+      | &nbsp;New Binder
+block underTopBtn
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -32,18 +31,5 @@ block content
           table#binder-table.table.table-bordered.table-hover
 
 
-block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/table-action.js')
+append js
   script(type='module', src='#{prefix}/javascripts/binders.js')
