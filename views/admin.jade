@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   title #{orgName} Admin
@@ -13,8 +13,11 @@ block bodyJs
   script(type='text/javascript').
     var rolesHtml = !{JSON.stringify(rolesHtml)};
 
-block content
-  .container-fluid
+prepend topBtn
+  .btn-group
+
+block underTopBtn
+    br
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
@@ -77,21 +80,10 @@ block content
           table#groups-table.table.table-bordered.table-hover
 
 
-block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
+append js
   script(type='text/javascript', src='#{prefix}/javascripts/users.js')
   script(type='text/javascript', src='#{prefix}/javascripts/groupnames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/groups.js')
+
 
 

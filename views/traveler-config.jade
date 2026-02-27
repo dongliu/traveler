@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   meta(charset='urf-8')
@@ -10,7 +10,10 @@ block head
   link(rel='stylesheet', href='#{prefix}/bootstrap-datepicker/css/datepicker.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
+prepend topBtn
+  .btn-group
+
+block underTopBtn
   .container
     #message
     h3 Title:
@@ -20,7 +23,6 @@ block content
       else
         span#title !{traveler.title}
       = ' '
-      //- button.btn.btn-primary.editable Edit
     h4 Part Description:
       = ' '
       if (locals.traveler.description == undefined)
@@ -37,14 +39,6 @@ block content
         span#dwr.editable !{traveler.dwr}
       = ' '
       button.btn.btn-primary.editable Edit
-    //- h4 Deadline:
-    //-   = ' '
-    //-   span.form-inline
-    //-     if (locals.traveler.deadline == undefined)
-    //-       input#deadline(type='date')
-    //-     else
-    //-       input#deadline(type='date', value='#{traveler.deadline}')
-    //-     = ' '
     p Created on
       = ' '
       span.time #{traveler.createdOn}
@@ -65,14 +59,6 @@ block content
           | completed
         when 3
           | frozen
-    //- h4 Locations
-    //- ul#locations
-      each location in traveler.locations
-        li
-          span.location #{location}
-          = ' '
-          button.btn.btn-small.btn-warning.removeLocation
-            i.fa.fa-trash-o.fa-lg
     h4 Serial Numbers
     ul#devices
       each device in traveler.devices
@@ -97,19 +83,9 @@ block content
       button.btn.btn-primary#add-tag
         i.fa.fa-tag.fa-lg
         | &nbsp;Add part number
-    //- br
-    //- br
-    //- if (viewConfig.showCCDB)
-    //-   .btn-group
-    //-       a.btn.btn-info(href='#{prefix}/devices/', target='#{viewConfig.linkTarget}') Browse devices
 
-block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+append js
   script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
   script(type='text/javascript', src='#{prefix}/jquery/jquery.jeditable.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='module', src='#{prefix}/javascripts/traveler-config.js')

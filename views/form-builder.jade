@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   meta(charset='urf-8')
@@ -23,7 +23,10 @@ block bodyJs
     var autoNumbering = !{JSON.stringify(viewConfig.autoNumbering)};
     var defaultRequired = !{JSON.stringify(viewConfig.defaultRequired)};
     var userKey = !{JSON.stringify(viewConfig.userKey)};
-block content
+prepend topBtn
+  .btn-group
+
+block underTopBtn
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -161,24 +164,14 @@ block content
         form(action="./edit" method="POST" onsubmit="return confirm('This form will be sent back to drafts for revision. Continue?');" style="margin: 0;")
           button.btn.btn-primary(type="submit") Revision
 
-block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-ui-1.10.2.custom.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+append js
   script(type='text/javascript', src='#{prefix}/rivets/rivets.min.js')
   script(type='text/javascript', src='#{prefix}/tinymce/tinymce.min.js')
   script(type='text/javascript', src='#{prefix}/tinymce/jquery.tinymce.min.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
   script(type='text/javascript', src='#{prefix}/builder/input.js')
   script(type='text/javascript', src='#{prefix}/builder/spec.js')
   script(type='text/javascript', src='#{prefix}/javascripts/uid.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/ZeroClipboard.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/TableTools.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-explorer.js')
   script(type='module', src='#{prefix}/javascripts/form-builder.js')

@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   meta(charset='urf-8')
@@ -9,7 +9,7 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
+block underTopBtn
   script(type='text/javascript').
     var group = !{JSON.stringify(group)};
   .container
@@ -38,22 +38,12 @@ block content
       button.btn.btn-primary#btnRemoveMembers(data-target='#remove') Remove Selected User(s) from Group
     table.table.table-bordered.table-hover#members-table
 
-block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
-  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+append js
   script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
   script(type='text/javascript', src='#{prefix}/dependencies/binder.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
   script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
   script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
-  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
   script(type='text/javascript', src='#{prefix}/javascripts/groupmembers.js')

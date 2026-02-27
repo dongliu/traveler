@@ -93,19 +93,21 @@ $(function() {
     }
   );
 
-  $('#groupname').typeahead(
-    {
-      minLength: 1,
-      highlight: true,
-      hint: true,
-    },
-    {
-      name: 'groupnames',
-      display: 'displayName',
-      limit: 20,
-      source: travelerGlobal.groupnames,
-    }
-  );
+  if (shareGroups) {
+    $('#groupname').typeahead(
+      {
+        minLength: 1,
+        highlight: true,
+        hint: true,
+      },
+      {
+        name: 'groupnames',
+        display: 'displayName',
+        limit: 20,
+        source: travelerGlobal.groupnames,
+      }
+    );
+  }
 
   var groupColumns = [
     selectColumn,
@@ -124,7 +126,10 @@ $(function() {
     },
     bAutoWidth: false,
     iDisplayLength: 10,
-    aLengthMenu: [[10, 50, 100, -1], [10, 50, 100, 'All']],
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
     oLanguage: {
       sLoadingRecords: 'Please wait - loading data from the server ...',
     },
