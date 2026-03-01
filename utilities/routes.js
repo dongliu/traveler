@@ -366,7 +366,7 @@ var traveler = {
       title: title,
       description: '',
       devices: devices,
-      tags: form.base.tags,
+      tags: form.tags,
       status: 0,
       createdBy: userId,
       createdOn: Date.now(),
