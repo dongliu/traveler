@@ -57,19 +57,47 @@ creation and Traveler-initiated NCR creation should be testable.
 
 ### User Story 1.5 - Forward and Notify NCR Stakeholders (Priority: P1)
 
-Upon submission of an NCR, the system automatically forwards the initiated NCR (including all attachments such as photographs, inspection reports, or test data) to the appropriate organizational personnel for notification and action. The NCR Originator or system administrator can verify that all required stakeholders have been notified and have received the complete NCR documentation.
+Upon submission of an NCR, the system automatically forwards the initiated NCR
+(including all attachments such as photographs, inspection reports, or test
+data) to the appropriate organizational personnel for notification and action.
+The NCR Originator or system administrator can verify that all required
+stakeholders have been notified and have received the complete NCR
+documentation.
 
-**Why this priority**: Timely notification of key stakeholders (CE/CS, Group Leader, QA Staff, Division Director/PM) is critical for rapid response to nonconformances. Delays in notification can cascade into longer resolution times and increased impact to production. This is a core part of the initiation workflow.
+**Why this priority**: Timely notification of key stakeholders (CE/CS, Group
+Leader, QA Staff, Division Director/PM) is critical for rapid response to
+nonconformances. Delays in notification can cascade into longer resolution times
+and increased impact to production. This is a core part of the initiation
+workflow.
 
-**Independent Test**: Can be fully tested by creating and submitting an NCR, then verifying that: (1) the system correctly identifies and routes the NCR to all required stakeholders based on organizational roles/assignments, (2) all attachments are successfully transmitted with the NCR, and (3) notification records show delivery/receipt confirmation for each stakeholder.
+**Independent Test**: Can be fully tested by creating and submitting an NCR,
+then verifying that: (1) the system correctly identifies and routes the NCR to
+all required stakeholders based on organizational roles/assignments, (2) all
+attachments are successfully transmitted with the NCR, and (3) notification
+records show delivery/receipt confirmation for each stakeholder.
 
 **Acceptance Scenarios**:
 
-1. **Given** an NCR is submitted with valid data, **When** the system processes the submission, **Then** the NCR is automatically forwarded to: Cognizant Engineer/Scientist (for engineering disposition), Cognizant Group Leader (for notification), QA Staff (for notification), and Cognizant Division Director or Project Manager (for notification)
-2. **Given** an NCR includes attachments (photographs, reports, test data), **When** it is forwarded to stakeholders, **Then** all attachments are transmitted with the NCR and remain accessible to each recipient
-3. **Given** stakeholders have been identified for an NCR, **When** the system forwards the NCR, **Then** each recipient receives notification (email, dashboard alert, or in-system notification) with a link to view the complete NCR details
-4. **Given** an NCR has been forwarded, **When** the NCR Originator or authorized user views the forwarding status, **Then** they see confirmation that all required stakeholders have been notified with timestamp and delivery status for each recipient
-5. **Given** a stakeholder's role or contact information changes, **When** a previously submitted NCR is viewed, **Then** the system identifies the stakeholder roles that were valid at the time of submission for audit compliance
+1. **Given** an NCR is submitted with valid data, **When** the system processes
+   the submission, **Then** the NCR is automatically forwarded to: Cognizant
+   Engineer/Scientist (for engineering disposition), Cognizant Group Leader (for
+   notification), QA Staff (for notification), and Cognizant Division Director
+   or Project Manager (for notification)
+2. **Given** an NCR includes attachments (photographs, reports, test data),
+   **When** it is forwarded to stakeholders, **Then** all attachments are
+   transmitted with the NCR and remain accessible to each recipient
+3. **Given** stakeholders have been identified for an NCR, **When** the system
+   forwards the NCR, **Then** each recipient receives notification (email,
+   dashboard alert, or in-system notification) with a link to view the complete
+   NCR details
+4. **Given** an NCR has been forwarded, **When** the NCR Originator or
+   authorized user views the forwarding status, **Then** they see confirmation
+   that all required stakeholders have been notified with timestamp and delivery
+   status for each recipient
+5. **Given** a stakeholder's role or contact information changes, **When** a
+   previously submitted NCR is viewed, **Then** the system identifies the
+   stakeholder roles that were valid at the time of submission for audit
+   compliance
 
 ---
 
@@ -250,13 +278,13 @@ searchable in archives.
 
 #### NCR Forwarding and Notification
 
-- **FR-007**: System MUST automatically forward the submitted NCR to all required
-  stakeholders upon submission: Cognizant Engineer/Scientist (CE/CS) for
-  engineering disposition, Cognizant Group Leader, QA Staff, and Cognizant
+- **FR-007**: System MUST automatically forward the submitted NCR to all
+  required stakeholders upon submission: Cognizant Engineer/Scientist (CE/CS)
+  for engineering disposition, Cognizant Group Leader, QA Staff, and Cognizant
   Division Director or Project Manager
-- **FR-008**: System MUST identify the correct CE/CS, Cognizant Group Leader,
-  QA Staff, and Division Director/PM based on organizational role assignments,
-  part assignment, or project assignment
+- **FR-008**: System MUST identify the correct CE/CS, Cognizant Group Leader, QA
+  Staff, and Division Director/PM based on organizational role assignments, part
+  assignment, or project assignment
 - **FR-009**: System MUST transmit all NCR attachments (photographs, inspection
   reports, test data, drawings) along with the NCR forwarding to all
   stakeholders
