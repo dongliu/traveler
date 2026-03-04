@@ -147,35 +147,58 @@ and routes to QA Staff with complete audit trail.
 
 ---
 
-### User Story 3 - Approve Nonconformance Report (Priority: P1)
+### User Story 3 - QA Review and Approve Nonconformance Report (Priority: P1)
 
-A Quality Manager or Executive Approver reviews the disposition decision and
-supporting rationale. They either approve the disposition plan or reject it with
-feedback requiring further investigation or alternative disposition.
+QA Staff receives the dispositioned NCR from the CE/CS and reviews both the
+nonconformance details and the engineering disposition. In conjunction with the
+CE/CS (as needed), QA Staff determines whether additional Approvers and
+personnel beyond the standard distribution are necessary. QA Staff may designate
+additional Approvers for approval authority and additional personnel to receive
+copies of the NCR. After making these designations, QA Staff approves the NCR
+using the Nonconformance Reporting System. Upon QA Staff's approval, the system
+automatically distributes the NCR to all designated Approvers.
 
-**Why this priority**: Approval provides management oversight and ensures
-consensus on how to handle conformance issues. Without approvals, dispositions
-may not be properly authorized or compliant with quality standards.
+**Why this priority**: QA Staff provides essential quality oversight and
+coordinates approvals. Their role in designating appropriate approval
+authorities and interested parties ensures all necessary stakeholders
+participate in authorization decisions. Without QA's systematic approach to
+approval coordination, critical stakeholders might be missed and approval
+authority might be inconsistent.
 
-**Independent Test**: Can be fully tested by routing a dispositioned NCR to an
-approver, allowing them to approve or reject with feedback, and verifying the
-NCR transitions to "Approved" or "Failed Approval" status with documented
-reasoning.
+**Independent Test**: Can be fully tested by routing a dispositioned NCR to QA
+Staff, allowing them to review the disposition, work with CE/CS context to
+designate additional approvers and distribution personnel, approve the NCR, and
+verifying the NCR reaches all designated approvers automatically with
+appropriate access and notification.
 
 **Acceptance Scenarios**:
 
-1. **Given** an NCR is in "Dispositioned" status, **When** an authorized
-   approver views it, **Then** they see the full nonconformance description,
-   proposed disposition, and supporting rationale
-2. **Given** an approver reviews the disposition, **When** they click "Approve",
-   **Then** the NCR transitions to "Approved" status with approver name and
-   timestamp recorded
-3. **Given** an approver determines the disposition is inadequate, **When** they
-   click "Reject", **Then** it transitions back to "Submitted" with required
-   feedback comments visible to the original dispositioner
-4. **Given** an NCR has been approved, **When** any authorized user views the
-   NCR, **Then** they see "APPROVED" clearly marked with approval date and
-   approver information
+1. **Given** an NCR is in "Dispositioned" status, **When** QA Staff accesses the
+   NCR, **Then** they see the full nonconformance description, CE/CS-provided
+   disposition (parts disposition, root cause, preventive actions, rework/repair
+   instructions), and can review all supporting documentation
+2. **Given** QA Staff is reviewing a disposition, **When** they consult with the
+   CE/CS (through NCR comments or direct communication), **Then** they can
+   identify if additional Approvers beyond the standard approvers are necessary
+3. **Given** QA Staff determines additional Approvers are needed, **When** they
+   access the approval section of the NCR, **Then** they can designate
+   additional Approvers by role, name, or organizational unit
+4. **Given** QA Staff may want to notify additional personnel outside the formal
+   approval chain, **When** they designate additional distribution personnel,
+   **Then** the system allows them to specify additional recipients who will
+   receive read-only copies of the complete NCR
+5. **Given** QA Staff has reviewed the disposition and made all necessary
+   approver/distribution designations, **When** they click "Approve", **Then**
+   the system records QA Staff identity, approval timestamp, designated
+   additional approvers, and designated distribution personnel, transitions NCR
+   to "Approved" status, and automatically sends the NCR to all designated
+   additional approvers with a request to review and approve
+6. **Given** QA Staff's approval is recorded, **When** any designated Approver
+   accesses the NCR, **Then** they see QA Staff's approval and have the ability
+   to give final authorization
+7. **Given** QA Staff needs to reject the disposition, **When** they click
+   "Reject" with required feedback, **Then** the NCR transitions back to
+   "Dispositioned" status with feedback visible to the CE/CS
 
 ---
 
@@ -198,7 +221,8 @@ categories, aging, and trends without implementation-specific technical metrics.
 
 1. **Given** there are multiple NCRs in the system, **When** a Quality Manager
    accesses the NCR Dashboard, **Then** they see: total open NCRs, NCRs by
-   status (Submitted, Dispositioned, Approved), and average time in workflow
+   status (Submitted, Dispositioned, Approved, Final Approval), and average time
+   in workflow
 2. **Given** an NCR has been approved, **When** it is marked as "Closed" with
    closure notes, **Then** it appears in closed NCR reports and is excluded from
    open/pending metrics
@@ -229,8 +253,8 @@ searchable in archives.
 
 **Acceptance Scenarios**:
 
-1. **Given** an NCR is in "Approved" status, **When** a user with appropriate
-   role accesses it, **Then** they see an option to "Close NCR"
+1. **Given** an NCR is in "Final Approval" status, **When** a user with
+   appropriate role accesses it, **Then** they see an option to "Close NCR"
 2. **Given** a user selects "Close NCR", **When** they provide closure notes
    (e.g., "Corrective action completed"), **Then** the NCR transitions to
    "Closed" with closure date and notes recorded
@@ -353,46 +377,50 @@ searchable in archives.
 
 #### NCR Closure
 
-- **FR-028**: System MUST allow authorized users to close approved NCRs
-- **FR-029**: System MUST require closure notes documenting completion status
+- **FR-037**: System MUST allow authorized users to close approved NCRs that
+  have received final approval
+- **FR-038**: System MUST require closure notes documenting completion status
   and verification that corrective actions and preventive actions from the CE/CS
   disposition have been implemented
-- **FR-030**: System MUST transition closed NCRs to "Closed" status and record
+- **FR-039**: System MUST transition closed NCRs to "Closed" status and record
   closure date and notes
-- **FR-031**: System MUST exclude closed NCRs from active/open workflow
+- **FR-040**: System MUST exclude closed NCRs from active/open workflow
   dashboards by default
 
 #### Reporting and Visibility
 
-- **FR-032**: System MUST provide a dashboard showing counts of NCRs by status
-  (Submitted, Dispositioned, Approved, Closed)
-- **FR-033**: System MUST generate aging reports showing time elapsed since NCR
+- **FR-041**: System MUST provide a dashboard showing counts of NCRs by status
+  (Submitted, Dispositioned, Approved, Final Approval, Closed)
+- **FR-042**: System MUST generate aging reports showing time elapsed since NCR
   submission for open NCRs
-- **FR-034**: System MUST support filtering and searching NCRs by: Item/Part
+- **FR-043**: System MUST support filtering and searching NCRs by: Item/Part
   Number, Specification Reference, Date Range, Status, Parts Disposition Type
   (Rework/Repair/Return/Scrap/Use-As-Is), and Root Cause Categories
-- **FR-035**: System MUST maintain complete audit trail for all NCR state
+- **FR-044**: System MUST maintain complete audit trail for all NCR state
   transitions with timestamp and user identity
 
 #### Security and Access Control
 
-- **FR-036**: System MUST enforce role-based access control with specific role
-  permissions: NCR Originator (create), CE/CS (disposition), QA Staff (review
-  and forward to approvers), Approver (approve), Manager (view reports)
-- **FR-037**: System MUST require authentication for all NCR operations
-- **FR-038**: System MUST prevent unauthorized users from modifying or viewing
+- **FR-045**: System MUST enforce role-based access control with specific role
+  permissions: NCR Originator (create), CE/CS (disposition), QA Staff (review,
+  approve, designate approvers/distribution), Designated Approver (review and
+  provide final approval), Manager (view reports)
+- **FR-046**: System MUST require authentication for all NCR operations
+- **FR-047**: System MUST prevent unauthorized users from modifying or viewing
   restricted NCR data
-- **FR-039**: System MUST log all access and modifications to NCRs for
+- **FR-048**: System MUST provide read-only access to designated distribution
+  personnel without approval authority
+- **FR-049**: System MUST log all access and modifications to NCRs for
   compliance auditing
 
 #### Data Management
 
-- **FR-040**: System MUST persist all NCR data reliably with backups
-- **FR-041**: System MUST handle concurrent access to the same NCR without data
+- **FR-050**: System MUST persist all NCR data reliably with backups
+- **FR-051**: System MUST handle concurrent access to the same NCR without data
   corruption
-- **FR-042**: System MUST not allow duplicate NCRs for the same nonconformance
+- **FR-052**: System MUST not allow duplicate NCRs for the same nonconformance
   incident
-- **FR-043**: System MUST support linking related NCRs (e.g., same root cause
+- **FR-053**: System MUST support linking related NCRs (e.g., same root cause
   affecting multiple items)
 
 ### Key Entities
@@ -401,21 +429,24 @@ searchable in archives.
 
 - Represents a reported quality issue for an item/product that doesn't meet
   specifications or requirements, tracked through engineering disposition and
-  quality approval
+  quality approval coordination
 - Attributes: NCR Number (unique, auto-generated), Part Name, Part Number, Part
   Revision, Quantity, Supplier Name, WBS Number, Cognizant Engineer/Scientist
   (CE/CS) Name, Specification/Drawing/PO Reference, Description of
   Nonconformance, Discovery Date, Discovery Context (incoming inspection /
   in-house assembly / in-house inspection), Status
-  (Submitted/Dispositioned/Approved/Closed), Originator Identity, Creation
-  Timestamp, Traveler Link (if applicable: Traveler ID, step number), Parts
-  Disposition (Rework/Repair/Return to Vendor/Scrap/Use-As-Is), Root Cause
+  (Submitted/Dispositioned/Approved/Final Approval/Closed), Originator Identity,
+  Creation Timestamp, Traveler Link (if applicable: Traveler ID, step number),
+  Parts Disposition (Rework/Repair/Return to Vendor/Scrap/Use-As-Is), Root Cause
   Documentation, Preventive Actions, Rework/Repair Instructions (if applicable),
-  CE/CS Identity, Disposition Timestamp
+  CE/CS Identity, CE/CS Disposition Timestamp, QA Staff Identity, QA Staff
+  Approval Timestamp, Designated Additional Approvers (list with roles/names),
+  Designated Distribution Personnel (list)
 - Relationships: Links to specific Items/Parts, References Suppliers, References
   Specifications/Drawings/POs, Links to eTraveler steps (optional), Has
-  Disposition (completed by CE/CS), Has Approval (completed by QA/Approvers),
-  Has Closure Record, Tracks Audit History, Tracks Forwarding History
+  Disposition (completed by CE/CS), Has QA Approval (completed by QA Staff), Has
+  Final Approval (completed by Designated Approvers), Has Closure Record, Tracks
+  Audit History, Tracks Forwarding History, Tracks Approver Designations
 
 **Disposition**:
 
