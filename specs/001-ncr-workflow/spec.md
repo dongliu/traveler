@@ -11,35 +11,47 @@ product criteria.
 
 ### User Story 1 - Create and Submit Nonconformance Report (Priority: P1)
 
-A Quality Inspector identifies an item that does not conform to the
-specification and must create a Nonconformance Report (NCR). The inspector
-documents the nonconformance details (what is wrong, which part/item, which
-specification requirement was violated) and submits it for disposition review.
+An NCR Originator (Quality Inspector, Line Inspector, or Quality Engineer)
+discovers a nonconformance either at incoming inspection or during in-house
+assembly/inspection. The NCR Originator creates a Nonconformance Report
+documenting the nonconformance with mandatory part information, supplier
+details, engineering contact, WBS reference, and a detailed description. The
+system automatically generates a unique NCR number. If the nonconformance is
+found while using an eTraveler, the NCR can be initiated directly from the
+Traveler step, linking the NCR to that specific work activity.
 
 **Why this priority**: This is the core workflow - without the ability to
 initiate NCRs, the entire system has no purpose. All other workflows depend on
 this functionality.
 
-**Independent Test**: Can be fully tested by allowing a quality inspector to
-create an NCR with all required details, verify the system captures and stores
-the information correctly, and demonstrates that the NCR is ready for
-disposition by an authorized reviewer.
+**Independent Test**: Can be fully tested by allowing an NCR Originator to
+create an NCR with all required details (Part Information with revision and
+quantity, Supplier, WBS, CE/CS name, Nonconformance Description), verify the
+system captures and stores the information correctly, and demonstrates that the
+NCR is ready for disposition by an authorized reviewer. Both standalone NCR
+creation and Traveler-initiated NCR creation should be testable.
 
 **Acceptance Scenarios**:
 
-1. **Given** a user has Quality Inspector role, **When** they access NCR
-   creation form, **Then** they see fields for: Item/Part Number,
-   Specification/Drawing Reference, Description of Nonconformance, Root Cause
-   (optional at creation), and Discovered Date
-2. **Given** required fields are filled, **When** they submit the NCR, **Then**
-   the system assigns a unique NCR number and transitions the NCR to "Submitted"
-   status
-3. **Given** an NCR has been submitted, **When** the Quality Inspector or
+1. **Given** a user has NCR Originator role, **When** they access NCR creation
+   form, **Then** they see mandatory fields for: Part Name, Part Number, Part
+   Revision, Quantity, Supplier Name, Work Breakdown Structure (WBS) Number,
+   Cognizant Engineer/Scientist name, Specification/Drawing Reference,
+   Description of Nonconformance, and Discovery Date
+2. **Given** required fields are populated correctly, **When** they submit the
+   NCR, **Then** the system assigns a unique, sequential NCR number and
+   transitions the NCR to "Submitted" status
+3. **Given** an NCR has been submitted, **When** the NCR Originator or
    authorized user views it, **Then** they see complete audit trail including
-   creation date, creator name, and submission timestamp
-4. **Given** a Quality Inspector attempts to submit an NCR with missing required
+   creation date, originator name, submission timestamp, and all captured
+   information
+4. **Given** an NCR Originator attempts to submit an NCR with missing mandatory
    fields, **When** they click submit, **Then** the system displays validation
-   errors and prevents submission
+   errors identifying which required fields are missing and prevents submission
+5. **Given** an NCR Originator is working within an eTraveler and discovers a
+   nonconformance, **When** they select "Initiate NCR" from the Traveler step,
+   **Then** the NCR creation form pre-populates with the Traveler context and
+   upon completion shows the new NCR number linked to that Traveler step
 
 ---
 
@@ -191,19 +203,28 @@ searchable in archives.
 
 #### NCR Initiation
 
-- **FR-001**: System MUST allow Quality Inspectors and authorized users to
-  create a new Nonconformance Report (NCR)
-- **FR-002**: System MUST capture the following data when creating an NCR:
-  Item/Part Number, Specification/Drawing/PO Reference, Description of
-  Nonconformance, Discovery Date, and Discoverer Information
-- **FR-003**: System MUST validate that all required fields are populated before
-  allowing NCR submission
+- **FR-001**: System MUST allow NCR Originators (Quality Inspectors, Line
+  Inspectors, Quality Engineers) and authorized users to create a new
+  Nonconformance Report (NCR)
+- **FR-002**: System MUST capture the following mandatory data when creating an
+  NCR: Part Name, Part Number, Part Revision, Quantity, Supplier Name, Work
+  Breakdown Structure (WBS) Number, Cognizant Engineer/Scientist (CE/CS) name,
+  Specification/Drawing/PO Reference, Description of Nonconformance, Discovery
+  Date, and Originator Information
+- **FR-003**: System MUST validate that all mandatory fields are populated and
+  properly formatted before allowing NCR submission
 - **FR-004**: System MUST automatically assign a unique, sequential NCR number
   upon submission
 - **FR-005**: System MUST record the creation timestamp, creator identity, and
   transition NCR to "Submitted" status upon creation
-- **FR-006**: System MUST allow Quality Inspectors to attach supporting
-  documentation (images, drawings, test results) to NCRs
+- **FR-006**: System MUST allow NCR Originators to attach supporting
+  documentation (images, drawings, test results, inspection reports) to NCRs
+- **FR-006a**: System MUST support launching NCR creation from within an
+  eTraveler work instruction, with automatic context capture (Traveler ID, step
+  number, associated part/assembly information) and linking of the NCR to the
+  specific Traveler step
+- **FR-006b**: System MUST display the newly generated NCR number in the
+  eTraveler upon successful creation when NCR is initiated from a Traveler step
 
 #### NCR Disposition
 
@@ -282,13 +303,17 @@ searchable in archives.
 **Nonconformance Report (NCR)**:
 
 - Represents a reported quality issue for an item/product that doesn't meet
-  specifications
-- Attributes: NCR Number (unique), Item/Part Number, Specification Reference,
-  Description, Discovery Date, Status (Submitted/Dispositioned/Approved/Closed),
-  Discoverer, Creation Timestamp
-- Relationships: Links to specific Items, References
-  Specifications/Drawings/POs, Has Disposition, Has Approval, Has Closure
-  Record, Tracks Audit History
+  specifications or requirements
+- Attributes: NCR Number (unique, auto-generated), Part Name, Part Number, Part
+  Revision, Quantity, Supplier Name, WBS Number, Cognizant Engineer/Scientist
+  Name, Specification/Drawing/PO Reference, Description of Nonconformance,
+  Discovery Date, Discovery Context (incoming inspection / in-house assembly /
+  in-house inspection), Status (Submitted/Dispositioned/Approved/Closed),
+  Originator Identity, Creation Timestamp, Traveler Link (if applicable:
+  Traveler ID, step number)
+- Relationships: Links to specific Items/Parts, References Suppliers, References
+  Specifications/Drawings/POs, Links to eTraveler steps (optional), Has
+  Disposition, Has Approval, Has Closure Record, Tracks Audit History
 
 **Disposition**:
 
