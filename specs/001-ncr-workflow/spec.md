@@ -195,8 +195,14 @@ appropriate access and notification.
    additional approvers with a request to review and approve
 6. **Given** QA Staff's approval is recorded, **When** any designated Approver
    accesses the NCR, **Then** they see QA Staff's approval and have the ability
-   to give final authorization
-7. **Given** QA Staff needs to reject the disposition, **When** they click
+   to give final authorization or return for comment
+7. **Given** a Designated Approver does not agree with the disposition, **When**
+   they click "Return for Comment", **Then** the NCR transitions to "Returned
+   for Comment" status and is routed back to QA Staff for comment resolution
+8. **Given** there are no outstanding comments, **When** a Designated Approver
+   reviews the NCR, **Then** they can approve it using the system and record
+   their final authorization
+9. **Given** QA Staff needs to reject the disposition, **When** they click
    "Reject" with required feedback, **Then** the NCR transitions back to
    "Dispositioned" status with feedback visible to the CE/CS
 
@@ -221,8 +227,8 @@ categories, aging, and trends without implementation-specific technical metrics.
 
 1. **Given** there are multiple NCRs in the system, **When** a Quality Manager
    accesses the NCR Dashboard, **Then** they see: total open NCRs, NCRs by
-   status (Submitted, Dispositioned, Approved, Final Approval), and average time
-   in workflow
+   status (Submitted, Dispositioned, Approved, Returned for Comment, Final
+   Approval, Closed), and average time in workflow
 2. **Given** an NCR has been approved, **When** it is marked as "Closed" with
    closure notes, **Then** it appears in closed NCR reports and is excluded from
    open/pending metrics
@@ -235,33 +241,50 @@ categories, aging, and trends without implementation-specific technical metrics.
 
 ---
 
-### User Story 5 - Close and Archive Nonconformance Record (Priority: P3)
+### User Story 5 - Execute Disposition and Close Nonconformance Record (Priority: P3)
 
-After a nonconformance has been approved and all corrective actions are
-complete, an authorized user marks the NCR as Closed. The closed NCR becomes
-part of the quality history archive but is no longer considered "open" in active
-workflow dashboards.
+After an NCR has received final approval from all designated approvers, the NCR
+Originator (or a designee) executes the authorized disposition (such as
+performing rework, repair, or other corrective actions) and then closes the NCR.
+When an NCR is marked as Closed, the system automatically distributes it to all
+Approvers and designated distribution personnel, and the closed NCR becomes part
+of the quality history archive but is no longer considered "open" in active
+workflow dashboards. If a Traveler was used, the Originator returns to the
+operation where the nonconformance occurred and electronically signs off, which
+closes the NCR in the system.
 
 **Why this priority**: Closure and archiving are important for data hygiene and
 historical tracking, but can be implemented after core workflow (P1) is
 complete. Organizations can informally track closure before this feature exists.
+Importantly, the Originator's execution of the disposition and sign-off ensures
+accountability and verifies that corrective actions are actually implemented.
 
 **Independent Test**: Can be fully tested by completing full workflow (submit →
-disposition → approve) and then verifying a user can mark as closed, specify
-closure details, and confirm it removes from active tracking while remaining
-searchable in archives.
+disposition → approve → final approval) and then verifying the NCR Originator
+can close the NCR with closure notes, that closure auto-distributes to all
+Approvers and distribution personnel, and confirms it removes from active
+tracking while remaining searchable in archives. For Traveler-initiated NCRs,
+verify electronic sign-off capability closes the NCR.
 
 **Acceptance Scenarios**:
 
-1. **Given** an NCR is in "Final Approval" status, **When** a user with
-   appropriate role accesses it, **Then** they see an option to "Close NCR"
+1. **Given** an NCR is in "Final Approval" status, **When** the NCR Originator
+   or designee accesses it, **Then** they see an option to "Close NCR" and
+   execute the authorized disposition
 2. **Given** a user selects "Close NCR", **When** they provide closure notes
-   (e.g., "Corrective action completed"), **Then** the NCR transitions to
+   (e.g., "Rework completed and verified"), **Then** the NCR transitions to
    "Closed" with closure date and notes recorded
-3. **Given** an NCR is closed, **When** a user views the active/open NCR list,
+3. **Given** an NCR is closed, **When** the system records the closed status,
+   **Then** it automatically distributes the closed NCR to all designated
+   Approvers and distribution personnel for their final records
+4. **Given** an NCR was initiated from a Traveler, **When** the NCR Originator
+   returns to the operation where the nonconformance occurred, **Then** they can
+   electronically sign off, which closes the NCR and includes an electronic copy
+   with the Traveler
+5. **Given** an NCR is closed, **When** a user views the active/open NCR list,
    **Then** the closed NCR does not appear, improving focus on items requiring
    action
-4. **Given** a closed NCR is searched for historical purposes, **When** a user
+6. **Given** a closed NCR is searched for historical purposes, **When** a user
    performs a search including closed NCRs, **Then** the record is found with
    full history intact
 
@@ -275,14 +298,20 @@ searchable in archives.
   in-progress items?
 - What if the referenced Specification/Drawing/PO is no longer available in the
   system?
-- How does the system manage NCR reassignment if the original dispositioner is
-  unavailable?
+- How does the system manage NCR reassignment if the original dispositioner or
+  Originator is unavailable?
 - Can an approved disposition be overridden, and if so, what audit trail changes
   are needed?
 - What happens if a stakeholder (CE/CS, Group Leader, QA, Director/PM) is not
   assigned or the email/notification delivery fails?
 - How does the system handle changes to stakeholder assignments after an NCR has
   already been forwarded?
+- What happens when a Designated Approver returns an NCR for comment multiple
+  times before reaching agreement?
+- How does the system handle when the NCR Originator or Designee is unavailable
+  to close/execute the disposition?
+- What occurs if a Traveler-initiated NCR is closed but the Traveler record is
+  no longer active or accessible?
 
 ## Requirements _(mandatory)_
 
@@ -375,22 +404,57 @@ searchable in archives.
 - **FR-027**: System MUST NOT allow closure of an NCR until it has been approved
   by authorized personnel
 
+#### Final Approval (Designated Approvers Authorization and Comment Resolution)
+
+- **FR-028**: System MUST display approved NCRs to designated approvers for
+  final authorization review
+- **FR-029**: System MUST allow designated approvers to review QA Staff's
+  approval, all disposition details, and supporting documentation
+- **FR-030**: System MUST allow designated approvers to provide final
+  authorization by clicking "Approve" to record their authorization, identity,
+  and timestamp
+- **FR-031**: System MUST allow designated approvers to return an NCR for
+  comment by clicking "Return for Comment" if they do not agree with the
+  disposition
+- **FR-032**: System MUST transition NCRs returned for comment to "Returned for
+  Comment" status and route back to QA Staff for resolution and comment
+  clarification
+- **FR-033**: System MUST track which designated approver returned the NCR and
+  what comments/concerns they raised
+- **FR-034**: System MUST allow QA Staff to address returned comments through
+  consultation with CE/CS and resubmit the NCR to approvers
+- **FR-035**: System MUST transition NCRs with resolved comments to "Final
+  Approval" status once all designated approvers have authorized
+- **FR-036**: System MUST record the Final Approval timestamp and approver
+  identities in the NCR audit trail
+
 #### NCR Closure
 
-- **FR-037**: System MUST allow authorized users to close approved NCRs that
-  have received final approval
-- **FR-038**: System MUST require closure notes documenting completion status
+- **FR-037**: System MUST allow NCR Originator or designee to execute the
+  authorized disposition (such as performing rework, repair, or other corrective
+  actions) and close approved NCRs that have received final approval
+- **FR-038**: System MUST provide electronic sign-off capability for
+  Traveler-initiated NCRs, allowing the Originator to return to the operation
+  where the nonconformance occurred and electronically sign off, which closes
+  the NCR
+- **FR-039**: System MUST require closure notes documenting completion status
   and verification that corrective actions and preventive actions from the CE/CS
   disposition have been implemented
-- **FR-039**: System MUST transition closed NCRs to "Closed" status and record
-  closure date and notes
-- **FR-040**: System MUST exclude closed NCRs from active/open workflow
+- **FR-040**: System MUST transition closed NCRs to "Closed" status, record
+  closure date, notes, and originator identity
+- **FR-040a**: System MUST automatically distribute the closed NCR to all
+  designated Approvers and designated Distribution Personnel upon closing for
+  their final records
+- **FR-040b**: System MUST, for Traveler-initiated NCRs, include an electronic
+  copy of the closed NCR with the Traveler record
+- **FR-040c**: System MUST exclude closed NCRs from active/open workflow
   dashboards by default
 
 #### Reporting and Visibility
 
 - **FR-041**: System MUST provide a dashboard showing counts of NCRs by status
-  (Submitted, Dispositioned, Approved, Final Approval, Closed)
+  (Submitted, Dispositioned, Approved, Returned for Comment, Final Approval,
+  Closed)
 - **FR-042**: System MUST generate aging reports showing time elapsed since NCR
   submission for open NCRs
 - **FR-043**: System MUST support filtering and searching NCRs by: Item/Part
@@ -435,13 +499,14 @@ searchable in archives.
   (CE/CS) Name, Specification/Drawing/PO Reference, Description of
   Nonconformance, Discovery Date, Discovery Context (incoming inspection /
   in-house assembly / in-house inspection), Status
-  (Submitted/Dispositioned/Approved/Final Approval/Closed), Originator Identity,
-  Creation Timestamp, Traveler Link (if applicable: Traveler ID, step number),
-  Parts Disposition (Rework/Repair/Return to Vendor/Scrap/Use-As-Is), Root Cause
-  Documentation, Preventive Actions, Rework/Repair Instructions (if applicable),
-  CE/CS Identity, CE/CS Disposition Timestamp, QA Staff Identity, QA Staff
-  Approval Timestamp, Designated Additional Approvers (list with roles/names),
-  Designated Distribution Personnel (list)
+  (Submitted/Dispositioned/Approved/Returned for Comment/Final Approval/Closed),
+  Originator Identity, Creation Timestamp, Traveler Link (if applicable:
+  Traveler ID, step number), Parts Disposition (Rework/Repair/Return to
+  Vendor/Scrap/Use-As-Is), Root Cause Documentation, Preventive Actions,
+  Rework/Repair Instructions (if applicable), CE/CS Identity, CE/CS Disposition
+  Timestamp, QA Staff Identity, QA Staff Approval Timestamp, Designated
+  Additional Approvers (list with roles/names), Designated Distribution
+  Personnel (list)
 - Relationships: Links to specific Items/Parts, References Suppliers, References
   Specifications/Drawings/POs, Links to eTraveler steps (optional), Has
   Disposition (completed by CE/CS), Has QA Approval (completed by QA Staff), Has
@@ -462,20 +527,27 @@ searchable in archives.
 
 **Approval**:
 
-- Represents management authorization of the disposition decision
-- Attributes: Approval Status (Approved/Rejected), Approver Identity, Approval
-  Timestamp, Comments/Feedback, Re-review Timestamp (if rejected and
-  resubmitted)
-- Relationships: Associated with one Dispositioned NCR, Recorded by Approver
-  User
+- Represents management authorization of the disposition decision, including QA
+  Staff approval with approver designations and Final Approval by designated
+  approvers
+- Attributes: Approval Status (Approved/Rejected/Returned for Comment), Approver
+  Identity, Approval Timestamp, Comments/Feedback, Re-review Timestamp (if
+  rejected and resubmitted), Designated Additional Approvers (list), Designated
+  Distribution Personnel (list)
+- Relationships: Associated with one Dispositioned NCR, Recorded by QA Staff
+  and/or Designated Approver Users, Tracks Comment Resolution If Returned for
+  Comment
 
 **Closure Record**:
 
-- Represents completion of corrective actions and formal closure of the NCR
-- Attributes: Closure Date, Closure Notes, Closed By (user identity), Closure
-  Timestamp
-- Relationships: Associated with one Approved NCR, References Completed
-  Corrective Actions
+- Represents execution of the authorized disposition and formal closure of the
+  NCR by the NCR Originator or designee
+- Attributes: Closure Date, Closure Notes (documenting disposition execution
+  verification), Closed By (NCR Originator or designee identity), Closure
+  Timestamp, Distribution Notification Timestamp (when auto-distributed)
+- Relationships: Associated with one Final-Approved NCR, References Executed
+  Corrective Actions, Tracks Closure Notifications to Approvers and Distribution
+  Personnel
 
 **Audit Log Entry**:
 
@@ -504,7 +576,8 @@ searchable in archives.
 - **SC-002**: 100% of created NCRs are successfully stored and retrievable in
   the system
 - **SC-003**: NCRs transition through workflow states (Submitted → Dispositioned
-  → Approved → Closed) automatically upon user action with zero data loss
+  → Approved → Final Approval → Closed) automatically upon user action with zero
+  data loss; Returned for Comment status enables comment resolution loops
 - **SC-004**: NCR search and filtering returns matching records in under 2
   seconds for repositories with 10,000+ NCRs
 - **SC-005**: Authorized users can view complete audit trail showing all changes
@@ -515,13 +588,16 @@ searchable in archives.
   counts and aging within 1 minute
 - **SC-008**: System prevents unauthorized access - users without proper roles
   cannot view or edit NCR data
-- **SC-009**: Rejected NCRs are successfully resubmitted and re-reviewed without
-  losing original documentation
+- **SC-009**: Returned-for-comment and rejected NCRs are successfully
+  resubmitted and re-reviewed without losing original documentation
 - **SC-010**: System supports concurrent access by 10+ users simultaneously
   without data corruption or conflicts
 - **SC-011**: NCR closure reduces the count of "open/pending" NCRs in dashboards
   in real-time
-- **SC-012**: Users report the NCR interface as "easy to use" in post-deployment
+- **SC-012**: Upon NCR closure by the Originator, the system automatically
+  distributes the closed NCR to all designated Approvers and distribution
+  personnel within 2 minutes
+- **SC-013**: Users report the NCR interface as "easy to use" in post-deployment
   survey with at least 80% satisfaction rating
 
 ## Assumptions
@@ -530,8 +606,10 @@ searchable in archives.
   pre-configured and managed separately (external identity/authorization system)
 - Item/Part Numbers and Specification/Drawing References already exist in a
   system that can be referenced (assume separate master data system)
-- Nonconformance workflows follow a linear progression (Submitted → Disposition
-  → Approval → Closure); rejection loops back to Submitted state
+- Nonconformance workflows follow a progression (Submitted → Disposition →
+  Approval → Final Approval → Closure) with rejection and comment loops: QA
+  rejection loops back to Disposition, and Approver "Return for Comment" loops
+  back to QA Staff for resolution
 - The organization defines disposition options (Scrap, Rework, etc.) in advance;
   system uses predefined list rather than user-defined
 - Email notifications for status changes are desirable but not required for MVP

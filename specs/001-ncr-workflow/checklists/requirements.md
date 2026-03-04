@@ -53,31 +53,52 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
 
 - 5 user stories (P1: 4 core workflows + 1 forwarding, P2: reporting, P3:
   closure) are independent and provide incremental value
-- Specification supports full NCR lifecycle: Create → Forward/Notify → CE/CS
-  Disposition (with Root Cause Analysis) → QA Review/Approved (with Approver
-  Designation) → Final Approval (by Designated Approvers) → Close → Report
+- Specification supports full NCR lifecycle with comment resolution loops:
+  Create → Forward/Notify → CE/CS Disposition (with Root Cause Analysis) → QA
+  Review/Approved (with Approver Designation) → Final Approval (by Designated
+  Approvers, with "Return for Comment" capability) → NCR Originator Executes &
+  Closes (with auto-distribution) → Close → Report
 - **Enhanced with NCR Originator specifics**: User Story 1 includes detailed
   role (NCR Originators: Quality Inspectors, Line Inspectors, Quality
   Engineers), discovery context, and mandatory fields (Part
   Name/Number/Revision/Quantity, Supplier, WBS, CE/CS name)
 - **Traveler Integration**: eTraveler context capture and NCR number display in
-  Traveler steps
+  Traveler steps; electronic sign-off in Traveler to close NCR with electronic
+  copy included
 - **Stakeholder Forwarding** (User Story 1.5): Auto-forwards NCR to CE/CS,
-  Cognizant Group Leader, QA Staff, Division Director/PM with attachments
+  Cognizant Group Leader, QA Staff, Division Director/PM with attachments and
+  delivery tracking
 - **CE/CS Engineering Disposition** (User Story 2): 5 parts disposition options,
   mandatory root cause and preventive actions, detailed instructions for
-  Rework/Repair
+  Rework/Repair, auto-forwarding to QA Staff
 - **QA Review and Approval Coordination** (User Story 3): QA Staff reviews with
   CE/CS, designates additional Approvers, designates distribution personnel,
   approves NCR, system auto-distributes to designated approvers
-- **Designated Approver Final Authorization** (FR-033 to FR-036): QA-designated
-  Approvers provide final authorization with system tracking and "Final
-  Approval" status
-- **53 Functional Requirements**: initiation, forwarding/notification, CE/CS
-  disposition, QA coordination, designated approver authorization, closure,
-  reporting, security, data management
-- **Two-Stage Approval**: (1) QA Staff approval with designations, (2) Final
-  Approval by designated approvers with auto-distribution
-- 6+ key entities with expanded NCR attributes for QA coordination and approver
-  tracking
+- **Designated Approver Final Authorization with Comment Resolution**: Approvers
+  can "Return for Comment" if they disagree; NCR goes to "Returned for Comment"
+  status; QA Staff resolves concerns through CE/CS consultation, then resubmits;
+  resolved NCRs progress to "Final Approval" status
+- **NCR Originator Execution and Closure** (User Story 5): Originator or
+  designee executes authorized disposition, closes NCR with closure notes; upon
+  closure, system automatically distributes closed NCR to all designated
+  Approvers and Distribution Personnel; for Traveler NCRs, electronic sign-off
+  closes it with electronic copy included in Traveler
+- **Returned for Comment Status**: New workflow state enabling comment loops
+  between Approvers and QA Staff before reaching Final Approval
+- **62+ Functional Requirements**: initiation (8), forwarding/notification (6),
+  CE/CS disposition (9), QA coordination (6), final approval & comment
+  resolution (9), closure (8), reporting (4), security (5), data management (4)
+- **Three-stage approval with comment resolution**: (1) QA Staff approval with
+  designations, (2) Designated Approver review with "Return for Comment"
+  capability, (3) QA Staff comment resolution loop enabling comment-based
+  improvement, (4) Final Approval recording once consensus reached
+- **Auto-distribution on Closure**: Upon closing by Originator, system
+  distributes closed NCR to all approvers and designated personnel within 2
+  minutes
+- 6 key entities with expanded attributes for QA coordination, approver
+  designations, comment resolution, closure execution tracking, and
+  auto-distribution notification
+- Edge cases identified: escalation procedures, Traveler availability,
+  Originator unavailability, multiple comment iterations, shipped product
+  handling
 - Ready to proceed to `/speckit.plan` phase
