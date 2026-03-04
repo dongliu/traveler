@@ -30,9 +30,10 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
 ## Feature Readiness
 
 - [x] All functional requirements have clear acceptance criteria (5+ user
-      stories with detailed scenarios, including forwarding workflow)
-- [x] User scenarios cover primary flows (Create → Forward/Notify → Disposition
-      → Approve → Close)
+      stories with detailed scenarios, including forwarding and CE/CS
+      disposition workflows)
+- [x] User scenarios cover primary flows (Create → Forward/Notify → CE/CS
+      Engineering Disposition → QA Review/Approve → Close)
 - [x] Feature meets measurable outcomes defined in Success Criteria (12 SC items
       covering performance, reliability, usability, role-based access)
 - [x] No implementation details leak into specification (focuses on "what" and
@@ -50,10 +51,10 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
 
 ## Notes
 
-- 5.5 user stories (P1: 3 core workflows + 1 forwarding, P2: reporting, P3:
+- 5 user stories (P1: 4 core workflows + 1 forwarding, P2: reporting, P3:
   closure) are independent and provide incremental value
-- Specification supports full NCR lifecycle: Create → Forward/Notify →
-  Disposition → Approve → Close → Report
+- Specification supports full NCR lifecycle: Create → Forward/Notify → CE/CS
+  Disposition (with Root Cause Analysis) → QA Review/Approve → Close → Report
 - **Enhanced with NCR Originator specifics**: User Story 1 now includes detailed
   role (NCR Originators: Quality Inspectors, Line Inspectors, Quality
   Engineers), discovery context (incoming inspection, in-house assembly,
@@ -62,12 +63,19 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
 - **Traveler Integration**: Specification includes eTraveler context capture and
   NCR number display in Traveler steps
 - **Stakeholder Forwarding** (User Story 1.5): System automatically forwards NCR
-  to CE/CS (for disposition), Cognizant Group Leader, QA Staff, and Division
-  Director/PM (for notification) with full attachment transmission and delivery
-  confirmation tracking
-- 40 functional requirements covering initiation, forwarding/notification,
-  disposition, approval, closure, reporting, security, and data management
+  to CE/CS (for engineering disposition), Cognizant Group Leader, QA Staff, and
+  Division Director/PM (for notification) with full attachment transmission and
+  delivery confirmation tracking
+- **CE/CS Engineering Disposition** (User Story 2): Cognizant Engineer/Scientist
+  performs technical disposition with 5 parts disposition options (Rework,
+  Repair, Return to Vendor, Scrap, Use-As-Is), mandatory root cause
+  documentation, mandatory preventive actions, and detailed rework/repair
+  instructions when applicable. System automatically routes to QA Staff for
+  review and approval.
+- 43 functional requirements covering initiation, forwarding/notification, CE/CS
+  disposition with root cause analysis, QA review/approval, closure, reporting,
+  security, and data management
 - 12 success criteria establish clear measurable goals for implementation
   validation
-- 6 key entities model the complete NCR workflow and stakeholder communication
+- 6 key entities with expanded Disposition entity for CE/CS engineering analysis
 - Ready to proceed to `/speckit.plan` phase

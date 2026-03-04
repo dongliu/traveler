@@ -103,34 +103,47 @@ records show delivery/receipt confirmation for each stakeholder.
 
 ### User Story 2 - Review and Disposition Nonconformance Report (Priority: P1)
 
-An Operations Manager or Quality Lead receives new/pending NCRs and must review
-the nonconformance details. Based on the situation (scrap, rework, use-as-is,
-return to vendor), they select a disposition and document the rationale for
-their decision.
+The Cognizant Engineer/Scientist (CE/CS) receives the forwarded NCR and performs
+engineering disposition by selecting the appropriate parts disposition option
+(Rework, Repair, Return to Vendor, Scrap, or Use-As-Is), providing detailed
+rework/repair instructions (if applicable), documenting the root cause of the
+nonconformance, and specifying corrective actions to prevent future occurrence.
+After completing the disposition analysis, the CE/CS electronically forwards the
+dispositioned NCR to QA Staff for review and approval.
 
-**Why this priority**: Dispositioning is the second critical workflow step.
-Without it, NCRs pile up and no corrective action occurs. This drives actual
-resolution of quality issues.
+**Why this priority**: Dispositioning is the critical engineering analysis step.
+The CE/CS provides the technical expertise to determine the correct disposition
+and root cause analysis. Without sound technical disposition and preventive
+actions, nonconformances will recur. This drives actual resolution and
+continuous improvement.
 
-**Independent Test**: Can be fully tested by routing a submitted NCR to a user
-with disposition authority, allowing them to select from defined dispositions
-with supporting documentation, and verifying the NCR transitions to
-"Dispositioned" status with an audit trail.
+**Independent Test**: Can be fully tested by routing a forwarded NCR to an
+CE/CS, allowing them to enter all mandatory disposition information (parts
+disposition from defined options, detailed instructions, root cause analysis,
+preventive actions), and verifying the NCR transitions to "Dispositioned" status
+and routes to QA Staff with complete audit trail.
 
 **Acceptance Scenarios**:
 
-1. **Given** an NCR is in "Submitted" status, **When** an authorized
-   dispositioner accesses the NCR, **Then** they see disposition options: Scrap,
-   Rework, Use-As-Is, Return to Vendor, Investigate Further, Review
-   Specification
-2. **Given** a dispositioner selects a disposition, **When** they submit
-   supporting notes/rationale, **Then** the system records the choice,
-   rationale, dispositioner name, and timestamp
-3. **Given** a disposition is entered, **When** the NCR status updates, **Then**
-   it transitions to "Dispositioned" and becomes visible to approvers
-4. **Given** a dispositioner attempts to disposition without providing required
-   rationale, **When** they click confirm, **Then** the system displays an error
-   and requests the required documentation
+1. **Given** an NCR is in "Submitted" status and has been forwarded to the
+   CE/CS, **When** the CE/CS accesses the NCR, **Then** they see mandatory
+   fields for: Parts Disposition (checkbox selection from Rework, Repair, Return
+   to Vendor, Scrap, Use-As-Is), Rework/Repair Instructions, Root Cause of
+   Problem, and Actions to Prevent Future Occurrence
+2. **Given** a CE/CS selects a disposition option requiring corrective action
+   (Rework or Repair), **When** they attempt to save, **Then** the system
+   requires detailed Rework/Repair Instructions and will not allow submission
+   without this information
+3. **Given** a CE/CS has entered all mandatory information, **When** they submit
+   the disposition, **Then** the system records the CE/CS identity, timestamp,
+   and all disposition details and automatically routes the NCR to QA Staff
+4. **Given** a CE/CS attempts to submit disposition without completing all
+   mandatory root cause and preventive action fields, **When** they click
+   submit, **Then** the system displays validation errors specifying which
+   required fields are incomplete and prevents submission
+5. **Given** disposition has been submitted by the CE/CS, **When** the NCR
+   status updates, **Then** it transitions to "Dispositioned" and becomes
+   visible to QA Staff and approvers
 
 ---
 
@@ -298,76 +311,88 @@ searchable in archives.
   showing that all required stakeholders have been notified with delivery
   timestamp for each
 
-#### NCR Disposition
+#### NCR Disposition (CE/CS Engineering Analysis)
 
-- **FR-013**: System MUST display NCRs in "Submitted" status to users with
-  disposition authority
-- **FR-014**: System MUST provide a predefined set of disposition options:
-  Scrap, Rework, Use-As-Is, Return to Vendor, Investigate Further, Review
-  Specification
-- **FR-015**: System MUST require dispositioning users to document the
-  rationale/justification for their selected disposition
-- **FR-016**: System MUST record the disposition, rationale, dispositioner
-  identity, and timestamp when a disposition decision is recorded
-- **FR-017**: System MUST transition NCR to "Dispositioned" status after
-  disposition data is submitted
-- **FR-018**: System MUST prevent disposition submission if required rationale
-  fields are empty
+- **FR-013**: System MUST display NCRs in "Submitted" status to the assigned
+  Cognizant Engineer/Scientist (CE/CS) for engineering disposition
+- **FR-014**: System MUST provide a predefined set of parts disposition options:
+  Rework, Repair, Return to Vendor, Scrap, Use-As-Is
+- **FR-015**: System MUST require the CE/CS to document the root cause of the
+  nonconformance problem
+- **FR-016**: System MUST require the CE/CS to specify actions to prevent future
+  occurrence (corrective and preventive actions)
+- **FR-017**: System MUST require the CE/CS to provide detailed Rework/Repair
+  Instructions when the selected disposition is Rework or Repair
+- **FR-018**: System MUST record the CE/CS identity, parts disposition
+  selection, root cause documentation, preventive actions, rework/repair
+  instructions (if applicable), and timestamp when disposition is submitted
+- **FR-019**: System MUST transition NCR to "Dispositioned" status after all
+  mandatory disposition data is submitted
+- **FR-020**: System MUST prevent disposition submission if any mandatory fields
+  (parts disposition, root cause, preventive actions, or-if applicable-rework
+  instructions) are incomplete
+- **FR-021**: System MUST automatically forward the dispositioned NCR to QA
+  Staff upon CE/CS submission of disposition
 
-#### NCR Approval
+#### NCR Approval (QA Review and Disposition Authorization)
 
-- **FR-019**: System MUST display "Dispositioned" NCRs to users with approval
-  authority
-- **FR-020**: System MUST show the complete NCR history (nonconformance details,
-  disposition, rationale) to approvers for review
-- **FR-021**: System MUST allow approvers to approve or reject dispositions
-- **FR-022**: System MUST transition approved NCRs to "Approved" status and
+- **FR-022**: System MUST display "Dispositioned" NCRs to QA Staff and other
+  users with approval authority
+- **FR-023**: System MUST show the complete NCR history including nonconformance
+  details, CE/CS-provided disposition (parts disposition, root cause, preventive
+  actions, rework/repair instructions), and associated documentation to
+  reviewers
+- **FR-024**: System MUST allow QA Staff and approvers to review and approve or
+  reject the CE/CS disposition
+- **FR-025**: System MUST transition approved NCRs to "Approved" status and
   record approver identity and timestamp
-- **FR-023**: System MUST transition rejected NCRs back to "Submitted" status
-  with required feedback comments visible to dispositioner
-- **FR-024**: System MUST NOT allow closure of an NCR until it has been approved
+- **FR-026**: System MUST transition rejected NCRs back to "Dispositioned"
+  status with required feedback comments visible to the CE/CS dispositioner
+- **FR-027**: System MUST NOT allow closure of an NCR until it has been approved
+  by authorized personnel
 
 #### NCR Closure
 
-- **FR-025**: System MUST allow authorized users to close approved NCRs
-- **FR-026**: System MUST require closure notes documenting completion status
-  and corrective actions taken
-- **FR-027**: System MUST transition closed NCRs to "Closed" status and record
+- **FR-028**: System MUST allow authorized users to close approved NCRs
+- **FR-029**: System MUST require closure notes documenting completion status
+  and verification that corrective actions and preventive actions from the CE/CS
+  disposition have been implemented
+- **FR-030**: System MUST transition closed NCRs to "Closed" status and record
   closure date and notes
-- **FR-028**: System MUST exclude closed NCRs from active/open workflow
+- **FR-031**: System MUST exclude closed NCRs from active/open workflow
   dashboards by default
 
 #### Reporting and Visibility
 
-- **FR-029**: System MUST provide a dashboard showing counts of NCRs by status
+- **FR-032**: System MUST provide a dashboard showing counts of NCRs by status
   (Submitted, Dispositioned, Approved, Closed)
-- **FR-030**: System MUST generate aging reports showing time elapsed since NCR
+- **FR-033**: System MUST generate aging reports showing time elapsed since NCR
   submission for open NCRs
-- **FR-031**: System MUST support filtering and searching NCRs by: Item/Part
-  Number, Specification Reference, Date Range, Status, Disposition Type, and
-  Root Cause Category
-- **FR-032**: System MUST maintain complete audit trail for all NCR state
+- **FR-034**: System MUST support filtering and searching NCRs by: Item/Part
+  Number, Specification Reference, Date Range, Status, Parts Disposition Type
+  (Rework/Repair/Return/Scrap/Use-As-Is), and Root Cause Categories
+- **FR-035**: System MUST maintain complete audit trail for all NCR state
   transitions with timestamp and user identity
 
 #### Security and Access Control
 
-- **FR-033**: System MUST enforce role-based access control: Quality Inspector
-  (create), Dispositioner (disposition), Approver (approve), Manager (view
-  reports)
-- **FR-034**: System MUST require authentication for all NCR operations
-- **FR-035**: System MUST prevent unauthorized users from modifying or viewing
+- **FR-036**: System MUST enforce role-based access control with specific role
+  permissions: NCR Originator (create), CE/CS (disposition), QA Staff (review
+  and forward to approvers), Approver (approve), Manager (view reports)
+- **FR-037**: System MUST require authentication for all NCR operations
+- **FR-038**: System MUST prevent unauthorized users from modifying or viewing
   restricted NCR data
-- **FR-036**: System MUST log all access and modifications to NCRs for
+- **FR-039**: System MUST log all access and modifications to NCRs for
   compliance auditing
 
 #### Data Management
 
-- **FR-037**: System MUST persist all NCR data reliably with backups
-- **FR-038**: System MUST handle concurrent access to the same NCR without data
+- **FR-040**: System MUST persist all NCR data reliably with backups
+- **FR-041**: System MUST handle concurrent access to the same NCR without data
   corruption
-- **FR-039**: System MUST not allow duplicate NCRs for the same nonconformance
+- **FR-042**: System MUST not allow duplicate NCRs for the same nonconformance
   incident
-- **FR-040**: System MUST support linking related NCRs (e.g., same root cause
+- **FR-043**: System MUST support linking related NCRs (e.g., same root cause
   affecting multiple items)
 
 ### Key Entities
@@ -375,25 +400,34 @@ searchable in archives.
 **Nonconformance Report (NCR)**:
 
 - Represents a reported quality issue for an item/product that doesn't meet
-  specifications or requirements
+  specifications or requirements, tracked through engineering disposition and
+  quality approval
 - Attributes: NCR Number (unique, auto-generated), Part Name, Part Number, Part
   Revision, Quantity, Supplier Name, WBS Number, Cognizant Engineer/Scientist
-  Name, Specification/Drawing/PO Reference, Description of Nonconformance,
-  Discovery Date, Discovery Context (incoming inspection / in-house assembly /
-  in-house inspection), Status (Submitted/Dispositioned/Approved/Closed),
-  Originator Identity, Creation Timestamp, Traveler Link (if applicable:
-  Traveler ID, step number)
+  (CE/CS) Name, Specification/Drawing/PO Reference, Description of
+  Nonconformance, Discovery Date, Discovery Context (incoming inspection /
+  in-house assembly / in-house inspection), Status
+  (Submitted/Dispositioned/Approved/Closed), Originator Identity, Creation
+  Timestamp, Traveler Link (if applicable: Traveler ID, step number), Parts
+  Disposition (Rework/Repair/Return to Vendor/Scrap/Use-As-Is), Root Cause
+  Documentation, Preventive Actions, Rework/Repair Instructions (if applicable),
+  CE/CS Identity, Disposition Timestamp
 - Relationships: Links to specific Items/Parts, References Suppliers, References
   Specifications/Drawings/POs, Links to eTraveler steps (optional), Has
-  Disposition, Has Approval, Has Closure Record, Tracks Audit History
+  Disposition (completed by CE/CS), Has Approval (completed by QA/Approvers),
+  Has Closure Record, Tracks Audit History, Tracks Forwarding History
 
 **Disposition**:
 
-- Represents the authorized decision on how to handle the nonconforming item
-- Attributes: Disposition Type (Scrap/Rework/Use-As-Is/Return to
-  Vendor/Investigate/Review Spec), Rationale, Dispositioner Identity, Decision
-  Timestamp, Supporting Documentation
-- Relationships: Associated with one NCR, Recorded by Dispositioner User
+- Represents the CE/CS engineering analysis and authorized decision on how to
+  handle the nonconforming item, including root cause analysis and preventive
+  actions
+- Attributes: Parts Disposition Type (Rework/Repair/Return to
+  Vendor/Scrap/Use-As-Is), Root Cause Documentation, Preventive Actions (Actions
+  to Prevent Future Occurrence), Rework/Repair Instructions (if applicable),
+  CE/CS Identity, Disposition Timestamp, Supporting Technical Documentation
+- Relationships: Associated with one NCR, Recorded by Cognizant
+  Engineer/Scientist (CE/CS) User, Forwarded to QA Staff for approval
 
 **Approval**:
 
