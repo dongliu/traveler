@@ -55,6 +55,24 @@ creation and Traveler-initiated NCR creation should be testable.
 
 ---
 
+### User Story 1.5 - Forward and Notify NCR Stakeholders (Priority: P1)
+
+Upon submission of an NCR, the system automatically forwards the initiated NCR (including all attachments such as photographs, inspection reports, or test data) to the appropriate organizational personnel for notification and action. The NCR Originator or system administrator can verify that all required stakeholders have been notified and have received the complete NCR documentation.
+
+**Why this priority**: Timely notification of key stakeholders (CE/CS, Group Leader, QA Staff, Division Director/PM) is critical for rapid response to nonconformances. Delays in notification can cascade into longer resolution times and increased impact to production. This is a core part of the initiation workflow.
+
+**Independent Test**: Can be fully tested by creating and submitting an NCR, then verifying that: (1) the system correctly identifies and routes the NCR to all required stakeholders based on organizational roles/assignments, (2) all attachments are successfully transmitted with the NCR, and (3) notification records show delivery/receipt confirmation for each stakeholder.
+
+**Acceptance Scenarios**:
+
+1. **Given** an NCR is submitted with valid data, **When** the system processes the submission, **Then** the NCR is automatically forwarded to: Cognizant Engineer/Scientist (for engineering disposition), Cognizant Group Leader (for notification), QA Staff (for notification), and Cognizant Division Director or Project Manager (for notification)
+2. **Given** an NCR includes attachments (photographs, reports, test data), **When** it is forwarded to stakeholders, **Then** all attachments are transmitted with the NCR and remain accessible to each recipient
+3. **Given** stakeholders have been identified for an NCR, **When** the system forwards the NCR, **Then** each recipient receives notification (email, dashboard alert, or in-system notification) with a link to view the complete NCR details
+4. **Given** an NCR has been forwarded, **When** the NCR Originator or authorized user views the forwarding status, **Then** they see confirmation that all required stakeholders have been notified with timestamp and delivery status for each recipient
+5. **Given** a stakeholder's role or contact information changes, **When** a previously submitted NCR is viewed, **Then** the system identifies the stakeholder roles that were valid at the time of submission for audit compliance
+
+---
+
 ### User Story 2 - Review and Disposition Nonconformance Report (Priority: P1)
 
 An Operations Manager or Quality Lead receives new/pending NCRs and must review
@@ -196,6 +214,10 @@ searchable in archives.
   unavailable?
 - Can an approved disposition be overridden, and if so, what audit trail changes
   are needed?
+- What happens if a stakeholder (CE/CS, Group Leader, QA, Director/PM) is not
+  assigned or the email/notification delivery fails?
+- How does the system handle changes to stakeholder assignments after an NCR has
+  already been forwarded?
 
 ## Requirements _(mandatory)_
 
@@ -226,76 +248,98 @@ searchable in archives.
 - **FR-006b**: System MUST display the newly generated NCR number in the
   eTraveler upon successful creation when NCR is initiated from a Traveler step
 
+#### NCR Forwarding and Notification
+
+- **FR-007**: System MUST automatically forward the submitted NCR to all required
+  stakeholders upon submission: Cognizant Engineer/Scientist (CE/CS) for
+  engineering disposition, Cognizant Group Leader, QA Staff, and Cognizant
+  Division Director or Project Manager
+- **FR-008**: System MUST identify the correct CE/CS, Cognizant Group Leader,
+  QA Staff, and Division Director/PM based on organizational role assignments,
+  part assignment, or project assignment
+- **FR-009**: System MUST transmit all NCR attachments (photographs, inspection
+  reports, test data, drawings) along with the NCR forwarding to all
+  stakeholders
+- **FR-010**: System MUST send notifications (email, dashboard alert, or
+  in-system notification) to all forwarded stakeholders with a link to access
+  the complete NCR details
+- **FR-011**: System MUST maintain a forwarding log showing: each stakeholder
+  who received the NCR, timestamp of forwarding, delivery status for each
+  recipient, and stakeholder roles as they existed at time of forwarding
+- **FR-012**: System MUST record and display forwarding confirmation on the NCR,
+  showing that all required stakeholders have been notified with delivery
+  timestamp for each
+
 #### NCR Disposition
 
-- **FR-007**: System MUST display NCRs in "Submitted" status to users with
+- **FR-013**: System MUST display NCRs in "Submitted" status to users with
   disposition authority
-- **FR-008**: System MUST provide a predefined set of disposition options:
+- **FR-014**: System MUST provide a predefined set of disposition options:
   Scrap, Rework, Use-As-Is, Return to Vendor, Investigate Further, Review
   Specification
-- **FR-009**: System MUST require dispositioning users to document the
+- **FR-015**: System MUST require dispositioning users to document the
   rationale/justification for their selected disposition
-- **FR-010**: System MUST record the disposition, rationale, dispositioner
+- **FR-016**: System MUST record the disposition, rationale, dispositioner
   identity, and timestamp when a disposition decision is recorded
-- **FR-011**: System MUST transition NCR to "Dispositioned" status after
+- **FR-017**: System MUST transition NCR to "Dispositioned" status after
   disposition data is submitted
-- **FR-012**: System MUST prevent disposition submission if required rationale
+- **FR-018**: System MUST prevent disposition submission if required rationale
   fields are empty
 
 #### NCR Approval
 
-- **FR-013**: System MUST display "Dispositioned" NCRs to users with approval
+- **FR-019**: System MUST display "Dispositioned" NCRs to users with approval
   authority
-- **FR-014**: System MUST show the complete NCR history (nonconformance details,
+- **FR-020**: System MUST show the complete NCR history (nonconformance details,
   disposition, rationale) to approvers for review
-- **FR-015**: System MUST allow approvers to approve or reject dispositions
-- **FR-016**: System MUST transition approved NCRs to "Approved" status and
+- **FR-021**: System MUST allow approvers to approve or reject dispositions
+- **FR-022**: System MUST transition approved NCRs to "Approved" status and
   record approver identity and timestamp
-- **FR-017**: System MUST transition rejected NCRs back to "Submitted" status
+- **FR-023**: System MUST transition rejected NCRs back to "Submitted" status
   with required feedback comments visible to dispositioner
-- **FR-018**: System MUST NOT allow closure of an NCR until it has been approved
+- **FR-024**: System MUST NOT allow closure of an NCR until it has been approved
 
 #### NCR Closure
 
-- **FR-019**: System MUST allow authorized users to close approved NCRs
-- **FR-020**: System MUST require closure notes documenting completion status
+- **FR-025**: System MUST allow authorized users to close approved NCRs
+- **FR-026**: System MUST require closure notes documenting completion status
   and corrective actions taken
-- **FR-021**: System MUST transition closed NCRs to "Closed" status and record
+- **FR-027**: System MUST transition closed NCRs to "Closed" status and record
   closure date and notes
-- **FR-022**: System MUST exclude closed NCRs from active/open workflow
+- **FR-028**: System MUST exclude closed NCRs from active/open workflow
   dashboards by default
 
 #### Reporting and Visibility
 
-- **FR-023**: System MUST provide a dashboard showing counts of NCRs by status
+- **FR-029**: System MUST provide a dashboard showing counts of NCRs by status
   (Submitted, Dispositioned, Approved, Closed)
-- **FR-024**: System MUST generate aging reports showing time elapsed since NCR
+- **FR-030**: System MUST generate aging reports showing time elapsed since NCR
   submission for open NCRs
-- **FR-025**: System MUST support filtering and searching NCRs by: Item/Part
+- **FR-031**: System MUST support filtering and searching NCRs by: Item/Part
   Number, Specification Reference, Date Range, Status, Disposition Type, and
   Root Cause Category
-- **FR-026**: System MUST maintain complete audit trail for all NCR state
+- **FR-032**: System MUST maintain complete audit trail for all NCR state
   transitions with timestamp and user identity
 
 #### Security and Access Control
 
-- **FR-027**: System MUST enforce role-based access control: Quality Inspector
+- **FR-033**: System MUST enforce role-based access control: Quality Inspector
   (create), Dispositioner (disposition), Approver (approve), Manager (view
   reports)
-- **FR-028**: System MUST require authentication for all NCR operations
-- **FR-029**: System MUST prevent unauthorized users from modifying or viewing
+- **FR-034**: System MUST require authentication for all NCR operations
+- **FR-035**: System MUST prevent unauthorized users from modifying or viewing
   restricted NCR data
-- **FR-030**: System MUST log all access and modifications to NCRs for
+- **FR-036**: System MUST log all access and modifications to NCRs for
   compliance auditing
 
 #### Data Management
 
-- **FR-031**: System MUST persist all NCR data reliably with backups
-- **FR-032**: System MUST handle concurrent access to the same NCR without data
+- **FR-037**: System MUST persist all NCR data reliably with backups
+- **FR-038**: System MUST handle concurrent access to the same NCR without data
   corruption
-- **FR-033**: System MUST not allow duplicate NCRs for the same nonconformance
+- **FR-039**: System MUST not allow duplicate NCRs for the same nonconformance
   incident
-- **FR-034**: System MUST support linking related NCRs (e.g., same root cause
+- **FR-040**: System MUST support linking related NCRs (e.g., same root cause
   affecting multiple items)
 
 ### Key Entities
@@ -346,6 +390,17 @@ searchable in archives.
 - Attributes: Action Type, User Identity, Timestamp, Previous State, New State,
   Comments
 - Relationships: Associated with one NCR, Multiple entries per NCR
+
+**Forwarding Log Entry**:
+
+- Records the transmission of an NCR to stakeholders upon submission
+- Attributes: Stakeholder Role (CE/CS, Group Leader, QA Staff, Director/PM),
+  Stakeholder Identity, Forwarding Timestamp, Delivery Status
+  (Pending/Delivered/Failed), Delivery Timestamp, Stakeholder Role as of
+  Forwarding Time (for audit compliance), Attachment Transmission Status,
+  Notification Method (email/dashboard/system alert)
+- Relationships: Associated with one NCR, Multiple entries per NCR (one per
+  stakeholder), Created at time of NCR submission
 
 ## Success Criteria _(mandatory)_
 
