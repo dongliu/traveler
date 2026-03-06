@@ -12,7 +12,6 @@ var Binder = require('../model/binder').Binder;
 var _ = require('lodash');
 var cheer = require('cheerio');
 const logger = require('../lib/loggers').getLogger();
-const debug = require('debug')('traveler:util:routes');
 
 const formStatusMap = require('../model/released-form').statusMap;
 
@@ -194,105 +193,88 @@ const binderUtil = {
       return res.status(500).send(error.message);
     }
   },
-  async addWork(binder, userId, req, res) {
-    try {
-      const { ids, type } = req.body;
-      if (!(ids instanceof Array)) {
-        return res.send(400, 'ids must be an array');
-      }
-      if (ids.length === 0) {
-        return res.send(204);
-      }
-      let model;
-      if (type === 'traveler') {
-        model = Traveler;
-      } else if (type === 'binder') {
-        model = Binder;
-      } else {
-        return res.send(400, `cannot handle ${type}`);
-      }
+  addWork(binder, userId, req, res) {
+    const { ids, type } = req.body;
+    if (!(ids instanceof Array)) {
+      return res.send(400, 'ids must be an array');
+    }
+    if (ids.length === 0) {
+      return res.send(204);
+    }
+    let model;
+    if (type === 'traveler') {
+      model = Traveler;
+    } else if (type === 'binder') {
+      model = Binder;
+    } else {
+      return res.send(400, `cannot handle ${type}`);
+    }
 
-      const { works } = binder;
-      const added = [];
-      debug(`adding works ${ids} of type ${type} into binder ${binder.id}`);
-      const items = await model
-        .find({
-          _id: {
-            $in: ids,
-          },
-        })
-        .exec();
+    const { works } = binder;
+    const added = [];
 
-      if (items.length === 0) {
-        return res.status(400).send('nothing to be added');
-      }
-      let addedTravelers = [];
-      items.forEach(item => {
-        if (type === 'binder') {
-          // skip the binder to be added into itself
-          if (item.id === binder.id) {
-            logger.warn(`binder ${item.id} cannot be added into itself`);
-            return;
-          }
-          // skip the binder if it contains other binders already
-          for (let i = 0; i < item.works.length; i += 1) {
-            if (item.works[i].refType === 'binder') {
-              logger.warn(`binder ${item.id} contains other binder`);
+    model
+      .find({
+        _id: {
+          $in: ids,
+        },
+      })
+      .exec(function(err, items) {
+        if (err) {
+          console.error(err);
+          return res.send(500, err.message);
+        }
+
+        if (items.length === 0) {
+          return res.status(400).send('nothing to be added');
+        }
+
+        items.forEach(function(item) {
+          if (type === 'binder') {
+            // skip the binder to be added into itself
+            if (item.id === binder.id) {
+              logger.warn(`binder ${item.id} cannot be added into itself`);
               return;
             }
+            // skip the binder if it contains other binders already
+            for (let i = 0; i < item.works.length; i += 1) {
+              if (item.works[i].refType === 'binder') {
+                logger.warn(`binder ${item.id} contains other binder`);
+                return;
+              }
+            }
           }
-        }
-        // skip a traveler that is already in a binder
-        if (type === 'traveler') {
-          if (item.inBinder === true) {
-            logger.warn(`traveler ${item.id} is already in a binder`);
-            return;
-          } else {
-            item.inBinder = true;
-            addedTravelers.push(item);
-          }
-        }
-        debug(
-          `should add work ${item.id} of type ${type} into binder ${binder.id} after in binder check`
-        );
-        if (!works.id(item._id)) {
-          const newWork = {
-            _id: item._id,
-            refType: type,
-            addedOn: Date.now(),
-            addedBy: userId,
-            status: item.status || 0,
-            value: item.value || 10,
-          };
-          works.push(newWork);
-          added.push(item.id);
-          binder.updateWorkProgress(item);
-        }
-      });
-
-      if (added.length === 0) {
-        return res.status(400).send('no item added');
-      }
-
-      binder.updatedOn = Date.now();
-      binder.updatedBy = userId;
-      // update the totalValue, finishedValue, and finishedValue
-      const newBinder = await new Promise((resolve, reject) => {
-        binder.updateProgress((saveErr, updatedBinder) => {
-          if (saveErr) {
-            reject(saveErr);
-          } else {
-            resolve(updatedBinder);
+          let newWork;
+          if (!works.id(item._id)) {
+            newWork = {
+              _id: item._id,
+              refType: type,
+              addedOn: Date.now(),
+              addedBy: userId,
+              status: item.status || 0,
+              value: item.value || 10,
+            };
+            works.push(newWork);
+            added.push(item.id);
+            binder.updateWorkProgress(item);
           }
         });
+
+        if (added.length === 0) {
+          return res.send(400, 'no new item added');
+        }
+
+        binder.updatedOn = Date.now();
+        binder.updatedBy = userId;
+        // update the totalValue, finishedValue, and finishedValue
+        return binder.updateProgress(function(saveErr, newBinder) {
+          if (saveErr) {
+            logger.error(saveErr);
+            return res.send(500, saveErr.message);
+          }
+          return res.json(200, newBinder);
+        });
       });
-      // save the travelers after the binder is updated successfully
-      await Promise.all(addedTravelers.map(item => item.save()));
-      return res.json(200, newBinder);
-    } catch (error) {
-      logger.error(error);
-      return res.send(500, error.message);
-    }
   },
 };
 
@@ -384,7 +366,7 @@ var traveler = {
       title: title,
       description: '',
       devices: devices,
-      tags: form.base.tags,
+      tags: form.tags,
       status: 0,
       createdBy: userId,
       createdOn: Date.now(),

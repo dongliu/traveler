@@ -6,7 +6,7 @@
  transferredOnColumn, ownerColumn, formStatusColumn, formTypeColumn,
  versionColumn, docNoColumn, releasedFormLinkColumn, releasedFormStatusColumn,
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
- transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn, shareGroups */
+ transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn, shareGroups, updatedOnHideColumn */
 
 import { initTableIfExists, sortByColumn } from './lib/table.js';
 
@@ -150,7 +150,7 @@ $(function() {
     titleColumn,
     tagsColumn,
     ownerColumn,
-    updatedOnColumn,
+    updatedOnHideColumn,
   ];
 
   if (shareGroups) {
@@ -180,7 +180,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  sortByColumn(formTableConfig, updatedOnColumn, 'desc');
+  sortByColumn(formTableConfig, updatedOnHideColumn, 'desc');
   initTableIfExists($('#form-table'), formTableConfig, tables);
 
   /* form table ends */
@@ -325,12 +325,13 @@ $(function() {
     selectColumn,
     formLinkColumn,
     formConfigLinkColumn,
+    formReviewLinkColumn,
     docNoColumn,
     versionColumn,
     titleColumn,
     tagsColumn,
     ownerColumn,
-    updatedOnColumn,
+    updatedOnHideColumn,
   ];
 
   if (shareGroups) {
@@ -360,7 +361,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  sortByColumn(submittedFormTableConfig, updatedOnColumn, 'desc');
+  sortByColumn(submittedFormTableConfig, updatedOnHideColumn, 'desc');
   initTableIfExists(
     $('#submitted-form-table'),
     submittedFormTableConfig,

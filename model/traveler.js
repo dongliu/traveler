@@ -184,18 +184,8 @@ var traveler = new Schema({
     default: false,
   },
   dwr: Schema.Types.String,
-  /**
-   * property to denote if the traveler was in a binder. when a traveler is
-   * added to a binder, this is set to true. when a traveler is removed from a
-   * binder, this is set back to false. because a traveler can be in only one
-   * binder after this change, a boolean value is enough to denote whether the
-   * traveler is in a binder or not.
-   */
-  inBinder: {
-    type: Boolean,
-    default: false,
-  },
 });
+
 // support the review process of traveler
 traveler.plugin(addReview);
 
