@@ -12,6 +12,10 @@ block head
 block bodyJs
   script(type='text/javascript').
     var title = !{JSON.stringify(title)};
+
+prepend topBtn
+  .btn-group
+
 block underTopBtn
   .container
     #message
