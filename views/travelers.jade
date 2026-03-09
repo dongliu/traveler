@@ -42,7 +42,7 @@ block underTopBtn
         if (viewConfig.transferOwnership)
           li
             a(href='#transferredtravelers', data-toggle='tab') Transferred travelers
-        if (viewConfig.shareGroups)
+        //- if (viewConfig.shareGroups)
           li
             a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
 
@@ -63,7 +63,7 @@ block underTopBtn
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
             table#transferred-traveler-table.table.table-bordered.table-hover
-        if (viewConfig.shareGroups)
+        //- if (viewConfig.shareGroups)
           #groupsharedtravelers.tab-pane
             .btn-toolbar
             table#group-shared-traveler-table.table.table-bordered.table-hover

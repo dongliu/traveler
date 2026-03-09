@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   meta(charset='urf-8')
@@ -9,9 +9,14 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
+block bodyJs
   script(type='text/javascript').
     var title = !{JSON.stringify(title)};
+
+prepend topBtn
+  .btn-group
+
+block underTopBtn
   .container
     #message
     .row
@@ -60,4 +65,5 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-viewer.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/tracking.js')
   script(type='text/javascript', src='#{prefix}/javascripts/released-form-management.js')
