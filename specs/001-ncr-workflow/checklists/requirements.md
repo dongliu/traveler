@@ -67,7 +67,7 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
   copy included
 - **Stakeholder Forwarding** (User Story 1.5): Auto-forwards NCR to CE/CS,
   Cognizant Group Leader, QA Staff, Division Director/PM with attachments and
-  delivery tracking
+  email notification to all stakeholders
 - **CE/CS Engineering Disposition** (User Story 2): 5 parts disposition options,
   mandatory root cause and preventive actions, detailed instructions for
   Rework/Repair, auto-forwarding to QA Staff
@@ -101,4 +101,7 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
 - Edge cases identified: escalation procedures, Traveler availability,
   Originator unavailability, multiple comment iterations, shipped product
   handling
+- **Email-only Notification**: Email is the primary and sole notification method
+  for all NCR forwarding, approvals, and status changes to stakeholders
+  (dashboard remains optional for visibility/reporting)
 - Ready to proceed to `/speckit.plan` phase

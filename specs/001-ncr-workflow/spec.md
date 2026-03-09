@@ -87,9 +87,8 @@ records show delivery/receipt confirmation for each stakeholder.
    **When** it is forwarded to stakeholders, **Then** all attachments are
    transmitted with the NCR and remain accessible to each recipient
 3. **Given** stakeholders have been identified for an NCR, **When** the system
-   forwards the NCR, **Then** each recipient receives notification (email,
-   dashboard alert, or in-system notification) with a link to view the complete
-   NCR details
+   forwards the NCR, **Then** each recipient receives email notification with a
+   link to view the complete NCR details
 4. **Given** an NCR has been forwarded, **When** the NCR Originator or
    authorized user views the forwarding status, **Then** they see confirmation
    that all required stakeholders have been notified with timestamp and delivery
@@ -354,9 +353,8 @@ verify electronic sign-off capability closes the NCR.
 - **FR-009**: System MUST transmit all NCR attachments (photographs, inspection
   reports, test data, drawings) along with the NCR forwarding to all
   stakeholders
-- **FR-010**: System MUST send notifications (email, dashboard alert, or
-  in-system notification) to all forwarded stakeholders with a link to access
-  the complete NCR details
+- **FR-010**: System MUST send email notifications to all forwarded stakeholders
+  with a link to access the complete NCR details
 - **FR-011**: System MUST maintain a forwarding log showing: each stakeholder
   who received the NCR, timestamp of forwarding, delivery status for each
   recipient, and stakeholder roles as they existed at time of forwarding
@@ -562,8 +560,8 @@ verify electronic sign-off capability closes the NCR.
 - Attributes: Stakeholder Role (CE/CS, Group Leader, QA Staff, Director/PM),
   Stakeholder Identity, Forwarding Timestamp, Delivery Status
   (Pending/Delivered/Failed), Delivery Timestamp, Stakeholder Role as of
-  Forwarding Time (for audit compliance), Attachment Transmission Status,
-  Notification Method (email/dashboard/system alert)
+  Forwarding Time (for audit compliance), Attachment Transmission Status, Email
+  Notification Status
 - Relationships: Associated with one NCR, Multiple entries per NCR (one per
   stakeholder), Created at time of NCR submission
 
@@ -612,8 +610,9 @@ verify electronic sign-off capability closes the NCR.
   back to QA Staff for resolution
 - The organization defines disposition options (Scrap, Rework, etc.) in advance;
   system uses predefined list rather than user-defined
-- Email notifications for status changes are desirable but not required for MVP
-  (can be added post-launch)
+- Email notifications for status changes are the primary notification method and
+  are required for all stakeholder communications (dashboard remains optional
+  for visibility)
 - Historical closed NCRs remain searchable and auditable with no data
   purge/deletion policy enforced
 - System will initially support single-language interface (English);
