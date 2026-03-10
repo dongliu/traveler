@@ -39,8 +39,9 @@ creation and Traveler-initiated NCR creation should be testable.
    Cognizant Engineer/Scientist name, Specification/Drawing Reference,
    Description of Nonconformance, and Discovery Date
 2. **Given** required fields are populated correctly, **When** they submit the
-   NCR, **Then** the system assigns a unique, sequential NCR number and
-   transitions the NCR to "Submitted" status
+   NCR, **Then** the system assigns a unique NCR number following the
+   organization's naming convention and transitions the NCR to "Submitted"
+   status
 3. **Given** an NCR has been submitted, **When** the NCR Originator or
    authorized user views it, **Then** they see complete audit trail including
    creation date, originator name, submission timestamp, and all captured
@@ -328,8 +329,8 @@ verify electronic sign-off capability closes the NCR.
   Date, and Originator Information
 - **FR-003**: System MUST validate that all mandatory fields are populated and
   properly formatted before allowing NCR submission
-- **FR-004**: System MUST automatically assign a unique, sequential NCR number
-  upon submission
+- **FR-004**: System MUST automatically assign a unique NCR number following the
+  organization's naming convention upon submission
 - **FR-005**: System MUST record the creation timestamp, creator identity, and
   transition NCR to "Submitted" status upon creation
 - **FR-006**: System MUST allow NCR Originators to attach supporting
@@ -492,11 +493,11 @@ verify electronic sign-off capability closes the NCR.
 - Represents a reported quality issue for an item/product that doesn't meet
   specifications or requirements, tracked through engineering disposition and
   quality approval coordination
-- Attributes: NCR Number (unique, auto-generated), Part Name, Part Number, Part
-  Revision, Quantity, Supplier Name, WBS Number, Cognizant Engineer/Scientist
-  (CE/CS) Name, Specification/Drawing/PO Reference, Description of
-  Nonconformance, Discovery Date, Discovery Context (incoming inspection /
-  in-house assembly / in-house inspection), Status
+- Attributes: NCR Number (unique, auto-generated following naming convention),
+  Part Name, Part Number, Part Revision, Quantity, Supplier Name, WBS Number,
+  Cognizant Engineer/Scientist (CE/CS) Name, Specification/Drawing/PO Reference,
+  Description of Nonconformance, Discovery Date, Discovery Context (incoming
+  inspection / in-house assembly / in-house inspection), Status
   (Submitted/Dispositioned/Approved/Returned for Comment/Final Approval/Closed),
   Originator Identity, Creation Timestamp, Traveler Link (if applicable:
   Traveler ID, step number), Parts Disposition (Rework/Repair/Return to
@@ -608,8 +609,10 @@ verify electronic sign-off capability closes the NCR.
   Approval → Final Approval → Closure) with rejection and comment loops: QA
   rejection loops back to Disposition, and Approver "Return for Comment" loops
   back to QA Staff for resolution
-- The organization defines disposition options (Scrap, Rework, etc.) in advance;
+- The organization defines disposal options (Scrap, Rework, etc.) in advance;
   system uses predefined list rather than user-defined
+- The organization defines the NCR numbering/naming convention; system applies
+  this convention when auto-generating NCR numbers (not necessarily sequential)
 - Email notifications for status changes are the primary notification method and
   are required for all stakeholder communications (dashboard remains optional
   for visibility)

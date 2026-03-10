@@ -104,4 +104,7 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
 - **Email-only Notification**: Email is the primary and sole notification method
   for all NCR forwarding, approvals, and status changes to stakeholders
   (dashboard remains optional for visibility/reporting)
+- **NCR Numbering Convention**: NCR numbers follow the organization's naming
+  convention (not necessarily sequential); system applies configured convention
+  upon creation
 - Ready to proceed to `/speckit.plan` phase
