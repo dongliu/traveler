@@ -107,4 +107,8 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
 - **NCR Numbering Convention**: NCR numbers follow the organization's naming
   convention (not necessarily sequential); system applies configured convention
   upon creation
-- Ready to proceed to `/speckit.plan` phase
+- **Outstanding Clarification (Deferred)**: NCR visibility/access control model
+  deferred to planning phase - will clarify whether all users see all NCRs
+  (Option B) or role-filtered view (Option C) based on organizational security
+  policy
+- Ready to proceed to `/speckit.plan` phase (with noted deferred clarification)

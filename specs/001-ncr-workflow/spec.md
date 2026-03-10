@@ -620,3 +620,22 @@ verify electronic sign-off capability closes the NCR.
   purge/deletion policy enforced
 - System will initially support single-language interface (English);
   internationalization can be added later if needed
+
+## Outstanding Clarifications _(deferred to planning phase)_
+
+### NCR Visibility & Access Control
+
+**Question**: Who should have visibility to view all NCRs and their current
+status?
+
+**Options Under Consideration**:
+
+- **Option B**: All authenticated users can view all NCRs and their statuses
+  (transparency/visibility for everyone)
+- **Option C**: Role-filtered view - each role sees NCRs relevant to them:
+  Originator sees their created NCRs, CE/CS sees submitted NCRs, QA sees
+  dispositioned NCRs, Managers see all for reporting
+
+**Decision Status**: Deferred to planning/implementation phase. Will be resolved
+based on organizational security policy and visibility requirements during
+requirements refinement with stakeholders.
