@@ -1,0 +1,224 @@
+{
+  "endpoint": "POST /api/ncr",
+  "description": "Create a new Nonconformance Report (NCR)",
+  "authentication": "Required (Bearer token)",
+  "authorization": "NCR Originator role",
+  "request": {
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer {token}"
+    },
+    "body": {
+      "type": "object",
+      "required": [
+        "part_name",
+        "part_number",
+        "part_revision",
+        "quantity",
+        "supplier_name",
+        "wbs_number",
+        "ce_cs_name",
+        "specification_drawing_reference",
+        "description_of_nonconformance",
+        "discovery_date",
+        "discovery_context"
+      ],
+      "properties": {
+        "part_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "Part or item name"
+        },
+        "part_number": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "description": "Part number or identifier"
+        },
+        "part_revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20,
+          "description": "Part revision level"
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Quantity of nonconforming items"
+        },
+        "supplier_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "Supplier or vendor name"
+        },
+        "wbs_number": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "description": "Work Breakdown Structure number"
+        },
+        "ce_cs_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "Cognizant Engineer/Scientist name (will be assigned)"
+        },
+        "specification_drawing_reference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "Reference to specification, drawing, or PO"
+        },
+        "description_of_nonconformance": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 2000,
+          "description": "Detailed description of the nonconformance"
+        },
+        "discovery_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when nonconformance was discovered (ISO 8601)"
+        },
+        "discovery_context": {
+          "type": "string",
+          "enum": [
+            "incoming_inspection",
+            "in_house_assembly",
+            "in_house_inspection"
+          ],
+          "description": "Context where nonconformance was discovered"
+        },
+        "traveler_id": {
+          "type": "string",
+          "description": "Optional: eTraveler ID if NCR is initiated from a Traveler"
+        },
+        "traveler_step_number": {
+          "type": "integer",
+          "description": "Optional: Traveler step number for context capture"
+        }
+      }
+    }
+  },
+  "response": {
+    "success": {
+      "statusCode": 201,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "value": true
+          },
+          "ncr": {
+            "type": "object",
+            "properties": {
+              "ncr_number": {
+                "type": "string",
+                "description": "Auto-generated NCR number per org convention"
+              },
+              "ncr_id": {
+                "type": "string",
+                "description": "MongoDB ObjectId of NCR document"
+              },
+              "status": {
+                "type": "string",
+                "value": "Submitted"
+              },
+              "creation_timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "originator_id": {
+                "type": "string",
+                "description": "User ID of NCR creator"
+              },
+              "part_name": {
+                "type": "string"
+              },
+              "part_number": {
+                "type": "string"
+              }
+            }
+          },
+          "message": {
+            "type": "string",
+            "value": "NCR created successfully. Initial notification emails sent to QA Staff, Group Leader, and Division Director."
+          }
+        }
+      }
+    },
+    "errors": {
+      "validation_error_400": {
+        "statusCode": 400,
+        "body": {
+          "success": false,
+          "error": "Validation Error",
+          "details": {
+            "type": "object",
+            "properties": {
+              "field_name": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Array of validation errors for field"
+              }
+            }
+          },
+          "example": {
+            "description_of_nonconformance": [
+              "Must be at least 20 characters long"
+            ],
+            "quantity": ["Must be greater than 0"]
+          }
+        }
+      },
+      "unauthorized_401": {
+        "statusCode": 401,
+        "body": {
+          "success": false,
+          "error": "Unauthorized",
+          "message": "Authentication token missing or invalid"
+        }
+      },
+      "forbidden_403": {
+        "statusCode": 403,
+        "body": {
+          "success": false,
+          "error": "Forbidden",
+          "message": "User does not have NCR Originator role"
+        }
+      },
+      "internal_error_500": {
+        "statusCode": 500,
+        "body": {
+          "success": false,
+          "error": "Internal Server Error",
+          "message": "An unexpected error occurred while creating NCR",
+          "request_id": "string"
+        }
+      }
+    }
+  },
+  "side_effects": [
+    "Create NCR document in MongoDB",
+    "Generate unique NCR number",
+    "Create Audit Log entry (NCR Created)",
+    "Send INITIAL NOTIFICATION emails to QA Staff, Group Leader, and Division Director",
+    "Send ENGINEERING DISPOSITION REQUEST email to CE/CS with link",
+    "Create Forwarding Log entries for all recipients",
+    "Transition NCR status to Submitted"
+  ],
+  "notes": [
+    "NCR number is auto-generated per organization's naming convention (not necessarily sequential)",
+    "Email notifications are sent asynchronously; response confirms email initiation, not delivery",
+    "If NCR initiated from Traveler, Traveler context is captured and linked",
+    "All mandatory fields are validated; missing or invalid fields return 400 error with details"
+  ]
+}

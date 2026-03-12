@@ -1,0 +1,197 @@
+{
+  "endpoint": "PATCH /api/ncr/:ncr_id/disposition",
+  "description": "Submit engineering disposition by CE/CS for a Submitted NCR",
+  "authentication": "Required (Bearer token)",
+  "authorization": "CE/CS role or Originator Delegate",
+  "request": {
+    "parameters": {
+      "path": {
+        "ncr_id": {
+          "type": "string",
+          "description": "MongoDB ObjectId of NCR document or NCR number"
+        }
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer {token}"
+    },
+    "body": {
+      "type": "object",
+      "required": [
+        "parts_disposition",
+        "root_cause_documentation",
+        "preventive_actions"
+      ],
+      "properties": {
+        "parts_disposition": {
+          "type": "string",
+          "enum": [
+            "Rework",
+            "Repair",
+            "Return to Vendor",
+            "Scrap",
+            "Use-As-Is"
+          ],
+          "description": "Selected disposition option for the nonconforming parts"
+        },
+        "root_cause_documentation": {
+          "type": "string",
+          "minLength": 50,
+          "maxLength": 5000,
+          "description": "Detailed root cause analysis"
+        },
+        "preventive_actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 50,
+            "maxLength": 1000
+          },
+          "description": "List of preventive actions to prevent future occurrence"
+        },
+        "rework_repair_instructions": {
+          "type": "string",
+          "minLength": 50,
+          "maxLength": 5000,
+          "description": "Required only if parts_disposition is 'Rework' or 'Repair'. Detailed step-by-step instructions."
+        }
+      }
+    }
+  },
+  "response": {
+    "success": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "value": true
+          },
+          "ncr": {
+            "type": "object",
+            "properties": {
+              "ncr_id": {
+                "type": "string"
+              },
+              "ncr_number": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "value": "Dispositioned"
+              },
+              "disposition": {
+                "type": "object",
+                "properties": {
+                  "parts_disposition": {
+                    "type": "string"
+                  },
+                  "root_cause_documentation": {
+                    "type": "string"
+                  },
+                  "preventive_actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "rework_repair_instructions": {
+                    "type": "string"
+                  },
+                  "ce_cs_identity": {
+                    "type": "string"
+                  },
+                  "ce_cs_timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "previous_status": {
+                "type": "string",
+                "value": "Submitted"
+              }
+            }
+          },
+          "message": {
+            "type": "string",
+            "value": "Disposition submitted successfully. QA Staff notified for concurrence review."
+          }
+        }
+      }
+    },
+    "errors": {
+      "validation_error_400": {
+        "statusCode": 400,
+        "body": {
+          "success": false,
+          "error": "Validation Error",
+          "details": {
+            "type": "object"
+          },
+          "example": {
+            "root_cause_documentation": ["Must be at least 50 characters long"],
+            "preventive_actions": [
+              "Requires at least 1 action, each minimum 50 characters"
+            ],
+            "rework_repair_instructions": [
+              "Required when parts_disposition is 'Rework' or 'Repair'"
+            ]
+          }
+        }
+      },
+      "invalid_status_409": {
+        "statusCode": 409,
+        "body": {
+          "success": false,
+          "error": "Conflict",
+          "message": "NCR must be in 'Submitted' status to submit disposition. Current status: Dispositioned"
+        }
+      },
+      "unauthorized_401": {
+        "statusCode": 401,
+        "body": {
+          "success": false,
+          "error": "Unauthorized",
+          "message": "Authentication token missing or invalid"
+        }
+      },
+      "forbidden_403": {
+        "statusCode": 403,
+        "body": {
+          "success": false,
+          "error": "Forbidden",
+          "message": "Only assigned CE/CS or Originator Delegate can submit disposition for this NCR"
+        }
+      },
+      "not_found_404": {
+        "statusCode": 404,
+        "body": {
+          "success": false,
+          "error": "Not Found",
+          "message": "NCR not found: {ncr_id}"
+        }
+      }
+    }
+  },
+  "side_effects": [
+    "Update NCR document with disposition data",
+    "Transition NCR status from Submitted to Dispositioned",
+    "Create Audit Log entry (Disposition Submitted) with user identity and timestamp",
+    "Send QA CONCURRENCE notification email to QA Staff",
+    "Create Forwarding Log entry for QA Staff notification"
+  ],
+  "notes": [
+    "Rework/Repair Instructions are mandatory ONLY if parts_disposition is 'Rework' or 'Repair'",
+    "All preventive actions must be actionable and measurable",
+    "Root cause documentation should follow 5-Why analysis or similar methodology",
+    "Only the assigned CE/CS (or their delegate) can submit disposition",
+    "Once disposition is submitted, NCR cannot be edited by Originator; only CE/CS or QA can modify"
+  ]
+}

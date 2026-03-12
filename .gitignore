@@ -51,3 +51,7 @@ docker/server.key
 
 # npm stuff #
 npm-debug.log*
+
+.github/
+.gemini/
+.claude/
