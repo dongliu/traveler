@@ -17,7 +17,7 @@ pattern), replacing separate audit-log and forwarding-log collections.
 
 **Language/Version**: Node.js 18+, JavaScript (ES6+)
 **Primary Dependencies**: Express 4, Mongoose 5, Nodemailer 6, javascript-state-machine
-**Storage**: MongoDB via Mongoose — 2 collections: `ncrs` (with embedded `events[]`), `preventive_actions`
+**Storage**: MongoDB via Mongoose — 1 collection: `ncrs` (embedded `events[]` + `preventive_actions[]`)
 **Testing**: Mocha — `test-unit/` (unit), `test-integ/` (integration)
 **Target Platform**: Linux server (single-org Node.js web service)
 **Project Type**: web-service
@@ -74,8 +74,7 @@ lib/
 └── ncr-email.js          # NCR notification templates (6 email types)
 
 model/
-├── ncr.js                # Mongoose schema (NcrEventSchema + NcrSchema)
-└── preventive-action.js  # Separate collection for PA tracking
+└── ncr.js                # Mongoose schema (PreventiveActionSchema + NcrEventSchema + NcrSchema)
 
 routes/
 └── ncr.js                # Express routes (thin, delegates to ncr-service)
@@ -102,6 +101,22 @@ test-integ/
 New files follow the established `lib/`, `model/`, `routes/`, `views/` pattern.
 
 ## Key Architectural Decisions
+
+### Preventive Actions as Subdocuments (user directive)
+
+`ncr.preventive_actions[]` is an embedded array of `PreventiveActionSchema`
+subdocuments inside the NCR document. No separate collection is used.
+
+- CE/CS populates `action_description` for each action during disposition
+- QA Staff later assigns `owner_*` and `target_completion_date` per subdocument
+- PA owner updates `status` and `comments` directly on the subdocument
+- PA lifecycle events (`pa.owner_assigned`, `pa.status_updated`, `pa.closed`)
+  are recorded in the same NCR's `events[]` for unified history
+- The `disposition.preventive_actions: [String]` field is **removed**; the
+  subdocuments replace it, with `action_description` serving the same purpose
+
+**Single collection**: all NCR data, events, and preventive actions live in
+the `ncrs` collection.
 
 ### Event Sourcing (user directive)
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The NCR Workflow Management system uses 4 MongoDB collections. All state
+The NCR Workflow Management system uses **1 MongoDB collection** (`ncrs`). All state
 transitions, user actions, and system notifications are recorded as immutable
 events embedded in the NCR document following the **event sourcing pattern**.
 Separate audit-log and forwarding-log collections are not needed — the NCR's
@@ -148,11 +148,14 @@ stream for the NCR's lifecycle.
   disposition: {
     parts_disposition: String,  // "Rework" | "Repair" | "Return to Vendor" | "Scrap" | "Use-As-Is"
     root_cause_documentation: String,
-    preventive_actions: [String],
     rework_repair_instructions: String,
     ce_cs_identity: ObjectId,
     ce_cs_timestamp: Date
   },
+
+  // Preventive Actions (subdocuments; action_description populated by CE/CS,
+  // owner/status enriched by QA Staff during concurrence review)
+  preventive_actions: [PreventiveActionSchema],
 
   // QA Concurrence (denormalized for quick access)
   qa_staff_identity: ObjectId,
@@ -242,30 +245,35 @@ Embedded in NCR document.
 Recorded via `ncr.closed` event in `events[]`. The `notification.final_distribution`
 system event captures all recipient delivery statuses.
 
-### 3. Preventive Action
+### 3. Preventive Action (subdocument embedded in NCR)
 
 **Purpose**: Tracks preventive actions identified by CE/CS and owned/executed
-by designated personnel. Kept as a separate collection because preventive
-actions have independent lifecycle and ownership outside the NCR's primary
-workflow.
+by designated personnel. Embedded in the NCR document so all quality data for
+an NCR lives in one place.
 
-**Mongoose Schema** (separate collection):
+CE/CS writes free-text descriptions during disposition; each description
+becomes a `PreventiveAction` subdocument. QA Staff later enriches each
+subdocument with owner assignment and tracks status to closure.
+
+**Mongoose Subschema** (embedded in `ncr.preventive_actions[]`):
 
 ```javascript
 {
   _id: ObjectId,
-  ncr_id: ObjectId,
 
+  // Captured from CE/CS disposition text
   action_description: String,
 
+  // Assigned by QA Staff
   owner_id: ObjectId,
   owner_name: String,
   owner_email: String,
-
   target_completion_date: Date,
-  actual_completion_date: Date,
 
+  // Tracked by PA owner
+  actual_completion_date: Date,
   status: String,             // "Open" | "In Progress" | "Completed" | "Overdue"
+  comments: [String],
 
   status_history: [{
     previous_status: String,
@@ -274,19 +282,21 @@ workflow.
     changed_timestamp: Date
   }],
 
-  comments: [String],
-
   created_at: Date,
   updated_at: Date
 }
 ```
 
+**How it flows into the NCR schema**: the `disposition.preventive_actions`
+field (raw strings from CE/CS) is replaced by `ncr.preventive_actions[]`
+(structured subdocuments). CE/CS populates `action_description` at disposition
+time; `owner_*` and `status` fields are filled by QA later.
+
 **Relationships**:
 
-- Belongs to one NCR
-- Owned by designated personnel
+- Embedded in one NCR (no foreign key needed)
 - PA lifecycle events (`pa.owner_assigned`, `pa.status_updated`, `pa.closed`)
-  are also recorded in the parent NCR's `events[]` for unified history
+  recorded in the same NCR's `events[]` for unified history
 
 ### 4. User (Reference)
 
@@ -298,7 +308,7 @@ compliance — role changes after the fact do not alter historical records.
 
 ### MongoDB Collections
 
-1. **ncrs** - Primary NCR documents (with embedded events)
+1. **ncrs** — the only collection; all NCR data, events, and preventive actions are embedded
 
    - Documents: One per NCR
    - Indexes:
@@ -310,18 +320,15 @@ compliance — role changes after the fact do not alter historical records.
      - `created_at`
      - `events.timestamp` (for event range queries)
      - `events.event_type` (for filtering specific event types)
-   - Embedded arrays: `events[]`, `additional_approvers[]`, `attachments[]`
-   - Expected events per NCR: 15–40 events (all user actions + notifications)
+     - `preventive_actions.status` (for PA reporting)
+     - `preventive_actions.owner_id` (for PA owner queries)
+   - Embedded arrays: `events[]`, `preventive_actions[]`, `additional_approvers[]`, `attachments[]`
+   - Expected events per NCR: 15–40; expected PAs per NCR: 1–5
 
-2. **preventive_actions** - Task tracking
-
-   - Documents: 1–5 per NCR
-   - Indexes: `(ncr_id, status)`, `owner_id`, `target_completion_date`
-   - Retention: Keep 1 year after completion
-
-**Removed collections** (replaced by `ncr.events[]`):
-- ~~audit_logs~~ → covered by user input events with `previous_status`/`new_status`
-- ~~forwarding_logs~~ → covered by system output events with `recipients[]`
+**Removed collections** (all data now embedded in NCR documents):
+- ~~audit_logs~~ → covered by user input events in `ncr.events[]`
+- ~~forwarding_logs~~ → covered by system output events in `ncr.events[]`
+- ~~preventive_actions~~ → embedded as `ncr.preventive_actions[]` subdocuments
 
 ## Workflow State Transitions
 
