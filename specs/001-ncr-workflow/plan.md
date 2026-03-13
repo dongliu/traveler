@@ -142,9 +142,9 @@ layer calls `fsm.can(transition)` before any MongoDB write.
 
 ### Email Notifications
 
-`lib/ncr-email.js` extends the existing nodemailer config with 6 NCR-specific
-email types. Each send call returns delivery results; the service layer appends
-the corresponding system output event to `ncr.events[]`.
+`lib/ncr-email.js` extends the existing nodemailer config with 7 NCR-specific
+email functions. Each send call returns per-recipient delivery results; the
+service layer appends the corresponding system output event to `ncr.events[]`.
 
 ### Access Control
 

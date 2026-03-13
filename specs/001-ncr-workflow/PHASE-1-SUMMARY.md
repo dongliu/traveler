@@ -1,7 +1,7 @@
 # Phase 1 Planning Summary: NCR Workflow Management
 
 **Date Completed**: March 10, 2026 **Branch**: `001-ncr-workflow`
-**Specification**: Complete (771 lines, 65 FRs, 7 user stories, 7 entities)
+**Specification**: Complete (771 lines, 65 FRs, 9 user stories, single-collection schema)
 **Planning Status**: ✅ COMPLETE
 
 ---
@@ -44,8 +44,7 @@
 
 - **Language**: Node.js 18+, JavaScript (ES6+)
 - **Workflow Engine**: javascript-state-machine (lightweight FSM library)
-- **Database**: MongoDB + Mongoose ODM (NCR documents, audit logs, forwarding
-  logs)
+- **Database**: MongoDB + Mongoose ODM (single `ncrs` collection with embedded events, PAs, disposition, approvals)
 - **Email Notifications**: email.js (SMTP-based email delivery)
 - **Web Framework**: Express (existing)
 - **View Engine**: Jade/Pug (existing)
@@ -57,10 +56,8 @@
   for Comment → Final Approval → Closed)
 - **Workflow Steps**: 7 (Origination → Initial Notification → Eng Disposition
   Request → QA Concurrence → Approval → Issuance → Final Distribution)
-- **Database Collections**: 7 (ncrs, dispositions/embedded, approvals/embedded,
-  closure_records/embedded, audit_logs, forwarding_logs, preventive_actions)
-- **API Endpoints**: 8+ (POST create, GET details, PATCH disposition, PATCH
-  concurrence, PATCH approve, PATCH close, POST comments, etc.)
+- **Database Collections**: 1 (`ncrs` — all data embedded: `events[]`, `preventive_actions[]`, `disposition`, `additional_approvers[]`, `closure_record`)
+- **API Endpoints**: 11 (POST create, GET list, GET detail, GET events, PATCH disposition, PATCH concurrence, PATCH approve, PATCH resubmit, PATCH close, PATCH PA owner, PATCH PA status)
 
 ---
 
@@ -84,18 +81,17 @@ All constitution principles are applicable and will be enforced:
 
 **Foundation (Iteration 1)**:
 
-- [ ] MongoDB schemas for 7 entities
-- [ ] javascript-state-machine FSM (6 states, transitions)
-- [ ] Basic CRUD operations
-- [ ] Unit tests (~20)
+- [ ] Single `model/ncr.js` with PreventiveActionSchema + NcrEventSchema + NcrSchema
+- [ ] `lib/ncr-state-machine.js` FSM factory (7 transitions)
+- [ ] `lib/ncr-email.js` with 7 notification functions
+- [ ] `routes/ncr.js` router skeleton (10 route stubs)
 
 **Core Workflow (Iteration 2)**:
 
-- [ ] 8 API endpoints (create, get, list, disposition, concurrence, approve,
-      close, comments)
-- [ ] 6 email notification types
-- [ ] Forwarding log tracking
-- [ ] Integration tests (~15)
+- [ ] 11 API endpoints across `routes/ncr.js`
+- [ ] 7 email notification functions with event recording
+- [ ] Event sourcing: all actions + notifications appended to `ncr.events[]`
+- [ ] Preventive actions as embedded subdocuments in `ncr.preventive_actions[]`
 
 **UI & Access Control (Iteration 3)**:
 
@@ -167,7 +163,7 @@ All constitution principles are applicable and will be enforced:
 
 | Item                        | Decision                              | Rationale                                                                       |
 | --------------------------- | ------------------------------------- | ------------------------------------------------------------------------------- |
-| **NCR Visibility**          | Deferred to implementation phase      | Will clarify Option B (all see all) vs C (role-filtered) during API development |
+| **NCR Visibility**          | **Decided: Option C (role-filtered)** | Originators see own NCRs; CE/CS sees awaiting-disposition; QA sees all Dispositioned+; Managers see all |
 | **Approver Loop Limit**     | Unlimited returns for comment in spec | Should implement max 3 returns before escalation to manager                     |
 | **eTraveler Sign-off**      | Electronic sign-off closes NCR        | Need to define signature capture method (e-signature vs checkbox)               |
 | **Email Retry Strategy**    | 3 retries on failure                  | Implement exponential backoff (1s, 2s, 4s) with dead letter queue               |

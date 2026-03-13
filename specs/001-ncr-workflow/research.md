@@ -102,13 +102,14 @@ templates in a new `lib/ncr-email.js`.
 NCR-specific templates as a separate module avoids modifying working email
 infrastructure while following the existing pattern.
 
-**6 notification types**:
-1. Initial Notification → QA Staff, Group Leader, Division Director
-2. Engineering Disposition Request → CE/CS
-3. QA Concurrence Complete → CE/CS (if rejected, back to CE/CS for revision)
-4. Approval Request → Designated Additional Approvers
-5. NCR Issuance → NCR Originator (final approval reached)
-6. Final Distribution → All stakeholder groups (on closure)
+**7 notification functions** in `lib/ncr-email.js`:
+1. `sendInitialNotification` → QA Staff, Group Leader, Division Director
+2. `sendDispositionRequest` → CE/CS (engineering disposition request)
+3. `sendQaNotification` → QA Staff (disposition complete or returned for comment)
+4. `sendApprovalRequest` → Designated Additional Approvers
+5. `sendIssuance` → NCR Originator (final approval reached)
+6. `sendFinalDistribution` → All 5 stakeholder groups (on closure)
+7. `sendPaAssigned` → Preventive Action owner (on PA assignment by QA)
 
 ---
 
@@ -147,7 +148,26 @@ authoritative history.
 
 ---
 
-### 6. Concurrent Access Protection
+### 6. Preventive Actions as NCR Subdocuments
+
+**Decision**: `ncr.preventive_actions[]` — embedded array of `PreventiveActionSchema`
+subdocuments inside the NCR document. No separate `preventive_actions` collection.
+
+**Rationale**: Preventive actions are created by CE/CS during disposition and tracked
+by QA thereafter. Embedding them keeps all quality data for an NCR in one document,
+consistent with the event sourcing approach (PA lifecycle events also go into
+`ncr.events[]`). The `disposition.preventive_actions: [String]` raw-text field is
+replaced by the structured subdocuments, with `action_description` carrying the CE/CS
+free-text. Owner assignment, status history, and comments are enriched in-place.
+MongoDB array filters (`arrayFilters`) allow atomic updates to individual subdocs.
+
+**Alternatives Considered**:
+- Separate `preventive_actions` collection — Rejected (user direction). Adds a
+  second collection and foreign-key lookups for data that is inherently owned by one NCR.
+
+---
+
+### 7. Concurrent Access Protection
 
 **Decision**: Mongoose optimistic concurrency via `__v` (version key) + atomic
 `findOneAndUpdate` operations for state transitions.
