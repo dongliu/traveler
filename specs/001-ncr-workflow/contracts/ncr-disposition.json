@@ -181,11 +181,10 @@
     }
   },
   "side_effects": [
-    "Update NCR document with disposition data",
-    "Transition NCR status from Submitted to Dispositioned",
-    "Create Audit Log entry (Disposition Submitted) with user identity and timestamp",
+    "Update NCR document with disposition data and status 'Dispositioned'",
+    "Append 'disposition.submitted' user event to ncr.events[] with previous_status='Submitted', new_status='Dispositioned', CE/CS identity, and disposition payload",
     "Send QA CONCURRENCE notification email to QA Staff",
-    "Create Forwarding Log entry for QA Staff notification"
+    "Append 'notification.qa_notification' system event to ncr.events[] with QA Staff delivery status"
   ],
   "notes": [
     "Rework/Repair Instructions are mandatory ONLY if parts_disposition is 'Rework' or 'Repair'",

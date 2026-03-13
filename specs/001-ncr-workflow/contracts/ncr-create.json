@@ -207,13 +207,13 @@
     }
   },
   "side_effects": [
-    "Create NCR document in MongoDB",
+    "Create NCR document in MongoDB with status 'Submitted'",
     "Generate unique NCR number",
-    "Create Audit Log entry (NCR Created)",
+    "Append 'ncr.submitted' user event to ncr.events[] with previous_status=null, new_status='Submitted'",
     "Send INITIAL NOTIFICATION emails to QA Staff, Group Leader, and Division Director",
+    "Append 'notification.initial' system event to ncr.events[] with per-recipient delivery status",
     "Send ENGINEERING DISPOSITION REQUEST email to CE/CS with link",
-    "Create Forwarding Log entries for all recipients",
-    "Transition NCR status to Submitted"
+    "Append 'notification.disposition_request' system event to ncr.events[] with CE/CS delivery status"
   ],
   "notes": [
     "NCR number is auto-generated per organization's naming convention (not necessarily sequential)",

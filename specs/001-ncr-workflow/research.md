@@ -112,14 +112,38 @@ infrastructure while following the existing pattern.
 
 ---
 
-### 5. Audit Trail Implementation
+### 5. Event Sourcing — Unified Event Stream
 
-**Decision**: Separate `audit_logs` MongoDB collection, written on every state
-transition and data modification.
+**Decision**: Embedded `events[]` array on the NCR document using the event
+sourcing pattern. Replaces separate `audit_logs` and `forwarding_logs`
+collections.
 
-**Rationale**: Audit trail must be immutable and complete for compliance. A
-separate collection ensures audit records are never overwritten and can be
-indexed independently for fast retrieval (`ncr_id + timestamp` index).
+**Rationale**: Every user action (submit, approve, close), system state
+transition, and system notification (email sent + per-recipient delivery
+status) is recorded as an immutable, append-only event in `ncr.events[]`. This
+eliminates two separate collections while making the full NCR lifecycle
+self-contained in a single document. The `status` field on the NCR is a
+denormalized read-model projection for efficient queries; `events[]` is the
+authoritative history.
+
+**Event categories**:
+- **User input events** — actions taken by authenticated users (e.g.,
+  `ncr.submitted`, `disposition.submitted`, `approval.approved`)
+- **System output events** — email notifications sent to stakeholders (e.g.,
+  `notification.initial`, `notification.issuance`), with per-recipient
+  delivery status embedded in the event's `recipients[]` field
+- Each event captures: `event_type`, `actor_type`, `actor_id`, `actor_name`,
+  `actor_role` (snapshot at time of event), `timestamp`, `previous_status`,
+  `new_status`, `payload`, and `recipients[]`
+
+**Alternatives Considered**:
+- Separate `audit_logs` collection — Rejected (user direction). Adds
+  collection management overhead and splits history across multiple documents.
+- Separate `forwarding_logs` collection — Rejected (user direction). Email
+  delivery records belong in the same event stream as the actions that
+  triggered them.
+- Hybrid (events + separate forwarding log) — Rejected. Partial unification
+  defeats the simplicity benefit of event sourcing.
 
 ---
 

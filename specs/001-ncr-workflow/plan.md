@@ -1,49 +1,53 @@
 # Implementation Plan: NCR Workflow Management
 
-**Branch**: `001-ncr-workflow` | **Date**: 2026-03-10 | **Spec**: [spec.md](spec.md)
+**Branch**: `001-ncr-workflow` | **Date**: 2026-03-11 | **Spec**: `specs/001-ncr-workflow/spec.md`
 **Input**: Feature specification from `/specs/001-ncr-workflow/spec.md`
 
 ## Summary
 
-Implement a Nonconformance Workflow Management (NCR) system as a new feature module
-within the existing eTraveler Express/Node.js application. The system enables
-organizations to initiate, disposition, and approve NCRs through a 6-state workflow
-engine built with `javascript-state-machine`. The implementation adds MongoDB
-collections for NCR data, 8 REST API endpoints, email notification pipelines, Jade
-views, and RBAC middleware — all following existing eTraveler patterns.
+Build a Nonconformance Report (NCR) workflow management module on top of the
+existing Express/Mongoose/Jade stack. The module enables NCR creation,
+engineering disposition (CE/CS), QA concurrence, designated approver
+authorization, issuance, and closure. A `javascript-state-machine` FSM governs
+state transitions. All state changes, user actions, and email notifications are
+recorded as immutable events embedded in the NCR document (event sourcing
+pattern), replacing separate audit-log and forwarding-log collections.
 
 ## Technical Context
 
 **Language/Version**: Node.js 18+, JavaScript (ES6+)
-**Primary Dependencies**: Express 4 (existing), Mongoose 5 (existing), Nodemailer 6
-(existing), `javascript-state-machine` (new — lightweight FSM library replacing
-workflow-es), jade 1.10 (existing)
-**Storage**: MongoDB + Mongoose ODM — new collections: `ncrs`, `audit_logs`,
-`forwarding_logs`, `preventive_actions`
-**Testing**: Mocha + Chai + Sinon (existing); unit tests for state machine and model
-validation; integration tests for API endpoints and workflow transitions
-**Target Platform**: Linux server (existing Express deployment)
-**Project Type**: Web application module (feature added to existing web service)
-**Performance Goals**: <2s search response for 10k+ NCRs; email delivery
-initiation <2s; dashboard load <1s
-**Constraints**: <200ms p95 API response; zero data loss on state transitions;
-10+ concurrent users without corruption
-**Scale/Scope**: 10k+ NCRs in archive; 50+ concurrent users; 8 API endpoints;
-5 Jade views; 6 email notification types
+**Primary Dependencies**: Express 4, Mongoose 5, Nodemailer 6, javascript-state-machine
+**Storage**: MongoDB via Mongoose — 2 collections: `ncrs` (with embedded `events[]`), `preventive_actions`
+**Testing**: Mocha — `test-unit/` (unit), `test-integ/` (integration)
+**Target Platform**: Linux server (single-org Node.js web service)
+**Project Type**: web-service
+**Performance Goals**: <2s query for 10,000+ NCRs (SC-004); email distributed within 2min of closure (SC-012)
+**Constraints**: 10+ concurrent users without corruption (SC-010); role-filtered NCR visibility
+**Scale/Scope**: Single-org deployment, 10k+ NCRs, 15–40 events per NCR
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+### Gate Evaluation (pre-design)
 
-| Principle | Status | Implementation |
-|-----------|--------|----------------|
-| **I. Automated Testing** | ✅ Pass | Unit tests (state machine transitions, model validation) targeting 80%+ coverage; integration tests (API endpoints, email); E2E for critical P1 workflows |
-| **II. Code Quality** | ✅ Pass | ESLint/Prettier via existing pre-commit hooks; separation of concerns (model → lib → routes → views); async/await throughout; no deeply nested callbacks |
-| **III. Security-First** | ✅ Pass | Input validation on all API routes; RBAC middleware per role (Originator/CE-CS/QA/Approver/Manager); parameterized Mongoose queries; HTML sanitization; no secrets in code |
-| **IV. Versioning** | ✅ Pass | Bump 3.2.0 → 3.3.0 for this feature; MongoDB schema migrations tracked in version control |
-| **V. Documentation** | ✅ Pass | API contracts in `contracts/`; data model in `data-model.md`; JSDoc for complex state machine and email logic |
+| Principle | Status | Notes |
+|---|---|---|
+| I. Automated Testing | PASS | Unit tests for `lib/ncr*.js`; integration tests for `routes/ncr.js`. 80% coverage target. |
+| II. Code Quality | PASS | FSM and service logic in `lib/`; routes are thin. Async/await throughout. |
+| III. Security-First | PASS | RBAC enforced at route middleware; input validated at route boundary; no secrets in code. |
+| IV. Versioning | PASS | Schema versioned. No breaking changes to existing routes. |
+| V. Documentation | PASS | API contracts in `contracts/`. JSDoc on complex logic. |
 
-**Constitution Check: PASSED** — No violations.
+No gate violations. No complexity tracking required.
+
+### Post-Design Re-check
+
+| Principle | Status | Notes |
+|---|---|---|
+| I. Automated Testing | PASS | Event appending logic is testable in unit tests; workflow transitions covered in integration tests. |
+| II. Code Quality | PASS | `NcrEventSchema` is a shared subschema; no duplication across models. |
+| III. Security-First | PASS | Events are append-only (no update/delete paths); actor snapshots prevent retrospective role manipulation. |
+| IV. Versioning | PASS | Embedded events are additive; existing NCR fields unchanged. |
+| V. Documentation | PASS | Event type enum documented in `data-model.md`; contracts updated with event side-effects. |
 
 ## Project Structure
 
@@ -51,55 +55,90 @@ initiation <2s; dashboard load <1s
 
 ```text
 specs/001-ncr-workflow/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
+├── plan.md              # This file
+├── research.md          # Phase 0 output
+├── data-model.md        # Phase 1 output (updated with event sourcing)
+├── quickstart.md        # Phase 1 output
+├── contracts/           # Phase 1 output
 │   ├── ncr-create.json
 │   └── ncr-disposition.json
-└── tasks.md             # Phase 2 output (/speckit.tasks command)
+└── tasks.md             # Phase 2 output (/speckit.tasks)
 ```
 
 ### Source Code (repository root)
 
 ```text
 lib/
-├── ncr.js                # Core NCR business logic and workflow orchestration
-├── ncr-state-machine.js  # javascript-state-machine FSM definition (6 states)
-├── ncr-service.js        # NCR CRUD service layer
-└── ncr-email.js          # Email notification templates (6 notification types)
+├── ncr-state-machine.js  # FSM factory (createNcrStateMachine)
+├── ncr-service.js        # Business logic (create, disposition, concur, approve, close)
+└── ncr-email.js          # NCR notification templates (6 email types)
 
 model/
-├── ncr.js                # Mongoose NCR schema (primary entity)
-├── audit-log.js          # Audit log schema (separate collection)
-├── forwarding-log.js     # Forwarding log schema (separate collection)
-└── preventive-action.js  # Preventive action schema (separate collection)
+├── ncr.js                # Mongoose schema (NcrEventSchema + NcrSchema)
+└── preventive-action.js  # Separate collection for PA tracking
 
 routes/
-└── ncr.js                # NCR API endpoints (8 routes)
+└── ncr.js                # Express routes (thin, delegates to ncr-service)
 
 views/
-├── ncr-create.jade       # NCR creation form
-├── ncr-detail.jade       # NCR detail view with audit trail
-├── ncr-disposition.jade  # CE/CS disposition form
-├── ncr-approval.jade     # QA concurrence and approver form
-└── ncr-dashboard.jade    # NCR status dashboard
+├── ncr-create.jade
+├── ncr-detail.jade
+├── ncr-disposition.jade
+├── ncr-concurrence.jade
+├── ncr-approval.jade
+├── ncr-close.jade
+└── ncr-dashboard.jade
 
 test-unit/
-├── ncr-state-machine.test.js  # FSM transitions, guards, invalid transition handling
-├── ncr-model.test.js          # Mongoose schema validation rules
-└── ncr-email.test.js          # Email template rendering (nodemailer mocked)
+├── ncr-state-machine.test.js
+├── ncr-service.test.js
+└── ncr-event.test.js
 
 test-integ/
-├── ncr-api.test.js            # API endpoint integration tests
-└── ncr-workflow.test.js       # End-to-end workflow transition tests
+└── ncr.test.js
 ```
 
-**Structure Decision**: Single project using existing eTraveler directory layout.
-NCR files slot into existing `lib/`, `model/`, `routes/`, and `views/` directories
-alongside current patterns. No new top-level directories needed.
+**Structure Decision**: Single project layout, extending existing repo structure.
+New files follow the established `lib/`, `model/`, `routes/`, `views/` pattern.
 
-## Complexity Tracking
+## Key Architectural Decisions
 
-> No constitution violations. No complexity justification required.
+### Event Sourcing (user directive)
+
+`ncr.events[]` is the authoritative audit and notification history for each
+NCR. Separate `audit_logs` and `forwarding_logs` collections are **not used**.
+
+- **User input events** (`actor_type: "user"`): every authenticated action
+  (create, disposition, concur, approve, close) is recorded with actor
+  snapshot, timestamp, previous/new status, and action payload.
+- **System output events** (`actor_type: "system"`): every email notification
+  is recorded with per-recipient delivery status embedded in the event's
+  `recipients[]` field.
+- Events are append-only. The service layer never updates or deletes events.
+- NCR fields like `status`, `disposition`, `closure_record` remain as
+  denormalized projections for efficient querying. On any conflict, `events[]`
+  is authoritative.
+
+### State Machine
+
+`createNcrStateMachine(currentStatus)` in `lib/ncr-state-machine.js` returns a
+per-request FSM instance initialized from the persisted `ncr.status`. Service
+layer calls `fsm.can(transition)` before any MongoDB write.
+
+### Email Notifications
+
+`lib/ncr-email.js` extends the existing nodemailer config with 6 NCR-specific
+email types. Each send call returns delivery results; the service layer appends
+the corresponding system output event to `ncr.events[]`.
+
+### Access Control
+
+Role-filtered visibility (Option C from spec). Route middleware checks
+`req.user.role` against allowed roles per endpoint. NCR Originators see their
+NCRs; CE/CS sees NCRs awaiting disposition; QA Staff sees NCRs awaiting
+concurrence; Managers see all.
+
+### Concurrent Access
+
+Mongoose optimistic concurrency via `__v` (version key) + atomic
+`findOneAndUpdate` for state transitions.
