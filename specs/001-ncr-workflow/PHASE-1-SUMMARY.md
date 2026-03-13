@@ -10,19 +10,16 @@
 
 ### Specification & Validation
 
-- ✅ **spec.md** (771 lines) - Complete functional specification with 7 stories,
-  65 FRs, 13 success criteria
+- ✅ **spec.md** (771 lines) - Complete functional specification with 9 user stories (US1/1.5/1.6/2/3/4/5/6/7), 65 FRs, 13 success criteria
 - ✅ **requirements.md** - Quality checklist with all items validated
 - ✅ **NCR-flow.md** - Visual flowchart describing 7-step workflow
 
 ### Planning Documents (Phase 1)
 
-- ✅ **plan.md** (257 lines) - Implementation plan with technical context,
-  constitution check, roadmap, and success metrics
-- ✅ **data-model.md** (412 lines) - Complete MongoDB schema design for 7
-  entities with relationships and constraints
-- ✅ **quickstart.md** (403 lines) - Development setup guide with API examples
-  and testing instructions
+- ✅ **plan.md** - Implementation plan with technical context, constitution check, source structure, and key architectural decisions (event sourcing, PA subdocuments, FSM, RBAC)
+- ✅ **data-model.md** - Single-collection schema: PreventiveActionSchema + NcrEventSchema + NcrSchema; event type enum (21 types); collection design with indexes
+- ✅ **quickstart.md** - Development setup guide with API endpoints table (11 routes), event sourcing examples, PA tracking examples, and troubleshooting
+- ✅ **research.md** - 7 design decisions: FSM library, RBAC, state machine design, email strategy, event sourcing, PA subdocuments, concurrent access
 
 ### API Contracts (Phase 1)
 
@@ -33,8 +30,7 @@
 
 ### Agent Context
 
-- ✅ **copilot-instructions.md** - Updated with javascript-state-machine, mongoose, email.js
-  technologies
+- ✅ **CLAUDE.md** - Updated with javascript-state-machine, Mongoose 5, Express 4, Nodemailer 6; single-collection storage noted
 
 ---
 
@@ -95,17 +91,16 @@ All constitution principles are applicable and will be enforced:
 
 **UI & Access Control (Iteration 3)**:
 
-- [ ] 5 Jade templates (create form, detail, disposition, approval, dashboard)
-- [ ] Role-based access control middleware
-- [ ] Audit trail viewer
-- [ ] End-to-end tests (~10)
+- [ ] 7 Jade views: ncr-create, ncr-detail (with event timeline), ncr-disposition, ncr-concurrence, ncr-approval, ncr-close, ncr-dashboard
+- [ ] Role-based access control middleware per route
+- [ ] Event timeline tab in ncr-detail (via GET /:id/events)
 
 **Admin & Reporting (Iteration 4)**:
 
-- [ ] NCR search and filtering
-- [ ] Management dashboard reporting
-- [ ] Preventive action tracking
-- [ ] Performance optimization for 10k+ NCRs
+- [ ] NCR search and filtering (status, part_number, supplier, date range, disposition type)
+- [ ] Management dashboard with status count badges and aging (30+ day escalation flag)
+- [ ] Preventive action owner assignment, status tracking, and closure via PA subdocument routes
+- [ ] `includeClosed` toggle for historical archive access
 
 **eTraveler Integration (Iteration 5)**:
 
@@ -175,16 +170,15 @@ All constitution principles are applicable and will be enforced:
 
 ### Next Steps (Development Phase - `/speckit.tasks`)
 
-1. **Create task breakdown from plan.md** → Run `/speckit.tasks` to generate
-   granular development tasks
-2. **Implement Foundation (Iteration 1)**:
-   - Create Mongoose schemas in `models/`
-   - Implement javascript-state-machine FSM in `lib/ncr-state-machine.js`
-   - Write 20 unit tests for schema validation
-3. **Implement Core Workflow (Iteration 2)**:
-   - Implement 8 API endpoints in `routes/ncr.js`
-   - Set up email.js integration in `lib/ncr-email.js`
-   - Write 15 integration tests
+1. **Task breakdown generated** → See [tasks.md](tasks.md) — 36 tasks across 9 phases
+2. **Implement Foundation (Phase 1+2)**:
+   - Install `javascript-state-machine`; register router in app.js
+   - Create `model/ncr.js` (3 schemas), `lib/ncr-state-machine.js`, `lib/ncr-email.js`, `routes/ncr.js` skeleton
+3. **Implement Core Workflow (Phases 3–6)**:
+   - Phase 3: NCR creation + 3 notification events (MVP start)
+   - Phase 4: CE/CS disposition + PA subdoc creation
+   - Phase 5: QA concurrence + approver loop
+   - Phase 6: Closure + final distribution
 
 ### Prerequisites for Developers
 
@@ -204,36 +198,35 @@ All constitution principles are applicable and will be enforced:
 - [ ] Role-based access control enforced
 - [ ] No credentials/secrets in code
 - [ ] ESLint/Prettier compliant
-- [ ] Audit trail recording all transitions
+- [ ] Event sourcing: all transitions and notifications appended to `ncr.events[]`
 - [ ] Complete documentation in code comments
 
 ---
 
 ## Reference Materials
 
-| Document                       | Purpose                        | Lines   |
-| ------------------------------ | ------------------------------ | ------- |
-| [spec.md](spec.md)             | Complete feature specification | 771     |
-| [plan.md](plan.md)             | Implementation roadmap         | 257     |
-| [data-model.md](data-model.md) | MongoDB schema design          | 412     |
-| [quickstart.md](quickstart.md) | Development setup guide        | 403     |
-| [contracts/](contracts/)       | API contract definitions       | 405     |
-| [NCR-flow.md](NCR-flow.md)     | Visual workflow diagram        | Mermaid |
-
-**Total Planning Documentation**: 2,248 lines + 1 diagram
+| Document                       | Purpose                                              |
+| ------------------------------ | ---------------------------------------------------- |
+| [spec.md](spec.md)             | Complete feature specification (9 stories, 65 FRs)  |
+| [plan.md](plan.md)             | Technical context, architecture, source structure    |
+| [research.md](research.md)     | 7 design decisions (FSM, event sourcing, PA, RBAC…) |
+| [data-model.md](data-model.md) | Single-collection schema, event types, indexes       |
+| [quickstart.md](quickstart.md) | Setup guide, all 11 API routes, code examples        |
+| [contracts/](contracts/)       | ncr-create.json + ncr-disposition.json               |
+| [tasks.md](tasks.md)           | 36 implementation tasks across 9 phases              |
 
 ---
 
 ## Sign-Off
 
-- **Specification Status**: ✅ APPROVED (65 FRs, 7 stories, 13 success criteria)
+- **Specification Status**: ✅ APPROVED (65 FRs, 9 user stories, 13 success criteria)
 - **Planning Status**: ✅ APPROVED (Technical context, data model, API
   contracts, roadmap)
 - **Constitution Check**: ✅ PASSED (All 5 principles applicable)
 - **Ready for Implementation**: ✅ YES
 
-**Branch**: `001-ncr-workflow` **Date**: March 10, 2026 **Next Phase**:
-Development (Iteration 1-5 implementation)
+**Branch**: `001-ncr-workflow` **Date**: March 11, 2026 **Next Phase**:
+Development — see [tasks.md](tasks.md) (36 tasks, MVP = Phases 1–4)
 
 ---
 
@@ -241,10 +234,8 @@ Development (Iteration 1-5 implementation)
 
 Before starting implementation:
 
-1. Review spec.md for any ambiguities (Section: Outstanding Clarifications)
-2. Confirm approver loop limit (unlimited vs max 3 returns)
-3. Finalize NCR visibility model (Option B vs C)
-4. Verify email service credentials and DNS configuration
-5. Confirm eTraveler integration scope with product team
+1. Verify email service credentials and SMTP configuration in `.env`
+2. Confirm approver loop limit behavior (spec allows unlimited returns; tasks.md implements as-is)
+3. Confirm eTraveler electronic sign-off UX (checkbox vs e-signature) before implementing T025
 
-**Ready to proceed with `/speckit.tasks` for development task breakdown.**
+**Task breakdown is complete — start with T001 in [tasks.md](tasks.md).**
