@@ -14,12 +14,12 @@ html
       var shareGroups = !{JSON.stringify(viewConfig.shareGroups)};
       var linkTarget = !{JSON.stringify(viewConfig.linkTarget)} || '_blank';
       var showCCDB = !{JSON.stringify(viewConfig.showCCDB)};
-      var userid = !{JSON.stringify(locals.userid)};
+      var userid = !{JSON.stringify(locals.userid || '')};
       var prefix = !{JSON.stringify(prefix)};
 
-      var isAdmin = !{isAdmin};
-      var isManager = !{isManager};
-      var isReviwer = !{isReviwer};
+      var isAdmin = !{isAdmin || false};
+      var isManager = !{isManager || false};
+      var isReviwer = !{isReviwer || false};
     block bodyJs
 
     .navbar.navbar-fixed-top
