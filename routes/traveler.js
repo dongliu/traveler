@@ -294,30 +294,6 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/publictravelers/', auth.ensureAuthenticated, function(req, res) {
-    res.render('public-travelers', routesUtilities.getRenderObject(req));
-  });
-
-  app.get('/publictravelers/json', auth.ensureAuthenticated, function(
-    req,
-    res
-  ) {
-    Traveler.find({
-      publicAccess: {
-        $in: [0, 1],
-      },
-      archived: {
-        $ne: true,
-      },
-    }).exec(function(err, travelers) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      return res.status(200).json(travelers);
-    });
-  });
-
   app.get('/currenttravelers/json', auth.ensureAuthenticated, function(
     req,
     res
