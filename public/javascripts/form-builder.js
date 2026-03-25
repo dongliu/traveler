@@ -185,9 +185,6 @@ function addSectionNumbers() {
 }
 
 function addSectionNumberToRichInstruction(richInstructionParent) {
-  if (autoNumbering === false) {
-    return;
-  }
   let target = richInstructionParent;
   if (richInstructionParent.className !== 'rich-instruction') {
     const tinymceChild = $(richInstructionParent).find('.tinymce')[0];
