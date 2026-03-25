@@ -762,25 +762,4 @@ module.exports = function(app) {
       }
     }
   );
-
-  app.get('/publicbinders/', auth.ensureAuthenticated, function(req, res) {
-    res.render('public-binders', routesUtilities.getRenderObject(req));
-  });
-
-  app.get('/publicbinders/json', auth.ensureAuthenticated, function(req, res) {
-    Binder.find({
-      publicAccess: {
-        $in: [0, 1],
-      },
-      status: {
-        $ne: 3,
-      },
-    }).exec(function(err, binders) {
-      if (err) {
-        console.error(err);
-        return res.status(500).send(err.message);
-      }
-      res.status(200).json(binders);
-    });
-  });
 };
