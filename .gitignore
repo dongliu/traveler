@@ -52,5 +52,5 @@ docker/server.key
 # npm stuff #
 npm-debug.log*
 
-.github/
+.github
 .claude
