@@ -351,24 +351,6 @@ module.exports = function(app) {
       });
   });
 
-  /*
-    app.get('/currenttravelersinv1/json', auth.ensureAuthenticated, function (req, res) {
-      var fullurl = config.legacy_traveler.travelers;
-      if (req.query.hasOwnProperty('device')) {
-        fullurl = config.legacy_traveler.devices + req.query.device;
-      }
-      request({
-        strictSSL: false,
-        url: fullurl
-      }).pipe(res);
-    });
-
-    app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
-      return res.render('currenttravelers', {
-        device: req.query.device || null
-      });
-    }); */
-
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function(
     req,
     res
