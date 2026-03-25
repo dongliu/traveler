@@ -293,30 +293,6 @@ module.exports = function(app) {
     }
   );
 
-  app.get('/publicforms/', auth.ensureAuthenticated, function(req, res) {
-    res.render('public-forms', routesUtilities.getRenderObject(req));
-  });
-
-  app.get('/publicforms/json', auth.ensureAuthenticated, async function(
-    req,
-    res
-  ) {
-    try {
-      const forms = await Form.find({
-        publicAccess: {
-          $in: [0, 1],
-        },
-        archived: {
-          $ne: true,
-        },
-      }).exec();
-      return res.status(200).json(forms);
-    } catch (error) {
-      logger.error(error);
-      return res.status(500).send(error.message);
-    }
-  });
-
   app.get('/forms/new', auth.ensureAuthenticated, function(req, res) {
     return res.render('form-new', routesUtilities.getRenderObject(req));
   });
