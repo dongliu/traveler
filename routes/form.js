@@ -557,25 +557,6 @@ module.exports = function(app) {
   );
 
   app.get(
-    '/forms/:id/version-mgmt',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Form),
-    reqUtils.canWriteMw('id'),
-    reqUtils.status('id', [0, 0.5, 1, 2]),
-    function(req, res) {
-      const form = req[req.params.id];
-      return res.render(
-        'form-version-mgmt',
-        routesUtilities.getRenderObject(req, {
-          type: 'form',
-          id: req.params.id,
-          title: form.title,
-        })
-      );
-    }
-  );
-
-  app.get(
     '/forms/:id/versions/json',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
