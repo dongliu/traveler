@@ -3,7 +3,8 @@ extends layout
 block head
   title #{orgName} Traveler - user manual
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='#{prefix}/bootstrap-3.4.1-dist/css/bootstrap.min.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/doc.css')
@@ -16,7 +17,7 @@ block content
 
   .container
     .row
-      .col-md-9
+      .span9
         section#how-to-use
           include:marked ./audience.md
         section#basics
@@ -63,8 +64,8 @@ block content
         section#contact
           include:marked ./contact.md
 
-      .col-md-3.sidebar
-        ul#affixlist.nav.nav-stacked.bs-docs-sidenav
+      .span3.sidebar
+        ul#affixlist.nav.nav-list.nav-stacked.bs-docs-sidenav
           li
             a(href='#basics') Basics
           li
@@ -84,7 +85,6 @@ block content
 
 
 block js
-  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
-  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap-3.4.1-dist/js/bootstrap.min.js')
+  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
   script(type='text/javascript', src='#{prefix}/javascripts/docs.js')

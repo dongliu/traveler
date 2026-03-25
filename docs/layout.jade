@@ -7,14 +7,15 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
   body
-    .navbar.navbar-fixed-top.navbar-default
-      .container-fluid
-        button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
-          span.icon-bar
-          span.icon-bar
-          span.icon-bar
-        .navbar-collapse.collapse
-          ul.nav.navbar-nav
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          .nav-collapse.collapse
+            ul.nav
               li
                 - var appName = "Traveler"
                 if (viewConfig.deploymentName)
