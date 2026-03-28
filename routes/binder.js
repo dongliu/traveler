@@ -11,6 +11,7 @@ const authConfig = require('../config/config').auth;
 const reqUtils = require('../lib/req-utils');
 const shareLib = require('../lib/share');
 const routesUtilities = require('../utilities/routes');
+const logger = require('../lib/loggers').getLogger();
 
 const valueProgressHtml = jade.compileFile(
   `${__dirname}/../views/binder-value-progress.jade`
@@ -351,6 +352,23 @@ module.exports = function(app) {
           .status(201)
           .send(`You can access the new binder at <a href="${url}">${url}</a>`);
       });
+    }
+  );
+
+  app.delete(
+    '/binders/:id/',
+    auth.ensureAuthenticated,
+    reqUtils.requireAdmin(),
+    reqUtils.exist('id', Binder),
+    async function(req, res) {
+      const binder = req[req.params.id];
+      try {
+        await binder.remove();
+        return res.status(200).send(`${req.params.id} deleted`);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
