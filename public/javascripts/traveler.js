@@ -683,6 +683,7 @@ $(function() {
       dataType: 'json',
     })
       .done(function(json, status, jqXHR) {
+        markValidity(input);
         var timestamp = jqXHR.getResponseHeader('Date');
         $('#message').append(
           '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' +
