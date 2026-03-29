@@ -50,7 +50,8 @@ function activeMenu() {
 
   navLinks.each(function setActive() {
     const link = $(this);
-    if (link.attr('href') === currentPath) {
+    const href = link.attr('href');
+    if (href.length > 1 && currentPath.startsWith(href)) {
       link.parent('li').addClass('active');
     }
   });
