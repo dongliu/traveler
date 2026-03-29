@@ -45,7 +45,7 @@ module.exports = function(app) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/releasedforms/', auth.ensureAuthenticated, function(req, res) {
+  app.get('/released-forms/', auth.ensureAuthenticated, function(req, res) {
     res.render('released-forms', routesUtilities.getRenderObject(req));
   });
 
