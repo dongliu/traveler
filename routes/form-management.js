@@ -6,6 +6,7 @@ const routesUtilities = require('../utilities/routes');
 
 const Form = mongoose.model('Form');
 const ReleasedForm = mongoose.model('ReleasedForm');
+const User = mongoose.model('User');
 const { statusMap } = require('../model/released-form');
 const reqUtils = require('../lib/req-utils');
 const logger = require('../lib/loggers').getLogger();
@@ -24,6 +25,10 @@ module.exports = function(app) {
       res.render('form-management', routesUtilities.getRenderObject(req));
     }
   );
+
+  app.get('/released-forms/', auth.ensureAuthenticated, function(req, res) {
+    res.render('released-forms', routesUtilities.getRenderObject(req));
+  });
 
   app.get(
     '/submitted-forms/json',
@@ -86,8 +91,20 @@ module.exports = function(app) {
     '/released-forms/:id/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', ReleasedForm),
-    function(req, res) {
+    async function(req, res) {
       const releasedForm = req[req.params.id];
+
+      // populate reviewer names if any
+      if (releasedForm.__review?.reviewResults) {
+        const reviewResults = releasedForm.__review.reviewResults;
+        for (let i = 0; i < reviewResults.length; i += 1) {
+          const reviewResult = reviewResults[i];
+          const reviewer = await User.findById(reviewResult.reviewerId).exec();
+          if (reviewer) {
+            reviewResult.reviewerName = reviewer.name;
+          }
+        }
+      }
 
       return res.render(
         'released-form',
@@ -101,6 +118,7 @@ module.exports = function(app) {
           ver: releasedForm.ver,
           base: releasedForm.base,
           discrepancy: releasedForm.discrepancy,
+          review: releasedForm.__review,
         })
       );
     }

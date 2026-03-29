@@ -45,10 +45,6 @@ module.exports = function(app) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/released-forms/', auth.ensureAuthenticated, function(req, res) {
-    res.render('released-forms', routesUtilities.getRenderObject(req));
-  });
-
   app.get('/forms/json', auth.ensureAuthenticated, async function(req, res) {
     try {
       const forms = await Form.find(
