@@ -14,6 +14,11 @@ prepend topBtn
     a.btn.btn-primary#new(href='#{prefix}/binders/new', target='#{viewConfig.linkTarget}', data-toggle='tooltip', title='create a new binder')
       i.fa.fa-paperclip.fa-lg
       | &nbsp;New Binder
+  if (isAdmin)
+    .btn-group
+      a.btn.btn-danger#delete(data-toggle='tooltip', title='delete selected travelers')
+        i.fa.fa-trash.fa-lg
+        | &nbsp;Delete
 block underTopBtn
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')

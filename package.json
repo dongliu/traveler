@@ -1,6 +1,6 @@
 {
   "name": "traveler",
-  "version": "3.2.0",
+  "version": "4.0.0",
   "private": true,
   "scripts": {
     "start": "node app",
@@ -9,7 +9,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/dongliu/traveler.git",
-    "release": "3.2.0"
+    "release": "4.0.0"
   },
   "dependencies": {
     "basic-auth": "1.0.0",
@@ -59,15 +59,5 @@
     "sinon": "^7.2.3",
     "supports-color": "^9.0.2",
     "templatizer": "^1.5.4"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.js": [
-      "prettier --write"
-    ]
   }
 }

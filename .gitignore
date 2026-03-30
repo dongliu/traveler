@@ -51,3 +51,8 @@ docker/server.key
 
 # npm stuff #
 npm-debug.log*
+
+.github
+.claude/settings.local.json
+.claude/agent-memory-local/
+.claude/worktrees/
