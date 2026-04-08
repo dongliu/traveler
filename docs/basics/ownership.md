@@ -30,19 +30,3 @@ entity. An entity’s ownership can be transferred to a different user by its
 current owner or by an admin user who has the required permission. The owner, by
 default, has the privilege to configure attributes of the entity including the
 sharing and public accessibility. Ownership transfer is a configurable feature.
-
-#### Configurable features
-
-The owner user can share an entity with other individual users or groups with
-read or write permission. The shared entity will also appear in the _shared
-entity_ tab or the _group shared entity_ tab of a user. This feature is
-controlled by the `shareUsers` option in `ad` configuration.
-
-The entity owner can configure an entity to be publicly readable or writable.
-All the public available entities are listed on the _all public forms_ or _all
-public travelers_ pages. This feature is controlled by the `shareGroups` option
-in `ad` configuration.
-
-The owner can update an entity's public accessibility when the `publicAccess`
-option is enabled in `ad` configuration. The default value of accessibility is
-set in the `app` configuration file.

@@ -18,17 +18,3 @@ display information.
 | 4    | bottom row   | text inputs to filter the corresponding table column                |
 | 5    | bottom left  | the numbers of entries out of the total number shown in the view    |
 | 6    | bottom right | pagination controls                                                 |
-
-<p/>
-
-<img src="../images/data-tables.png" alt="the areas of a data table">
-
-Some tables have extra tools that allow a user to copy, export, or print the
-table. The traveler application uses
-[the datatables js library](https://datatables.net/) for the tables in web UI.
-Many pages in the application are still on an old version of the library, and
-the tools are not supported by browsers due to the dependency on the flash
-technology. We are in the process of updating those pages to use the latest
-version of the datatables library.
-
-<img src="../images/data-table-tools.png" alt="data table tools" style="width:25%">
