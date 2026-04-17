@@ -3,7 +3,7 @@ networks:
     external: true
     name: traveler-dev
   private:
-    name: private
+    name: ${COMPOSE_PROJECT_NAME-traveler}-private
 services:
   web:
     build: .
@@ -29,7 +29,8 @@ services:
       - DEBUG=traveler:*
       - DEBUG_COLORS=true
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
   mongo:
     image: 'mongo:3.4'
     environment:
@@ -37,7 +38,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=rootspass
       - MONGO_INITDB_DATABASE=traveler
     command: --smallfiles
-    container_name: 'traveler-mongodb'
     volumes:
       # mapping for the db setup script
       - ../traveler-mongo/seed:/docker-entrypoint-initdb.d
@@ -51,6 +51,12 @@ services:
     # - '27017:27017'
     networks:
       - private
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
   mongo-express:
     image: mongo-express
     restart: unless-stopped
@@ -66,4 +72,5 @@ services:
       - ME_CONFIG_BASICAUTH_USERNAME=traveler
       - ME_CONFIG_BASICAUTH_PASSWORD=travelerpass
     depends_on:
-      - 'mongo'
+      mongo:
+        condition: service_healthy

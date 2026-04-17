@@ -1,5 +1,5 @@
 {
- "server_address": "traveler-mongodb",
+ "server_address": "mongo",
  "server_port": "27017",
  "traveler_db": "traveler",
  "username": "traveler",
