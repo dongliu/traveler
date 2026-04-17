@@ -49,13 +49,7 @@ docker/server.crt
 docker/server.csr
 docker/server.key
 
-# the data dir
-docker/mongo/data/
-!docker/mongo/data/README.md
-
-# the backup die
-docker/mongo/backup/
-!docker/mongo/backup/README.md
+.env
 
 # npm stuff #
 npm-debug.log*

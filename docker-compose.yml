@@ -3,7 +3,7 @@ networks:
     external: true
     name: traveler-dev
   private:
-    name: upton-private
+    name: private
 services:
   web:
     build: .
@@ -14,8 +14,8 @@ services:
       # comment next line to exclude the docker configuration
       # - /app/docker
     ports:
-      - '3101:3001'
-      - '3102:3002'
+      - '${WEB_PORT-3001}:3001'
+      - '${API_PORT-3002}:3002'
       # - "3443:3443"
     networks:
       - private
@@ -40,13 +40,13 @@ services:
     container_name: 'traveler-mongodb'
     volumes:
       # mapping for the db setup script
-      - ./docker/mongo/seed:/docker-entrypoint-initdb.d
+      - ../traveler-mongo/seed:/docker-entrypoint-initdb.d
       # mapping for the db location
-      - ./docker/mongo/data:/data/db
+      - ../${COMPOSE_PROJECT_NAME-traveler}-mongo/data:/data/db
       # backup dir
-      - ./docker/mongo/backup:/backup
+      - ../${COMPOSE_PROJECT_NAME-traveler}-mongo/backup:/backup
       # script dir
-      - ./docker/mongo/script:/script
+      - ../traveler-mongo/script:/script
     # ports:
     # - '27017:27017'
     networks:
@@ -55,7 +55,7 @@ services:
     image: mongo-express
     restart: unless-stopped
     ports:
-      - 8181:8081
+      - ${MONGO_EXPRESS_PORT-8081}:8081
     networks:
       - private
     environment:
