@@ -1,8 +1,11 @@
-version: "3"
+name: traveler-local
+
 networks:
-  default:
+  infra:
     external: true
     name: traveler-dev
+  private:
+    name: ${COMPOSE_PROJECT_NAME-traveler}-private
 services:
   web:
     build: .
@@ -13,12 +16,64 @@ services:
       # comment next line to exclude the docker configuration
       # - /app/docker
     ports:
-      - "3001:3001"
-      - "3002:3002"
+      - '${WEB_PORT-3001}:3001'
+      - '${API_PORT-3002}:3002'
       # - "3443:3443"
+    networks:
+      - private
+      - infra
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     restart: unless-stopped
     command: nodemon app.js
     environment:
       - TRAVELER_CONFIG_REL_PATH=docker
       - DEBUG=traveler:*
       - DEBUG_COLORS=true
+    depends_on:
+      mongo:
+        condition: service_healthy
+  mongo:
+    image: 'mongo:3.4'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=rootspass
+      - MONGO_INITDB_DATABASE=traveler
+    command: --smallfiles
+    # container_name: 'traveler-mongodb'
+    volumes:
+      # mapping for the db setup script
+      - ../traveler-mongo/seed:/docker-entrypoint-initdb.d
+      # mapping for the db location
+      - ../${COMPOSE_PROJECT_NAME-traveler}-mongo/data:/data/db
+      # backup dir
+      - ../${COMPOSE_PROJECT_NAME-traveler}-mongo/backup:/backup
+      # script dir
+      - ../traveler-mongo/script:/script
+    # ports:
+    # - '27017:27017'
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  mongo-express:
+    image: mongo-express
+    restart: unless-stopped
+    ports:
+      - ${MONGO_EXPRESS_PORT-8081}:8081
+    networks:
+      - private
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=rootspass
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
+      - ME_CONFIG_BASICAUTH_USERNAME=traveler
+      - ME_CONFIG_BASICAUTH_PASSWORD=travelerpass
+    depends_on:
+      mongo:
+        condition: service_healthy
