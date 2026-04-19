@@ -1,7 +1,8 @@
 /*
  global prefix, ajax401, updateAjaxURL, disableAjaxCache: false formLinkColumn,
  titleColumn, sDomNoTools, filterEvent, formStatusColumn, tagsColumn, Holder,
- versionColumn, reviewRequestedByColumn, reviewRequestedOnColumn
+ versionColumn, reviewRequestedByColumn, reviewRequestedOnColumn, docNoColumn,
+ ownerColumn
  */
 
 import * as Table from './lib/table.js';
@@ -12,10 +13,11 @@ $(function() {
   disableAjaxCache();
   const reviewFormsAoColumns = [
     formLinkColumn,
-    titleColumn,
+    docNoColumn,
     versionColumn,
-    formStatusColumn,
+    titleColumn,
     tagsColumn,
+    ownerColumn,
     reviewRequestedByColumn,
     reviewRequestedOnColumn,
   ];

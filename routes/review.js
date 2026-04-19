@@ -59,9 +59,10 @@ module.exports = function(app) {
               $ne: true,
             },
           },
-          'title formType status tags _v __review'
+          'title documentNumber createdBy formType status tags _v __review'
         )
           .populate('__review.reviewRequests.requestedBy', 'name')
+          .populate('createdBy', 'name')
           .exec();
         return res.status(200).json(forms);
       } catch (error) {
