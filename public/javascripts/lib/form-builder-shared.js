@@ -2,6 +2,11 @@
 /* eslint-disable no-param-reassign */
 /* global rivets, UID */
 
+export function isNumberSupported($cgr) {
+  const type = $('span.fe-type', $cgr).text();
+  return ['rich'].includes(type);
+}
+
 export function userkey_error($userkey, msg) {
   if (!$userkey.closest('.control-group').hasClass('error')) {
     $userkey
