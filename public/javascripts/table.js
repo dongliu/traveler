@@ -728,6 +728,7 @@ const releasedTemplatedOwnerColumn = {
 const clonedByColumn = personColumn('Cloned by', 'clonedBy');
 
 const updatedOnColumn = longDateColumn('Updated', 'updatedOn');
+const lastEditColumn = longDateColumn('Last Edited', 'updatedOn');
 const updatedOnHideColumn = longDateColumn('Updated', 'updatedOn', false);
 const updatedByColumn = personColumn('Updated by', 'updatedBy');
 
