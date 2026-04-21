@@ -86,7 +86,6 @@ $(function() {
         $('#message').append(
           `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>${jqXHR.responseText}</div>`
         );
-        userTable.fnReloadAjax();
       },
       error(jqXHR) {
         $('#message').append(
