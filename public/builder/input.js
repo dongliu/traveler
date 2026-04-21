@@ -159,7 +159,7 @@
       buf.push(
         '<div class="pull-right control-group-buttons"><div class="btn-group">'
       );
-      if (autoNumbering === false) {
+      if (autoNumbering === false && locals.isSupported === true) {
         buf.push(
           '<a data-toggle="tooltip" title="number" class="btn btn-info"><i class="fa fa-sort-numeric-asc fa-lg"></i></a>'
         );

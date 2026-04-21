@@ -4,6 +4,7 @@
 
 import { add_new_cgr, binding } from './form-builder-shared.js';
 import { checkbox_edit } from './checkbox.js';
+import { isNumberSupported } from './form-builder-shared.js';
 
 export function add_checkbox($checkbox_set_controls) {
   // Add a checkbox spec into the set
@@ -17,7 +18,7 @@ export function checkbox_set_edit($cgr) {
   let help = '';
   // get all input components
   const $checkbox_set = $(input.checkbox_set());
-  const $buttons = $(input.button());
+  const $buttons = $(input.button({isSupported: isNumberSupported($cgr)}));
 
   // get configuration (spec) view components
   const $label = $(spec.label());

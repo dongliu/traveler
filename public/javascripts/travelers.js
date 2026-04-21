@@ -11,7 +11,7 @@ travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false,
 tagsColumn: false, sDomNoTNoR: false*/
 
 /*global archiveFromModal, transferFromModal, modalScroll, docNoColumn,
-travelerVersionColumn, fnSelectAll, fnDeselect, updateStatusFromModal, createdByColumn, updatedOnHideColumn */
+travelerVersionColumn, fnSelectAll, fnDeselect, updateStatusFromModal, createdByColumn, updatedOnHideColumn, lastEditColumn */
 
 import * as AddBinder from './lib/binder.js';
 import * as Modal from './lib/modal.js';
@@ -112,7 +112,7 @@ $(function() {
     deviceColumn,
     ownerColumn,
     statusColumn,
-    updatedOnHideColumn,
+    lastEditColumn,
     travelerProgressColumn,
   ];
   const travelerTableConfig = {

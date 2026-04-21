@@ -49,6 +49,8 @@ docker/server.crt
 docker/server.csr
 docker/server.key
 
+.env
+
 # npm stuff #
 npm-debug.log*
 

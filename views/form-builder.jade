@@ -102,6 +102,18 @@ block underTopBtn
     //- textarea#version-notes(placeholder="Version Notes" style="width: 100%;" rows=3 disabled=status !== 0)= versionNotes
     if (status === 0)
       .btn-group.dropup
+        button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Operations
+          span.caret
+        ul.dropdown-menu
+          //- li#add-grid
+          //-   a Grid
+          li#add-section
+            a Section
+          li#add-rich
+            a Instructions
+          li#add-figure
+            a Figure
+      .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
           span.caret
         ul.dropdown-menu
@@ -123,18 +135,6 @@ block underTopBtn
             a Upload file
           //- li#add-other
             a other types
-      .btn-group.dropup
-        button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Operations
-          span.caret
-        ul.dropdown-menu
-          //- li#add-grid
-          //-   a Grid
-          li#add-figure
-            a Figure
-          li#add-section
-            a Section
-          li#add-rich
-            a Instructions
       .btn-group
         button.btn#adjust Adjust location
       .btn-group

@@ -2,7 +2,7 @@
 global linkTarget, validationMessage, isValid,
 moment, Binder, travelerStatus, finishedInput: writable, ajax401, prefix,
 DiscrepancyFormLoader, traveler, markValidity, markFormValidity, findById,
-livespan, Modernizr, createSideNav, generateHistoryRecordHtml
+livespan, Modernizr, createSideNav, generateHistoryRecordHtml, travelerGlobal
 */
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
@@ -21,6 +21,57 @@ function dateSupport() {
       format: 'yyyy-mm-dd',
     });
   }
+}
+
+function notify() {
+  travelerGlobal.usernames.initialize();
+
+  $('#username').typeahead(
+    {
+      minLength: 1,
+      highlight: true,
+      hint: true,
+    },
+    {
+      name: 'usernames',
+      display: 'displayName',
+      limit: 20,
+      source: travelerGlobal.usernames,
+    }
+  );
+
+  $('#notify').on('click', function(e) {
+    e.preventDefault();
+    const name = $('#username').val();
+    const user = travelerGlobal.usernames.get(name);
+    if (user === null || user.length === 0) {
+      $('#message').append(
+        `<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>Unknown user ${name}.  Please select from the list.</div>`
+      );
+      return;
+    }
+    const mail = user[0].mail;
+    $.ajax({
+      url: './notify',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        mail: mail,
+        name: name,
+      }),
+      success(data, status, jqXHR) {
+        $('#message').append(
+          `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>${jqXHR.responseText}</div>`
+        );
+      },
+      error(jqXHR) {
+        $('#message').append(
+          `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the share list : ${jqXHR.responseText}</div>`
+        );
+      },
+    });
+    $('#username').closest('form').reset();
+  });
 }
 
 function setStatus(s) {
@@ -146,6 +197,8 @@ $(function() {
   createSideNav();
 
   cleanForm();
+
+  notify();
 
   // update every 30 seconds
   // $.livestamp.interval(30 * 1000);

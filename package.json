@@ -9,7 +9,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/dongliu/traveler.git",
-    "release": "4.0.0"
+    "release": "4.0.2"
   },
   "dependencies": {
     "basic-auth": "1.0.0",
@@ -52,8 +52,6 @@
     "chai": "^4.2.0",
     "eslint": "^9.9.0",
     "globals": "^15.9.0",
-    "husky": "^3.1.0",
-    "lint-staged": "^11.2.3",
     "mocha": "^5.2.0",
     "prettier": "^1.19.1",
     "sinon": "^7.2.3",

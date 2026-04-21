@@ -152,6 +152,11 @@ block underTopBtn
         if (locals.traveler.status === 1)
           .btn-group
             button.btn.btn-primary#complete2 Submit for completion
+          .well
+            form.form-inline
+              input#username.input(type='text', placeholder='Last, First', name='name')
+              != ' '
+              button.btn.btn-primary#notify(type='submit', data-toggle='tooltip', title='Email the user about this traveler') Notify
       .span3.sidebar
 
 block js
@@ -169,6 +174,9 @@ block js
   script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler-discrepancy-form-loader.js')
