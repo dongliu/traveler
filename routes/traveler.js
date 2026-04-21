@@ -504,6 +504,33 @@ module.exports = function(app) {
     }
   );
 
+  app.post(
+    '/travelers/:id/notify',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.hasAll('body', ['mail', 'name']),
+    async function(req, res) {
+      const traveler = req[req.params.id];
+      const href = `${req.protocol}://${req.get('host')}/travelers/${
+        traveler._id
+      }/`;
+      const result = await sendNotification({
+        recipients: req.body.mail,
+        subject: `Your input is needed on this traveler ${traveler.title}`,
+        text: `Hi ${req.body.name}, ${res.locals.username} wants to notify you about the traveler ${traveler.title} at ${href}.`,
+        html: `Hi ${req.body.name}, ${res.locals.username} wants to notify you about the traveler <a href="${href}">${traveler.title}</a>`,
+      });
+      if (result) {
+        return res
+          .status(200)
+          .send(`Notification sent to ${req.body.name} successfully`);
+      }
+      return res
+        .status(500)
+        .send(`Error sending notification to ${req.body.name}`);
+    }
+  );
+
   // add a new review request
   app.post(
     '/travelers/:id/review/results',
