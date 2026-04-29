@@ -1,7 +1,7 @@
-extends layout
+extends default-buttons
 
 block head
-  meta(charset='urf-8')
+  meta(charset='utf-8')
   title #{orgName} - traveler - #{traveler._id}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
@@ -9,13 +9,18 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
+block bodyJs
   script(type='text/javascript').
     var traveler = !{JSON.stringify(traveler)};
     var travelerStatus = !{JSON.stringify(traveler.status)};
     var finishedInput = !{JSON.stringify(traveler.finishedInput)};
     var totalInput = !{JSON.stringify(traveler.totalInput)};
     var title = !{JSON.stringify(traveler.title)};
+
+prepend topBtn
+  .btn-group
+
+block underTopBtn
   .container
     #message
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
@@ -147,12 +152,19 @@ block content
         if (locals.traveler.status === 1)
           .btn-group
             button.btn.btn-primary#complete2 Submit for completion
+          .well
+            form.form-inline
+              input#username.input(type='text', placeholder='Last, First', name='name')
+              != ' '
+              button.btn.btn-primary#notify(type='submit', data-toggle='tooltip', title='Email the user about this traveler') Notify
       .span3.sidebar
 
 block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
   script(type='text/javascript', src='#{prefix}/dependencies/lodash.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
   script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
   script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
@@ -162,7 +174,11 @@ block js
   script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
   script(type='text/javascript', src='#{prefix}/javascripts/table.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/util.js')
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
   script(type='text/javascript', src='#{prefix}/javascripts/traveler-discrepancy-form-loader.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/tracking.js')
   script(type='module', src='#{prefix}/javascripts/traveler.js')

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const { addHistory } = require('./history');
 const { addVersion } = require('./history');
+const { attachReview } = require('./review');
 
 /*
 status := 1 // released
@@ -65,6 +66,8 @@ const releasedForm = new Schema({
   ver: String,
   documentNumber: String,
 });
+
+releasedForm.plugin(attachReview);
 
 releasedForm.plugin(addVersion, {
   fieldsToVersion: ['title', 'description', 'base', 'discrepancy'],

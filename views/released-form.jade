@@ -1,4 +1,4 @@
-extends layout
+extends default-buttons
 
 block head
   meta(charset='urf-8')
@@ -9,9 +9,14 @@ block head
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
-block content
+block bodyJs
   script(type='text/javascript').
     var title = !{JSON.stringify(title)};
+
+prepend topBtn
+  .btn-group
+
+block underTopBtn
   .container
     #message
     .row
@@ -21,6 +26,28 @@ block content
         h4 status: #{statusText}
         h4 version:&nbsp;
           span#version #{ver}
+        if (review)
+          //- h4 Reviews
+          #reviews.accordion
+            .accordion-group
+              .accordion-heading
+                a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#review-results") #{review.reviewResults.length} approval(s)
+              #review-results.accordion-body.collapse
+                .accordion-inner
+                  each result in review.reviewResults
+                    accordion(id="#{result._id}")
+                      .accordion-group
+                        .accordion-heading
+                          a.accordion-toggle(data-toggle="collapse" data-parent="#{result._id}" href="\##{result._id}-comment") #{result.reviewerName || result.reviewerId}
+                            | &nbsp;
+                            if (result.result === "1")
+                              | approved
+                            | &nbsp;version #{result.v} on&nbsp;
+                            span.time #{result.submittedOn}
+
+                        .accordion-body.collapse(id="#{result._id}-comment")
+                          .accordion-inner
+                            span #{result.comment}
         .well-large
           if (discrepancy)
             .control-group#discrepancy-legend
@@ -32,6 +59,7 @@ block content
           form.form-horizontal#output
             != base.html
         #validation.well.hide
+
       .span3.sidebar
     //- .btn-group(data-toggle='buttons-radio')
       button.btn.btn-info#show-validation Show validation
@@ -49,8 +77,10 @@ block content
           button.btn.btn-warning#revision(data-toggle='tooltip', title='reversion the template') Start a revision
 
 block js
-  script(type='text/javascript', src='#{prefix}/jquery/jquery-1.9.1.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
   script(type='text/javascript', src='#{prefix}/javascripts/validation.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
   script(type='text/javascript', src='#{prefix}/dependencies/livestamp.js')
@@ -60,4 +90,5 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/global.js')
   script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/form-viewer.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/tracking.js')
   script(type='text/javascript', src='#{prefix}/javascripts/released-form-management.js')

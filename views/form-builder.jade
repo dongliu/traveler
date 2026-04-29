@@ -10,7 +10,7 @@ block head
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
   link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
-  link(rel='stylesheet', href='#{prefix}/jquery/ui-lightness/jquery-ui-1.10.2.custom.css')
+  link(rel='stylesheet', href='#{prefix}/jquery-ui-1.14.2.custom/jquery-ui.theme.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
@@ -102,6 +102,18 @@ block underTopBtn
     //- textarea#version-notes(placeholder="Version Notes" style="width: 100%;" rows=3 disabled=status !== 0)= versionNotes
     if (status === 0)
       .btn-group.dropup
+        button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Operations
+          span.caret
+        ul.dropdown-menu
+          //- li#add-grid
+          //-   a Grid
+          li#add-section
+            a Section
+          li#add-rich
+            a Instructions
+          li#add-figure
+            a Figure
+      .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
           span.caret
         ul.dropdown-menu
@@ -113,7 +125,7 @@ block underTopBtn
             a Radio
           li#add-text
             a Text
-          li#add-figure
+          //- li#add-figure
             a Figure
           //- li#add-par
             a Paragraph
@@ -123,16 +135,6 @@ block underTopBtn
             a Upload file
           //- li#add-other
             a other types
-      .btn-group.dropup
-        button.btn.dropdown-toggle(data-toggle='dropdown')#struct-items Operations
-          span.caret
-        ul.dropdown-menu
-          //- li#add-grid
-          //-   a Grid
-          li#add-section
-            a Section
-          li#add-rich
-            a Instructions
       .btn-group
         button.btn#adjust Adjust location
       .btn-group

@@ -11,6 +11,7 @@ import {
   checkbox_set_edit,
   binding_checkbox_set_events,
 } from './lib/checkbox-set.js';
+import { isNumberSupported } from './lib/form-builder-shared.js';
 
 const mce_content = {
   selector: 'textarea.tinymce',
@@ -90,6 +91,7 @@ function sendRequest(data, cb, option) {
       $('form#output').fadeTo('slow', 1);
     });
 }
+
 
 function archive_prior_released_forms(target) {
   if (!target) {
@@ -185,9 +187,6 @@ function addSectionNumbers() {
 }
 
 function addSectionNumberToRichInstruction(richInstructionParent) {
-  if (autoNumbering === false) {
-    return;
-  }
   let target = richInstructionParent;
   if (richInstructionParent.className !== 'rich-instruction') {
     const tinymceChild = $(richInstructionParent).find('.tinymce')[0];
@@ -419,7 +418,7 @@ function radio_edit($cgr) {
   let help = '';
   // get all input components
   const $radio_group = $(input.radiogroup());
-  const $buttons = $(input.button());
+  const $buttons = $(input.button({isSupported: isNumberSupported($cgr)}));
 
   // get configuration (spec) view components
   const $label = $(spec.label());
@@ -547,7 +546,7 @@ function checkbox_edit($cgr) {
     required = $('input', $cgr).prop('required');
   }
   const $checkbox = $(input.checkbox());
-  const $buttons = $(input.button());
+  const $buttons = $(input.button({isSupported: isNumberSupported($cgr)}));
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $checkbox_text = $(spec.checkbox_text());
@@ -593,7 +592,7 @@ function text_edit($cgr) {
     required = $('.controls input', $cgr).prop('required');
   }
   const $text = $(input.text());
-  const $buttons = $(input.button());
+  const $buttons = $(input.button({isSupported: isNumberSupported($cgr)}));
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $placeholder = $(spec.placeholder());
@@ -640,7 +639,7 @@ function figure_edit($cgr) {
     width = $('img', $cgr).attr('width') || $('img', $cgr).prop('clientWidth');
   }
   const $figure = $(input.figure());
-  const $buttons = $(input.button());
+  const $buttons = $(input.button({isSupported: isNumberSupported($cgr)}));
   const $file = $(spec.imagefile());
   const $alt = $(spec.alt());
   const $figcaption = $(spec.figcaption());
@@ -821,7 +820,7 @@ function other_edit($cgr) {
     required = $('input', $cgr).prop('required');
   }
   const $other = $(input.other());
-  const $buttons = $(input.button());
+  const $buttons = $(input.button({isSupported: isNumberSupported($cgr)}));
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $placeholder = $(spec.placeholder());
@@ -880,7 +879,7 @@ function textarea_edit($cgr) {
   }
 
   const $textarea = $(input.textarea());
-  const $buttons = $(input.button());
+  const $buttons = $(input.button({isSupported: isNumberSupported($cgr)}));
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $placeholder = $(spec.placeholder());
@@ -958,7 +957,7 @@ function number_edit($cgr) {
   }
 
   const $number = $(input.number());
-  const $buttons = $(input.button());
+  const $buttons = $(input.button({isSupported: isNumberSupported($cgr)}));
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $placeholder = $(spec.placeholder());
@@ -1023,7 +1022,7 @@ function file_edit($cgr) {
   }
 
   var $upload = $(input.upload());
-  const $buttons = $(input.button());
+  const $buttons = $(input.button({isSupported: isNumberSupported($cgr)}));
   var $label = $(spec.label());
   var $required = $(spec.required());
   var $userkey = $(spec.userkey());
@@ -1314,16 +1313,16 @@ function binding_events() {
         if ($('.control-group-buttons', $(this)).length) {
           $('.control-group-buttons', $(this)).show();
         } else {
-          $(this).prepend(input.button());
+          $(this).prepend(input.button({isSupported: isNumberSupported($(this))}));
         }
         // if this is a figure, disable the numbering button
-        if ($(this).find('figure').length) {
-          $(this)
-            .find('a.btn[title="number"]')
-            .removeClass('btn-info')
-            .css('color', '#999')
-            .prop('disabled', true);
-        }
+        // if ($(this).find('figure').length) {
+        //   $(this)
+        //     .find('a.btn[title="number"]')
+        //     .removeClass('btn-info')
+        //     .css('color', '#999')
+        //     .prop('disabled', true);
+        // }
       }
     }
   });

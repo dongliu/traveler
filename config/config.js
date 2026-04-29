@@ -90,7 +90,7 @@ module.exports.load = function() {
   var viewConfig = {};
   viewConfig.showDevice = false;
   viewConfig.shareUsers = true;
-  viewConfig.shareGroups = true;
+  viewConfig.shareGroups = false;
   viewConfig.transferOwnership = true;
   viewConfig.linkTarget = '_self';
   viewConfig.showBinderValue = false;
@@ -137,5 +137,6 @@ module.exports.load = function() {
   // default true
   viewConfig.userKey =
     this.app.user_key === undefined ? true : this.app.user_key;
+  viewConfig.NODE_ENV = process.env.NODE_ENV || 'development';
   module.exports.viewConfig = viewConfig;
 };

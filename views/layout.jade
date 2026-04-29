@@ -14,12 +14,13 @@ html
       var shareGroups = !{JSON.stringify(viewConfig.shareGroups)};
       var linkTarget = !{JSON.stringify(viewConfig.linkTarget)} || '_blank';
       var showCCDB = !{JSON.stringify(viewConfig.showCCDB)};
-      var userid = !{JSON.stringify(locals.userid)};
+      var userid = !{JSON.stringify(locals.userid || '')};
       var prefix = !{JSON.stringify(prefix)};
 
-      var isAdmin = !{isAdmin};
-      var isManager = !{isManager};
-      var isReviwer = !{isReviwer};
+      var isAdmin = !{isAdmin || false};
+      var isManager = !{isManager || false};
+      var isReviwer = !{isReviwer || false};
+      var NODE_ENV = !{JSON.stringify(viewConfig.NODE_ENV)};
     block bodyJs
 
     .navbar.navbar-fixed-top
@@ -45,7 +46,7 @@ html
                 li
                   a(href='#{prefix}/forms/') Draft #{viewConfig.terminology.form}s
                 li
-                  a(href='#{prefix}/releasedforms/') Released #{viewConfig.terminology.form}s
+                  a(href='#{prefix}/released-forms/') Released #{viewConfig.terminology.form}s
                 li
                   a(href='#{prefix}/travelers/') Travelers
                 li

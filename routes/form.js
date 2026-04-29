@@ -45,10 +45,6 @@ module.exports = function(app) {
     res.render('forms', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/releasedforms/', auth.ensureAuthenticated, function(req, res) {
-    res.render('released-forms', routesUtilities.getRenderObject(req));
-  });
-
   app.get('/forms/json', auth.ensureAuthenticated, async function(req, res) {
     try {
       const forms = await Form.find(
@@ -293,30 +289,6 @@ module.exports = function(app) {
     }
   );
 
-  app.get('/publicforms/', auth.ensureAuthenticated, function(req, res) {
-    res.render('public-forms', routesUtilities.getRenderObject(req));
-  });
-
-  app.get('/publicforms/json', auth.ensureAuthenticated, async function(
-    req,
-    res
-  ) {
-    try {
-      const forms = await Form.find({
-        publicAccess: {
-          $in: [0, 1],
-        },
-        archived: {
-          $ne: true,
-        },
-      }).exec();
-      return res.status(200).json(forms);
-    } catch (error) {
-      logger.error(error);
-      return res.status(500).send(error.message);
-    }
-  });
-
   app.get('/forms/new', auth.ensureAuthenticated, function(req, res) {
     return res.render('form-new', routesUtilities.getRenderObject(req));
   });
@@ -551,25 +523,6 @@ module.exports = function(app) {
           id: req.params.id,
           title: form.title,
           access: String(form.publicAccess),
-        })
-      );
-    }
-  );
-
-  app.get(
-    '/forms/:id/version-mgmt',
-    auth.ensureAuthenticated,
-    reqUtils.exist('id', Form),
-    reqUtils.canWriteMw('id'),
-    reqUtils.status('id', [0, 0.5, 1, 2]),
-    function(req, res) {
-      const form = req[req.params.id];
-      return res.render(
-        'form-version-mgmt',
-        routesUtilities.getRenderObject(req, {
-          type: 'form',
-          id: req.params.id,
-          title: form.title,
         })
       );
     }

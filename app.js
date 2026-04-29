@@ -190,7 +190,6 @@ require('./routes/review')(app);
 require('./routes/user')(app);
 require('./routes/group')(app);
 require('./routes/profile')(app);
-require('./routes/device')(app);
 require('./routes/ldaplogin')(app);
 require('./routes/doc')(app);
 

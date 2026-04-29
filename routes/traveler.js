@@ -294,30 +294,6 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/publictravelers/', auth.ensureAuthenticated, function(req, res) {
-    res.render('public-travelers', routesUtilities.getRenderObject(req));
-  });
-
-  app.get('/publictravelers/json', auth.ensureAuthenticated, function(
-    req,
-    res
-  ) {
-    Traveler.find({
-      publicAccess: {
-        $in: [0, 1],
-      },
-      archived: {
-        $ne: true,
-      },
-    }).exec(function(err, travelers) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      return res.status(200).json(travelers);
-    });
-  });
-
   app.get('/currenttravelers/json', auth.ensureAuthenticated, function(
     req,
     res
@@ -350,24 +326,6 @@ module.exports = function(app) {
         return res.status(200).json(travelers);
       });
   });
-
-  /*
-    app.get('/currenttravelersinv1/json', auth.ensureAuthenticated, function (req, res) {
-      var fullurl = config.legacy_traveler.travelers;
-      if (req.query.hasOwnProperty('device')) {
-        fullurl = config.legacy_traveler.devices + req.query.device;
-      }
-      request({
-        strictSSL: false,
-        url: fullurl
-      }).pipe(res);
-    });
-
-    app.get('/currenttravelers/', auth.ensureAuthenticated, function (req, res) {
-      return res.render('currenttravelers', {
-        device: req.query.device || null
-      });
-    }); */
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function(
     req,
@@ -543,6 +501,33 @@ module.exports = function(app) {
           'data'
         )
       );
+    }
+  );
+
+  app.post(
+    '/travelers/:id/notify',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.hasAll('body', ['mail', 'name']),
+    async function(req, res) {
+      const traveler = req[req.params.id];
+      const href = `${req.protocol}://${req.get('host')}/travelers/${
+        traveler._id
+      }/`;
+      const result = await sendNotification({
+        recipients: req.body.mail,
+        subject: `Your input is needed on this traveler ${traveler.title}`,
+        text: `Hi ${req.body.name}, ${res.locals.username} wants to notify you about the traveler ${traveler.title} at ${href}.`,
+        html: `Hi ${req.body.name}, ${res.locals.username} wants to notify you about the traveler <a href="${href}">${traveler.title}</a>`,
+      });
+      if (result) {
+        return res
+          .status(200)
+          .send(`Notification sent to ${req.body.name} successfully`);
+      }
+      return res
+        .status(500)
+        .send(`Error sending notification to ${req.body.name}`);
     }
   );
 

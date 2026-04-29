@@ -198,8 +198,15 @@ function addReview(schema) {
   };
 }
 
+function attachReview(schema) {
+  schema.add({
+    __review: review,
+  });
+}
+
 module.exports = {
   review,
   reviewResult,
   addReview,
+  attachReview,
 };
