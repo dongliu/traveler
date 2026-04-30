@@ -37,6 +37,7 @@ require('./model/released-form');
 require('./model/traveler');
 require('./model/binder');
 require('./model/history');
+require('./model/ncr');
 
 // Connect to mongo database
 let mongoAddress = 'mongodb://';
@@ -192,6 +193,7 @@ require('./routes/group')(app);
 require('./routes/profile')(app);
 require('./routes/ldaplogin')(app);
 require('./routes/doc')(app);
+app.use('/api/ncr', require('./routes/ncr'));
 
 app.get('/api', function(req, res) {
   res.render('api', {
