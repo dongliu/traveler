@@ -1,0 +1,180 @@
+extends layout
+
+block head
+  meta(charset='utf-8')
+  title NCR - #{ncr.ncr_number}
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+  style.
+    .event-timeline { border-left: 3px solid #ddd; padding-left: 15px; margin-top: 10px; }
+    .event-entry { margin-bottom: 12px; position: relative; }
+    .event-entry::before { content: ''; width: 10px; height: 10px; background: #999; border-radius: 50%; position: absolute; left: -19px; top: 4px; }
+    .badge-Submitted { background-color: #5bc0de; }
+    .badge-Dispositioned { background-color: #f0ad4e; }
+    .badge-Approved { background-color: #5cb85c; }
+    .badge-Returned { background-color: #d9534f; }
+    .badge-Final { background-color: #428bca; }
+    .badge-Closed { background-color: #777; }
+
+block content
+  .container(style='margin-top: 10px')
+    .row-fluid
+      .span8
+        h3
+          | NCR&nbsp;
+          span.label(class='badge-#{ncr.status.replace(/ /g, "")}')= ncr.status
+          | &nbsp;#{ncr.ncr_number}
+      .span4.text-right
+        if ncr.status === 'Submitted' || ncr.status === 'Dispositioned'
+          a.btn.btn-primary(href='#{prefix}/ncr/#{ncr._id}/disposition') Submit Disposition
+        if ncr.status === 'Dispositioned'
+          a.btn.btn-success(href='#{prefix}/ncr/#{ncr._id}/concurrence') QA Concurrence
+        if ncr.status === 'Approved'
+          a.btn.btn-warning(href='#{prefix}/ncr/#{ncr._id}/approve') Approve / Return
+        if ncr.status === 'Final Approval'
+          a.btn.btn-danger(href='#{prefix}/ncr/#{ncr._id}/close') Close NCR
+
+    .row-fluid
+      .span6
+        fieldset
+          legend Part Information
+          dl.dl-horizontal
+            dt Part Name
+            dd= ncr.part_name
+            dt Part Number
+            dd= ncr.part_number
+            dt Part Revision
+            dd= ncr.part_revision
+            dt Quantity
+            dd= ncr.quantity
+            dt Supplier
+            dd= ncr.supplier_name
+
+      .span6
+        fieldset
+          legend Reference
+          dl.dl-horizontal
+            dt WBS Number
+            dd= ncr.wbs_number
+            dt Spec / Drawing
+            dd= ncr.specification_drawing_reference
+            if ncr.po_reference
+              dt PO Reference
+              dd= ncr.po_reference
+            dt CE/CS
+            dd= ncr.ce_cs_name
+            dt Originator
+            dd= ncr.originator_name
+            dt Created
+            dd= new Date(ncr.creation_timestamp).toLocaleDateString()
+
+    .row-fluid
+      .span12
+        fieldset
+          legend Nonconformance Details
+          dl.dl-horizontal
+            dt Discovery Date
+            dd= new Date(ncr.discovery_date).toLocaleDateString()
+            dt Context
+            dd= ncr.discovery_context.replace(/_/g, ' ')
+            dt Description
+            dd= ncr.description_of_nonconformance
+
+    if ncr.disposition && ncr.disposition.parts_disposition
+      .row-fluid
+        .span12
+          fieldset
+            legend Disposition
+            dl.dl-horizontal
+              dt Parts Disposition
+              dd= ncr.disposition.parts_disposition
+              if ncr.disposition.root_cause_documentation
+                dt Root Cause
+                dd= ncr.disposition.root_cause_documentation
+              if ncr.disposition.rework_repair_instructions
+                dt Rework / Repair Instructions
+                dd= ncr.disposition.rework_repair_instructions
+
+    if ncr.additional_approvers && ncr.additional_approvers.length
+      .row-fluid
+        .span12
+          fieldset
+            legend Approval Status
+            table.table.table-bordered.table-condensed
+              thead
+                tr
+                  th Approver
+                  th Role
+                  th Status
+                  th Timestamp
+                  th Comments
+              tbody
+                each approver in ncr.additional_approvers
+                  tr
+                    td= approver.approver_name
+                    td= approver.approver_role
+                    td
+                      span.label= approver.approval_status
+                    td= approver.approval_timestamp ? new Date(approver.approval_timestamp).toLocaleString() : '—'
+                    td= approver.comments || '—'
+
+    if ncr.preventive_actions && ncr.preventive_actions.length
+      .row-fluid
+        .span12
+          fieldset
+            legend Preventive Actions
+            table.table.table-bordered.table-condensed
+              thead
+                tr
+                  th Description
+                  th Owner
+                  th Target Date
+                  th Status
+              tbody
+                each pa in ncr.preventive_actions
+                  tr
+                    td= pa.action_description
+                    td= pa.owner_name || '—'
+                    td= pa.target_completion_date ? new Date(pa.target_completion_date).toLocaleDateString() : '—'
+                    td
+                      span.label= pa.status
+
+    if ncr.closure_record && ncr.closure_record.closure_date
+      .row-fluid
+        .span12
+          fieldset
+            legend Closure
+            dl.dl-horizontal
+              dt Closed By
+              dd= ncr.closure_record.closed_by_name
+              dt Closure Date
+              dd= new Date(ncr.closure_record.closure_date).toLocaleDateString()
+              if ncr.closure_record.closure_notes
+                dt Notes
+                dd= ncr.closure_record.closure_notes
+
+    .row-fluid
+      .span12
+        fieldset
+          legend Event Timeline
+          .event-timeline
+            each event in ncr.events.slice().reverse()
+              .event-entry
+                span.badge= event.event_type
+                | &nbsp;
+                strong= event.actor_name || 'System'
+                if event.actor_role
+                  |  (#{event.actor_role})
+                | &nbsp;&mdash;&nbsp;
+                = new Date(event.timestamp).toLocaleString()
+                if event.previous_status && event.new_status
+                  .muted
+                    small #{event.previous_status || 'None'} &rarr; #{event.new_status}
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')

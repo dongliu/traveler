@@ -1,0 +1,192 @@
+extends layout
+
+block head
+  meta(charset='utf-8')
+  title NCR - New Nonconformance Report
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  .container(style='margin-top: 10px')
+    h3 New Nonconformance Report
+    #ncr-success.alert.alert-success(style='display:none')
+      strong NCR Created: &nbsp;
+      span#ncr-number-display
+      | &nbsp; has been submitted successfully.
+    #ncr-error.alert.alert-error(style='display:none')
+      strong Error: &nbsp;
+      span#ncr-error-msg
+    form#ncr-create-form.form-horizontal
+      fieldset
+        legend Part Information
+        .control-group
+          label.control-label(for='part_name') Part Name
+            span.text-error *
+          .controls
+            input#part_name(type='text', name='part_name', maxlength='255', required)
+        .control-group
+          label.control-label(for='part_number') Part Number
+            span.text-error *
+          .controls
+            input#part_number(type='text', name='part_number', maxlength='50', required)
+        .control-group
+          label.control-label(for='part_revision') Part Revision
+            span.text-error *
+          .controls
+            input#part_revision(type='text', name='part_revision', maxlength='20', required)
+        .control-group
+          label.control-label(for='quantity') Quantity
+            span.text-error *
+          .controls
+            input#quantity(type='number', name='quantity', min='1', required)
+        .control-group
+          label.control-label(for='supplier_name') Supplier Name
+            span.text-error *
+          .controls
+            input#supplier_name(type='text', name='supplier_name', maxlength='255', required)
+      fieldset
+        legend Reference Information
+        .control-group
+          label.control-label(for='wbs_number') WBS Number
+            span.text-error *
+          .controls
+            input#wbs_number(type='text', name='wbs_number', maxlength='50', required)
+        .control-group
+          label.control-label(for='specification_drawing_reference') Specification / Drawing Ref.
+            span.text-error *
+          .controls
+            input#specification_drawing_reference(type='text', name='specification_drawing_reference', maxlength='255', required)
+        .control-group
+          label.control-label(for='po_reference') PO Reference
+          .controls
+            input#po_reference(type='text', name='po_reference', maxlength='255')
+        .control-group
+          label.control-label(for='ce_cs_name') CE/CS Name
+            span.text-error *
+          .controls
+            input#ce_cs_name(type='text', name='ce_cs_name', maxlength='255', required)
+      fieldset
+        legend Nonconformance Details
+        .control-group
+          label.control-label Discovery Date
+            span.text-error *
+          .controls
+            input#discovery_date(type='date', name='discovery_date', required)
+        .control-group
+          label.control-label Discovery Context
+            span.text-error *
+          .controls
+            label.radio
+              input(type='radio', name='discovery_context', value='incoming_inspection', required)
+              | &nbsp; Incoming Inspection
+            label.radio
+              input(type='radio', name='discovery_context', value='in_house_assembly')
+              | &nbsp; In-House Assembly
+            label.radio
+              input(type='radio', name='discovery_context', value='in_house_inspection')
+              | &nbsp; In-House Inspection
+        .control-group
+          label.control-label(for='description_of_nonconformance') Description of Nonconformance
+            span.text-error *
+          .controls
+            textarea#description_of_nonconformance(name='description_of_nonconformance', rows='5', maxlength='2000', required, placeholder='Minimum 20 characters')
+            span#desc-counter.help-block 0 / 2000
+      fieldset
+        legend Traveler Link (Optional)
+        .control-group
+          label.control-label(for='traveler_id') Traveler ID
+          .controls
+            input#traveler_id(type='text', name='traveler_id', maxlength='50')
+        .control-group
+          label.control-label(for='traveler_step_number') Traveler Step Number
+          .controls
+            input#traveler_step_number(type='number', name='traveler_step_number', min='1')
+      .control-group
+        .controls
+          .btn-group
+            button#submit-btn.btn.btn-primary(type='submit') Submit NCR
+          .btn-group(style='margin-left: 5px')
+            button.btn(type='button', onclick='history.back()') Cancel
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script.
+    $(function () {
+      var maxDate = new Date().toISOString().split('T')[0];
+      $('#discovery_date').attr('max', maxDate);
+
+      $('#description_of_nonconformance').on('input', function () {
+        $('#desc-counter').text($(this).val().length + ' / 2000');
+      });
+
+      $('#ncr-create-form').on('submit', function (e) {
+        e.preventDefault();
+        var errors = [];
+        var desc = $('#description_of_nonconformance').val().trim();
+        if (desc.length < 20) errors.push('Description of Nonconformance must be at least 20 characters.');
+        if (!$('input[name="discovery_context"]:checked').val()) errors.push('Discovery Context is required.');
+
+        if (errors.length) {
+          $('#ncr-error-msg').text(errors.join(' '));
+          $('#ncr-error').show();
+          return;
+        }
+
+        var payload = {
+          part_name: $('#part_name').val().trim(),
+          part_number: $('#part_number').val().trim(),
+          part_revision: $('#part_revision').val().trim(),
+          quantity: parseInt($('#quantity').val(), 10),
+          supplier_name: $('#supplier_name').val().trim(),
+          wbs_number: $('#wbs_number').val().trim(),
+          specification_drawing_reference: $('#specification_drawing_reference').val().trim(),
+          po_reference: $('#po_reference').val().trim() || undefined,
+          ce_cs_name: $('#ce_cs_name').val().trim(),
+          discovery_date: $('#discovery_date').val(),
+          discovery_context: $('input[name="discovery_context"]:checked').val(),
+          description_of_nonconformance: desc,
+        };
+        var travelerId = $('#traveler_id').val().trim();
+        if (travelerId) {
+          payload.traveler_id = travelerId;
+          var stepNum = parseInt($('#traveler_step_number').val(), 10);
+          if (!isNaN(stepNum)) payload.traveler_step_number = stepNum;
+        }
+
+        $('#submit-btn').prop('disabled', true).text('Submitting...');
+        $('#ncr-error').hide();
+
+        $.ajax({
+          url: prefix + '/api/ncr',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function (data) {
+            if (data.success) {
+              $('#ncr-number-display').text(data.ncr.ncr_number);
+              $('#ncr-success').show();
+              $('#ncr-create-form').hide();
+            }
+          },
+          error: function (xhr) {
+            var resp = xhr.responseJSON || {};
+            var msg = resp.error || 'Submission failed. Please try again.';
+            if (resp.details) {
+              var fields = Object.keys(resp.details).map(function (k) {
+                return k + ': ' + resp.details[k].join(', ');
+              });
+              msg += ' — ' + fields.join('; ');
+            }
+            $('#ncr-error-msg').text(msg);
+            $('#ncr-error').show();
+            $('#submit-btn').prop('disabled', false).text('Submit NCR');
+          },
+        });
+      });
+    });

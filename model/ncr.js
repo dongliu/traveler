@@ -5,7 +5,7 @@ const ObjectId = Schema.Types.ObjectId;
 
 const PreventiveActionSchema = new Schema({
   action_description: String,
-  owner_id: ObjectId,
+  owner_id: String,
   owner_name: String,
   owner_email: String,
   target_completion_date: Date,
@@ -19,7 +19,7 @@ const PreventiveActionSchema = new Schema({
     {
       previous_status: String,
       new_status: String,
-      changed_by: ObjectId,
+      changed_by: String,
       changed_timestamp: Date,
     },
   ],
@@ -54,7 +54,7 @@ const NCR_EVENT_TYPES = [
 const NcrEventSchema = new Schema({
   event_type: { type: String, enum: NCR_EVENT_TYPES },
   actor_type: { type: String, enum: ['user', 'system'] },
-  actor_id: ObjectId,
+  actor_id: String,
   actor_name: String,
   actor_role: String,
   timestamp: { type: Date, required: true },
@@ -63,7 +63,7 @@ const NcrEventSchema = new Schema({
   payload: Schema.Types.Mixed,
   recipients: [
     {
-      recipient_id: ObjectId,
+      recipient_id: String,
       recipient_name: String,
       recipient_role: String,
       recipient_role_snapshot: String,
@@ -86,7 +86,7 @@ const NCR_STATUSES = [
 
 const NcrSchema = new Schema({
   ncr_number: String,
-  originator_id: ObjectId,
+  originator_id: String,
   originator_name: String,
   creation_timestamp: Date,
   discovery_date: Date,
@@ -116,8 +116,8 @@ const NcrSchema = new Schema({
   },
 
   ce_cs_name: String,
-  ce_cs_id: ObjectId,
-  ce_cs_delegate_id: ObjectId,
+  ce_cs_id: String,
+  ce_cs_delegate_id: String,
 
   disposition: {
     parts_disposition: {
@@ -126,19 +126,19 @@ const NcrSchema = new Schema({
     },
     root_cause_documentation: String,
     rework_repair_instructions: String,
-    ce_cs_identity: ObjectId,
+    ce_cs_identity: String,
     ce_cs_timestamp: Date,
   },
 
   preventive_actions: [PreventiveActionSchema],
 
-  qa_staff_identity: ObjectId,
+  qa_staff_identity: String,
   qa_staff_name: String,
   qa_concurrence_timestamp: Date,
 
   additional_approvers: [
     {
-      approver_id: ObjectId,
+      approver_id: String,
       approver_name: String,
       approver_role: String,
       designated_timestamp: Date,
@@ -152,7 +152,7 @@ const NcrSchema = new Schema({
   ],
 
   closure_record: {
-    closed_by: ObjectId,
+    closed_by: String,
     closed_by_name: String,
     closure_date: Date,
     closure_notes: String,
