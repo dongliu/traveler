@@ -90,6 +90,11 @@ block content
             dl.dl-horizontal
               dt Parts Disposition
               dd= ncr.disposition.parts_disposition
+              dt Submitted By
+              dd= ncr.ce_cs_name
+              if ncr.disposition.ce_cs_timestamp
+                dt Submitted On
+                dd= new Date(ncr.disposition.ce_cs_timestamp).toLocaleString()
               if ncr.disposition.root_cause_documentation
                 dt Root Cause
                 dd= ncr.disposition.root_cause_documentation

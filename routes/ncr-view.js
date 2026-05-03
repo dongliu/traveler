@@ -8,6 +8,19 @@ module.exports = function(app) {
     res.render('ncr-create', routesUtilities.getRenderObject(req));
   });
 
+  app.get('/ncr/:id/disposition', auth.ensureAuthenticated, async function(req, res) {
+    try {
+      const ncr = await Ncr.findById(req.params.id).lean();
+      if (!ncr) return res.status(404).send('NCR not found');
+      if (ncr.status !== 'Submitted') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncr/${req.params.id}`);
+      const renderObj = routesUtilities.getRenderObject(req, { ncr });
+      return res.render('ncr-disposition', renderObj);
+    } catch (err) {
+      logger.error('NCR disposition view failed:', err);
+      return res.status(500).send('Error loading NCR');
+    }
+  });
+
   app.get('/ncr/:id', auth.ensureAuthenticated, async function(req, res) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();

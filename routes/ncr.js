@@ -1,6 +1,6 @@
 const express = require('express');
 const auth = require('../lib/auth');
-const { createNcr } = require('../lib/ncr-service');
+const { createNcr, submitDisposition } = require('../lib/ncr-service');
 const logger = require('../lib/loggers').getLogger();
 
 const router = express.Router();
@@ -79,7 +79,49 @@ router.get('/:id', auth.ensureAuthenticated, notImplemented);
 
 router.get('/:id/events', auth.ensureAuthenticated, notImplemented);
 
-router.patch('/:id/disposition', auth.ensureAuthenticated, notImplemented);
+router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
+  const errors = {};
+  const b = req.body;
+  const PARTS_DISPOSITIONS = ['Rework', 'Repair', 'Return to Vendor', 'Scrap', 'Use-As-Is'];
+
+  if (!b.parts_disposition || !PARTS_DISPOSITIONS.includes(b.parts_disposition))
+    errors.parts_disposition = [`Must be one of: ${PARTS_DISPOSITIONS.join(', ')}`];
+  if (!b.root_cause_documentation || String(b.root_cause_documentation).trim().length < 50)
+    errors.root_cause_documentation = ['Must be at least 50 characters long'];
+  if (!Array.isArray(b.preventive_actions) || b.preventive_actions.length < 1)
+    errors.preventive_actions = ['Requires at least 1 action'];
+  else if (b.preventive_actions.some(a => !a || String(a).trim().length < 50))
+    errors.preventive_actions = ['Each action must be at least 50 characters long'];
+  if (['Rework', 'Repair'].includes(b.parts_disposition)) {
+    if (!b.rework_repair_instructions || String(b.rework_repair_instructions).trim().length < 50)
+      errors.rework_repair_instructions = ["Required when parts_disposition is 'Rework' or 'Repair'"];
+  }
+
+  if (Object.keys(errors).length > 0)
+    return res.status(400).json({ success: false, error: 'Validation Error', details: errors });
+
+  try {
+    const user = { id: req.session.userid, name: res.locals.username };
+    const ncr = await submitDisposition(req.params.id, b, user);
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        disposition: ncr.disposition,
+        previous_status: 'Submitted',
+      },
+      message: 'Disposition submitted successfully. QA Staff notified for concurrence review.',
+    });
+  } catch (err) {
+    if (err.status === 404) return res.status(404).json({ success: false, error: 'Not Found', message: err.message });
+    if (err.status === 403) return res.status(403).json({ success: false, error: 'Forbidden', message: err.message });
+    if (err.status === 409) return res.status(409).json({ success: false, error: 'Conflict', message: err.message });
+    logger.error('Disposition submission failed:', err);
+    return res.status(500).json({ success: false, error: 'Internal Server Error', message: err.message });
+  }
+});
 
 router.patch('/:id/concurrence', auth.ensureAuthenticated, notImplemented);
 
