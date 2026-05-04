@@ -8,6 +8,8 @@ const {
   returnForComment,
   qaResubmit,
   closeNcr,
+  listNcrs,
+  getNcrById,
 } = require('../lib/ncr-service');
 const logger = require('../lib/loggers').getLogger();
 
@@ -81,9 +83,46 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
   }
 });
 
-router.get('/', auth.ensureAuthenticated, notImplemented);
+router.get('/', auth.ensureAuthenticated, async (req, res) => {
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const filters = {
+      status: req.query.status,
+      part_number: req.query.part_number,
+      supplier_name: req.query.supplier_name,
+      from_date: req.query.from_date,
+      to_date: req.query.to_date,
+      parts_disposition: req.query.parts_disposition,
+      root_cause: req.query.root_cause,
+      includeClosed: req.query.includeClosed === 'true' || req.query.includeClosed === true,
+      page: req.query.page,
+      limit: req.query.limit,
+    };
+    const result = await listNcrs(filters, user);
+    return res.status(200).json({ success: true, ...result });
+  } catch (err) {
+    logger.error('NCR list failed:', err);
+    return res.status(500).json({ success: false, error: 'Internal Server Error', message: err.message });
+  }
+});
 
-router.get('/:id', auth.ensureAuthenticated, notImplemented);
+router.get('/:id', auth.ensureAuthenticated, async (req, res) => {
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const ncr = await getNcrById(req.params.id, user);
+    return res.status(200).json({ success: true, ncr });
+  } catch (err) {
+    return mapServiceError(err, res, 'NCR fetch');
+  }
+});
 
 router.get('/:id/events', auth.ensureAuthenticated, notImplemented);
 

@@ -1,0 +1,222 @@
+extends layout
+
+block head
+  meta(charset='utf-8')
+  title NCR Dashboard
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/jquery.dataTables.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+  style.
+    .status-card { display:inline-block; min-width:130px; margin:4px 6px 4px 0; padding:8px 12px; border-radius:4px; cursor:pointer; color:#fff; }
+    .status-card.active { box-shadow:0 0 0 2px #333 inset; }
+    .status-card .count { font-size:1.6em; font-weight:bold; display:block; }
+    .escalation { color:#b94a48; font-weight:bold; }
+    .row-escalated { background-color:#fde9e8; }
+    .filter-bar { padding:10px; background:#f5f5f5; border-radius:4px; margin-bottom:10px; }
+    .filter-bar label { display:block; font-size:0.9em; }
+
+block content
+  .container-fluid(style='margin-top: 10px')
+    h3
+      | NCR Dashboard
+      a.btn.btn-primary.pull-right(href='#{prefix}/ncr/new')
+        i.fa.fa-plus
+        | &nbsp; New NCR
+
+    #status-summary
+      span.status-card(data-status='', style='background:#666') All&nbsp;
+        span.count.count-all 0
+      span.status-card(data-status='Submitted', style='background:#5bc0de') Submitted&nbsp;
+        span.count.count-Submitted 0
+      span.status-card(data-status='Dispositioned', style='background:#f0ad4e') Dispositioned&nbsp;
+        span.count.count-Dispositioned 0
+      span.status-card(data-status='Approved', style='background:#5cb85c') Approved&nbsp;
+        span.count.count-Approved 0
+      span.status-card(data-status='Returned for Comment', style='background:#d9534f') Returned&nbsp;
+        span.count.count-Returned 0
+      span.status-card(data-status='Final Approval', style='background:#428bca') Final Approval&nbsp;
+        span.count.count-Final 0
+      span.status-card(data-status='Closed', style='background:#777') Closed&nbsp;
+        span.count.count-Closed 0
+
+    .filter-bar
+      .row-fluid
+        .span2
+          label Part Number
+          input#f-part(type='text')
+        .span2
+          label Supplier
+          input#f-supplier(type='text')
+        .span2
+          label Disposition
+          select#f-disposition
+            option(value='') Any
+            option Rework
+            option Repair
+            option Return to Vendor
+            option Scrap
+            option Use-As-Is
+        .span2
+          label Discovery From
+          input#f-from(type='date')
+        .span2
+          label Discovery To
+          input#f-to(type='date')
+        .span2
+          label Root Cause Keyword
+          input#f-rootcause(type='text', placeholder='regex/keyword')
+      .row-fluid(style='margin-top: 6px')
+        .span6
+          label.checkbox.inline
+            input#f-includeClosed(type='checkbox')
+            | &nbsp; Include Closed
+        .span6.text-right
+          button#apply-filters.btn.btn-primary
+            i.fa.fa-search
+            | &nbsp; Apply
+          button#clear-filters.btn(style='margin-left:5px') Clear
+
+    table#ncr-table.table.table-bordered.table-condensed.table-striped(style='width:100%')
+      thead
+        tr
+          th NCR #
+          th Part #
+          th Part Name
+          th Supplier
+          th Status
+          th Days
+          th CE/CS
+          th Originator
+          th
+      tbody#ncr-tbody
+
+    .row-fluid
+      .span6
+        span#range-info
+      .span6.text-right
+        .btn-group
+          button#prev-page.btn(disabled)
+            i.fa.fa-chevron-left
+            | &nbsp; Prev
+          button#next-page.btn Next&nbsp;
+            i.fa.fa-chevron-right
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script.
+    $(function () {
+      var state = { page: 1, limit: 25, status: '' };
+
+      function buildQuery(includeStatus) {
+        var p = $.param({
+          page: state.page,
+          limit: state.limit,
+          status: includeStatus ? state.status : '',
+          part_number: $('#f-part').val().trim(),
+          supplier_name: $('#f-supplier').val().trim(),
+          parts_disposition: $('#f-disposition').val(),
+          from_date: $('#f-from').val(),
+          to_date: $('#f-to').val(),
+          root_cause: $('#f-rootcause').val().trim(),
+          includeClosed: $('#f-includeClosed').is(':checked'),
+        });
+        return p;
+      }
+
+      function escapeHtml(s) {
+        return $('<div></div>').text(s == null ? '' : s).html();
+      }
+
+      function statusBadge(s) {
+        var bg = { 'Submitted':'#5bc0de','Dispositioned':'#f0ad4e','Approved':'#5cb85c','Returned for Comment':'#d9534f','Final Approval':'#428bca','Closed':'#777' }[s] || '#999';
+        return '<span class="label" style="background:' + bg + '">' + escapeHtml(s) + '</span>';
+      }
+
+      function renderRows(ncrs) {
+        var $tbody = $('#ncr-tbody').empty();
+        if (!ncrs.length) {
+          $tbody.append('<tr><td colspan="9" class="muted text-center">No NCRs found.</td></tr>');
+          return;
+        }
+        ncrs.forEach(function (n) {
+          var escalated = (n.days_elapsed != null && n.days_elapsed >= 30 && n.status !== 'Closed');
+          var $tr = $('<tr></tr>');
+          if (escalated) $tr.addClass('row-escalated');
+          $tr.append('<td><a href="' + prefix + '/ncr/' + n._id + '">' + escapeHtml(n.ncr_number || n._id) + '</a></td>');
+          $tr.append('<td>' + escapeHtml(n.part_number) + '</td>');
+          $tr.append('<td>' + escapeHtml(n.part_name) + '</td>');
+          $tr.append('<td>' + escapeHtml(n.supplier_name) + '</td>');
+          $tr.append('<td>' + statusBadge(n.status) + '</td>');
+          var daysCell = (n.days_elapsed == null) ? '—' : n.days_elapsed;
+          if (escalated) daysCell += ' <span class="escalation">Escalation Needed</span>';
+          $tr.append('<td>' + daysCell + '</td>');
+          $tr.append('<td>' + escapeHtml(n.ce_cs_name) + '</td>');
+          $tr.append('<td>' + escapeHtml(n.originator_name) + '</td>');
+          $tr.append('<td><a class="btn btn-mini" href="' + prefix + '/ncr/' + n._id + '">View</a></td>');
+          $tbody.append($tr);
+        });
+      }
+
+      function load() {
+        $.getJSON(prefix + '/api/ncr?' + buildQuery(true), function (data) {
+          renderRows(data.ncrs || []);
+          var start = (data.page - 1) * data.limit + 1;
+          var end = Math.min(data.total, data.page * data.limit);
+          $('#range-info').text(data.total === 0 ? '0 NCRs' : start + '–' + end + ' of ' + data.total);
+          $('#prev-page').prop('disabled', data.page <= 1);
+          $('#next-page').prop('disabled', data.page * data.limit >= data.total);
+        });
+      }
+
+      function loadCounts() {
+        var q = $.param({
+          part_number: $('#f-part').val().trim(),
+          supplier_name: $('#f-supplier').val().trim(),
+          parts_disposition: $('#f-disposition').val(),
+          from_date: $('#f-from').val(),
+          to_date: $('#f-to').val(),
+          root_cause: $('#f-rootcause').val().trim(),
+          includeClosed: true,
+          limit: 1000,
+        });
+        $.getJSON(prefix + '/api/ncr?' + q, function (data) {
+          var counts = { 'Submitted':0,'Dispositioned':0,'Approved':0,'Returned for Comment':0,'Final Approval':0,'Closed':0 };
+          (data.ncrs || []).forEach(function (n) { if (counts.hasOwnProperty(n.status)) counts[n.status]++; });
+          $('.count-all').text(data.total || 0);
+          $('.count-Submitted').text(counts['Submitted']);
+          $('.count-Dispositioned').text(counts['Dispositioned']);
+          $('.count-Approved').text(counts['Approved']);
+          $('.count-Returned').text(counts['Returned for Comment']);
+          $('.count-Final').text(counts['Final Approval']);
+          $('.count-Closed').text(counts['Closed']);
+        });
+      }
+
+      $('.status-card').on('click', function () {
+        $('.status-card').removeClass('active');
+        $(this).addClass('active');
+        state.status = $(this).data('status');
+        state.page = 1;
+        load();
+      });
+      $('#apply-filters').on('click', function () { state.page = 1; load(); loadCounts(); });
+      $('#clear-filters').on('click', function () {
+        $('#f-part,#f-supplier,#f-rootcause,#f-from,#f-to').val('');
+        $('#f-disposition').val('');
+        $('#f-includeClosed').prop('checked', false);
+        state.page = 1; state.status = '';
+        $('.status-card').removeClass('active');
+        load(); loadCounts();
+      });
+      $('#prev-page').on('click', function () { if (state.page > 1) { state.page--; load(); } });
+      $('#next-page').on('click', function () { state.page++; load(); });
+
+      load();
+      loadCounts();
+    });

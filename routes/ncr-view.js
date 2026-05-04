@@ -4,6 +4,10 @@ const routesUtilities = require('../utilities/routes');
 const logger = require('../lib/loggers').getLogger();
 
 module.exports = function(app) {
+  app.get('/ncr', auth.ensureAuthenticated, function(req, res) {
+    res.render('ncr-dashboard', routesUtilities.getRenderObject(req));
+  });
+
   app.get('/ncr/new', auth.ensureAuthenticated, function(req, res) {
     res.render('ncr-create', routesUtilities.getRenderObject(req));
   });
