@@ -158,6 +158,9 @@ const NcrSchema = new Schema({
     closure_notes: String,
     closure_timestamp: Date,
     distribution_notification_timestamp: Date,
+    disposition_execution_verified: Boolean,
+    preventive_actions_verified: Boolean,
+    traveler_signed_off: Boolean,
   },
 
   attachments: [

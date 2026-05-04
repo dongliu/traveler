@@ -1,0 +1,152 @@
+extends layout
+
+block head
+  meta(charset='utf-8')
+  title NCR #{ncr.ncr_number} — Close NCR
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  - var isTraveler = ncr.traveler_link && ncr.traveler_link.initiated_from_traveler === true
+
+  .container(style='margin-top: 10px')
+    h3 Close NCR
+    h4
+      | NCR&nbsp;
+      strong= ncr.ncr_number
+      |  &mdash; #{ncr.part_name} (#{ncr.part_number})
+      | &nbsp;
+      span.label.label-info= ncr.status
+
+    fieldset
+      legend Approved Disposition
+      dl.dl-horizontal
+        dt Parts Disposition
+        dd= ncr.disposition && ncr.disposition.parts_disposition
+        if ncr.disposition && ncr.disposition.root_cause_documentation
+          dt Root Cause
+          dd= ncr.disposition.root_cause_documentation
+        if ncr.disposition && ncr.disposition.rework_repair_instructions
+          dt Rework / Repair Instructions
+          dd= ncr.disposition.rework_repair_instructions
+
+    if ncr.preventive_actions && ncr.preventive_actions.length
+      fieldset
+        legend Preventive Actions
+        ol
+          each pa in ncr.preventive_actions
+            li
+              = pa.action_description
+              | &nbsp;
+              span.label= pa.status
+
+    #close-success.alert.alert-success(style='display:none')
+      strong NCR closed.&nbsp;
+      | Final distribution sent to all stakeholders.
+      |  &nbsp;
+      a(id='close-detail-link', href='#') View NCR
+    #close-error.alert.alert-error(style='display:none')
+      strong Error:&nbsp;
+      span#close-error-msg
+
+    form#close-form.form-horizontal
+      fieldset
+        legend Closure
+        .control-group
+          label.control-label(for='closure_notes') Closure Notes
+            span.text-error *
+          .controls
+            textarea#closure_notes(name='closure_notes', rows='5', maxlength='2000', required, placeholder='Minimum 20 characters — describe disposition execution and verification')
+            span#cn-counter.help-block 0 / 2000
+        .control-group
+          .controls
+            label.checkbox
+              input#disposition_execution_verified(type='checkbox')
+              | I have verified the disposition has been executed
+            label.checkbox
+              input#preventive_actions_verified(type='checkbox')
+              | I have verified the preventive actions have been completed
+
+      if isTraveler
+        fieldset
+          legend Traveler Sign-Off
+          p.help-block.
+            This NCR was initiated from a Traveler. Electronic confirmation
+            of traveler sign-off is required before closure.
+          .control-group
+            .controls
+              label.checkbox
+                input#traveler_signed_off(type='checkbox', required)
+                | I confirm the associated Traveler step has been signed off
+
+      .control-group
+        .controls
+          .btn-group
+            button#close-btn.btn.btn-danger(type='submit') Close NCR
+          .btn-group(style='margin-left: 5px')
+            a.btn(href='#{prefix}/ncr/#{ncr._id}') Cancel
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script.
+    $(function () {
+      var ncrId = '#{ncr._id}';
+      var isTraveler = #{JSON.stringify(!!(ncr.traveler_link && ncr.traveler_link.initiated_from_traveler))};
+
+      $('#closure_notes').on('input', function () {
+        $('#cn-counter').text($(this).val().length + ' / 2000');
+      });
+
+      $('#close-form').on('submit', function (e) {
+        e.preventDefault();
+        var notes = $('#closure_notes').val().trim();
+        var errors = [];
+        if (notes.length < 20) errors.push('Closure notes must be at least 20 characters.');
+        if (isTraveler && !$('#traveler_signed_off').is(':checked'))
+          errors.push('Traveler sign-off confirmation is required.');
+
+        if (errors.length) {
+          $('#close-error-msg').text(errors.join(' '));
+          $('#close-error').show();
+          return;
+        }
+        $('#close-error').hide();
+
+        var payload = {
+          closure_notes: notes,
+          disposition_execution_verified: $('#disposition_execution_verified').is(':checked'),
+          preventive_actions_verified: $('#preventive_actions_verified').is(':checked'),
+        };
+        if (isTraveler) payload.traveler_signed_off = true;
+
+        $('#close-btn').prop('disabled', true).text('Closing...');
+        $.ajax({
+          url: prefix + '/api/ncr/' + ncrId + '/close',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function () {
+            $('#close-detail-link').attr('href', prefix + '/ncr/' + ncrId);
+            $('#close-success').show();
+            $('#close-form').hide();
+          },
+          error: function (xhr) {
+            var resp = xhr.responseJSON || {};
+            var msg = resp.message || resp.error || 'Closure failed.';
+            if (resp.details) {
+              msg += ' — ' + Object.keys(resp.details).map(function (k) {
+                return resp.details[k].join(', ');
+              }).join('; ');
+            }
+            $('#close-error-msg').text(msg);
+            $('#close-error').show();
+            $('#close-btn').prop('disabled', false).text('Close NCR');
+          },
+        });
+      });
+    });

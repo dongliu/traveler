@@ -7,6 +7,7 @@ const {
   submitApproval,
   returnForComment,
   qaResubmit,
+  closeNcr,
 } = require('../lib/ncr-service');
 const logger = require('../lib/loggers').getLogger();
 
@@ -244,7 +245,36 @@ router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
   }
 });
 
-router.patch('/:id/close', auth.ensureAuthenticated, notImplemented);
+router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
+  const b = req.body;
+  const errors = {};
+  if (!b.closure_notes || String(b.closure_notes).trim().length < 20)
+    errors.closure_notes = ['Required and must be at least 20 characters'];
+
+  if (Object.keys(errors).length > 0)
+    return res.status(400).json({ success: false, error: 'Validation Error', details: errors });
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const ncr = await closeNcr(req.params.id, b, user);
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        closure_record: ncr.closure_record,
+      },
+      message: 'NCR closed successfully. Final distribution sent to all stakeholders.',
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Closure');
+  }
+});
 
 router.patch(
   '/:id/preventive-actions/:pa_id/owner',

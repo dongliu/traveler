@@ -33,6 +33,19 @@ module.exports = function(app) {
     }
   });
 
+  app.get('/ncr/:id/close', auth.ensureAuthenticated, async function(req, res) {
+    try {
+      const ncr = await Ncr.findById(req.params.id).lean();
+      if (!ncr) return res.status(404).send('NCR not found');
+      if (ncr.status !== 'Final Approval') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncr/${req.params.id}`);
+      const renderObj = routesUtilities.getRenderObject(req, { ncr });
+      return res.render('ncr-close', renderObj);
+    } catch (err) {
+      logger.error('NCR close view failed:', err);
+      return res.status(500).send('Error loading NCR');
+    }
+  });
+
   app.get('/ncr/:id/disposition', auth.ensureAuthenticated, async function(req, res) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();
