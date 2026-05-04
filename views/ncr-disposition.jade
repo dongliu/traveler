@@ -1,0 +1,219 @@
+extends layout
+
+block head
+  meta(charset='utf-8')
+  title NCR #{ncr.ncr_number} — Submit Disposition
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  .container(style='margin-top: 10px')
+    h3 Submit Engineering Disposition
+    h4
+      | NCR&nbsp;
+      strong= ncr.ncr_number
+      |  &mdash; #{ncr.part_name} (#{ncr.part_number})
+
+    .well
+      dl.dl-horizontal
+        dt Supplier
+        dd= ncr.supplier_name
+        dt WBS
+        dd= ncr.wbs_number
+        dt Discovery Date
+        dd= new Date(ncr.discovery_date).toLocaleDateString()
+        dt Context
+        dd= ncr.discovery_context.replace(/_/g, ' ')
+        dt Description of Nonconformance
+        dd= ncr.description_of_nonconformance
+
+    #disp-success.alert.alert-success(style='display:none')
+      strong Disposition submitted.&nbsp;
+      | QA Staff have been notified for concurrence review.
+      |  &nbsp;
+      a(id='disp-detail-link', href='#') View NCR
+    #disp-error.alert.alert-error(style='display:none')
+      strong Error:&nbsp;
+      span#disp-error-msg
+
+    form#disp-form.form-horizontal
+      fieldset
+        legend Parts Disposition
+        .control-group
+          label.control-label Parts Disposition
+            span.text-error *
+          .controls
+            each opt in ['Rework', 'Repair', 'Return to Vendor', 'Scrap', 'Use-As-Is']
+              label.radio
+                input(type='radio', name='parts_disposition', value=opt, required)
+                | &nbsp; #{opt}
+
+        #rework-repair-field.control-group(style='display:none')
+          label.control-label(for='rework_repair_instructions') Rework / Repair Instructions
+            span.text-error *
+          .controls
+            textarea#rework_repair_instructions(name='rework_repair_instructions', rows='5', maxlength='5000', placeholder='Minimum 50 characters — detailed step-by-step instructions')
+            span#rri-counter.help-block 0 / 5000
+
+      fieldset
+        legend Root Cause Analysis
+        .control-group
+          label.control-label(for='root_cause_documentation') Root Cause Documentation
+            span.text-error *
+          .controls
+            textarea#root_cause_documentation(name='root_cause_documentation', rows='6', maxlength='5000', required, placeholder='Minimum 50 characters — use 5-Why or similar methodology')
+            span#rc-counter.help-block 0 / 5000
+
+      fieldset
+        legend Preventive Actions
+        p.help-block Each action must be at least 50 characters and describe a measurable corrective step.
+        #pa-list
+          .pa-entry.control-group
+            label.control-label Action 1
+              span.text-error *
+            .controls
+              textarea.pa-textarea(rows='3', maxlength='1000', placeholder='Minimum 50 characters')
+              span.pa-counter.help-block 0 / 1000
+        .control-group
+          .controls
+            button#add-pa.btn.btn-sm(type='button')
+              i.fa.fa-plus
+              | &nbsp; Add Another Action
+
+      .control-group
+        .controls
+          .btn-group
+            button#submit-btn.btn.btn-primary(type='submit') Submit Disposition
+          .btn-group(style='margin-left: 5px')
+            a.btn(href='#{prefix}/ncr/#{ncr._id}') Cancel
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script.
+    $(function () {
+      var ncrId = '#{ncr._id}';
+
+      function updateCounter(textarea, counter) {
+        $(counter).text($(textarea).val().length + ' / ' + $(textarea).attr('maxlength'));
+      }
+
+      $('#root_cause_documentation').on('input', function () {
+        updateCounter(this, '#rc-counter');
+      });
+      $('#rework_repair_instructions').on('input', function () {
+        updateCounter(this, '#rri-counter');
+      });
+
+      $(document).on('input', '.pa-textarea', function () {
+        updateCounter(this, $(this).siblings('.pa-counter'));
+      });
+
+      $('input[name="parts_disposition"]').on('change', function () {
+        var val = $(this).val();
+        if (val === 'Rework' || val === 'Repair') {
+          $('#rework-repair-field').show();
+          $('#rework_repair_instructions').prop('required', true);
+        } else {
+          $('#rework-repair-field').hide();
+          $('#rework_repair_instructions').prop('required', false).val('');
+          $('#rri-counter').text('0 / 5000');
+        }
+      });
+
+      var paCount = 1;
+      $('#add-pa').on('click', function () {
+        paCount++;
+        var entry = $('<div class="pa-entry control-group">' +
+          '<label class="control-label">Action ' + paCount + ' <span class="text-error">*</span></label>' +
+          '<div class="controls">' +
+          '<textarea class="pa-textarea" rows="3" maxlength="1000" placeholder="Minimum 50 characters"></textarea>' +
+          '<span class="pa-counter help-block">0 / 1000</span>' +
+          '<button type="button" class="btn btn-sm btn-danger remove-pa" style="margin-top:4px">' +
+          '<i class="fa fa-minus"></i> Remove</button>' +
+          '</div></div>');
+        $('#pa-list').append(entry);
+      });
+
+      $(document).on('click', '.remove-pa', function () {
+        $(this).closest('.pa-entry').remove();
+        $('#pa-list .pa-entry').each(function (i) {
+          $(this).find('label').first().html('Action ' + (i + 1) + ' <span class="text-error">*</span>');
+        });
+        paCount = $('#pa-list .pa-entry').length;
+      });
+
+      $('#disp-form').on('submit', function (e) {
+        e.preventDefault();
+        var errors = [];
+
+        var pd = $('input[name="parts_disposition"]:checked').val();
+        if (!pd) errors.push('Parts Disposition is required.');
+
+        var rc = $('#root_cause_documentation').val().trim();
+        if (rc.length < 50) errors.push('Root Cause Documentation must be at least 50 characters.');
+
+        var pas = [];
+        var paValid = true;
+        $('.pa-textarea').each(function () {
+          var v = $(this).val().trim();
+          if (v.length < 50) paValid = false;
+          pas.push(v);
+        });
+        if (!paValid || pas.length === 0) errors.push('Each Preventive Action must be at least 50 characters.');
+
+        var rri = '';
+        if (pd === 'Rework' || pd === 'Repair') {
+          rri = $('#rework_repair_instructions').val().trim();
+          if (rri.length < 50) errors.push('Rework/Repair Instructions must be at least 50 characters.');
+        }
+
+        if (errors.length) {
+          $('#disp-error-msg').text(errors.join(' '));
+          $('#disp-error').show();
+          return;
+        }
+        $('#disp-error').hide();
+
+        var payload = {
+          parts_disposition: pd,
+          root_cause_documentation: rc,
+          preventive_actions: pas,
+        };
+        if (rri) payload.rework_repair_instructions = rri;
+
+        $('#submit-btn').prop('disabled', true).text('Submitting...');
+
+        $.ajax({
+          url: prefix + '/api/ncr/' + ncrId + '/disposition',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function (data) {
+            if (data.success) {
+              $('#disp-detail-link').attr('href', prefix + '/ncr/' + ncrId);
+              $('#disp-success').show();
+              $('#disp-form').hide();
+            }
+          },
+          error: function (xhr) {
+            var resp = xhr.responseJSON || {};
+            var msg = resp.message || resp.error || 'Submission failed.';
+            if (resp.details) {
+              var fields = Object.keys(resp.details).map(function (k) {
+                return resp.details[k].join(', ');
+              });
+              msg += ' — ' + fields.join('; ');
+            }
+            $('#disp-error-msg').text(msg);
+            $('#disp-error').show();
+            $('#submit-btn').prop('disabled', false).text('Submit Disposition');
+          },
+        });
+      });
+    });

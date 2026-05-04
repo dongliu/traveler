@@ -1,6 +1,13 @@
 const express = require('express');
 const auth = require('../lib/auth');
-const { createNcr, submitDisposition } = require('../lib/ncr-service');
+const {
+  createNcr,
+  submitDisposition,
+  submitConcurrence,
+  submitApproval,
+  returnForComment,
+  qaResubmit,
+} = require('../lib/ncr-service');
 const logger = require('../lib/loggers').getLogger();
 
 const router = express.Router();
@@ -123,9 +130,119 @@ router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
   }
 });
 
-router.patch('/:id/concurrence', auth.ensureAuthenticated, notImplemented);
+function mapServiceError(err, res, action) {
+  if (err.status === 400) return res.status(400).json({ success: false, error: 'Validation Error', message: err.message });
+  if (err.status === 403) return res.status(403).json({ success: false, error: 'Forbidden', message: err.message });
+  if (err.status === 404) return res.status(404).json({ success: false, error: 'Not Found', message: err.message });
+  if (err.status === 409) return res.status(409).json({ success: false, error: 'Conflict', message: err.message });
+  logger.error(`${action} failed:`, err);
+  return res.status(500).json({ success: false, error: 'Internal Server Error', message: err.message });
+}
 
-router.patch('/:id/approve', auth.ensureAuthenticated, notImplemented);
+router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
+  const additionalApprovers = req.body.additional_approvers;
+  if (additionalApprovers !== undefined && !Array.isArray(additionalApprovers)) {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation Error',
+      details: { additional_approvers: ['Must be an array'] },
+    });
+  }
+  if (Array.isArray(additionalApprovers)) {
+    for (const a of additionalApprovers) {
+      if (!a || !a.approver_id || !a.approver_role) {
+        return res.status(400).json({
+          success: false,
+          error: 'Validation Error',
+          details: { additional_approvers: ['Each entry requires approver_id and approver_role'] },
+        });
+      }
+    }
+  }
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      email: res.locals.userEmail || '',
+      roles: res.locals.roles || [],
+    };
+    const ncr = await submitConcurrence(req.params.id, additionalApprovers || [], user);
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        additional_approvers: ncr.additional_approvers,
+      },
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Concurrence');
+  }
+});
+
+router.patch('/:id/approve', auth.ensureAuthenticated, async (req, res) => {
+  const action = req.body.action;
+  if (!['approve', 'return_for_comment'].includes(action)) {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation Error',
+      details: { action: ["Must be 'approve' or 'return_for_comment'"] },
+    });
+  }
+  if (action === 'return_for_comment' && (!req.body.comments || String(req.body.comments).trim().length === 0)) {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation Error',
+      details: { comments: ['Required when action is return_for_comment'] },
+    });
+  }
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const ncr = action === 'approve'
+      ? await submitApproval(req.params.id, user)
+      : await returnForComment(req.params.id, req.body.comments, user);
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        additional_approvers: ncr.additional_approvers,
+      },
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Approval');
+  }
+});
+
+router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const ncr = await qaResubmit(req.params.id, user);
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        additional_approvers: ncr.additional_approvers,
+      },
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'QA resubmit');
+  }
+});
 
 router.patch('/:id/close', auth.ensureAuthenticated, notImplemented);
 

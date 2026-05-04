@@ -1,0 +1,161 @@
+extends layout
+
+block head
+  meta(charset='utf-8')
+  title NCR #{ncr.ncr_number} — QA Concurrence
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  .container(style='margin-top: 10px')
+    h3 QA Concurrence
+    h4
+      | NCR&nbsp;
+      strong= ncr.ncr_number
+      |  &mdash; #{ncr.part_name} (#{ncr.part_number})
+
+    fieldset
+      legend NCR Summary
+      dl.dl-horizontal
+        dt Supplier
+        dd= ncr.supplier_name
+        dt WBS
+        dd= ncr.wbs_number
+        dt Discovery
+        dd= new Date(ncr.discovery_date).toLocaleDateString() + ' — ' + ncr.discovery_context.replace(/_/g, ' ')
+        dt Description
+        dd= ncr.description_of_nonconformance
+
+    if ncr.disposition && ncr.disposition.parts_disposition
+      fieldset
+        legend Engineering Disposition
+        dl.dl-horizontal
+          dt Parts Disposition
+          dd= ncr.disposition.parts_disposition
+          dt Submitted By
+          dd= ncr.ce_cs_name
+          dt Submitted On
+          dd= ncr.disposition.ce_cs_timestamp ? new Date(ncr.disposition.ce_cs_timestamp).toLocaleString() : '—'
+          dt Root Cause
+          dd= ncr.disposition.root_cause_documentation
+          if ncr.disposition.rework_repair_instructions
+            dt Rework / Repair Instructions
+            dd= ncr.disposition.rework_repair_instructions
+
+    if ncr.preventive_actions && ncr.preventive_actions.length
+      fieldset
+        legend Preventive Actions
+        ol
+          each pa in ncr.preventive_actions
+            li= pa.action_description
+
+    fieldset
+      legend Additional Approvers
+      p.help-block.
+        Optional: designate additional approvers required for this disposition.
+        If you leave this list empty and click <strong>Concur</strong>, the NCR
+        moves directly to <em>Final Approval</em>. If you add approvers,
+        approval requests will be sent and the NCR will move to <em>Approved</em>
+        until all designated approvers have approved.
+
+      table#approvers-table.table.table-bordered.table-condensed
+        thead
+          tr
+            th Username
+            th Role
+            th(style='width: 80px')
+        tbody#approvers-list
+        tfoot
+          tr
+            td
+              input#new-approver-id.input-medium(type='text', placeholder='username')
+            td
+              input#new-approver-role.input-medium(type='text', placeholder='e.g. Project Manager')
+            td
+              button#add-approver.btn.btn-sm(type='button')
+                i.fa.fa-plus
+                | &nbsp; Add
+
+    #conc-success.alert.alert-success(style='display:none')
+      strong Concurrence submitted.&nbsp;
+      span#conc-success-msg
+      |  &nbsp;
+      a(id='conc-detail-link', href='#') View NCR
+    #conc-error.alert.alert-error(style='display:none')
+      strong Error:&nbsp;
+      span#conc-error-msg
+
+    .form-actions
+      button#concur-btn.btn.btn-primary(type='button') Concur
+      a.btn(href='#{prefix}/ncr/#{ncr._id}', style='margin-left: 5px') Cancel
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script.
+    $(function () {
+      var ncrId = '#{ncr._id}';
+      var approvers = [];
+
+      function render() {
+        var $tbody = $('#approvers-list').empty();
+        if (approvers.length === 0) {
+          $tbody.append('<tr><td colspan="3" class="muted">No additional approvers — concurring will move NCR directly to Final Approval.</td></tr>');
+          return;
+        }
+        approvers.forEach(function (a, i) {
+          var $tr = $('<tr></tr>');
+          $tr.append($('<td></td>').text(a.approver_id));
+          $tr.append($('<td></td>').text(a.approver_role));
+          var $rm = $('<button type="button" class="btn btn-sm btn-danger">Remove</button>').on('click', function () {
+            approvers.splice(i, 1);
+            render();
+          });
+          $tr.append($('<td></td>').append($rm));
+          $tbody.append($tr);
+        });
+      }
+
+      $('#add-approver').on('click', function () {
+        var id = $('#new-approver-id').val().trim();
+        var role = $('#new-approver-role').val().trim();
+        if (!id || !role) return;
+        if (approvers.some(function (a) { return a.approver_id === id; })) return;
+        approvers.push({ approver_id: id, approver_role: role });
+        $('#new-approver-id').val('');
+        $('#new-approver-role').val('');
+        render();
+      });
+
+      $('#concur-btn').on('click', function () {
+        $('#conc-error').hide();
+        $('#concur-btn').prop('disabled', true).text('Submitting...');
+        $.ajax({
+          url: prefix + '/api/ncr/' + ncrId + '/concurrence',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({ additional_approvers: approvers }),
+          success: function (data) {
+            var msg = data.ncr.status === 'Final Approval'
+              ? 'NCR moved to Final Approval; issuance email sent.'
+              : 'Approval requests sent to ' + (data.ncr.additional_approvers || []).length + ' approver(s).';
+            $('#conc-success-msg').text(msg);
+            $('#conc-detail-link').attr('href', prefix + '/ncr/' + ncrId);
+            $('#conc-success').show();
+            $('#concur-btn').hide();
+          },
+          error: function (xhr) {
+            var resp = xhr.responseJSON || {};
+            $('#conc-error-msg').text(resp.message || resp.error || 'Submission failed.');
+            $('#conc-error').show();
+            $('#concur-btn').prop('disabled', false).text('Concur');
+          },
+        });
+      });
+
+      render();
+    });

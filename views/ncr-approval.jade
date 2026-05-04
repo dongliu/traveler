@@ -1,0 +1,179 @@
+extends layout
+
+block head
+  meta(charset='utf-8')
+  title NCR #{ncr.ncr_number} — Approval
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  - var isQa = (locals.roles && locals.roles.indexOf('qa_staff') !== -1)
+  - var isReturnedForComment = (ncr.status === 'Returned for Comment')
+  - var myEntry = (ncr.additional_approvers || []).filter(function(a){ return a.approver_id === locals.userid; })[0]
+  - var canActAsApprover = !!myEntry && ncr.status === 'Approved' && myEntry.approval_status === 'Pending'
+
+  .container(style='margin-top: 10px')
+    h3 NCR Approval
+    h4
+      | NCR&nbsp;
+      strong= ncr.ncr_number
+      |  &mdash; #{ncr.part_name} (#{ncr.part_number})
+      | &nbsp;
+      span.label.label-info= ncr.status
+
+    fieldset
+      legend NCR Summary
+      dl.dl-horizontal
+        dt Supplier
+        dd= ncr.supplier_name
+        dt WBS
+        dd= ncr.wbs_number
+        dt Description
+        dd= ncr.description_of_nonconformance
+
+    if ncr.disposition && ncr.disposition.parts_disposition
+      fieldset
+        legend Engineering Disposition
+        dl.dl-horizontal
+          dt Parts Disposition
+          dd= ncr.disposition.parts_disposition
+          dt Submitted By
+          dd= ncr.ce_cs_name
+          dt Root Cause
+          dd= ncr.disposition.root_cause_documentation
+          if ncr.disposition.rework_repair_instructions
+            dt Rework / Repair Instructions
+            dd= ncr.disposition.rework_repair_instructions
+
+    if ncr.qa_concurrence_timestamp
+      fieldset
+        legend QA Concurrence
+        dl.dl-horizontal
+          dt QA Staff
+          dd= ncr.qa_staff_name
+          dt Concurred On
+          dd= new Date(ncr.qa_concurrence_timestamp).toLocaleString()
+
+    fieldset
+      legend Approver Status
+      table.table.table-bordered.table-condensed
+        thead
+          tr
+            th Approver
+            th Role
+            th Status
+            th Decided On
+            th Comments
+        tbody
+          if !ncr.additional_approvers || ncr.additional_approvers.length === 0
+            tr
+              td(colspan='5').muted No additional approvers were designated.
+          else
+            each a in ncr.additional_approvers
+              tr
+                td= a.approver_name
+                td= a.approver_role
+                td
+                  span.label= a.approval_status
+                td= a.approval_timestamp ? new Date(a.approval_timestamp).toLocaleString() : '—'
+                td= a.comments || '—'
+
+    #app-success.alert.alert-success(style='display:none')
+      strong Done.&nbsp;
+      span#app-success-msg
+      |  &nbsp;
+      a(id='app-detail-link', href='#') View NCR
+    #app-error.alert.alert-error(style='display:none')
+      strong Error:&nbsp;
+      span#app-error-msg
+
+    if canActAsApprover
+      fieldset
+        legend Your Decision
+        .control-group
+          .controls
+            button#approve-btn.btn.btn-success(type='button')
+              i.fa.fa-check
+              | &nbsp; Approve
+        .control-group
+          label.control-label(for='comments') Return Comments
+          .controls
+            textarea#comments(rows='4', maxlength='2000', placeholder='Required when returning for comment')
+            br
+            button#return-btn.btn.btn-warning(type='button', style='margin-top: 4px')
+              i.fa.fa-undo
+              | &nbsp; Return for Comment
+
+    if isQa && isReturnedForComment
+      fieldset
+        legend QA Action
+        p.help-block An approver returned this NCR for comment. Address the comments and resubmit to all returned-for-comment approvers.
+        button#resubmit-btn.btn.btn-primary(type='button')
+          i.fa.fa-refresh
+          | &nbsp; Resubmit to Approvers
+
+    .form-actions
+      a.btn(href='#{prefix}/ncr/#{ncr._id}') Back to NCR
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script.
+    $(function () {
+      var ncrId = '#{ncr._id}';
+
+      function send(payload, btn, successMsgFn) {
+        $('#app-error').hide();
+        var orig = btn.text();
+        btn.prop('disabled', true).text('Submitting...');
+        $.ajax({
+          url: prefix + '/api/ncr/' + ncrId + (payload._endpoint || '/approve'),
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function (data) {
+            $('#app-success-msg').text(successMsgFn(data));
+            $('#app-detail-link').attr('href', prefix + '/ncr/' + ncrId);
+            $('#app-success').show();
+            $('fieldset legend:contains("Your Decision")').closest('fieldset').hide();
+            $('fieldset legend:contains("QA Action")').closest('fieldset').hide();
+          },
+          error: function (xhr) {
+            var resp = xhr.responseJSON || {};
+            $('#app-error-msg').text(resp.message || resp.error || 'Submission failed.');
+            $('#app-error').show();
+            btn.prop('disabled', false).text(orig);
+          },
+        });
+      }
+
+      $('#approve-btn').on('click', function () {
+        send({ action: 'approve' }, $(this), function (data) {
+          return data.ncr.status === 'Final Approval'
+            ? 'You approved. All approvers have approved — NCR moved to Final Approval.'
+            : 'You approved. Awaiting other approvers.';
+        });
+      });
+
+      $('#return-btn').on('click', function () {
+        var c = $('#comments').val().trim();
+        if (!c) {
+          $('#app-error-msg').text('Comments are required.');
+          $('#app-error').show();
+          return;
+        }
+        send({ action: 'return_for_comment', comments: c }, $(this), function () {
+          return 'Returned for comment. QA Staff has been notified.';
+        });
+      });
+
+      $('#resubmit-btn').on('click', function () {
+        send({ _endpoint: '/resubmit' }, $(this), function () {
+          return 'Resubmitted to approvers. New approval requests sent.';
+        });
+      });
+    });
