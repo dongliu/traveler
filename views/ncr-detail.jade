@@ -126,25 +126,81 @@ block content
                     td= approver.comments || '—'
 
     if ncr.preventive_actions && ncr.preventive_actions.length
+      - var isQa = (locals.roles && locals.roles.indexOf('qa_staff') !== -1)
       .row-fluid
         .span12
           fieldset
             legend Preventive Actions
-            table.table.table-bordered.table-condensed
-              thead
-                tr
-                  th Description
-                  th Owner
-                  th Target Date
-                  th Status
-              tbody
-                each pa in ncr.preventive_actions
-                  tr
-                    td= pa.action_description
-                    td= pa.owner_name || '—'
-                    td= pa.target_completion_date ? new Date(pa.target_completion_date).toLocaleDateString() : '—'
-                    td
-                      span.label= pa.status
+            #pa-error.alert.alert-error(style='display:none')
+              span#pa-error-msg
+            each pa in ncr.preventive_actions
+              .well(data-pa-id=String(pa._id), style='margin-bottom:10px')
+                p
+                  strong= pa.action_description
+                dl.dl-horizontal
+                  dt Status
+                  dd
+                    span.label(class='pa-status-badge')= pa.status || 'Open'
+                  dt Owner
+                  dd
+                    if pa.owner_name
+                      = pa.owner_name + ' '
+                      span.muted (#{pa.target_completion_date ? new Date(pa.target_completion_date).toLocaleDateString() : 'no target date'})
+                    else
+                      span.muted Unassigned
+                  if pa.actual_completion_date
+                    dt Completed
+                    dd= new Date(pa.actual_completion_date).toLocaleDateString()
+                  if pa.comments && pa.comments.length
+                    dt Comments
+                    dd
+                      ul
+                        each c in pa.comments
+                          li= c
+
+                .btn-toolbar(style='margin-top:6px')
+                  if isQa
+                    button.btn.btn-sm.btn-info.pa-assign-btn(type='button')
+                      i.fa.fa-user
+                      | &nbsp; #{pa.owner_id ? 'Reassign Owner' : 'Assign Owner'}
+                  if pa.owner_id === locals.userid && (!pa.status || pa.status !== 'Completed')
+                    button.btn.btn-sm.btn-primary.pa-update-btn(type='button')
+                      i.fa.fa-pencil
+                      | &nbsp; Update Status
+                  if isQa && pa.status !== 'Completed'
+                    button.btn.btn-sm.btn-success.pa-close-btn(type='button')
+                      i.fa.fa-check
+                      | &nbsp; Close PA
+
+                .pa-assign-form(style='display:none; margin-top:8px; padding:8px; background:#fff; border-radius:3px')
+                  .control-group
+                    label Owner Username
+                    input.pa-owner-id(type='text', value=pa.owner_id || '')
+                  .control-group
+                    label Owner Name
+                    input.pa-owner-name(type='text', value=pa.owner_name || '')
+                  .control-group
+                    label Owner Email
+                    input.pa-owner-email(type='email', value=pa.owner_email || '')
+                  .control-group
+                    label Target Completion Date
+                    input.pa-target-date(type='date', value=pa.target_completion_date ? new Date(pa.target_completion_date).toISOString().slice(0,10) : '')
+                  button.btn.btn-sm.btn-primary.pa-assign-submit(type='button') Save
+                  button.btn.btn-sm.pa-cancel(type='button') Cancel
+
+                .pa-update-form(style='display:none; margin-top:8px; padding:8px; background:#fff; border-radius:3px')
+                  .control-group
+                    label New Status
+                    select.pa-new-status
+                      option(value='Open') Open
+                      option(value='In Progress') In Progress
+                      option(value='Overdue') Overdue
+                      option(value='Completed') Completed
+                  .control-group
+                    label Comment (optional)
+                    textarea.pa-comment(rows='2')
+                  button.btn.btn-sm.btn-primary.pa-update-submit(type='button') Save
+                  button.btn.btn-sm.pa-cancel(type='button') Cancel
 
     if ncr.closure_record && ncr.closure_record.closure_date
       .row-fluid
@@ -183,3 +239,100 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script(type='text/javascript').
+    (function($) {
+      var ncrId = '#{ncr._id}';
+      var apiBase = '#{prefix}/api/ncr/' + ncrId + '/preventive-actions';
+
+      function showPaError(msg) {
+        $('#pa-error-msg').text(msg);
+        $('#pa-error').show();
+        setTimeout(function() { $('#pa-error').hide(); }, 5000);
+      }
+
+      function getPaWell(btn) {
+        return $(btn).closest('.well');
+      }
+
+      function getPaId(btn) {
+        return getPaWell(btn).data('pa-id');
+      }
+
+      $(document).on('click', '.pa-assign-btn', function() {
+        var $well = getPaWell(this);
+        $well.find('.pa-assign-form').toggle();
+        $well.find('.pa-update-form').hide();
+      });
+
+      $(document).on('click', '.pa-update-btn', function() {
+        var $well = getPaWell(this);
+        $well.find('.pa-update-form').toggle();
+        $well.find('.pa-assign-form').hide();
+      });
+
+      $(document).on('click', '.pa-cancel', function() {
+        getPaWell(this).find('.pa-assign-form, .pa-update-form').hide();
+      });
+
+      $(document).on('click', '.pa-assign-submit', function() {
+        var $well = getPaWell(this);
+        var paId = getPaId(this);
+        var payload = {
+          owner_id: $well.find('.pa-owner-id').val().trim(),
+          owner_name: $well.find('.pa-owner-name').val().trim(),
+          owner_email: $well.find('.pa-owner-email').val().trim(),
+          target_completion_date: $well.find('.pa-target-date').val()
+        };
+        if (!payload.owner_id || !payload.owner_name || !payload.owner_email || !payload.target_completion_date) {
+          return showPaError('All owner fields are required.');
+        }
+        $.ajax({
+          url: apiBase + '/' + paId + '/owner',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to assign owner.';
+            showPaError(msg);
+          }
+        });
+      });
+
+      $(document).on('click', '.pa-update-submit', function() {
+        var $well = getPaWell(this);
+        var paId = getPaId(this);
+        var payload = {
+          action: 'update',
+          status: $well.find('.pa-new-status').val(),
+          comment: $well.find('.pa-comment').val().trim()
+        };
+        $.ajax({
+          url: apiBase + '/' + paId + '/status',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to update status.';
+            showPaError(msg);
+          }
+        });
+      });
+
+      $(document).on('click', '.pa-close-btn', function() {
+        var paId = getPaId(this);
+        if (!confirm('Close this preventive action?')) return;
+        $.ajax({
+          url: apiBase + '/' + paId + '/status',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({ action: 'close' }),
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to close PA.';
+            showPaError(msg);
+          }
+        });
+      });
+    })(jQuery);

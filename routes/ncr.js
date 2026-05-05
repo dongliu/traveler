@@ -10,6 +10,9 @@ const {
   closeNcr,
   listNcrs,
   getNcrById,
+  assignPaOwner,
+  updatePaStatus,
+  closePa,
 } = require('../lib/ncr-service');
 const logger = require('../lib/loggers').getLogger();
 
@@ -315,16 +318,61 @@ router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
   }
 });
 
-router.patch(
-  '/:id/preventive-actions/:pa_id/owner',
-  auth.ensureAuthenticated,
-  notImplemented
-);
+router.patch('/:id/preventive-actions/:pa_id/owner', auth.ensureAuthenticated, async (req, res) => {
+  const b = req.body;
+  const errors = {};
+  if (!b.owner_id) errors.owner_id = ['Required'];
+  if (!b.owner_name) errors.owner_name = ['Required'];
+  if (!b.owner_email) errors.owner_email = ['Required'];
+  if (!b.target_completion_date) errors.target_completion_date = ['Required'];
+  if (Object.keys(errors).length > 0)
+    return res.status(400).json({ success: false, error: 'Validation Error', details: errors });
 
-router.patch(
-  '/:id/preventive-actions/:pa_id/status',
-  auth.ensureAuthenticated,
-  notImplemented
-);
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const ncr = await assignPaOwner(req.params.id, req.params.pa_id, b, user);
+    const pa = ncr.preventive_actions.id(req.params.pa_id);
+    return res.status(200).json({ success: true, ncr_id: ncr._id, preventive_action: pa });
+  } catch (err) {
+    return mapServiceError(err, res, 'PA owner assign');
+  }
+});
+
+router.patch('/:id/preventive-actions/:pa_id/status', auth.ensureAuthenticated, async (req, res) => {
+  const action = req.body.action;
+  if (!['update', 'close'].includes(action)) {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation Error',
+      details: { action: ["Must be 'update' or 'close'"] },
+    });
+  }
+  if (action === 'update' && !req.body.status) {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation Error',
+      details: { status: ['Required when action is update'] },
+    });
+  }
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const ncr = action === 'close'
+      ? await closePa(req.params.id, req.params.pa_id, user)
+      : await updatePaStatus(req.params.id, req.params.pa_id, { status: req.body.status, comment: req.body.comment }, user);
+    const pa = ncr.preventive_actions.id(req.params.pa_id);
+    return res.status(200).json({ success: true, ncr_id: ncr._id, preventive_action: pa });
+  } catch (err) {
+    return mapServiceError(err, res, 'PA status update');
+  }
+});
 
 module.exports = router;
