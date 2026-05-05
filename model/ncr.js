@@ -184,8 +184,9 @@ NcrSchema.index({ discovery_date: 1 });
 NcrSchema.index({ part_number: 1 });
 NcrSchema.index({ supplier_name: 1 });
 NcrSchema.index({ created_at: 1 });
-NcrSchema.index({ 'events.timestamp': 1 });
+NcrSchema.index({ 'disposition.parts_disposition': 1 });
 NcrSchema.index({ 'events.event_type': 1 });
+NcrSchema.index({ 'events.timestamp': 1 });
 NcrSchema.index({ 'preventive_actions.status': 1 });
 NcrSchema.index({ 'preventive_actions.owner_id': 1 });
 

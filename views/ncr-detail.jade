@@ -219,8 +219,10 @@ block content
     .row-fluid
       .span12
         fieldset
-          legend Event Timeline
-          .event-timeline
+          legend
+            | Event Timeline&nbsp;
+            a.btn.btn-mini#timeline-toggle(href='#') Hide
+          .event-timeline#event-timeline
             each event in ncr.events.slice().reverse()
               .event-entry
                 span.badge= event.event_type
@@ -233,6 +235,9 @@ block content
                 if event.previous_status && event.new_status
                   .muted
                     small #{event.previous_status || 'None'} &rarr; #{event.new_status}
+                if event.payload
+                  a.event-payload-toggle(href='#', style='font-size:11px; margin-left:8px') [payload]
+                  pre.event-payload(style='display:none; font-size:11px; margin:4px 0 0; white-space:pre-wrap; word-break:break-all; background:#f5f5f5; padding:6px; border-radius:3px')= JSON.stringify(event.payload, null, 2)
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
@@ -318,6 +323,23 @@ block js
             showPaError(msg);
           }
         });
+      });
+
+      $('#timeline-toggle').on('click', function(e) {
+        e.preventDefault();
+        var $tl = $('#event-timeline');
+        if ($tl.is(':visible')) {
+          $tl.hide();
+          $(this).text('Show');
+        } else {
+          $tl.show();
+          $(this).text('Hide');
+        }
+      });
+
+      $(document).on('click', '.event-payload-toggle', function(e) {
+        e.preventDefault();
+        $(this).next('.event-payload').toggle();
       });
 
       $(document).on('click', '.pa-close-btn', function() {

@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const auth = require('../lib/auth');
 const {
   createNcr,
@@ -18,36 +19,57 @@ const logger = require('../lib/loggers').getLogger();
 
 const router = express.Router();
 
+function isValidId(id) {
+  return mongoose.isValidObjectId(id);
+}
+
+function sanitizeStr(val) {
+  if (val === undefined || val === null) return val;
+  return String(val).replace(/<[^>]*>/g, '').trim();
+}
+
+function badId(res, param) {
+  return res.status(400).json({ success: false, error: 'Bad Request', message: `Invalid ${param} format` });
+}
+
 const DISCOVERY_CONTEXTS = [
   'incoming_inspection',
   'in_house_assembly',
   'in_house_inspection',
 ];
 
-const notImplemented = (req, res) =>
-  res.status(501).json({ error: 'Not implemented' });
-
 router.post('/', auth.ensureAuthenticated, async (req, res) => {
   const errors = {};
-  const b = req.body;
+  const b = {
+    part_name: sanitizeStr(req.body.part_name),
+    part_number: sanitizeStr(req.body.part_number),
+    part_revision: sanitizeStr(req.body.part_revision),
+    quantity: req.body.quantity,
+    supplier_name: sanitizeStr(req.body.supplier_name),
+    wbs_number: sanitizeStr(req.body.wbs_number),
+    ce_cs_name: sanitizeStr(req.body.ce_cs_name),
+    ce_cs_id: sanitizeStr(req.body.ce_cs_id),
+    ce_cs_email: sanitizeStr(req.body.ce_cs_email),
+    specification_drawing_reference: sanitizeStr(req.body.specification_drawing_reference),
+    po_reference: sanitizeStr(req.body.po_reference),
+    description_of_nonconformance: sanitizeStr(req.body.description_of_nonconformance),
+    discovery_date: req.body.discovery_date,
+    discovery_context: req.body.discovery_context,
+    traveler_id: req.body.traveler_id,
+    traveler_step_number: req.body.traveler_step_number,
+  };
 
-  if (!b.part_name || !String(b.part_name).trim())
-    errors.part_name = ['Required'];
-  if (!b.part_number || !String(b.part_number).trim())
-    errors.part_number = ['Required'];
-  if (!b.part_revision || !String(b.part_revision).trim())
-    errors.part_revision = ['Required'];
+  if (!b.part_name) errors.part_name = ['Required'];
+  if (!b.part_number) errors.part_number = ['Required'];
+  if (!b.part_revision) errors.part_revision = ['Required'];
   if (!b.quantity || Number(b.quantity) < 1)
     errors.quantity = ['Must be greater than 0'];
-  if (!b.supplier_name || !String(b.supplier_name).trim())
-    errors.supplier_name = ['Required'];
-  if (!b.wbs_number || !String(b.wbs_number).trim())
-    errors.wbs_number = ['Required'];
-  if (!b.ce_cs_name || !String(b.ce_cs_name).trim())
-    errors.ce_cs_name = ['Required'];
-  if (!b.specification_drawing_reference || !String(b.specification_drawing_reference).trim())
+  if (!b.supplier_name) errors.supplier_name = ['Required'];
+  if (!b.wbs_number) errors.wbs_number = ['Required'];
+  if (!b.ce_cs_name) errors.ce_cs_name = ['Required'];
+  if (!b.specification_drawing_reference)
     errors.specification_drawing_reference = ['Required'];
-  if (!b.description_of_nonconformance || String(b.description_of_nonconformance).trim().length < 20)
+  if (!b.description_of_nonconformance || b.description_of_nonconformance.length < 20)
     errors.description_of_nonconformance = ['Must be at least 20 characters long'];
   if (!b.discovery_date)
     errors.discovery_date = ['Required'];
@@ -57,7 +79,7 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
     errors.discovery_context = [`Must be one of: ${DISCOVERY_CONTEXTS.join(', ')}`];
 
   if (Object.keys(errors).length > 0) {
-    return res.status(400).json({ success: false, error: 'Validation Error', details: errors });
+    return res.status(400).json({ success: false, error: 'Validation Error', message: 'Validation failed', details: errors });
   }
 
   try {
@@ -114,6 +136,7 @@ router.get('/', auth.ensureAuthenticated, async (req, res) => {
 });
 
 router.get('/:id', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
   try {
     const user = {
       id: req.session.userid,
@@ -127,28 +150,52 @@ router.get('/:id', auth.ensureAuthenticated, async (req, res) => {
   }
 });
 
-router.get('/:id/events', auth.ensureAuthenticated, notImplemented);
+router.get('/:id/events', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const ncr = await getNcrById(req.params.id, user);
+    const events = (ncr.events || [])
+      .slice()
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    return res.status(200).json({ success: true, ncr_id: ncr._id, events });
+  } catch (err) {
+    return mapServiceError(err, res, 'Events fetch');
+  }
+});
 
 router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
   const errors = {};
-  const b = req.body;
   const PARTS_DISPOSITIONS = ['Rework', 'Repair', 'Return to Vendor', 'Scrap', 'Use-As-Is'];
+  const b = {
+    parts_disposition: req.body.parts_disposition,
+    root_cause_documentation: sanitizeStr(req.body.root_cause_documentation),
+    rework_repair_instructions: sanitizeStr(req.body.rework_repair_instructions),
+    preventive_actions: Array.isArray(req.body.preventive_actions)
+      ? req.body.preventive_actions.map(a => sanitizeStr(a))
+      : req.body.preventive_actions,
+  };
 
   if (!b.parts_disposition || !PARTS_DISPOSITIONS.includes(b.parts_disposition))
     errors.parts_disposition = [`Must be one of: ${PARTS_DISPOSITIONS.join(', ')}`];
-  if (!b.root_cause_documentation || String(b.root_cause_documentation).trim().length < 50)
+  if (!b.root_cause_documentation || b.root_cause_documentation.length < 50)
     errors.root_cause_documentation = ['Must be at least 50 characters long'];
   if (!Array.isArray(b.preventive_actions) || b.preventive_actions.length < 1)
     errors.preventive_actions = ['Requires at least 1 action'];
   else if (b.preventive_actions.some(a => !a || String(a).trim().length < 50))
     errors.preventive_actions = ['Each action must be at least 50 characters long'];
   if (['Rework', 'Repair'].includes(b.parts_disposition)) {
-    if (!b.rework_repair_instructions || String(b.rework_repair_instructions).trim().length < 50)
+    if (!b.rework_repair_instructions || b.rework_repair_instructions.length < 50)
       errors.rework_repair_instructions = ["Required when parts_disposition is 'Rework' or 'Repair'"];
   }
 
   if (Object.keys(errors).length > 0)
-    return res.status(400).json({ success: false, error: 'Validation Error', details: errors });
+    return res.status(400).json({ success: false, error: 'Validation Error', message: 'Validation failed', details: errors });
 
   try {
     const user = { id: req.session.userid, name: res.locals.username };
@@ -183,11 +230,13 @@ function mapServiceError(err, res, action) {
 }
 
 router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
   const additionalApprovers = req.body.additional_approvers;
   if (additionalApprovers !== undefined && !Array.isArray(additionalApprovers)) {
     return res.status(400).json({
       success: false,
       error: 'Validation Error',
+      message: 'Validation failed',
       details: { additional_approvers: ['Must be an array'] },
     });
   }
@@ -197,6 +246,7 @@ router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
         return res.status(400).json({
           success: false,
           error: 'Validation Error',
+          message: 'Validation failed',
           details: { additional_approvers: ['Each entry requires approver_id and approver_role'] },
         });
       }
@@ -226,18 +276,22 @@ router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
 });
 
 router.patch('/:id/approve', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
   const action = req.body.action;
+  const comments = sanitizeStr(req.body.comments);
   if (!['approve', 'return_for_comment'].includes(action)) {
     return res.status(400).json({
       success: false,
       error: 'Validation Error',
+      message: 'Validation failed',
       details: { action: ["Must be 'approve' or 'return_for_comment'"] },
     });
   }
-  if (action === 'return_for_comment' && (!req.body.comments || String(req.body.comments).trim().length === 0)) {
+  if (action === 'return_for_comment' && (!comments || comments.length === 0)) {
     return res.status(400).json({
       success: false,
       error: 'Validation Error',
+      message: 'Validation failed',
       details: { comments: ['Required when action is return_for_comment'] },
     });
   }
@@ -250,7 +304,7 @@ router.patch('/:id/approve', auth.ensureAuthenticated, async (req, res) => {
     };
     const ncr = action === 'approve'
       ? await submitApproval(req.params.id, user)
-      : await returnForComment(req.params.id, req.body.comments, user);
+      : await returnForComment(req.params.id, comments, user);
     return res.status(200).json({
       success: true,
       ncr: {
@@ -266,6 +320,7 @@ router.patch('/:id/approve', auth.ensureAuthenticated, async (req, res) => {
 });
 
 router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
   try {
     const user = {
       id: req.session.userid,
@@ -288,13 +343,19 @@ router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
 });
 
 router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
-  const b = req.body;
+  if (!isValidId(req.params.id)) return badId(res, 'id');
   const errors = {};
-  if (!b.closure_notes || String(b.closure_notes).trim().length < 20)
+  const b = {
+    closure_notes: sanitizeStr(req.body.closure_notes),
+    disposition_execution_verified: req.body.disposition_execution_verified,
+    preventive_actions_verified: req.body.preventive_actions_verified,
+    traveler_signed_off: req.body.traveler_signed_off,
+  };
+  if (!b.closure_notes || b.closure_notes.length < 20)
     errors.closure_notes = ['Required and must be at least 20 characters'];
 
   if (Object.keys(errors).length > 0)
-    return res.status(400).json({ success: false, error: 'Validation Error', details: errors });
+    return res.status(400).json({ success: false, error: 'Validation Error', message: 'Validation failed', details: errors });
 
   try {
     const user = {
@@ -319,14 +380,21 @@ router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
 });
 
 router.patch('/:id/preventive-actions/:pa_id/owner', auth.ensureAuthenticated, async (req, res) => {
-  const b = req.body;
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  if (!isValidId(req.params.pa_id)) return badId(res, 'pa_id');
+  const b = {
+    owner_id: sanitizeStr(req.body.owner_id),
+    owner_name: sanitizeStr(req.body.owner_name),
+    owner_email: sanitizeStr(req.body.owner_email),
+    target_completion_date: req.body.target_completion_date,
+  };
   const errors = {};
   if (!b.owner_id) errors.owner_id = ['Required'];
   if (!b.owner_name) errors.owner_name = ['Required'];
   if (!b.owner_email) errors.owner_email = ['Required'];
   if (!b.target_completion_date) errors.target_completion_date = ['Required'];
   if (Object.keys(errors).length > 0)
-    return res.status(400).json({ success: false, error: 'Validation Error', details: errors });
+    return res.status(400).json({ success: false, error: 'Validation Error', message: 'Validation failed', details: errors });
 
   try {
     const user = {
@@ -343,11 +411,15 @@ router.patch('/:id/preventive-actions/:pa_id/owner', auth.ensureAuthenticated, a
 });
 
 router.patch('/:id/preventive-actions/:pa_id/status', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  if (!isValidId(req.params.pa_id)) return badId(res, 'pa_id');
   const action = req.body.action;
+  const comment = sanitizeStr(req.body.comment);
   if (!['update', 'close'].includes(action)) {
     return res.status(400).json({
       success: false,
       error: 'Validation Error',
+      message: 'Validation failed',
       details: { action: ["Must be 'update' or 'close'"] },
     });
   }
@@ -355,6 +427,7 @@ router.patch('/:id/preventive-actions/:pa_id/status', auth.ensureAuthenticated, 
     return res.status(400).json({
       success: false,
       error: 'Validation Error',
+      message: 'Validation failed',
       details: { status: ['Required when action is update'] },
     });
   }
@@ -367,7 +440,7 @@ router.patch('/:id/preventive-actions/:pa_id/status', auth.ensureAuthenticated, 
     };
     const ncr = action === 'close'
       ? await closePa(req.params.id, req.params.pa_id, user)
-      : await updatePaStatus(req.params.id, req.params.pa_id, { status: req.body.status, comment: req.body.comment }, user);
+      : await updatePaStatus(req.params.id, req.params.pa_id, { status: req.body.status, comment }, user);
     const pa = ncr.preventive_actions.id(req.params.pa_id);
     return res.status(200).json({ success: true, ncr_id: ncr._id, preventive_action: pa });
   } catch (err) {
