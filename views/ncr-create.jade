@@ -66,7 +66,7 @@ block content
           label.control-label(for='ce_cs_name') CE/CS Name
             span.text-error *
           .controls
-            input#ce_cs_name(type='text', name='ce_cs_name', maxlength='255', required)
+            input#ce_cs_name.input(type='text', name='ce_cs_name', maxlength='255', required, placeholder='Last, First')
       fieldset
         legend Nonconformance Details
         .control-group
@@ -116,10 +116,21 @@ block js
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script.
     $(function () {
       var maxDate = new Date().toISOString().split('T')[0];
       $('#discovery_date').attr('max', maxDate);
+
+      if (travelerGlobal.usernames) {
+        travelerGlobal.usernames.initialize();
+        $('#ce_cs_name').typeahead(
+          { minLength: 1, highlight: true, hint: true },
+          { name: 'usernames', display: 'displayName', limit: 20, source: travelerGlobal.usernames }
+        );
+      }
 
       $('#description_of_nonconformance').on('input', function () {
         $('#desc-counter').text($(this).val().length + ' / 2000');
