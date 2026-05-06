@@ -90,7 +90,6 @@ block content
           th Days
           th CE/CS
           th Originator
-          th
       tbody#ncr-tbody
 
     .row-fluid
@@ -158,7 +157,6 @@ block js
           $tr.append('<td>' + daysCell + '</td>');
           $tr.append('<td>' + escapeHtml(n.ce_cs_name) + '</td>');
           $tr.append('<td>' + escapeHtml(n.originator_name) + '</td>');
-          $tr.append('<td><a class="btn btn-mini" href="' + prefix + '/ncr/' + n._id + '">View</a></td>');
           $tbody.append($tr);
         });
       }
