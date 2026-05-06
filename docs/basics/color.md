@@ -27,8 +27,8 @@ listed in the following table.
 
 | entity type | progress bar | values |
 | ----------- | ------------ | ------ |
-| traveler | <div class="progress active progress-striped" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:28%;"></div><div class="progress-value">2 / 7</div></div> | updated input number / total input number |
-| binder or entity in a binder | <div class="progress active progress-striped" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:25%;"></div><div class="progress-value">0 + 3 / 10</div></div> | finished value + in-progress value / total value |
+| traveler | <div class="progress active progress-striped" style="width: 100px;"><div class="bar bar-success" style="width:0%;"></div><div class="bar bar-info" style="width:28%;"></div><div class="progress-value">2 / 7</div></div> | # updated inputs / # total inputs |
+| binder or entity in a binder | <div class="progress active progress-striped" style="width: 100px;"><div class="bar bar-success" style="width:25%;"></div><div class="bar bar-info" style="width:58.333333333333336%;"></div><div class="progress-value">1 / 4 + 7 / 9</div></div> | # finished tasks / # total tasks  + # updated inputs / # total inputs |
 
 <br/>
 
