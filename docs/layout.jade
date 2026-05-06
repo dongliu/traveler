@@ -1,8 +1,5 @@
 doctype html
 html
-  - var isAdmin = locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1
-  - var isManager = locals && locals.userid && locals.roles && locals.roles.indexOf('manager') !== -1
-  - var isReviwer = locals && locals.userid && locals.permissions && locals.permissions.indexOf('review_forms') !== -1
   head
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     block head
@@ -21,33 +18,9 @@ html
                 if (viewConfig.deploymentName)
                     - appName += " - " + viewConfig.deploymentName
                 a(href='#{prefix}/') #{appName}
-              if (viewConfig.topBarUrls)
-                each url in viewConfig.topBarUrls
-                  li
-                    a(href=url.url, target='_blank') #{url.text}
-
-              block links
-                li
-                  a(href='#{prefix}/forms/').caps Draft #{viewConfig.terminology.form}s
-                li
-                  a(href='#{prefix}/releasedforms/').caps Released #{viewConfig.terminology.form}s
-                li
-                  a(href='#{prefix}/travelers/') Travelers
-                li
-                  a(href='#{prefix}/binders/') Binders
-                if (isReviwer)
-                  li
-                    a(href='#{prefix}/reviews/') My Reviews
-                li
-                  a(href='#{prefix}/docs/', target='#{viewConfig.linkTarget}') Documents
-
-              if (locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1)
-                li
-                  a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
 
     block content
     .container-fluid
       h6.text-right
         a(href='https://github.com/dongliu/traveler', target='_blank') Release #{viewConfig.appVersion}
     block js
-
