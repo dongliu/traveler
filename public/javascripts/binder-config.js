@@ -5,6 +5,7 @@
 /*global moment: false, ajax401: false, updateAjaxURL: false, disableAjaxCache: false, prefix: false, Holder*/
 
 import * as Editable from './lib/editable.js';
+import * as Table from './lib/table.js';
 
 function cleanTagForm() {
   $('#new-tag')
@@ -215,8 +216,6 @@ $(function() {
 
   var workAoColumns = [
     removeColumn,
-    sequenceColumn,
-    colorColumn,
     workLinkColumn,
     titleColumn,
     addedByColumn,
@@ -228,9 +227,7 @@ $(function() {
     sharedGroupColumn,
   ];
 
-  var works;
-
-  var worksTable = $('#work-table').dataTable({
+  const worksTableConfig = {
     sAjaxSource: './works/json',
     sAjaxDataProp: 'works',
     bAutoWidth: false,
@@ -245,19 +242,12 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: workAoColumns,
-    fnInitComplete: function() {
-      Holder.run({
-        images: 'img.user',
-      });
-      works = worksTable.fnGetData();
-      changeEvents();
-    },
-    aaSorting: [
-      [1, 'asc'],
-      [2, 'asc'],
-    ],
     sDom: sDomNoTools,
-  });
+  };
+
+  Table.sortByColumn(worksTableConfig, addedOnColumn, 'desc');
+
+  var worksTable = $('#work-table').dataTable(worksTableConfig);
 
   $('#work-table').on('click', 'a.remove', function() {
     $('#modalLabel').html('Remove the following work from this binder?');
@@ -297,38 +287,6 @@ $(function() {
 
   $('#more').click(function() {
     setStatus(1);
-  });
-
-  $('#save').click(function() {
-    $('#save').prop('disabled', true);
-    var updates = {};
-    $('input.input-changed, select.input-changed').each(function(
-      index,
-      element
-    ) {
-      getUpdate(element, updates, worksTable);
-    });
-
-    if (!$.isEmptyObject(updates)) {
-      updateWorks(updates, function(err, data) {
-        if (!err) {
-          data.forEach(function(newW) {
-            works.forEach(function(w) {
-              if (newW._id === w._id) {
-                w.sequence = newW.sequence;
-                w.priority = newW.priority;
-                w.value = newW.value;
-                w.color = newW.color;
-              }
-            });
-          });
-
-          worksTable.fnClearTable();
-          worksTable.fnAddData(works);
-          changeEvents();
-        }
-      });
-    }
   });
 
   Editable.binding($, initValue);

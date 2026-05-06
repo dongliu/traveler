@@ -20,14 +20,10 @@ $(function() {
   var workAoColumns = [
     selectColumn,
     workLinkColumn,
-    sColumn,
-    cColumn,
     titleColumn,
     ownerColumn,
     deviceColumn,
     tagsColumn,
-    // keysColumn,
-    // manPowerColumn,
     travelerProgressColumn,
   ];
   fnAddFilterFoot('#work-table', workAoColumns);
@@ -44,14 +40,8 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: workAoColumns,
-    fnDrawCallback: function() {
-      Holder.run({
-        images: 'img.user',
-      });
-    },
     aaSorting: [
       [2, 'asc'],
-      [3, 'asc'],
     ],
     sDom: sDomNoTools,
   });
@@ -69,13 +59,6 @@ $(function() {
       $('#input-progress').html(data.inputProgress);
     })
     .always();
-
-  $('#sort').click(function() {
-    worksTable.fnSort([
-      [1, 'asc'],
-      [2, 'asc'],
-    ]);
-  });
 
   $('span.time').each(function() {
     $(this).text(
