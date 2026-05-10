@@ -1289,6 +1289,49 @@ module.exports = function(app) {
     }
   );
 
+  app.delete(
+    '/data/:id',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', TravelerData),
+    function(req, res, next) {
+      const data = req[req.params.id];
+      if (data.inputType !== 'file') {
+        return res
+          .status(400)
+          .send('only file uploads can be deleted via this endpoint');
+      }
+      req.params.travelerId = String(data.traveler);
+      return next();
+    },
+    reqUtils.exist('travelerId', Traveler),
+    reqUtils.canWriteMw('travelerId'),
+    reqUtils.status('travelerId', [1]),
+    async function deleteData(req, res) {
+      const data = req[req.params.id];
+      const traveler = req[req.params.travelerId];
+      try {
+        if (data.file && data.file.path) {
+          await fs.promises
+            .unlink(path.resolve(data.file.path))
+            .catch(function(err) {
+              if (err.code !== 'ENOENT') {
+                throw err;
+              }
+            });
+        }
+        await TravelerData.findByIdAndDelete(data._id);
+        traveler.data.pull(data._id);
+        traveler.updatedBy = req.session.userid;
+        traveler.updatedOn = Date.now();
+        await traveler.save();
+        return res.status(204).send();
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
   app.get(
     '/travelers/:id/share/',
     auth.ensureAuthenticated,
