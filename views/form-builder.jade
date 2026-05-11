@@ -40,7 +40,7 @@ block underTopBtn
     p Status:
       | &nbsp;#{statusText}
     p Document Number:&nbsp;
-      span#doc-number.text-monospace #{documentNumber}
+      span#doc-number #{documentNumber}
     p Version:&nbsp;
       span#version #{_v}
     if ((status === 0 || status === 0.5 || status === 1 ) && review)
