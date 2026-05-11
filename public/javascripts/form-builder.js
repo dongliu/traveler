@@ -535,9 +535,9 @@ function radio_edit($cgr) {
 
 function checkbox_edit($cgr) {
   $('#output .well.spec').remove();
-  let label = 'label';
+  let label = 'Completed ?';
   let userkey = '';
-  let checkbox_text = 'checkbox text';
+  let checkbox_text = 'Yes';
   let required = false;
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
