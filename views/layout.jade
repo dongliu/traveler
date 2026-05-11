@@ -46,14 +46,14 @@ html
                 li
                   a(href='#{prefix}/forms/').caps #{viewConfig.terminology.form}s
                 li
-                  a(href='#{prefix}/released-forms/') Released #{viewConfig.terminology.form}s
+                  a(href='#{prefix}/released-forms/').caps Released #{viewConfig.terminology.form}s
                 li
                   a(href='#{prefix}/travelers/') Travelers
                 li
                   a(href='#{prefix}/binders/') Binders
                 if (isReviwer)
                   li
-                    a(href='#{prefix}/reviews/') Pending Reviews
+                    a(href='#{prefix}/reviews/').caps My Reviews
                 if (locals && locals.userid && locals.roles && locals.roles.indexOf('admin') !== -1)
                   li
                     a(href='#{prefix}/admin/', target='#{viewConfig.linkTarget}') Admin
