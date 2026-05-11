@@ -35,12 +35,11 @@ block underTopBtn
       ul.nav.nav-tabs
         li.active
           a(href='#travelers', data-toggle='tab') Travelers
+        li
+          a(href='#under-review-travelers', data-toggle='tab').caps under review Travelers
         if (viewConfig.transferOwnership)
           li
             a(href='#transferredtravelers', data-toggle='tab') Transferred travelers
-        //- if (viewConfig.shareGroups)
-          li
-            a(href='#groupsharedtravelers', data-toggle='tab') Group shared travelers
 
       .tab-content
         #travelers.tab-pane.active
@@ -59,10 +58,8 @@ block underTopBtn
                   i.fa.fa-user.fa-lg
                   | &nbsp;Transfer ownership
             table#transferred-traveler-table.table.table-bordered.table-hover
-        //- if (viewConfig.shareGroups)
-          #groupsharedtravelers.tab-pane
-            .btn-toolbar
-            table#group-shared-traveler-table.table.table-bordered.table-hover
+        #under-review-travelers.tab-pane
+          table#under-review-traveler-table.table.table-bordered.table-hover
 
 append js
   script(type='module', src='#{prefix}/javascripts/travelers.js')

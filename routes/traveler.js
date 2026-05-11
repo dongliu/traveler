@@ -298,12 +298,14 @@ module.exports = function(app) {
     req,
     res
   ) {
+    const statusQuery = req.query.status;
+    const statusList = statusQuery.split(',').map(v => Number(v));
     var search = {
       archived: {
         $ne: true,
       },
       status: {
-        $ne: 4,
+        $in: statusList,
       },
     };
     if (req.query.hasOwnProperty('device')) {

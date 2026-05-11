@@ -101,7 +101,7 @@ $(function() {
   updateAjaxURL(prefix);
   disableAjaxCache();
   const tables = [];
-  var travelerAoColumns = [
+  const travelerAoColumns = [
     selectColumn,
     travelerConfigLinkColumn,
     travelerLinkColumn,
@@ -116,7 +116,7 @@ $(function() {
     travelerProgressColumn,
   ];
   const travelerTableConfig = {
-    sAjaxSource: '/currenttravelers/json',
+    sAjaxSource: '/currenttravelers/json?status=0,1,2',
     sAjaxDataProp: '',
     bAutoWidth: false,
     bProcessing: true,
@@ -135,6 +135,41 @@ $(function() {
   };
   Table.sortByColumn(travelerTableConfig, updatedOnHideColumn, 'desc');
   Table.initTableIfExists($('#traveler-table'), travelerTableConfig, tables);
+
+  const reviewTravelerAoColumns = [
+    selectColumn,
+    travelerConfigLinkColumn,
+    travelerLinkColumn,
+    docNoColumn,
+    travelerVersionColumn,
+    titleColumn,
+    tagsColumn,
+    deviceColumn,
+    ownerColumn,
+    // statusColumn,
+    lastEditColumn,
+    travelerProgressColumn,
+  ];
+  const reviewTravelerTableConfig = {
+    sAjaxSource: '/currenttravelers/json?status=1.5',
+    sAjaxDataProp: '',
+    bAutoWidth: false,
+    bProcessing: true,
+    iDisplayLength: 10,
+    aLengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All'],
+    ],
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    bDeferRender: true,
+    aoColumns: travelerAoColumns,
+    aaSorting: [],
+    sDom: sDomNoTools,
+  };
+  Table.sortByColumn(reviewTravelerTableConfig, updatedOnHideColumn, 'desc');
+  Table.initTableIfExists($('#under-review-traveler-table'), reviewTravelerTableConfig, tables);
 
   /*transferred traveler table starts*/
   var transferredTravelerAoColumns = [
