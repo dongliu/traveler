@@ -18,13 +18,13 @@ const mce_content = {
   content_css: '/bootstrap/css/bootstrap.css',
   browser_spellcheck: true,
   plugins: [
-    ['advlist autolink link image lists charmap hr anchor spellchecker'],
+    ['advlist autolink link lists charmap hr anchor spellchecker'],
     ['wordcount visualblocks visualchars code media nonbreaking'],
     ['contextmenu directionality paste'],
   ],
   toolbar1:
-    'charmap | link image | undo redo | removeformat | bullist numlist outdent indent | formatselect bold italic underline strikethrough',
-  contextmenu: 'charmap link image',
+    'charmap | link | undo redo | removeformat | bullist numlist outdent indent | formatselect bold italic underline strikethrough',
+  contextmenu: 'charmap link',
   menubar: false,
   statusbar: false,
 };
