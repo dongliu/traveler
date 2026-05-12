@@ -736,9 +736,8 @@ function figure_edit($cgr) {
     $this.attr('disabled', true);
     const input = $file.find('input')[0];
     const data = new FormData();
-    data.append('name', input.name);
     data.append('type', input.type);
-    data.append(input.name, input.files[0]);
+    data.append('file', input.files[0]);
     $.ajax({
       url: './uploads/',
       type: 'POST',
