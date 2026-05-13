@@ -22,8 +22,9 @@ block underTopBtn
     .row
       .span9
         h3 !{title}
-        h4 type: #{formType}
         h4 status: #{statusText}
+        h4 Document Number:&nbsp;
+          span#doc-number #{documentNumber}
         h4 version:&nbsp;
           span#version #{ver}
         if (review)

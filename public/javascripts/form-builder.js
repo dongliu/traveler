@@ -18,13 +18,13 @@ const mce_content = {
   content_css: '/bootstrap/css/bootstrap.css',
   browser_spellcheck: true,
   plugins: [
-    ['advlist autolink link image lists charmap hr anchor spellchecker'],
+    ['advlist autolink link lists charmap hr anchor spellchecker'],
     ['wordcount visualblocks visualchars code media nonbreaking'],
     ['contextmenu directionality paste'],
   ],
   toolbar1:
-    'charmap | link image | undo redo | removeformat | bullist numlist outdent indent | formatselect bold italic underline strikethrough',
-  contextmenu: 'charmap link image',
+    'charmap | link | undo redo | removeformat | bullist numlist outdent indent | formatselect bold italic underline strikethrough',
+  contextmenu: 'charmap link',
   menubar: false,
   statusbar: false,
 };
@@ -535,9 +535,9 @@ function radio_edit($cgr) {
 
 function checkbox_edit($cgr) {
   $('#output .well.spec').remove();
-  let label = 'label';
+  let label = 'Completed ?';
   let userkey = '';
-  let checkbox_text = 'checkbox text';
+  let checkbox_text = 'Yes';
   let required = false;
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
@@ -736,9 +736,8 @@ function figure_edit($cgr) {
     $this.attr('disabled', true);
     const input = $file.find('input')[0];
     const data = new FormData();
-    data.append('name', input.name);
     data.append('type', input.type);
-    data.append(input.name, input.files[0]);
+    data.append('file', input.files[0]);
     $.ajax({
       url: './uploads/',
       type: 'POST',

@@ -191,6 +191,10 @@ function editButton() {
   return '<div class="pull-right note-update-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit" class="btn btn-info"><i class="fa fa-edit fa-lg"></i></a></div></div>';
 }
 
+function deleteFileButton() {
+  return '<span class="file-delete-button"> <a data-toggle="tooltip" title="delete file" class="btn btn-mini btn-danger"><i class="fa fa-trash"></i></a></span>';
+}
+
 $(function() {
   ajax401(prefix);
 
@@ -489,6 +493,73 @@ $(function() {
         });
     });
   });
+
+  // render file delete on hover for uploaded file history
+  $('#form').on('mouseenter', '.file-history-item', function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    $this.addClass('file-history-focus');
+    if ($('.file-delete-button', $this).length) {
+      $('.file-delete-button', $this).show();
+    } else {
+      $this.append(deleteFileButton());
+    }
+  });
+
+  $('#form').on('mouseleave', '.file-history-item', function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    $this.removeClass('file-history-focus');
+    $('.file-delete-button', $this).hide();
+  });
+
+  $('#form').on(
+    'click',
+    '.file-history-focus a.btn[title="delete file"]',
+    function(e) {
+      e.preventDefault();
+      var $that = $(this);
+      var $item = $that.closest('.file-history-item');
+      var id = $item.prop('id');
+      var fileName = $item.find('a').first().text();
+      $('#modalLabel').html('Delete uploaded file');
+      $('#modal .modal-body').html(
+        '<p>Are you sure you want to delete the uploaded file <strong>' +
+          $('<div>').text(fileName).html() +
+          '</strong>? This action cannot be undone.</p>'
+      );
+      $('#modal .modal-footer').html(
+        '<button value="delete" class="btn btn-warning" data-dismiss="modal">Delete</button><button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>'
+      );
+      $('#modal').modal('show');
+      $('#modal button[value="delete"]').click(function() {
+        e.preventDefault();
+        $.ajax({
+          url: '/data/' + id,
+          type: 'DELETE',
+        })
+          .done(function(data, status, jqXHR) {
+            var timestamp = jqXHR.getResponseHeader('Date');
+            $('#message').append(
+              '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File deleted ' +
+                livespan(timestamp, false) +
+                '</div>'
+            );
+            $item.remove();
+          })
+          .fail(function(jqXHR) {
+            if (jqXHR.status !== 401) {
+              $('#message').append(
+                '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot delete the file: ' +
+                  jqXHR.responseText +
+                  '</div>'
+              );
+              $(window).scrollTop($('#message div:last-child').offset().top - 40);
+            }
+          });
+      });
+    }
+  );
 
   // Safari web browser will not recognize input event for radio and checkbox.
   $('#form input[type="radio"], input[type="checkbox"]').on(

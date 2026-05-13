@@ -3,9 +3,47 @@ const fs = require('fs');
 const path = require('path');
 const debug = require('debug')('traveler:route:traveler');
 const mongoose = require('mongoose');
+const multer = require('multer');
 const _ = require('lodash');
 
 const config = require('../config/config');
+
+const allowedUploadMimetypes = new Set([
+  'application/pdf',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-xpsdocument',
+  'application/oxps',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
+
+function travelerUploadFileFilter(req, file, cb) {
+  if (!file.mimetype) {
+    return cb(null, false);
+  }
+  if (/^(image|text)\//i.test(file.mimetype)) {
+    return cb(null, true);
+  }
+  if (allowedUploadMimetypes.has(file.mimetype)) {
+    return cb(null, true);
+  }
+  return cb(null, false);
+}
+
+const upload = multer({
+  dest: config.uploadPath,
+  limits: {
+    fileSize: (config.app.upload_size || 10) * 1024 * 1024,
+  },
+});
+const singleFileUpload = multer({
+  dest: config.uploadPath,
+  limits: {
+    files: 1,
+    fileSize: (config.app.upload_size || 10) * 1024 * 1024,
+  },
+  fileFilter: travelerUploadFileFilter,
+});
 const routesUtilities = require('../utilities/routes');
 const mqttUtilities = require('../utilities/mqtt');
 
@@ -298,12 +336,14 @@ module.exports = function(app) {
     req,
     res
   ) {
+    const statusQuery = req.query.status;
+    const statusList = statusQuery.split(',').map(v => Number(v));
     var search = {
       archived: {
         $ne: true,
       },
       status: {
-        $ne: 4,
+        $in: statusList,
       },
     };
     if (req.query.hasOwnProperty('device')) {
@@ -824,6 +864,7 @@ module.exports = function(app) {
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [1, 1.5]),
     reqUtils.exist('lid', Log),
+    upload.any(),
     reqUtils.sanitize('body'),
     function(req, res) {
       const log = req[req.params.lid];
@@ -831,11 +872,10 @@ module.exports = function(app) {
       _.keys(req.body).forEach(function(name) {
         log.records.push({ name, value: req.body[name] });
       });
-      if (req.files) {
-        _.keys(req.files).forEach(function(name) {
-          const file = req.files[name];
+      if (req.files && req.files.length) {
+        req.files.forEach(function(file) {
           log.records.push({
-            name,
+            name: file.fieldname,
             value: file.originalname,
             file: {
               path: file.path,
@@ -1224,21 +1264,23 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.canWriteMw('id'),
     reqUtils.status('id', [1]),
+    singleFileUpload.any(),
     function(req, res) {
       const doc = req[req.params.id];
 
-      if (_.isEmpty(req.files)) {
+      if (!req.files || !req.files.length) {
         return res.status(400).send('Expect One uploaded file');
       }
 
+      const uploaded = req.files[0];
       const data = new TravelerData({
         traveler: doc._id,
-        name: req.body.name,
-        value: req.files[req.body.name].originalname,
+        name: req.body.name || uploaded.fieldname,
+        value: uploaded.originalname,
         file: {
-          path: req.files[req.body.name].path,
-          encoding: req.files[req.body.name].encoding,
-          mimetype: req.files[req.body.name].mimetype,
+          path: uploaded.path,
+          encoding: uploaded.encoding,
+          mimetype: uploaded.mimetype,
         },
         inputType: req.body.type,
         inputBy: req.session.userid,
@@ -1285,6 +1327,49 @@ module.exports = function(app) {
         });
       } else {
         res.status(200).json(data);
+      }
+    }
+  );
+
+  app.delete(
+    '/data/:id',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', TravelerData),
+    function(req, res, next) {
+      const data = req[req.params.id];
+      if (data.inputType !== 'file') {
+        return res
+          .status(400)
+          .send('only file uploads can be deleted via this endpoint');
+      }
+      req.params.travelerId = String(data.traveler);
+      return next();
+    },
+    reqUtils.exist('travelerId', Traveler),
+    reqUtils.canWriteMw('travelerId'),
+    reqUtils.status('travelerId', [1]),
+    async function deleteData(req, res) {
+      const data = req[req.params.id];
+      const traveler = req[req.params.travelerId];
+      try {
+        if (data.file && data.file.path) {
+          await fs.promises
+            .unlink(path.resolve(data.file.path))
+            .catch(function(err) {
+              if (err.code !== 'ENOENT') {
+                throw err;
+              }
+            });
+        }
+        await TravelerData.findByIdAndDelete(data._id);
+        traveler.data.pull(data._id);
+        traveler.updatedBy = req.session.userid;
+        traveler.updatedOn = Date.now();
+        await traveler.save();
+        return res.status(204).send();
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
       }
     }
   );

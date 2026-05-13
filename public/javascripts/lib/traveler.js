@@ -75,11 +75,13 @@ export function fileHistory(found) {
   if (found.length > 0) {
     for (i = 0; i < found.length; i += 1) {
       link = `${prefix}/data/${found[i]._id}`;
-      output = `${output}<strong><a href=${link} target="${linkTarget}" download=${
+      output = `${output}<span class="file-history-item" id="${
+        found[i]._id
+      }"><strong><a href=${link} target="${linkTarget}" download=${
         found[i].value
       }>${found[i].value}</a></strong> uploaded by ${
         found[i].inputBy
-      } ${livespan(found[i].inputOn, false)}; `;
+      } ${livespan(found[i].inputOn, false)}; </span>`;
     }
   }
   return output;

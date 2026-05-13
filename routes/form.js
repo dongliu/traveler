@@ -1,9 +1,24 @@
 const debug = require('debug')('traveler:route:form');
 const _ = require('lodash');
 const mongoose = require('mongoose');
+const multer = require('multer');
 const path = require('path');
 const config = require('../config/config');
 const auth = require('../lib/auth');
+
+const imageUpload = multer({
+  dest: config.uploadPath,
+  limits: {
+    files: 1,
+    fileSize: (config.app.upload_size || 10) * 1024 * 1024,
+  },
+  fileFilter(req, file, cb) {
+    if (!file.mimetype || !/^image\/(gif|jpe?g|png)$/i.test(file.mimetype)) {
+      return cb(null, false);
+    }
+    return cb(null, true);
+  },
+});
 
 const authConfig = config.auth;
 
@@ -420,23 +435,22 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canWriteMw('id'),
+    imageUpload.single('file'),
     async function(req, res) {
       const doc = req[req.params.id];
-      if (_.isEmpty(req.files)) {
-        return res.status(400).send('Expect One uploaded file');
-      }
-
-      if (!req.body.name) {
-        return res.status(400).send('Expect input name');
+      if (!req.file) {
+        return res
+          .status(400)
+          .send('Expect one uploaded image file (gif, jpeg, or png)');
       }
 
       const file = new FormFile({
         form: doc._id,
-        value: req.files[req.body.name].originalname,
+        value: req.file.originalname,
         file: {
-          path: req.files[req.body.name].path,
-          encoding: req.files[req.body.name].encoding,
-          mimetype: req.files[req.body.name].mimetype,
+          path: req.file.path,
+          encoding: req.file.encoding,
+          mimetype: req.file.mimetype,
         },
         inputType: req.body.type,
         uploadedBy: req.session.userid,
