@@ -12,4 +12,4 @@ Besides web based user interface, the traveler application provides a simple
 HTTP [API](#api) for other applications to operate templates, travelers, and
 binders.
 
-<img src="../images/traveler-flow.png" alt="traveler flow">
+![traveler flow](../../images/traveler-flow.png)

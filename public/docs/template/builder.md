@@ -15,7 +15,7 @@ class="fa fa-file-o fa-lg"></i>&nbsp;New form</a> button.
 A new page will load the following page.
 
 <figure align="center">
-<img src="../images/template-type.png" alt="new template page" style="width:50%">
+![new template page](../../images/template-type.png)
 <figcaption>
 New template
 </figcaption>
