@@ -13,21 +13,39 @@ import {
 } from './lib/checkbox-set.js';
 import { isNumberSupported } from './lib/form-builder-shared.js';
 
-const mce_content = {
-  selector: 'textarea.tinymce',
-  content_css: '/bootstrap/css/bootstrap.css',
-  browser_spellcheck: true,
+const mceConfig = {
+  base_url: '/tinymce',
+  license_key: 'gpl',
+  suffix: '.min',
+
+  // Required in v6+
+  model: 'dom',
+
   plugins: [
-    ['advlist autolink link lists charmap hr anchor spellchecker'],
-    ['wordcount visualblocks visualchars code media nonbreaking'],
-    ['contextmenu directionality paste'],
+    'advlist', 'autolink', 'lists', 'link', 'image',
+    'charmap', 'preview', 'anchor', 'searchreplace',
+    'visualblocks', 'code', 'fullscreen', 'insertdatetime',
+    'table', 'help', 'wordcount'
   ],
-  toolbar1:
-    'charmap | link | undo redo | removeformat | bullist numlist outdent indent | formatselect bold italic underline strikethrough',
-  contextmenu: 'charmap link',
-  menubar: false,
-  statusbar: false,
-};
+
+  toolbar: 'undo redo | charmap | link image | bullist numlist outdent indent | formatselect bold italic underline strikethrough | removeformat',
+
+  // v8: Promise-based upload handler
+  images_upload_handler: async (blobInfo) => {
+    const formData = new FormData();
+    formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+    const response = await fetch('./uploads/', { method: 'POST', body: formData });
+    if (!response.ok) throw new Error('Upload failed');
+
+    const data = await response.json();
+    return data.location;  // must return the URL string
+  },
+
+  setup: (editor) => {
+    editor.on('change', () => editor.save()); // sync with jQuery/form
+  }
+}
 
 let initHtml = '';
 let initNotes = '';
@@ -1112,19 +1130,21 @@ function rich_edit($cgr) {
     $('#output').append($new_cgr);
     $('#output').append($edit);
   }
-  $('textarea', $rich_textarea).html(html);
-  tinymce.init(mce_content);
+  const $mceTextarea = $('textarea', $rich_textarea);
+  $mceTextarea.html(html);
+  $mceTextarea.tinymce(mceConfig);
   $done.click(function(e) {
     e.preventDefault();
-    const content = tinymce.activeEditor.getContent();
+    const editor = $mceTextarea.tinymce();
+    const content = editor ? editor.getContent() : '';
     if (content === '') {
       // nothing was done
-      tinymce.remove();
+      if (editor) editor.remove();
       $edit.remove();
       $new_cgr.remove();
     } else {
-      $('.tinymce', $rich).html(tinymce.activeEditor.getContent());
-      tinymce.remove();
+      $('.tinymce', $rich).html(editor.getContent());
+      editor.remove();
       $(this)
         .closest('.spec')
         .remove();
