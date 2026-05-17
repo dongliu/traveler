@@ -15,6 +15,7 @@ import {
 const mceConfig = {
   base_url: '/tinymce',
   license_key: 'gpl',
+  promotion: false,
   suffix: '.min',
 
   // Required in v6+
