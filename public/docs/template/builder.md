@@ -14,12 +14,7 @@ class="fa fa-file-o fa-lg"></i>&nbsp;New form</a> button.
 
 A new page will load the following page.
 
-<figure align="center">
 ![new template page](../../images/template-type.png)
-<figcaption>
-New template
-</figcaption>
-</figure>
 
 The user needs to set the new template's name, and choose the type. The default
 type is [normal](#normal). The [discrepancy](#discrepancy) type is for QA
@@ -98,12 +93,16 @@ When a template has sections, a floating navigation will be generated on the
 right side of the traveler page. With the navigation, the user can jump to a
 section with a click. This is helpful when a template is several pages long.
 
-With rich instruction, a user can add math formulas, web links, images, and
-lists to the template. This is useful when the user needs a rich format editor
-to compose the paragraph. Note that the image added into the rich instruction
-needs to be hosted on a location that a traveler viewer can access. It is
-different from the figure in basic input, which accepts an uploaded image file
-from the user and saved on the traveler server storage.
+With rich instruction, a user can add math formulas, web links, images, tables,
+and other rich component. This is useful when the user needs a rich format
+editor to compose the paragraph.
+
+Two types of images can be added into a template, 1) a self-hosted image that is
+uploaded from a user's local disk and saved on traveler server, and 2) an image
+that is hosted on an website that the users have access. Option 1) is
+recommended in order to have full control of the image.
+
+![upload image in rich editor](../../images/tinymce-image-upload.png)
 
 #### Update, delete, or duplicate a component
 

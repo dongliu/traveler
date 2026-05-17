@@ -3,12 +3,7 @@
 The following diagram shows the state transition of a template and a released
 template.
 
-<figure align="center">
 ![template life cycle](../../images/template-life.png)
-<figcaption>
-States and life cycle of templates
-</figcaption>
-</figure>
 
 There are two groups of templates: draft and released. Only a released template
 can be used to create a traveler. The traveler application supports the review

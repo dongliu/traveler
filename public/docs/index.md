@@ -1,6 +1,6 @@
 # Traveler User Manual
 
-*Updated on 01/02/2026*
+*Updated on 05/17/2026*
 
 ## How to Use
 
