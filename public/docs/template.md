@@ -1,3 +1,72 @@
+## Draft template
+
+**Audience: traveler users, especially process template owner**
+
+Before creating travelers, a user needs to design a template and release it after a review process. A traveler template mimics the paper traveler so that a process owner defines the sequence of actions and specifies the data to be collected in each step.
+
+### Normal templates
+
+Most traveler use cases can be covered with normal templates. The user can
+define most common HTML input types, including numbers, date, short text, long
+text, radio button, checkbox, and file upload in a normal template. The user can
+also include instructive directions of text, diagrams, and formulas in a normal
+template. A normal template supports numbered sections for easy navigation and
+reference.
+
+### Discrepancy template
+
+A discrepancy template can be used for a quality assurance (QA) like process. It
+is owned by the QA process owner, who has the responsibility to verify the
+result of a traveler. When a traveler is ready for quality assurance, a QA
+personal will check if the result meets the expectation. A discrepancy is logged
+if the work does not pass QA, which will be followed by a correction. The
+correction will be recorded in the traveler with data updates. Then a new QA
+iteration can be triggered.
+
+A released discrepancy template cannot used solely without being attached to a
+released normal template when creating a traveler.
+
+### States and life cycle of a template
+
+The following diagram shows the state transition of a template and a released
+template.
+
+![template life cycle](../images/template-life.png)
+
+There are two groups of templates: draft and released. Only a released template
+can be used to create a traveler. The traveler application supports the review
+and approval process of templates.
+
+A template is a draft and editable when created. When a draft template is not
+needed any more, it can be archived.
+
+When a draft template is ready for review, its owner can request one or more
+reviewers to check if the template is ready to release. A reviewer can either
+approve or request for change. When any reviewer requests a change, the review
+process ends and the form becomes editable. All the reviewers must approve
+before a template can be released.
+
+When a template is released after a review process, a new released template is
+created. A released template can be archived. A released template can be updated
+by reversion. When a reversion starts, no traveler can be created from the old
+released template. The original draft template becomes editable, from where a
+new released template version can be created after a new review process.
+
+### Tabs on the template page
+
+**Note: this section depends on configuration**
+
+The templates are listed in different tabs according to their status. Please
+click the tab to see what are the content to be included in each tab.
+
+<div>
+<ul class="nav nav-tabs"><li class="active"><a href="#forms" data-toggle="tab">Draft templates</a></li><li><a href="#submittedforms" data-toggle="tab">Under review templates</a></li></ul>
+<div class="tab-content well">
+<div id="forms" class="tab-pane active">All draft templates</div>
+<div id="submittedforms" class="tab-pane">All draft templates under review</div>
+</div>
+</div>
+
 ### Template builder
 
 The template builder is a what-you-see-is-what-you-get editor. It is the
@@ -14,10 +83,10 @@ class="fa fa-file-o fa-lg"></i>&nbsp;New form</a> button.
 
 A new page will load the following page.
 
-![new template page](../../images/template-type.png)
+![new template page](../images/template-type.png)
 
 The user needs to set the new template's name, and choose the type. The default
-type is [normal](#normal). The [discrepancy](#discrepancy) type is for QA
+type is [normal](#normal-templates). The [discrepancy](#discrepancy-template) type is for QA
 process in order to check the discrepancy of a work. Click <button
 class="btn btn-primary">Confirm</button> to go to next step. Always start with
 the normal type for your first try.
@@ -102,7 +171,7 @@ uploaded from a user's local disk and saved on traveler server, and 2) an image
 that is hosted on an website that the users have access. Option 1) is
 recommended in order to have full control of the image.
 
-![upload image in rich editor](../../images/tinymce-image-upload.png)
+![upload image in rich editor](../images/tinymce-image-upload.png)
 
 #### Update, delete, or duplicate a component
 
@@ -190,3 +259,63 @@ validation</button> button.
 
 The user can save the template in the builder as a new template. The new
 template can be found in the my draft templates list.
+
+### Clone a template
+
+
+### Ownership transfer
+
+
+### Template version control
+
+When a watched property of a template is updated on the server (the user clicks
+the save button), the template version will be incremented. The watched
+properties include the title, description, and HTML. The template viewer or
+builder always renders the latest version when refreshed.
+
+The user can view the versions with HTML changes by clicking the
+<a data-toggle="tooltip" title="Check and switch versions" class="btn btn-primary">Version
+control</a> button. The user can choose any two versions to compare them side by
+side. Note that not all the details of template HTML are viewable when rendered,
+e.g. the input validation rules like min and max value of a number. The user can
+"revert" the template to an old version by clicking the
+<button data-toggle="tooltip" title="Create a new version" class="btn btn-primary use">Use</button>
+button. In order to record the change, a new version is created for the
+template.
+
+![version control](../images/version-control.png)
+
+### Template review and release process
+
+A traveler can only be created from a released template. A released template is
+created when a draft template is approved by the reviewers and released after
+that. When the owner finishes editing a template, s/he can request a template
+review by click on the <button class="btn btn-primary">Submit for
+review</button> button.
+
+All the submitted templates are listed on the under review templates tab. On the
+template review page, the template owner can add or remove reviewers. A reviewer
+is a user with the reviewer role. When any reviewer requests change in the form,
+the review process is stopped. All past review results and comments for specific
+versions are viewable for future reference. The review process restarts when the
+owner makes changes and submits for review again.
+
+When all the reviewers approve the template of the current version, the <button
+class="btn btn-primary">Release</button> button will appear on the template
+page. When the owner releases the approved template, a new released template is
+created. The approved template is listed on the approved and released template
+table.
+
+#### Reviewer
+
+**Audience: admin and reviewer**
+
+A normal traveler user cannot review templates. The admin needs to add the
+reviewer role to the users who want to perform the task. A reviewer sees <a
+href="/reviews/">Reviews</a> link on top of the traveler page. The reviews page
+lists all the active templates under review. The reviewer can approve or request
+for more works for a template. A template needs to be approved by all the
+reviewers before release. A single rework request from any reviewer will
+terminate the review process, and the template becomes editable again. A
+reviewer can request change for a template that s/he has approved before it is
+released by the template's owner.

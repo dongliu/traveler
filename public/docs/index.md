@@ -8,50 +8,23 @@
 
 ## Basics
 
-- [Overview](basics/header.md)
-- [Templates](basics/template.md)
-- [Travelers](basics/traveler.md)
-- [Binders](basics/binder.md)
-- [Login](basics/login.md)
-- [Ownership and access control](basics/ownership.md)
-- [Tabs](basics/tab.md)
-- [Print](basics/print.md)
-- [Color coding](basics/color.md)
+- [Basics](basics.md)
 
 ## Draft Templates
 
-- [Overview](template/header.md)
-- [Normal templates](template/normal.md)
-- [Discrepancy templates](template/discrepancy.md)
-- [Lifecycle](template/lifecycle.md)
-- [Tabs](template/tab.md)
-- [Form builder](template/builder.md)
-- [Clone a template](template/clone.md)
-- [Transfer ownership](template/transfer.md)
-- [Version control](template/version-control.md)
-- [Review process](template/review.md)
+- [Draft Templates](template.md)
 
 ## Released Templates
 
-- [Overview](released_template/header.md)
-- [Revision](released_template/revision.md)
+- [Released Templates](released-template.md)
 
 ## Travelers
 
-- [Overview](traveler/header.md)
-- [Create a traveler](traveler/create.md)
-- [Traveler status](traveler/status.md)
-- [Update status](traveler/update-status.md)
-- [Tabs](traveler/tab.md)
-- [View traveler](traveler/view.md)
-- [Update traveler](traveler/update.md)
-- [Update notes](traveler/update-note.md)
-- [Configure a traveler](traveler/config.md)
-- [Manage forms](traveler/manage-forms.md)
+- [Travelers](traveler.md)
 
 ## Binders
 
-- [All binder topics](binder/all.md)
+- [Binders](binder.md)
 
 ## API
 
