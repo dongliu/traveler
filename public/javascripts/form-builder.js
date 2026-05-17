@@ -16,6 +16,7 @@ import { isNumberSupported } from './lib/form-builder-shared.js';
 const mceConfig = {
   base_url: '/tinymce',
   license_key: 'gpl',
+  promotion: false,
   suffix: '.min',
 
   // Required in v6+
