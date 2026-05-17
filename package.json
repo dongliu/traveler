@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "start": "node app",
-    "unit": "mocha test-unit/**/*.test.js"
+    "unit": "mocha test-unit/**/*.test.js",
+    "copy:tinymce": "cpx \"node_modules/tinymce/**/*\" public/tinymce",
+    "copy:tinymce-jquery": "cpx \"node_modules/@tinymce/tinymce-jquery/**/*\" public/tinymce-jquery",
+    "copy:assets": "npm run copy:tinymce && npm run copy:tinymce-jquery"
   },
   "repository": {
     "type": "git",
@@ -12,6 +15,7 @@
     "release": "4.0.4"
   },
   "dependencies": {
+    "@tinymce/tinymce-jquery": "^2.0.0",
     "basic-auth": "1.0.0",
     "cas.js": "0.1.0",
     "cheerio": "0.22.0",
@@ -42,7 +46,7 @@
     "request": "2.34.0",
     "sanitize-html": "^1.20.0",
     "serve-favicon": "2.5.0",
-    "tinymce": "^5.10.1",
+    "tinymce": "^8.0.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
@@ -50,6 +54,7 @@
     "@types/node": "^25.0.3",
     "acorn": "^7.4.1",
     "chai": "^4.2.0",
+    "cpx2": "^8.0.2",
     "eslint": "^9.9.0",
     "globals": "^15.9.0",
     "mocha": "^5.2.0",
