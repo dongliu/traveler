@@ -3,7 +3,11 @@
   "version": "3.2.0",
   "private": true,
   "scripts": {
-    "start": "node app"
+    "start": "node app",
+    "unit": "mocha test-unit/**/*.test.js",
+    "copy:tinymce": "cpx \"node_modules/tinymce/**/*\" public/tinymce",
+    "copy:tinymce-jquery": "cpx \"node_modules/@tinymce/tinymce-jquery/**/*\" public/tinymce-jquery",
+    "copy:assets": "npm run copy:tinymce && npm run copy:tinymce-jquery"
   },
   "repository": {
     "type": "git",
@@ -11,6 +15,7 @@
     "release": "3.2.0"
   },
   "dependencies": {
+    "@tinymce/tinymce-jquery": "^2.0.0",
     "basic-auth": "1.0.0",
     "cas.js": "0.1.0",
     "cheerio": "0.22.0",
@@ -38,17 +43,16 @@
     "request": "2.34.0",
     "sanitize-html": "^1.20.0",
     "serve-favicon": "2.5.0",
-    "tinymce": "^5.10.1",
+    "tinymce": "^8.0.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "acorn": "^7.4.1",
     "chai": "^4.2.0",
-    "eslint": "^8.57.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^6.9.0",
-    "eslint-plugin-import": "^2.24.2",
+    "cpx2": "^8.0.2",
+    "eslint": "^9.9.0",
+    "globals": "^15.9.0",
     "mocha": "^5.2.0",
     "prettier": "^1.19.1",
     "sinon": "^7.2.3",
