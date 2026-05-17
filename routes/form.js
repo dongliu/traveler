@@ -475,7 +475,7 @@ module.exports = function(app) {
           encoding: req.file.encoding,
           mimetype: req.file.mimetype,
         },
-        inputType: req.body.type,
+        inputType: req.body.type || 'file',
         uploadedBy: req.session.userid,
         uploadedOn: Date.now(),
       });
@@ -487,9 +487,7 @@ module.exports = function(app) {
         res.set('Location', url);
         return res
           .status(201)
-          .send(
-            `The uploaded file is at <a target="_blank" href="${url}">${url}</a>`
-          );
+          .json({location: url});
       } catch (error) {
         logger.error(error);
         return res.status(500).send(error.message);
