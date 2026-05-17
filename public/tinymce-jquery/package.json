@@ -1,0 +1,67 @@
+{
+  "name": "@tinymce/tinymce-jquery",
+  "version": "2.2.0",
+  "description": "Official TinyMCE integration for jQuery",
+  "main": "dist/tinymce-jquery.js",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE.txt"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "clean": "rimraf lib dist scratch",
+    "test": "bedrock-auto -b chrome-headless -d src/test/ts",
+    "test-manual": "bedrock -d src/test/ts",
+    "build": "yarn run clean && tsc -p ./tsconfig.json && rollup -c rollup.config.js",
+    "lint": "eslint src",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "deploy-storybook": "yarn storybook-to-ghpages --source-branch=main"
+  },
+  "repository": "https://github.com/tinymce/tinymce-jquery",
+  "author": "Tiny Technologies",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.21.3",
+    "@ephox/agar": "^7.4.1",
+    "@ephox/bedrock-client": "^14.0.0",
+    "@ephox/bedrock-server": "^14.0.0",
+    "@ephox/katamari": "^9.1.5",
+    "@ephox/mcagar": "^8.3.2",
+    "@ephox/sand": "^6.0.9",
+    "@ephox/sugar": "^9.2.1",
+    "@ephox/swag": "^4.6.0",
+    "@rollup/plugin-terser": "^0.4.0",
+    "@storybook/addon-actions": "^6.5.16",
+    "@storybook/addon-essentials": "^6.5.16",
+    "@storybook/addon-interactions": "^6.5.16",
+    "@storybook/addon-links": "^6.5.16",
+    "@storybook/builder-webpack5": "^6.5.16",
+    "@storybook/html": "^6.5.16",
+    "@storybook/manager-webpack5": "^6.5.16",
+    "@storybook/storybook-deployer": "^2.8.16",
+    "@storybook/testing-library": "^0.0.13",
+    "@tinymce/beehive-flow": "^0.19.0",
+    "@tinymce/eslint-plugin": "^3.0.0",
+    "@types/jquery": "^3.5.16",
+    "@types/react": "^17.0.0",
+    "babel-loader": "^8.3.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "rimraf": "^4.4.1",
+    "rollup": "^3.20.2",
+    "tinymce": "^8.0.1",
+    "tslib": "^2.5.0",
+    "typescript": "^5.9.3",
+    "webpack": "^5.9.0"
+  },
+  "dependencies": {},
+  "resolutions": {
+    "@types/node": "^16"
+  }
+}
