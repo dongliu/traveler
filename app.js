@@ -105,7 +105,7 @@ if (app.get('env') === 'production') {
 }
 
 app.set('port', process.env.PORT || appSettings.app_port);
-app.set('views', [`${__dirname}/views`, `${__dirname}/docs`]);
+app.set('views', `${__dirname}/views`);
 app.set('view engine', 'jade');
 if (app.get('env') === 'production') {
   app.use(
@@ -121,6 +121,7 @@ app.use(
   })
 );
 app.use(compression());
+require('./routes/doc')(app);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(`${__dirname}/public/favicon.ico`));
 if (app.get('env') === 'development') {
@@ -181,8 +182,6 @@ require('./routes/user')(app);
 require('./routes/group')(app);
 require('./routes/profile')(app);
 require('./routes/ldaplogin')(app);
-require('./routes/doc')(app);
-
 app.get('/api', function(req, res) {
   res.render('api', {
     prefix: req.proxied ? req.proxied_prefix : '',
