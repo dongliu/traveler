@@ -51,3 +51,14 @@ docker/server.key
 
 # npm stuff #
 npm-debug.log*
+
+# Claude Code
+.claude/settings.local.json
+.claude/CLAUDE.md
+.claude/projects/
+.claude/todos/
+.claude/tasks/
+.claude/worktrees/
+
+# local env
+.env
