@@ -14,7 +14,6 @@ const rewrite = require('express-urlrewrite');
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
-const multer = require('multer');
 const path = require('path');
 const rotator = require('file-stream-rotator');
 
@@ -107,7 +106,7 @@ if (app.get('env') === 'production') {
 }
 
 app.set('port', process.env.PORT || appSettings.app_port);
-app.set('views', [`${__dirname}/views`, `${__dirname}/docs`]);
+app.set('views', `${__dirname}/views`);
 app.set('view engine', 'jade');
 if (app.get('env') === 'production') {
   app.use(
@@ -123,6 +122,7 @@ app.use(
   })
 );
 app.use(compression());
+require('./routes/doc')(app);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(`${__dirname}/public/favicon.ico`));
 if (app.get('env') === 'development') {
@@ -145,15 +145,6 @@ app.use(
     }),
     cookie: {
       maxAge: appSettings.cookie_life || 28800000,
-    },
-  })
-);
-app.use(
-  multer({
-    dest: config.uploadPath,
-    limits: {
-      files: 1,
-      fileSize: (config.app.upload_size || 10) * 1024 * 1024,
     },
   })
 );
@@ -192,10 +183,6 @@ require('./routes/user')(app);
 require('./routes/group')(app);
 require('./routes/profile')(app);
 require('./routes/ldaplogin')(app);
-require('./routes/doc')(app);
-require('./routes/ncr-view')(app);
-app.use('/api/ncr', require('./routes/ncr'));
-
 app.get('/api', function(req, res) {
   res.render('api', {
     prefix: req.proxied ? req.proxied_prefix : '',
