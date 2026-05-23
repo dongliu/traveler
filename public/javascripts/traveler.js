@@ -916,6 +916,16 @@ $(function() {
     });
   });
 
+  $('#submit-review-admin').on('click', function(e) {
+    e.preventDefault();
+    submitReview({
+      result: $('input[name="admin-result"]:checked').val(),
+      comment: $('#admin-comment').val(),
+      v: traveler._v || 1,
+      reviewerId: $('#admin-reviewer-select').val(),
+    });
+  });
+
   $('#add-discrepancy').click(function() {
     $.ajax({
       url: './logs/',

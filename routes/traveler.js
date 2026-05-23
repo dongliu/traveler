@@ -462,27 +462,40 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.canReadMw('id'),
     redirectPreview,
-    function getTraveler(req, res) {
+    async function getTraveler(req, res) {
       const doc = req[req.params.id];
-      return routesUtilities.getDeviceValue(doc.devices).then(function(value) {
-        doc.devices = value;
-        return res.render(
-          'traveler',
-          routesUtilities.getRenderObject(req, {
-            isOwner: reqUtils.isOwner(req, doc),
-            canStart: doc.sharedWith.some(
-              doc => doc._id === req.session.userid
-            ),
-            isReviewer: doc.isReviewer(req.session.userid),
-            traveler: doc,
-            review: doc.__review,
-            formHTML:
-              doc.forms.length === 1
-                ? doc.forms[0].html
-                : doc.forms.id(doc.activeForm).html,
-          })
-        );
-      });
+      const value = await routesUtilities.getDeviceValue(doc.devices);
+      doc.devices = value;
+
+      // for admin: build list of reviewers (excluding admin themselves) for on-behalf-of dropdown
+      let pendingReviewers = [];
+      if (reqUtils.isAdmin(req) && doc.__review?.reviewRequests?.length) {
+        const reviewerIds = doc.__review.reviewRequests
+          .map(r => r._id)
+          .filter(id => id !== req.session.userid);
+        if (reviewerIds.length) {
+          const reviewers = await User.find({ _id: { $in: reviewerIds } }).exec();
+          pendingReviewers = reviewers.map(r => ({ _id: r._id, name: r.name }));
+        }
+      }
+
+      return res.render(
+        'traveler',
+        routesUtilities.getRenderObject(req, {
+          isOwner: reqUtils.isOwner(req, doc),
+          canStart: doc.sharedWith.some(
+            doc => doc._id === req.session.userid
+          ),
+          isReviewer: doc.isReviewer(req.session.userid),
+          pendingReviewers,
+          traveler: doc,
+          review: doc.__review,
+          formHTML:
+            doc.forms.length === 1
+              ? doc.forms[0].html
+              : doc.forms.id(doc.activeForm).html,
+        })
+      );
     }
   );
 
@@ -578,9 +591,18 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     // only available when under review
     reqUtils.status('id', [1.5]),
-    function(req, res, next) {
+    function submitReview(req, res, next) {
       const traveler = req[req.params.id];
       const isReviewer = traveler.isReviewer(req.session.userid);
+      if (reqUtils.isAdmin(req) && req.body.reviewerId) {
+        if (!traveler.isReviewer(req.body.reviewerId)) {
+          return res.status(400).send('reviewerId is not a reviewer of this traveler');
+        }
+        logger.info(
+          `admin ${req.session.userid} submitting review on behalf of reviewer ${req.body.reviewerId} for traveler ${req.params.id}`
+        );
+        return next();
+      }
       if (!isReviewer) {
         return res.status(401).send('only reviewer can submit');
       }
