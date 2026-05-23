@@ -1779,6 +1779,22 @@ function binding_events() {
     );
   });
 
+  $('#submit-review-admin').on('click', function(e) {
+    e.preventDefault();
+    sendRequest(
+      {
+        result: $('input[name="admin-result"]:checked').val(),
+        comment: $('#admin-comment').val(),
+        v: $('#version').text(),
+        reviewerId: $('#admin-reviewer-select').val(),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      'review'
+    );
+  });
+
   $('#obsolete, #archive').click(function() {
     sendRequest(
       {

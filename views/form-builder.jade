@@ -89,6 +89,34 @@ block underTopBtn
                       textarea#comment(name="comment", cols="40", rows="10")
                   .btn-group
                     button.btn.btn-primary#submit-review(data-toggle='tooltip', title='Report review result') Submit
+        //- admin can submit a review on behalf of a reviewer
+        if (isAdmin && status === 0.5 && pendingReviewers && pendingReviewers.length)
+          .accordion-group
+            .accordion-heading
+              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#admin-review") Submit review on behalf of reviewer (Admin)
+            #admin-review.accordion-body.collapse
+              .accordion-inner
+                form.form-horizontal#admin-review-form
+                  .control-group
+                    .control-label Reviewer
+                    .controls
+                      select#admin-reviewer-select(name="reviewerId")
+                        each r in pendingReviewers
+                          option(value="#{r._id}") #{r.name || r._id}
+                  .control-group
+                    .controls
+                      label.radio
+                        input#admin-approve(type="radio" name="admin-result" value="1")
+                        span Approve
+                      label.radio
+                        input#admin-non-approve(type="radio" name="admin-result" value="2")
+                        span Reject
+                  .control-group
+                    .control-label comment
+                    .controls
+                      textarea#admin-comment(name="admin-comment", cols="40", rows="10")
+                  .btn-group
+                    button.btn.btn-primary#submit-review-admin(data-toggle='tooltip', title='Submit review on behalf of reviewer') Submit
 
     .well-large
       form.form-horizontal#output

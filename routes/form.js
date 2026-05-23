@@ -317,6 +317,7 @@ module.exports = function(app) {
     async function formBuilder(req, res) {
       const form = req[req.params.id];
       const isReviewer = form.isReviewer(req.session.userid);
+      const isAdmin = reqUtils.isAdmin(req);
       const allApproved = form.allApproved();
       debug(`all approved: ${allApproved}`);
 
@@ -329,6 +330,18 @@ module.exports = function(app) {
           if (reviewer) {
             reviewResult.reviewerName = reviewer.name;
           }
+        }
+      }
+
+      // for admin: build list of reviewers (excluding admin themselves) for on-behalf-of dropdown
+      let pendingReviewers = [];
+      if (isAdmin && form.__review?.reviewRequests?.length) {
+        const reviewerIds = form.__review.reviewRequests
+          .map(r => r._id)
+          .filter(id => id !== req.session.userid);
+        if (reviewerIds.length) {
+          const reviewers = await User.find({ _id: { $in: reviewerIds } }).exec();
+          pendingReviewers = reviewers.map(r => ({ _id: r._id, name: r.name }));
         }
       }
 
@@ -346,6 +359,8 @@ module.exports = function(app) {
           formType: form.formType,
           prefix: req.proxied ? req.proxied_prefix : '',
           isReviewer,
+          isAdmin,
+          pendingReviewers,
           allApproved,
           review: form.__review,
           released_form_version_mgmt: config.app.released_form_version_mgmt,
@@ -628,9 +643,18 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     // only available when under review
     reqUtils.status('id', [0.5]),
-    function(req, res, next) {
+    function submitReview(req, res, next) {
       const form = req[req.params.id];
       const isReviewer = form.isReviewer(req.session.userid);
+      if (reqUtils.isAdmin(req) && req.body.reviewerId) {
+        if (!form.isReviewer(req.body.reviewerId)) {
+          return res.status(400).send('reviewerId is not a reviewer of this form');
+        }
+        logger.info(
+          `admin ${req.session.userid} submitting review on behalf of reviewer ${req.body.reviewerId} for form ${req.params.id}`
+        );
+        return next();
+      }
       if (!isReviewer) {
         return res.status(401).send('only reviewer can submit');
       }
