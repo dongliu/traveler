@@ -127,5 +127,6 @@ module.exports.load = function() {
   }
   viewConfig.terminology = this.ui.terminology;
 
+  viewConfig.NODE_ENV = process.env.NODE_ENV || 'development';
   module.exports.viewConfig = viewConfig;
 };
