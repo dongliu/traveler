@@ -13,7 +13,6 @@ const rewrite = require('express-urlrewrite');
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
-const multer = require('multer');
 const path = require('path');
 const rotator = require('file-stream-rotator');
 
@@ -131,15 +130,6 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: appSettings.cookie_life || 28800000,
-    },
-  })
-);
-app.use(
-  multer({
-    dest: config.uploadPath,
-    limits: {
-      files: 1,
-      fileSize: (config.app.upload_size || 10) * 1024 * 1024,
     },
   })
 );

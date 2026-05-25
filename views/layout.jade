@@ -11,8 +11,9 @@ html
       var shareGroups = !{JSON.stringify(viewConfig.shareGroups)};
       var linkTarget = !{JSON.stringify(viewConfig.linkTarget)} || '_blank';
       var showCCDB = !{JSON.stringify(viewConfig.showCCDB)};
-      var userid = !{JSON.stringify(locals.session.userid)};
+      var userid = !{JSON.stringify(locals.userid || '')};
       var prefix = !{JSON.stringify(prefix)};
+      var NODE_ENV = !{JSON.stringify(viewConfig.NODE_ENV)};
 
     - var isAdmin = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1
     - var isManager = locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('manager') !== -1
