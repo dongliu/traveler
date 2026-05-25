@@ -669,8 +669,8 @@ ul.pagination > li:last-child > span {
   -moz-border-radius-bottomright: 4px;
 }
 
-table,
-table th,
-table td {
+form.form-horizontal table,
+form.form-horizontal table th,
+form.form-horizontal table td {
   border: 1pt solid black;
 }
