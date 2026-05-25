@@ -42,7 +42,8 @@ export function add_new_cgr(
     $new_cgr.prepend($buttons.hide());
   }
   if ($cgr) {
-    if ($('span.fe-type', $cgr).text() !== 'radio') {
+    const feType = $('span.fe-type', $cgr).text();
+    if (feType !== 'radio' && feType !== 'table') {
       // reserve important attributes that are not covered but rivet model binding like unique name
       $('input, textarea, img', $new_cgr).attr(
         'name',
@@ -66,7 +67,7 @@ export function updateSectionNumbers() {
   let controlNumber = 0;
   // assign the sequence number to all legend
   $('#output')
-    .find('legend, .control-label, .rich-instruction')
+    .find('legend, .control-label, .rich-instruction, .table-group')
     .each(function() {
       if ($(this).is('legend')) {
         sectionNumber += 1;
@@ -83,6 +84,13 @@ export function updateSectionNumbers() {
 
         $(this)
           .find('.rich-instruction-number')
+          .text(`${sectionNumber}.${instructionNumber}`);
+      } else if ($(this).is('.table-group')) {
+        instructionNumber += 1;
+        controlNumber = 0;
+        $(this)
+          .find('.table-group-number')
+          .first()
           .text(`${sectionNumber}.${instructionNumber}`);
       } else {
         controlNumber += 1;

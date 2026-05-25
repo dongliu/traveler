@@ -674,3 +674,62 @@ form.form-horizontal table th,
 form.form-horizontal table td {
   border: 1pt solid black;
 }
+
+/* ── Table builder ──────────────────────────────────────────────────────────── */
+
+.table-group {
+  margin: 6px 0;
+}
+
+.table-group-number {
+  font-weight: bold;
+  color: #555;
+  margin-right: 4px;
+}
+
+.table-group-label {
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+/* Cells are clickable while the parent wrap is in editing mode */
+.control-group-wrap[data-status="editing"] .form-table th,
+.control-group-wrap[data-status="editing"] .form-table td {
+  cursor: pointer;
+}
+
+.control-group-wrap[data-status="editing"] .form-table th:hover,
+.control-group-wrap[data-status="editing"] .form-table td:hover {
+  background-color: #d9edf7;
+}
+
+/* Add Row / Add Column buttons shown during editing */
+.table-action-btns {
+  margin: 6px 0 2px;
+}
+
+.table-add-row-btn,
+.table-add-col-btn {
+  margin-right: 6px;
+}
+
+/* Row / column manage list in spec panel */
+.table-manage-list {
+  margin-bottom: 4px;
+}
+
+.table-manage-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 3px;
+}
+
+.table-item-label {
+  min-width: 90px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
