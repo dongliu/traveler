@@ -326,7 +326,7 @@ figcaption {
   padding-right: 10px;
 }
 
-/* checkbox set */ 
+/* checkbox set */
 .checkbox-set-controls .controls {
   margin-left: 0px;
 }
@@ -669,9 +669,9 @@ ul.pagination > li:last-child > span {
   -moz-border-radius-bottomright: 4px;
 }
 
-form.form-horizontal table,
-form.form-horizontal table th,
-form.form-horizontal table td {
+form.form-horizontal .tinymce table,
+form.form-horizontal .tinymce table th,
+form.form-horizontal .tinymce table td {
   border: 1pt solid black;
 }
 
