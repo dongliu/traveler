@@ -139,6 +139,59 @@ export function renderNotes() {
     .always();
 }
 
+export function renderTableHistorySections(data) {
+  let tableIndex = 0;
+  $('#form .table-group').each(function() {
+    const $tableGroup = $(this);
+    const $table = $tableGroup.find('.form-table');
+    if (!$table.length) return;
+
+    tableIndex += 1;
+    const sectionId = `table-history-body-${tableIndex}`;
+    $tableGroup.find('.table-history-section').remove();
+
+    const cellHistories = [];
+    $table.find('tbody td').each(function() {
+      const $cell = $(this);
+      const $inputs = $cell.find('input, textarea');
+      if (!$inputs.length) return;
+      const name = $inputs[0].getAttribute('name');
+      if (!name) return;
+      const found = data.filter(e => e.name === name);
+      if (!found.length) return;
+      found.sort((a, b) => (a.inputOn > b.inputOn ? -1 : 1));
+
+      const colIndex = $cell.index();
+      const rowIndex = $cell.closest('tr').index();
+      const rowLabel =
+        $table.find('tbody tr').eq(rowIndex).find('th:first strong').text() ||
+        `Row ${rowIndex}`;
+      const colLabel =
+        $table.find('tbody tr').first().find('th, td').eq(colIndex).find('strong').text() ||
+        `Col ${colIndex}`;
+      cellHistories.push({ name, rowLabel, colLabel, records: found, inputType: found[0].inputType });
+    });
+
+    if (!cellHistories.length) return;
+
+    const historyRows = cellHistories.map(ch =>
+      `<div class="cell-history-item" data-input-name="${ch.name}">` +
+      `<strong>${ch.rowLabel} &times; ${ch.colLabel}:</strong> ` +
+      `<span class="cell-history-records">${ch.records.map(r =>
+        generateHistoryRecordHtml(ch.inputType, r.value, r.inputBy, r.inputOn)
+      ).join('')}</span>` +
+      `</div>`
+    ).join('');
+
+    $tableGroup.append(
+      `<div class="table-history-section">` +
+      `<a class="table-history-toggle" data-toggle="collapse" href="#${sectionId}">Cell update history</a>` +
+      `<div id="${sectionId}" class="collapse"><div class="table-history-content">${historyRows}</div></div>` +
+      `</div>`
+    );
+  });
+}
+
 export function renderHistory(binder, travelerStatus = null) {
   $.ajax({
     url: './data/',
@@ -202,6 +255,32 @@ export function renderHistory(binder, travelerStatus = null) {
           }
         }
       });
+
+      // Restore saved values for table cell inputs (not inside .controls)
+      $('#form .form-table tbody td').each(function() {
+        const $cell = $(this);
+        const inputElements = $cell.find('input, textarea');
+        if (!inputElements.length) return;
+        const element = inputElements[0];
+        const found = data.filter(e => e.name === element.name);
+        if (!found.length) return;
+        found.sort((a, b) => (a.inputOn > b.inputOn ? -1 : 1));
+        const currentValue = found[0].value;
+        if (found[0].inputType === 'radio') {
+          for (let i = 0; i < inputElements.length; i += 1) {
+            if (inputElements[i].value === currentValue) {
+              binder.deserializeFieldFromValue(inputElements[i], currentValue);
+              binder.accessor.set(element.name, currentValue);
+              break;
+            }
+          }
+        } else {
+          binder.deserializeFieldFromValue(element, currentValue);
+          binder.accessor.set(element.name, currentValue);
+        }
+      });
+
+      renderTableHistorySections(data);
 
       // check if active here
       if (travelerStatus === 1) {

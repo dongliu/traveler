@@ -733,3 +733,31 @@ form.form-horizontal .tinymce table td {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Table cell — traveler edit mode */
+.form-table td.table-cell-editing {
+  background-color: #dff0d8;
+}
+.table-cell-buttons {
+  margin-top: 4px;
+}
+
+/* Table cell history section */
+.table-history-section {
+  margin-top: 6px;
+  font-size: 12px;
+}
+.table-history-toggle {
+  cursor: pointer;
+}
+.table-history-content {
+  padding: 4px 0;
+}
+.cell-history-item {
+  margin-bottom: 4px;
+  padding: 3px 0;
+  border-bottom: 1px solid #eee;
+}
+.cell-history-item:last-child {
+  border-bottom: none;
+}
