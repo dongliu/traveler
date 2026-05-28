@@ -438,6 +438,7 @@ $(function() {
 
   function formInputMade() {
     var $this = $(this);
+    if ($this.closest('.form-table').length) return;
     var inputs = $this.closest('.controls').find('input,textarea');
     var i;
     for (i = 0; i < inputs.length; i += 1) {
@@ -454,6 +455,39 @@ $(function() {
       );
     }
   }
+
+  function tableInputMade() {
+    var $this = $(this);
+    var $cell = $this.closest('td');
+    var inputs = $cell.find('input, textarea');
+    var i;
+    for (i = 0; i < inputs.length; i += 1) {
+      markValidity(inputs[i]);
+    }
+    $('#form input,textarea').not(inputs).prop('disabled', true);
+    $('#complete').prop('disabled', true);
+    $cell.addClass('table-cell-editing');
+    if (!$cell.children('.table-cell-buttons').length) {
+      $cell.append(
+        '<div class="table-cell-buttons">' +
+          '<button value="table-cell-save" class="btn btn-mini btn-primary">Save</button> ' +
+          '<button value="table-cell-reset" class="btn btn-mini">Reset</button>' +
+          '</div>'
+      );
+    }
+  }
+
+  $('#form').on(
+    'click',
+    '.form-table td input[type="radio"], .form-table td input[type="checkbox"]',
+    tableInputMade
+  );
+
+  $('#form').on(
+    'input',
+    '.form-table td input:not([type="file"]):not([type="radio"]):not([type="checkbox"]), .form-table td textarea',
+    tableInputMade
+  );
 
   $('#form').on('click', 'button[value="save"]', function(e) {
     e.preventDefault();
@@ -562,6 +596,140 @@ $(function() {
     $(this)
       .closest('.control-group-buttons')
       .remove();
+  });
+
+  $('#form').on('click', 'button[value="table-cell-save"]', function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    var $cell = $this.closest('td');
+    var inputs = $cell.find('input, textarea');
+    var input = inputs[0];
+    var i;
+    if (input.type === 'radio') {
+      for (i = 0; i < inputs.length; i += 1) {
+        if (inputs[i].checked) {
+          input = inputs[i];
+          break;
+        }
+      }
+    }
+    var $tableGroup = $cell.closest('.table-group');
+    var isFirstSave = !$tableGroup
+      .find('.cell-history-item[data-input-name="' + input.name + '"]')
+      .length;
+    binder.serializeField(input);
+    $.ajax({
+      url: './data/',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        name: input.name,
+        type: input.type,
+        value: binder.accessor.target[input.name],
+      }),
+    })
+      .done(function(data, status, jqXHR) {
+        var timestamp = jqXHR.getResponseHeader('Date');
+        $('#message').append(
+          '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Change saved ' +
+            livespan(timestamp, false) +
+            '</div>'
+        );
+        var newRecord = generateHistoryRecordHtml(
+          input.type,
+          binder.accessor.target[input.name],
+          'you',
+          timestamp,
+          true
+        );
+        var $historySection = $tableGroup.find('.table-history-section');
+        if ($historySection.length) {
+          var $item = $historySection.find(
+            '.cell-history-item[data-input-name="' + input.name + '"]'
+          );
+          if ($item.length) {
+            $item.find('.cell-history-records').prepend(newRecord);
+          } else {
+            var $tbl = $tableGroup.find('.form-table');
+            var rowLabel =
+              $tbl.find('tbody tr').eq($cell.closest('tr').index()).find('th:first strong').text() ||
+              'Row ' + $cell.closest('tr').index();
+            var colLabel =
+              $tbl.find('tbody tr').first().find('th, td').eq($cell.index()).find('strong').text() ||
+              'Col ' + $cell.index();
+            $historySection.find('.table-history-content').append(
+              '<div class="cell-history-item" data-input-name="' + input.name + '">' +
+                '<strong>' + rowLabel + ' &times; ' + colLabel + ':</strong> ' +
+                '<span class="cell-history-records">' + newRecord + '</span>' +
+                '</div>'
+            );
+          }
+          // Expand the section so the new record is visible
+          $historySection.find('.collapse').addClass('in');
+        } else {
+          var sectionId = 'table-history-body-' + Date.now();
+          var $tbl2 = $tableGroup.find('.form-table');
+          var rowLabel2 =
+            $tbl2.find('tbody tr').eq($cell.closest('tr').index()).find('th:first strong').text() ||
+            'Row ' + $cell.closest('tr').index();
+          var colLabel2 =
+            $tbl2.find('tbody tr').first().find('th, td').eq($cell.index()).find('strong').text() ||
+            'Col ' + $cell.index();
+          $tableGroup.append(
+            '<div class="table-history-section">' +
+              '<a class="table-history-toggle" data-toggle="collapse" href="#' + sectionId + '">Cell update history</a>' +
+              '<div id="' + sectionId + '" class="collapse in">' +
+              '<div class="table-history-content">' +
+              '<div class="cell-history-item" data-input-name="' + input.name + '">' +
+              '<strong>' + rowLabel2 + ' &times; ' + colLabel2 + ':</strong> ' +
+              '<span class="cell-history-records">' + newRecord + '</span>' +
+              '</div></div></div></div>'
+          );
+        }
+        if (isFirstSave) incrementFinished();
+        $cell.removeClass('table-cell-editing');
+        $cell.children('.table-cell-buttons').remove();
+      })
+      .fail(function(jqXHR) {
+        if (jqXHR.status !== 401) {
+          $('#message').append(
+            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot save the value: ' +
+              jqXHR.responseText +
+              '</div>'
+          );
+          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        }
+      })
+      .always(function() {
+        $('#form input,textarea').prop('disabled', false);
+        $('#complete').prop('disabled', false);
+      });
+  });
+
+  $('#form').on('click', 'button[value="table-cell-reset"]', function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    var $cell = $this.closest('td');
+    var inputs = $cell.find('input, textarea');
+    var i;
+    for (i = 0; i < inputs.length; i += 1) {
+      if (binder.accessor.target[inputs[i].name] === undefined) {
+        if ($(inputs[i]).is(':checkbox') || $(inputs[i]).is(':radio')) {
+          $(inputs[i]).prop('checked', false);
+        } else {
+          $(inputs[i]).val('');
+        }
+      } else {
+        binder.deserializeField(inputs[i]);
+      }
+    }
+    for (i = 0; i < inputs.length; i += 1) {
+      markValidity(inputs[i]);
+    }
+    $('#form input,textarea').prop('disabled', false);
+    $('#complete').prop('disabled', false);
+    $cell.removeClass('table-cell-editing');
+    $cell.children('.table-cell-buttons').remove();
   });
 
   $('#form input:file').change(function(e) {

@@ -33,6 +33,21 @@ See <https://github.com/dongliu/traveler-mongo> for mongodb and mongo express.
 See <https://github.com/dongliu/traveler-ldap> for open LDAP and a php LDAP
 admin web interface.
 
+## config local environment (optional)
+
+Create a `.env` file at the root of the the project, and include
+
+```
+COMPOSE_PROJECT_NAME=ernest
+WEB_PORT=3301
+API_PORT=3302
+MONGO_EXPRESS_PORT=8381
+```
+
+The default values of these variables can be found at `docker-compose.yml`. The
+`WEB_PORT` used must be consistent with that in `docker/auth.json`, otherwise
+auth will not work properly.
+
 ## build and run the application
 
 Start the traveler-ldap docker containers from its own directory.
@@ -43,8 +58,8 @@ The traveler application can be run by running
 docker compose up
 ```
 
-The traveler application can be accessed at <http://localhost:3001>. The mongoDB
-containers will start as dependency of the traveler application.
+The traveler application can be accessed at <http://localhost:WEB_PORT>. The
+mongoDB containers will start as dependency of the traveler application.
 
 If you want to server the application or the api on https, add `ssl_key` and
 `ssl_cert` configurations in the `app.json` and `api.json` files. You will need

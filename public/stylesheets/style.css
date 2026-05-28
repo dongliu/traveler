@@ -326,7 +326,7 @@ figcaption {
   padding-right: 10px;
 }
 
-/* checkbox set */ 
+/* checkbox set */
 .checkbox-set-controls .controls {
   margin-left: 0px;
 }
@@ -669,8 +669,95 @@ ul.pagination > li:last-child > span {
   -moz-border-radius-bottomright: 4px;
 }
 
-table,
-table th,
-table td {
+form.form-horizontal .tinymce table,
+form.form-horizontal .tinymce table th,
+form.form-horizontal .tinymce table td {
   border: 1pt solid black;
+}
+
+/* ── Table builder ──────────────────────────────────────────────────────────── */
+
+.table-group {
+  margin: 6px 0;
+}
+
+.table-group-number {
+  font-weight: bold;
+  color: #555;
+  margin-right: 4px;
+}
+
+.table-group-label {
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+/* Cells are clickable while the parent wrap is in editing mode */
+.control-group-wrap[data-status="editing"] .form-table th,
+.control-group-wrap[data-status="editing"] .form-table td {
+  cursor: pointer;
+}
+
+.control-group-wrap[data-status="editing"] .form-table th:hover,
+.control-group-wrap[data-status="editing"] .form-table td:hover {
+  background-color: #d9edf7;
+}
+
+/* Add Row / Add Column buttons shown during editing */
+.table-action-btns {
+  margin: 6px 0 2px;
+}
+
+.table-add-row-btn,
+.table-add-col-btn {
+  margin-right: 6px;
+}
+
+/* Row / column manage list in spec panel */
+.table-manage-list {
+  margin-bottom: 4px;
+}
+
+.table-manage-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 3px;
+}
+
+.table-item-label {
+  min-width: 90px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Table cell — traveler edit mode */
+.form-table td.table-cell-editing {
+  background-color: #dff0d8;
+}
+.table-cell-buttons {
+  margin-top: 4px;
+}
+
+/* Table cell history section */
+.table-history-section {
+  margin-top: 6px;
+  font-size: 12px;
+}
+.table-history-toggle {
+  cursor: pointer;
+}
+.table-history-content {
+  padding: 4px 0;
+}
+.cell-history-item {
+  margin-bottom: 4px;
+  padding: 3px 0;
+  border-bottom: 1px solid #eee;
+}
+.cell-history-item:last-child {
+  border-bottom: none;
 }

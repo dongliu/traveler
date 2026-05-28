@@ -11,6 +11,7 @@ import {
   checkbox_set_edit,
   binding_checkbox_set_events,
 } from './lib/checkbox-set.js';
+import { table_edit, binding_table_events } from './lib/table-builder.js';
 
 const mceConfig = {
   base_url: '/tinymce',
@@ -151,7 +152,7 @@ function updateSectionNumbers() {
   let controlNumber = 0;
   // assign the sequence number to all legend
   $('#output')
-    .find('legend, .control-label, .rich-instruction')
+    .find('legend, .control-label, .rich-instruction, .table-group')
     .each(function() {
       if ($(this).is('legend')) {
         sectionNumber += 1;
@@ -169,6 +170,13 @@ function updateSectionNumbers() {
         $(this)
           .find('.rich-instruction-number')
           .text(`${sectionNumber}.${instructionNumber}`);
+      } else if ($(this).is('.table-group')) {
+        instructionNumber += 1;
+        controlNumber = 0;
+        $(this)
+          .find('.table-group-number')
+          .first()
+          .text(`${sectionNumber}.${instructionNumber}`);
       } else {
         controlNumber += 1;
         $(this)
@@ -180,13 +188,15 @@ function updateSectionNumbers() {
 
 function addSectionNumbers() {
   $('#output')
-    .find('legend, .control-label, .tinymce')
+    .find('legend, .control-label, .tinymce, .table-group')
     .each(function() {
       if ($(this).is('legend')) {
         prependSpanIfNotExists(this, 'section-number');
       } else if ($(this).is('div.tinymce')) {
         const instructionParent = this.parentElement;
         addSectionNumberToRichInstruction(instructionParent);
+      } else if ($(this).is('.table-group')) {
+        prependSpanIfNotExists(this, 'table-group-number');
       } else {
         prependSpanIfNotExists(this, 'control-number');
       }
@@ -1246,6 +1256,12 @@ function working() {
     other_edit();
     scrollToBottom();
   });
+
+  $('#add-table').click(function(e) {
+    e.preventDefault();
+    table_edit();
+    scrollToBottom();
+  });
 }
 
 function modalAlert(label, body) {
@@ -1263,6 +1279,8 @@ function cleanBeforeSave() {
   $('#output .control-focus').removeClass('control-focus');
   $('#output .control-group-buttons').remove();
   $('#output .checkbox-set-buttons').remove();
+  // remove any table edit-only UI that was left behind without clicking Done
+  $('#output .table-edit-ui').remove();
   // clean status
   $('#output .control-group-wrap').removeAttr('data-status');
   // remove tinymce
@@ -1347,8 +1365,16 @@ function binding_events() {
     const cloned = $cgr.clone();
     $('.control-group-buttons', $(cloned)).remove();
     $(cloned).removeClass('control-focus');
-    $('input, textarea', $(cloned)).attr('name', UID.generateShort());
-    $('input, textarea', $(cloned)).removeAttr('data-userkey');
+    if ($('span.fe-type', $cgr).text() === 'table') {
+      // Each table cell input needs its own unique name
+      $('input, textarea', $(cloned)).each(function() {
+        $(this).attr('name', UID.generateShort());
+        $(this).removeAttr('data-userkey');
+      });
+    } else {
+      $('input, textarea', $(cloned)).attr('name', UID.generateShort());
+      $('input, textarea', $(cloned)).removeAttr('data-userkey');
+    }
     $('legend', $(cloned)).attr('id', UID.generateShort());
     $(that)
       .closest('.control-group-wrap')
@@ -1372,6 +1398,7 @@ function binding_events() {
     if ($cgr.attr('data-status') === 'editing') {
       // close the edit well
       $cgr.siblings('.spec').remove();
+      $cgr.find('.table-edit-ui').remove();
       $cgr.removeAttr('data-status');
       return;
     }
@@ -1409,6 +1436,9 @@ function binding_events() {
         break;
       case 'other':
         other_edit($cgr);
+        break;
+      case 'table':
+        table_edit($cgr);
         break;
       default:
         console.log(`input type ${type} not implemented.`);
@@ -1737,4 +1767,6 @@ $(function() {
   binding_events();
   // checkbox set specific events
   binding_checkbox_set_events();
+  // table specific events
+  binding_table_events();
 });

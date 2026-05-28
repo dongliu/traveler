@@ -1,5 +1,3 @@
-name: traveler-local
-
 networks:
   infra:
     external: true
