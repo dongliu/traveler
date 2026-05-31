@@ -1446,6 +1446,8 @@ const addedByColumn = personColumn('Added by', 'addedBy');
 
 const addedOnColumn = dateColumn('Added on', 'addedOn');
 
+const workCreatedOnColumn = longDateColumn('Created', 'createdOn');
+
 const sequenceColumn = {
   sTitle: 'Sequence',
   mData: 'sequence',

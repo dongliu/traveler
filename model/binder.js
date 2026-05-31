@@ -24,6 +24,7 @@ const work = new Schema({
     required: true,
     enum: ['traveler', 'binder'],
   },
+  createdOn: Date,
   addedOn: Date,
   addedBy: String,
   status: Number,

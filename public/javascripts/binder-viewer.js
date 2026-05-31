@@ -20,10 +20,11 @@ $(function() {
   var workAoColumns = [
     selectColumn,
     workLinkColumn,
-    titleColumn,
-    ownerColumn,
-    deviceColumn,
-    tagsColumn,
+    columnTitle('Traveler title'),
+    // ownerColumn,
+    // deviceColumn,
+    // tagsColumn,
+    workCreatedOnColumn,
     travelerProgressColumn,
   ];
   fnAddFilterFoot('#work-table', workAoColumns);
