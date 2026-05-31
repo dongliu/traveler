@@ -601,13 +601,13 @@ function text_edit($cgr) {
   let label = 'label';
   let userkey = '';
   let placeholder = '';
-  let help = '';
+  // let help = '';
   let required = false;
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
-    help = $('.controls span.help-block', $cgr).text();
+    // help = $('.controls span.help-block', $cgr).text();
     required = $('.controls input', $cgr).prop('required');
   }
   const $text = $(input.text());
@@ -615,14 +615,14 @@ function text_edit($cgr) {
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $placeholder = $(spec.placeholder());
-  const $help = $(spec.help());
+  // const $help = $(spec.help());
   const $required = $(spec.required());
   const $done = $(spec.done());
   const $edit = $('<div class="well spec"></div>').append(
     $label,
     $userkey,
     $placeholder,
-    $help,
+    // $help,
     $required,
     $done
   );
@@ -634,13 +634,13 @@ function text_edit($cgr) {
     label,
     userkey,
     placeholder,
-    help,
+    // help,
     required,
   };
   $('input', $label).val(label);
   $('input', $userkey).val(userkey);
   $('input', $placeholder).val(placeholder);
-  $('input', $help).val(help);
+  // $('input', $help).val(help);
   $('input', $required).prop('checked', required);
   binding($edit, $text, model, $done);
 }
