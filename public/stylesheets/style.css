@@ -761,3 +761,7 @@ form.form-horizontal .tinymce table td {
 .cell-history-item:last-child {
   border-bottom: none;
 }
+
+.caps {
+  text-transform: capitalize;
+}
