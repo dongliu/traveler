@@ -226,6 +226,17 @@ function renderCellConfig(cellType, $cellConfig, $cell) {
       });
       break;
     }
+    case 'file': {
+      const userkey = $cell.find('input[type="file"]').data('userkey') || '';
+      $cellConfig.append(`
+        <div class="control-group">
+          <div class="control-label">User key</div>
+          <div class="controls">
+            <input type="text" id="cell-userkey" pattern="[a-zA-Z_0-9]{1,30}" value="${esc(userkey)}"/>
+          </div>
+        </div>`);
+      break;
+    }
     default:
       break;
   }
@@ -268,6 +279,15 @@ function applyCellType(cellType, $cellConfig, $cell) {
         ).join('')
       );
       $cell.attr('data-cell-type', 'radio');
+      break;
+    }
+    case 'file': {
+      const userkey = $('#cell-userkey', $cellConfig).val().trim();
+      const name = $cell.find('input[type="file"]').attr('name') || UID.generateShort();
+      $cell.html(
+        `<input type="file" disabled="disabled" name="${name}" data-userkey="${esc(userkey)}"/>`
+      );
+      $cell.attr('data-cell-type', 'file');
       break;
     }
     case 'empty':
@@ -314,6 +334,7 @@ function openCellEditModal($cell, $table) {
             <option value="text">Text input</option>
             <option value="checkbox">Checkbox</option>
             <option value="radio">Radio</option>
+            <option value="file">File upload</option>
           </select>
         </div>
       </div>`);
