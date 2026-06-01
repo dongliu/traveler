@@ -8,36 +8,62 @@
  releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
  transferFromModal, archivedByColumn, archivedOnColumn, formReviewLinkColumn */
 
-function travelFromModal() {
+function travelFromModal(formId, formTitle, copyNumber) {
   $('#submit').prop('disabled', true);
   $('#return').prop('disabled', true);
-  let number = $('#modal .modal-body div.target').length;
-  $('#modal .modal-body div.target').each(function() {
-    const that = this;
+
+  const $body = $('#modal .modal-body');
+  $body.empty();
+  for (let i = 1; i <= copyNumber; i++) {
+    $body.append(
+      `<div id="copy-${i}" class="target">${formTitle}_${i} &nbsp;<span class="copy-status"><i class="fa fa-spinner fa-spin"></i></span></div>`
+    );
+  }
+
+  let remaining = copyNumber;
+
+  function oneDone() {
+    remaining -= 1;
+    if (remaining === 0) {
+      $('#return').prop('disabled', false);
+    }
+  }
+
+  for (let i = 1; i <= copyNumber; i++) {
+    const travelerTitle = `${formTitle}_${i}`;
+    const $row = $(`#copy-${i}`);
+
     $.ajax({
       url: '/travelers/',
       type: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify({
-        form: this.id,
-      }),
+      data: JSON.stringify({ form: formId }),
     })
-      .done(function() {
-        $(that).prepend('<i class="fa fa-check"></i>');
-        $(that).addClass('text-success');
+      .done(function(resp) {
+        const parts = resp.location.replace(/\/$/, '').split('/');
+        const travelerId = parts[parts.length - 1];
+        $.ajax({
+          url: `/travelers/${travelerId}/config`,
+          type: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify({ title: travelerTitle }),
+        })
+          .done(function() {
+            $row.find('.copy-status').html('<i class="fa fa-check"></i>');
+            $row.addClass('text-success');
+          })
+          .fail(function() {
+            $row.find('.copy-status').html('<i class="fa fa-check"></i> (rename failed)');
+            $row.addClass('text-warning');
+          })
+          .always(oneDone);
       })
       .fail(function(jqXHR) {
-        $(that).prepend('<i class="icon-question"></i>');
-        $(that).append(` : ${jqXHR.responseText}`);
-        $(that).addClass('text-error');
-      })
-      .always(function() {
-        number = number - 1;
-        if (number === 0) {
-          $('#return').prop('disabled', false);
-        }
+        $row.find('.copy-status').html(`<i class="icon-question"></i> : ${jqXHR.responseText}`);
+        $row.addClass('text-error');
+        oneDone();
       });
-  });
+  }
 }
 
 function cloneFromModal(activeTable) {
@@ -208,21 +234,32 @@ $(function() {
         '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
-    } else {
-      $('#modalLabel').html(
-        `Create travelers from the following ${selected.length} forms? `
-      );
-      $('#modal .modal-body').empty();
-      selected.forEach(function(row) {
-        const data = activeTable.fnGetData(row);
-        $('#modal .modal-body').append(formatItemUpdate(data));
-      });
+    } else if (selected.length > 1) {
+      $('#modalLabel').html('Alert');
+      $('#modal .modal-body').html('Please select only one form to create travelers from.');
       $('#modal .modal-footer').html(
-        '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+        '<button data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
+      );
+      $('#modal').modal('show');
+    } else {
+      const data = activeTable.fnGetData(selected[0]);
+      $('#modalLabel').html('Create travelers');
+      $('#modal .modal-body').html(
+        `<div><b>${data.title}</b></div>` +
+        '<div class="control-group" style="margin-top:10px;">' +
+        '<label class="control-label" for="copy-number">Number of copies</label>' +
+        '<div class="controls">' +
+        '<input type="number" id="copy-number" value="1" min="1" max="20" style="width:60px;"/>' +
+        '</div></div>'
+      );
+      $('#modal .modal-footer').html(
+        '<button id="submit" class="btn btn-primary">Confirm</button>' +
+        '<button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        travelFromModal();
+        const copyNumber = Math.min(20, Math.max(1, parseInt($('#copy-number').val(), 10) || 1));
+        travelFromModal(data._id, data.title, copyNumber);
       });
     }
   });
