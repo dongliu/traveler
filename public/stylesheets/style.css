@@ -709,6 +709,27 @@ form.form-horizontal .tinymce table td {
   background-color: #d9edf7;
 }
 
+/* Control row/cells are not data cells — no pointer cursor or hover highlight */
+.control-group-wrap[data-status='editing'] .form-table .table-col-ctrl,
+.control-group-wrap[data-status='editing'] .form-table .table-ctrl-corner,
+.control-group-wrap[data-status='editing'] .form-table .table-row-ctrl {
+  cursor: default;
+  background-color: #f5f5f5;
+  white-space: nowrap;
+  padding: 2px 4px;
+}
+
+.control-group-wrap[data-status='editing'] .form-table .table-col-ctrl:hover,
+.control-group-wrap[data-status='editing'] .form-table .table-ctrl-corner:hover,
+.control-group-wrap[data-status='editing'] .form-table .table-row-ctrl:hover {
+  background-color: #f5f5f5;
+}
+
+/* Instruction cell content in traveler view */
+.table-cell-instruction {
+  padding: 2px 0;
+}
+
 /* Add Row / Add Column buttons shown during editing */
 .table-action-btns {
   margin: 6px 0 2px;

@@ -10,16 +10,27 @@ The changes will allow the user to 1) reset and modify a cell's type after it is
 
 ## Detailed Design
 
-- The user can specify the type of cell anywhere, including those in first row and first column
-  - move the control buttons, move and delete of a row to the very left of the row, similarly those of a column to the very top of the column. No need to identify a row or a column by the text with the th cell.
-- When click in a cell that an input was previously specified, the use can choose to `reset` the cell.
-  - when reset is clicked, the init type selection dropdown is available.
-- Add a new option if input of rich instruction of tinyMCE, with which the user can add a rich text to any cell.
-
+- All cells (including those in the first row and first column) support any cell type via the type dropdown. The `header`, `empty`, `text`, `checkbox`, `radio`, `file`, and `instruction` types are available for every cell.
+- Row and column control buttons (move, delete) are rendered directly inside the table during editing rather than in a separate spec panel list:
+  - A control row is prepended to the table with ←/→/✕ buttons for each column.
+  - A control cell is prepended to each data row with ↑/↓/✕ buttons.
+  - Control elements are marked `.table-edit-ui` and removed on Done.
+- A new `instruction` cell type uses a TinyMCE editor (initialized inline in the cell-edit modal) to add rich text to any cell. Content is stored as `<div class="table-cell-instruction">` with `data-cell-type="instruction"`.
 
 ### UI / Form Builder Integration
 
-TBD
+**`public/javascripts/lib/table-builder.js`**
+
+- `buildInTableControls($table)` — replaces the spec-panel row/column manage lists. Injects a `.table-control-row` at the top of tbody and a `.table-row-ctrl` cell at the start of each data row, each with the appropriate move/remove buttons.
+- `getDataRows` filters out `.table-control-row`; column operations use `.not('.table-row-ctrl')` to address only data cells.
+- `openCellEditModal` — unified for all cells (no separate `isHeader` path). Dropdown starts at the cell's current `data-cell-type` (defaulting to `header` for `<th>`, `empty` for `<td>`). Completing with `header` type swaps a `<td>` to `<th>` and vice versa.
+- `renderCellConfig` / `applyCellType` — extended with `header` and `instruction` cases. The `instruction` case initializes a lightweight TinyMCE instance on a textarea inside the modal and destroys it on type-switch, Complete, or modal dismiss.
+- Spec panel simplified to label input + Done button only.
+
+**`public/stylesheets/style.css`**
+
+- Control row/cells (`.table-col-ctrl`, `.table-row-ctrl`, `.table-ctrl-corner`) override the editing-mode pointer cursor and hover highlight with a neutral grey background.
+- `.table-cell-instruction` — minimal padding for rendered instruction content in traveler view.
 
 ### Data Model
 
