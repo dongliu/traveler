@@ -418,6 +418,22 @@ function openCellEditModal($cell) {
   $('#modal').modal('show');
 }
 
+// ── Confirmation modal ────────────────────────────────────────────────────────
+
+function confirmThenDo(message, action) {
+  $('#modalLabel').text('Confirm');
+  $('#modal .modal-body').html(`<p>${message}</p>`);
+  $('#modal .modal-footer').html(
+    '<button value="confirm" class="btn btn-danger">Remove</button>' +
+    '<button value="cancel" class="btn" data-dismiss="modal">Cancel</button>'
+  );
+  $('#modal button[value="confirm"]').off('click').on('click', function () {
+    $('#modal').modal('hide');
+    action();
+  });
+  $('#modal').modal('show');
+}
+
 // ── Main table_edit ───────────────────────────────────────────────────────────
 
 export function table_edit($cgr) {
@@ -523,8 +539,11 @@ export function table_edit($cgr) {
   $tableGroup.on('click.table-builder', '.table-row-ctrl .table-row-remove', function (e) {
     e.preventDefault();
     e.stopPropagation();
-    doRemoveRow($table, parseInt($(this).data('row'), 10));
-    buildInTableControls($table);
+    const rowIndex = parseInt($(this).data('row'), 10);
+    confirmThenDo('Remove this row? This cannot be undone.', function () {
+      doRemoveRow($table, rowIndex);
+      buildInTableControls($table);
+    });
   });
 
   // Column controls delegated from $tableGroup
@@ -545,8 +564,11 @@ export function table_edit($cgr) {
   $tableGroup.on('click.table-builder', '.table-col-ctrl .table-col-remove', function (e) {
     e.preventDefault();
     e.stopPropagation();
-    doRemoveColumn($table, parseInt($(this).data('col'), 10));
-    buildInTableControls($table);
+    const colIndex = parseInt($(this).data('col'), 10);
+    confirmThenDo('Remove this column? This cannot be undone.', function () {
+      doRemoveColumn($table, colIndex);
+      buildInTableControls($table);
+    });
   });
 
   $edit.on('click', '.table-done-btn', function (e) {
