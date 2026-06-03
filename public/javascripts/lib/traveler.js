@@ -174,14 +174,17 @@ export function renderTableHistorySections(data) {
 
     if (!cellHistories.length) return;
 
-    const historyRows = cellHistories.map(ch =>
-      `<div class="cell-history-item" data-input-name="${ch.name}">` +
-      `<strong>${ch.rowLabel} &times; ${ch.colLabel}:</strong> ` +
-      `<span class="cell-history-records">${ch.records.map(r =>
-        generateHistoryRecordHtml(ch.inputType, r.value, r.inputBy, r.inputOn)
-      ).join('')}</span>` +
-      `</div>`
-    ).join('');
+    const historyRows = cellHistories.map(ch => {
+      const recordsHtml = ch.inputType === 'file'
+        ? fileHistory(ch.records)
+        : ch.records.map(r =>
+            generateHistoryRecordHtml(ch.inputType, r.value, r.inputBy, r.inputOn)
+          ).join('');
+      return `<div class="cell-history-item" data-input-name="${ch.name}">` +
+        `<strong>${ch.rowLabel} &times; ${ch.colLabel}:</strong> ` +
+        `<span class="cell-history-records">${recordsHtml}</span>` +
+        `</div>`;
+    }).join('');
 
     $tableGroup.append(
       `<div class="table-history-section">` +
@@ -265,6 +268,7 @@ export function renderHistory(binder, travelerStatus = null) {
         const found = data.filter(e => e.name === element.name);
         if (!found.length) return;
         found.sort((a, b) => (a.inputOn > b.inputOn ? -1 : 1));
+        if (element.type === 'file') return;
         const currentValue = found[0].value;
         if (found[0].inputType === 'radio') {
           for (let i = 0; i < inputElements.length; i += 1) {
