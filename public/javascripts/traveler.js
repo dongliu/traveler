@@ -906,6 +906,10 @@ $(function() {
             $history.html()
         );
         // $.livestamp.resume();
+        $(input).siblings('.file-current').remove();
+        $(input).after(
+          '<span class="file-current"><a href="' + json.location + '" target="' + linkTarget + '">' + input.files[0].name + '</a></span>'
+        );
         $this.closest('.control-group-buttons').remove();
       })
       .fail(function(jqXHR) {
@@ -1016,6 +1020,10 @@ $(function() {
               '</div></div></div></div>'
           );
         }
+        $(input).siblings('.file-current').remove();
+        $(input).after(
+          '<span class="file-current"><a href="' + json.location + '" target="' + linkTarget + '">' + input.files[0].name + '</a></span>'
+        );
         if (isFirstSave) incrementFinished();
         $cell.removeClass('table-cell-editing');
         $cell.children('.table-cell-buttons').remove();

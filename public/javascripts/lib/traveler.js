@@ -223,6 +223,11 @@ export function renderHistory(binder, travelerStatus = null) {
               return 1;
             });
             if (element.type === 'file') {
+              const latest = found[0];
+              const latestLink = `${prefix}/data/${latest._id}`;
+              $(element).after(
+                `<span class="file-current"><a href="${latestLink}" target="${linkTarget}" download="${latest.value}">${latest.value}</a></span>`
+              );
               $(element)
                 .closest('.controls')
                 .append(
@@ -268,7 +273,14 @@ export function renderHistory(binder, travelerStatus = null) {
         const found = data.filter(e => e.name === element.name);
         if (!found.length) return;
         found.sort((a, b) => (a.inputOn > b.inputOn ? -1 : 1));
-        if (element.type === 'file') return;
+        if (element.type === 'file') {
+          const latest = found[0];
+          const latestLink = `${prefix}/data/${latest._id}`;
+          $(element).after(
+            `<span class="file-current"><a href="${latestLink}" target="${linkTarget}" download="${latest.value}">${latest.value}</a></span>`
+          );
+          return;
+        }
         const currentValue = found[0].value;
         if (found[0].inputType === 'radio') {
           for (let i = 0; i < inputElements.length; i += 1) {

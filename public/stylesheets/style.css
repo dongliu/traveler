@@ -730,6 +730,12 @@ form.form-horizontal .tinymce table td {
   padding: 2px 0;
 }
 
+/* Latest uploaded file link shown next to file input */
+.file-current {
+  margin-left: 6px;
+  font-size: 13px;
+}
+
 /* Add Row / Add Column buttons shown during editing */
 .table-action-btns {
   margin: 6px 0 2px;

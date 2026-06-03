@@ -32,13 +32,13 @@ No new data model is needed. Each cell input stores its value in the existing `t
 **`public/javascripts/traveler.js`**
 
 - `formInputMade()` — added early return when the touched input is inside `.form-table`, preventing the non-table handler from trying to find `.controls` and incorrectly disabling all inputs.
-- `tableInputMade()` — new function called when any cell input is touched:
+- `tableInputMade()` — new function called when any non-file cell input is touched:
   - Adds class `table-cell-editing` to the `<td>` to highlight the active cell.
   - Disables all other form inputs (consistent with non-table behavior).
   - Disables the `#complete` button.
   - Appends Save / Reset buttons (`.table-cell-buttons`) inside the `<td>` below the input.
 - Delegated `click` handler on `#form` for `.form-table td input[type="radio"]` and `input[type="checkbox"]` → `tableInputMade`.
-- Delegated `input` handler on `#form` for `.form-table td` text/textarea inputs → `tableInputMade`.
+- Delegated `input` handler on `#form` for `.form-table td` text/textarea inputs (excluding `file`) → `tableInputMade`.
 - `button[value="table-cell-save"]` handler:
   - Determines the checked radio if the cell type is radio.
   - Records whether this is the first save for the cell (used to call `incrementFinished()`).
@@ -48,6 +48,14 @@ No new data model is needed. Each cell input stores its value in the existing `t
 - `button[value="table-cell-reset"]` handler:
   - Restores each cell input from the binder (or clears it if never saved).
   - Re-enables all form inputs and removes the cell highlight and buttons.
+- `input:file` change handler — extended with an `isTableCell` branch:
+  - For table cell file inputs: validates file type and size (same logic as non-table), appends a `.validation` div inside the `<td>` for error messages, adds `table-cell-editing` class, and appends Upload / Cancel buttons (`.table-cell-buttons`) inside the cell.
+- `button[value="table-cell-upload"]` handler:
+  - POSTs the file as `FormData` to `./uploads/` — same endpoint as non-table file upload.
+  - On success: inserts/replaces a `.file-current` link after the file input showing the uploaded filename (see `rfcs/travler-file-input.md`). Updates the table history section with a file link record, creating the section if it does not yet exist. Calls `incrementFinished()` on the first upload per cell. Removes cell highlight and buttons.
+  - On failure: shows an error alert. Re-enables all inputs in `.always()`.
+- `button[value="table-cell-cancel"]` handler:
+  - Re-enables all form inputs, removes `table-cell-editing` class and `.table-cell-buttons` from the cell.
 
 **`public/javascripts/lib/traveler.js`**
 
@@ -55,9 +63,11 @@ No new data model is needed. Each cell input stores its value in the existing `t
   - Iterates over every `.table-group` in `#form`.
   - For each cell `<td>` that has at least one history record in `data`, determines the row and column labels from the corresponding `<th>` elements.
   - Builds a collapsed Bootstrap accordion (`<div class="collapse">`) appended inside `.table-group`, containing one `.cell-history-item` per cell, labelled `Row × Col`.
+  - For `inputType === 'file'` cells, renders records using `fileHistory()` (download links) rather than `generateHistoryRecordHtml()`.
   - Only creates the section when at least one cell has history; tables with no prior data get no section.
 - `renderHistory()` — extended:
   - After the existing `.controls` loop, iterates over `.form-table tbody td` to restore saved values into cell inputs via `binder.deserializeFieldFromValue` — identical logic to the non-table path.
+  - For `input[type="file"]` cells: skips value restore (file inputs cannot be pre-populated), and instead inserts a `.file-current` link after the input showing the latest uploaded filename (see `rfcs/travler-file-input.md`).
   - Calls `renderTableHistorySections(data)` to build the history sections before enabling the form.
 
 **`public/stylesheets/style.css`**

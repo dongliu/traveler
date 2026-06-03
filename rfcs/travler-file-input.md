@@ -14,7 +14,19 @@ After the user upload a file for a file input, the file linked to its location o
 
 ### UI / Traveler Changes
 
-To be added.
+**`public/javascripts/traveler.js`**
+
+- `button[value="upload"]` done handler (non-table file inputs): after updating `.input-history`, removes any existing `.file-current` sibling of the file input and inserts a new `<span class="file-current">` immediately after the `<input type="file">`, containing a link to the just-uploaded file using the URL returned by the server (`json.location`).
+- `button[value="table-cell-upload"]` done handler (table cell file inputs): same — inserts/replaces `.file-current` inside the `<td>` after the file input before clearing the cell editing state.
+
+**`public/javascripts/lib/traveler.js`**
+
+- `renderHistory()` non-table file path: before appending `.input-history`, inserts a `.file-current` span after the file input using `${prefix}/data/${latest._id}` with a `download` attribute and the stored filename as link text. Only the most recent record (`found[0]`, sorted by `inputOn` descending) is used.
+- `renderHistory()` table cell file path: for `element.type === 'file'`, inserts the same `.file-current` span inside the cell, then returns early (file inputs cannot be pre-populated, so value restore is skipped).
+
+**`public/stylesheets/style.css`**
+
+- `.file-current` — small left margin (`6px`) and slightly reduced font size (`13px`) so the link sits neatly beside the file button without dominating it.
 
 ### Data Model
 
