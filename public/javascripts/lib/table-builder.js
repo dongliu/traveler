@@ -1,6 +1,6 @@
 /* eslint-disable func-names */
 /* eslint-disable no-param-reassign */
-/* global input, UID */
+/* global input, UID, tinymce */
 
 import { updateSectionNumbers } from './form-builder-shared.js';
 
@@ -17,11 +17,11 @@ function esc(text) {
 // ── Table DOM helpers ─────────────────────────────────────────────────────────
 
 function getDataRows($table) {
-  return $table.find('tbody > tr');
+  return $table.find('tbody > tr').not('.table-control-row');
 }
 
 function getColCount($table) {
-  return getDataRows($table).first().children('th, td').length;
+  return getDataRows($table).first().children('th, td').not('.table-row-ctrl').length;
 }
 
 function headerCell(text) {
@@ -49,7 +49,7 @@ function createInitialTable() {
 function doAddRow($table) {
   const colCount = getColCount($table);
   const rowCount = getDataRows($table).length;
-  let html = `<tr>${headerCell(`Row ${rowCount}`)}`;
+  let html = `<tr>${headerCell(`Row ${rowCount + 1}`)}`;
   for (let c = 1; c < colCount; c++) html += emptyCell();
   html += '</tr>';
   $table.find('tbody').append(html);
@@ -58,7 +58,9 @@ function doAddRow($table) {
 function doAddColumn($table) {
   const colCount = getColCount($table);
   getDataRows($table).each(function (i) {
-    $(this).append(i === 0 ? headerCell(`Column ${colCount}`) : emptyCell());
+    const $cells = $(this).children('th, td').not('.table-row-ctrl');
+    const newCell = i === 0 ? headerCell(`Column ${colCount + 1}`) : emptyCell();
+    $cells.last().after(newCell);
   });
 }
 
@@ -68,12 +70,12 @@ function doRemoveRow($table, rowIndex) {
 
 function doRemoveColumn($table, colIndex) {
   getDataRows($table).each(function () {
-    $(this).children('th, td').eq(colIndex).remove();
+    $(this).children('th, td').not('.table-row-ctrl').eq(colIndex).remove();
   });
 }
 
 function doMoveRowUp($table, rowIndex) {
-  if (rowIndex <= 1) return;
+  if (rowIndex <= 0) return;
   const $rows = getDataRows($table);
   $rows.eq(rowIndex).insertBefore($rows.eq(rowIndex - 1));
 }
@@ -85,81 +87,83 @@ function doMoveRowDown($table, rowIndex) {
 }
 
 function doMoveColLeft($table, colIndex) {
-  if (colIndex <= 1) return;
+  if (colIndex <= 0) return;
   getDataRows($table).each(function () {
-    const $cells = $(this).children('th, td');
+    const $cells = $(this).children('th, td').not('.table-row-ctrl');
     $cells.eq(colIndex).insertBefore($cells.eq(colIndex - 1));
   });
 }
 
 function doMoveColRight($table, colIndex) {
   getDataRows($table).each(function () {
-    const $cells = $(this).children('th, td');
+    const $cells = $(this).children('th, td').not('.table-row-ctrl');
     if (colIndex >= $cells.length - 1) return;
     $cells.eq(colIndex).insertAfter($cells.eq(colIndex + 1));
   });
 }
 
-// ── Spec panel: row / column manage lists ─────────────────────────────────────
+// ── In-table row/column control buttons ───────────────────────────────────────
 
-function buildRowList($table) {
-  const $container = $('<div class="table-manage-list"></div>');
+function buildInTableControls($table) {
+  $table.find('.table-control-row').remove();
+  $table.find('.table-row-ctrl').remove();
+
   const $rows = getDataRows($table);
-  const total = $rows.length;
-  for (let r = 1; r < total; r++) {
-    const label = $rows.eq(r).find('th:first strong').text() || `Row ${r}`;
-    $container.append(`
-      <div class="table-manage-item">
-        <span class="table-item-label">${esc(label)}</span>
-        <button class="btn btn-mini table-row-up" data-row="${r}" ${r === 1 ? 'disabled' : ''}>↑</button>
-        <button class="btn btn-mini table-row-down" data-row="${r}" ${r === total - 1 ? 'disabled' : ''}>↓</button>
-        <button class="btn btn-mini btn-warning table-row-remove" data-row="${r}">✕</button>
-      </div>`);
-  }
-  return $container;
-}
+  const rowCount = $rows.length;
+  const colCount = getColCount($table);
 
-function buildColList($table) {
-  const $container = $('<div class="table-manage-list"></div>');
-  const $cells = getDataRows($table).first().children('th, td');
-  const total = $cells.length;
-  for (let c = 1; c < total; c++) {
-    const label = $cells.eq(c).find('strong').text() || `Column ${c}`;
-    $container.append(`
-      <div class="table-manage-item">
-        <span class="table-item-label">${esc(label)}</span>
-        <button class="btn btn-mini table-col-left" data-col="${c}" ${c === 1 ? 'disabled' : ''}>←</button>
-        <button class="btn btn-mini table-col-right" data-col="${c}" ${c === total - 1 ? 'disabled' : ''}>→</button>
+  // Control row at top: one cell per data column with ←/→/✕
+  const $controlRow = $('<tr class="table-edit-ui table-control-row"></tr>');
+  $controlRow.append('<th class="table-edit-ui table-ctrl-corner"></th>');
+  for (let c = 0; c < colCount; c++) {
+    $controlRow.append(`
+      <th class="table-edit-ui table-col-ctrl">
+        <button class="btn btn-mini table-col-left" data-col="${c}" ${c === 0 ? 'disabled' : ''}>←</button>
+        <button class="btn btn-mini table-col-right" data-col="${c}" ${c === colCount - 1 ? 'disabled' : ''}>→</button>
         <button class="btn btn-mini btn-warning table-col-remove" data-col="${c}">✕</button>
-      </div>`);
+      </th>`);
   }
-  return $container;
-}
+  $table.find('tbody').prepend($controlRow);
 
-function refreshManageLists($table, $rowSection, $colSection) {
-  $rowSection.empty().append(buildRowList($table));
-  $colSection.empty().append(buildColList($table));
+  // Control cell at left of each data row with ↑/↓/✕
+  $rows.each(function (r) {
+    const $ctrlCell = $(`
+      <td class="table-edit-ui table-row-ctrl">
+        <button class="btn btn-mini table-row-up" data-row="${r}" ${r === 0 ? 'disabled' : ''}>↑</button>
+        <button class="btn btn-mini table-row-down" data-row="${r}" ${r === rowCount - 1 ? 'disabled' : ''}>↓</button>
+        <button class="btn btn-mini btn-warning table-row-remove" data-row="${r}">✕</button>
+      </td>`);
+    $(this).prepend($ctrlCell);
+  });
 }
 
 // ── Cell editing modal ────────────────────────────────────────────────────────
 
-let _radioCount = 0;
+const CELL_EDITOR_ID = 'cell-instruction-editor';
 
-function addRadioOptionRow($list, value) {
-  _radioCount += 1;
-  $list.append(`
-    <div class="control-group radio-option-item">
-      <div class="control-label">Option ${_radioCount}</div>
-      <div class="controls">
-        <input type="text" class="radio-option-text" value="${esc(value)}"/>
-        <button class="btn btn-warning btn-small btn-remove-radio-option">−</button>
-      </div>
-    </div>`);
+function destroyInstructionEditor() {
+  if (typeof tinymce !== 'undefined') {
+    const editor = tinymce.get(CELL_EDITOR_ID);
+    if (editor) editor.remove();
+  }
 }
 
 function renderCellConfig(cellType, $cellConfig, $cell) {
+  destroyInstructionEditor();
   $cellConfig.empty();
   switch (cellType) {
+    case 'header': {
+      const currentText = $cell.find('strong').text() || '';
+      $cellConfig.append(`
+        <div class="control-group">
+          <div class="control-label">Text</div>
+          <div class="controls">
+            <input type="text" id="cell-header-text" class="input-xlarge" value="${esc(currentText)}"/>
+            <span class="help-inline">Displayed in bold</span>
+          </div>
+        </div>`);
+      break;
+    }
     case 'text': {
       const placeholder = $cell.find('input[type="text"]').attr('placeholder') || '';
       const userkey = $cell.find('input[type="text"]').data('userkey') || '';
@@ -205,11 +209,22 @@ function renderCellConfig(cellType, $cellConfig, $cell) {
         </div>`);
       const $optList = $('<div id="radio-option-list"></div>');
       $cellConfig.append($optList);
-      _radioCount = 0;
+      let radioCount = 0;
+      function addRadioOptionRow(value) {
+        radioCount += 1;
+        $optList.append(`
+          <div class="control-group radio-option-item">
+            <div class="control-label">Option ${radioCount}</div>
+            <div class="controls">
+              <input type="text" class="radio-option-text" value="${esc(value)}"/>
+              <button class="btn btn-warning btn-small btn-remove-radio-option">−</button>
+            </div>
+          </div>`);
+      }
       if ($radios.length > 0) {
-        $radios.each(function () { addRadioOptionRow($optList, $(this).val() || `Option ${_radioCount + 1}`); });
+        $radios.each(function () { addRadioOptionRow($(this).val() || `Option ${radioCount + 1}`); });
       } else {
-        addRadioOptionRow($optList, 'Option 1');
+        addRadioOptionRow('Option 1');
       }
       $cellConfig.append(
         '<div class="control-group"><div class="controls">' +
@@ -218,12 +233,49 @@ function renderCellConfig(cellType, $cellConfig, $cell) {
       );
       $cellConfig.on('click', '#cell-add-radio-option', function (e) {
         e.preventDefault();
-        addRadioOptionRow($optList, `Option ${_radioCount + 1}`);
+        addRadioOptionRow(`Option ${radioCount + 1}`);
       });
       $cellConfig.on('click', '.btn-remove-radio-option', function (e) {
         e.preventDefault();
         $(this).closest('.radio-option-item').remove();
       });
+      break;
+    }
+    case 'file': {
+      const userkey = $cell.find('input[type="file"]').data('userkey') || '';
+      $cellConfig.append(`
+        <div class="control-group">
+          <div class="control-label">User key</div>
+          <div class="controls">
+            <input type="text" id="cell-userkey" pattern="[a-zA-Z_0-9]{1,30}" value="${esc(userkey)}"/>
+          </div>
+        </div>`);
+      break;
+    }
+    case 'instruction': {
+      const currentHtml = $cell.find('.table-cell-instruction').html() || '';
+      $cellConfig.append(`
+        <div class="control-group">
+          <div class="control-label">Instruction</div>
+          <div class="controls">
+            <textarea id="${CELL_EDITOR_ID}" class="input-xlarge">${currentHtml}</textarea>
+          </div>
+        </div>`);
+      setTimeout(function () {
+        $(`#${CELL_EDITOR_ID}`).tinymce({
+          base_url: '/tinymce',
+          license_key: 'gpl',
+          promotion: false,
+          suffix: '.min',
+          model: 'dom',
+          plugins: ['lists', 'link', 'charmap'],
+          toolbar: 'undo redo | bold italic | bullist numlist | link charmap',
+          menubar: false,
+          setup: (editor) => {
+            editor.on('change', () => editor.save());
+          },
+        });
+      }, 0);
       break;
     }
     default:
@@ -233,6 +285,12 @@ function renderCellConfig(cellType, $cellConfig, $cell) {
 
 function applyCellType(cellType, $cellConfig, $cell) {
   switch (cellType) {
+    case 'header': {
+      const text = $('#cell-header-text', $cellConfig).val() || '';
+      $cell.html(`<strong>${esc(text)}</strong>`);
+      $cell.attr('data-cell-type', 'header');
+      break;
+    }
     case 'text': {
       const placeholder = $('#cell-placeholder', $cellConfig).val().trim();
       const userkey = $('#cell-userkey', $cellConfig).val().trim();
@@ -270,6 +328,28 @@ function applyCellType(cellType, $cellConfig, $cell) {
       $cell.attr('data-cell-type', 'radio');
       break;
     }
+    case 'file': {
+      const userkey = $('#cell-userkey', $cellConfig).val().trim();
+      const name = $cell.find('input[type="file"]').attr('name') || UID.generateShort();
+      $cell.html(
+        `<input type="file" disabled="disabled" name="${name}" data-userkey="${esc(userkey)}"/>`
+      );
+      $cell.attr('data-cell-type', 'file');
+      break;
+    }
+    case 'instruction': {
+      let content = '';
+      if (typeof tinymce !== 'undefined') {
+        const editor = tinymce.get(CELL_EDITOR_ID);
+        if (editor) {
+          content = editor.getContent();
+          editor.remove();
+        }
+      }
+      $cell.html(`<div class="table-cell-instruction">${content}</div>`);
+      $cell.attr('data-cell-type', 'instruction');
+      break;
+    }
     case 'empty':
     default:
       $cell.html('');
@@ -278,64 +358,79 @@ function applyCellType(cellType, $cellConfig, $cell) {
   }
 }
 
-function openCellEditModal($cell, $table) {
-  const isHeader = $cell.is('th');
+function openCellEditModal($cell) {
+  const currentType = $cell.attr('data-cell-type') || ($cell.is('th') ? 'header' : 'empty');
 
-  $('#modalLabel').html(isHeader ? 'Edit Header Cell' : 'Edit Cell');
+  $('#modalLabel').html('Edit Cell');
   const $modalBody = $('#modal .modal-body');
   $modalBody.empty();
 
-  if (isHeader) {
-    const currentText = $cell.find('strong').text();
-    $modalBody.append(`
-      <div class="control-group">
-        <div class="control-label">Text</div>
-        <div class="controls">
-          <input type="text" id="cell-header-text" class="input-xlarge" value="${esc(currentText)}"/>
-          <span class="help-inline">Displayed in bold</span>
-        </div>
-      </div>`);
-    $('#modal .modal-footer').html(
-      '<button value="complete" class="btn btn-primary">Complete</button>' +
-      '<button value="cancel" class="btn" data-dismiss="modal">Cancel</button>'
-    );
-    $('#modal button[value="complete"]').off('click').on('click', function () {
-      $cell.html(`<strong>${esc($('#cell-header-text').val())}</strong>`);
-      $('#modal').modal('hide');
-    });
-  } else {
-    const cellType = $cell.attr('data-cell-type') || 'empty';
-    $modalBody.append(`
-      <div class="control-group">
-        <div class="control-label">Cell type</div>
-        <div class="controls">
-          <select id="cell-type-select">
-            <option value="empty">Empty</option>
-            <option value="text">Text input</option>
-            <option value="checkbox">Checkbox</option>
-            <option value="radio">Radio</option>
-          </select>
-        </div>
-      </div>`);
-    const $cellConfig = $('<div id="cell-config"></div>');
-    $modalBody.append($cellConfig);
+  $modalBody.append(`
+    <div class="control-group">
+      <div class="control-label">Cell type</div>
+      <div class="controls">
+        <select id="cell-type-select">
+          <option value="header">Header</option>
+          <option value="empty">Empty</option>
+          <option value="text">Text input</option>
+          <option value="checkbox">Checkbox</option>
+          <option value="radio">Radio</option>
+          <option value="file">File upload</option>
+          <option value="instruction">Instruction (rich text)</option>
+        </select>
+      </div>
+    </div>`);
 
-    $('#cell-type-select').val(cellType);
-    renderCellConfig(cellType, $cellConfig, $cell);
-    $('#cell-type-select').off('change').on('change', function () {
-      renderCellConfig($(this).val(), $cellConfig, $cell);
-    });
+  const $cellConfig = $('<div id="cell-config"></div>');
+  $modalBody.append($cellConfig);
 
-    $('#modal .modal-footer').html(
-      '<button value="complete" class="btn btn-primary">Complete</button>' +
-      '<button value="cancel" class="btn" data-dismiss="modal">Cancel</button>'
-    );
-    $('#modal button[value="complete"]').off('click').on('click', function () {
-      applyCellType($('#cell-type-select').val(), $cellConfig, $cell);
-      $('#modal').modal('hide');
-    });
-  }
+  $('#cell-type-select').val(currentType);
+  renderCellConfig(currentType, $cellConfig, $cell);
 
+  $('#cell-type-select').off('change').on('change', function () {
+    renderCellConfig($(this).val(), $cellConfig, $cell);
+  });
+
+  $('#modal .modal-footer').html(
+    '<button value="complete" class="btn btn-primary">Complete</button>' +
+    '<button value="cancel" class="btn" data-dismiss="modal">Cancel</button>'
+  );
+
+  $('#modal button[value="complete"]').off('click').on('click', function () {
+    const selectedType = $('#cell-type-select').val();
+    applyCellType(selectedType, $cellConfig, $cell);
+    // Swap th<->td when header type changes
+    if (selectedType === 'header' && $cell.is('td')) {
+      $('<th>').attr('data-cell-type', 'header').html($cell.html()).insertBefore($cell);
+      $cell.remove();
+    } else if (selectedType !== 'header' && $cell.is('th')) {
+      $('<td>').attr('data-cell-type', selectedType).html($cell.html()).insertBefore($cell);
+      $cell.remove();
+    }
+    $('#modal').modal('hide');
+  });
+
+  // Destroy TinyMCE if modal is dismissed without completing
+  $('#modal').off('hidden.table-cell-editor').on('hidden.table-cell-editor', function () {
+    destroyInstructionEditor();
+  });
+
+  $('#modal').modal('show');
+}
+
+// ── Confirmation modal ────────────────────────────────────────────────────────
+
+function confirmThenDo(message, action) {
+  $('#modalLabel').text('Confirm');
+  $('#modal .modal-body').html(`<p>${message}</p>`);
+  $('#modal .modal-footer').html(
+    '<button value="confirm" class="btn btn-danger">Remove</button>' +
+    '<button value="cancel" class="btn" data-dismiss="modal">Cancel</button>'
+  );
+  $('#modal button[value="confirm"]').off('click').on('click', function () {
+    $('#modal').modal('hide');
+    action();
+  });
   $('#modal').modal('show');
 }
 
@@ -347,13 +442,11 @@ export function table_edit($cgr) {
   let label, $table, $tableGroup, $wrap;
 
   if ($cgr) {
-    // ── Edit existing table in-place (no cloning, no DOM replacement) ──────
     label = $('.table-group-label', $cgr).text() || 'Table';
     $tableGroup = $('.table-group', $cgr);
     $table = $('table.form-table', $cgr);
 
     if (!$table.length) {
-      // Defensive fallback: table missing somehow — rebuild fresh
       $table = createInitialTable();
       $tableGroup.append($table);
     }
@@ -361,13 +454,14 @@ export function table_edit($cgr) {
     $wrap = $cgr;
     $wrap.attr('data-status', 'editing');
 
-    // Ensure the edit/duplicate/remove buttons are present (hover may not have
-    // fired yet if the user triggered edit via keyboard or programmatically)
     if (!$('.control-group-buttons', $wrap).length) {
       $wrap.prepend($(input.button()).hide());
     }
+
+    // Clean up any leftover edit UI from a previous edit session
+    $tableGroup.find('.table-edit-ui').remove();
+    $tableGroup.off('click.table-builder');
   } else {
-    // ── New table ───────────────────────────────────────────────────────────
     label = 'Table';
     $table = createInitialTable();
 
@@ -383,7 +477,7 @@ export function table_edit($cgr) {
     $('#output').append($wrap);
   }
 
-  // Add Row / Add Column buttons (edit-only, removed on Done)
+  // Add Row / Add Column buttons (removed on Done)
   const $addRowBtn = $('<button class="btn btn-small table-add-row-btn table-edit-ui">+ Add Row</button>');
   const $addColBtn = $('<button class="btn btn-small table-add-col-btn table-edit-ui">+ Add Column</button>');
   $tableGroup.append(
@@ -391,10 +485,9 @@ export function table_edit($cgr) {
       .append($addRowBtn).append(' ').append($addColBtn)
   );
 
-  // Build spec panel
-  const $rowSection = $('<div></div>');
-  const $colSection = $('<div></div>');
+  buildInTableControls($table);
 
+  // Spec panel: label + Done only (row/col management is now in the table)
   const $edit = $('<div class="well spec"></div>').append(`
     <div class="control-group">
       <div class="control-label">Table Label</div>
@@ -403,20 +496,12 @@ export function table_edit($cgr) {
       </div>
     </div>`
   ).append(
-    $('<div class="control-group"><div class="control-label">Rows</div></div>')
-      .append($('<div class="controls"></div>').append($rowSection))
-  ).append(
-    $('<div class="control-group"><div class="control-label">Columns</div></div>')
-      .append($('<div class="controls"></div>').append($colSection))
-  ).append(
     '<div class="control-group"><div class="controls">' +
     '<button type="submit" class="btn btn-primary table-done-btn">Done</button>' +
     '</div></div>'
   );
 
   $wrap.after($edit);
-
-  refreshManageLists($table, $rowSection, $colSection);
 
   // ── Event handlers ────────────────────────────────────────────────────────
 
@@ -427,60 +512,72 @@ export function table_edit($cgr) {
   $addRowBtn.on('click', function (e) {
     e.preventDefault();
     doAddRow($table);
-    refreshManageLists($table, $rowSection, $colSection);
+    buildInTableControls($table);
   });
 
   $addColBtn.on('click', function (e) {
     e.preventDefault();
     doAddColumn($table);
-    refreshManageLists($table, $rowSection, $colSection);
+    buildInTableControls($table);
   });
 
-  $edit.on('click', '.table-row-up', function (e) {
+  // Row controls delegated from $tableGroup so they survive control rebuilds
+  $tableGroup.on('click.table-builder', '.table-row-ctrl .table-row-up', function (e) {
     e.preventDefault();
+    e.stopPropagation();
     doMoveRowUp($table, parseInt($(this).data('row'), 10));
-    refreshManageLists($table, $rowSection, $colSection);
+    buildInTableControls($table);
   });
 
-  $edit.on('click', '.table-row-down', function (e) {
+  $tableGroup.on('click.table-builder', '.table-row-ctrl .table-row-down', function (e) {
     e.preventDefault();
+    e.stopPropagation();
     doMoveRowDown($table, parseInt($(this).data('row'), 10));
-    refreshManageLists($table, $rowSection, $colSection);
+    buildInTableControls($table);
   });
 
-  $edit.on('click', '.table-row-remove', function (e) {
+  $tableGroup.on('click.table-builder', '.table-row-ctrl .table-row-remove', function (e) {
     e.preventDefault();
-    doRemoveRow($table, parseInt($(this).data('row'), 10));
-    refreshManageLists($table, $rowSection, $colSection);
+    e.stopPropagation();
+    const rowIndex = parseInt($(this).data('row'), 10);
+    confirmThenDo('Remove this row? This cannot be undone.', function () {
+      doRemoveRow($table, rowIndex);
+      buildInTableControls($table);
+    });
   });
 
-  $edit.on('click', '.table-col-left', function (e) {
+  // Column controls delegated from $tableGroup
+  $tableGroup.on('click.table-builder', '.table-col-ctrl .table-col-left', function (e) {
     e.preventDefault();
+    e.stopPropagation();
     doMoveColLeft($table, parseInt($(this).data('col'), 10));
-    refreshManageLists($table, $rowSection, $colSection);
+    buildInTableControls($table);
   });
 
-  $edit.on('click', '.table-col-right', function (e) {
+  $tableGroup.on('click.table-builder', '.table-col-ctrl .table-col-right', function (e) {
     e.preventDefault();
+    e.stopPropagation();
     doMoveColRight($table, parseInt($(this).data('col'), 10));
-    refreshManageLists($table, $rowSection, $colSection);
+    buildInTableControls($table);
   });
 
-  $edit.on('click', '.table-col-remove', function (e) {
+  $tableGroup.on('click.table-builder', '.table-col-ctrl .table-col-remove', function (e) {
     e.preventDefault();
-    doRemoveColumn($table, parseInt($(this).data('col'), 10));
-    refreshManageLists($table, $rowSection, $colSection);
+    e.stopPropagation();
+    const colIndex = parseInt($(this).data('col'), 10);
+    confirmThenDo('Remove this column? This cannot be undone.', function () {
+      doRemoveColumn($table, colIndex);
+      buildInTableControls($table);
+    });
   });
 
   $edit.on('click', '.table-done-btn', function (e) {
     e.preventDefault();
-    // Assign unique names to any cell inputs that don't have one yet
     $table.find('input, textarea').each(function () {
       if (!$(this).attr('name')) $(this).attr('name', UID.generateShort());
     });
-    // Remove edit-only UI elements
     $tableGroup.find('.table-edit-ui').remove();
-    // Close spec
+    $tableGroup.off('click.table-builder');
     $edit.remove();
     $wrap.removeAttr('data-status');
     updateSectionNumbers();
@@ -490,15 +587,15 @@ export function table_edit($cgr) {
 // ── Global event bindings for table editing ───────────────────────────────────
 
 export function binding_table_events() {
-  // Cell click opens modal only when the parent wrap is in editing mode
+  // Exclude control row/cells from the cell-click handler
   $('#output').on(
     'click',
-    '.control-group-wrap[data-status="editing"] .form-table th,' +
-    '.control-group-wrap[data-status="editing"] .form-table td',
+    '.control-group-wrap[data-status="editing"] .form-table th:not(.table-col-ctrl):not(.table-ctrl-corner),' +
+    '.control-group-wrap[data-status="editing"] .form-table td:not(.table-row-ctrl)',
     function (e) {
       e.preventDefault();
       e.stopPropagation();
-      openCellEditModal($(this), $(this).closest('.form-table'));
+      openCellEditModal($(this));
     }
   );
 }

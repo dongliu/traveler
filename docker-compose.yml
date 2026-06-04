@@ -59,7 +59,7 @@ services:
       retries: 5
       start_period: 10s
   mongo-express:
-    image: mongo-express
+    image: mongo-express:0.54.0
     restart: unless-stopped
     ports:
       - ${MONGO_EXPRESS_PORT-8081}:8081

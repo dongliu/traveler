@@ -48,6 +48,10 @@ The default values of these variables can be found at `docker-compose.yml`. The
 `WEB_PORT` used must be consistent with that in `docker/auth.json`, otherwise
 auth will not work properly.
 
+The `COMPOSE_PROJECT_NAME` variable is optional. When it is set, then there need
+to a directory to be copied from the `traveler-mongo` directory, and renamed as
+something like `ernest-mongo`, where the mongodb data will be saved.
+
 ## build and run the application
 
 Start the traveler-ldap docker containers from its own directory.

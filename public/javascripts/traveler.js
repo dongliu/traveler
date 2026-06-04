@@ -735,24 +735,39 @@ $(function() {
   $('#form input:file').change(function(e) {
     e.preventDefault();
     var $this = $(this);
-    var $cgw = $this.closest('.control-group-wrap');
-    $('#form input,textarea')
-      .not($this)
-      .prop('disabled', true);
+    var isTableCell = !!$this.closest('.form-table').length;
+    var $cell = isTableCell ? $this.closest('td') : null;
+    var $cgw = isTableCell ? null : $this.closest('.control-group-wrap');
+
+    $('#form input,textarea').not($this).prop('disabled', true);
     $('#complete').prop('disabled', true);
+
     var file = this.files[0];
     if (file === undefined) {
-      $cgw.children('.control-group-buttons').remove();
+      if (isTableCell) {
+        $cell.removeClass('table-cell-editing');
+        $cell.children('.table-cell-buttons').remove();
+      } else {
+        $cgw.children('.control-group-buttons').remove();
+      }
       return;
     }
 
-    var $validation = $cgw.find('.validation');
-    if ($validation.length) {
-      $validation = $($validation[0]);
+    var $validation;
+    if (isTableCell) {
+      $validation = $cell.find('.validation');
+      if (!$validation.length) {
+        $validation = $('<div class="validation"></div>').appendTo($cell);
+      }
     } else {
-      $validation = $('<div class="validation"></div>').appendTo(
-        $cgw.find('.controls')
-      );
+      $validation = $cgw.find('.validation');
+      if ($validation.length) {
+        $validation = $($validation[0]);
+      } else {
+        $validation = $('<div class="validation"></div>').appendTo(
+          $cgw.find('.controls')
+        );
+      }
     }
 
     var valid_type = false;
@@ -781,9 +796,12 @@ $(function() {
       valid_type =
         /^(image|text)\//i.test(file.type) ||
         file.type === 'application/pdf' ||
+        file.type === 'application/msword' ||
         file.type === 'application/vnd.ms-excel' ||
-        file.type ===
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        file.type === 'application/vnd.oasis.opendocument.text' ||
+        file.type === 'application/vnd.oasis.opendocument.spreadsheet' ||
         file.type === 'application/vnd.ms-xpsdocument' ||
         file.type === 'application/oxps';
     }
@@ -799,23 +817,45 @@ $(function() {
       }
 
       $validation.html('<p class="text-error">' + validation_text + '</p>');
-      $cgw.children('.control-group-buttons').remove();
+      if (isTableCell) {
+        $cell.children('.table-cell-buttons').remove();
+        $cell.removeClass('table-cell-editing');
+      } else {
+        $cgw.children('.control-group-buttons').remove();
+      }
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
       $validation.html(
         '<p class="text-error">' + file.size + ' is too large to upload</p>'
       );
-      $cgw.children('.control-group-buttons').remove();
+      if (isTableCell) {
+        $cell.children('.table-cell-buttons').remove();
+        $cell.removeClass('table-cell-editing');
+      } else {
+        $cgw.children('.control-group-buttons').remove();
+      }
       return;
     }
     // clear validation message if any
     $validation.empty();
 
-    if ($cgw.children('.control-group-buttons').length === 0) {
-      $cgw.prepend(
-        '<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>'
-      );
+    if (isTableCell) {
+      $cell.addClass('table-cell-editing');
+      if (!$cell.children('.table-cell-buttons').length) {
+        $cell.append(
+          '<div class="table-cell-buttons">' +
+            '<button value="table-cell-upload" class="btn btn-mini btn-primary">Upload</button> ' +
+            '<button value="table-cell-cancel" class="btn btn-mini">Cancel</button>' +
+            '</div>'
+        );
+      }
+    } else {
+      if ($cgw.children('.control-group-buttons').length === 0) {
+        $cgw.prepend(
+          '<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>'
+        );
+      }
     }
   });
 
@@ -869,6 +909,10 @@ $(function() {
             $history.html()
         );
         // $.livestamp.resume();
+        $(input).siblings('.file-current').remove();
+        $(input).after(
+          '<span class="file-current"><a href="' + json.location + '" target="' + linkTarget + '">' + input.files[0].name + '</a></span>'
+        );
         $this.closest('.control-group-buttons').remove();
       })
       .fail(function(jqXHR) {
@@ -895,6 +939,121 @@ $(function() {
     $(this)
       .closest('.control-group-buttons')
       .remove();
+  });
+
+  $('#form').on('click', 'button[value="table-cell-upload"]', function(e) {
+    e.preventDefault();
+    var $this = $(this);
+    $this.prop('disabled', true);
+    var $cell = $this.closest('td');
+    var input = $cell.find('input[type="file"]')[0];
+    var $tableGroup = $cell.closest('.table-group');
+    var isFirstSave = !$tableGroup
+      .find('.cell-history-item[data-input-name="' + input.name + '"]')
+      .length;
+    var data = new FormData();
+    data.append('name', input.name);
+    data.append('type', input.type);
+    data.append(input.name, input.files[0]);
+    $.ajax({
+      url: './uploads/',
+      type: 'POST',
+      processData: false,
+      contentType: false,
+      data: data,
+      dataType: 'json',
+    })
+      .done(function(json, status, jqXHR) {
+        var timestamp = jqXHR.getResponseHeader('Date');
+        $('#message').append(
+          '<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>File uploaded ' +
+            livespan(timestamp, false) +
+            '</div>'
+        );
+        var newRecord =
+          '<strong><a href=' +
+          json.location +
+          ' target="' +
+          linkTarget +
+          '">' +
+          input.files[0].name +
+          '</a></strong> uploaded by you ' +
+          livespan(timestamp, false) +
+          '; ';
+        var $historySection = $tableGroup.find('.table-history-section');
+        if ($historySection.length) {
+          var $item = $historySection.find(
+            '.cell-history-item[data-input-name="' + input.name + '"]'
+          );
+          if ($item.length) {
+            $item.find('.cell-history-records').prepend(newRecord);
+          } else {
+            var $tbl = $tableGroup.find('.form-table');
+            var rowLabel =
+              $tbl.find('tbody tr').eq($cell.closest('tr').index()).find('th:first strong').text() ||
+              'Row ' + $cell.closest('tr').index();
+            var colLabel =
+              $tbl.find('tbody tr').first().find('th, td').eq($cell.index()).find('strong').text() ||
+              'Col ' + $cell.index();
+            $historySection.find('.table-history-content').append(
+              '<div class="cell-history-item" data-input-name="' + input.name + '">' +
+                '<strong>' + rowLabel + ' &times; ' + colLabel + ':</strong> ' +
+                '<span class="cell-history-records">' + newRecord + '</span>' +
+                '</div>'
+            );
+          }
+          $historySection.find('.collapse').addClass('in');
+        } else {
+          var sectionId = 'table-history-body-' + Date.now();
+          var $tbl2 = $tableGroup.find('.form-table');
+          var rowLabel2 =
+            $tbl2.find('tbody tr').eq($cell.closest('tr').index()).find('th:first strong').text() ||
+            'Row ' + $cell.closest('tr').index();
+          var colLabel2 =
+            $tbl2.find('tbody tr').first().find('th, td').eq($cell.index()).find('strong').text() ||
+            'Col ' + $cell.index();
+          $tableGroup.append(
+            '<div class="table-history-section">' +
+              '<a class="table-history-toggle" data-toggle="collapse" href="#' + sectionId + '">Cell update history</a>' +
+              '<div id="' + sectionId + '" class="collapse in">' +
+              '<div class="table-history-content">' +
+              '<div class="cell-history-item" data-input-name="' + input.name + '">' +
+              '<strong>' + rowLabel2 + ' &times; ' + colLabel2 + ':</strong> ' +
+              '<span class="cell-history-records">' + newRecord + '</span>' +
+              '</div></div></div></div>'
+          );
+        }
+        $(input).siblings('.file-current').remove();
+        $(input).after(
+          '<span class="file-current"><a href="' + json.location + '" target="' + linkTarget + '">' + input.files[0].name + '</a></span>'
+        );
+        if (isFirstSave) incrementFinished();
+        $cell.removeClass('table-cell-editing');
+        $cell.children('.table-cell-buttons').remove();
+      })
+      .fail(function(jqXHR) {
+        if (jqXHR.status !== 401) {
+          $('#message').append(
+            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot upload the file: ' +
+              (jqXHR.responseText || 'unknown') +
+              '</div>'
+          );
+          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        }
+      })
+      .always(function() {
+        $('#form input,textarea').prop('disabled', false);
+        $('#complete').prop('disabled', false);
+      });
+  });
+
+  $('#form').on('click', 'button[value="table-cell-cancel"]', function(e) {
+    e.preventDefault();
+    var $cell = $(this).closest('td');
+    $('#form input,textarea').prop('disabled', false);
+    $('#complete').prop('disabled', false);
+    $cell.removeClass('table-cell-editing');
+    $cell.children('.table-cell-buttons').remove();
   });
 
   $('#work').click(function(e) {

@@ -10,11 +10,14 @@ const config = require('../config/config');
 
 const allowedUploadMimetypes = new Set([
   'application/pdf',
+  'application/msword',
   'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.oasis.opendocument.text',
+  'application/vnd.oasis.opendocument.spreadsheet',
   'application/vnd.ms-xpsdocument',
   'application/oxps',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ]);
 
 function travelerUploadFileFilter(req, file, cb) {
