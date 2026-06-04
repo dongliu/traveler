@@ -796,9 +796,12 @@ $(function() {
       valid_type =
         /^(image|text)\//i.test(file.type) ||
         file.type === 'application/pdf' ||
+        file.type === 'application/msword' ||
         file.type === 'application/vnd.ms-excel' ||
-        file.type ===
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        file.type === 'application/vnd.oasis.opendocument.text' ||
+        file.type === 'application/vnd.oasis.opendocument.spreadsheet' ||
         file.type === 'application/vnd.ms-xpsdocument' ||
         file.type === 'application/oxps';
     }
