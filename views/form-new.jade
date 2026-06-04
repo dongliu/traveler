@@ -27,7 +27,8 @@ block content
         .control-label Document number
         .controls
           input(type='text', maxlength=20, name='documentNumber', required, value="#{form && form.documentNumber || ''}")
-      .control-group
+          span.help-inline e.g. Group Code - 00x
+      //- .control-group
         .control-label Description
         .controls
           input(type='text', maxlength=100, name='description', value="#{form && form.description || ''}")

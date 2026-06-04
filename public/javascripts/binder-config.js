@@ -217,14 +217,16 @@ $(function() {
   var workAoColumns = [
     removeColumn,
     workLinkColumn,
-    titleColumn,
-    addedByColumn,
-    addedOnColumn,
-    ownerColumn,
-    deviceColumn,
-    tagsColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
+    columnTitle('Traveler title'),
+    workCreatedOnColumn,
+    travelerProgressColumn,
+    // addedByColumn,
+    // addedOnColumn,
+    // ownerColumn,
+    // deviceColumn,
+    // tagsColumn,
+    // sharedWithColumn,
+    // sharedGroupColumn,
   ];
 
   const worksTableConfig = {

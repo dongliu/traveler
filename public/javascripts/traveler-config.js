@@ -103,7 +103,6 @@ $(function() {
   //     $this.parent().remove();
   //   });
 
-  var devices;
 
   $('#add').click(function(e) {
     e.preventDefault();
@@ -117,40 +116,6 @@ $(function() {
       cleanDeviceForm();
     });
 
-    if (showCCDB) {
-      if (!devices) {
-        devices = new Bloodhound({
-          datumTokenizer: function(device) {
-            return Bloodhound.tokenizers.nonword(device.inventoryId);
-          },
-          queryTokenizer: Bloodhound.tokenizers.nonword,
-          identify: function(device) {
-            return device.inventoryId;
-          },
-          prefetch: {
-            url: prefix + '/devices/json',
-            cacheKey: 'devices',
-          },
-        });
-        devices.initialize();
-      }
-    } else if (!devices) {
-      devices = [];
-    }
-
-    $('#newDevice').typeahead(
-      {
-        minLength: 1,
-        highlight: true,
-        hint: true,
-      },
-      {
-        name: 'devices',
-        limit: 20,
-        display: 'inventoryId',
-        source: devices,
-      }
-    );
 
     $('#confirm').click(function(confirmE) {
       confirmE.preventDefault();

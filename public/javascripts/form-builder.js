@@ -601,13 +601,13 @@ function text_edit($cgr) {
   let label = 'label';
   let userkey = '';
   let placeholder = '';
-  let help = '';
+  // let help = '';
   let required = false;
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
-    help = $('.controls span.help-block', $cgr).text();
+    // help = $('.controls span.help-block', $cgr).text();
     required = $('.controls input', $cgr).prop('required');
   }
   const $text = $(input.text());
@@ -615,14 +615,14 @@ function text_edit($cgr) {
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $placeholder = $(spec.placeholder());
-  const $help = $(spec.help());
+  // const $help = $(spec.help());
   const $required = $(spec.required());
   const $done = $(spec.done());
   const $edit = $('<div class="well spec"></div>').append(
     $label,
     $userkey,
     $placeholder,
-    $help,
+    // $help,
     $required,
     $done
   );
@@ -634,13 +634,13 @@ function text_edit($cgr) {
     label,
     userkey,
     placeholder,
-    help,
+    // help,
     required,
   };
   $('input', $label).val(label);
   $('input', $userkey).val(userkey);
   $('input', $placeholder).val(placeholder);
-  $('input', $help).val(help);
+  // $('input', $help).val(help);
   $('input', $required).prop('checked', required);
   binding($edit, $text, model, $done);
 }
@@ -1029,14 +1029,14 @@ function file_edit($cgr) {
   var label = 'label';
   var required = false;
   var userkey = '';
-  var help = '';
+  // var help = '';
   var filetype = '';
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     required = $('input', $cgr).prop('required');
     userkey = $('.controls input', $cgr).data('userkey');
     filetype = $('.controls input', $cgr).data('filetype');
-    help = $('.controls span.help-block', $cgr).text();
+    // help = $('.controls span.help-block', $cgr).text();
   }
 
   var $upload = $(input.upload());
@@ -1046,14 +1046,14 @@ function file_edit($cgr) {
   var $userkey = $(spec.userkey());
   var $filetype = $(spec.filetype());
 
-  var $help = $(spec.help());
+  // var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append(
     $label,
     $required,
     $userkey,
     $filetype,
-    $help,
+    // $help,
     $done
   );
   const $new_cgr = $(
@@ -1066,14 +1066,14 @@ function file_edit($cgr) {
     required: required,
     userkey: userkey,
     filetype: filetype,
-    help: help,
+    // help: help,
   };
 
   $('input', $label).val(label);
   $('input', $required).prop('checked', required);
   $('input', $userkey).val(userkey);
   $('input', $filetype).val(filetype);
-  $('input', $help).val(help);
+  // $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
 }

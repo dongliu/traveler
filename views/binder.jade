@@ -39,7 +39,7 @@ block underTopBtn
           if ((locals.isOwner != undefined && locals.isOwner) || isAdmin || isManager)
             a(href="config")
               button.btn.btn-primary Configuration
-    h4 !{binder.description}
+    //- h4 !{binder.description}
     #details.collapse.out
       h4 Owner: #{binder.owner || binder.createdBy}
       h4 Status:
