@@ -13,29 +13,33 @@ Previously submitted approvals should be voided on record, since the rejection s
 - The review model should have a void status in `reviewResult`.
 - Previously submitted approval review results will be voided once a rejection is in place.
   - A voided result is terminal — it cannot transition to any other status.
-- The review history on the form page should not display voided review results.
+- The review history on the form page displays voided review results in a separate collapsed section, showing the submitted date and the voided date for each entry.
+- The document version (`_v`) is not incremented when a rejection is submitted.
 - Traveler review process is out of scope, because there can be only one reviewer.
 
 ## Design
 
 ### Schema — `reviewResult` sub-document (`model/review.js`)
 
-Add an optional `voided` field to the `reviewResult` sub-document:
+Add two optional fields to the `reviewResult` sub-document:
 
 ```js
-voided: { type: Boolean }
+voided:   { type: Boolean },
+voidedOn: { type: Date }
 ```
 
-Absent / `undefined` means the result is active. `true` means it has been voided. The field is intentionally sparse so that existing records require no migration.
+Absent / `undefined` means the result is active. Both fields are intentionally sparse so that existing records require no migration.
 
 ### Voiding logic — `addReviewResult()` (`model/review.js`)
 
-When a reviewer submits `result === "2"` (rejection), before pushing the new result, iterate `__review.reviewResults` and set `voided = true` on every entry that:
+When a reviewer submits `result === "2"` (rejection), before pushing the new result, iterate `__review.reviewResults` and set `voided = true` and `voidedOn = <current timestamp>` on every entry that:
 - has `result === "1"` (approval), **and**
 - has the same `v` (document version) as the incoming rejection, **and**
 - is not already voided.
 
 This keeps the operation scoped to the active review cycle and is safe to re-apply (idempotent per the terminal-state requirement).
+
+The document version (`_v`) is **not** incremented on rejection. Since `_v` stays the same across the re-review cycle, the `voided` flag is the authoritative signal for excluding prior approvals in `allApproved()`.
 
 ### Approval check — `allApproved()` (`model/review.js`)
 
@@ -43,9 +47,10 @@ The existing method builds a per-reviewer map of latest results filtered by vers
 
 ### View — review history (`views/form-builder.jade`, `views/released-form.jade`)
 
-When rendering `review.reviewResults`, skip entries where `result.voided === true`. No visual indicator (e.g. strike-through) is shown; voided results are fully omitted from the list.
+Split the rendered review results into two groups:
 
-> **Clarification needed**: The requirement says voided results should not be displayed. This design interprets that as completely hidden. If an audit trail is needed on-screen (e.g. showing voided approvals in a muted style), the view logic would change but the model design stays the same.
+- **Active results** — entries where `voided` is absent or `false`. Rendered as today, unchanged.
+- **Voided results** — entries where `voided === true`. Rendered in a separate section below the active results, collapsed by default. Each row shows the reviewer name, the original submitted date (`submittedOn`), and the voided date (`voidedOn`).
 
 ## Implementation
 
@@ -57,4 +62,4 @@ TBD
 
 ## Open Questions
 
-- **Does the document version (`v`) increment when an owner resubmits after a rejection?** If yes, version filtering in `allApproved()` already isolates each review cycle, and the `voided` flag is only needed for the display requirement. If no, the `voided` flag becomes load-bearing for correctness in `allApproved()` as well.
+TBD
