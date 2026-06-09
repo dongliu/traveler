@@ -51,7 +51,9 @@ block underTopBtn
             a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#review-results") Completed review(s)
           #review-results.accordion-body.collapse
             .accordion-inner
-              each result in review.reviewResults
+              - var activeResults = review.reviewResults.filter(function(r) { return !r.voided; })
+              - var voidedResults = review.reviewResults.filter(function(r) { return r.voided; })
+              each result in activeResults
                 accordion(id="#{result._id}")
                   .accordion-group
                     .accordion-heading
@@ -67,11 +69,25 @@ block underTopBtn
                     .accordion-body.collapse(id="#{result._id}-comment")
                       .accordion-inner
                         span #{result.comment}
+              if voidedResults.length
+                .accordion-group
+                  .accordion-heading
+                    a.accordion-toggle(data-toggle="collapse" data-parent="#review-results" href="#voided-results") Voided review(s)
+                  #voided-results.accordion-body.collapse
+                    .accordion-inner
+                      each result in voidedResults
+                        .accordion-group
+                          .accordion-heading
+                            | #{result.reviewerName || result.reviewerId}
+                            | &nbsp;#{result.result === '1' ? 'approved' : 'rejected'} on&nbsp;
+                            span.time #{result.submittedOn}
+                            | ,&nbsp;voided on&nbsp;
+                            span.time #{result.voidedOn}
         //- reviewer and under review see the simple review form
         if (isReviewer && status === 0.5)
           .accordion-group
             .accordion-heading
-              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Submit the review
+              a.accordion-toggle(data-toggle="collapse" data-parent="#reviews" href="#new-review") Submit new review
             #new-review.accordion-body.collapse
               .accordion-inner
                 form.form-horizontal#review
@@ -137,7 +153,7 @@ block underTopBtn
             a Section
           li#add-rich
             a Instructions
-          li#add-figure
+          //- li#add-figure
             a Figure
       .btn-group.dropup
         button.btn.dropdown-toggle(data-toggle='dropdown')#input-items Basic inputs
