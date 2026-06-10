@@ -526,7 +526,11 @@
     };
     var setupIntegration = function () {
       var jq = getJquery();
-      jq.expr.pseudos.tinymce = function (e) {
+      jq.expr.pseudos.tinymce = jq.expr.createPseudo ? jq.expr.createPseudo(function (_text) {
+        return function (elem) {
+          return !!getTinymceInstance(elem);
+        };
+      }) : function (e) {
         return !!getTinymceInstance(e);
       };
       jq.fn.tinymce = tinymceFn;
