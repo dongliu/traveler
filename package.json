@@ -47,7 +47,7 @@
     "request": "2.34.0",
     "sanitize-html": "^1.20.0",
     "serve-favicon": "2.5.0",
-    "tinymce": "^8.0.0",
+    "tinymce": "^6.8.6",
     "winston": "^3.2.1"
   },
   "devDependencies": {

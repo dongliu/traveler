@@ -15,12 +15,9 @@ import { isNumberSupported } from './lib/form-builder-shared.js';
 
 const mceConfig = {
   base_url: '/tinymce',
-  license_key: 'gpl',
-  promotion: false,
   suffix: '.min',
-
-  // Required in v6+
-  model: 'dom',
+  promotion: false,
+  branding: false,
 
   plugins: [
     'advlist', 'autolink', 'lists', 'link', 'image',
@@ -31,7 +28,6 @@ const mceConfig = {
 
   toolbar: 'undo redo | charmap | link image | bullist numlist outdent indent | formatselect bold italic underline strikethrough | removeformat',
 
-  // v8: Promise-based upload handler
   images_upload_handler: async (blobInfo) => {
     const formData = new FormData();
     formData.append('file', blobInfo.blob(), blobInfo.filename());
