@@ -35,6 +35,8 @@ const reviewResult = new Schema({
   v: Number,
   submittedOn: Date,
   comment: String,
+  voided: Boolean,
+  voidedOn: Date,
 });
 
 const review = new Schema({
@@ -125,25 +127,31 @@ function addReview(schema) {
     v
   ) {
     const doc = this;
+    const vNum = Number(v);
     try {
+      // void prior results before pushing the new rejection so the new entry
+      // is never included in the iteration and is never self-voided
+      if (result === '2') {
+        const now = Date.now();
+        doc.__review.reviewResults.forEach(r => {
+          if (r.v === vNum && !r.voided) {
+            r.voided = true;
+            r.voidedOn = now;
+          }
+        });
+        closeReviewRequests(doc);
+        doc.__review.reviewRequests = [];
+      }
+
       doc.__review.reviewResults.push({
         reviewerId,
         result,
         comment,
         submittedOn: Date.now(),
-        v,
+        v: vNum,
       });
-
-      // if rework (result = 2), then
-      // 1. remove doc from reviewer's review list
-      // 2. remove reviewer from reviewer list, after which a new review request is needed
-      if (result === '2') {
-        // doc.status = 0;
-        closeReviewRequests(doc);
-        doc.__review.reviewRequests = [];
-      }
       const newDoc = await doc.save();
-      debug(`doc saved as ${newDoc}`);
+      debug(`doc saved, reviewResults: %O`, newDoc.__review.reviewResults);
       return newDoc;
     } catch (error) {
       logger.error(`update review db error: ${error}`);
@@ -174,7 +182,7 @@ function addReview(schema) {
     // filter to the current version
     // for traveler use referenceReleasedFormVer as the temporary version. this might need to be changed later
     const docVersion = doc._v || 1;
-    const currentReviewResults = reviewResults.filter(r => r.v === docVersion);
+    const currentReviewResults = reviewResults.filter(r => r.v === docVersion && !r.voided);
     // the last is the latest
     for (i = currentReviewResults.length - 1; i >= 0; i -= 1) {
       debug(

@@ -10,21 +10,17 @@ function formatDateLong(date) {
 }
 
 function selectEvent() {
-  $('tbody').on('click', 'input.select-row', function(e) {
+  $('tbody').on('click', 'input.select-row', function (e) {
     if ($(this).prop('checked')) {
-      $(e.target)
-        .closest('tr')
-        .addClass('row-selected');
+      $(e.target).closest('tr').addClass('row-selected');
     } else {
-      $(e.target)
-        .closest('tr')
-        .removeClass('row-selected');
+      $(e.target).closest('tr').removeClass('row-selected');
     }
   });
 }
 
 function selectMultiEvent(table) {
-  $(`${table} tbody`).on('click', 'input.select-row', function(e) {
+  $(`${table} tbody`).on('click', 'input.select-row', function (e) {
     const tr = $(e.target).closest('tr');
     if ($(tr).hasClass('row-selected')) {
       $(tr).removeClass('row-selected');
@@ -35,25 +31,19 @@ function selectMultiEvent(table) {
 }
 
 function selectOneEvent(table) {
-  $(`${table} tbody`).on('click', 'input.select-row', function(e) {
+  $(`${table} tbody`).on('click', 'input.select-row', function (e) {
     if ($(this).prop('checked')) {
       $(`${table} tr.row-selected`).removeClass('row-selected');
-      $(`${table} input.select-row`)
-        .not(this)
-        .prop('checked', false);
-      $(e.target)
-        .closest('tr')
-        .addClass('row-selected');
+      $(`${table} input.select-row`).not(this).prop('checked', false);
+      $(e.target).closest('tr').addClass('row-selected');
     } else {
-      $(e.target)
-        .closest('tr')
-        .removeClass('row-selected');
+      $(e.target).closest('tr').removeClass('row-selected');
     }
   });
 }
 
 function filterEvent() {
-  $('.filter').on('keyup', 'input', function(e) {
+  $('.filter').on('keyup', 'input', function (e) {
     const table = $(this).closest('table');
     const th = $(this).closest('th');
     const filter = $(this).closest('.filter');
@@ -185,14 +175,14 @@ function personNameColumn(title, key) {
 }
 
 function fnWrap(oTableLocal) {
-  $(oTableLocal.fnSettings().aoData).each(function() {
+  $(oTableLocal.fnSettings().aoData).each(function () {
     $(this.nTr).removeClass('nowrap');
   });
   oTableLocal.fnAdjustColumnSizing();
 }
 
 function fnUnwrap(oTableLocal) {
-  $(oTableLocal.fnSettings().aoData).each(function() {
+  $(oTableLocal.fnSettings().aoData).each(function () {
     $(this.nTr).addClass('nowrap');
   });
   oTableLocal.fnAdjustColumnSizing();
@@ -227,9 +217,7 @@ function fnDeselect(oTableLocal, selectedClass, checkboxClass) {
   for (i = 0; i < aTrs.length; i += 1) {
     if ($(aTrs[i]).hasClass(selectedClass)) {
       $(aTrs[i]).removeClass(selectedClass);
-      $(aTrs[i])
-        .find(`input.${checkboxClass}:checked`)
-        .prop('checked', false);
+      $(aTrs[i]).find(`input.${checkboxClass}:checked`).prop('checked', false);
     }
   }
 }
@@ -250,30 +238,26 @@ function fnSelectAll(oTableLocal, selectedClass, checkboxClass, current) {
 
   for (i = 0; i < rows.length; i += 1) {
     $(rows[i]).addClass(selectedClass);
-    $(rows[i])
-      .find(`input.${checkboxClass}`)
-      .prop('checked', true);
+    $(rows[i]).find(`input.${checkboxClass}`).prop('checked', true);
   }
 }
 
 function fnSetDeselect(nTr, selectedClass, checkboxClass) {
   if ($(nTr).hasClass(selectedClass)) {
     $(nTr).removeClass(selectedClass);
-    $(nTr)
-      .find(`input.${checkboxClass}:checked`)
-      .prop('checked', false);
+    $(nTr).find(`input.${checkboxClass}:checked`).prop('checked', false);
   }
 }
 
 function fnSetColumnsVis(oTableLocal, columns, show) {
-  columns.forEach(function(e, i, a) {
+  columns.forEach(function (e, i, a) {
     oTableLocal.fnSetColumnVis(e, show);
   });
 }
 
 function fnAddFilterFoot(sTable, aoColumns) {
   const tr = $('<tr role="row">');
-  aoColumns.forEach(function(c) {
+  aoColumns.forEach(function (c) {
     if (c.bVisible === false) {
       return;
     }
@@ -290,7 +274,7 @@ function fnAddFilterFoot(sTable, aoColumns) {
 
 function fnAddFilterHead(sTable, aoColumns) {
   const tr = $('<tr role="row">');
-  aoColumns.forEach(function(c) {
+  aoColumns.forEach(function (c) {
     if (c.bFilter) {
       tr.append(
         `<th><input type="text" placeholder="${c.sTitle}" style="width:80%;" autocomplete="off"></th>`
@@ -304,12 +288,12 @@ function fnAddFilterHead(sTable, aoColumns) {
 
 function formatTravelerStatus(s) {
   const status = {
-    '1': 'active',
-    '1.5': 'submitted for completion',
-    '2': 'completed',
-    '3': 'frozen',
-    '4': 'archived',
-    '0': 'initialized',
+    1: 'active',
+    1.5: 'submitted for completion',
+    2: 'completed',
+    3: 'frozen',
+    4: 'archived',
+    0: 'initialized',
   };
   if (status[s.toString()]) {
     return status[s.toString()];
@@ -317,7 +301,7 @@ function formatTravelerStatus(s) {
   return 'unknown';
 }
 
-$.fn.dataTableExt.oApi.fnAddDataAndDisplay = function(oSettings, aData) {
+$.fn.dataTableExt.oApi.fnAddDataAndDisplay = function (oSettings, aData) {
   /* Add the data */
   const iAdded = this.oApi._fnAddData(oSettings, aData);
   const nAdded = oSettings.aoData[iAdded].nTr;
@@ -354,7 +338,7 @@ $.fn.dataTableExt.oApi.fnAddDataAndDisplay = function(oSettings, aData) {
   };
 };
 
-$.fn.dataTableExt.oApi.fnDisplayRow = function(oSettings, nRow) {
+$.fn.dataTableExt.oApi.fnDisplayRow = function (oSettings, nRow) {
   // Account for the "display" all case - row is already displayed
   if (oSettings._iDisplayLength === -1) {
     return;
@@ -527,18 +511,20 @@ function cloneForm(id, type, title) {
       title,
     }),
   })
-    .done(function(d) {
+    .done(function (d) {
       $('#message').append(
-        `${'<div class="alert alert-success">' +
-          '<button class="close" data-dismiss="alert">x</button>The form was cloned. '}${d}</div>`
+        `${
+          '<div class="alert alert-success">' +
+          '<button class="close" data-dismiss="alert">x</button>The form was cloned. '
+        }${d}</div>`
       );
     })
-    .fail(function(jqXHR) {
+    .fail(function (jqXHR) {
       $('#message').append(
-        `${'<div class="alert alert-error">' +
-          '<button class="close" data-dismiss="alert">x</button>'}${
-          jqXHR.responseText
-        }.</div>`
+        `${
+          '<div class="alert alert-error">' +
+          '<button class="close" data-dismiss="alert">x</button>'
+        }${jqXHR.responseText}.</div>`
       );
     });
 }
@@ -555,7 +541,7 @@ function cloneModal(id, type) {
     '<button id="submit" class="btn btn-primary">Confirm</button><button id="return" data-dismiss="modal" aria-hidden="true" class="btn">Return</button>'
   );
   $('#modal').modal('show');
-  $('#submit').click(function() {
+  $('#submit').click(function () {
     cloneForm(id, type, $('#modal input').val());
   });
 }
@@ -608,7 +594,7 @@ const reviewRequestedOnColumn = {
     if (!requests) {
       return '';
     }
-    const request = requests.find(function(r) {
+    const request = requests.find(function (r) {
       return r._id === userid;
     });
     if (!request) {
@@ -629,7 +615,7 @@ const reviewRequestedByColumn = {
     if (!requests) {
       return '';
     }
-    const request = requests.find(function(r) {
+    const request = requests.find(function (r) {
       return r._id === userid;
     });
     if (!request) {
@@ -651,7 +637,7 @@ const reviewersColumn = {
       if (requests.length === 0) {
         return '';
       }
-      const reviews = requests.map(function(r) {
+      const reviews = requests.map(function (r) {
         if (type === 'filter' || type === 'sort') {
           return r._id;
         }
@@ -804,6 +790,15 @@ const commentColumn = {
   bFilter: true,
 };
 
+function columnTitle(t) {
+  return {
+    sTitle: t,
+    sDefaultContent: '',
+    mData: 'title',
+    bFilter: true,
+  };
+}
+
 const titleColumn = {
   sTitle: 'Title',
   sDefaultContent: '',
@@ -850,10 +845,10 @@ const formTypeColumn = {
 
 function formatFormStatus(s) {
   const status = {
-    '0': 'draft',
-    '0.5': 'under review',
-    '1': 'closed',
-    '2': 'archived',
+    0: 'draft',
+    0.5: 'under review',
+    1: 'closed',
+    2: 'archived',
   };
   if (status[s.toString()]) {
     return status[s.toString()];
@@ -871,8 +866,8 @@ const formStatusColumn = {
 
 function formatReleasedFormStatus(s) {
   const status = {
-    '1': 'released',
-    '2': 'archived',
+    1: 'released',
+    2: 'archived',
   };
   if (status[s.toString()]) {
     return status[s.toString()];
@@ -1186,7 +1181,7 @@ function usersColumn(title, prop) {
         if (source[prop].length === 0) {
           return '';
         }
-        const names = source[prop].map(function(u) {
+        const names = source[prop].map(function (u) {
           if (!u._id) {
             return u;
           }
@@ -1217,7 +1212,7 @@ function usersFilteredColumn(title, filter) {
       if (users.length === 0) {
         return '';
       }
-      const names = users.map(function(u) {
+      const names = users.map(function (u) {
         if (!u._id) {
           return u;
         }
@@ -1247,10 +1242,10 @@ function notIn(user, users) {
   return true;
 }
 
-const manPowerColumn = usersFilteredColumn('Powered by', function(source) {
+const manPowerColumn = usersFilteredColumn('Powered by', function (source) {
   const out = [];
   if (source.manPower) {
-    source.manPower.forEach(function(m) {
+    source.manPower.forEach(function (m) {
       if (notIn(m, out)) {
         out.push(m);
       }
@@ -1258,7 +1253,7 @@ const manPowerColumn = usersFilteredColumn('Powered by', function(source) {
   }
 
   if (source.sharedWith) {
-    source.sharedWith.forEach(function(s) {
+    source.sharedWith.forEach(function (s) {
       if (s.access === 1) {
         if (notIn(s, out)) {
           out.push(s);
@@ -1278,7 +1273,7 @@ const sharedGroupColumn = {
       if (source.sharedGroup.length === 0) {
         return '';
       }
-      const names = source.sharedGroup.map(function(g) {
+      const names = source.sharedGroup.map(function (g) {
         return g.groupname;
       });
       return names.join('; ');
@@ -1362,7 +1357,7 @@ const membersColumn = {
   sDefaultContent: '',
   bFilter: false,
   mRender(data) {
-    data.sort(function(a, b) {
+    data.sort(function (a, b) {
       if (a.name < b.name) {
         return -1;
       }
@@ -1371,7 +1366,7 @@ const membersColumn = {
       }
       return 0;
     });
-    const result = data.map(function(d) {
+    const result = data.map(function (d) {
       return `<li>${d.name}</li>`;
     });
     return `<ul>${result.join('')}</ul>`;
@@ -1450,6 +1445,8 @@ const modifiedByColumn = {
 const addedByColumn = personColumn('Added by', 'addedBy');
 
 const addedOnColumn = dateColumn('Added on', 'addedOn');
+
+const workCreatedOnColumn = longDateColumn('Created', 'createdOn');
 
 const sequenceColumn = {
   sTitle: 'Sequence',
@@ -1634,7 +1631,7 @@ const sDomPage = "<'row-fluid'r>t<'row-fluid'<'span6'i><'span6'p>>";
  *    table.fnReloadAjax();
  */
 
-jQuery.fn.dataTableExt.oApi.fnReloadAjax = function(
+jQuery.fn.dataTableExt.oApi.fnReloadAjax = function (
   oSettings,
   sNewSource,
   fnCallback,
@@ -1675,7 +1672,7 @@ jQuery.fn.dataTableExt.oApi.fnReloadAjax = function(
     oSettings.oInstance,
     oSettings.sAjaxSource,
     aData,
-    function(json) {
+    function (json) {
       /* Clear the old information from the table */
       that.oApi._fnClearTable(oSettings);
 

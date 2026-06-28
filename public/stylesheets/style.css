@@ -688,3 +688,10 @@ ul.pagination > li:last-child > span {
 .caps {
   text-transform: capitalize;
 }
+
+/* fix table in the form */
+form.form-horizontal .tinymce table,
+form.form-horizontal .tinymce table th,
+form.form-horizontal .tinymce table td {
+  border: 1pt solid black;
+}

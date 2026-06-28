@@ -249,6 +249,7 @@ const binderUtil = {
             newWork = {
               _id: item._id,
               refType: type,
+              createdOn: item.createdOn,
               addedOn: Date.now(),
               addedBy: userId,
               status: item.status || 0,

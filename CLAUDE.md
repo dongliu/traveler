@@ -1,42 +1,64 @@
-# traveler Development Guidelines
+# CLAUDE.md
 
-Auto-generated from all feature plans. Last updated: 2026-03-10
-
-## Active Technologies
-- MongoDB via Mongoose — 2 collections: `ncrs` (with embedded `events[]`), `preventive_actions` (001-ncr-workflow)
-- MongoDB via Mongoose — 1 collection: `ncrs` (embedded `events[]` + `preventive_actions[]`) (001-ncr-workflow)
-
-- Node.js 18+, JavaScript (ES6+) + Express 4, Mongoose 5, Nodemailer 6, javascript-state-machine (FSM) (001-ncr-workflow)
-
-## Project Structure
-
-```text
-lib/          # Business logic, state machine, email templates
-model/        # Mongoose schemas
-routes/       # Express route handlers
-views/        # Jade templates
-test-unit/    # Unit tests (mocha)
-test-integ/   # Integration tests
-```
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Commands
 
-npm test && npm run lint
+```bash
+# Install dependencies and copy required assets
+npm install
+npm run copy:assets        # copies TinyMCE into public/
 
-## Code Style
+# Run the application (port 3001 web, 3002 API)
+npm start                  # node app
+# In Docker (preferred for local dev)
+docker compose up
 
-Node.js 18+, JavaScript (ES6+): Follow standard conventions
+# Lint
+npx eslint .
 
-## Recent Changes
-- 001-ncr-workflow: Added Node.js 18+, JavaScript (ES6+) + Express 4, Mongoose 5, Nodemailer 6, javascript-state-machine
-- 001-ncr-workflow: Added Node.js 18+, JavaScript (ES6+) + Express 4, Mongoose 5, Nodemailer 6, javascript-state-machine
+# Tests
+npm test                   # all unit tests (mocha test-unit/**/*.test.js)
+npx mocha test-unit/lib/permission.test.js   # single test file
 
-- 001-ncr-workflow: Added javascript-state-machine (FSM), NCR workflow module (lib/ncr*.js, model/ncr*.js, routes/ncr.js, views/ncr-*.jade)
+# Unit tests require this env var when run outside Docker
+TRAVELER_CONFIG_REL_PATH=docker npm test
+```
 
-<!-- MANUAL ADDITIONS START -->
-<!-- MANUAL ADDITIONS END -->
+## Architecture
 
-<!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
-<!-- SPECKIT END -->
+**Traveler** is a web-based electronic traveler / work-order system (the project is called "traveler" even though the repo directory is "upton"). It runs two HTTP servers from [app.js](app.js): a session-authenticated web app (port 3001) and a Basic-Auth REST API (port 3002), both backed by the same MongoDB database via Mongoose.
+
+### Core Data Model
+
+The lifecycle is: **Form (template) → Released Form → Traveler (work instance) → Binder (collection)**.
+
+| Model | File | Role |
+|-------|------|------|
+| Form | [model/form.js](model/form.js) | Draft/submitted/released/archived template |
+| ReleasedForm | [model/released-form.js](model/released-form.js) | Approved form ready for instantiation; can combine a base form + discrepancy form |
+| Traveler | [model/traveler.js](model/traveler.js) | A single work instance filled out from a released form |
+| Binder | [model/binder.js](model/binder.js) | Named collection of related travelers |
+| Review | [model/review.js](model/review.js) | Approval workflow (configurable policy: all / majority / any) |
+| History | [model/history.js](model/history.js) | Append-only audit log for all entities |
+| Share | [model/share.js](model/share.js) | Per-entity access grants to users or groups |
+
+### Request Handling
+
+Routes live in [routes/](routes/) and map cleanly to models (form.js, traveler.js, binder.js, review.js, …). Shared middleware and helpers are in [lib/req-utils.js](lib/req-utils.js). Permission checks use [lib/permission.js](lib/permission.js) with roles defined in [lib/role.js](lib/role.js).
+
+### Authentication
+
+Supports three strategies configured at deploy time: LDAP/AD ([lib/ldap-client.js](lib/ldap-client.js), [routes/ldaplogin.js](routes/ldaplogin.js)), CAS, and local session. Sessions are stored in MongoDB via `connect-mongo`.
+
+### Frontend
+
+Server-side rendering with **Jade/Pug** templates ([views/](views/), [builderview/](builderview/), [inputview/](inputview/)). Client-side interactivity uses **Rivets.js** for data binding, jQuery, and **TinyMCE 8** for rich-text fields. No build step — static assets are served directly from [public/](public/) (TinyMCE must be copied there with `npm run copy:assets` after install).
+
+### Configuration
+
+[config/config.js](config/config.js) dynamically loads JSON files from a directory controlled by the `TRAVELER_CONFIG_REL_PATH` env var (defaults to `config/`; use `docker` for the Docker dev environment). Separate JSON files configure MongoDB, API, auth, LDAP/AD, email, MQTT, and UI settings.
+
+### Email & Messaging
+
+Outbound email via **Nodemailer** ([lib/email.js](lib/email.js)). Optional MQTT integration for event-driven notifications.

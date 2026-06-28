@@ -15,12 +15,9 @@ import { isNumberSupported } from './lib/form-builder-shared.js';
 
 const mceConfig = {
   base_url: '/tinymce',
-  license_key: 'gpl',
-  promotion: false,
   suffix: '.min',
-
-  // Required in v6+
-  model: 'dom',
+  promotion: false,
+  branding: false,
 
   plugins: [
     'advlist', 'autolink', 'lists', 'link', 'image',
@@ -31,7 +28,6 @@ const mceConfig = {
 
   toolbar: 'undo redo | charmap | link image | bullist numlist outdent indent | formatselect bold italic underline strikethrough | removeformat',
 
-  // v8: Promise-based upload handler
   images_upload_handler: async (blobInfo) => {
     const formData = new FormData();
     formData.append('file', blobInfo.blob(), blobInfo.filename());
@@ -601,13 +597,13 @@ function text_edit($cgr) {
   let label = 'label';
   let userkey = '';
   let placeholder = '';
-  let help = '';
+  // let help = '';
   let required = false;
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     userkey = $('.controls input', $cgr).data('userkey');
     placeholder = $('.controls input', $cgr).attr('placeholder');
-    help = $('.controls span.help-block', $cgr).text();
+    // help = $('.controls span.help-block', $cgr).text();
     required = $('.controls input', $cgr).prop('required');
   }
   const $text = $(input.text());
@@ -615,14 +611,14 @@ function text_edit($cgr) {
   const $label = $(spec.label());
   const $userkey = $(spec.userkey());
   const $placeholder = $(spec.placeholder());
-  const $help = $(spec.help());
+  // const $help = $(spec.help());
   const $required = $(spec.required());
   const $done = $(spec.done());
   const $edit = $('<div class="well spec"></div>').append(
     $label,
     $userkey,
     $placeholder,
-    $help,
+    // $help,
     $required,
     $done
   );
@@ -634,13 +630,13 @@ function text_edit($cgr) {
     label,
     userkey,
     placeholder,
-    help,
+    // help,
     required,
   };
   $('input', $label).val(label);
   $('input', $userkey).val(userkey);
   $('input', $placeholder).val(placeholder);
-  $('input', $help).val(help);
+  // $('input', $help).val(help);
   $('input', $required).prop('checked', required);
   binding($edit, $text, model, $done);
 }
@@ -1029,14 +1025,14 @@ function file_edit($cgr) {
   var label = 'label';
   var required = false;
   var userkey = '';
-  var help = '';
+  // var help = '';
   var filetype = '';
   if ($cgr) {
     label = $('.control-label span.model-label', $cgr).text();
     required = $('input', $cgr).prop('required');
     userkey = $('.controls input', $cgr).data('userkey');
     filetype = $('.controls input', $cgr).data('filetype');
-    help = $('.controls span.help-block', $cgr).text();
+    // help = $('.controls span.help-block', $cgr).text();
   }
 
   var $upload = $(input.upload());
@@ -1046,14 +1042,14 @@ function file_edit($cgr) {
   var $userkey = $(spec.userkey());
   var $filetype = $(spec.filetype());
 
-  var $help = $(spec.help());
+  // var $help = $(spec.help());
   var $done = $(spec.done());
   var $edit = $('<div class="well spec"></div>').append(
     $label,
     $required,
     $userkey,
     $filetype,
-    $help,
+    // $help,
     $done
   );
   const $new_cgr = $(
@@ -1066,14 +1062,14 @@ function file_edit($cgr) {
     required: required,
     userkey: userkey,
     filetype: filetype,
-    help: help,
+    // help: help,
   };
 
   $('input', $label).val(label);
   $('input', $required).prop('checked', required);
   $('input', $userkey).val(userkey);
   $('input', $filetype).val(filetype);
-  $('input', $help).val(help);
+  // $('input', $help).val(help);
 
   binding($edit, $upload, model, $done);
 }
@@ -1771,6 +1767,22 @@ function binding_events() {
         result: $('input[name="result"]:checked').val(),
         comment: $('#comment').val(),
         v: $('#version').text(),
+      },
+      function() {
+        window.location.reload(true);
+      },
+      'review'
+    );
+  });
+
+  $('#submit-review-admin').on('click', function(e) {
+    e.preventDefault();
+    sendRequest(
+      {
+        result: $('input[name="admin-result"]:checked').val(),
+        comment: $('#admin-comment').val(),
+        v: $('#version').text(),
+        reviewerId: $('#admin-reviewer-select').val(),
       },
       function() {
         window.location.reload(true);
