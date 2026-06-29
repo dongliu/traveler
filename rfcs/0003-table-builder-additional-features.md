@@ -2,7 +2,7 @@
 
 ## Summary
 
-The first set of features of table builder was implemented as described in rfcs/table-builder.md. Two features need to be added which were not in the original design.
+The first set of features of table builder was implemented as described in rfcs/0001-table-builder.md. Two features need to be added which were not in the original design.
 
 ## Motivation
 
