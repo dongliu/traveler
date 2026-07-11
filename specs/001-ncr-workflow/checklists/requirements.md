@@ -62,8 +62,10 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
   role (NCR Originators: Quality Inspectors, Line Inspectors, Quality
   Engineers), discovery context, and mandatory fields (Part
   Name/Number/Revision/Quantity, Supplier, WBS, CE/CS name)
-- **Traveler Reference (model/API only)**: NCR creation form/API accepts an
-  optional, manually-entered Traveler ID and step number to link the NCR; a
+- **Traveler Reference (data model/API only, not exposed in any UI)**: the NCR
+  data model and creation API support an optional Traveler ID and step number
+  to link the NCR, reserved for a future eTraveler-launched creation flow; the
+  standalone NCR creation page has no field for entering this. A
   self-attestation checkbox on the NCR closure form confirms Traveler sign-off
   before a linked NCR can close. No eTraveler-side UI integration (launch
   point, auto-context capture, NCR number display in Traveler, electronic copy

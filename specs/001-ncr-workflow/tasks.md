@@ -46,7 +46,7 @@
 
 - [x] T008 [US1] Implement `createNcr(data, user)` in `lib/ncr-service.js`: generate NCR number (e.g. `NCR-YYYY-NNNN` sequential counter), create and save NCR document with status `Submitted`, append `ncr.submitted` user event (actor=user, previous_status=null, new_status='Submitted', payload includes ncr_number and part summary), call `sendInitialNotification()` and append `notification.initial` system event with returned delivery results, call `sendDispositionRequest()` and append `notification.disposition_request` system event with CE/CS delivery result; return saved NCR
 - [x] T009 [US1] Implement `POST /` handler in `routes/ncr.js`: validate all mandatory fields from `contracts/ncr-create.json` (part_name, part_number, part_revision, quantity>0, supplier_name, wbs_number, ce_cs_name, specification_drawing_reference, description_of_nonconformance min 20 chars, discovery_date ≤ today, discovery_context enum); call `createNcr()`; return 201 with ncr_number, ncr_id, status, creation_timestamp, originator_id, part_name, part_number per contract
-- [x] T010 [P] [US1] Create `views/ncr-create.jade`: form with all mandatory fields — text inputs for part_name, part_number, part_revision, supplier_name, wbs_number, ce_cs_name, specification_drawing_reference; number input for quantity; textarea for description_of_nonconformance (min 20 chars client hint); date picker for discovery_date; radio group for discovery_context (incoming_inspection / in_house_assembly / in_house_inspection); optional traveler_id and traveler_step_number fields; client-side validation before submit; on success display assigned ncr_number prominently
+- [x] T010 [P] [US1] Create `views/ncr-create.jade`: form with all mandatory fields — text inputs for part_name, part_number, part_revision, supplier_name, wbs_number, ce_cs_name, specification_drawing_reference; number input for quantity; textarea for description_of_nonconformance (min 20 chars client hint); date picker for discovery_date; radio group for discovery_context (incoming_inspection / in_house_assembly / in_house_inspection); client-side validation before submit; on success display assigned ncr_number prominently. No Traveler-linking fields on this page (see T037 — `traveler_id`/`traveler_step_number` remain API/model-only, reserved for a future eTraveler-launched creation flow)
 - [x] T011 [P] [US1] Create `views/ncr-detail.jade`: display all NCR fields organized by section (Part Info, Reference, Disposition if populated, Approval Status, Closure if populated, Preventive Actions if populated); render event timeline from `ncr.events[]` sorted by timestamp showing event_type badge, actor_name + actor_role, timestamp, and collapsed payload; show status badge with color per status value; action buttons appropriate to current user role and NCR status
 
 **Checkpoint**: NCR creation end-to-end works. Status shows Submitted. Events timeline has 3 entries (ncr.submitted + 2 notifications).
@@ -140,6 +140,16 @@
 
 ---
 
+## Phase 10: Scope Correction — Remove Traveler-Link Fields from NCR Creation Page
+
+**Purpose**: The standalone NCR creation page should not expose Traveler-linking as a manual data-entry option — that only makes sense as part of a future eTraveler-launched creation flow. Remove the UI fields while keeping the `traveler_link` data model and the `traveler_id`/`traveler_step_number` create-API parameters intact for that future work.
+
+- [x] T037 [US1] Remove the "Traveler Link (Optional)" fieldset (`traveler_id`, `traveler_step_number` inputs) from `views/ncr-create.jade` and the corresponding client-side JS that read those inputs into the submit payload; leave `model/ncr.js` (`traveler_link` schema), `lib/ncr-service.js` (`createNcr()` traveler_link population), and `routes/ncr.js` (`POST /` still accepts `traveler_id`/`traveler_step_number` in the request body) unchanged. NCR closure logic (`traveler_signed_off` self-attestation) is unaffected since it triggers on `ncr.traveler_link.initiated_from_traveler`, not on any UI field
+
+**Checkpoint**: Standalone NCR creation page has no Traveler-related fields. `POST /api/ncr` still accepts `traveler_id`/`traveler_step_number` for any future caller (e.g. an eTraveler-launched flow) to populate `traveler_link`.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -153,6 +163,7 @@
 - **US4+6 archive (Phase 7)**: Depends on Phase 2; can start in parallel with Phases 3–6 if seeded test data is used
 - **US7 (Phase 8)**: Depends on Phase 4 (preventive_actions[] populated by disposition)
 - **Polish (Phase 9)**: Depends on all user story phases
+- **Scope Correction (Phase 10)**: Depends on Phase 3 (amends `views/ncr-create.jade` from T010)
 
 ### User Story Dependencies
 

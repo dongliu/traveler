@@ -93,11 +93,11 @@
         },
         "traveler_id": {
           "type": "string",
-          "description": "Optional: Traveler ID, manually entered by the Originator, to link the NCR to a Traveler record. No automated capture from the eTraveler UI."
+          "description": "Optional: Traveler ID to link the NCR to a Traveler record. Not exposed on the standalone NCR creation page; reserved at the API layer for a future eTraveler-launched creation flow."
         },
         "traveler_step_number": {
           "type": "integer",
-          "description": "Optional: Traveler step number, manually entered alongside traveler_id"
+          "description": "Optional: Traveler step number accompanying traveler_id. Reserved at the API layer for future use, same as traveler_id."
         }
       }
     }
@@ -218,7 +218,7 @@
   "notes": [
     "NCR number is auto-generated per organization's naming convention (not necessarily sequential)",
     "Email notifications are sent asynchronously; response confirms email initiation, not delivery",
-    "If traveler_id is provided, it (and traveler_step_number) is stored as a manual link on the NCR; there is no automated context capture from an eTraveler UI",
+    "traveler_id/traveler_step_number are API-only fields not exposed on the standalone NCR creation page; if a caller provides them, they are stored as a link on the NCR for future eTraveler-launched creation flows",
     "All mandatory fields are validated; missing or invalid fields return 400 error with details"
   ]
 }

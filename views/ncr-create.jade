@@ -93,16 +93,6 @@ block content
           .controls
             textarea#description_of_nonconformance(name='description_of_nonconformance', rows='5', maxlength='2000', required, placeholder='Minimum 20 characters')
             span#desc-counter.help-block 0 / 2000
-      fieldset
-        legend Traveler Link (Optional)
-        .control-group
-          label.control-label(for='traveler_id') Traveler ID
-          .controls
-            input#traveler_id(type='text', name='traveler_id', maxlength='50')
-        .control-group
-          label.control-label(for='traveler_step_number') Traveler Step Number
-          .controls
-            input#traveler_step_number(type='number', name='traveler_step_number', min='1')
       .control-group
         .controls
           .btn-group
@@ -163,12 +153,6 @@ block js
           discovery_context: $('input[name="discovery_context"]:checked').val(),
           description_of_nonconformance: desc,
         };
-        var travelerId = $('#traveler_id').val().trim();
-        if (travelerId) {
-          payload.traveler_id = travelerId;
-          var stepNum = parseInt($('#traveler_step_number').val(), 10);
-          if (!isNaN(stepNum)) payload.traveler_step_number = stepNum;
-        }
 
         $('#submit-btn').prop('disabled', true).text('Submitting...');
         $('#ncr-error').hide();

@@ -132,8 +132,9 @@ stream for the NCR's lifecycle.
   // Status & Workflow (denormalized read model; source of truth is events[])
   status: String,             // "Submitted" | "Dispositioned" | "Approved" | "Returned for Comment" | "Final Approval" | "Closed"
 
-  // Traveler Reference (manual link entered on NCR creation form; no eTraveler
-  // UI integration — see spec.md "Future Work: eTraveler UI Integration")
+  // Traveler Reference (API-only; not exposed on the standalone NCR creation
+  // page, reserved for a future eTraveler-launched creation flow — see
+  // spec.md "Future Work: eTraveler UI Integration")
   traveler_link: {
     traveler_id: ObjectId,
     step_number: Number,
