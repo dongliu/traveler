@@ -16,9 +16,17 @@ discovers a nonconformance either at incoming inspection or during in-house
 assembly/inspection. The NCR Originator creates a Nonconformance Report
 documenting the nonconformance with mandatory part information, supplier
 details, engineering contact, WBS reference, and a detailed description. The
-system automatically generates a unique NCR number. If the nonconformance is
-found while using an eTraveler, the NCR can be initiated directly from the
-Traveler step, linking the NCR to that specific work activity.
+system automatically generates a unique NCR number. If the nonconformance was
+found while using an eTraveler, the Originator can optionally record a
+reference to that Traveler (Traveler ID and step number) on the NCR creation
+form to link the NCR to that specific work activity.
+
+> **Implementation note**: Traveler linkage in this phase is a manual field on
+> the standalone NCR creation form (model + API support only). There is no
+> "Initiate NCR" launch point inside the eTraveler UI, no automatic
+> pre-population of NCR fields from Traveler context, and no display of the
+> resulting NCR number back within the Traveler step. That UI integration is
+> not yet planned or implemented — see [Future Work: eTraveler UI Integration](#future-work-etraveler-ui-integration-not-yet-planned).
 
 **Why this priority**: This is the core workflow - without the ability to
 initiate NCRs, the entire system has no purpose. All other workflows depend on
@@ -29,7 +37,8 @@ create an NCR with all required details (Part Information with revision and
 quantity, Supplier, WBS, CE/CS name, Nonconformance Description), verify the
 system captures and stores the information correctly, and demonstrates that the
 NCR is ready for disposition by an authorized reviewer. Both standalone NCR
-creation and Traveler-initiated NCR creation should be testable.
+creation and NCR creation with an optional Traveler ID/step number reference
+should be testable.
 
 **Acceptance Scenarios**:
 
@@ -49,10 +58,12 @@ creation and Traveler-initiated NCR creation should be testable.
 4. **Given** an NCR Originator attempts to submit an NCR with missing mandatory
    fields, **When** they click submit, **Then** the system displays validation
    errors identifying which required fields are missing and prevents submission
-5. **Given** an NCR Originator is working within an eTraveler and discovers a
-   nonconformance, **When** they select "Initiate NCR" from the Traveler step,
-   **Then** the NCR creation form pre-populates with the Traveler context and
-   upon completion shows the new NCR number linked to that Traveler step
+5. **Given** an NCR Originator discovered the nonconformance while working an
+   eTraveler step, **When** they create the NCR and manually enter the Traveler
+   ID and step number in the optional Traveler Link fields, **Then** the system
+   stores the reference on the NCR and the NCR is retrievable as linked to that
+   Traveler (no automatic launch from, or NCR number display within, the
+   eTraveler UI itself)
 
 ---
 
@@ -308,10 +319,17 @@ transitions to "Closed" status.
 4. **Given** an NCR Originator or designee selects "Close NCR", **When** they
    provide closure notes (e.g., "Rework completed and verified"), **Then** the
    NCR transitions to "Closed" with closure date and notes recorded
-5. **Given** an NCR was initiated from a Traveler, **When** the NCR Originator
-   returns to the operation where the nonconformance occurred, **Then** they can
-   electronically sign off, which closes the NCR and includes an electronic copy
-   with the Traveler
+5. **Given** an NCR is linked to a Traveler (Traveler ID/step number recorded at
+   creation), **When** the NCR Originator or designee attempts to close it,
+   **Then** the NCR close form requires them to check a confirmation stating
+   the associated Traveler step has been signed off, and the NCR cannot
+   transition to "Closed" until this confirmation is checked
+
+> **Implementation note**: This confirmation is a self-attestation checkbox on
+> the NCR's own closure form — it is not an electronic sign-off performed
+> inside the eTraveler UI, and no electronic copy of the closed NCR is
+> attached to the Traveler record. See
+> [Future Work: eTraveler UI Integration](#future-work-etraveler-ui-integration-not-yet-planned).
 
 ---
 
@@ -442,14 +460,15 @@ notifications as actions progress to completion.
 - **FR-006**: System MUST allow NCR Originators to attach supporting
   documentation (images, drawings, test results, inspection reports) to NCRs
 
-##### Initiation from Traveler
+##### Initiation from Traveler (model/API only — see [Future Work](#future-work-etraveler-ui-integration-not-yet-planned) for UI integration)
 
-- **FR-006a**: System MUST support launching NCR creation from within an
-  eTraveler work instruction, with automatic context capture (Traveler ID, step
-  number, associated part/assembly information) and linking of the NCR to the
-  specific Traveler step
-- **FR-006b**: System MUST display the newly generated NCR number in the
-  eTraveler upon successful creation when NCR is initiated from a Traveler step
+- **FR-006a**: System MUST allow the NCR Originator to optionally record a
+  Traveler ID and step number on the NCR creation form/API request, and MUST
+  persist this as a link between the NCR and the referenced Traveler. This is a
+  manually-entered reference field; there is no automated context capture from
+  the eTraveler UI
+- **FR-006b**: System MUST make Traveler-linked NCRs retrievable/queryable by
+  their linked Traveler ID and step number
 
 #### NCR Forwarding and Notification
 
@@ -553,9 +572,13 @@ notifications as actions progress to completion.
   implemented
 - **FR-042**: System MUST transition closed NCRs to "Closed" status, record
   closure date, notes, and originator identity
-- **FR-043**: System MUST, for Traveler-initiated NCRs, provide electronic
-  sign-off capability, allowing the Originator to sign off and close the NCR,
-  with an electronic copy of the closed NCR included with the Traveler
+- **FR-043**: System MUST, for Traveler-linked NCRs, require the Originator or
+  designee to check a self-attestation confirmation on the NCR closure form
+  stating that the associated Traveler step has been signed off, and MUST
+  block closure until this confirmation is checked. (This confirmation lives on
+  the NCR's own closure form, not inside the eTraveler UI — see
+  [Future Work](#future-work-etraveler-ui-integration-not-yet-planned) for
+  in-Traveler sign-off and automatic electronic-copy attachment.)
 
 #### Final Distribution and Closure Archive
 
@@ -700,6 +723,27 @@ notifications as actions progress to completion.
   Notification Status
 - Relationships: Associated with one NCR, Multiple entries per NCR (one per
   stakeholder), Created at time of NCR submission
+
+## Future Work: eTraveler UI Integration (Not Yet Planned)
+
+The current implementation supports linking an NCR to a Traveler only at the
+data/API layer: the Originator manually enters a Traveler ID and step number on
+the NCR creation form (FR-006a/FR-006b), and a self-attestation checkbox on the
+NCR closure form confirms Traveler sign-off before a Traveler-linked NCR can
+close (FR-043). No eTraveler-side UI work has been planned or implemented for
+this feature. The following capabilities remain out of scope until a future
+phase is planned:
+
+- An "Initiate NCR" action or launch point within the eTraveler step UI itself
+- Automatic pre-population of the NCR creation form from the Traveler's current
+  context (Traveler ID, step number, associated part/assembly information)
+  without manual entry
+- Display of the resulting NCR number back within the eTraveler step once an
+  NCR is created
+- Performing the Traveler sign-off confirmation from within the eTraveler UI
+  (today this is a checkbox on the NCR's own closure form)
+- Automatically attaching an electronic copy of the closed NCR to the Traveler
+  record
 
 ## Success Criteria _(mandatory)_
 

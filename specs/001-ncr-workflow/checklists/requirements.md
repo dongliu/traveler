@@ -62,9 +62,13 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
   role (NCR Originators: Quality Inspectors, Line Inspectors, Quality
   Engineers), discovery context, and mandatory fields (Part
   Name/Number/Revision/Quantity, Supplier, WBS, CE/CS name)
-- **Traveler Integration**: eTraveler context capture and NCR number display in
-  Traveler steps; electronic sign-off in Traveler to close NCR with electronic
-  copy included
+- **Traveler Reference (model/API only)**: NCR creation form/API accepts an
+  optional, manually-entered Traveler ID and step number to link the NCR; a
+  self-attestation checkbox on the NCR closure form confirms Traveler sign-off
+  before a linked NCR can close. No eTraveler-side UI integration (launch
+  point, auto-context capture, NCR number display in Traveler, electronic copy
+  attachment) is planned or implemented yet — see spec.md "Future Work: eTraveler
+  UI Integration"
 - **Stakeholder Forwarding** (User Story 1.5): Auto-forwards NCR to CE/CS,
   Cognizant Group Leader, QA Staff, Division Director/PM with attachments and
   email notification to all stakeholders
@@ -81,8 +85,9 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
 - **NCR Originator Execution and Closure** (User Story 5): Originator or
   designee executes authorized disposition, closes NCR with closure notes; upon
   closure, system automatically distributes closed NCR to all designated
-  Approvers and Distribution Personnel; for Traveler NCRs, electronic sign-off
-  closes it with electronic copy included in Traveler
+  Approvers and Distribution Personnel; for Traveler-linked NCRs, a
+  self-attestation checkbox on the NCR closure form confirms Traveler sign-off
+  before closure (no electronic copy delivery to the Traveler)
 - **Returned for Comment Status**: New workflow state enabling comment loops
   between Approvers and QA Staff before reaching Final Approval
 - **62+ Functional Requirements**: initiation (8), forwarding/notification (6),

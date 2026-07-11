@@ -78,7 +78,7 @@ Notification events capture per-recipient delivery status.
 | `approval.returned_for_comment` | Designated approver returns for comment | → Returned for Comment |
 | `qa.resubmitted` | QA resubmits after comment resolution | → Approved |
 | `ncr.closed` | Originator/designee closes NCR | → Closed |
-| `traveler.signed_off` | Originator signs off in eTraveler | → Closed (traveler-initiated) |
+| `traveler.signed_off` | Originator self-attests Traveler sign-off on the NCR closure form (not performed inside the eTraveler UI) | → Closed (traveler-linked) |
 | `pa.owner_assigned` | QA assigns preventive action owner | No |
 | `pa.status_updated` | PA owner updates status | No |
 | `pa.closed` | QA Staff closes preventive action | No |
@@ -132,7 +132,8 @@ stream for the NCR's lifecycle.
   // Status & Workflow (denormalized read model; source of truth is events[])
   status: String,             // "Submitted" | "Dispositioned" | "Approved" | "Returned for Comment" | "Final Approval" | "Closed"
 
-  // eTraveler Integration
+  // Traveler Reference (manual link entered on NCR creation form; no eTraveler
+  // UI integration — see spec.md "Future Work: eTraveler UI Integration")
   traveler_link: {
     traveler_id: ObjectId,
     step_number: Number,
@@ -461,7 +462,8 @@ Submitted
 
    - Cannot close without Final Approval status
    - Closure Notes required, minimum 20 characters
-   - Cannot close NCR initiated from Traveler without Traveler sign-off
+   - Cannot close a Traveler-linked NCR without the `traveler_signed_off`
+     self-attestation checkbox being checked on the NCR closure form
 
 5. **Events**:
    - `timestamp` required on every event

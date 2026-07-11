@@ -93,11 +93,11 @@
         },
         "traveler_id": {
           "type": "string",
-          "description": "Optional: eTraveler ID if NCR is initiated from a Traveler"
+          "description": "Optional: Traveler ID, manually entered by the Originator, to link the NCR to a Traveler record. No automated capture from the eTraveler UI."
         },
         "traveler_step_number": {
           "type": "integer",
-          "description": "Optional: Traveler step number for context capture"
+          "description": "Optional: Traveler step number, manually entered alongside traveler_id"
         }
       }
     }
@@ -218,7 +218,7 @@
   "notes": [
     "NCR number is auto-generated per organization's naming convention (not necessarily sequential)",
     "Email notifications are sent asynchronously; response confirms email initiation, not delivery",
-    "If NCR initiated from Traveler, Traveler context is captured and linked",
+    "If traveler_id is provided, it (and traveler_step_number) is stored as a manual link on the NCR; there is no automated context capture from an eTraveler UI",
     "All mandatory fields are validated; missing or invalid fields return 400 error with details"
   ]
 }
