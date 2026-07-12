@@ -13,13 +13,12 @@ Each user story gets checked in two passes, producing two separate outputs
 — not one pass/fail verdict:
 
 1. **REQUIRED — MVP accepted?** Does the story's core workflow work
-   end-to-end per its written acceptance scenarios? Binary. Any failed
-   REQUIRED item means the story isn't done — file it as a bug.
+   end-to-end per its written acceptance scenarios? If any
+   REQUIRED item failed, then we need to fix it before verifying the next user story.
 2. **RECOMMENDED — improvements found.** Anything noticed that would
    improve the experience but doesn't block a user from completing the
    workflow (unclear labels, extra clicks, inconsistent styling, etc.).
-   Logged, not fixed in the moment, doesn't block sign-off. Triaged
-   afterward into High/Medium/Low and scheduled as separate follow-up work.
+   Logged and triaged afterward into High/Medium/Low and scheduled as separate follow-up work.
 
 ## Per-story verification checklist
 
@@ -37,17 +36,16 @@ Each user story gets checked in two passes, producing two separate outputs
 | US8 | Integrate NCR Creation from Traveler | Launch NCR creation from an eTraveler step, pre-populated from Traveler context | |
 | — | Access Control & Validation (cross-cutting) | Wrong-role requests rejected (403); missing records return 404; validation errors surfaced correctly | |
 
-## Improvement backlog process
+## Improvement backlog process for recommendations
 
 1. Log every improvement noted during verification, tagged with the story
    it came from.
 2. After a full verification round, triage the whole list together (the
    same issue often recurs across stories) into:
-   - **High** — likely to cause user mistakes or confusion
+   - **High** — likely to cause user confusion
    - **Medium** — friction/inconsistency that slows users down
    - **Low** — cosmetic
-3. Prioritized items become follow-up backlog work — after this round's
-   sign-off, not blocking it.
+3. Prioritized items become follow-up backlog work.
 
 ## Reporting
 
@@ -56,8 +54,6 @@ Each verification round produces:
 - A per-story result: **Accepted** / **Failed** / **Not Implemented —
   blocked**, plus any improvements found (or "None observed").
 - A consolidated, de-duplicated, prioritized improvement backlog.
-- A linked bug for any **Failed** story (failures are defects to fix before
-  sign-off, not backlog candidates).
+- An issue description for any **Failed** story.
 
-A round is complete when every in-scope story shows **Accepted**, or is
-explicitly deferred with a reason (as US8 is today).
+A round is complete only when every in-scope story shows **Accepted**.
