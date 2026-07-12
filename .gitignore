@@ -58,4 +58,4 @@ test-e2e/results/
 npm-debug.log*
 
 .github
-.claude
+.claude/settings.local.json
