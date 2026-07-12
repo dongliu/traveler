@@ -20,6 +20,23 @@ and Report on Nonconformances" (Priority: P2)
 
 ## Test Steps for Claude in Chrome
 
+### Session Setup — Environment and Recording
+
+0. Read the project's `.env` file (at the repo root, relative to this
+   file: `../.env`; gitignored; falls back to
+   the defaults below for any var that is unset) to resolve the actual
+   ports for this run: `WEB_PORT` (default `3001`), `API_PORT` (default
+   `3002`), `MONGO_EXPRESS_PORT` (default `8081`), and the login credentials
+   `E2E_USER` and `E2E_PASS`. Use the resolved web app port for every
+   `localhost:3001`-style URL referenced below in this file — substitute the
+   real port, don't assume the placeholder.
+0. Navigate to `http://localhost:<WEB_PORT>/login`. If the page redirects to
+   the app (already authenticated), skip to the next step. Otherwise, enter
+   the value of `E2E_USER` as the username and `E2E_PASS` as the password and
+   submit the login form.
+0. Begin a GIF recording of the browser session before proceeding to the
+   first numbered test step below.
+
 ### Acceptance Scenario 1 — dashboard shows counts by status
 
 1. Navigate to `http://localhost:3001/ncr`.
@@ -57,6 +74,26 @@ and Report on Nonconformances" (Priority: P2)
     in Setup. Confirm its "Days" cell shows a number ≥ 30 and the red text
     "Escalation Needed" next to it, with the row highlighted (pink/red
     background).
+
+
+### End of Session — Stop Recording, Save Artifacts, Report
+
+After the final test step above:
+
+- Stop the GIF recording.
+- Save the GIF to `test-e2e/results/`
+  (create this directory first if it doesn't exist) as
+  `US4-track-and-report-<YYYY-MM-DD>.gif`, where `<YYYY-MM-DD>` is today's date.
+- Output a single markdown block containing:
+  - Test ID and timestamp
+  - Environment URL (the resolved URL from the Session Setup step above)
+  - Step results (pass/fail per numbered step or Acceptance Scenario)
+  - Console errors observed during the session
+  - Failed network requests observed during the session
+  - Overall result (Pass / Fail / Pass with caveats)
+
+  Also save that same markdown block to
+  `test-e2e/results/US4-track-and-report-<YYYY-MM-DD>-report.md`.
 
 ## Expected Results
 

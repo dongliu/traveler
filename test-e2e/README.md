@@ -12,13 +12,45 @@ browser session a human can watch and double-check, not a CI gate.
 
 ## How to run a test file
 
-1. Open the target test file (e.g. `test-e2e/us1-create-and-submit-ncr.md`).
-2. Paste its "Test Steps for Claude in Chrome" section to Claude in Chrome as
-   your instruction, along with the "Setup" section so it knows what state to
-   start from.
-3. Let Claude execute the steps in the browser.
-4. Compare what happened against "Expected Results".
-5. Go through "Human Verification Checklist" yourself — re-check the final
+Each test file is self-contained: its "Test Steps for Claude in Chrome"
+section already includes reading `.env` for the real ports, starting/stopping
+a GIF recording, and writing the report — you don't need to add any of that
+yourself, just point Claude at the file. Requires the **Claude in Chrome**
+browser extension installed and connected (Claude will prompt you to connect
+it on first use if it isn't already).
+
+### Running in Claude Code Desktop app
+
+1. Open the Claude Code desktop app with this repo as the project.
+2. In the chat, tell it which file to run, e.g.:
+   > Run `test-e2e/us1-create-and-submit-ncr.md` end to end using Claude in
+   > Chrome.
+3. Approve the Chrome-extension connection prompt and any tool-use
+   confirmations if asked.
+4. Claude reads the file's Setup + Test Steps sections itself, drives the
+   browser, and leaves the GIF and markdown report in `test-e2e/results/`.
+
+### Running in Claude Code CLI
+
+1. From a terminal, `cd` into this repo and start Claude Code:
+   ```bash
+   claude
+   ```
+2. Give it the same instruction as above, referencing the file by path:
+   ```
+   Run test-e2e/us1-create-and-submit-ncr.md end to end using Claude in Chrome.
+   ```
+   Or run it non-interactively:
+   ```bash
+   claude -p "Run test-e2e/us1-create-and-submit-ncr.md end to end using Claude in Chrome."
+   ```
+3. Approve any permission prompts for the browser tools or for writing to
+   `test-e2e/results/`.
+
+### After either method
+
+1. Compare what happened against the file's "Expected Results" section.
+2. Go through "Human Verification Checklist" yourself — re-check the final
    state in the browser (and in mongo-express, where noted) independently of
    what Claude reports, since Claude's summary of its own actions is not a
    substitute for you looking at the actual page/data.
@@ -41,11 +73,13 @@ browser session a human can watch and double-check, not a CI gate.
   - Mongo Express (DB browser): `http://localhost:${MONGO_EXPRESS_PORT-8081}`
     — login `traveler` / `travelerpass` (per `docker-compose.yml`; this
     credential pair is not overridden by `.env`)
-- Logged in to the web app as a normal authenticated user. The dev/test auth
-  backend is whatever `docker/auth.json` points at (LDAP in the default
-  docker-compose setup) — use whatever credentials that environment provides.
-- Know your own login username. It is the `_id` of your document in the
-  `users` collection, and it is what appears as `originator_id` /
+- Login credentials set in `.env` as `E2E_USER` (username) and `E2E_PASS`
+  (password). Each test's Session Setup step reads these from `.env` and logs
+  in automatically if not already authenticated. The dev/test auth backend is
+  whatever `docker/auth.json` points at (LDAP in the default docker-compose
+  setup) — `E2E_USER`/`E2E_PASS` must be valid credentials for that backend.
+- Know your own login username (`E2E_USER`). It is the `_id` of your document
+  in the `users` collection, and it is what appears as `originator_id` /
   `actor_id` / `approver_id` throughout the NCR data model. The tests below
   refer to this as `<your-username>`.
 
