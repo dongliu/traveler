@@ -49,11 +49,11 @@ console with its live session cookie.
 
 ### Part A — 403 Forbidden: QA-only action attempted by a non-QA user
 
-1. Navigate to any authenticated page, e.g. `http://localhost:3001/ncr`.
+1. Navigate to any authenticated page, e.g. `http://localhost:3001/ncrs`.
 2. Open DevTools Console and run:
 
    ```js
-   fetch('/api/ncr/<dispositioned-ncr-id>/concurrence', {
+   fetch('/api/ncrs/<dispositioned-ncr-id>/concurrence', {
      method: 'PATCH',
      headers: { 'Content-Type': 'application/json' },
      credentials: 'same-origin',
@@ -71,7 +71,7 @@ console with its live session cookie.
    to a different username than the currently logged-in user):
 
    ```js
-   fetch('/api/ncr/<submitted-ncr-id>/disposition', {
+   fetch('/api/ncrs/<submitted-ncr-id>/disposition', {
      method: 'PATCH',
      headers: { 'Content-Type': 'application/json' },
      credentials: 'same-origin',
@@ -88,7 +88,7 @@ console with its live session cookie.
 5. Run:
 
    ```js
-   fetch('/api/ncr/000000000000000000000000').then(r => r.status).then(console.log);
+   fetch('/api/ncrs/000000000000000000000000').then(r => r.status).then(console.log);
    ```
 
 ### Part D — 400 Validation error on creation
@@ -96,7 +96,7 @@ console with its live session cookie.
 6. Run:
 
    ```js
-   fetch('/api/ncr', {
+   fetch('/api/ncrs', {
      method: 'POST',
      headers: { 'Content-Type': 'application/json' },
      credentials: 'same-origin',
@@ -110,7 +110,7 @@ console with its live session cookie.
    (already Dispositioned), logged in as the CE/CS user from that test:
 
    ```js
-   fetch('/api/ncr/<already-dispositioned-ncr-id>/disposition', {
+   fetch('/api/ncrs/<already-dispositioned-ncr-id>/disposition', {
      method: 'PATCH',
      headers: { 'Content-Type': 'application/json' },
      credentials: 'same-origin',

@@ -2,7 +2,7 @@
 
 **Spec reference**: `specs/001-ncr-workflow/spec.md`, "User Story 1 - Create and
 Submit Nonconformance Report" (Priority: P1)
-**Files under test**: `views/ncr-create.jade`, `routes/ncr.js` (`POST /api/ncr`), `lib/ncr-service.js` (`createNcr`)
+**Files under test**: `views/ncr-create.jade`, `routes/ncr.js` (`POST /api/ncrs`), `lib/ncr-service.js` (`createNcr`)
 
 ## Setup
 
@@ -33,7 +33,7 @@ Submit Nonconformance Report" (Priority: P1)
 
 ### Acceptance Scenario 1 — mandatory fields, no Traveler-linking fields
 
-1. Navigate to `http://localhost:3001/ncr/new`.
+1. Navigate to `http://localhost:3001/ncrs/new`.
 2. Confirm the page title is "New Nonconformance Report".
 3. Read every visible field label and section legend on the form and list
    them out.
@@ -61,7 +61,7 @@ Submit Nonconformance Report" (Priority: P1)
 
 ### Acceptance Scenario 3 — audit trail visible after submission
 
-7. Navigate to the NCR's detail page (`http://localhost:3001/ncr/<ncr-id>`).
+7. Navigate to the NCR's detail page (`http://localhost:3001/ncrs/<ncr-id>`).
 8. Confirm the page shows: Part Information, Reference (including CE/CS
    name and Originator name), Nonconformance Details (discovery date,
    context, description), and an Event Timeline section.
@@ -70,7 +70,7 @@ Submit Nonconformance Report" (Priority: P1)
 
 ### Acceptance Scenario 4 — validation blocks incomplete submission
 
-10. Navigate to `http://localhost:3001/ncr/new` again (fresh page).
+10. Navigate to `http://localhost:3001/ncrs/new` again (fresh page).
 11. Fill in all fields as in step 4, except set Description of
     Nonconformance to just: `Too short`
 12. Click "Submit NCR".

@@ -2,7 +2,7 @@
 
 **Spec reference**: `specs/001-ncr-workflow/spec.md`, "User Story 5 - NCR
 Issuance and Execution" (Priority: P2)
-**Files under test**: `views/ncr-close.jade`, `routes/ncr.js` (`POST /api/ncr`, `PATCH /api/ncr/:id/close`), `lib/ncr-service.js` (`createNcr`, `closeNcr`)
+**Files under test**: `views/ncr-close.jade`, `routes/ncr.js` (`POST /api/ncrs`, `PATCH /api/ncrs/:id/close`), `lib/ncr-service.js` (`createNcr`, `closeNcr`)
 
 ## Setup — Part A (standalone NCR)
 
@@ -40,7 +40,7 @@ Issuance and Execution" (Priority: P2)
 
 ### Acceptance Scenario 1 — issuance email sent on Final Approval (verify as precondition)
 
-1. Navigate to `http://localhost:3001/ncr/<ncr-a-id>` and open the Event
+1. Navigate to `http://localhost:3001/ncrs/<ncr-a-id>` and open the Event
    Timeline. Confirm a `notification.issuance` event already exists (it was
    created when NCR-A reached Final Approval in the US3 test) — this
    confirms AS1 without needing to re-trigger it here.
@@ -70,7 +70,7 @@ Issuance and Execution" (Priority: P2)
 10. Open DevTools Console (any authenticated page) and run:
 
     ```js
-    fetch('/api/ncr', {
+    fetch('/api/ncrs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
@@ -97,7 +97,7 @@ Issuance and Execution" (Priority: P2)
 12. Edit the document: set `status` to `"Final Approval"` (fast-forwarding
     past disposition/QA/approval, already covered by other user-story
     tests, to isolate this test to the closure step).
-13. Navigate to `http://localhost:3001/ncr/<that-ncr-id>/close`.
+13. Navigate to `http://localhost:3001/ncrs/<that-ncr-id>/close`.
 14. Confirm a "Traveler Sign-Off" section is visible with the text: "This
     NCR was initiated from a Traveler. Electronic confirmation of traveler
     sign-off is required before closure." and a checkbox: "I confirm the

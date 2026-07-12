@@ -3,7 +3,7 @@
 **Spec reference**: `specs/001-ncr-workflow/spec.md`, "User Story 6 - Final
 NCR Distribution and Closure Archive" (Priority: P2)
 **Files under test**: `lib/ncr-service.js` (`closeNcr` final-distribution
-recipient logic), `views/ncr-dashboard.jade`, `routes/ncr.js` (`GET /api/ncr`)
+recipient logic), `views/ncr-dashboard.jade`, `routes/ncr.js` (`GET /api/ncrs`)
 
 This story's closure trigger is the same action tested in
 `us5-ncr-issuance-and-execution.md` — reuse that NCR rather than closing a
@@ -50,7 +50,7 @@ while excluded from the active view.
 
 ### Acceptance Scenario 1 — final distribution sent to 5 stakeholder groups
 
-1. Navigate to `http://localhost:3001/ncr/<closed-ncr-id>`.
+1. Navigate to `http://localhost:3001/ncrs/<closed-ncr-id>`.
 2. Open the Event Timeline and find the `notification.final_distribution`
    entry. Expand `[payload]` or otherwise inspect its recorded recipients.
 3. List every distinct recipient in that event.
@@ -70,7 +70,7 @@ while excluded from the active view.
 
 ### Acceptance Scenario 3 — closed NCR excluded from active/open list
 
-7. Navigate to `http://localhost:3001/ncr` with default filters (Include
+7. Navigate to `http://localhost:3001/ncrs` with default filters (Include
    Closed unchecked). Confirm this NCR does not appear.
 
 ### Acceptance Scenario 4 — closed NCR is searchable for historical purposes

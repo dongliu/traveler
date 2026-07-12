@@ -2,7 +2,7 @@
 
 **Spec reference**: `specs/001-ncr-workflow/spec.md`, "User Story 2 - CE/CS
 Performs Engineering Disposition" (Priority: P1)
-**Files under test**: `views/ncr-disposition.jade`, `routes/ncr.js` (`PATCH /api/ncr/:id/disposition`), `lib/ncr-service.js` (`submitDisposition`)
+**Files under test**: `views/ncr-disposition.jade`, `routes/ncr.js` (`PATCH /api/ncrs/:id/disposition`), `lib/ncr-service.js` (`submitDisposition`)
 
 ## Setup
 
@@ -36,9 +36,9 @@ Performs Engineering Disposition" (Priority: P1)
 
 ### Acceptance Scenario 1 — CE/CS sees all mandatory NCR data
 
-1. Navigate to `http://localhost:3001/ncr/<ncr-id>` and click "Submit
+1. Navigate to `http://localhost:3001/ncrs/<ncr-id>` and click "Submit
    Disposition" (or navigate directly to
-   `http://localhost:3001/ncr/<ncr-id>/disposition`).
+   `http://localhost:3001/ncrs/<ncr-id>/disposition`).
 2. Confirm the page title reads "Submit Engineering Disposition" and the
    summary box shows the correct Supplier, WBS, Discovery Date, Context,
    and Description.
@@ -116,7 +116,7 @@ After the final test step above:
 - [ ] `events` array contains `disposition.submitted` (actor = your
       username) and `notification.qa_notification`.
 - [ ] Re-attempt step 9 a second time against the same (now Dispositioned)
-      NCR via the browser console (`PATCH /api/ncr/<id>/disposition` with
+      NCR via the browser console (`PATCH /api/ncrs/<id>/disposition` with
       the same payload) and confirm it now fails — see
       `supplementary-access-control-and-validation.md` Part E for the exact
       409 response this should produce, proving the one-time-only

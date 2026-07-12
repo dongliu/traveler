@@ -2,7 +2,7 @@
 
 **Spec reference**: `specs/001-ncr-workflow/spec.md`, "User Story 4 - Track
 and Report on Nonconformances" (Priority: P2)
-**Files under test**: `views/ncr-dashboard.jade`, `routes/ncr.js` (`GET /api/ncr`), `lib/ncr-service.js` (`listNcrs`)
+**Files under test**: `views/ncr-dashboard.jade`, `routes/ncr.js` (`GET /api/ncrs`), `lib/ncr-service.js` (`listNcrs`)
 
 ## Setup
 
@@ -39,7 +39,7 @@ and Report on Nonconformances" (Priority: P2)
 
 ### Acceptance Scenario 1 — dashboard shows counts by status
 
-1. Navigate to `http://localhost:3001/ncr`.
+1. Navigate to `http://localhost:3001/ncrs`.
 2. Read the status-card row at the top: All, Submitted, Dispositioned,
    Approved, Returned, Final Approval, Closed — each with a count.
 3. Look for any "average time in workflow" statistic anywhere on the page.

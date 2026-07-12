@@ -41,12 +41,12 @@ this test suite.
 
 ### Acceptance Scenarios 1 & 2 — CE/CS receives a request with a link to the full NCR
 
-1. Navigate to any authenticated page, e.g. `http://localhost:3001/ncr`.
+1. Navigate to any authenticated page, e.g. `http://localhost:3001/ncrs`.
 2. Open DevTools Console and run (substituting `<cecs-username>` and a real
    email):
 
    ```js
-   fetch('/api/ncr', {
+   fetch('/api/ncrs', {
      method: 'POST',
      headers: { 'Content-Type': 'application/json' },
      credentials: 'same-origin',
@@ -68,7 +68,7 @@ this test suite.
    }).then(r => r.json()).then(console.log);
    ```
 3. Record the returned `ncr.ncr_number` and `ncr.ncr_id`.
-4. Navigate to `http://localhost:3001/ncr/<ncr-id>`.
+4. Navigate to `http://localhost:3001/ncrs/<ncr-id>`.
 5. Open the Event Timeline and find the `notification.disposition_request`
    entry. Inspect its recorded recipient(s).
 6. Confirm the NCR detail page itself (which is what the "link to the
@@ -93,7 +93,7 @@ this test suite.
    candidate, the disposition PATCH, to see if it's silently accepted):
 
    ```js
-   fetch('/api/ncr/<ncr-id>/disposition', {
+   fetch('/api/ncrs/<ncr-id>/disposition', {
      method: 'PATCH',
      headers: { 'Content-Type': 'application/json' },
      credentials: 'same-origin',

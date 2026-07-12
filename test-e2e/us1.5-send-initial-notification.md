@@ -12,7 +12,7 @@ received email.
 
 ## Setup
 
-- Create a fresh NCR via `http://localhost:3001/ncr/new` (same steps as
+- Create a fresh NCR via `http://localhost:3001/ncrs/new` (same steps as
   `us1-create-and-submit-ncr.md` Acceptance Scenario 2), or reuse that NCR
   if you haven't yet run the disposition test against it.
 - No special role required to create the NCR (any authenticated user).
@@ -45,7 +45,7 @@ received email.
 ### Acceptance Scenario 1 — initial notification sent to QA/Group Leader/Division Director
 
 1. Create the NCR as described in Setup, recording its id.
-2. Navigate to `http://localhost:3001/ncr/<ncr-id>`.
+2. Navigate to `http://localhost:3001/ncrs/<ncr-id>`.
 3. Open the Event Timeline and find the entry with event type
    `notification.initial`.
 4. Click `[payload]` if present, or otherwise inspect the entry's recorded

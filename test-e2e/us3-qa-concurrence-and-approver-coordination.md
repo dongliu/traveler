@@ -2,7 +2,7 @@
 
 **Spec reference**: `specs/001-ncr-workflow/spec.md`, "User Story 3 - QA
 Concurrence and Approver Coordination" (Priority: P1)
-**Files under test**: `views/ncr-concurrence.jade`, `views/ncr-approval.jade`, `routes/ncr.js` (`PATCH /api/ncr/:id/concurrence`, `PATCH /api/ncr/:id/approve`, `PATCH /api/ncr/:id/resubmit`), `lib/ncr-service.js` (`submitConcurrence`, `submitApproval`, `returnForComment`, `qaResubmit`)
+**Files under test**: `views/ncr-concurrence.jade`, `views/ncr-approval.jade`, `routes/ncr.js` (`PATCH /api/ncrs/:id/concurrence`, `PATCH /api/ncrs/:id/approve`, `PATCH /api/ncrs/:id/resubmit`), `lib/ncr-service.js` (`submitConcurrence`, `submitApproval`, `returnForComment`, `qaResubmit`)
 
 ## Setup
 
@@ -41,7 +41,7 @@ Concurrence and Approver Coordination" (Priority: P1)
 ### Acceptance Scenarios 1–4 — QA reviews and concurs with no additional approvers (NCR-A)
 
 1. Logged in as the QA Staff test user, navigate to
-   `http://localhost:3001/ncr/<ncr-a-id>/concurrence`.
+   `http://localhost:3001/ncrs/<ncr-a-id>/concurrence`.
 2. Confirm the page shows "QA Concurrence" as heading, and the NCR Summary
    + Engineering Disposition sections match NCR-A's disposition data (AS1).
 3. Confirm the Additional Approvers table shows: "No additional approvers —
@@ -53,13 +53,13 @@ Concurrence and Approver Coordination" (Priority: P1)
 
 ### Acceptance Scenarios 5, 6, 8 — QA designates an approver; approver approves (NCR-B1)
 
-6. Navigate to `http://localhost:3001/ncr/<ncr-b1-id>/concurrence`.
+6. Navigate to `http://localhost:3001/ncrs/<ncr-b1-id>/concurrence`.
 7. In the "username" field, enter `<approver-username>`; in the role field,
    enter `Project Manager`. Click "Add". Confirm the row appears (AS2).
 8. Click "Concur" (AS5).
 9. Read the resulting success message.
 10. Log out, log back in as `<approver-username>`.
-11. Navigate to `http://localhost:3001/ncr/<ncr-b1-id>/approve`. Confirm the
+11. Navigate to `http://localhost:3001/ncrs/<ncr-b1-id>/approve`. Confirm the
     page shows the complete nonconformance, CE/CS disposition, and QA
     concurrence info, with "Approve" and "Return for Comment" controls
     (AS6).
@@ -72,11 +72,11 @@ Concurrence and Approver Coordination" (Priority: P1)
 14. Repeat steps 6–7 against NCR-B2 (designate `<approver-username>`, click
     "Concur").
 15. Log in as `<approver-username>`, navigate to
-    `http://localhost:3001/ncr/<ncr-b2-id>/approve`.
+    `http://localhost:3001/ncrs/<ncr-b2-id>/approve`.
 16. In "Return Comments", enter: `Rework instructions are unclear about the sanding grit — please clarify with CE/CS before I can approve.`
 17. Click "Return for Comment" (AS7).
 18. Log back in as QA Staff, navigate to
-    `http://localhost:3001/ncr/<ncr-b2-id>/approve` again. Confirm a "QA
+    `http://localhost:3001/ncrs/<ncr-b2-id>/approve` again. Confirm a "QA
     Action" section with a "Resubmit to Approvers" button is now visible,
     and the approver table shows the returned status + comment.
 19. Click "Resubmit to Approvers".
@@ -90,7 +90,7 @@ Concurrence and Approver Coordination" (Priority: P1)
     rejection action:
 
     ```js
-    fetch('/api/ncr/<a-dispositioned-ncr-id>/concurrence', {
+    fetch('/api/ncrs/<a-dispositioned-ncr-id>/concurrence', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',

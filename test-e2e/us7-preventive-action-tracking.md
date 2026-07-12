@@ -2,7 +2,7 @@
 
 **Spec reference**: `specs/001-ncr-workflow/spec.md`, "User Story 7 -
 Preventive Action Tracking and Management" (Priority: P2)
-**Files under test**: `views/ncr-detail.jade` (PA widgets), `routes/ncr.js` (`PATCH /api/ncr/:id/preventive-actions/:pa_id/owner`, `.../status`), `lib/ncr-service.js` (`assignPaOwner`, `updatePaStatus`, `closePa`)
+**Files under test**: `views/ncr-detail.jade` (PA widgets), `routes/ncr.js` (`PATCH /api/ncrs/:id/preventive-actions/:pa_id/owner`, `.../status`), `lib/ncr-service.js` (`assignPaOwner`, `updatePaStatus`, `closePa`)
 
 ## Setup
 
@@ -36,7 +36,7 @@ Preventive Action Tracking and Management" (Priority: P2)
 
 ### Acceptance Scenario 1 — captured preventive actions are displayed
 
-1. Navigate to `http://localhost:3001/ncr/<ncr-id>` (logged in as the QA
+1. Navigate to `http://localhost:3001/ncrs/<ncr-id>` (logged in as the QA
    Staff test user). Scroll to "Preventive Actions". Confirm both actions
    from disposition are listed with their descriptions, each with status
    badge "Open" and "Unassigned" for owner.
