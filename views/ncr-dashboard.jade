@@ -22,7 +22,7 @@ block content
   .container-fluid(style='margin-top: 10px')
     h3
       | NCR Dashboard
-      a.btn.btn-primary.pull-right(href='#{prefix}/ncr/new')
+      a.btn.btn-primary.pull-right(href='#{prefix}/ncrs/new')
         i.fa.fa-plus
         | &nbsp; New NCR
 
@@ -147,7 +147,7 @@ block js
           var escalated = (n.days_elapsed != null && n.days_elapsed >= 30 && n.status !== 'Closed');
           var $tr = $('<tr></tr>');
           if (escalated) $tr.addClass('row-escalated');
-          $tr.append('<td><a href="' + prefix + '/ncr/' + n._id + '">' + escapeHtml(n.ncr_number || n._id) + '</a></td>');
+          $tr.append('<td><a href="' + prefix + '/ncrs/' + n._id + '">' + escapeHtml(n.ncr_number || n._id) + '</a></td>');
           $tr.append('<td>' + escapeHtml(n.part_number) + '</td>');
           $tr.append('<td>' + escapeHtml(n.part_name) + '</td>');
           $tr.append('<td>' + escapeHtml(n.supplier_name) + '</td>');
@@ -162,7 +162,7 @@ block js
       }
 
       function load() {
-        $.getJSON(prefix + '/api/ncr?' + buildQuery(true), function (data) {
+        $.getJSON(prefix + '/api/ncrs?' + buildQuery(true), function (data) {
           renderRows(data.ncrs || []);
           var start = (data.page - 1) * data.limit + 1;
           var end = Math.min(data.total, data.page * data.limit);
@@ -183,7 +183,7 @@ block js
           includeClosed: true,
           limit: 1000,
         });
-        $.getJSON(prefix + '/api/ncr?' + q, function (data) {
+        $.getJSON(prefix + '/api/ncrs?' + q, function (data) {
           var counts = { 'Submitted':0,'Dispositioned':0,'Approved':0,'Returned for Comment':0,'Final Approval':0,'Closed':0 };
           (data.ncrs || []).forEach(function (n) { if (counts.hasOwnProperty(n.status)) counts[n.status]++; });
           $('.count-all').text(data.total || 0);

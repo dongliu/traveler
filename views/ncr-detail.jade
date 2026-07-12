@@ -28,13 +28,13 @@ block content
           | &nbsp;#{ncr.ncr_number}
       .span4.text-right
         if ncr.status === 'Submitted' || ncr.status === 'Dispositioned'
-          a.btn.btn-primary(href='#{prefix}/ncr/#{ncr._id}/disposition') Submit Disposition
+          a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Submit Disposition
         if ncr.status === 'Dispositioned'
-          a.btn.btn-success(href='#{prefix}/ncr/#{ncr._id}/concurrence') QA Concurrence
+          a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
         if ncr.status === 'Approved'
-          a.btn.btn-warning(href='#{prefix}/ncr/#{ncr._id}/approve') Approve / Return
+          a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
         if ncr.status === 'Final Approval'
-          a.btn.btn-danger(href='#{prefix}/ncr/#{ncr._id}/close') Close NCR
+          a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR
 
     .row-fluid
       .span6
@@ -247,7 +247,7 @@ block js
   script(type='text/javascript').
     (function($) {
       var ncrId = '#{ncr._id}';
-      var apiBase = '#{prefix}/api/ncr/' + ncrId + '/preventive-actions';
+      var apiBase = '#{prefix}/api/ncrs/' + ncrId + '/preventive-actions';
 
       function showPaError(msg) {
         $('#pa-error-msg').text(msg);

@@ -184,7 +184,7 @@ require('./routes/group')(app);
 require('./routes/profile')(app);
 require('./routes/ldaplogin')(app);
 require('./routes/ncr-view')(app);
-app.use('/api/ncr', require('./routes/ncr'));
+app.use('/api/ncrs', require('./routes/ncr'));
 
 app.get('/api', function(req, res) {
   res.render('api', {

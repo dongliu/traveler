@@ -86,7 +86,7 @@ block content
           .btn-group
             button#close-btn.btn.btn-danger(type='submit') Close NCR
           .btn-group(style='margin-left: 5px')
-            a.btn(href='#{prefix}/ncr/#{ncr._id}') Cancel
+            a.btn(href='#{prefix}/ncrs/#{ncr._id}') Cancel
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
@@ -126,12 +126,12 @@ block js
 
         $('#close-btn').prop('disabled', true).text('Closing...');
         $.ajax({
-          url: prefix + '/api/ncr/' + ncrId + '/close',
+          url: prefix + '/api/ncrs/' + ncrId + '/close',
           method: 'PATCH',
           contentType: 'application/json',
           data: JSON.stringify(payload),
           success: function () {
-            $('#close-detail-link').attr('href', prefix + '/ncr/' + ncrId);
+            $('#close-detail-link').attr('href', prefix + '/ncrs/' + ncrId);
             $('#close-success').show();
             $('#close-form').hide();
           },

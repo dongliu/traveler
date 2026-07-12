@@ -115,7 +115,7 @@ block content
           | &nbsp; Resubmit to Approvers
 
     .form-actions
-      a.btn(href='#{prefix}/ncr/#{ncr._id}') Back to NCR
+      a.btn(href='#{prefix}/ncrs/#{ncr._id}') Back to NCR
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
@@ -131,13 +131,13 @@ block js
         var orig = btn.text();
         btn.prop('disabled', true).text('Submitting...');
         $.ajax({
-          url: prefix + '/api/ncr/' + ncrId + (payload._endpoint || '/approve'),
+          url: prefix + '/api/ncrs/' + ncrId + (payload._endpoint || '/approve'),
           method: 'PATCH',
           contentType: 'application/json',
           data: JSON.stringify(payload),
           success: function (data) {
             $('#app-success-msg').text(successMsgFn(data));
-            $('#app-detail-link').attr('href', prefix + '/ncr/' + ncrId);
+            $('#app-detail-link').attr('href', prefix + '/ncrs/' + ncrId);
             $('#app-success').show();
             $('fieldset legend:contains("Your Decision")').closest('fieldset').hide();
             $('fieldset legend:contains("QA Action")').closest('fieldset').hide();

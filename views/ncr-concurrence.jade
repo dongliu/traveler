@@ -89,7 +89,7 @@ block content
 
     .form-actions
       button#concur-btn.btn.btn-primary(type='button') Concur
-      a.btn(href='#{prefix}/ncr/#{ncr._id}', style='margin-left: 5px') Cancel
+      a.btn(href='#{prefix}/ncrs/#{ncr._id}', style='margin-left: 5px') Cancel
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
@@ -135,7 +135,7 @@ block js
         $('#conc-error').hide();
         $('#concur-btn').prop('disabled', true).text('Submitting...');
         $.ajax({
-          url: prefix + '/api/ncr/' + ncrId + '/concurrence',
+          url: prefix + '/api/ncrs/' + ncrId + '/concurrence',
           method: 'PATCH',
           contentType: 'application/json',
           data: JSON.stringify({ additional_approvers: approvers }),
@@ -144,7 +144,7 @@ block js
               ? 'NCR moved to Final Approval; issuance email sent.'
               : 'Approval requests sent to ' + (data.ncr.additional_approvers || []).length + ' approver(s).';
             $('#conc-success-msg').text(msg);
-            $('#conc-detail-link').attr('href', prefix + '/ncr/' + ncrId);
+            $('#conc-detail-link').attr('href', prefix + '/ncrs/' + ncrId);
             $('#conc-success').show();
             $('#concur-btn').hide();
           },

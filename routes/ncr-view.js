@@ -4,19 +4,19 @@ const routesUtilities = require('../utilities/routes');
 const logger = require('../lib/loggers').getLogger();
 
 module.exports = function(app) {
-  app.get('/ncr', auth.ensureAuthenticated, function(req, res) {
+  app.get('/ncrs', auth.ensureAuthenticated, function(req, res) {
     res.render('ncr-dashboard', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/ncr/new', auth.ensureAuthenticated, function(req, res) {
+  app.get('/ncrs/new', auth.ensureAuthenticated, function(req, res) {
     res.render('ncr-create', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/ncr/:id/concurrence', auth.ensureAuthenticated, async function(req, res) {
+  app.get('/ncrs/:id/concurrence', auth.ensureAuthenticated, async function(req, res) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();
       if (!ncr) return res.status(404).send('NCR not found');
-      if (ncr.status !== 'Dispositioned') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncr/${req.params.id}`);
+      if (ncr.status !== 'Dispositioned') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncrs/${req.params.id}`);
       const renderObj = routesUtilities.getRenderObject(req, { ncr });
       return res.render('ncr-concurrence', renderObj);
     } catch (err) {
@@ -25,7 +25,7 @@ module.exports = function(app) {
     }
   });
 
-  app.get('/ncr/:id/approve', auth.ensureAuthenticated, async function(req, res) {
+  app.get('/ncrs/:id/approve', auth.ensureAuthenticated, async function(req, res) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();
       if (!ncr) return res.status(404).send('NCR not found');
@@ -37,11 +37,11 @@ module.exports = function(app) {
     }
   });
 
-  app.get('/ncr/:id/close', auth.ensureAuthenticated, async function(req, res) {
+  app.get('/ncrs/:id/close', auth.ensureAuthenticated, async function(req, res) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();
       if (!ncr) return res.status(404).send('NCR not found');
-      if (ncr.status !== 'Final Approval') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncr/${req.params.id}`);
+      if (ncr.status !== 'Final Approval') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncrs/${req.params.id}`);
       const renderObj = routesUtilities.getRenderObject(req, { ncr });
       return res.render('ncr-close', renderObj);
     } catch (err) {
@@ -50,11 +50,11 @@ module.exports = function(app) {
     }
   });
 
-  app.get('/ncr/:id/disposition', auth.ensureAuthenticated, async function(req, res) {
+  app.get('/ncrs/:id/disposition', auth.ensureAuthenticated, async function(req, res) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();
       if (!ncr) return res.status(404).send('NCR not found');
-      if (ncr.status !== 'Submitted') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncr/${req.params.id}`);
+      if (ncr.status !== 'Submitted') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncrs/${req.params.id}`);
       const renderObj = routesUtilities.getRenderObject(req, { ncr });
       return res.render('ncr-disposition', renderObj);
     } catch (err) {
@@ -63,7 +63,7 @@ module.exports = function(app) {
     }
   });
 
-  app.get('/ncr/:id', auth.ensureAuthenticated, async function(req, res) {
+  app.get('/ncrs/:id', auth.ensureAuthenticated, async function(req, res) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();
       if (!ncr) return res.status(404).send('NCR not found');

@@ -87,7 +87,7 @@ block content
           .btn-group
             button#submit-btn.btn.btn-primary(type='submit') Submit Disposition
           .btn-group(style='margin-left: 5px')
-            a.btn(href='#{prefix}/ncr/#{ncr._id}') Cancel
+            a.btn(href='#{prefix}/ncrs/#{ncr._id}') Cancel
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
@@ -190,13 +190,13 @@ block js
         $('#submit-btn').prop('disabled', true).text('Submitting...');
 
         $.ajax({
-          url: prefix + '/api/ncr/' + ncrId + '/disposition',
+          url: prefix + '/api/ncrs/' + ncrId + '/disposition',
           method: 'PATCH',
           contentType: 'application/json',
           data: JSON.stringify(payload),
           success: function (data) {
             if (data.success) {
-              $('#disp-detail-link').attr('href', prefix + '/ncr/' + ncrId);
+              $('#disp-detail-link').attr('href', prefix + '/ncrs/' + ncrId);
               $('#disp-success').show();
               $('#disp-form').hide();
             }
