@@ -36,6 +36,7 @@ require('./model/released-form');
 require('./model/traveler');
 require('./model/binder');
 require('./model/history');
+require('./model/ncr');
 
 // Connect to mongo database
 let mongoAddress = 'mongodb://';
@@ -182,6 +183,9 @@ require('./routes/user')(app);
 require('./routes/group')(app);
 require('./routes/profile')(app);
 require('./routes/ldaplogin')(app);
+require('./routes/ncr-view')(app);
+app.use('/api/ncrs', require('./routes/ncr'));
+
 app.get('/api', function(req, res) {
   res.render('api', {
     prefix: req.proxied ? req.proxied_prefix : '',

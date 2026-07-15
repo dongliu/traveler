@@ -51,8 +51,11 @@ docker/server.key
 
 .env
 
+# e2e test run artifacts (GIFs, reports) #
+test-e2e/results/
+
 # npm stuff #
 npm-debug.log*
 
 .github
-.claude
+.claude/settings.local.json

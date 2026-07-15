@@ -1,0 +1,360 @@
+extends layout
+
+block head
+  meta(charset='utf-8')
+  title NCR - #{ncr.ncr_number}
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+  style.
+    .event-timeline { border-left: 3px solid #ddd; padding-left: 15px; margin-top: 10px; }
+    .event-entry { margin-bottom: 12px; position: relative; }
+    .event-entry::before { content: ''; width: 10px; height: 10px; background: #999; border-radius: 50%; position: absolute; left: -19px; top: 4px; }
+    .badge-Submitted { background-color: #5bc0de; }
+    .badge-Dispositioned { background-color: #f0ad4e; }
+    .badge-Approved { background-color: #5cb85c; }
+    .badge-Returned { background-color: #d9534f; }
+    .badge-Final { background-color: #428bca; }
+    .badge-Closed { background-color: #777; }
+
+block content
+  .container(style='margin-top: 10px')
+    .row-fluid
+      .span8
+        h3
+          | NCR&nbsp;
+          span.label(class='badge-#{ncr.status.replace(/ /g, "")}')= ncr.status
+          | &nbsp;#{ncr.ncr_number}
+      .span4.text-right
+        if ncr.status === 'Submitted' || ncr.status === 'Dispositioned'
+          a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Submit Disposition
+        if ncr.status === 'Dispositioned'
+          a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
+        if ncr.status === 'Approved'
+          a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
+        if ncr.status === 'Final Approval'
+          a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR
+
+    .row-fluid
+      .span6
+        fieldset
+          legend Part Information
+          dl.dl-horizontal
+            dt Part Name
+            dd= ncr.part_name
+            dt Part Number
+            dd= ncr.part_number
+            dt Part Revision
+            dd= ncr.part_revision
+            dt Quantity
+            dd= ncr.quantity
+            dt Supplier
+            dd= ncr.supplier_name
+
+      .span6
+        fieldset
+          legend Reference
+          dl.dl-horizontal
+            dt WBS Number
+            dd= ncr.wbs_number
+            dt Spec / Drawing
+            dd= ncr.specification_drawing_reference
+            if ncr.po_reference
+              dt PO Reference
+              dd= ncr.po_reference
+            dt CE/CS
+            dd= ncr.ce_cs_name
+            dt Originator
+            dd= ncr.originator_name
+            dt Created
+            dd= new Date(ncr.creation_timestamp).toLocaleDateString()
+
+    .row-fluid
+      .span12
+        fieldset
+          legend Nonconformance Details
+          dl.dl-horizontal
+            dt Discovery Date
+            dd= new Date(ncr.discovery_date).toLocaleDateString()
+            dt Context
+            dd= ncr.discovery_context.replace(/_/g, ' ')
+            dt Description
+            dd= ncr.description_of_nonconformance
+
+    if ncr.disposition && ncr.disposition.parts_disposition
+      .row-fluid
+        .span12
+          fieldset
+            legend Disposition
+            dl.dl-horizontal
+              dt Parts Disposition
+              dd= ncr.disposition.parts_disposition
+              dt Submitted By
+              dd= ncr.ce_cs_name
+              if ncr.disposition.ce_cs_timestamp
+                dt Submitted On
+                dd= new Date(ncr.disposition.ce_cs_timestamp).toLocaleString()
+              if ncr.disposition.root_cause_documentation
+                dt Root Cause
+                dd= ncr.disposition.root_cause_documentation
+              if ncr.disposition.rework_repair_instructions
+                dt Rework / Repair Instructions
+                dd= ncr.disposition.rework_repair_instructions
+
+    if ncr.additional_approvers && ncr.additional_approvers.length
+      .row-fluid
+        .span12
+          fieldset
+            legend Approval Status
+            table.table.table-bordered.table-condensed
+              thead
+                tr
+                  th Approver
+                  th Role
+                  th Status
+                  th Timestamp
+                  th Comments
+              tbody
+                each approver in ncr.additional_approvers
+                  tr
+                    td= approver.approver_name
+                    td= approver.approver_role
+                    td
+                      span.label= approver.approval_status
+                    td= approver.approval_timestamp ? new Date(approver.approval_timestamp).toLocaleString() : '—'
+                    td= approver.comments || '—'
+
+    if ncr.preventive_actions && ncr.preventive_actions.length
+      - var isQa = (locals.roles && locals.roles.indexOf('qa_staff') !== -1)
+      .row-fluid
+        .span12
+          fieldset
+            legend Preventive Actions
+            #pa-error.alert.alert-error(style='display:none')
+              span#pa-error-msg
+            each pa in ncr.preventive_actions
+              .well(data-pa-id=String(pa._id), style='margin-bottom:10px')
+                p
+                  strong= pa.action_description
+                dl.dl-horizontal
+                  dt Status
+                  dd
+                    span.label(class='pa-status-badge')= pa.status || 'Open'
+                  dt Owner
+                  dd
+                    if pa.owner_name
+                      = pa.owner_name + ' '
+                      span.muted (#{pa.target_completion_date ? new Date(pa.target_completion_date).toLocaleDateString() : 'no target date'})
+                    else
+                      span.muted Unassigned
+                  if pa.actual_completion_date
+                    dt Completed
+                    dd= new Date(pa.actual_completion_date).toLocaleDateString()
+                  if pa.comments && pa.comments.length
+                    dt Comments
+                    dd
+                      ul
+                        each c in pa.comments
+                          li= c
+
+                .btn-toolbar(style='margin-top:6px')
+                  if isQa
+                    button.btn.btn-sm.btn-info.pa-assign-btn(type='button')
+                      i.fa.fa-user
+                      | &nbsp; #{pa.owner_id ? 'Reassign Owner' : 'Assign Owner'}
+                  if pa.owner_id === locals.userid && (!pa.status || pa.status !== 'Completed')
+                    button.btn.btn-sm.btn-primary.pa-update-btn(type='button')
+                      i.fa.fa-pencil
+                      | &nbsp; Update Status
+                  if isQa && pa.status !== 'Completed'
+                    button.btn.btn-sm.btn-success.pa-close-btn(type='button')
+                      i.fa.fa-check
+                      | &nbsp; Close PA
+
+                .pa-assign-form(style='display:none; margin-top:8px; padding:8px; background:#fff; border-radius:3px')
+                  .control-group
+                    label Owner Username
+                    input.pa-owner-id(type='text', value=pa.owner_id || '')
+                  .control-group
+                    label Owner Name
+                    input.pa-owner-name(type='text', value=pa.owner_name || '')
+                  .control-group
+                    label Owner Email
+                    input.pa-owner-email(type='email', value=pa.owner_email || '')
+                  .control-group
+                    label Target Completion Date
+                    input.pa-target-date(type='date', value=pa.target_completion_date ? new Date(pa.target_completion_date).toISOString().slice(0,10) : '')
+                  button.btn.btn-sm.btn-primary.pa-assign-submit(type='button') Save
+                  button.btn.btn-sm.pa-cancel(type='button') Cancel
+
+                .pa-update-form(style='display:none; margin-top:8px; padding:8px; background:#fff; border-radius:3px')
+                  .control-group
+                    label New Status
+                    select.pa-new-status
+                      option(value='Open') Open
+                      option(value='In Progress') In Progress
+                      option(value='Overdue') Overdue
+                      option(value='Completed') Completed
+                  .control-group
+                    label Comment (optional)
+                    textarea.pa-comment(rows='2')
+                  button.btn.btn-sm.btn-primary.pa-update-submit(type='button') Save
+                  button.btn.btn-sm.pa-cancel(type='button') Cancel
+
+    if ncr.closure_record && ncr.closure_record.closure_date
+      .row-fluid
+        .span12
+          fieldset
+            legend Closure
+            dl.dl-horizontal
+              dt Closed By
+              dd= ncr.closure_record.closed_by_name
+              dt Closure Date
+              dd= new Date(ncr.closure_record.closure_date).toLocaleDateString()
+              if ncr.closure_record.closure_notes
+                dt Notes
+                dd= ncr.closure_record.closure_notes
+
+    .row-fluid
+      .span12
+        fieldset
+          legend
+            | Event Timeline&nbsp;
+            a.btn.btn-mini#timeline-toggle(href='#') Hide
+          .event-timeline#event-timeline
+            each event in ncr.events.slice().reverse()
+              .event-entry
+                span.badge= event.event_type
+                | &nbsp;
+                strong= event.actor_name || 'System'
+                if event.actor_role
+                  |  (#{event.actor_role})
+                | &nbsp;&mdash;&nbsp;
+                = new Date(event.timestamp).toLocaleString()
+                if event.previous_status && event.new_status
+                  .muted
+                    small #{event.previous_status || 'None'} &rarr; #{event.new_status}
+                if event.payload
+                  a.event-payload-toggle(href='#', style='font-size:11px; margin-left:8px') [payload]
+                  pre.event-payload(style='display:none; font-size:11px; margin:4px 0 0; white-space:pre-wrap; word-break:break-all; background:#f5f5f5; padding:6px; border-radius:3px')= JSON.stringify(event.payload, null, 2)
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script(type='text/javascript').
+    (function($) {
+      var ncrId = '#{ncr._id}';
+      var apiBase = '#{prefix}/api/ncrs/' + ncrId + '/preventive-actions';
+
+      function showPaError(msg) {
+        $('#pa-error-msg').text(msg);
+        $('#pa-error').show();
+        setTimeout(function() { $('#pa-error').hide(); }, 5000);
+      }
+
+      function getPaWell(btn) {
+        return $(btn).closest('.well');
+      }
+
+      function getPaId(btn) {
+        return getPaWell(btn).data('pa-id');
+      }
+
+      $(document).on('click', '.pa-assign-btn', function() {
+        var $well = getPaWell(this);
+        $well.find('.pa-assign-form').toggle();
+        $well.find('.pa-update-form').hide();
+      });
+
+      $(document).on('click', '.pa-update-btn', function() {
+        var $well = getPaWell(this);
+        $well.find('.pa-update-form').toggle();
+        $well.find('.pa-assign-form').hide();
+      });
+
+      $(document).on('click', '.pa-cancel', function() {
+        getPaWell(this).find('.pa-assign-form, .pa-update-form').hide();
+      });
+
+      $(document).on('click', '.pa-assign-submit', function() {
+        var $well = getPaWell(this);
+        var paId = getPaId(this);
+        var payload = {
+          owner_id: $well.find('.pa-owner-id').val().trim(),
+          owner_name: $well.find('.pa-owner-name').val().trim(),
+          owner_email: $well.find('.pa-owner-email').val().trim(),
+          target_completion_date: $well.find('.pa-target-date').val()
+        };
+        if (!payload.owner_id || !payload.owner_name || !payload.owner_email || !payload.target_completion_date) {
+          return showPaError('All owner fields are required.');
+        }
+        $.ajax({
+          url: apiBase + '/' + paId + '/owner',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to assign owner.';
+            showPaError(msg);
+          }
+        });
+      });
+
+      $(document).on('click', '.pa-update-submit', function() {
+        var $well = getPaWell(this);
+        var paId = getPaId(this);
+        var payload = {
+          action: 'update',
+          status: $well.find('.pa-new-status').val(),
+          comment: $well.find('.pa-comment').val().trim()
+        };
+        $.ajax({
+          url: apiBase + '/' + paId + '/status',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to update status.';
+            showPaError(msg);
+          }
+        });
+      });
+
+      $('#timeline-toggle').on('click', function(e) {
+        e.preventDefault();
+        var $tl = $('#event-timeline');
+        if ($tl.is(':visible')) {
+          $tl.hide();
+          $(this).text('Show');
+        } else {
+          $tl.show();
+          $(this).text('Hide');
+        }
+      });
+
+      $(document).on('click', '.event-payload-toggle', function(e) {
+        e.preventDefault();
+        $(this).next('.event-payload').toggle();
+      });
+
+      $(document).on('click', '.pa-close-btn', function() {
+        var paId = getPaId(this);
+        if (!confirm('Close this preventive action?')) return;
+        $.ajax({
+          url: apiBase + '/' + paId + '/status',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({ action: 'close' }),
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to close PA.';
+            showPaError(msg);
+          }
+        });
+      });
+    })(jQuery);
