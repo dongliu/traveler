@@ -21,5 +21,10 @@
   "default_form_public_access": -1,
   "default_traveler_public_access": 0,
   "default_binder_public_access": 0,
-  "released_form_version_mgmt": 1
+  "released_form_version_mgmt": 1,
+  "smtp_host": "mail-service",
+  "smtp_port": 1025,
+  "smtp_ssl": false,
+  "smtp_tls": false,
+  "notification_email_address": "traveler-noreply@example.com"
 }
