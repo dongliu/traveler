@@ -4,19 +4,109 @@
 
 Send email notifications to users when significant events occur in the application — including but not limited to the review workflow — to keep relevant parties informed without requiring them to poll the UI.
 
+The design and implementation are split into two parts that ship independently:
+
+- **Part 1 — Notification library**: `lib/email.js`, its unit tests, and a standalone script to verify the SMTP connection in the runtime environment. No application behavior changes.
+- **Part 2 — Event integration**: wiring `sendNotification(...)` into application events. Deferred until the trigger event list is confirmed.
+
 ## Status
 
-Proposed.
+Part 1: Accepted — key transport decisions confirmed (basic unauthenticated SMTP; no `smtp_user`/`smtp_pass`).
+
+Part 2: Proposed — trigger events to be confirmed.
 
 ## Motivation
 
 Users currently have no way to learn about activity in the application without logging in and checking manually. This creates friction for time-sensitive workflows such as review approvals and traveler sign-offs, but the problem applies more broadly: any event where one user's action creates work or context for another user is a candidate for a notification.
 
-## Detailed Design
+Splitting the work lets the transport layer land and be validated against the real SMTP relay now, while the event list — a product decision, not a technical one — is settled separately.
 
-### Trigger events
+---
 
-> Subject lines and body content are candidates to be confirmed.
+## Part 1 — Notification Library
+
+### Confirmed decisions
+
+- **Basic SMTP is enough.** The runtime environment provides an SMTP relay that accepts mail from the application host without authentication. No `smtp_user` / `smtp_pass` config keys, no app passwords, no OAuth2 / Google service account setup. The earlier Google Workspace auth options (OAuth2 service account, app password) are dropped.
+
+### Email delivery
+
+Uses `nodemailer` with `html-to-text` to auto-generate a plain-text fallback from the HTML body.
+
+The implementation lives in `lib/email.js` and exports:
+
+```js
+sendNotification({ subject, recipients, text, html })
+```
+
+- `recipients` may be a single address string or an array.
+- If only `html` is provided, `html-to-text` generates the `text` part automatically.
+- The transport is initialized lazily on first use and pooled (`maxConnections: 2`).
+- The transport uses no `auth` option — connection is unauthenticated by design.
+- Errors are logged via `lib/loggers` and never propagated — a mail failure must never break a request.
+- The sender display name is `"eTraveler Notification"` with the configured notification address.
+
+### Configuration
+
+SMTP settings are read from `config.app` (i.e. `app.json`). The following keys are added:
+
+| Key | Description |
+|---|---|
+| `smtp_host` | SMTP server hostname |
+| `smtp_port` | SMTP server port |
+| `smtp_ssl` | `true` to use TLS from the start |
+| `smtp_tls` | `true` to allow STARTTLS upgrade |
+| `notification_email_address` | The From address for outbound notifications |
+
+Per the constitution (Configuration Externalization), real values live in `../etc/traveler-config/app.json`; the repo's `config/app_change.json` gains example entries only.
+
+### Unit tests
+
+`test/lib/email-test.js` (Mocha + Chai + Sinon), covering every export of `lib/email.js` per constitution Principle III:
+
+- `sendNotification` normalizes a single recipient string to an array.
+- `text` is auto-generated from `html` when omitted.
+- The transport is created once (lazy init) and reused across calls.
+- Transport errors are logged and swallowed — the returned promise never rejects.
+- Sender field combines the display name and `notification_email_address`.
+
+Tests stub the nodemailer transport; no real SMTP traffic.
+
+### SMTP connection check script
+
+`tools/check-smtp.js` — a standalone Node script to validate the SMTP path from the actual runtime environment (the app host inside the relay's allowlist), where a developer laptop cannot stand in:
+
+```
+node tools/check-smtp.js                     # verify connection/handshake only
+node tools/check-smtp.js someone@example.com # verify, then send a test message
+```
+
+Behavior:
+
+1. Loads SMTP settings through `config/config.js` (same path the app uses — also validates the deployed `app.json`).
+2. Builds the same transport shape as `lib/email.js` and calls `transport.verify()` to exercise DNS, TCP connect, and the SMTP handshake (including STARTTLS when `smtp_tls` is set).
+3. With an address argument, sends a small test message via `sendNotification` so the full delivery path (relay acceptance, From address validity) is confirmed end to end.
+4. Prints a clear pass/fail per step and exits non-zero on failure — usable in install/upgrade checklists (`sbin/` runbooks can call it).
+
+### Part 1 deliverables
+
+| Artifact | Purpose |
+|---|---|
+| `lib/email.js` | `sendNotification` + lazy pooled transport |
+| `test/lib/email-test.js` | Unit tests (stubbed transport) |
+| `tools/check-smtp.js` | Runtime SMTP verification script |
+| `config/app_change.json` | Example SMTP keys |
+| `package.json` | Add `nodemailer`, `html-to-text` |
+
+Part 1 has no user-visible behavior: nothing calls `sendNotification` yet.
+
+---
+
+## Part 2 — Event Integration (deferred)
+
+> **To be confirmed.** The event list below is a candidate set carried over from the original proposal. Part 2 design finalizes which events fire, their recipients, and exact subject/body wording; only then are integration points implemented.
+
+### Candidate trigger events
 
 #### Form review
 
@@ -48,102 +138,9 @@ Users currently have no way to learn about activity in the application without l
 
 The `User` model already has an `email` field and a `subscribe` boolean. Notifications are only sent when `subscribe` is `true` and `email` is non-empty. Users can toggle their subscription from their profile page.
 
-### Email delivery
-
-Uses `nodemailer` (same library as the `upton` branch) with `html-to-text` to auto-generate a plain-text fallback from the HTML body.
-
-The implementation lives in `lib/email.js` and exports:
-
-```js
-sendNotification({ subject, recipients, text, html })
-```
-
-- `recipients` may be a single address string or an array.
-- If only `html` is provided, `html-to-text` generates the `text` part automatically.
-- The transport is initialized lazily on first use and pooled (`maxConnections: 2`).
-- Errors are logged via `lib/loggers` and never propagated — a mail failure must never break a request.
-- The sender display name is `"eTraveler Notification"` with the configured notification address.
-
-### Configuration
-
-SMTP settings are read from `config.app` (i.e. `app.json`). The following keys are added:
-
-| Key | Description |
-|---|---|
-| `smtp_host` | SMTP server hostname |
-| `smtp_port` | SMTP server port |
-| `smtp_ssl` | `true` to use TLS from the start |
-| `smtp_tls` | `true` to allow STARTTLS upgrade |
-| `notification_email_address` | The From address for outbound notifications |
-
-For this deployment the SMTP backend is **Google Workspace**. The auth method is to be confirmed, but the two practical options are below.
-
-#### Option A — OAuth2 with a service account (recommended)
-
-Google's preferred server-to-server approach. No passwords stored; tokens are short-lived and automatically refreshed.
-
-1. In Google Cloud Console, create a service account and download its JSON key file.
-2. Enable the **Gmail API** for the project.
-3. In the Google Workspace Admin console, grant the service account domain-wide delegation with the scope `https://www.googleapis.com/auth/gmail.send`.
-4. Add the `googleapis` package and use the `google.auth.GoogleAuth` client to mint an OAuth2 access token, then pass it to nodemailer as an OAuth2 transport:
-
-```js
-const { google } = require('googleapis');
-
-const auth = new google.auth.GoogleAuth({
-  keyFile: config.app.google_service_account_key,
-  scopes: ['https://www.googleapis.com/auth/gmail.send'],
-  clientOptions: { subject: config.app.notification_email_address },
-});
-
-const accessToken = await auth.getAccessToken();
-
-transport = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    type: 'OAuth2',
-    user: config.app.notification_email_address,
-    accessToken,
-  },
-});
-```
-
-New config keys needed in `app.json`:
-
-| Key | Description |
-|---|---|
-| `google_service_account_key` | Path to the service account JSON key file |
-
-#### Option B — App password over SMTP (simpler, no extra package)
-
-Suitable if OAuth2 setup is not available. Requires 2-Step Verification on the sending account and an app password generated in the Google account settings. Uses the existing SMTP transport shape in `lib/email.js` with no code changes:
-
-```json
-{
-  "smtp_host": "smtp.gmail.com",
-  "smtp_port": 587,
-  "smtp_ssl": false,
-  "smtp_tls": true,
-  "notification_email_address": "traveler-noreply@example.com",
-  "smtp_user": "traveler-noreply@example.com",
-  "smtp_pass": "<app-password>"
-}
-```
-
-The `initTransport` call in `lib/email.js` would need to pass `auth: { user, pass }` when these keys are present.
-
-New config keys needed in `app.json`:
-
-| Key | Description |
-|---|---|
-| `smtp_user` | SMTP login username (the sending address) |
-| `smtp_pass` | App password generated in Google account settings |
-
-> **To be confirmed.** Choose Option A or Option B and remove the other before implementation.
-
 ### Integration points
 
-> **To be defined.** Integration points will be identified once the trigger events table is complete. Each event maps to a call to `sendNotification(...)` at the appropriate place in the relevant route or library function.
+> **To be defined** once the trigger events table is confirmed. Each event maps to a call to `sendNotification(...)` at the appropriate place in the relevant route or library function (e.g., `lib/review.js` for review events, the state-transition handlers for lifecycle events).
 
 ### Email content
 
@@ -152,9 +149,12 @@ Emails are HTML with an auto-generated plain-text fallback. Each message include
 - A direct URL to the document using `config.app.url` as the base.
 - A footer with a link to the user's profile to unsubscribe.
 
+---
+
 ## Drawbacks
 
-- Adds an external dependency (`nodemailer`, `html-to-text`) and a new operational concern (SMTP/Google Workspace configuration).
+- Adds two dependencies (`nodemailer`, `html-to-text`) and a new operational concern (SMTP relay reachability from the app host).
+- Unauthenticated relay means delivery depends on the relay's host allowlist — moving the app host can silently break mail; `tools/check-smtp.js` exists to catch exactly this.
 - Users with `subscribe: true` but an outdated `email` field will silently receive no mail.
 - No retry logic — transient SMTP failures result in a missed notification with no recovery.
 
@@ -165,6 +165,9 @@ Emails are HTML with an auto-generated plain-text fallback. Each message include
 
 ## Unresolved Questions
 
+Part 2 only:
+
+- Which candidate trigger events are in scope for the first integration release?
 - Should admins be able to send a broadcast notification to all subscribed users?
 - Should there be per-event granularity in the subscription settings, or is a single on/off toggle sufficient?
 - How should the app URL be configured for constructing deep links in emails?
