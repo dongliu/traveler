@@ -51,6 +51,7 @@ async function main() {
   if (recipient) {
     const sent = await email.sendNotification({
       subject: 'SMTP connection check',
+      from: recipient,
       recipients: recipient,
       html:
         '<p>This is a test message from <code>tools/check-smtp.js</code>.</p>' +
