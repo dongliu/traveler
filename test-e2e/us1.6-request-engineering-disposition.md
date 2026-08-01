@@ -28,10 +28,12 @@ this test suite.
    file: `../.env`; gitignored; falls back to
    the defaults below for any var that is unset) to resolve the actual
    ports for this run: `WEB_PORT` (default `3001`), `API_PORT` (default
-   `3002`), `MONGO_EXPRESS_PORT` (default `8081`), and the login credentials
-   `E2E_USER` and `E2E_PASS`. Use the resolved web app port for every
-   `localhost:3001`-style URL referenced below in this file — substitute the
-   real port, don't assume the placeholder.
+   `3002`), `MONGO_EXPRESS_PORT` (default `8081`), and the app login
+   credentials `E2E_USER` and `E2E_PASS`. Mongo Express basic-auth
+   credentials are `traveler` / `travelerpass` (defined in
+   `docker-compose.yml`, not in `.env`). Use the resolved web app port for
+   every `localhost:3001`-style URL referenced below in this file —
+   substitute the real port, don't assume the placeholder.
 0. Navigate to `http://localhost:<WEB_PORT>/login`. If the page redirects to
    the app (already authenticated), skip to the next step. Otherwise, enter
    the value of `E2E_USER` as the username and `E2E_PASS` as the password and
