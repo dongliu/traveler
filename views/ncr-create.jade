@@ -133,12 +133,17 @@ block js
         if (desc.length < 20) errors.push('Description of Nonconformance must be at least 20 characters.');
         if (!$('input[name="discovery_context"]:checked').val()) errors.push('Discovery Context is required.');
 
+        var ceCsName = $('#ce_cs_name').val().trim();
+        var ceCsUsers = travelerGlobal.usernames ? travelerGlobal.usernames.get(ceCsName) : [];
+        if (!ceCsUsers || ceCsUsers.length === 0) errors.push('CE/CS Name must be selected from the list.');
+
         if (errors.length) {
           $('#ncr-error-msg').text(errors.join(' '));
           $('#ncr-error').show();
           return;
         }
 
+        var ceCsUser = ceCsUsers[0];
         var payload = {
           part_name: $('#part_name').val().trim(),
           part_number: $('#part_number').val().trim(),
@@ -148,7 +153,9 @@ block js
           wbs_number: $('#wbs_number').val().trim(),
           specification_drawing_reference: $('#specification_drawing_reference').val().trim(),
           po_reference: $('#po_reference').val().trim() || undefined,
-          ce_cs_name: $('#ce_cs_name').val().trim(),
+          ce_cs_name: ceCsName,
+          ce_cs_id: ceCsUser.uid,
+          ce_cs_email: ceCsUser.mail,
           discovery_date: $('#discovery_date').val(),
           discovery_context: $('input[name="discovery_context"]:checked').val(),
           description_of_nonconformance: desc,
