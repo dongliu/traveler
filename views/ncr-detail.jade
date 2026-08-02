@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='utf-8')
-  title NCR - #{ncr.ncr_number}
+  title #{ncr.ncr_number} — #{ncr.status}
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -23,9 +23,8 @@ block content
     .row-fluid
       .span8
         h3
-          | NCR&nbsp;
+          | #{ncr.ncr_number}&nbsp;
           span.label(class='badge-#{ncr.status.replace(/ /g, "")}')= ncr.status
-          | &nbsp;#{ncr.ncr_number}
       .span4.text-right
         if ncr.status === 'Submitted' || ncr.status === 'Dispositioned'
           a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Submit Disposition
