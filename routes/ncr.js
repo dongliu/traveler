@@ -88,7 +88,8 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
       name: res.locals.username,
       email: res.locals.userEmail || '',
     };
-    const ncr = await createNcr(b, user);
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await createNcr(b, user, webBaseUrl);
     return res.status(201).json({
       success: true,
       ncr: {
