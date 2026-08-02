@@ -234,6 +234,28 @@ block content
                 if event.previous_status && event.new_status
                   .muted
                     small #{event.previous_status || 'None'} &rarr; #{event.new_status}
+                if event.event_type && event.event_type.indexOf('notification.') === 0 && event.recipients && event.recipients.length
+                  table.table.table-condensed(style='margin:6px 0 0; font-size:11px; width:auto')
+                    thead
+                      tr
+                        th(style='padding:2px 8px') Recipient
+                        th(style='padding:2px 8px') Status
+                        th(style='padding:2px 8px') Delivered At
+                    tbody
+                      each r in event.recipients
+                        tr
+                          td(style='padding:2px 8px')= r.recipient_email || r.recipient_id || '—'
+                          td(style='padding:2px 8px')
+                            if r.delivery_status === 'Delivered'
+                              span.label.label-success= r.delivery_status
+                            else if r.delivery_status === 'Failed'
+                              span.label.label-important= r.delivery_status
+                              if r.error_message
+                                |  &nbsp;
+                                span.muted(style='font-size:10px')= r.error_message
+                            else
+                              span.label= r.delivery_status || 'Unknown'
+                          td(style='padding:2px 8px')= r.delivery_timestamp ? new Date(r.delivery_timestamp).toLocaleString() : '—'
                 if event.payload
                   a.event-payload-toggle(href='#', style='font-size:11px; margin-left:8px') [payload]
                   pre.event-payload(style='display:none; font-size:11px; margin:4px 0 0; white-space:pre-wrap; word-break:break-all; background:#f5f5f5; padding:6px; border-radius:3px')= JSON.stringify(event.payload, null, 2)
