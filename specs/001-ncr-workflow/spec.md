@@ -115,8 +115,15 @@ confirmation for each recipient with timestamps.
 After sending the initial notification to QA and management, the system sends a
 separate email request to the Cognizant Engineer/Scientist (CE/CS) asking them
 to perform engineering disposition on the nonconformance. The email includes a
-link to the complete NCR with all gathered information. The CE/CS can optionally
-assign an Originator Delegate if needed.
+link to the complete NCR with all gathered information.
+
+> **Implementation note**: The ability for a CE/CS to assign an Originator
+> Delegate is deferred until requirements are clarified. It is not yet defined
+> when a delegate assignment is permitted (e.g., only when the CE/CS is
+> unavailable vs. at any time), who can be designated as a delegate, what
+> authority the delegate holds relative to the CE/CS, or how the delegate
+> assignment is initiated and recorded. See
+> [Future Work: CE/CS Delegate Assignment](#future-work-cecs-delegate-assignment-pending-requirements-clarification).
 
 **Why this priority**: The engineering disposition request initiates the
 technical analysis phase. This separates the awareness notification (to
@@ -140,12 +147,6 @@ records the CE/CS assignment and email delivery confirmation.
 3. **Given** the CE/CS is assigned to perform disposition, **When** they review
    the NCR, **Then** the system records their assignment with timestamp and
    access log entry
-4. **Given** the assigned CE/CS is unavailable, **When** they receive the
-   disposition request, **Then** they can optionally designate an Originator
-   Delegate to perform the disposition on their behalf
-5. **Given** an Originator Delegate is assigned, **When** the delegate accesses
-   the NCR, **Then** they have full authority to document and forward the
-   disposition with their identity recorded in the system
 
 ---
 
@@ -505,8 +506,10 @@ notifications as actions progress to completion.
   disposition request email
 - **FR-014**: System MUST record the CE/CS assignment with timestamp and email
   delivery confirmation in the NCR forwarding log
-- **FR-015**: System MUST allow the CE/CS to optionally designate an Originator
-  Delegate to perform the disposition on their behalf
+
+> **Deferred — FR-015**: CE/CS delegate assignment is deferred until
+> requirements are clarified. See
+> [Future Work: CE/CS Delegate Assignment](#future-work-cecs-delegate-assignment-pending-requirements-clarification).
 
 #### NCR Disposition (CE/CS Engineering Analysis)
 
@@ -731,6 +734,46 @@ notifications as actions progress to completion.
   Notification Status
 - Relationships: Associated with one NCR, Multiple entries per NCR (one per
   stakeholder), Created at time of NCR submission
+
+## Future Work: CE/CS Delegate Assignment (Pending Requirements Clarification)
+
+A CE/CS may need to assign a delegate to perform engineering disposition on
+their behalf. This capability is deferred because the following requirements
+have not yet been defined:
+
+- **When**: Under what conditions a delegate assignment is permitted — e.g.,
+  only when the CE/CS declares unavailability, or at any time at their
+  discretion; whether there is a time window after the initial notification
+  before a delegate can be named.
+- **Who**: Who qualifies as an eligible delegate — e.g., same engineering
+  discipline, same organizational group, any authenticated user with an
+  engineering role, or a pre-approved list maintained by QA.
+- **Authority**: What the delegate is authorized to do — full disposition
+  authority identical to the CE/CS, or a more limited scope (e.g., cannot
+  select certain disposition types like Use-As-Is without CE/CS co-signature).
+- **How**: How the assignment is initiated — via the NCR detail page by the
+  CE/CS, via a separate reassignment workflow, or via a request-and-accept
+  flow requiring the delegate to confirm; and how the delegate is notified.
+- **Audit**: How the delegation is recorded — whether it appears as a distinct
+  event in the NCR audit trail separate from normal disposition, and whether
+  the original CE/CS retains any accountability after delegating.
+
+Once requirements are clarified, the following capabilities can be specified
+and implemented:
+
+- CE/CS initiates a delegate assignment from the NCR with a defined trigger
+  condition
+- System validates delegate eligibility against defined criteria
+- System notifies the delegate with a link to the NCR and context from the
+  original disposition request
+- System records the delegation event (delegator identity, delegate identity,
+  timestamp, reason/condition) in the NCR event log
+- Delegate performs disposition with their own identity recorded; original
+  CE/CS assignment is preserved in history for audit compliance
+- Disposition submitted by a delegate is treated identically to a CE/CS
+  submission for downstream QA concurrence and approval steps
+
+---
 
 ## Future Work: QA and Management Notifications (Deferred)
 

@@ -146,6 +146,14 @@ layer calls `fsm.can(transition)` before any MongoDB write.
 email functions. Each send call returns per-recipient delivery results; the
 service layer appends the corresponding system output event to `ncr.events[]`.
 
+> **Deferred — CE/CS Delegate Assignment**: `ncr-service.js` does not implement
+> any delegate assignment flow. No `assignDelegate` service method, no delegate
+> notification email, and no `delegate_assigned` event type are introduced in
+> this phase. The data model MUST NOT add a `delegate` field yet — it will be
+> added when requirements are clarified (see spec Future Work section). Any
+> disposition submitted in this phase is attributed solely to the designated
+> CE/CS.
+
 ### Access Control
 
 Role-filtered visibility (Option C from spec). Route middleware checks
