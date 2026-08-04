@@ -58,46 +58,55 @@ NCR is ready for disposition by an authorized reviewer.
 
 ---
 
-### User Story 1.5 - Send Initial Notification (Priority: P1)
+### User Story 1.5 - Send Submission Confirmation and Engineering Disposition Request (Priority: P1)
 
-Upon submission of an NCR, the system automatically sends an initial
-notification email summarizing the nonconformance information to key
-stakeholders for awareness and action initiation. The initial notification goes
-to QA Staff, Cognizant Group Leader, and Cognizant Division Director/PM to
-inform them of the nonconformance. The CE/CS (Engineering Disposition) is
-notified separately with a direct request for engineering disposition.
+Upon submission of an NCR, the system automatically sends two notifications:
+(1) a submission confirmation email to the NCR Originator acknowledging that
+their NCR was received and assigned a unique NCR number, and (2) an engineering
+disposition request email to the designated CE/CS requesting them to perform
+engineering disposition on the nonconformance, including a link to the complete
+NCR.
 
-**Why this priority**: Early notification of quality and management stakeholders
-ensures visibility and initiates the quality response process. This is a core
-part of the initiation workflow.
+> **Implementation note**: Notifications to QA Staff, Cognizant Group Leader,
+> and Cognizant Division Director/PM are deferred to a future iteration. The
+> mechanism for identifying those personnel from a WBS number is not yet
+> defined. See
+> [Future Work: QA and Management Notifications](#future-work-qa-and-management-notifications-deferred).
+
+**Why this priority**: Confirming receipt to the NCR Originator ensures they
+know their report was accepted and can track it by NCR number. Notifying the
+CE/CS immediately initiates the engineering disposition phase, which is the
+critical next step in the workflow.
 
 **Independent Test**: Can be fully tested by creating and submitting an NCR,
-then verifying that: (1) INITIAL NOTIFICATION email is sent with NCR summary to
-QA, Group Leader, and Division Director, (2) all email recipients receive the
-notification with timestamp confirmation, and (3) notification records show
-delivery confirmation for each recipient.
+then verifying that: (1) a submission confirmation email is sent to the NCR
+Originator with the assigned NCR number and a link to the NCR, (2) an
+engineering disposition request email is sent to the designated CE/CS with a
+link to the complete NCR, and (3) notification records show delivery
+confirmation for each recipient with timestamps.
 
 **Acceptance Scenarios**:
 
 1. **Given** an NCR is submitted with valid data, **When** the system processes
-   the submission, **Then** the INITIAL NOTIFICATION is automatically sent via
-   email summarizing NCR information to: Cognizant QA Staff, Cognizant Group
-   Leader, and Cognizant Division Director or Project Manager
-2. **Given** an initial notification email is sent, **When** recipients receive
-   it, **Then** the email includes NCR summary information and a link to view
-   the complete NCR details in the system
-3. **Given** an NCR has been submitted, **When** the NCR Originator or
+   the submission, **Then** a submission confirmation email is automatically
+   sent to the NCR Originator including the assigned NCR number, submission
+   timestamp, and a link to view the NCR in the system
+2. **Given** an NCR is submitted with a CE/CS designated, **When** the system
+   processes the submission, **Then** an engineering disposition request email
+   is automatically sent to the designated CE/CS requesting engineering
+   disposition, including a link to the complete NCR
+3. **Given** a notification email is sent to the NCR Originator or CE/CS,
+   **When** the recipient receives and opens the email, **Then** the email
+   includes NCR summary information (Part Name, Part Number, Quantity, WBS,
+   Description) and a direct link to the complete NCR in the system
+4. **Given** an NCR has been submitted, **When** the NCR Originator or
    authorized user views the notification status, **Then** they see confirmation
-   that initial notification has been sent to all required stakeholders with
-   timestamp for each recipient
-4. **Given** a notification is sent to a stakeholder, **When** the stakeholder
-   accesses the link, **Then** they can view the complete NCR details including
-   part information, supplier, WBS, description, and all supporting
+   that the submission confirmation and CE/CS disposition request have been sent,
+   with delivery timestamp for each recipient
+5. **Given** a notification is sent and the recipient accesses the link,
+   **When** they click the link, **Then** they can view the complete NCR details
+   including part information, supplier, WBS, description, and all supporting
    documentation
-5. **Given** a stakeholder's role or contact information changes, **When** a
-   previously submitted NCR is viewed, **Then** the system identifies the
-   stakeholder roles that were valid at the time of submission for audit
-   compliance
 
 ---
 
@@ -106,8 +115,15 @@ delivery confirmation for each recipient.
 After sending the initial notification to QA and management, the system sends a
 separate email request to the Cognizant Engineer/Scientist (CE/CS) asking them
 to perform engineering disposition on the nonconformance. The email includes a
-link to the complete NCR with all gathered information. The CE/CS can optionally
-assign an Originator Delegate if needed.
+link to the complete NCR with all gathered information.
+
+> **Implementation note**: The ability for a CE/CS to assign an Originator
+> Delegate is deferred until requirements are clarified. It is not yet defined
+> when a delegate assignment is permitted (e.g., only when the CE/CS is
+> unavailable vs. at any time), who can be designated as a delegate, what
+> authority the delegate holds relative to the CE/CS, or how the delegate
+> assignment is initiated and recorded. See
+> [Future Work: CE/CS Delegate Assignment](#future-work-cecs-delegate-assignment-pending-requirements-clarification).
 
 **Why this priority**: The engineering disposition request initiates the
 technical analysis phase. This separates the awareness notification (to
@@ -131,12 +147,6 @@ records the CE/CS assignment and email delivery confirmation.
 3. **Given** the CE/CS is assigned to perform disposition, **When** they review
    the NCR, **Then** the system records their assignment with timestamp and
    access log entry
-4. **Given** the assigned CE/CS is unavailable, **When** they receive the
-   disposition request, **Then** they can optionally designate an Originator
-   Delegate to perform the disposition on their behalf
-5. **Given** an Originator Delegate is assigned, **When** the delegate accesses
-   the NCR, **Then** they have full authority to document and forward the
-   disposition with their identity recorded in the system
 
 ---
 
@@ -462,22 +472,29 @@ notifications as actions progress to completion.
   their linked Traveler ID and step number (for whichever future caller
   populates the link via the API)
 
-#### NCR Forwarding and Notification
+#### NCR Submission Confirmation and CE/CS Notification
 
-- **FR-007**: System MUST automatically send an initial notification email upon
-  NCR submission to: Cognizant QA Staff, Cognizant Group Leader, and Cognizant
-  Division Director or Project Manager to inform them of the new nonconformance
-- **FR-008**: System MUST identify the correct QA Staff, Cognizant Group Leader,
-  and Division Director/PM based on organizational role assignments, part
-  assignment, or project assignment
-- **FR-009**: System MUST transmit comprehensive NCR summary information in the
-  initial notification email including: Part Name, Number, Quantity, Supplier,
-  WBS, Description of Nonconformance, and a link to access the complete NCR
-- **FR-010**: System MUST send initial notification emails to QA, Group Leader,
-  and Division Director with confirmation of delivery
+- **FR-007**: System MUST automatically send a submission confirmation email to
+  the NCR Originator upon NCR submission, including the assigned NCR number,
+  submission timestamp, and a link to view the NCR
+- **FR-008**: System MUST automatically send an engineering disposition request
+  email to the designated CE/CS upon NCR submission, requesting engineering
+  disposition and including a link to the complete NCR with all captured data
+- **FR-009**: System MUST transmit comprehensive NCR summary information in
+  both the submission confirmation and CE/CS notification emails, including:
+  Part Name, Number, Quantity, Supplier, WBS, Description of Nonconformance,
+  and a link to access the complete NCR
+- **FR-010**: System MUST send the submission confirmation and CE/CS disposition
+  request emails with confirmation of delivery for each recipient
 - **FR-011**: System MUST maintain a notification log showing: each recipient
-  who received the initial notification, timestamp of notification, and delivery
-  status for each recipient
+  who received a notification, timestamp of notification, and delivery status
+  for each recipient
+
+> **Deferred — FR-007d, FR-008d**: Notification to Cognizant QA Staff,
+> Cognizant Group Leader, and Cognizant Division Director/PM upon NCR submission
+> is deferred until the mechanism for identifying those personnel from a WBS
+> number is defined. See
+> [Future Work: QA and Management Notifications](#future-work-qa-and-management-notifications-deferred).
 
 #### Engineering Disposition Request
 
@@ -489,8 +506,10 @@ notifications as actions progress to completion.
   disposition request email
 - **FR-014**: System MUST record the CE/CS assignment with timestamp and email
   delivery confirmation in the NCR forwarding log
-- **FR-015**: System MUST allow the CE/CS to optionally designate an Originator
-  Delegate to perform the disposition on their behalf
+
+> **Deferred — FR-015**: CE/CS delegate assignment is deferred until
+> requirements are clarified. See
+> [Future Work: CE/CS Delegate Assignment](#future-work-cecs-delegate-assignment-pending-requirements-clarification).
 
 #### NCR Disposition (CE/CS Engineering Analysis)
 
@@ -715,6 +734,66 @@ notifications as actions progress to completion.
   Notification Status
 - Relationships: Associated with one NCR, Multiple entries per NCR (one per
   stakeholder), Created at time of NCR submission
+
+## Future Work: CE/CS Delegate Assignment (Pending Requirements Clarification)
+
+A CE/CS may need to assign a delegate to perform engineering disposition on
+their behalf. This capability is deferred because the following requirements
+have not yet been defined:
+
+- **When**: Under what conditions a delegate assignment is permitted — e.g.,
+  only when the CE/CS declares unavailability, or at any time at their
+  discretion; whether there is a time window after the initial notification
+  before a delegate can be named.
+- **Who**: Who qualifies as an eligible delegate — e.g., same engineering
+  discipline, same organizational group, any authenticated user with an
+  engineering role, or a pre-approved list maintained by QA.
+- **Authority**: What the delegate is authorized to do — full disposition
+  authority identical to the CE/CS, or a more limited scope (e.g., cannot
+  select certain disposition types like Use-As-Is without CE/CS co-signature).
+- **How**: How the assignment is initiated — via the NCR detail page by the
+  CE/CS, via a separate reassignment workflow, or via a request-and-accept
+  flow requiring the delegate to confirm; and how the delegate is notified.
+- **Audit**: How the delegation is recorded — whether it appears as a distinct
+  event in the NCR audit trail separate from normal disposition, and whether
+  the original CE/CS retains any accountability after delegating.
+
+Once requirements are clarified, the following capabilities can be specified
+and implemented:
+
+- CE/CS initiates a delegate assignment from the NCR with a defined trigger
+  condition
+- System validates delegate eligibility against defined criteria
+- System notifies the delegate with a link to the NCR and context from the
+  original disposition request
+- System records the delegation event (delegator identity, delegate identity,
+  timestamp, reason/condition) in the NCR event log
+- Delegate performs disposition with their own identity recorded; original
+  CE/CS assignment is preserved in history for audit compliance
+- Disposition submitted by a delegate is treated identically to a CE/CS
+  submission for downstream QA concurrence and approval steps
+
+---
+
+## Future Work: QA and Management Notifications (Deferred)
+
+Upon NCR submission, notifications to Cognizant QA Staff, Cognizant Group
+Leader, and Cognizant Division Director/PM are deferred. The mechanism for
+resolving those personnel from a WBS number is not yet defined. Once a
+WBS-to-personnel lookup strategy is established (e.g., an organizational
+directory integration, a WBS ownership mapping table, or a manual assignment
+step), the following capabilities can be implemented:
+
+- Automatic identification of the Cognizant QA Staff, Group Leader, and
+  Division Director/PM from the WBS number on the NCR
+- INITIAL NOTIFICATION email to those stakeholders with NCR summary and link
+- Delivery confirmation logged per recipient in the notification log
+- Stakeholder role snapshot at time of submission for audit compliance
+
+Until then, the submission workflow notifies only the NCR Originator
+(confirmation) and the CE/CS (engineering disposition request).
+
+---
 
 ## Future Work: eTraveler UI Integration (Not Yet Planned)
 

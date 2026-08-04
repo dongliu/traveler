@@ -2,7 +2,7 @@ extends layout
 
 block head
   meta(charset='utf-8')
-  title NCR #{ncr.ncr_number} — QA Concurrence
+  title #{ncr.ncr_number} — QA Concurrence
   meta(name='viewport', content='width=device-width, initial-scale=1.0')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
@@ -14,7 +14,8 @@ block content
     h4
       | NCR&nbsp;
       strong= ncr.ncr_number
-      |  &mdash; #{ncr.part_name} (#{ncr.part_number})
+      |  &mdash; #{ncr.status}
+    h4 #{ncr.part_name} (#{ncr.part_number})
 
     fieldset
       legend NCR Summary

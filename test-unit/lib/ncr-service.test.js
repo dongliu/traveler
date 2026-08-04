@@ -11,7 +11,7 @@ if (!mongoose.modelNames().includes('User')) {
 // Stub ncr-email functions on the module exports *before* loading lib/ncr-service
 // so that the destructured locals inside ncr-service.js pick up the stubs.
 const ncrEmailModule = require('../../lib/ncr-email');
-sinon.stub(ncrEmailModule, 'sendInitialNotification').resolves([]);
+const sendInitialNotificationStub = sinon.stub(ncrEmailModule, 'sendInitialNotification').resolves([]);
 sinon.stub(ncrEmailModule, 'sendDispositionRequest').resolves([]);
 sinon.stub(ncrEmailModule, 'sendQaNotification').resolves([]);
 sinon.stub(ncrEmailModule, 'sendApprovalRequest').resolves([]);
@@ -129,6 +129,7 @@ afterEach(() => {
 describe('lib/ncr-service — createNcr', () => {
   it('creates an NCR with an auto-generated number starting at 0001 when none exist', async () => {
     sinon.stub(Ncr, 'findOne').resolves(null);
+    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@test.com' }]);
     const year = new Date().getFullYear();
 
     const ncr = await createNcr(minimalNcrData(), makeUser());
@@ -143,14 +144,27 @@ describe('lib/ncr-service — createNcr', () => {
   it('increments the sequence based on the last NCR number for the year', async () => {
     const year = new Date().getFullYear();
     sinon.stub(Ncr, 'findOne').resolves({ ncr_number: `NCR-${year}-0007` });
+    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@test.com' }]);
 
     const ncr = await createNcr(minimalNcrData(), makeUser());
 
     ncr.ncr_number.should.equal(`NCR-${year}-0008`);
   });
 
+  it('looks up originator email from the User model and passes it as a string to sendInitialNotification', async () => {
+    sinon.stub(Ncr, 'findOne').resolves(null);
+    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@db.example.com' }]);
+
+    // email on the user arg is ignored — the DB value is what gets passed
+    await createNcr(minimalNcrData(), makeUser({ email: 'wrong@caller.com' }));
+
+    const emailArg = sendInitialNotificationStub.lastCall.args[1];
+    emailArg.should.equal('alice@db.example.com');
+  });
+
   it('sends a disposition-request notification when ce_cs_id is provided', async () => {
     sinon.stub(Ncr, 'findOne').resolves(null);
+    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@test.com' }]);
     const data = minimalNcrData({ ce_cs_id: 'ces1', ce_cs_email: 'ces@test.com' });
 
     const ncr = await createNcr(data, makeUser());
@@ -160,6 +174,7 @@ describe('lib/ncr-service — createNcr', () => {
 
   it('stores a traveler_link when traveler_id is provided', async () => {
     sinon.stub(Ncr, 'findOne').resolves(null);
+    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@test.com' }]);
     const data = minimalNcrData({ traveler_id: 'trav1', traveler_step_number: 3 });
 
     const ncr = await createNcr(data, makeUser());

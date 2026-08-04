@@ -57,7 +57,8 @@ it on first use if it isn't already).
 
 ## Prerequisites
 
-- App running locally: `docker compose up` (preferred) or `npm start`.
+- The Docker stack must already be running (`docker compose up`) before executing
+  any test — do not start or stop containers as part of a test run.
 - **Ports are not fixed** — `docker-compose.yml` reads them from a local
   `.env` file (gitignored, not the same as the repo's `.env.example`, which
   only documents NCR-specific settings and doesn't set these port vars),
