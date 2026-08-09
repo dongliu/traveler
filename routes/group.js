@@ -78,7 +78,7 @@ function addGroup(req, res) {
         roles.push('admin');
       }
       group = new Group({
-        _id: result[0].sAMAccountName.toLowerCase(),
+        _id: (result[0].uid || result[0].sAMAccountName || '').toLowerCase(),
         name: result[0].displayName,
         email: result[0].mail,
         office: result[0].physicalDeliveryOfficeName,
@@ -273,7 +273,7 @@ module.exports = function(app) {
       if (result.length > 1) {
         return res.status(403).send(`User ${fullname} is not unique`);
       }
-      const uid = result[0].sAMAccountName.toLowerCase();
+      const uid = (result[0].uid || result[0].sAMAccountName || '').toLowerCase();
       if (uid.length === 0) {
         return res
           .status(404)
