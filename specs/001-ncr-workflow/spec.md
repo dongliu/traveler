@@ -80,12 +80,14 @@ each NCR.
 
 **Independent Test**: Can be fully tested by creating and submitting an NCR,
 then verifying that: (1) an engineering disposition request email is sent TO the
-designated CE/CS, with the NCR Originator CC'd, containing the NCR number, Part
-Name, Supplier name, Originator name, and a link to the NCR; (2) an initial
-notification email is sent TO all members of the ncr-qa group containing the
-NCR number, Part Name, Supplier name, Originator name, CE/CS name, problem
-description, and a link; and (3) notification records show delivery confirmation
-for each recipient with timestamps.
+designated CE/CS with the NCR Originator CC'd, containing NCR number, Part
+Name, Supplier name, Originator name, and a link to the NCR; (2) an initial FYI
+notification email is sent TO all members of the ncr-qa group with the NCR
+Originator CC'd, containing NCR number, Part Name, Supplier name, Originator
+name, CE/CS name, problem description, and a link; and (3) notification records
+show delivery status and timestamp for each TO recipient and each CC recipient
+independently, with CC status resolved as the best result across all outbound
+sends carrying that CC address.
 
 **Acceptance Scenarios**:
 
@@ -96,9 +98,9 @@ for each recipient with timestamps.
    and any additional comments from the Originator
 2. **Given** an NCR is submitted, **When** the system processes the submission,
    **Then** an initial FYI notification email is automatically sent TO all
-   members of the ncr-qa group, containing: the assigned NCR number, Part Name,
-   Supplier name, Originator name, CE/CS name, the initial description of the
-   nonconformance problem, and a link to the NCR
+   members of the ncr-qa group, with the NCR Originator CC'd, containing: the
+   assigned NCR number, Part Name, Supplier name, Originator name, CE/CS name,
+   the initial description of the nonconformance problem, and a link to the NCR
 3. **Given** the CE/CS receives the disposition request email, **When** they
    click the link, **Then** they access the complete NCR with all mandatory
    fields and supporting documentation ready for disposition
@@ -107,7 +109,8 @@ for each recipient with timestamps.
 5. **Given** an NCR has been submitted, **When** an authorized user views the
    notification status, **Then** they see confirmation that both the CE/CS
    disposition request and QA Admin initial notification have been sent, with
-   delivery timestamps for each recipient
+   delivery status and timestamp for each TO recipient and for each CC recipient
+   independently tracked
 
 ---
 
@@ -441,19 +444,21 @@ notifications as actions progress to completion.
   NCR number, Part Name, Supplier name, Originator name, a link to the NCR, and
   any additional comments from the Originator
 - **FR-008**: System MUST automatically send an initial FYI notification email
-  TO all members of the ncr-qa QA Admin group upon NCR submission, informing
-  them the NCR has been initiated and forwarded to CE/CS for engineering
-  disposition, and including: the assigned NCR number, Part Name, Supplier name,
-  Originator name, CE/CS name, initial description of the nonconformance
-  problem, and a link to the NCR
-- **FR-009**: System MUST record the CE/CS disposition request and QA Admin
-  initial notification in the NCR forwarding log, capturing each recipient's
-  identity, stakeholder role, forwarding timestamp, and email delivery status
-- **FR-010**: System MUST send the CE/CS disposition request and QA Admin
-  notification emails with confirmation of delivery for each recipient
-- **FR-011**: System MUST maintain a notification log showing: each recipient
-  who received a notification, timestamp of notification, and delivery status
-  for each recipient
+  TO all members of the ncr-qa QA Admin group upon NCR submission, with the NCR
+  Originator CC'd, informing them the NCR has been initiated and forwarded to
+  CE/CS for engineering disposition, and including: the assigned NCR number,
+  Part Name, Supplier name, Originator name, CE/CS name, initial description of
+  the nonconformance problem, and a link to the NCR
+- **FR-009**: System MUST record each notification event in the NCR event log,
+  capturing for every TO recipient: email address, delivery status, and delivery
+  timestamp; and for every CC recipient: email address, delivery status, and
+  delivery timestamp tracked independently from TO recipients
+- **FR-010**: System MUST track delivery confirmation for both TO and CC
+  recipients on each notification email; CC delivery status is resolved as the
+  best result (Delivered if any outbound send carrying that CC address succeeded)
+- **FR-011**: System MUST display the notification log on the NCR detail view,
+  showing TO and CC recipients as distinct rows, each with delivery status badge
+  and delivery timestamp
 
 > **Deferred**: Notification to Cognizant Group Leader and Cognizant Division
 > Director/PM upon NCR submission is deferred until the mechanism for
