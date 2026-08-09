@@ -8,6 +8,10 @@ if (!mongoose.modelNames().includes('User')) {
   mongoose.model('User', new mongoose.Schema({ _id: String, name: String, email: String, roles: [String] }));
 }
 
+if (!mongoose.modelNames().includes('Group')) {
+  mongoose.model('Group', new mongoose.Schema({ _id: String, members: [{ type: String, ref: 'User' }] }));
+}
+
 // Stub ncr-email functions on the module exports *before* loading lib/ncr-service
 // so that the destructured locals inside ncr-service.js pick up the stubs.
 const ncrEmailModule = require('../../lib/ncr-email');
@@ -37,6 +41,7 @@ const {
 
 const { Ncr } = require('../../model/ncr');
 const User = mongoose.model('User');
+const Group = mongoose.model('Group');
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -105,6 +110,11 @@ function stubUserFind(results) {
   return sinon.stub(User, 'find').returns({ lean: () => Promise.resolve(results) });
 }
 
+function stubGroupFindOne(result) {
+  const chain = { populate: function() { return chain; }, lean: () => Promise.resolve(result) };
+  Group.findOne.returns(chain);
+}
+
 async function expectRejection(promise, status) {
   let threw = false;
   try {
@@ -118,6 +128,9 @@ async function expectRejection(promise, status) {
 
 beforeEach(() => {
   sinon.stub(Ncr.prototype, 'save').resolves();
+  // Default: ncr-qa group not configured — no user is a QA staff member
+  const nullChain = { populate: function() { return nullChain; }, lean: () => Promise.resolve(null) };
+  sinon.stub(Group, 'findOne').returns(nullChain);
 });
 
 afterEach(() => {
@@ -129,7 +142,7 @@ afterEach(() => {
 describe('lib/ncr-service — createNcr', () => {
   it('creates an NCR with an auto-generated number starting at 0001 when none exist', async () => {
     sinon.stub(Ncr, 'findOne').resolves(null);
-    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@test.com' }]);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     const year = new Date().getFullYear();
 
     const ncr = await createNcr(minimalNcrData(), makeUser());
@@ -144,27 +157,26 @@ describe('lib/ncr-service — createNcr', () => {
   it('increments the sequence based on the last NCR number for the year', async () => {
     const year = new Date().getFullYear();
     sinon.stub(Ncr, 'findOne').resolves({ ncr_number: `NCR-${year}-0007` });
-    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@test.com' }]);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
 
     const ncr = await createNcr(minimalNcrData(), makeUser());
 
     ncr.ncr_number.should.equal(`NCR-${year}-0008`);
   });
 
-  it('looks up originator email from the User model and passes it as a string to sendInitialNotification', async () => {
+  it('sends initial notification to QA staff from the ncr-qa group, not the submitter', async () => {
     sinon.stub(Ncr, 'findOne').resolves(null);
-    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@db.example.com' }]);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@org.com' }] });
 
-    // email on the user arg is ignored — the DB value is what gets passed
-    await createNcr(minimalNcrData(), makeUser({ email: 'wrong@caller.com' }));
+    await createNcr(minimalNcrData(), makeUser({ email: 'submitter@caller.com' }));
 
     const emailArg = sendInitialNotificationStub.lastCall.args[1];
-    emailArg.should.equal('alice@db.example.com');
+    emailArg.should.deep.equal(['qa@org.com']);
   });
 
   it('sends a disposition-request notification when ce_cs_id is provided', async () => {
     sinon.stub(Ncr, 'findOne').resolves(null);
-    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@test.com' }]);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     const data = minimalNcrData({ ce_cs_id: 'ces1', ce_cs_email: 'ces@test.com' });
 
     const ncr = await createNcr(data, makeUser());
@@ -174,7 +186,7 @@ describe('lib/ncr-service — createNcr', () => {
 
   it('stores a traveler_link when traveler_id is provided', async () => {
     sinon.stub(Ncr, 'findOne').resolves(null);
-    stubUserFind([{ _id: 'user1', name: 'Alice', email: 'alice@test.com' }]);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     const data = minimalNcrData({ traveler_id: 'trav1', traveler_step_number: 3 });
 
     const ncr = await createNcr(data, makeUser());
@@ -206,7 +218,7 @@ describe('lib/ncr-service — submitDisposition', () => {
 
   it('submits a Rework disposition, sets preventive actions, and transitions to Dispositioned', async () => {
     stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
-    stubUserFind([{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }]);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
 
     const data = {
       parts_disposition: 'Rework',
@@ -228,7 +240,7 @@ describe('lib/ncr-service — submitDisposition', () => {
 
   it('does not require rework_repair_instructions for a Use-As-Is disposition', async () => {
     stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
-    stubUserFind([]);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
 
     const data = {
       parts_disposition: 'Use-As-Is',
@@ -239,7 +251,7 @@ describe('lib/ncr-service — submitDisposition', () => {
     const result = await submitDisposition('id1', data, user);
 
     (result.disposition.rework_repair_instructions === undefined).should.be.true;
-    result.events.some(e => e.event_type === 'notification.qa_notification').should.be.false;
+    result.events.some(e => e.event_type === 'notification.qa_notification').should.be.true;
   });
 });
 
@@ -253,16 +265,19 @@ describe('lib/ncr-service — submitConcurrence', () => {
   });
 
   it('throws 404 when NCR not found', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(null);
     await expectRejection(submitConcurrence('id1', [], qaUser), 404);
   });
 
   it('throws 409 when NCR is not Dispositioned', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Submitted' }));
     await expectRejection(submitConcurrence('id1', [], qaUser), 409);
   });
 
   it('transitions directly to Final Approval and sends issuance email when no additional approvers', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Dispositioned', originator_id: 'orig1' }));
     stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
 
@@ -275,6 +290,7 @@ describe('lib/ncr-service — submitConcurrence', () => {
   });
 
   it('transitions to Approved and requests approval from designated approvers', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
     stubUserFind([{ _id: 'appr1', name: 'Approver One', email: 'a1@test.com' }]);
 
@@ -386,7 +402,7 @@ describe('lib/ncr-service — returnForComment', () => {
       status: 'Approved',
       additional_approvers: [{ approver_id: 'appr1', approval_status: 'Pending' }],
     }));
-    stubUserFind([{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }]);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
 
     const result = await returnForComment('id1', 'Disagree with rework plan', approver);
 
@@ -406,16 +422,19 @@ describe('lib/ncr-service — qaResubmit', () => {
   });
 
   it('throws 404 when NCR not found', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     stubFindById(null);
     await expectRejection(qaResubmit('id1', qaUser), 404);
   });
 
   it('throws 409 when NCR is not Returned for Comment', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Approved' }));
     await expectRejection(qaResubmit('id1', qaUser), 409);
   });
 
   it('resets returned approvers to Pending and re-requests their approval', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     stubFindById(newNcr({
       status: 'Returned for Comment',
       additional_approvers: [
@@ -607,21 +626,25 @@ describe('lib/ncr-service — assignPaOwner', () => {
   });
 
   it('throws 400 when required owner fields are missing', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     await expectRejection(assignPaOwner('id1', 'pa1', { owner_id: 'u1' }, qaUser), 400);
   });
 
   it('throws 404 when NCR not found', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     stubFindById(null);
     await expectRejection(assignPaOwner('id1', 'pa1', validOwnerData(), qaUser), 404);
   });
 
   it('throws 404 when the preventive action is not found', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     stubFindById(newNcr({ preventive_actions: [] }));
     const missingId = new mongoose.Types.ObjectId().toString();
     await expectRejection(assignPaOwner('id1', missingId, validOwnerData(), qaUser), 404);
   });
 
   it('assigns an owner, appends an event, and notifies the owner', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     const ncr = newNcr({ preventive_actions: [{ action_description: 'Update work instruction', status: 'Open' }] });
     stubFindById(ncr);
     const paId = ncr.preventive_actions[0]._id.toString();
@@ -696,17 +719,20 @@ describe('lib/ncr-service — closePa', () => {
   });
 
   it('throws 404 when NCR not found', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     stubFindById(null);
     await expectRejection(closePa('id1', 'pa1', qaUser), 404);
   });
 
   it('throws 404 when the preventive action is not found', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     stubFindById(newNcr({ preventive_actions: [] }));
     const missingId = new mongoose.Types.ObjectId().toString();
     await expectRejection(closePa('id1', missingId, qaUser), 404);
   });
 
   it('marks the preventive action Completed and appends a pa.closed event', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     const ncr = newNcr({ preventive_actions: [{ action_description: 'x', status: 'In Progress' }] });
     stubFindById(ncr);
     const paId = ncr.preventive_actions[0]._id.toString();

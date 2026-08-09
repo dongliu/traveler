@@ -180,7 +180,7 @@ block js
           },
           error: function (xhr) {
             var resp = xhr.responseJSON || {};
-            var msg = resp.error || 'Submission failed. Please try again.';
+            var msg = resp.message || resp.error || 'Submission failed. Please try again.';
             if (resp.details) {
               var fields = Object.keys(resp.details).map(function (k) {
                 return k + ': ' + resp.details[k].join(', ');
