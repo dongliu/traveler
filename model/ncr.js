@@ -73,7 +73,14 @@ const NcrEventSchema = new Schema({
       error_message: String,
     },
   ],
-  cc: [String],
+  cc: [
+    {
+      recipient_email: String,
+      delivery_status: String,
+      delivery_timestamp: Date,
+      error_message: String,
+    },
+  ],
 });
 
 const NCR_STATUSES = [
