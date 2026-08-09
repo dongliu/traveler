@@ -238,12 +238,14 @@ block content
                   table.table.table-condensed(style='margin:6px 0 0; font-size:11px; width:auto')
                     thead
                       tr
+                        th(style='padding:2px 8px') Field
                         th(style='padding:2px 8px') Recipient
                         th(style='padding:2px 8px') Status
                         th(style='padding:2px 8px') Delivered At
                     tbody
                       each r in event.recipients
                         tr
+                          td(style='padding:2px 8px; color:#666') To
                           td(style='padding:2px 8px')= r.recipient_email || r.recipient_id || '—'
                           td(style='padding:2px 8px')
                             if r.delivery_status === 'Delivered'
@@ -256,6 +258,14 @@ block content
                             else
                               span.label= r.delivery_status || 'Unknown'
                           td(style='padding:2px 8px')= r.delivery_timestamp ? new Date(r.delivery_timestamp).toLocaleString() : '—'
+                      if event.cc && event.cc.length
+                        each ccEmail in event.cc
+                          tr
+                            td(style='padding:2px 8px; color:#666') CC
+                            td(style='padding:2px 8px')= ccEmail
+                            td(style='padding:2px 8px')
+                              span.label.label-default(style='background:#aaa') —
+                            td(style='padding:2px 8px') —
                 if event.payload
                   a.event-payload-toggle(href='#', style='font-size:11px; margin-left:8px') [payload]
                   pre.event-payload(style='display:none; font-size:11px; margin:4px 0 0; white-space:pre-wrap; word-break:break-all; background:#f5f5f5; padding:6px; border-radius:3px')= JSON.stringify(event.payload, null, 2)

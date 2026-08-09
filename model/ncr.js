@@ -73,6 +73,7 @@ const NcrEventSchema = new Schema({
       error_message: String,
     },
   ],
+  cc: [String],
 });
 
 const NCR_STATUSES = [

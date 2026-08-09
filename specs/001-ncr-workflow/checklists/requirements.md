@@ -71,9 +71,11 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
   point, auto-context capture, NCR number display in Traveler, electronic copy
   attachment) is planned or implemented yet — see spec.md "Future Work: eTraveler
   UI Integration"
-- **Stakeholder Forwarding** (User Story 1.5): Auto-forwards NCR to CE/CS,
-  Cognizant Group Leader, QA Staff, Division Director/PM with attachments and
-  email notification to all stakeholders
+- **NCR Submission Emails** (User Story 1.5): Upon submission, two emails are
+  sent: (1) engineering disposition request TO CE/CS, CC Originator (per
+  emails.md template 1); (2) initial FYI notification TO all QA Admins in the
+  ncr-qa group (per emails.md template 2). Cognizant Group Leader and Division
+  Director/PM notifications are deferred to a future iteration
 - **CE/CS Engineering Disposition** (User Story 2): 5 parts disposition options,
   mandatory root cause and preventive actions, detailed instructions for
   Rework/Repair, auto-forwarding to QA Staff

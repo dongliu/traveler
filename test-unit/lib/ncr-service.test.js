@@ -15,8 +15,8 @@ if (!mongoose.modelNames().includes('Group')) {
 // Stub ncr-email functions on the module exports *before* loading lib/ncr-service
 // so that the destructured locals inside ncr-service.js pick up the stubs.
 const ncrEmailModule = require('../../lib/ncr-email');
-const sendInitialNotificationStub = sinon.stub(ncrEmailModule, 'sendInitialNotification').resolves([]);
-sinon.stub(ncrEmailModule, 'sendDispositionRequest').resolves([]);
+const sendInitialNotificationStub = sinon.stub(ncrEmailModule, 'sendInitialNotification').resolves({ results: [], cc: [] });
+sinon.stub(ncrEmailModule, 'sendDispositionRequest').resolves({ results: [], cc: [] });
 sinon.stub(ncrEmailModule, 'sendQaNotification').resolves([]);
 sinon.stub(ncrEmailModule, 'sendApprovalRequest').resolves([]);
 sinon.stub(ncrEmailModule, 'sendIssuance').resolves([]);
