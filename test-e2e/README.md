@@ -13,11 +13,21 @@ browser session a human can watch and double-check, not a CI gate.
 ## How to run a test file
 
 Each test file is self-contained: its "Test Steps for Claude in Chrome"
-section already includes reading `.env` for the real ports, starting/stopping
-a GIF recording, and writing the report — you don't need to add any of that
-yourself, just point Claude at the file. Requires the **Claude in Chrome**
-browser extension installed and connected (Claude will prompt you to connect
-it on first use if it isn't already).
+section already includes reading `.env` for the real ports and writing the
+report — you don't need to add any of that yourself, just point Claude at
+the file. Requires the **Claude in Chrome** browser extension installed and
+connected (Claude will prompt you to connect it on first use if it isn't
+already).
+
+These test files do not produce a video or screenshot artifact. Both were
+tried and dropped: OS-level screen recording (`screencapture -v`) captures
+the physical display, and the browser Claude drives isn't reliably on it
+(on this machine it recorded nothing but the desktop background); saving
+individual screenshots to disk (`save_to_disk`) reported success but the
+files were never found anywhere on the accessible filesystem. Verification
+relies on the step-by-step results in the report and the human independently
+re-checking the app per the "Human Verification Checklist," not on a replay
+artifact.
 
 ### Running in Claude Code Desktop app
 
@@ -28,7 +38,7 @@ it on first use if it isn't already).
 3. Approve the Chrome-extension connection prompt and any tool-use
    confirmations if asked.
 4. Claude reads the file's Setup + Test Steps sections itself, drives the
-   browser, and leaves the GIF and markdown report in `test-e2e/results/`.
+   browser, and leaves the markdown report in `test-e2e/results/`.
 
 ### Running in Claude Code CLI
 

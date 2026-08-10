@@ -29,13 +29,15 @@ secondary source for delivery status and CC tracking.
   `us1-create-and-submit-ncr.md` Acceptance Scenario 2), ensuring a CE/CS is
   designated in the form. Record the NCR id, the CE/CS email selected, and the
   logged-in user's email (the Originator).
-- Confirm the `ncr-qa` group exists and has at least one member with a valid
-  email address (check via mongo-express or `GET /groups/ncr-qa/members/json`).
+- **[Manual check — do not automate]** Confirm the `ncr-qa` group exists and
+  has at least one member with a valid email address before running this test.
+  Verify manually via mongo-express or by opening
+  `http://localhost:<WEB_PORT>/groups/ncr-qa/members/json` in the browser.
 - No special role required to create the NCR (any authenticated user).
 
 ## Test Steps for Claude in Chrome
 
-### Session Setup — Environment and Recording
+### Session Setup — Environment
 
 0. Read the project's `.env` file (at the repo root, relative to this
    file: `../.env`; gitignored; falls back to the defaults below for any var
@@ -56,8 +58,6 @@ secondary source for delivery status and CC tracking.
    the app (already authenticated), skip to the next step. Otherwise, enter
    the value of `E2E_USER` as the username and `E2E_PASS` as the password and
    submit the login form.
-0. Begin a GIF recording of the browser session before proceeding to the
-   first numbered test step below.
 
 ### Acceptance Scenario 1 — CE/CS disposition request sent TO CE/CS, CC Originator
 
@@ -100,8 +100,9 @@ secondary source for delivery status and CC tracking.
    - The phrase "forwarded to [CE/CS] for engineering disposition"
    - The initial description of the nonconformance problem
    - A clickable link to the NCR
-9. Click the NCR link from each email (copy the URL into a new browser tab)
-   and confirm it loads the correct NCR detail page.
+9. For each email's NCR link: read its `href`, then `navigate` the same
+   browser tab to that URL and confirm it loads the correct NCR detail page.
+   Navigate back to Mailpit afterward to continue with the remaining steps.
 
 ### Acceptance Scenario 4 — notification log shows TO and CC with delivery status and timestamp
 
@@ -118,15 +119,10 @@ secondary source for delivery status and CC tracking.
     - A **CC** row shows the Originator email with its own `delivery_status`
       and `delivery_timestamp`.
 
-### End of Session — Stop Recording, Save Artifacts, Report
+### End of Session — Save Artifacts, Report
 
 After the final test step above:
 
-- Stop the GIF recording.
-- Save the GIF to `test-e2e/results/`
-  (create this directory first if it doesn't exist) as
-  `US1.5-send-initial-notification-<YYYY-MM-DD>.gif`, where `<YYYY-MM-DD>` is
-  today's date.
 - Output a single markdown block containing:
   - Test ID and timestamp
   - Environment URL (the resolved URL from the Session Setup step above)
