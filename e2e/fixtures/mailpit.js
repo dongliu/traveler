@@ -59,4 +59,16 @@ function createMailpitClient(request, baseUrl) {
   return { clearAll, search, getMessage, waitForMessage, addresses };
 }
 
-module.exports = { createMailpitClient };
+/**
+ * Collapses all whitespace (including the line breaks html-to-text inserts
+ * when word-wrapping the plain-text body — see lib/email.js's htmlToText
+ * conversion) into single spaces. Discovered empirically: a long field value
+ * embedded in a message's `Text` body can get split across a wrapped line,
+ * which breaks a naive `.toContain()` substring check even though the text
+ * reads correctly. Always normalize before asserting on email body content.
+ */
+function normalizeWhitespace(str) {
+  return (str || '').replace(/\s+/g, ' ').trim();
+}
+
+module.exports = { createMailpitClient, normalizeWhitespace };

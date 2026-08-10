@@ -194,6 +194,43 @@ custom diagnostics code is needed.
   inside the same process driving the browser and doesn't depend on OS
   screen-recording permissions at all.
 
+## Decision 7: Auth persona switching and within-file parallelism (discovered during Phase 3 implementation)
+
+**Decision**: A single Playwright *project*, defaulting every spec file to
+the primary persona's `storageState` at the top-level `use` config. The
+secondary persona (`E2E_USER2`) is opted into locally, per-test, via
+`test.use({ storageState: SECONDARY_AUTH_STATE })` (exported from
+`e2e/fixtures/auth-state.js`) rather than a second Playwright project.
+Additionally, `fullyParallel` is `false` (Playwright's default): tests
+within one spec file run serially; different files still run in parallel
+across workers.
+
+**Rationale**: The original plan.md Project Structure sketch described two
+top-level `projects` (`primary`/`secondary`). Implementing it revealed a real
+bug: Playwright runs every matched spec file under *every configured
+project*, so a two-project setup would have run every story's file twice
+(once per persona) for no reason, and — worse — created a genuine race
+condition for User Story 1's "empty the ncr-qa group" scenario (Acceptance
+Scenario 6) if both projects' workers executed that file concurrently under
+`fullyParallel: true`. A single default project with local `test.use()`
+overrides only where a second identity is actually needed (the two US2
+approver scenarios) avoids both problems. Turning `fullyParallel` off is the
+same fix applied one level deeper: even within one project, several
+scenarios in the same file share mutable state (an NCR created in
+`beforeAll` and reused by later assertions; the shared `ncr-qa` group),
+which parallel execution *within* a file would race.
+
+**Alternatives considered**:
+- *Two Playwright projects (`primary`/`secondary`)*: rejected per the bug
+  above — this was the original plan.md sketch, corrected during
+  implementation once the double-run and race-condition consequences became
+  concrete.
+- *`fullyParallel: true` with manual `test.describe.serial()` wrapping only
+  the racy scenarios*: rejected as more fragile than defaulting to serial
+  within a file — it requires remembering to opt every future shared-state
+  scenario into serial mode individually, whereas the chosen default is
+  safe unless a test explicitly opts itself into something risky.
+
 ## Summary of resolved Technical Context
 
 | Field | Resolution |
