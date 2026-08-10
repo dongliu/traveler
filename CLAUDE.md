@@ -67,3 +67,10 @@ Outbound email via **Nodemailer** ([lib/email.js](lib/email.js)). Optional MQTT 
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
 <!-- SPECKIT END -->
+
+## Active Technologies
+- JavaScript (Node.js 18+, matching the app's existing runtime) + `@playwright/test` (new devDependency); no other new dependency required — Mailpit verification uses Playwright's own built-in `request` fixture, and fixture provisioning reuses the app's own `mongoose`/`model/*.js` inside the `web` container rather than adding a second DB driver (002-playwright-e2e-tests)
+- N/A directly — the suite introduces no new storage layer; fixture provisioning delegates to the existing app's own Mongoose models via `docker compose exec` (see research.md Decision 2) (002-playwright-e2e-tests)
+
+## Recent Changes
+- 002-playwright-e2e-tests: Added JavaScript (Node.js 18+, matching the app's existing runtime) + `@playwright/test` (new devDependency); no other new dependency required — Mailpit verification uses Playwright's own built-in `request` fixture, and fixture provisioning reuses the app's own `mongoose`/`model/*.js` inside the `web` container rather than adding a second DB driver
