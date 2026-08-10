@@ -15,7 +15,7 @@ one `test()`/`test.describe()` block per Acceptance Scenario).
 
 | Field | Type | Notes |
 |---|---|---|
-| `runId` | string | Unique per suite invocation (e.g. timestamp + short random suffix), generated once in global setup and threaded through every scenario via a Playwright fixture |
+| `runId` | string | A fresh timestamp+random suffix generated per scenario (not one shared value for the whole suite run) — this is a strictly stronger guarantee than per-run uniqueness alone, since it also prevents two scenarios *within the same run* from colliding on a shared tag; see `e2e/fixtures/run-id.js` |
 | `scenarioName` | string | Maps 1:1 to an Acceptance Scenario in spec.md (e.g. `US1-AS3-cecs-disposition-request`) |
 | `personaUsed` | enum: `primary` \| `secondary` | Which of the two configured identities (Decision 4) drives this scenario's browser actions |
 | `fixturesRequired` | Test Fixture Request[] | Zero or more fixture requests this scenario provisions before acting |

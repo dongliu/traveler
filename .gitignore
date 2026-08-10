@@ -54,6 +54,11 @@ docker/server.key
 # e2e test run artifacts (GIFs, reports) #
 test-e2e/results/
 
+# Playwright e2e suite run artifacts #
+playwright-report/
+test-results/
+e2e/.auth/
+
 # npm stuff #
 npm-debug.log*
 

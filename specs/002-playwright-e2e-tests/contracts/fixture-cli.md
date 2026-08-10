@@ -73,21 +73,24 @@ scenarios need it set directly (per `model/ncr.js`'s `ce_cs_id: String`).
 
 ### `backdate-ncr`
 
-Sets an NCR's `creation_timestamp` (per `model/ncr.js`) into the past, for
+Sets an NCR's `created_at` (the field `lib/ncr-service.js`'s `listNcrs`
+actually computes `days_elapsed`/escalation from — *not* `creation_timestamp`,
+which is a separate display field also set for realism) into the past, for
 aging/escalation dashboard checks.
 
 - Args: `{ "ncrId": "<ncr _id>", "daysAgo": 31 }`
-- Output: `{ "ok": true, "ncrId": "...", "creation_timestamp": "<ISO date>" }`
+- Output: `{ "ok": true, "ncrId": "...", "created_at": "<ISO date>" }`
 
 ### `create-traveler-linked-ncr`
 
-Creates an NCR directly (bypassing the creation-page UI, which exposes no
-Traveler-link fields) with `traveler_link.initiated_from_traveler = true`, for
-the Traveler sign-off closure check (spec User Story 2, Acceptance Scenario
-6). Accepts the same field set as the real creation API/form, plus the
-Traveler link fields.
+Creates an NCR document directly via Mongoose (bypassing both the creation
+UI, which exposes no Traveler-link fields, and `lib/ncr-service.js`'s
+`createNcr()`, which always creates status `Submitted` and sends real
+notification emails — undesirable for a fixture that needs to place an NCR
+at an arbitrary status, e.g. `Final Approval`, for the Traveler sign-off
+closure check (spec User Story 2, Acceptance Scenario 6)).
 
-- Args: `{ "ncrData": { ...same shape as the NCR creation form fields... }, "travelerId": "<id>", "stepNumber": 3 }`
+- Args: `{ "ncrData": { ...minimal required NcrSchema fields: part_name, wbs_number, supplier_name, originator_id, originator_name, ce_cs_id, ce_cs_name... }, "status": "Final Approval", "travelerId": "<id>", "stepNumber": 3 }` (`status` defaults to `"Submitted"` if omitted)
 - Output: `{ "ok": true, "ncrId": "...", "ncr_number": "..." }`
 
 ### `get-user`
