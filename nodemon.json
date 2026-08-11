@@ -11,6 +11,7 @@
     "traveler_uploads",
     "test-unit",
     "test-integ",
+    "playwright-report",
     "sbin",
     "etc",
     "logs"
