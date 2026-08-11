@@ -16,7 +16,7 @@ if (!mongoose.modelNames().includes('Group')) {
 // so that the destructured locals inside ncr-service.js pick up the stubs.
 const ncrEmailModule = require('../../lib/ncr-email');
 const sendInitialNotificationStub = sinon.stub(ncrEmailModule, 'sendInitialNotification').resolves({ results: [], cc: [] });
-sinon.stub(ncrEmailModule, 'sendDispositionRequest').resolves({ results: [], cc: [] });
+const sendDispositionRequestStub = sinon.stub(ncrEmailModule, 'sendDispositionRequest').resolves({ results: [], cc: [] });
 sinon.stub(ncrEmailModule, 'sendQaNotification').resolves([]);
 sinon.stub(ncrEmailModule, 'sendApprovalRequest').resolves([]);
 sinon.stub(ncrEmailModule, 'sendIssuance').resolves([]);
@@ -182,6 +182,22 @@ describe('lib/ncr-service — createNcr', () => {
     const ncr = await createNcr(data, makeUser());
 
     ncr.events.some(e => e.event_type === 'notification.disposition_request').should.be.true;
+  });
+
+  it('sends no email at all when the ncr-qa group is not configured, even when ce_cs_email is provided', async () => {
+    sinon.stub(Ncr, 'findOne').resolves(null);
+    // beforeEach's default Group.findOne stub already resolves to null (no group).
+    // sendDispositionRequestStub/sendInitialNotificationStub are shared, module-level
+    // stubs (not re-created per test), so reset their call history before asserting.
+    sendDispositionRequestStub.resetHistory();
+    sendInitialNotificationStub.resetHistory();
+    const data = minimalNcrData({ ce_cs_id: 'ces1', ce_cs_email: 'ces@test.com' });
+
+    await expectRejection(createNcr(data, makeUser()), 500);
+
+    sendDispositionRequestStub.called.should.be.false;
+    sendInitialNotificationStub.called.should.be.false;
+    Ncr.prototype.save.called.should.be.false;
   });
 
   it('stores a traveler_link when traveler_id is provided', async () => {

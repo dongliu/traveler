@@ -65,7 +65,12 @@ notifications: (1) an engineering disposition request TO the designated CE/CS
 (with the NCR Originator CC'd) asking them to complete the CE/CS section of the
 report, and (2) an initial FYI notification TO all QA Admins (members of the
 ncr-qa group) informing them that the NCR has been initiated and forwarded to
-CE/CS for engineering disposition.
+CE/CS for engineering disposition. Both notifications depend on the ncr-qa
+group being configured with at least one member: if it is not, the system
+MUST NOT send either notification — including the CE/CS disposition request —
+and the NCR submission itself MUST fail with a clear configuration error,
+rather than leaving the CE/CS notified about an NCR that was never actually
+created.
 
 > **Implementation note**: Notifications to Cognizant Group Leader and Cognizant
 > Division Director/PM upon NCR submission are deferred. The mechanism for
@@ -111,6 +116,11 @@ sends carrying that CC address.
    disposition request and QA Admin initial notification have been sent, with
    delivery status and timestamp for each TO recipient and for each CC recipient
    independently tracked
+6. **Given** the ncr-qa group has no members configured, **When** an NCR
+   Originator attempts to submit an NCR, **Then** the submission fails with a
+   clear configuration error identifying that QA staff is not configured, no
+   CE/CS disposition request email is sent, no QA Admin notification email is
+   sent, and no NCR document is created
 
 ---
 
@@ -443,6 +453,13 @@ notifications as actions progress to completion.
   CC'd, requesting completion of the CE/CS section and including: the assigned
   NCR number, Part Name, Supplier name, Originator name, a link to the NCR, and
   any additional comments from the Originator
+- **FR-007a**: System MUST verify the ncr-qa QA Admin group has at least one
+  configured member *before* sending any submission notification, including
+  the CE/CS disposition request (FR-007). If the group is missing or empty,
+  the system MUST NOT send the CE/CS disposition request or the QA Admin
+  notification, and MUST fail the NCR submission entirely (no NCR document is
+  created) with a configuration error identifying that QA staff is not
+  configured
 - **FR-008**: System MUST automatically send an initial FYI notification email
   TO all members of the ncr-qa QA Admin group upon NCR submission, with the NCR
   Originator CC'd, informing them the NCR has been initiated and forwarded to

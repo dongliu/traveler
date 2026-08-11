@@ -198,11 +198,18 @@ test.describe('US1 - NCR creation and submission notifications', () => {
     expect(initialEvent.cc[0].delivery_timestamp).toBeTruthy();
   });
 
-  test('AS6 - fails submission with a clear error when ncr-qa has no members', async ({ page }) => {
+  test('AS6 - fails submission with a clear error when ncr-qa has no members, and sends no email at all (not even to CE/CS)', async ({ page }) => {
     const { members: originalMembers } = await execFixtureCli('get-group', { groupId: NCR_QA_GROUP_ID });
     await execFixtureCli('remove-group-member', { groupId: NCR_QA_GROUP_ID });
 
+    const apiContext = await request.newContext();
+    const mailpitClient = createMailpitClient(apiContext, env.mailBaseUrl);
+
     try {
+      // Baseline: how many disposition-request emails has CE/CS received so
+      // far in this run, before the failed attempt below.
+      const before = await mailpitClient.search(`to:"${CE_CS_EMAIL}" subject:"Disposition"`);
+
       const data = buildNcrData();
       await fillNcrForm(page, data);
 
@@ -211,10 +218,19 @@ test.describe('US1 - NCR creation and submission notifications', () => {
         'NCR-QA group is not configured. Contact an administrator.'
       );
       await expect(page.locator('#ncr-success')).toBeHidden();
+
+      // No NCR was created, so there is no ncr_number to search Mailpit by —
+      // instead assert the CE/CS's disposition-request email count did not
+      // grow at all, proving the failed attempt sent nothing (per FR-007a:
+      // the CE/CS email must not be sent when QA staff isn't configured,
+      // even though ce_cs_name/email were validly supplied on the form).
+      const after = await mailpitClient.search(`to:"${CE_CS_EMAIL}" subject:"Disposition"`);
+      expect(after.length).toBe(before.length);
     } finally {
       for (const memberId of originalMembers) {
         await execFixtureCli('add-group-member', { groupId: NCR_QA_GROUP_ID, userId: memberId });
       }
+      await apiContext.dispose();
     }
   });
 });
