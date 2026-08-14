@@ -235,11 +235,12 @@ block content
                   .muted
                     small #{event.previous_status || 'None'} &rarr; #{event.new_status}
                 if event.event_type && event.event_type.indexOf('notification.') === 0 && event.recipients && event.recipients.length
+                  - var totalRecipientCount = event.recipients.length + (event.cc ? event.cc.length : 0)
                   table.table.table-condensed(style='margin:6px 0 0; font-size:11px; width:auto')
                     thead
                       tr
                         th(style='padding:2px 8px') Field
-                        th(style='padding:2px 8px') Recipient
+                        th(style='padding:2px 8px')= totalRecipientCount > 1 ? 'Recipients' : 'Recipient'
                         th(style='padding:2px 8px') Status
                         th(style='padding:2px 8px') Delivered At
                     tbody
