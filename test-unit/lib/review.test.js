@@ -10,9 +10,16 @@ if (!mongoose.modelNames().includes('User')) {
 
 // Stub sendNotification and releaseForm on their module exports *before* loading
 // lib/review.js so that the destructured locals inside review.js pick up the stubs.
+// Reuse an existing sendNotification stub if another test file (e.g.
+// ncr-email.test.js) already wrapped it — Mocha loads every
+// test-unit/**/*.test.js file into one process, so a second unconditional
+// sinon.stub() on the same method throws "already wrapped".
 const emailModule = require('../../lib/email');
 const formModule = require('../../lib/form');
-sinon.stub(emailModule, 'sendNotification').resolves();
+const sendNotificationStub = emailModule.sendNotification.isSinonProxy
+  ? emailModule.sendNotification
+  : sinon.stub(emailModule, 'sendNotification');
+sendNotificationStub.resolves();
 sinon.stub(formModule, 'releaseForm').resolves();
 
 delete require.cache[require.resolve('../../lib/review.js')];

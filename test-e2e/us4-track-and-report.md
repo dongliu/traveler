@@ -20,7 +20,7 @@ and Report on Nonconformances" (Priority: P2)
 
 ## Test Steps for Claude in Chrome
 
-### Session Setup — Environment and Recording
+### Session Setup — Environment
 
 0. Read the project's `.env` file (at the repo root, relative to this
    file: `../.env`; gitignored; falls back to
@@ -36,8 +36,6 @@ and Report on Nonconformances" (Priority: P2)
    the app (already authenticated), skip to the next step. Otherwise, enter
    the value of `E2E_USER` as the username and `E2E_PASS` as the password and
    submit the login form.
-0. Begin a GIF recording of the browser session before proceeding to the
-   first numbered test step below.
 
 ### Acceptance Scenario 1 — dashboard shows counts by status
 
@@ -78,14 +76,10 @@ and Report on Nonconformances" (Priority: P2)
     background).
 
 
-### End of Session — Stop Recording, Save Artifacts, Report
+### End of Session — Save Artifacts, Report
 
 After the final test step above:
 
-- Stop the GIF recording.
-- Save the GIF to `test-e2e/results/`
-  (create this directory first if it doesn't exist) as
-  `US4-track-and-report-<YYYY-MM-DD>.gif`, where `<YYYY-MM-DD>` is today's date.
 - Output a single markdown block containing:
   - Test ID and timestamp
   - Environment URL (the resolved URL from the Session Setup step above)

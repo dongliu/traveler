@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node app",
     "unit": "mocha test-unit/**/*.test.js",
+    "e2e": "playwright test --config=e2e/playwright.config.js",
     "copy:tinymce": "cpx \"node_modules/tinymce/**/*\" public/tinymce",
     "copy:tinymce-jquery": "cpx \"node_modules/@tinymce/tinymce-jquery/**/*\" public/tinymce-jquery",
     "copy:assets": "npm run copy:tinymce && npm run copy:tinymce-jquery"
@@ -12,7 +13,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/dongliu/traveler.git",
-    "release": "5.0.1"
+    "release": "5.0.2"
   },
   "dependencies": {
     "@tinymce/tinymce-jquery": "^2.0.0",
@@ -53,6 +54,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^25.0.3",
     "acorn": "^7.4.1",
     "chai": "^4.2.0",

@@ -30,7 +30,7 @@ console with its live session cookie.
 
 ## Test Steps for Claude in Chrome
 
-### Session Setup — Environment and Recording
+### Session Setup — Environment
 
 0. Read the project's `.env` file (at the repo root, relative to this
    file: `../.env`; gitignored; falls back to
@@ -46,8 +46,6 @@ console with its live session cookie.
    the app (already authenticated), skip to the next step. Otherwise, enter
    the value of `E2E_USER` as the username and `E2E_PASS` as the password and
    submit the login form.
-0. Begin a GIF recording of the browser session before proceeding to the
-   first numbered test step below.
 
 ### Part A — 403 Forbidden: QA-only action attempted by a non-QA user
 
@@ -125,14 +123,10 @@ console with its live session cookie.
    ```
 
 
-### End of Session — Stop Recording, Save Artifacts, Report
+### End of Session — Save Artifacts, Report
 
 After the final test step above:
 
-- Stop the GIF recording.
-- Save the GIF to `test-e2e/results/`
-  (create this directory first if it doesn't exist) as
-  `SUPP-access-control-and-validation-<YYYY-MM-DD>.gif`, where `<YYYY-MM-DD>` is today's date.
 - Output a single markdown block containing:
   - Test ID and timestamp
   - Environment URL (the resolved URL from the Session Setup step above)

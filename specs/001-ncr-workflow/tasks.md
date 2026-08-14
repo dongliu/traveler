@@ -38,13 +38,13 @@
 
 ---
 
-## Phase 3: User Story 1 + 1.5 + 1.6 — Create NCR and Send Notifications (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 + 1.5 — Create NCR and Send Notifications (Priority: P1) 🎯 MVP
 
-**Goal**: NCR Originator submits NCR; system auto-assigns NCR number; initial notification sent to QA/Group Leader/Director; engineering disposition request sent to CE/CS. All 3 notification emails recorded as events.
+**Goal**: NCR Originator submits NCR; system auto-assigns NCR number; engineering disposition request sent TO CE/CS with Originator CC'd; initial FYI notification sent TO all QA Admins in the ncr-qa group. Both notification emails recorded as system events.
 
-**Independent Test**: Create an NCR with all required fields → verify: (1) NCR document saved with status Submitted, (2) ncr.events[] contains ncr.submitted + notification.initial + notification.disposition_request events, (3) NCR number assigned per convention, (4) mandatory field validation rejects missing/invalid fields with 400.
+**Independent Test**: Create an NCR with all required fields → verify: (1) NCR document saved with status Submitted, (2) ncr.events[] contains ncr.submitted + notification.disposition_request + notification.initial events, (3) NCR number assigned per convention, (4) mandatory field validation rejects missing/invalid fields with 400.
 
-- [x] T008 [US1] Implement `createNcr(data, user)` in `lib/ncr-service.js`: generate NCR number (e.g. `NCR-YYYY-NNNN` sequential counter), create and save NCR document with status `Submitted`, append `ncr.submitted` user event (actor=user, previous_status=null, new_status='Submitted', payload includes ncr_number and part summary), call `sendInitialNotification()` and append `notification.initial` system event with returned delivery results, call `sendDispositionRequest()` and append `notification.disposition_request` system event with CE/CS delivery result; return saved NCR
+- [x] T008 [US1] Implement `createNcr(data, user)` in `lib/ncr-service.js`: generate NCR number (e.g. `NCR-YYYY-NNNN` sequential counter), create and save NCR document with status `Submitted`, append `ncr.submitted` user event (actor=user, previous_status=null, new_status='Submitted', payload includes ncr_number and part summary); call `sendDispositionRequest()` with CE/CS as TO and Originator as CC and append `notification.disposition_request` system event with delivery results; call `sendInitialNotification()` to all ncr-qa group members and append `notification.initial` system event with returned delivery results; return saved NCR
 - [x] T009 [US1] Implement `POST /` handler in `routes/ncr.js`: validate all mandatory fields from `contracts/ncr-create.json` (part_name, part_number, part_revision, quantity>0, supplier_name, wbs_number, ce_cs_name, specification_drawing_reference, description_of_nonconformance min 20 chars, discovery_date ≤ today, discovery_context enum); call `createNcr()`; return 201 with ncr_number, ncr_id, status, creation_timestamp, originator_id, part_name, part_number per contract
 - [x] T010 [P] [US1] Create `views/ncr-create.jade`: form with all mandatory fields — text inputs for part_name, part_number, part_revision, supplier_name, wbs_number, ce_cs_name, specification_drawing_reference; number input for quantity; textarea for description_of_nonconformance (min 20 chars client hint); date picker for discovery_date; radio group for discovery_context (incoming_inspection / in_house_assembly / in_house_inspection); client-side validation before submit; on success display assigned ncr_number prominently. No Traveler-linking fields on this page (see T037 — `traveler_id`/`traveler_step_number` remain API/model-only, reserved for a future eTraveler-launched creation flow)
 - [x] T011 [P] [US1] Create `views/ncr-detail.jade`: display all NCR fields organized by section (Part Info, Reference, Disposition if populated, Approval Status, Closure if populated, Preventive Actions if populated); render event timeline from `ncr.events[]` sorted by timestamp showing event_type badge, actor_name + actor_role, timestamp, and collapsed payload; show status badge with color per status value; action buttons appropriate to current user role and NCR status
@@ -156,7 +156,7 @@
 
 - **Setup (Phase 1)**: No dependencies — start immediately
 - **Foundational (Phase 2)**: Depends on Phase 1 — BLOCKS all user stories
-- **US1+1.5+1.6 (Phase 3)**: Depends on Phase 2
+- **US1+1.5 (Phase 3)**: Depends on Phase 2
 - **US2 (Phase 4)**: Depends on Phase 3 (NCR must exist in Submitted status)
 - **US3 (Phase 5)**: Depends on Phase 4 (NCR must be in Dispositioned status)
 - **US5+6 (Phase 6)**: Depends on Phase 5 (NCR must reach Final Approval)
@@ -169,7 +169,7 @@
 
 | Story | Can Start After | Depends On |
 |---|---|---|
-| US1/1.5/1.6 (Phase 3) | Phase 2 | None |
+| US1/1.5 (Phase 3) | Phase 2 | None |
 | US2 (Phase 4) | Phase 3 | US1 creates the NCR |
 | US3 (Phase 5) | Phase 4 | US2 transitions to Dispositioned |
 | US5+6 (Phase 6) | Phase 5 | US3 reaches Final Approval |
