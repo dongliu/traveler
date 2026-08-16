@@ -200,3 +200,115 @@ test.describe('Originator Designate - assign and remove', () => {
     await expect(page.locator('#designate-toggle')).toHaveCount(0);
   });
 });
+
+test.describe('Originator Designate - Designate exercises Originator authority (US2)', () => {
+  // Bob plays two roles at once here: the real, permanent ncr-qa member
+  // (per e2e/us1-create-and-submit-ncr.spec.js's fixture data) who submits
+  // QA concurrence, and the Designate on the NCR he's concurring on — these
+  // are orthogonal (QA-staff membership is global; Designate is per-NCR), so
+  // this is a legitimate combination, not a test shortcut. It also means
+  // this block never mutates the shared ncr-qa group itself, avoiding the
+  // cross-file race the group-emptying test in us1-create-and-submit-ncr.spec.js
+  // already accepts as a known, documented risk (research.md Decision 5) —
+  // no need to add a second source of contention on that same resource.
+
+  /** Creates an NCR, assigns bob as Designate, and drives it to Final Approval. */
+  async function createAndBringToFinalApproval(page, designatePage) {
+    const { ncrId, ncrNumber } = await createTestNcr({ ncrData: { ce_cs_id: 'dong', ce_cs_name: 'Dong Liu' } });
+
+    await page.request.patch(`/api/ncrs/${ncrId}/designate`, {
+      data: { designate_id: DESIGNATE_ID, designate_name: DESIGNATE_DISPLAY_NAME, designate_email: DESIGNATE_EMAIL },
+    });
+    await page.request.patch(`/api/ncrs/${ncrId}/disposition`, {
+      data: {
+        parts_disposition: 'Use-As-Is',
+        root_cause_documentation: 'Root cause documentation exceeding fifty characters for validation purposes here.',
+        preventive_actions: ['Preventive action description exceeding fifty characters for validation purposes here.'],
+      },
+    });
+    await designatePage.request.patch(`/api/ncrs/${ncrId}/concurrence`, { data: { additional_approvers: [] } });
+
+    return { ncrId, ncrNumber };
+  }
+
+  test('the Designate receives the ISSUANCE email alongside the Originator', async ({ page, browser }) => {
+    const designatePage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    const { ncrId } = await createAndBringToFinalApproval(page, designatePage);
+    await designatePage.close();
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'events'] });
+    expect(ncr.status).toBe('Final Approval');
+
+    const issuanceEvent = ncr.events.find(e => e.event_type === 'notification.issuance');
+    expect(issuanceEvent).toBeTruthy();
+    const recipientEmails = issuanceEvent.recipients.map(r => r.recipient_email);
+    expect(recipientEmails).toContain(DESIGNATE_EMAIL);
+  });
+
+  test('the Designate appears in their own NCR dashboard/list', async ({ page, browser }) => {
+    const designatePage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    const { ncrNumber } = await createAndBringToFinalApproval(page, designatePage);
+
+    const res = await designatePage.request.get('/api/ncrs?includeClosed=true');
+    const body = await res.json();
+    expect(body.ncrs.some(n => n.ncr_number === ncrNumber)).toBe(true);
+    await designatePage.close();
+  });
+
+  test('the Designate can close the NCR, and the closure record identifies them, not the Originator', async ({ page, browser }) => {
+    const designatePage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    const { ncrId } = await createAndBringToFinalApproval(page, designatePage);
+
+    const closeRes = await designatePage.request.patch(`/api/ncrs/${ncrId}/close`, {
+      data: {
+        closure_notes: 'Closed by the Designate as part of automated verification.',
+        disposition_execution_verified: true,
+        preventive_actions_verified: true,
+        traveler_signed_off: true,
+      },
+    });
+    expect(closeRes.status()).toBe(200);
+    const body = await closeRes.json();
+    expect(body.ncr.status).toBe('Closed');
+    expect(body.ncr.closure_record.closed_by).toBe(DESIGNATE_ID);
+    expect(body.ncr.closure_record.closed_by_name).toBe(DESIGNATE_DISPLAY_NAME);
+    await designatePage.close();
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['events'] });
+    const closedEvent = ncr.events.find(e => e.event_type === 'ncr.closed');
+    expect(closedEvent.actor_id).toBe(DESIGNATE_ID);
+  });
+
+  test('the FINAL NCR DISTRIBUTION email reaches the Designate too', async ({ page, browser }) => {
+    const designatePage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    const { ncrId } = await createAndBringToFinalApproval(page, designatePage);
+
+    await designatePage.request.patch(`/api/ncrs/${ncrId}/close`, {
+      data: {
+        closure_notes: 'Closed to verify final distribution recipiency.',
+        disposition_execution_verified: true,
+        preventive_actions_verified: true,
+        traveler_signed_off: true,
+      },
+    });
+    await designatePage.close();
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['events'] });
+    const fdEvent = ncr.events.find(e => e.event_type === 'notification.final_distribution');
+    expect(fdEvent).toBeTruthy();
+    expect(fdEvent.recipients.map(r => r.recipient_email)).toContain(DESIGNATE_EMAIL);
+  });
+
+  test('the Designate has no special access to an unrelated NCR', async ({ browser }) => {
+    // A separate NCR the Designate (bob) has no relationship to at all —
+    // originator is guobao, no Designate assigned.
+    const { ncrId: unrelatedNcrId } = await createTestNcr({
+      ncrData: { originator_id: 'guobao', originator_name: 'Guobao Shen' },
+    });
+
+    const designatePage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    const res = await designatePage.request.get(`/api/ncrs/${unrelatedNcrId}`);
+    expect(res.status()).toBe(403);
+    await designatePage.close();
+  });
+});

@@ -68,19 +68,18 @@ block content
             dd= ncr.originator_name
             dt Created
             dd= new Date(ncr.creation_timestamp).toLocaleDateString()
-            if locals.userid === ncr.originator_id
-              dt Designate
-              dd#designate-display
+            dt Designate
+            dd#designate-display
+              if ncr.originator_designate_name
+                = ncr.originator_designate_name
+              else
+                span.muted None
+              if locals.userid === ncr.originator_id && ncr.status !== 'Closed'
+                | &nbsp;
+                a#designate-toggle.btn.btn-mini(href='#')= ncr.originator_designate_name ? 'Change' : 'Assign'
                 if ncr.originator_designate_name
-                  = ncr.originator_designate_name
-                else
-                  span.muted None
-                if ncr.status !== 'Closed'
                   | &nbsp;
-                  a#designate-toggle.btn.btn-mini(href='#')= ncr.originator_designate_name ? 'Change' : 'Assign'
-                  if ncr.originator_designate_name
-                    | &nbsp;
-                    button#designate-remove-btn.btn.btn-mini.btn-danger(type='button') Remove
+                  button#designate-remove-btn.btn.btn-mini.btn-danger(type='button') Remove
           if locals.userid === ncr.originator_id && ncr.status !== 'Closed'
             #designate-error.alert.alert-error(style='display:none; margin-top:6px')
               span#designate-error-msg

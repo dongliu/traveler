@@ -19,8 +19,8 @@ const sendInitialNotificationStub = sinon.stub(ncrEmailModule, 'sendInitialNotif
 const sendDispositionRequestStub = sinon.stub(ncrEmailModule, 'sendDispositionRequest').resolves({ results: [], cc: [] });
 sinon.stub(ncrEmailModule, 'sendQaNotification').resolves([]);
 sinon.stub(ncrEmailModule, 'sendApprovalRequest').resolves([]);
-sinon.stub(ncrEmailModule, 'sendIssuance').resolves([]);
-sinon.stub(ncrEmailModule, 'sendFinalDistribution').resolves([]);
+const sendIssuanceStub = sinon.stub(ncrEmailModule, 'sendIssuance').resolves([]);
+const sendFinalDistributionStub = sinon.stub(ncrEmailModule, 'sendFinalDistribution').resolves([]);
 sinon.stub(ncrEmailModule, 'sendPaAssigned').resolves([]);
 const sendDesignateAssignedStub = sinon.stub(ncrEmailModule, 'sendDesignateAssigned').resolves([]);
 
@@ -308,6 +308,21 @@ describe('lib/ncr-service — submitConcurrence', () => {
     result.events.some(e => e.event_type === 'notification.issuance').should.be.true;
   });
 
+  it('includes the Designate\'s email in the issuance send when one is assigned', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned', originator_id: 'orig1', originator_designate_id: 'des1' }));
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'des1', name: 'Designate', email: 'des@test.com' },
+    ]);
+
+    await submitConcurrence('id1', [], qaUser);
+
+    const emails = sendIssuanceStub.lastCall.args[1];
+    emails.should.include('orig@test.com');
+    emails.should.include('des@test.com');
+  });
+
   it('transitions to Approved and requests approval from designated approvers', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
@@ -386,6 +401,25 @@ describe('lib/ncr-service — submitApproval', () => {
 
     result.status.should.equal('Final Approval');
     result.events.some(e => e.event_type === 'notification.issuance').should.be.true;
+  });
+
+  it('includes the Designate\'s email in the issuance send when one is assigned', async () => {
+    stubFindById(newNcr({
+      status: 'Approved',
+      originator_id: 'orig1',
+      originator_designate_id: 'des1',
+      additional_approvers: [{ approver_id: 'appr1', approval_status: 'Pending' }],
+    }));
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'des1', name: 'Designate', email: 'des@test.com' },
+    ]);
+
+    await submitApproval('id1', approver);
+
+    const emails = sendIssuanceStub.lastCall.args[1];
+    emails.should.include('orig@test.com');
+    emails.should.include('des@test.com');
   });
 });
 
@@ -552,6 +586,46 @@ describe('lib/ncr-service — closeNcr', () => {
     result.closure_record.traveler_signed_off.should.be.true;
     result.events.some(e => e.event_type === 'traveler.signed_off').should.be.true;
   });
+
+  it('allows the Designate (not just the Originator) to close the NCR', async () => {
+    const designate = makeUser({ id: 'des1', name: 'Des Person' });
+    stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1', originator_designate_id: 'des1' }));
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+
+    const result = await closeNcr('id1', { closure_notes: 'Closed by the Designate, verified' }, designate);
+
+    result.status.should.equal('Closed');
+  });
+
+  it('records the Designate\'s own identity as the closer, not the Originator\'s', async () => {
+    const designate = makeUser({ id: 'des1', name: 'Des Person' });
+    stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1', originator_designate_id: 'des1' }));
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+
+    const result = await closeNcr('id1', { closure_notes: 'Closed by the Designate, verified' }, designate);
+
+    result.closure_record.closed_by.should.equal('des1');
+    result.closure_record.closed_by_name.should.equal('Des Person');
+    const closedEvent = result.events.find(e => e.event_type === 'ncr.closed');
+    closedEvent.actor_id.should.equal('des1');
+  });
+
+  it('includes the Designate\'s email in the final-distribution send when one is assigned', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      originator_designate_id: 'des1',
+    }));
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'des1', name: 'Designate', email: 'des@test.com' },
+    ]);
+
+    await closeNcr('id1', { closure_notes: 'Closed with a Designate assigned, verified' }, originator);
+
+    const emails = sendFinalDistributionStub.lastCall.args[1];
+    emails.should.include('des@test.com');
+  });
 });
 
 // ── assignDesignate ─────────────────────────────────────────────────────────
@@ -702,6 +776,16 @@ describe('lib/ncr-service — listNcrs', () => {
     query.$or.should.deep.include({ originator_id: 'orig1' });
   });
 
+  it('also scopes results to NCRs where the user is the Designate', async () => {
+    const findStub = stubNcrFind([]);
+    sinon.stub(Ncr, 'countDocuments').resolves(0);
+
+    await listNcrs({}, makeUser({ id: 'des1', roles: [] }));
+
+    const query = findStub.firstCall.args[0];
+    query.$or.should.deep.include({ originator_designate_id: 'des1' });
+  });
+
   it('does not scope results for managers', async () => {
     const findStub = stubNcrFind([]);
     sinon.stub(Ncr, 'countDocuments').resolves(0);
@@ -745,6 +829,32 @@ describe('lib/ncr-service — getNcrById', () => {
     });
 
     await expectRejection(getNcrById('id1', makeUser({ id: 'orig1', roles: [] })), 403);
+  });
+
+  it('allows the Designate to access the NCR they are assigned to', async () => {
+    stubFindByIdLean({
+      originator_id: 'orig1',
+      originator_designate_id: 'des1',
+      status: 'Submitted',
+      additional_approvers: [],
+      preventive_actions: [],
+    });
+
+    const result = await getNcrById('id1', makeUser({ id: 'des1', roles: [] }));
+
+    result.originator_designate_id.should.equal('des1');
+  });
+
+  it('denies access to a Designate on a different, unrelated NCR', async () => {
+    stubFindByIdLean({
+      originator_id: 'someoneElse',
+      originator_designate_id: 'someoneElsesDesignate',
+      status: 'Submitted',
+      additional_approvers: [],
+      preventive_actions: [],
+    });
+
+    await expectRejection(getNcrById('id1', makeUser({ id: 'des1', roles: [] })), 403);
   });
 });
 
