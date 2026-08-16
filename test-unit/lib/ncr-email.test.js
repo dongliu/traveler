@@ -19,6 +19,10 @@ const {
   sendInitialNotification,
   sendDispositionRequest,
   sendQaNotification,
+  sendApprovalRequest,
+  sendIssuance,
+  sendFinalDistribution,
+  sendPaAssigned,
 } = require('../../lib/ncr-email.js');
 
 function makeNcr(overrides = {}) {
@@ -119,10 +123,69 @@ describe('lib/ncr-email — sendQaNotification (no CC use case)', () => {
   it('sends a single email to all QA staff recipients', async () => {
     const qaStaff = ['qa1@test.com', 'qa2@test.com'];
 
-    const { results } = await sendQaNotification(makeNcr(), qaStaff);
+    const results = await sendQaNotification(makeNcr(), qaStaff);
 
     sendNotificationStub.callCount.should.equal(1);
     sendNotificationStub.firstCall.args[0].recipients.should.equal(qaStaff.join(','));
     results.should.have.lengthOf(2);
+  });
+});
+
+// The four describe blocks below guard against a real regression found while
+// implementing 003-originator-designate: these functions (and sendPaAssigned)
+// all returned sendToRecipients' raw {results, ccResults} object instead of a
+// plain array, which every caller in lib/ncr-service.js expects — a live
+// TypeError ("results.map is not a function") on disposition submission, QA
+// concurrence, approval, return-for-comment, resubmit, closure, and PA owner
+// assignment. None of these functions had any direct test coverage before.
+
+describe('lib/ncr-email — sendApprovalRequest', () => {
+  it('sends a single email to all approvers and returns a plain result array', async () => {
+    const approvers = ['appr1@test.com', 'appr2@test.com'];
+
+    const results = await sendApprovalRequest(makeNcr(), approvers);
+
+    sendNotificationStub.callCount.should.equal(1);
+    sendNotificationStub.firstCall.args[0].recipients.should.equal(approvers.join(','));
+    results.should.have.lengthOf(2);
+    results.every(r => r.delivery_status === 'Delivered').should.be.true;
+  });
+});
+
+describe('lib/ncr-email — sendIssuance', () => {
+  it('sends a single email to the Originator (and Designate, if included) and returns a plain result array', async () => {
+    const recipients = ['orig@test.com', 'designate@test.com'];
+
+    const results = await sendIssuance(makeNcr(), recipients);
+
+    sendNotificationStub.callCount.should.equal(1);
+    sendNotificationStub.firstCall.args[0].recipients.should.equal(recipients.join(','));
+    results.should.have.lengthOf(2);
+  });
+});
+
+describe('lib/ncr-email — sendFinalDistribution', () => {
+  it('sends a single email to all stakeholders and returns a plain result array', async () => {
+    const recipients = ['a@test.com', 'b@test.com', 'c@test.com'];
+
+    const results = await sendFinalDistribution(makeNcr(), recipients);
+
+    sendNotificationStub.callCount.should.equal(1);
+    sendNotificationStub.firstCall.args[0].recipients.should.equal(recipients.join(','));
+    results.should.have.lengthOf(3);
+  });
+});
+
+describe('lib/ncr-email — sendPaAssigned', () => {
+  it('sends to the owner\'s email address (not the owner object itself) and returns a plain result array', async () => {
+    const pa = { action_description: 'Update work instruction', target_completion_date: new Date() };
+    const owner = { recipient_id: 'owner1', email: 'owner1@test.com' };
+
+    const results = await sendPaAssigned(makeNcr(), pa, owner);
+
+    sendNotificationStub.callCount.should.equal(1);
+    sendNotificationStub.firstCall.args[0].recipients.should.equal('owner1@test.com');
+    results.should.have.lengthOf(1);
+    results[0].recipient_email.should.equal('owner1@test.com');
   });
 });
