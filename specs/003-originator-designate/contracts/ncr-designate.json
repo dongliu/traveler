@@ -25,6 +25,10 @@
         "designate_name": {
           "type": "string",
           "description": "Display name of the Designate, resolved client-side from the same user typeahead already used for CE/CS selection. Required when designate_id is present; ignored on removal."
+        },
+        "designate_email": {
+          "type": "string",
+          "description": "Email address of the Designate, resolved client-side from the same user typeahead already used for CE/CS selection (matching how ce_cs_email is already supplied on NCR creation). Required when designate_id is present — the assignment notification email (FR-006) is sent to this address; ignored on removal."
         }
       }
     }

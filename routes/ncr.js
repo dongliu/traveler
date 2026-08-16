@@ -9,6 +9,8 @@ const {
   returnForComment,
   qaResubmit,
   closeNcr,
+  assignDesignate,
+  removeDesignate,
   listNcrs,
   getNcrById,
   assignPaOwner,
@@ -377,6 +379,43 @@ router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
     });
   } catch (err) {
     return mapServiceError(err, res, 'Closure');
+  }
+});
+
+router.patch('/:id/designate', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  const designateId = sanitizeStr(req.body.designate_id);
+  const designateName = sanitizeStr(req.body.designate_name);
+  const designateEmail = sanitizeStr(req.body.designate_email);
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+
+    const ncr = designateId
+      ? await assignDesignate(
+        req.params.id,
+        { designate_id: designateId, designate_name: designateName, designate_email: designateEmail },
+        user,
+        webBaseUrl
+      )
+      : await removeDesignate(req.params.id, user);
+
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        originator_designate_id: ncr.originator_designate_id || null,
+        originator_designate_name: ncr.originator_designate_name || null,
+      },
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Designate assignment');
   }
 });
 

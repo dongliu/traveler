@@ -22,6 +22,7 @@ sinon.stub(ncrEmailModule, 'sendApprovalRequest').resolves([]);
 sinon.stub(ncrEmailModule, 'sendIssuance').resolves([]);
 sinon.stub(ncrEmailModule, 'sendFinalDistribution').resolves([]);
 sinon.stub(ncrEmailModule, 'sendPaAssigned').resolves([]);
+const sendDesignateAssignedStub = sinon.stub(ncrEmailModule, 'sendDesignateAssigned').resolves([]);
 
 delete require.cache[require.resolve('../../lib/ncr-service.js')];
 const {
@@ -32,6 +33,8 @@ const {
   returnForComment,
   qaResubmit,
   closeNcr,
+  assignDesignate,
+  removeDesignate,
   listNcrs,
   getNcrById,
   assignPaOwner,
@@ -548,6 +551,119 @@ describe('lib/ncr-service — closeNcr', () => {
     result.status.should.equal('Closed');
     result.closure_record.traveler_signed_off.should.be.true;
     result.events.some(e => e.event_type === 'traveler.signed_off').should.be.true;
+  });
+});
+
+// ── assignDesignate ─────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — assignDesignate', () => {
+  const originator = makeUser({ id: 'orig1' });
+  const validDesignateData = { designate_id: 'des1', designate_name: 'Des Person', designate_email: 'des@test.com' };
+
+  it('throws 404 when NCR not found', async () => {
+    stubFindById(null);
+    await expectRejection(assignDesignate('id1', validDesignateData, originator), 404);
+  });
+
+  it('throws 403 when caller is not the originator', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'someoneElse' }));
+    await expectRejection(assignDesignate('id1', validDesignateData, originator), 403);
+  });
+
+  it('throws 403 when caller is the current Designate, not the Originator', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'someoneElse', originator_designate_id: 'orig1' }));
+    await expectRejection(assignDesignate('id1', validDesignateData, originator), 403);
+  });
+
+  it('throws 400 when designate_id, designate_name, or designate_email is missing', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'orig1' }));
+    await expectRejection(assignDesignate('id1', { designate_id: 'des1' }, originator), 400);
+  });
+
+  it('throws 400 when assigning the Originator as their own Designate', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'orig1' }));
+    await expectRejection(
+      assignDesignate('id1', { designate_id: 'orig1', designate_name: 'Origin', designate_email: 'orig@test.com' }, originator),
+      400
+    );
+  });
+
+  it('throws 409 when the NCR is Closed', async () => {
+    stubFindById(newNcr({ status: 'Closed', originator_id: 'orig1' }));
+    await expectRejection(assignDesignate('id1', validDesignateData, originator), 409);
+  });
+
+  it('assigns a Designate, records a delegate.assigned event, and notifies the Designate', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'orig1' }));
+
+    const result = await assignDesignate('id1', validDesignateData, originator);
+
+    result.originator_designate_id.should.equal('des1');
+    result.originator_designate_name.should.equal('Des Person');
+    const event = result.events.find(e => e.event_type === 'delegate.assigned');
+    event.should.exist;
+    event.actor_id.should.equal('orig1');
+    event.payload.designate_id.should.equal('des1');
+    result.events.some(e => e.event_type === 'notification.designate_assigned').should.be.true;
+    sendDesignateAssignedStub.lastCall.args[1].should.equal('des@test.com');
+  });
+
+  it('replaces an existing Designate when assigning a different one', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'orig1', originator_designate_id: 'old1', originator_designate_name: 'Old Person' }));
+
+    const result = await assignDesignate('id1', validDesignateData, originator);
+
+    result.originator_designate_id.should.equal('des1');
+    result.originator_designate_name.should.equal('Des Person');
+  });
+});
+
+// ── removeDesignate ──────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — removeDesignate', () => {
+  const originator = makeUser({ id: 'orig1' });
+
+  it('throws 404 when NCR not found', async () => {
+    stubFindById(null);
+    await expectRejection(removeDesignate('id1', originator), 404);
+  });
+
+  it('throws 403 when caller is not the originator', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'someoneElse', originator_designate_id: 'orig1' }));
+    await expectRejection(removeDesignate('id1', originator), 403);
+  });
+
+  it('throws 409 when the NCR is Closed', async () => {
+    stubFindById(newNcr({ status: 'Closed', originator_id: 'orig1', originator_designate_id: 'des1' }));
+    await expectRejection(removeDesignate('id1', originator), 409);
+  });
+
+  it('clears the Designate and records a delegate.removed event with the outgoing identity', async () => {
+    stubFindById(newNcr({
+      status: 'Submitted',
+      originator_id: 'orig1',
+      originator_designate_id: 'des1',
+      originator_designate_name: 'Des Person',
+    }));
+
+    const result = await removeDesignate('id1', originator);
+
+    (result.originator_designate_id === undefined || result.originator_designate_id === null).should.be.true;
+    (result.originator_designate_name === undefined || result.originator_designate_name === null).should.be.true;
+    const event = result.events.find(e => e.event_type === 'delegate.removed');
+    event.should.exist;
+    event.payload.previous_designate_id.should.equal('des1');
+    event.payload.previous_designate_name.should.equal('Des Person');
+  });
+
+  it('succeeds (no-op removal) even when no Designate was assigned', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'orig1' }));
+
+    const result = await removeDesignate('id1', originator);
+
+    const event = result.events.find(e => e.event_type === 'delegate.removed');
+    event.should.exist;
+    (event.payload.previous_designate_id === undefined || event.payload.previous_designate_id === null).should.be.true;
   });
 });
 
