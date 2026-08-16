@@ -268,6 +268,17 @@ link to the NCR with all disposition details and approved corrective actions.
 The NCR Originator executes the authorized disposition and then marks the NCR as
 Closed.
 
+> **Implementation note**: The "designee" referenced throughout this user
+> story (and User Story 6) is the Designate concept defined and implemented
+> by [`specs/003-originator-designate/spec.md`](../003-originator-designate/spec.md).
+> An NCR's Originator may assign exactly one other user as Designate, who
+> then holds the same authority the Originator has on that specific NCR —
+> including receiving the ISSUANCE and FINAL NCR DISTRIBUTION emails below,
+> and closing the NCR, with their own identity (not the Originator's)
+> recorded as the closer. See that spec for the full assignment mechanism,
+> authorization rules, and audit trail; this was previously an unspecified
+> gap in this document.
+
 **Why this priority**: Issuance ensures the Originator receives clear
 notification that the disposition has been approved and they are authorized to
 proceed with execution. This provides accountability and prevents unauthorized
@@ -317,6 +328,10 @@ Approvers (if designated), (4) Cognizant Group Leader and Division Director, (5)
 PPM if the nonconformance involved a supplier issue. The closed NCR is removed
 from active workflow dashboards but remains searchable in historical archives
 with complete audit trail.
+
+> **Implementation note**: "Designee" here is the same Designate concept
+> introduced in User Story 5's implementation note — see
+> [`specs/003-originator-designate/spec.md`](../003-originator-designate/spec.md).
 
 **Why this priority**: Final distribution ensures all stakeholders receive
 closure notification for their records. Archive retention allows historical
@@ -548,6 +563,11 @@ notifications as actions progress to completion.
 
 #### NCR Issuance and Execution
 
+> **Implementation note**: "Designee" in FR-039, FR-040, and FR-043 below is
+> the Designate concept defined and implemented by
+> [`specs/003-originator-designate/spec.md`](../003-originator-designate/spec.md)
+> — see User Story 5's implementation note above for details.
+
 - **FR-039**: System MUST send an NCR ISSUANCE email to the NCR Originator or
   designee upon Final Approval status, with a link to the complete NCR and all
   approved disposition details, requesting execution of the authorized
@@ -568,6 +588,9 @@ notifications as actions progress to completion.
   in-Traveler sign-off and automatic electronic-copy attachment.)
 
 #### Final Distribution and Closure Archive
+
+> **Implementation note**: "Designee" in FR-044 below is the same Designate
+> concept — see User Story 5's implementation note above.
 
 - **FR-044**: System MUST automatically send a FINAL NCR DISTRIBUTION email when
   an NCR is closed to the following recipient groups: (1) Originator/Designee,
