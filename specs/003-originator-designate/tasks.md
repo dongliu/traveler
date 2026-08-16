@@ -35,7 +35,7 @@ directories, or tooling to initialize (plan.md's Technical Context —
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T001 In `model/ncr.js`: add `originator_designate_id: String` and `originator_designate_name: String` to `NcrSchema` (both optional, no `required: true` — data-model.md); add `'delegate.removed'` to the `NCR_EVENT_TYPES` array, alongside the existing (currently unused) `'delegate.assigned'` entry
+- [x] T001 In `model/ncr.js`: add `originator_designate_id: String` and `originator_designate_name: String` to `NcrSchema` (both optional, no `required: true` — data-model.md); add `'delegate.removed'` to the `NCR_EVENT_TYPES` array, alongside the existing (currently unused) `'delegate.assigned'` entry
 
 **Checkpoint**: `model/ncr.js` has both new fields and both event types. User story implementation can now begin.
 

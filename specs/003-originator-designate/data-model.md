@@ -24,12 +24,13 @@ migration is needed).
 |---|---|---|
 | `delegate.assigned` | Already present in the enum, previously unused | Reused for both initial assignment and replacement (research.md Decision 2) |
 | `delegate.removed` | New | Added for removal, matching the schema's existing one-event-type-per-outcome convention |
+| `notification.designate_assigned` | New | The system-side record of the FR-006 notification email send, via the existing `appendNotificationEvent()` helper — added because every other email send in `lib/ncr-service.js` (`notification.initial`, `notification.issuance`, `notification.pa_assigned`, etc.) gets its own tracked system event with per-recipient delivery status/timestamp, and the Designate notification should follow the same convention rather than being the one email in the codebase with no delivery tracking |
 
 ## Event payload shape
 
-Both event types are `actor_type: 'user'` events (the Originator performing
-the assignment/removal), following the same shape as every other user-action
-event in `NcrEventSchema`:
+`delegate.assigned`/`delegate.removed` are `actor_type: 'user'` events (the
+Originator performing the assignment/removal), following the same shape as
+every other user-action event in `NcrEventSchema`:
 
 - `actor_id`/`actor_name`: the acting Originator (always — per FR-002, only
   the Originator can ever produce this event)
@@ -37,6 +38,12 @@ event in `NcrEventSchema`:
 - `timestamp`: when the assignment/removal occurred
 - `payload` (for `delegate.assigned`): `{ designate_id, designate_name }`
 - `payload` (for `delegate.removed`): `{ previous_designate_id, previous_designate_name }`
+
+`notification.designate_assigned` is an `actor_type: 'system'` event,
+produced by `appendNotificationEvent()` exactly like every other
+notification event in this schema — `recipients: [{recipient_email, delivery_status,
+delivery_timestamp, error_message}]` for the Designate. No `cc` (this
+notification has no CC recipient).
 
 No `previous_status`/`new_status` — assigning or removing a Designate does
 not transition the NCR's own workflow `status`.
