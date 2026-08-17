@@ -786,6 +786,16 @@ describe('lib/ncr-service — listNcrs', () => {
     query.$or.should.deep.include({ originator_designate_id: 'des1' });
   });
 
+  it('also scopes results to NCRs where the user is the assigned CE/CS, regardless of their roles', async () => {
+    const findStub = stubNcrFind([]);
+    sinon.stub(Ncr, 'countDocuments').resolves(0);
+
+    await listNcrs({}, makeUser({ id: 'ces1', roles: [] }));
+
+    const query = findStub.firstCall.args[0];
+    query.$or.should.deep.include({ ce_cs_id: 'ces1' });
+  });
+
   it('does not scope results for managers', async () => {
     const findStub = stubNcrFind([]);
     sinon.stub(Ncr, 'countDocuments').resolves(0);
@@ -855,6 +865,20 @@ describe('lib/ncr-service — getNcrById', () => {
     });
 
     await expectRejection(getNcrById('id1', makeUser({ id: 'des1', roles: [] })), 403);
+  });
+
+  it('allows the assigned CE/CS to access the NCR, regardless of their roles', async () => {
+    stubFindByIdLean({
+      originator_id: 'orig1',
+      ce_cs_id: 'ces1',
+      status: 'Submitted',
+      additional_approvers: [],
+      preventive_actions: [],
+    });
+
+    const result = await getNcrById('id1', makeUser({ id: 'ces1', roles: [] }));
+
+    result.ce_cs_id.should.equal('ces1');
   });
 });
 
