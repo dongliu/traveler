@@ -223,9 +223,12 @@ not assigned as Designate on.
   "designee" — this feature defines and implements it; no separate,
   additional "designee" concept exists alongside it.
 - Designate authority is scoped per-NCR (tied to the specific NCR's own
-  Designate assignment), not a system-wide role — this mirrors the existing
-  `ce_cs_delegate_id` pattern already present for CE/CS, which is also
-  per-NCR rather than a global role.
+  Designate assignment), not a system-wide role. (An earlier `ce_cs_delegate_id`
+  field anticipated a similarly per-NCR delegation concept for CE/CS, but
+  CE/CS delegation was subsequently ruled out — see
+  `specs/001-ncr-workflow/spec.md`'s "Resolved: CE/CS Delegate Assignment" —
+  and that field has been removed. The Originator's Designate is now the only
+  delegation mechanism in the system.)
 - Any authenticated user in the system is eligible to be assigned as a
   Designate — there is no restricted pool or role requirement, consistent
   with how a CE/CS is already freely selected by name on NCR creation.

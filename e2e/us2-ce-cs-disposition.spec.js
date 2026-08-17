@@ -262,7 +262,7 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     expect(ncr.status).toBe('Dispositioned');
   });
 
-  test('a user who is neither CE/CS nor CE/CS Delegate cannot submit disposition', async ({ browser }) => {
+  test('a user who is not the assigned CE/CS cannot submit disposition', async ({ browser }) => {
     const { ncrId } = await createTestNcr();
 
     const otherPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });

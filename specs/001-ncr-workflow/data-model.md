@@ -70,7 +70,8 @@ Notification events capture per-recipient delivery status.
 |---|---|---|
 | `ncr.submitted` | NCR Originator creates NCR | → Submitted |
 | `disposition.submitted` | CE/CS submits engineering disposition | → Dispositioned |
-| `delegate.assigned` | CE/CS assigns originator delegate | No |
+| `delegate.assigned` | Originator assigns a Designate | No |
+| `delegate.removed` | Originator removes the Designate | No |
 | `qa.concurred` | QA Staff gives concurrence | → Approved or Final Approval |
 | `approvers.designated` | QA Staff designates additional approvers | No (part of qa.concurred payload) |
 | `qa.rejected` | QA Staff rejects disposition (back to CE/CS) | → Submitted |
@@ -112,6 +113,10 @@ stream for the NCR's lifecycle.
   // NCR Origination
   originator_id: ObjectId,    // Reference to User
   originator_name: String,
+  // Delegation is Originator-only — see specs/003-originator-designate for
+  // the full assignment mechanism, authorization rules, and audit trail
+  originator_designate_id: ObjectId,    // Reference to User; unset when no Designate is assigned
+  originator_designate_name: String,
   creation_timestamp: Date,
   discovery_date: Date,
   discovery_context: String,  // "incoming_inspection" | "in_house_assembly" | "in_house_inspection"
@@ -141,10 +146,10 @@ stream for the NCR's lifecycle.
     initiated_from_traveler: Boolean
   },
 
-  // CE/CS Assignment
+  // CE/CS Assignment (no delegate field — CE/CS has no delegation mechanism
+  // of its own; see spec.md "Resolved: CE/CS Delegate Assignment")
   ce_cs_name: String,
   ce_cs_id: ObjectId,
-  ce_cs_delegate_id: ObjectId,  // If CE/CS delegates
 
   // Disposition (populated after CE/CS submission)
   disposition: {

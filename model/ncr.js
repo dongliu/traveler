@@ -129,7 +129,6 @@ const NcrSchema = new Schema({
 
   ce_cs_name: String,
   ce_cs_id: String,
-  ce_cs_delegate_id: String,
 
   disposition: {
     parts_disposition: {

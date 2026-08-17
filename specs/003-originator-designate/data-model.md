@@ -10,7 +10,7 @@ research.md Decision 1.
 
 | Field | Type | Notes |
 |---|---|---|
-| `originator_designate_id` | `String` | The current Designate's user id, or absent/unset when no Designate is assigned. Mirrors `ce_cs_delegate_id`'s existing shape exactly (research.md Decision 1). |
+| `originator_designate_id` | `String` | The current Designate's user id, or absent/unset when no Designate is assigned. Mirrors the shape `ce_cs_delegate_id` used to have (research.md Decision 1) — that field has since been removed, as CE/CS delegation was ruled out and this Designate field is now the only per-NCR delegation mechanism in the system (see `specs/001-ncr-workflow/spec.md`'s "Resolved: CE/CS Delegate Assignment"). |
 | `originator_designate_name` | `String` | Cached display name for the Designate, populated at assignment time — mirrors the existing `ce_cs_name`/`ce_cs_id` caching pair, so `views/ncr-detail.jade` can render the current Designate without a User lookup/populate at render time, consistent with how the page already renders `ncr.ce_cs_name`/`ncr.originator_name` directly from the lean document. |
 
 Both fields are optional (no `required: true`) — an NCR with no Designate

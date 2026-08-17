@@ -15,11 +15,15 @@ FINAL NCR DISTRIBUTION emails, and closing the NCR — with their own identity
 recorded, not the Originator's). This closes a gap `specs/001-ncr-workflow/spec.md`
 already assumed existed ("NCR Originator or designee" appears in five places)
 but never actually specified or built. Research found the codebase already
-anticipates this exact shape: `ce_cs_delegate_id` is a working, already-wired
+anticipated this exact shape: `ce_cs_delegate_id` was a working, already-wired
 permission check for an analogous CE/CS delegate concept that nothing ever
-sets, and `NCR_EVENT_TYPES` already reserves a `delegate.assigned` event type
-that nothing ever pushes. This feature follows that same established pattern
-for the Originator side rather than introducing a new mechanism.
+set, and `NCR_EVENT_TYPES` already reserves a `delegate.assigned` event type
+that nothing ever pushed. This feature followed that same established pattern
+for the Originator side rather than introducing a new mechanism. (`ce_cs_delegate_id`
+itself was subsequently removed once CE/CS delegation was formally ruled out
+— see `specs/001-ncr-workflow/spec.md`'s "Resolved: CE/CS Delegate
+Assignment" — but the pattern it established lives on as this feature's own
+`originator_designate_id`.)
 
 ## Technical Context
 

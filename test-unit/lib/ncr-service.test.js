@@ -225,7 +225,7 @@ describe('lib/ncr-service — submitDisposition', () => {
     await expectRejection(submitDisposition('id1', {}, user), 404);
   });
 
-  it('throws 403 when user is not the assigned CE/CS or delegate', async () => {
+  it('throws 403 when user is not the assigned CE/CS', async () => {
     stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'someoneElse' }));
     await expectRejection(submitDisposition('id1', {}, user), 403);
   });

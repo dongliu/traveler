@@ -7,6 +7,20 @@ This research is grounded entirely in reading the actual running code
 rather than assumed patterns, since this feature closes a gap the codebase
 already partially anticipated.
 
+> **Post-resolution update**: The `ce_cs_delegate_id` field referenced
+> throughout this document (as the precedent this feature's shape follows)
+> has since been **removed** from the codebase. After the "Future Work:
+> CE/CS Delegate Assignment" question in `specs/001-ncr-workflow/spec.md` was
+> formally resolved — CE/CS delegation will not be implemented; delegation
+> authority belongs solely to the Originator — the dead, never-set
+> `ce_cs_delegate_id` field and its associated checks were removed. The
+> decisions below are left as-written for historical accuracy: they
+> correctly describe the codebase as it existed when this feature was
+> designed, and the shape they chose (a plain id field checked alongside the
+> primary identity) remains the actual, current implementation of
+> `originator_designate_id` — only the CE/CS-side precedent they cite has
+> since gone away.
+
 ## Decision 1: Reuse the existing `ce_cs_delegate_id` pattern, not a new mechanism
 
 **Decision**: Model the Designate exactly the way `ce_cs_delegate_id` already
