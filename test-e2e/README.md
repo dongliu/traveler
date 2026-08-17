@@ -1,16 +1,51 @@
 # NCR Workflow — Browser E2E Test Suite
 
+> **These natural-language test scripts are being migrated to automated
+> Playwright tests in [`e2e/`](../e2e/).** The `.md` files in this directory
+> are the **canonical test specifications** — each acceptance scenario defined
+> here is either already implemented as a Playwright `*.spec.js` file or is
+> planned for implementation. See the [Test index](#test-index) below for
+> current status per user story.
+
 These test cases exercise the Nonconformance Report (NCR) workflow through the
-actual rendered UI, using the **Claude in Chrome** browser extension as the
-executor. Each file is a self-contained script: Claude drives the browser
-step-by-step, and a human then works through the "Human Verification
-Checklist" at the end to confirm the run actually did what it claims.
+actual rendered UI. Each `.md` file is a self-contained natural-language
+script: step-by-step instructions a human (or Claude in Chrome) can follow
+manually, plus a "Human Verification Checklist" at the end.
 
-These are **not** automated/asserting tests (no Playwright/Cypress code) —
-they are structured natural-language scripts, because the goal is a real
-browser session a human can watch and double-check, not a CI gate.
+As coverage in [`e2e/`](../e2e/) grows, the Playwright suite becomes the
+primary CI gate. The `.md` scripts remain valuable for exploratory testing,
+quick smoke-checks without the Docker stack, and as the source-of-truth
+specification when writing new Playwright tests.
 
-## How to run a test file
+## Playwright implementation status
+
+| File | Playwright spec | Status |
+|------|-----------------|--------|
+| `us1-create-and-submit-ncr.md` | `e2e/us1-create-and-submit-ncr.spec.js` | Implemented |
+| `us1.5-send-initial-notification.md` | `e2e/us1-create-and-submit-ncr.spec.js` (AS4) | Implemented |
+| `us1.6-request-engineering-disposition.md` | `e2e/us1-create-and-submit-ncr.spec.js` (AS3) | Implemented |
+| `us2-ce-cs-disposition.md` | `e2e/us2-ce-cs-disposition.spec.js` | Implemented |
+| `us3-qa-concurrence-and-approver-coordination.md` | *(planned)* | Not yet automated |
+| `us4-track-and-report.md` | *(planned)* | Not yet automated |
+| `us5-ncr-issuance-and-execution.md` | *(planned)* | Not yet automated |
+| `us6-final-distribution-and-closure-archive.md` | *(planned)* | Not yet automated |
+| `us7-preventive-action-tracking.md` | *(planned)* | Not yet automated |
+| `supplementary-access-control-and-validation.md` | *(planned)* | Not yet automated |
+
+For the Originator Designate feature (outside the main NCR user stories), see
+`e2e/us-originator-designate.spec.js`.
+
+## How to run the Playwright suite
+
+```bash
+# From the repo root (Docker stack must be running)
+cd e2e
+npx playwright test
+```
+
+See [`e2e/README.md`](../e2e/README.md) for full setup instructions.
+
+## How to run a manual test file
 
 Each test file is self-contained: its "Test Steps for Claude in Chrome"
 section already includes reading `.env` for the real ports and writing the
