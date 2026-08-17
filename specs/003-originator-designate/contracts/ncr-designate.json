@@ -1,0 +1,105 @@
+{
+  "endpoint": "PATCH /api/ncrs/:id/designate",
+  "description": "Assign, change, or remove the current Designate for an NCR. The same endpoint handles all three: presence of designate_id in the body assigns/replaces, absence (or null) removes.",
+  "authentication": "Required (session)",
+  "authorization": "Only the NCR's own Originator (ncr.originator_id === session user id) — not the current Designate, not QA Staff, not a Manager/Admin",
+  "request": {
+    "parameters": {
+      "path": {
+        "id": {
+          "type": "string",
+          "description": "MongoDB ObjectId of the NCR document"
+        }
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "type": "object",
+      "properties": {
+        "designate_id": {
+          "type": ["string", "null"],
+          "description": "User id to assign as Designate. Omit or pass null to remove the current Designate instead."
+        },
+        "designate_name": {
+          "type": "string",
+          "description": "Display name of the Designate, resolved client-side from the same user typeahead already used for CE/CS selection. Required when designate_id is present; ignored on removal."
+        },
+        "designate_email": {
+          "type": "string",
+          "description": "Email address of the Designate, resolved client-side from the same user typeahead already used for CE/CS selection (matching how ce_cs_email is already supplied on NCR creation). Required when designate_id is present — the assignment notification email (FR-006) is sent to this address; ignored on removal."
+        }
+      }
+    }
+  },
+  "response": {
+    "success_200": {
+      "statusCode": 200,
+      "body": {
+        "success": true,
+        "ncr": {
+          "ncr_id": "string",
+          "ncr_number": "string",
+          "originator_designate_id": "string | null",
+          "originator_designate_name": "string | null"
+        }
+      }
+    },
+    "errors": {
+      "validation_400": {
+        "statusCode": 400,
+        "body": {
+          "success": false,
+          "error": "Validation Error",
+          "message": "Validation failed",
+          "details": {
+            "designate_id": ["Cannot assign the Originator as their own Designate"]
+          }
+        }
+      },
+      "unauthorized_401": {
+        "statusCode": 401,
+        "body": {
+          "success": false,
+          "error": "Unauthorized",
+          "message": "Authentication required"
+        }
+      },
+      "forbidden_403": {
+        "statusCode": 403,
+        "body": {
+          "success": false,
+          "error": "Forbidden",
+          "message": "Only the NCR Originator can assign, change, or remove the Designate"
+        }
+      },
+      "not_found_404": {
+        "statusCode": 404,
+        "body": {
+          "success": false,
+          "error": "Not Found",
+          "message": "NCR not found: {id}"
+        }
+      },
+      "conflict_409": {
+        "statusCode": 409,
+        "body": {
+          "success": false,
+          "error": "Conflict",
+          "message": "Cannot assign, change, or remove the Designate on a Closed NCR"
+        }
+      }
+    }
+  },
+  "side_effects": [
+    "On assign/change: set originator_designate_id and originator_designate_name on the NCR document; append a 'delegate.assigned' user event to ncr.events[] with payload {designate_id, designate_name}; send the Designate a notification email with a link to the NCR",
+    "On removal: clear originator_designate_id and originator_designate_name; append a 'delegate.removed' user event to ncr.events[] with payload {previous_designate_id, previous_designate_name}; no email sent"
+  ],
+  "notes": [
+    "Assigning a new Designate while one is already assigned replaces it — an NCR has at most one active Designate at a time",
+    "Self-assignment (designate_id === the Originator's own id) is rejected with 400, not 403 — it's an invalid request shape, not an authorization failure",
+    "The Designate's own identity (not the Originator's) is what gets recorded when they later perform a Designate-eligible action (e.g. closure) — this endpoint only manages the assignment itself",
+    "Once assigned, the Designate gains access via the existing NCR visibility/authorization checks (see data-model.md) — no separate 'accept' step exists"
+  ]
+}

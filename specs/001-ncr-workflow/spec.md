@@ -41,9 +41,9 @@ NCR is ready for disposition by an authorized reviewer.
 1. **Given** a user has NCR Originator role, **When** they access NCR creation
    form, **Then** they see mandatory fields for: Part Name, Part Number, Part
    Revision, Quantity, Supplier Name, Work Breakdown Structure (WBS) Number,
-   Cognizant Engineer/Scientist name, Specification/Drawing Reference,
-   Description of Nonconformance, and Discovery Date, and no Traveler-linking
-   fields
+   Cognizant Engineer/Scientist name, Description of Nonconformance, Discovery
+   Date, and Discovery Context, plus an optional field for Specification/
+   Drawing Reference (and PO Reference), and no Traveler-linking fields
 2. **Given** required fields are populated correctly, **When** they submit the
    NCR, **Then** the system assigns a unique NCR number following the
    organization's naming convention and transitions the NCR to "Submitted"
@@ -268,6 +268,17 @@ link to the NCR with all disposition details and approved corrective actions.
 The NCR Originator executes the authorized disposition and then marks the NCR as
 Closed.
 
+> **Implementation note**: The "designee" referenced throughout this user
+> story (and User Story 6) is the Designate concept defined and implemented
+> by [`specs/003-originator-designate/spec.md`](../003-originator-designate/spec.md).
+> An NCR's Originator may assign exactly one other user as Designate, who
+> then holds the same authority the Originator has on that specific NCR —
+> including receiving the ISSUANCE and FINAL NCR DISTRIBUTION emails below,
+> and closing the NCR, with their own identity (not the Originator's)
+> recorded as the closer. See that spec for the full assignment mechanism,
+> authorization rules, and audit trail; this was previously an unspecified
+> gap in this document.
+
 **Why this priority**: Issuance ensures the Originator receives clear
 notification that the disposition has been approved and they are authorized to
 proceed with execution. This provides accountability and prevents unauthorized
@@ -317,6 +328,10 @@ Approvers (if designated), (4) Cognizant Group Leader and Division Director, (5)
 PPM if the nonconformance involved a supplier issue. The closed NCR is removed
 from active workflow dashboards but remains searchable in historical archives
 with complete audit trail.
+
+> **Implementation note**: "Designee" here is the same Designate concept
+> introduced in User Story 5's implementation note — see
+> [`specs/003-originator-designate/spec.md`](../003-originator-designate/spec.md).
 
 **Why this priority**: Final distribution ensures all stakeholders receive
 closure notification for their records. Archive retention allows historical
@@ -424,8 +439,11 @@ notifications as actions progress to completion.
 - **FR-002**: System MUST capture the following mandatory data when creating an
   NCR: Part Name, Part Number, Part Revision, Quantity, Supplier Name, Work
   Breakdown Structure (WBS) Number, Cognizant Engineer/Scientist (CE/CS) name,
-  Specification/Drawing/PO Reference, Description of Nonconformance, Discovery
-  Date, and Originator Information
+  Description of Nonconformance, Discovery Date, Discovery Context, and
+  Originator Information
+- **FR-002a**: System MUST additionally capture the following optional data
+  when creating an NCR, if provided: Specification/Drawing Reference and PO
+  Reference
 - **FR-003**: System MUST validate that all mandatory fields are populated and
   properly formatted before allowing NCR submission
 - **FR-004**: System MUST automatically assign a unique NCR number following the
@@ -483,9 +501,9 @@ notifications as actions progress to completion.
 > notification (FR-008) is implemented via the ncr-qa group. See
 > [Future Work: Group Leader and Director Notifications](#future-work-qa-and-management-notifications-deferred).
 
-> **Deferred — FR-015**: CE/CS delegate assignment is deferred until
-> requirements are clarified. See
-> [Future Work: CE/CS Delegate Assignment](#future-work-cecs-delegate-assignment-pending-requirements-clarification).
+> **Resolved — FR-015**: CE/CS delegate assignment will not be implemented.
+> Delegation authority on an NCR belongs solely to the Originator. See
+> [Resolved: CE/CS Delegate Assignment](#resolved-cecs-delegate-assignment-superseded-by-originator-designate).
 
 #### NCR Disposition (CE/CS Engineering Analysis)
 
@@ -548,6 +566,11 @@ notifications as actions progress to completion.
 
 #### NCR Issuance and Execution
 
+> **Implementation note**: "Designee" in FR-039, FR-040, and FR-043 below is
+> the Designate concept defined and implemented by
+> [`specs/003-originator-designate/spec.md`](../003-originator-designate/spec.md)
+> — see User Story 5's implementation note above for details.
+
 - **FR-039**: System MUST send an NCR ISSUANCE email to the NCR Originator or
   designee upon Final Approval status, with a link to the complete NCR and all
   approved disposition details, requesting execution of the authorized
@@ -568,6 +591,9 @@ notifications as actions progress to completion.
   in-Traveler sign-off and automatic electronic-copy attachment.)
 
 #### Final Distribution and Closure Archive
+
+> **Implementation note**: "Designee" in FR-044 below is the same Designate
+> concept — see User Story 5's implementation note above.
 
 - **FR-044**: System MUST automatically send a FINAL NCR DISTRIBUTION email when
   an NCR is closed to the following recipient groups: (1) Originator/Designee,
@@ -711,43 +737,23 @@ notifications as actions progress to completion.
 - Relationships: Associated with one NCR, Multiple entries per NCR (one per
   stakeholder), Created at time of NCR submission
 
-## Future Work: CE/CS Delegate Assignment (Pending Requirements Clarification)
+## Resolved: CE/CS Delegate Assignment (Superseded by Originator Designate)
 
-A CE/CS may need to assign a delegate to perform engineering disposition on
-their behalf. This capability is deferred because the following requirements
-have not yet been defined:
+**Resolution**: CE/CS delegate assignment will not be implemented. Delegation
+authority on an NCR belongs solely to the Originator, who may assign exactly
+one Designate holding the Originator's own full authority on that specific
+NCR — see [`specs/003-originator-designate/spec.md`](../003-originator-designate/spec.md).
+The CE/CS role has no separate delegation mechanism of its own: engineering
+disposition (FR-016 through FR-023) remains tied exclusively to the NCR's
+assigned CE/CS identity (`ce_cs_id`). The codebase's earlier
+`ce_cs_delegate_id` scaffolding — a field anticipated by an early permission
+check but never actually settable through any route or UI — has been removed
+accordingly.
 
-- **When**: Under what conditions a delegate assignment is permitted — e.g.,
-  only when the CE/CS declares unavailability, or at any time at their
-  discretion; whether there is a time window after the initial notification
-  before a delegate can be named.
-- **Who**: Who qualifies as an eligible delegate — e.g., same engineering
-  discipline, same organizational group, any authenticated user with an
-  engineering role, or a pre-approved list maintained by QA.
-- **Authority**: What the delegate is authorized to do — full disposition
-  authority identical to the CE/CS, or a more limited scope (e.g., cannot
-  select certain disposition types like Use-As-Is without CE/CS co-signature).
-- **How**: How the assignment is initiated — via the NCR detail page by the
-  CE/CS, via a separate reassignment workflow, or via a request-and-accept
-  flow requiring the delegate to confirm; and how the delegate is notified.
-- **Audit**: How the delegation is recorded — whether it appears as a distinct
-  event in the NCR audit trail separate from normal disposition, and whether
-  the original CE/CS retains any accountability after delegating.
-
-Once requirements are clarified, the following capabilities can be specified
-and implemented:
-
-- CE/CS initiates a delegate assignment from the NCR with a defined trigger
-  condition
-- System validates delegate eligibility against defined criteria
-- System notifies the delegate with a link to the NCR and context from the
-  original disposition request
-- System records the delegation event (delegator identity, delegate identity,
-  timestamp, reason/condition) in the NCR event log
-- Delegate performs disposition with their own identity recorded; original
-  CE/CS assignment is preserved in history for audit compliance
-- Disposition submitted by a delegate is treated identically to a CE/CS
-  submission for downstream QA concurrence and approval steps
+This closes out the open questions previously listed here (When/Who/
+Authority/How/Audit for a CE/CS-initiated delegate): they no longer apply,
+since the Originator's Designate already covers the underlying need — someone
+else acting with equivalent authority on a specific NCR — end-to-end.
 
 ---
 

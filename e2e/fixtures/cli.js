@@ -130,7 +130,12 @@ async function backdateNcr({ ncrId, daysAgo }) {
 async function createTravelerLinkedNcr({ ncrData, status, travelerId, stepNumber }) {
   const { Ncr } = require('../../model/ncr');
   const now = new Date();
-  const ncrNumber = `NCR-FIXTURE-${Date.now().toString(36)}`;
+  // Date.now() alone is millisecond-resolution, so concurrent invocations
+  // from different spec files (separate `docker compose exec` processes
+  // running in parallel Playwright workers) can collide on the unique
+  // ncr_number index — append a random component to keep this unique even
+  // when two calls land in the same millisecond.
+  const ncrNumber = `NCR-FIXTURE-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
   const ncr = new Ncr({
     ncr_number: ncrNumber,
     status: status || 'Submitted',

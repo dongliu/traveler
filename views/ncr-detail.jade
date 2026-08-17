@@ -57,8 +57,9 @@ block content
           dl.dl-horizontal
             dt WBS Number
             dd= ncr.wbs_number
-            dt Spec / Drawing
-            dd= ncr.specification_drawing_reference
+            if ncr.specification_drawing_reference
+              dt Spec / Drawing
+              dd= ncr.specification_drawing_reference
             if ncr.po_reference
               dt PO Reference
               dd= ncr.po_reference
@@ -68,16 +69,40 @@ block content
             dd= ncr.originator_name
             dt Created
             dd= new Date(ncr.creation_timestamp).toLocaleDateString()
+            dt Designate
+            dd#designate-display
+              if ncr.originator_designate_name
+                = ncr.originator_designate_name
+              else
+                span.muted None
+              if locals.userid === ncr.originator_id && ncr.status !== 'Closed'
+                | &nbsp;
+                a#designate-toggle.btn.btn-mini(href='#')= ncr.originator_designate_name ? 'Change' : 'Assign'
+                if ncr.originator_designate_name
+                  | &nbsp;
+                  button#designate-remove-btn.btn.btn-mini.btn-danger(type='button') Remove
+          if locals.userid === ncr.originator_id && ncr.status !== 'Closed'
+            #designate-error.alert.alert-error(style='display:none; margin-top:6px')
+              span#designate-error-msg
+            #designate-form(style='display:none; margin-top:6px; padding:8px; background:#fff; border-radius:3px')
+              .control-group
+                label Designate Name
+                input#designate-name-input.input(type='text', placeholder='Last, First', autocomplete='off')
+              .designate-actions(style='position:relative; z-index:1000;')
+                button#designate-submit-btn.btn.btn-sm.btn-primary(type='button') Save
+                button#designate-cancel-btn.btn.btn-sm(type='button') Cancel
 
     .row-fluid
       .span12
         fieldset
           legend Nonconformance Details
           dl.dl-horizontal
-            dt Discovery Date
-            dd= new Date(ncr.discovery_date).toLocaleDateString()
-            dt Context
-            dd= ncr.discovery_context.replace(/_/g, ' ')
+            if ncr.discovery_date
+              dt Discovery Date
+              dd= new Date(ncr.discovery_date).toLocaleDateString()
+            if ncr.discovery_context
+              dt Context
+              dd= ncr.discovery_context.replace(/_/g, ' ')
             dt Description
             dd= ncr.description_of_nonconformance
 
@@ -284,6 +309,9 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script(type='text/javascript').
     (function($) {
       var ncrId = '#{ncr._id}';
@@ -394,6 +422,81 @@ block js
           error: function(xhr) {
             var msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to close PA.';
             showPaError(msg);
+          }
+        });
+      });
+
+      if (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames) {
+        travelerGlobal.usernames.initialize();
+        $('#designate-name-input').typeahead(
+          { minLength: 1, highlight: true, hint: true },
+          { name: 'usernames', display: 'displayName', limit: 20, source: travelerGlobal.usernames }
+        );
+      }
+
+      function showDesignateError(msg) {
+        $('#designate-error-msg').text(msg);
+        $('#designate-error').show();
+      }
+
+      // The typeahead dropdown renders directly below #designate-name-input
+      // and can still be open (visually overlapping Save/Cancel, which sit
+      // immediately below the field) when those buttons are clicked, since
+      // this form has no other field to blur through first. Close it on
+      // mousedown (which fires before click) so the buttons are reliably
+      // clickable on the first attempt.
+      $('#designate-submit-btn, #designate-cancel-btn').on('mousedown', function() {
+        $('#designate-name-input').typeahead('close');
+      });
+
+      $('#designate-toggle').on('click', function(e) {
+        e.preventDefault();
+        $('#designate-error').hide();
+        $('#designate-form').toggle();
+      });
+
+      $('#designate-cancel-btn').on('click', function() {
+        $('#designate-form').hide();
+        $('#designate-error').hide();
+      });
+
+      $('#designate-submit-btn').on('click', function() {
+        var name = $('#designate-name-input').val().trim();
+        var users = (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames)
+          ? travelerGlobal.usernames.get(name)
+          : [];
+        if (!users || users.length === 0) {
+          return showDesignateError('Designate must be selected from the list.');
+        }
+        var designateUser = users[0];
+        $.ajax({
+          url: '#{prefix}/api/ncrs/#{ncr._id}/designate',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            designate_id: designateUser.uid,
+            designate_name: name,
+            designate_email: designateUser.mail
+          }),
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var resp = xhr.responseJSON || {};
+            showDesignateError(resp.message || resp.error || 'Failed to assign Designate.');
+          }
+        });
+      });
+
+      $('#designate-remove-btn').on('click', function() {
+        if (!confirm('Remove the current Designate from this NCR?')) return;
+        $.ajax({
+          url: '#{prefix}/api/ncrs/#{ncr._id}/designate',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({}),
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var resp = xhr.responseJSON || {};
+            showDesignateError(resp.message || resp.error || 'Failed to remove Designate.');
           }
         });
       });

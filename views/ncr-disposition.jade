@@ -21,10 +21,12 @@ block content
         dd= ncr.supplier_name
         dt WBS
         dd= ncr.wbs_number
-        dt Discovery Date
-        dd= new Date(ncr.discovery_date).toLocaleDateString()
-        dt Context
-        dd= ncr.discovery_context.replace(/_/g, ' ')
+        if ncr.discovery_date
+          dt Discovery Date
+          dd= new Date(ncr.discovery_date).toLocaleDateString()
+        if ncr.discovery_context
+          dt Context
+          dd= ncr.discovery_context.replace(/_/g, ' ')
         dt Description of Nonconformance
         dd= ncr.description_of_nonconformance
 
@@ -37,7 +39,7 @@ block content
       strong Error:&nbsp;
       span#disp-error-msg
 
-    form#disp-form.form-horizontal
+    form#disp-form.form-horizontal(novalidate)
       fieldset
         legend Parts Disposition
         .control-group

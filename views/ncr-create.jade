@@ -56,9 +56,8 @@ block content
             input#wbs_number(type='text', name='wbs_number', maxlength='50', required)
         .control-group
           label.control-label(for='specification_drawing_reference') Specification / Drawing Ref.
-            span.text-error *
           .controls
-            input#specification_drawing_reference(type='text', name='specification_drawing_reference', maxlength='255', required)
+            input#specification_drawing_reference(type='text', name='specification_drawing_reference', maxlength='255')
         .control-group
           label.control-label(for='po_reference') PO Reference
           .controls
@@ -152,7 +151,7 @@ block js
           quantity: parseInt($('#quantity').val(), 10),
           supplier_name: $('#supplier_name').val().trim(),
           wbs_number: $('#wbs_number').val().trim(),
-          specification_drawing_reference: $('#specification_drawing_reference').val().trim(),
+          specification_drawing_reference: $('#specification_drawing_reference').val().trim() || undefined,
           po_reference: $('#po_reference').val().trim() || undefined,
           ce_cs_name: ceCsName,
           ce_cs_id: ceCsUser.uid,

@@ -24,8 +24,12 @@ block content
         dd= ncr.supplier_name
         dt WBS
         dd= ncr.wbs_number
-        dt Discovery
-        dd= new Date(ncr.discovery_date).toLocaleDateString() + ' — ' + ncr.discovery_context.replace(/_/g, ' ')
+        - var discoveryParts = []
+        - if (ncr.discovery_date) discoveryParts.push(new Date(ncr.discovery_date).toLocaleDateString())
+        - if (ncr.discovery_context) discoveryParts.push(ncr.discovery_context.replace(/_/g, ' '))
+        if discoveryParts.length
+          dt Discovery
+          dd= discoveryParts.join(' — ')
         dt Description
         dd= ncr.description_of_nonconformance
 

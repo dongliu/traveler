@@ -31,6 +31,7 @@ const NCR_EVENT_TYPES = [
   'ncr.submitted',
   'disposition.submitted',
   'delegate.assigned',
+  'delegate.removed',
   'qa.concurred',
   'approvers.designated',
   'qa.rejected',
@@ -49,6 +50,7 @@ const NCR_EVENT_TYPES = [
   'notification.issuance',
   'notification.final_distribution',
   'notification.pa_assigned',
+  'notification.designate_assigned',
 ];
 
 const NcrEventSchema = new Schema({
@@ -96,6 +98,8 @@ const NcrSchema = new Schema({
   ncr_number: String,
   originator_id: String,
   originator_name: String,
+  originator_designate_id: String,
+  originator_designate_name: String,
   creation_timestamp: Date,
   discovery_date: Date,
   discovery_context: {
@@ -125,7 +129,6 @@ const NcrSchema = new Schema({
 
   ce_cs_name: String,
   ce_cs_id: String,
-  ce_cs_delegate_id: String,
 
   disposition: {
     parts_disposition: {

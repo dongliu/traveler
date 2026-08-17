@@ -70,7 +70,8 @@ Notification events capture per-recipient delivery status.
 |---|---|---|
 | `ncr.submitted` | NCR Originator creates NCR | → Submitted |
 | `disposition.submitted` | CE/CS submits engineering disposition | → Dispositioned |
-| `delegate.assigned` | CE/CS assigns originator delegate | No |
+| `delegate.assigned` | Originator assigns a Designate | No |
+| `delegate.removed` | Originator removes the Designate | No |
 | `qa.concurred` | QA Staff gives concurrence | → Approved or Final Approval |
 | `approvers.designated` | QA Staff designates additional approvers | No (part of qa.concurred payload) |
 | `qa.rejected` | QA Staff rejects disposition (back to CE/CS) | → Submitted |
@@ -112,22 +113,26 @@ stream for the NCR's lifecycle.
   // NCR Origination
   originator_id: ObjectId,    // Reference to User
   originator_name: String,
+  // Delegation is Originator-only — see specs/003-originator-designate for
+  // the full assignment mechanism, authorization rules, and audit trail
+  originator_designate_id: ObjectId,    // Reference to User; unset when no Designate is assigned
+  originator_designate_name: String,
   creation_timestamp: Date,
-  discovery_date: Date,
-  discovery_context: String,  // "incoming_inspection" | "in_house_assembly" | "in_house_inspection"
+  discovery_date: Date,        // Mandatory
+  discovery_context: String,  // Mandatory; "incoming_inspection" | "in_house_assembly" | "in_house_inspection"
 
   // Part Information (Mandatory)
   part_name: String,
   part_number: String,
   part_revision: String,
   quantity: Number,
-  supplier_name: String,
-  wbs_number: String,
+  supplier_name: String,       // Mandatory
+  wbs_number: String,          // Mandatory
 
-  // Reference Information
-  specification_drawing_reference: String,
+  // Reference Information (Optional, except Description of Nonconformance)
+  specification_drawing_reference: String,  // Optional
   po_reference: String,
-  description_of_nonconformance: String,
+  description_of_nonconformance: String,  // Mandatory
 
   // Status & Workflow (denormalized read model; source of truth is events[])
   status: String,             // "Submitted" | "Dispositioned" | "Approved" | "Returned for Comment" | "Final Approval" | "Closed"
@@ -141,10 +146,10 @@ stream for the NCR's lifecycle.
     initiated_from_traveler: Boolean
   },
 
-  // CE/CS Assignment
+  // CE/CS Assignment (no delegate field — CE/CS has no delegation mechanism
+  // of its own; see spec.md "Resolved: CE/CS Delegate Assignment")
   ce_cs_name: String,
   ce_cs_id: ObjectId,
-  ce_cs_delegate_id: ObjectId,  // If CE/CS delegates
 
   // Disposition (populated after CE/CS submission)
   disposition: {
@@ -441,7 +446,8 @@ Submitted
 1. **NCR Creation**:
 
    - All mandatory fields required (Part Name, Number, Revision, Quantity,
-     Supplier, WBS, CE/CS, Description)
+     Supplier, WBS, CE/CS, Description, Discovery Date, Discovery Context)
+   - Specification/Drawing Reference and PO Reference are optional
    - Description minimum 20 characters
    - Quantity > 0
    - Discovery Date ≤ today

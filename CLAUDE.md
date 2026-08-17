@@ -71,6 +71,8 @@ shell commands, and other important information, read the current plan
 ## Active Technologies
 - JavaScript (Node.js 18+, matching the app's existing runtime) + `@playwright/test` (new devDependency); no other new dependency required — Mailpit verification uses Playwright's own built-in `request` fixture, and fixture provisioning reuses the app's own `mongoose`/`model/*.js` inside the `web` container rather than adding a second DB driver (002-playwright-e2e-tests)
 - N/A directly — the suite introduces no new storage layer; fixture provisioning delegates to the existing app's own Mongoose models via `docker compose exec` (see research.md Decision 2) (002-playwright-e2e-tests)
+- JavaScript (Node.js 18+) — unchanged, extends the existing app + None new — reuses Express/Mongoose/Nodemailer and the existing `travelerGlobal.usernames` Bloodhound typeahead already used for CE/CS selection on NCR creation (research.md Decision 4) (003-originator-designate)
+- MongoDB via Mongoose — two additive fields (`originator_designate_id`, `originator_designate_name`) on the existing `Ncr` schema plus one new `NCR_EVENT_TYPES` enum value (`delegate.removed`; `delegate.assigned` already exists, unused); no new collection, no migration needed since the fields are optional and absent by default on every existing documen (003-originator-designate)
 
 ## Recent Changes
 - 002-playwright-e2e-tests: Added JavaScript (Node.js 18+, matching the app's existing runtime) + `@playwright/test` (new devDependency); no other new dependency required — Mailpit verification uses Playwright's own built-in `request` fixture, and fixture provisioning reuses the app's own `mongoose`/`model/*.js` inside the `web` container rather than adding a second DB driver
