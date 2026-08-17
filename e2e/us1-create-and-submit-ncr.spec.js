@@ -3,7 +3,7 @@ const { runId } = require('./fixtures/run-id');
 const { execFixtureCli } = require('./fixtures/exec-cli');
 const { createMailpitClient, normalizeWhitespace } = require('./fixtures/mailpit');
 const { resolveEnv } = require('./fixtures/env');
-const { PRIMARY_AUTH_STATE } = require('./fixtures/auth-state');
+const { PRIMARY_AUTH_STATE, SECONDARY_AUTH_STATE } = require('./fixtures/auth-state');
 
 const env = resolveEnv();
 
@@ -46,7 +46,9 @@ async function fillNcrForm(page, data) {
   await page.fill('#quantity', String(data.quantity));
   await page.fill('#supplier_name', data.supplier_name);
   await page.fill('#wbs_number', data.wbs_number);
-  await page.fill('#specification_drawing_reference', data.specification_drawing_reference);
+  if (data.specification_drawing_reference) {
+    await page.fill('#specification_drawing_reference', data.specification_drawing_reference);
+  }
 
   if (data.ce_cs_name) {
     await page.fill('#ce_cs_name', data.ce_cs_name);
@@ -55,7 +57,9 @@ async function fillNcrForm(page, data) {
     await page.waitForSelector('.tt-suggestion', { timeout: 5000 }).catch(() => {});
   }
 
-  await page.fill('#discovery_date', data.discovery_date);
+  if (data.discovery_date) {
+    await page.fill('#discovery_date', data.discovery_date);
+  }
   if (data.discovery_context) {
     await page.check(`input[name="discovery_context"][value="${data.discovery_context}"]`);
   }
@@ -96,6 +100,65 @@ test.describe('US1 - NCR creation and submission notifications', () => {
     const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'ncr_number'] });
     expect(ncr.status).toBe('Submitted');
     expect(ncr.ncr_number).toBe(ncrNumber);
+  });
+
+  test('AS1b - creates an NCR with Specification/Drawing Reference omitted (the one optional field), and its detail page still renders', async ({ page }) => {
+    // Specification/Drawing Reference is optional (spec.md FR-002a). Every
+    // other field on this form — including Discovery Date and Discovery
+    // Context — is mandatory.
+    const { ncrId } = await createNcrViaUi(page, { specification_drawing_reference: undefined });
+
+    const { ncr } = await execFixtureCli('get-ncr', {
+      ncrId,
+      fields: ['status', 'specification_drawing_reference'],
+    });
+    expect(ncr.status).toBe('Submitted');
+    expect(ncr.specification_drawing_reference).toBeFalsy();
+
+    expect((await page.request.get(`/ncrs/${ncrId}`)).status()).toBe(200);
+  });
+
+  test('AS1c - detail/disposition/concurrence pages render even when Discovery Date/Context are absent from the underlying document (legacy or externally-created data)', async ({ page, browser }) => {
+    // Discovery Date and Discovery Context are mandatory on the standard
+    // creation form, but nothing enforces their presence at the schema level
+    // (model/ncr.js) — a document created outside that form (fixture data, a
+    // migration, a future API caller) can still lack them. Regression check:
+    // ncr-detail.jade, ncr-disposition.jade, and ncr-concurrence.jade used to
+    // call .replace()/new Date() directly on these fields with no guard,
+    // which threw when the field was absent.
+    const id = runId();
+    const { ncrId } = await execFixtureCli('create-traveler-linked-ncr', {
+      ncrData: {
+        part_name: `E2E No-Discovery-Fields ${id}`,
+        part_number: `PN-${id}`,
+        wbs_number: `WBS-${id}`,
+        supplier_name: `Supplier ${id}`,
+        originator_id: 'dong',
+        originator_name: 'Dong Liu',
+        ce_cs_id: 'bob',
+        ce_cs_name: CE_CS_DISPLAY_NAME,
+        description_of_nonconformance: `No discovery fields test ${id}, exceeding twenty characters.`,
+      },
+      status: 'Submitted',
+      travelerId: '507f1f77bcf86cd799439000',
+      stepNumber: 1,
+    });
+
+    expect((await page.request.get(`/ncrs/${ncrId}`)).status()).toBe(200);
+    expect((await page.request.get(`/ncrs/${ncrId}/disposition`)).status()).toBe(200);
+
+    const ceCsPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    const dispositionRes = await ceCsPage.request.patch(`/api/ncrs/${ncrId}/disposition`, {
+      data: {
+        parts_disposition: 'Use-As-Is',
+        root_cause_documentation: 'Root cause documentation exceeding fifty characters for validation purposes.',
+        preventive_actions: ['Preventive action description exceeding fifty characters for validation purposes.'],
+      },
+    });
+    expect(dispositionRes.status()).toBe(200);
+    await ceCsPage.close();
+
+    expect((await page.request.get(`/ncrs/${ncrId}/concurrence`)).status()).toBe(200);
   });
 
   test('AS2 - rejects submission with an invalid field and creates no NCR', async ({ page }) => {

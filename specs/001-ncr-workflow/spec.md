@@ -41,9 +41,9 @@ NCR is ready for disposition by an authorized reviewer.
 1. **Given** a user has NCR Originator role, **When** they access NCR creation
    form, **Then** they see mandatory fields for: Part Name, Part Number, Part
    Revision, Quantity, Supplier Name, Work Breakdown Structure (WBS) Number,
-   Cognizant Engineer/Scientist name, Specification/Drawing Reference,
-   Description of Nonconformance, and Discovery Date, and no Traveler-linking
-   fields
+   Cognizant Engineer/Scientist name, Description of Nonconformance, Discovery
+   Date, and Discovery Context, plus an optional field for Specification/
+   Drawing Reference (and PO Reference), and no Traveler-linking fields
 2. **Given** required fields are populated correctly, **When** they submit the
    NCR, **Then** the system assigns a unique NCR number following the
    organization's naming convention and transitions the NCR to "Submitted"
@@ -439,8 +439,11 @@ notifications as actions progress to completion.
 - **FR-002**: System MUST capture the following mandatory data when creating an
   NCR: Part Name, Part Number, Part Revision, Quantity, Supplier Name, Work
   Breakdown Structure (WBS) Number, Cognizant Engineer/Scientist (CE/CS) name,
-  Specification/Drawing/PO Reference, Description of Nonconformance, Discovery
-  Date, and Originator Information
+  Description of Nonconformance, Discovery Date, Discovery Context, and
+  Originator Information
+- **FR-002a**: System MUST additionally capture the following optional data
+  when creating an NCR, if provided: Specification/Drawing Reference and PO
+  Reference
 - **FR-003**: System MUST validate that all mandatory fields are populated and
   properly formatted before allowing NCR submission
 - **FR-004**: System MUST automatically assign a unique NCR number following the

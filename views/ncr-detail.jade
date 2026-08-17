@@ -57,8 +57,9 @@ block content
           dl.dl-horizontal
             dt WBS Number
             dd= ncr.wbs_number
-            dt Spec / Drawing
-            dd= ncr.specification_drawing_reference
+            if ncr.specification_drawing_reference
+              dt Spec / Drawing
+              dd= ncr.specification_drawing_reference
             if ncr.po_reference
               dt PO Reference
               dd= ncr.po_reference
@@ -96,10 +97,12 @@ block content
         fieldset
           legend Nonconformance Details
           dl.dl-horizontal
-            dt Discovery Date
-            dd= new Date(ncr.discovery_date).toLocaleDateString()
-            dt Context
-            dd= ncr.discovery_context.replace(/_/g, ' ')
+            if ncr.discovery_date
+              dt Discovery Date
+              dd= new Date(ncr.discovery_date).toLocaleDateString()
+            if ncr.discovery_context
+              dt Context
+              dd= ncr.discovery_context.replace(/_/g, ' ')
             dt Description
             dd= ncr.description_of_nonconformance
 

@@ -69,8 +69,6 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
   if (!b.supplier_name) errors.supplier_name = ['Required'];
   if (!b.wbs_number) errors.wbs_number = ['Required'];
   if (!b.ce_cs_name) errors.ce_cs_name = ['Required'];
-  if (!b.specification_drawing_reference)
-    errors.specification_drawing_reference = ['Required'];
   if (!b.description_of_nonconformance || b.description_of_nonconformance.length < 20)
     errors.description_of_nonconformance = ['Must be at least 20 characters long'];
   if (!b.discovery_date)

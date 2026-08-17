@@ -118,21 +118,21 @@ stream for the NCR's lifecycle.
   originator_designate_id: ObjectId,    // Reference to User; unset when no Designate is assigned
   originator_designate_name: String,
   creation_timestamp: Date,
-  discovery_date: Date,
-  discovery_context: String,  // "incoming_inspection" | "in_house_assembly" | "in_house_inspection"
+  discovery_date: Date,        // Mandatory
+  discovery_context: String,  // Mandatory; "incoming_inspection" | "in_house_assembly" | "in_house_inspection"
 
   // Part Information (Mandatory)
   part_name: String,
   part_number: String,
   part_revision: String,
   quantity: Number,
-  supplier_name: String,
-  wbs_number: String,
+  supplier_name: String,       // Mandatory
+  wbs_number: String,          // Mandatory
 
-  // Reference Information
-  specification_drawing_reference: String,
+  // Reference Information (Optional, except Description of Nonconformance)
+  specification_drawing_reference: String,  // Optional
   po_reference: String,
-  description_of_nonconformance: String,
+  description_of_nonconformance: String,  // Mandatory
 
   // Status & Workflow (denormalized read model; source of truth is events[])
   status: String,             // "Submitted" | "Dispositioned" | "Approved" | "Returned for Comment" | "Final Approval" | "Closed"
@@ -446,7 +446,8 @@ Submitted
 1. **NCR Creation**:
 
    - All mandatory fields required (Part Name, Number, Revision, Quantity,
-     Supplier, WBS, CE/CS, Description)
+     Supplier, WBS, CE/CS, Description, Discovery Date, Discovery Context)
+   - Specification/Drawing Reference and PO Reference are optional
    - Description minimum 20 characters
    - Quantity > 0
    - Discovery Date ≤ today
