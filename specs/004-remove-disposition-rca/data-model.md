@@ -4,15 +4,13 @@
 
 ### NCR Disposition Subdocument (`ncr.disposition`)
 
-No schema field is removed. `root_cause_documentation` remains declared in
-`model/ncr.js` for backward compatibility. The change is in validation and
-population behavior only.
+The `root_cause_documentation` field is removed from the disposition subdocument
+in `model/ncr.js`.
 
 ```javascript
-// model/ncr.js — disposition embedded subdocument (UNCHANGED)
+// model/ncr.js — disposition embedded subdocument (after change)
 disposition: {
   parts_disposition: String,         // required — validated in route
-  root_cause_documentation: String,  // KEPT but no longer populated or validated
   rework_repair_instructions: String,// required only when Rework/Repair
   ce_cs_identity: ObjectId,
   ce_cs_timestamp: Date,
@@ -35,9 +33,8 @@ disposition: {
 
 | Layer | Reason |
 |-------|--------|
-| `model/ncr.js` — `root_cause_documentation: String` | backward compat with existing records |
-| `lib/ncr-service.js` — root_cause dashboard filter (L757-759) | historical search still valid |
-| Existing NCR documents | no migration; old values stay in place, silently ignored by new UI |
+| `lib/ncr-service.js` — root_cause dashboard filter (L757-759) | historical search still valid for existing records |
+| Existing NCR documents | no migration required; MongoDB stores only present fields |
 
 ## Disposition Event Payload
 
