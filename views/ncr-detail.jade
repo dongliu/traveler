@@ -237,6 +237,24 @@ block content
                 dt Notes
                 dd= ncr.closure_record.closure_notes
 
+    if ncr.attachments && ncr.attachments.length
+      .row-fluid
+        .span12
+          fieldset
+            legend Attachments
+            ul.unstyled
+              each file in ncr.attachments
+                li(style='margin-bottom:4px')
+                  a(href='#{prefix}/api/ncrs/#{ncr._id}/attachments/#{file.file_id}')
+                    i.fa.fa-paperclip
+                    | &nbsp;
+                    = file.file_name
+                  | &nbsp;
+                  span.muted
+                    = 'uploaded by ' + (file.uploaded_by_name || file.uploaded_by || 'unknown')
+                    | ,&nbsp;
+                    = new Date(file.upload_timestamp).toLocaleString()
+
     .row-fluid
       .span12
         fieldset

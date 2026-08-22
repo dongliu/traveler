@@ -40,6 +40,8 @@ const {
   assignPaOwner,
   updatePaStatus,
   closePa,
+  addAttachments,
+  getAttachment,
 } = require('../../lib/ncr-service.js');
 
 const { Ncr } = require('../../model/ncr');
@@ -945,6 +947,110 @@ describe('lib/ncr-service — getNcrById', () => {
     const result = await getNcrById('id1', makeUser({ id: 'ces1', roles: [] }));
 
     result.ce_cs_id.should.equal('ces1');
+  });
+});
+
+// ── addAttachments ───────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — addAttachments', () => {
+  const originator = makeUser({ id: 'orig1', name: 'Origin Person' });
+
+  function makeFile(overrides = {}) {
+    return {
+      originalname: 'inspection-photo.jpg',
+      mimetype: 'image/jpeg',
+      path: '/tmp/uploads/abc123',
+      ...overrides,
+    };
+  }
+
+  it('throws 404 when NCR not found', async () => {
+    stubFindById(null);
+    await expectRejection(addAttachments('id1', [makeFile()], originator), 404);
+  });
+
+  it('throws 403 when user does not have access to the NCR', async () => {
+    stubFindById(newNcr({ originator_id: 'someoneElse', status: 'Submitted' }));
+    await expectRejection(addAttachments('id1', [makeFile()], originator), 403);
+  });
+
+  it('appends each uploaded file as an attachment with uploader identity and timestamp', async () => {
+    stubFindById(newNcr({ originator_id: 'orig1', status: 'Submitted' }));
+
+    const files = [
+      makeFile({ originalname: 'photo.jpg', mimetype: 'image/jpeg', path: '/tmp/uploads/f1' }),
+      makeFile({ originalname: 'report.pdf', mimetype: 'application/pdf', path: '/tmp/uploads/f2' }),
+    ];
+
+    const { ncr, added } = await addAttachments('id1', files, originator);
+
+    added.should.have.lengthOf(2);
+    ncr.attachments.should.have.lengthOf(2);
+    ncr.attachments[0].file_name.should.equal('photo.jpg');
+    ncr.attachments[0].file_type.should.equal('image/jpeg');
+    ncr.attachments[0].file_path.should.equal('/tmp/uploads/f1');
+    ncr.attachments[0].uploaded_by.should.equal('orig1');
+    ncr.attachments[0].uploaded_by_name.should.equal('Origin Person');
+    ncr.attachments[0].upload_timestamp.should.be.instanceOf(Date);
+    ncr.attachments[1].file_name.should.equal('report.pdf');
+  });
+
+  it('records an attachment.uploaded event for each file', async () => {
+    stubFindById(newNcr({ originator_id: 'orig1', status: 'Submitted' }));
+
+    const { ncr } = await addAttachments(
+      'id1',
+      [makeFile(), makeFile({ originalname: 'second.pdf' })],
+      originator
+    );
+
+    const attachmentEvents = ncr.events.filter(e => e.event_type === 'attachment.uploaded');
+    attachmentEvents.should.have.lengthOf(2);
+    attachmentEvents[0].actor_id.should.equal('orig1');
+  });
+
+  it('allows the assigned CE/CS to add attachments', async () => {
+    stubFindById(newNcr({ originator_id: 'someoneElse', ce_cs_id: 'ces1', status: 'Submitted' }));
+
+    const { added } = await addAttachments('id1', [makeFile()], makeUser({ id: 'ces1' }));
+
+    added.should.have.lengthOf(1);
+  });
+});
+
+// ── getAttachment ────────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — getAttachment', () => {
+  const originator = makeUser({ id: 'orig1' });
+
+  it('throws 404 when NCR not found', async () => {
+    stubFindByIdLean(null);
+    await expectRejection(getAttachment('id1', 'file1', originator), 404);
+  });
+
+  it('throws 403 when user does not have access to the NCR', async () => {
+    stubFindByIdLean({ originator_id: 'someoneElse', status: 'Submitted', attachments: [] });
+    await expectRejection(getAttachment('id1', 'file1', originator), 403);
+  });
+
+  it('throws 404 when the attachment is not found', async () => {
+    stubFindByIdLean({ originator_id: 'orig1', status: 'Submitted', attachments: [] });
+    await expectRejection(getAttachment('id1', 'missing', originator), 404);
+  });
+
+  it('returns the matching attachment metadata', async () => {
+    stubFindByIdLean({
+      originator_id: 'orig1',
+      status: 'Submitted',
+      attachments: [
+        { file_id: 'file1', file_name: 'photo.jpg', file_type: 'image/jpeg', file_path: '/tmp/uploads/f1' },
+      ],
+    });
+
+    const attachment = await getAttachment('id1', 'file1', originator);
+
+    attachment.file_name.should.equal('photo.jpg');
+    attachment.file_path.should.equal('/tmp/uploads/f1');
   });
 });
 

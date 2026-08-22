@@ -16,6 +16,7 @@ block content
       a#ncr-number-link(href='#')
         span#ncr-number-display
       | &nbsp; has been submitted successfully.
+      div#attachment-status(style='margin-top:8px')
     #ncr-error.alert.alert-error(style='display:none')
       strong Error: &nbsp;
       span#ncr-error-msg
@@ -93,6 +94,13 @@ block content
           .controls
             textarea#description_of_nonconformance(name='description_of_nonconformance', rows='5', maxlength='2000', required)
             span#desc-counter.help-block 0 / 2000
+      fieldset
+        legend Attachments
+        .control-group
+          label.control-label(for='attachments') Files
+          .controls
+            input#attachments(type='file', name='attachments', multiple)
+            span.help-block Optional. PDF, Excel, Word, XPS, image, or text files.
       .control-group
         .controls
           .btn-group
@@ -125,6 +133,40 @@ block js
       $('#description_of_nonconformance').on('input', function () {
         $('#desc-counter').text($(this).val().length + ' / 2000');
       });
+
+      function uploadAttachments(ncrId) {
+        var files = $('#attachments')[0].files;
+        if (!files || !files.length) return;
+
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i += 1) {
+          formData.append('attachments', files[i]);
+        }
+
+        $('#attachment-status').text('Uploading ' + files.length + ' attachment(s)...');
+        $.ajax({
+          url: prefix + '/api/ncrs/' + ncrId + '/attachments',
+          method: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (uploadData) {
+            var count = (uploadData.attachments || []).length;
+            if (count === files.length) {
+              $('#attachment-status').text(count + ' attachment(s) uploaded.');
+            } else {
+              $('#attachment-status').text(
+                count + ' of ' + files.length + ' attachment(s) uploaded (some file types are not allowed).'
+              );
+            }
+          },
+          error: function () {
+            $('#attachment-status').text(
+              'NCR created, but attachment upload failed. You can add attachments later from the NCR detail page.'
+            );
+          },
+        });
+      }
 
       $('#ncr-create-form').on('submit', function (e) {
         e.preventDefault();
@@ -174,6 +216,7 @@ block js
               $('#ncr-number-link').attr('href', prefix + '/ncrs/' + data.ncr.ncr_id);
               $('#ncr-success').show();
               $('#ncr-create-form').hide();
+              uploadAttachments(data.ncr.ncr_id);
             }
           },
           error: function (xhr) {

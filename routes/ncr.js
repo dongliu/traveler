@@ -1,6 +1,11 @@
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
+const multer = require('multer');
 const auth = require('../lib/auth');
+const config = require('../config/config');
+const { fileFilter } = require('../lib/upload');
 const {
   createNcr,
   submitDisposition,
@@ -16,10 +21,21 @@ const {
   assignPaOwner,
   updatePaStatus,
   closePa,
+  addAttachments,
+  getAttachment,
 } = require('../lib/ncr-service');
 const logger = require('../lib/loggers').getLogger();
 
 const router = express.Router();
+
+const attachmentUpload = multer({
+  dest: config.uploadPath,
+  limits: {
+    files: 10,
+    fileSize: (config.app.upload_size || 10) * 1024 * 1024,
+  },
+  fileFilter,
+});
 
 function isValidId(id) {
   return mongoose.isValidObjectId(id);
@@ -166,6 +182,50 @@ router.get('/:id/events', auth.ensureAuthenticated, async (req, res) => {
     return res.status(200).json({ success: true, ncr_id: ncr._id, events });
   } catch (err) {
     return mapServiceError(err, res, 'Events fetch');
+  }
+});
+
+router.post('/:id/attachments', auth.ensureAuthenticated, attachmentUpload.any(), async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  if (!req.files || !req.files.length) {
+    return res.status(400).json({ success: false, error: 'Bad Request', message: 'Expected at least one uploaded file' });
+  }
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const { added } = await addAttachments(req.params.id, req.files, user);
+    return res.status(201).json({
+      success: true,
+      attachments: added.map(a => ({
+        file_id: a.file_id,
+        file_name: a.file_name,
+        file_type: a.file_type,
+        upload_timestamp: a.upload_timestamp,
+      })),
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Attachment upload');
+  }
+});
+
+router.get('/:id/attachments/:fileId', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const attachment = await getAttachment(req.params.id, req.params.fileId, user);
+    fs.exists(attachment.file_path, exists => {
+      if (!exists) return res.status(410).json({ success: false, error: 'Gone', message: 'File no longer available' });
+      return res.download(path.resolve(attachment.file_path), attachment.file_name);
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Attachment fetch');
   }
 });
 
