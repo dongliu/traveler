@@ -43,8 +43,6 @@ block content
           dd= ncr.ce_cs_name
           dt Submitted On
           dd= ncr.disposition.ce_cs_timestamp ? new Date(ncr.disposition.ce_cs_timestamp).toLocaleString() : '—'
-          dt Root Cause
-          dd= ncr.disposition.root_cause_documentation
           if ncr.disposition.rework_repair_instructions
             dt Rework / Repair Instructions
             dd= ncr.disposition.rework_repair_instructions

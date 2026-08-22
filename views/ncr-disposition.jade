@@ -59,15 +59,6 @@ block content
             span#rri-counter.help-block 0 / 5000
 
       fieldset
-        legend Root Cause Analysis
-        .control-group
-          label.control-label(for='root_cause_documentation') Root Cause Documentation
-            span.text-error *
-          .controls
-            textarea#root_cause_documentation(name='root_cause_documentation', rows='6', maxlength='5000', required, placeholder='Minimum 50 characters — use 5-Why or similar methodology')
-            span#rc-counter.help-block 0 / 5000
-
-      fieldset
         legend Preventive Actions
         p.help-block Each action must be at least 50 characters and describe a measurable corrective step.
         #pa-list
@@ -104,9 +95,6 @@ block js
         $(counter).text($(textarea).val().length + ' / ' + $(textarea).attr('maxlength'));
       }
 
-      $('#root_cause_documentation').on('input', function () {
-        updateCounter(this, '#rc-counter');
-      });
       $('#rework_repair_instructions').on('input', function () {
         updateCounter(this, '#rri-counter');
       });
@@ -156,9 +144,6 @@ block js
         var pd = $('input[name="parts_disposition"]:checked').val();
         if (!pd) errors.push('Parts Disposition is required.');
 
-        var rc = $('#root_cause_documentation').val().trim();
-        if (rc.length < 50) errors.push('Root Cause Documentation must be at least 50 characters.');
-
         var pas = [];
         var paValid = true;
         $('.pa-textarea').each(function () {
@@ -183,7 +168,6 @@ block js
 
         var payload = {
           parts_disposition: pd,
-          root_cause_documentation: rc,
           preventive_actions: pas,
         };
         if (rri) payload.rework_repair_instructions = rri;

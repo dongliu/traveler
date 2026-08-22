@@ -119,9 +119,6 @@ block content
               if ncr.disposition.ce_cs_timestamp
                 dt Submitted On
                 dd= new Date(ncr.disposition.ce_cs_timestamp).toLocaleString()
-              if ncr.disposition.root_cause_documentation
-                dt Root Cause
-                dd= ncr.disposition.root_cause_documentation
               if ncr.disposition.rework_repair_instructions
                 dt Rework / Repair Instructions
                 dd= ncr.disposition.rework_repair_instructions

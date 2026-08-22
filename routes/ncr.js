@@ -175,7 +175,6 @@ router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
   const PARTS_DISPOSITIONS = ['Rework', 'Repair', 'Return to Vendor', 'Scrap', 'Use-As-Is'];
   const b = {
     parts_disposition: req.body.parts_disposition,
-    root_cause_documentation: sanitizeStr(req.body.root_cause_documentation),
     rework_repair_instructions: sanitizeStr(req.body.rework_repair_instructions),
     preventive_actions: Array.isArray(req.body.preventive_actions)
       ? req.body.preventive_actions.map(a => sanitizeStr(a))
@@ -184,8 +183,6 @@ router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
 
   if (!b.parts_disposition || !PARTS_DISPOSITIONS.includes(b.parts_disposition))
     errors.parts_disposition = [`Must be one of: ${PARTS_DISPOSITIONS.join(', ')}`];
-  if (!b.root_cause_documentation || b.root_cause_documentation.length < 50)
-    errors.root_cause_documentation = ['Must be at least 50 characters long'];
   if (!Array.isArray(b.preventive_actions) || b.preventive_actions.length < 1)
     errors.preventive_actions = ['Requires at least 1 action'];
   else if (b.preventive_actions.some(a => !a || String(a).trim().length < 50))

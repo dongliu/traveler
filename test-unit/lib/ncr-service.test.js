@@ -241,7 +241,6 @@ describe('lib/ncr-service — submitDisposition', () => {
 
     const data = {
       parts_disposition: 'Rework',
-      root_cause_documentation: 'Root cause explanation exceeding fifty characters for validation',
       rework_repair_instructions: 'Detailed rework instructions exceeding fifty characters for validation',
       preventive_actions: ['Update work instruction', 'Retrain operator'],
     };
@@ -257,13 +256,27 @@ describe('lib/ncr-service — submitDisposition', () => {
     result.events.some(e => e.event_type === 'notification.qa_notification').should.be.true;
   });
 
+  it('succeeds without root_cause_documentation (field removed from disposition)', async () => {
+    stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+
+    const data = {
+      parts_disposition: 'Use-As-Is',
+      preventive_actions: ['Preventive action description exceeding fifty characters for validation purposes.'],
+    };
+
+    const result = await submitDisposition('id1', data, user);
+
+    result.status.should.equal('Dispositioned');
+    (result.disposition.root_cause_documentation === undefined).should.be.true;
+  });
+
   it('does not require rework_repair_instructions for a Use-As-Is disposition', async () => {
     stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
 
     const data = {
       parts_disposition: 'Use-As-Is',
-      root_cause_documentation: 'Root cause explanation exceeding fifty characters for validation',
       preventive_actions: ['Update work instruction'],
     };
 
