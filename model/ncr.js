@@ -135,7 +135,6 @@ const NcrSchema = new Schema({
       type: String,
       enum: ['Rework', 'Repair', 'Return to Vendor', 'Scrap', 'Use-As-Is'],
     },
-    root_cause_documentation: String,
     rework_repair_instructions: String,
     ce_cs_identity: String,
     ce_cs_timestamp: Date,
