@@ -242,8 +242,8 @@ block content
         fieldset
           legend
             | Event Timeline&nbsp;
-            a.btn.btn-mini#timeline-toggle(href='#') Hide
-          .event-timeline#event-timeline
+            a.btn.btn-mini#timeline-toggle(href='#') Show
+          .event-timeline#event-timeline(style='display:none')
             each event in ncr.events.slice().reverse()
               .event-entry
                 span.badge= event.event_type
