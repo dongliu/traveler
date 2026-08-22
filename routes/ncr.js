@@ -183,10 +183,12 @@ router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
 
   if (!b.parts_disposition || !PARTS_DISPOSITIONS.includes(b.parts_disposition))
     errors.parts_disposition = [`Must be one of: ${PARTS_DISPOSITIONS.join(', ')}`];
-  if (!Array.isArray(b.preventive_actions) || b.preventive_actions.length < 1)
-    errors.preventive_actions = ['Requires at least 1 action'];
-  else if (b.preventive_actions.some(a => !a || String(a).trim().length < 50))
-    errors.preventive_actions = ['Each action must be at least 50 characters long'];
+  if (b.preventive_actions !== undefined) {
+    if (!Array.isArray(b.preventive_actions))
+      errors.preventive_actions = ['Must be an array'];
+    else if (b.preventive_actions.some(a => !a || String(a).trim().length < 50))
+      errors.preventive_actions = ['Each action must be at least 50 characters long'];
+  }
   if (['Rework', 'Repair'].includes(b.parts_disposition)) {
     if (!b.rework_repair_instructions || b.rework_repair_instructions.length < 50)
       errors.rework_repair_instructions = ["Required when parts_disposition is 'Rework' or 'Repair'"];

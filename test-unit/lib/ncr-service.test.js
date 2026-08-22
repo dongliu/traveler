@@ -271,6 +271,35 @@ describe('lib/ncr-service — submitDisposition', () => {
     (result.disposition.root_cause_documentation === undefined).should.be.true;
   });
 
+  it('succeeds with zero preventive actions (field no longer required)', async () => {
+    stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+
+    const data = {
+      parts_disposition: 'Use-As-Is',
+      preventive_actions: [],
+    };
+
+    const result = await submitDisposition('id1', data, user);
+
+    result.status.should.equal('Dispositioned');
+    result.preventive_actions.should.have.lengthOf(0);
+  });
+
+  it('succeeds when preventive_actions is omitted entirely', async () => {
+    stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+
+    const data = {
+      parts_disposition: 'Use-As-Is',
+    };
+
+    const result = await submitDisposition('id1', data, user);
+
+    result.status.should.equal('Dispositioned');
+    result.preventive_actions.should.have.lengthOf(0);
+  });
+
   it('does not require rework_repair_instructions for a Use-As-Is disposition', async () => {
     stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });

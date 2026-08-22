@@ -213,6 +213,41 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     expect(qaNotificationEvent).toBeTruthy();
   });
 
+  test('AS4b - submission succeeds with zero Preventive Actions (field is optional)', async ({ page }) => {
+    const { ncrId } = await createTestNcr();
+    await page.goto(`/ncrs/${ncrId}/disposition`);
+
+    await page.check('input[name="parts_disposition"][value="Use-As-Is"]');
+    // The default Preventive Action textarea is intentionally left blank.
+
+    await submitDispositionAndWaitForSuccess(page);
+
+    await expect(page.locator('#disp-success')).toBeVisible();
+
+    const { ncr } = await execFixtureCli('get-ncr', {
+      ncrId,
+      fields: ['status', 'preventive_actions'],
+    });
+    expect(ncr.status).toBe('Dispositioned');
+    expect(ncr.preventive_actions).toHaveLength(0);
+  });
+
+  test('server accepts a disposition payload that omits preventive_actions entirely', async ({ page }) => {
+    // Defense-in-depth: verifies routes/ncr.js accepts a missing
+    // preventive_actions key directly, bypassing the browser form.
+    const { ncrId } = await createTestNcr();
+
+    const res = await patchDispositionWithRetry(page.request, ncrId, {
+      parts_disposition: 'Use-As-Is',
+    });
+
+    expect(res.status()).toBe(200);
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'preventive_actions'] });
+    expect(ncr.status).toBe('Dispositioned');
+    expect(ncr.preventive_actions).toHaveLength(0);
+  });
+
   test('server rejects an invalid disposition payload independent of client-side checks', async ({ page }) => {
     // Defense-in-depth: verifies routes/ncr.js's own field validation
     // directly, bypassing the browser form entirely, so a regression there is

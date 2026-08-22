@@ -60,11 +60,10 @@ block content
 
       fieldset
         legend Preventive Actions
-        p.help-block Each action must be at least 50 characters and describe a measurable corrective step.
+        p.help-block Optional. If provided, each action must be at least 50 characters and describe a measurable corrective step.
         #pa-list
           .pa-entry.control-group
             label.control-label Action 1
-              span.text-error *
             .controls
               textarea.pa-textarea(rows='3', maxlength='1000', placeholder='Minimum 50 characters')
               span.pa-counter.help-block 0 / 1000
@@ -119,7 +118,7 @@ block js
       $('#add-pa').on('click', function () {
         paCount++;
         var entry = $('<div class="pa-entry control-group">' +
-          '<label class="control-label">Action ' + paCount + ' <span class="text-error">*</span></label>' +
+          '<label class="control-label">Action ' + paCount + '</label>' +
           '<div class="controls">' +
           '<textarea class="pa-textarea" rows="3" maxlength="1000" placeholder="Minimum 50 characters"></textarea>' +
           '<span class="pa-counter help-block">0 / 1000</span>' +
@@ -132,7 +131,7 @@ block js
       $(document).on('click', '.remove-pa', function () {
         $(this).closest('.pa-entry').remove();
         $('#pa-list .pa-entry').each(function (i) {
-          $(this).find('label').first().html('Action ' + (i + 1) + ' <span class="text-error">*</span>');
+          $(this).find('label').first().text('Action ' + (i + 1));
         });
         paCount = $('#pa-list .pa-entry').length;
       });
@@ -148,10 +147,11 @@ block js
         var paValid = true;
         $('.pa-textarea').each(function () {
           var v = $(this).val().trim();
+          if (v.length === 0) return;
           if (v.length < 50) paValid = false;
           pas.push(v);
         });
-        if (!paValid || pas.length === 0) errors.push('Each Preventive Action must be at least 50 characters.');
+        if (!paValid) errors.push('Each Preventive Action must be at least 50 characters.');
 
         var rri = '';
         if (pd === 'Rework' || pd === 'Repair') {
