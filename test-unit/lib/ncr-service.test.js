@@ -569,9 +569,33 @@ describe('lib/ncr-service — closeNcr', () => {
     await expectRejection(closeNcr('id1', { closure_notes: 'x'.repeat(30) }, originator), 409);
   });
 
-  it('throws 400 when closure_notes is missing or too short', async () => {
+  it('throws 400 when closure_notes is missing', async () => {
     stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1' }));
-    await expectRejection(closeNcr('id1', { closure_notes: 'too short' }, originator), 400);
+    await expectRejection(closeNcr('id1', {}, originator), 400);
+  });
+
+  it('throws 400 when closure_notes is empty/whitespace', async () => {
+    stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1' }));
+    await expectRejection(closeNcr('id1', { closure_notes: '   ' }, originator), 400);
+  });
+
+  it('accepts closure_notes of any non-empty length (no minimum character requirement)', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      ce_cs_id: 'ces1',
+      qa_staff_identity: 'qa1',
+    }));
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'ces1', name: 'CES', email: 'ces@test.com' },
+      { _id: 'qa1', name: 'QA', email: 'qa@test.com' },
+    ]);
+
+    const result = await closeNcr('id1', { closure_notes: 'ok' }, originator);
+
+    result.status.should.equal('Closed');
+    result.closure_record.closure_notes.should.equal('ok');
   });
 
   it('throws 400 when a Traveler-linked NCR is closed without traveler_signed_off', async () => {

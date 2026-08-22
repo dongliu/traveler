@@ -55,17 +55,17 @@ block content
           label.control-label(for='rework_repair_instructions') Rework / Repair Instructions
             span.text-error *
           .controls
-            textarea#rework_repair_instructions(name='rework_repair_instructions', rows='5', maxlength='5000', placeholder='Minimum 50 characters — detailed step-by-step instructions')
+            textarea#rework_repair_instructions(name='rework_repair_instructions', rows='5', maxlength='5000', placeholder='Detailed step-by-step instructions')
             span#rri-counter.help-block 0 / 5000
 
       fieldset
         legend Preventive Actions
-        p.help-block Optional. If provided, each action must be at least 50 characters and describe a measurable corrective step.
+        p.help-block Optional. If provided, describe a measurable corrective step.
         #pa-list
           .pa-entry.control-group
             label.control-label Action 1
             .controls
-              textarea.pa-textarea(rows='3', maxlength='1000', placeholder='Minimum 50 characters')
+              textarea.pa-textarea(rows='3', maxlength='1000')
               span.pa-counter.help-block 0 / 1000
         .control-group
           .controls
@@ -120,7 +120,7 @@ block js
         var entry = $('<div class="pa-entry control-group">' +
           '<label class="control-label">Action ' + paCount + '</label>' +
           '<div class="controls">' +
-          '<textarea class="pa-textarea" rows="3" maxlength="1000" placeholder="Minimum 50 characters"></textarea>' +
+          '<textarea class="pa-textarea" rows="3" maxlength="1000"></textarea>' +
           '<span class="pa-counter help-block">0 / 1000</span>' +
           '<button type="button" class="btn btn-sm btn-danger remove-pa" style="margin-top:4px">' +
           '<i class="fa fa-minus"></i> Remove</button>' +
@@ -144,19 +144,16 @@ block js
         if (!pd) errors.push('Parts Disposition is required.');
 
         var pas = [];
-        var paValid = true;
         $('.pa-textarea').each(function () {
           var v = $(this).val().trim();
           if (v.length === 0) return;
-          if (v.length < 50) paValid = false;
           pas.push(v);
         });
-        if (!paValid) errors.push('Each Preventive Action must be at least 50 characters.');
 
         var rri = '';
         if (pd === 'Rework' || pd === 'Repair') {
           rri = $('#rework_repair_instructions').val().trim();
-          if (rri.length < 50) errors.push('Rework/Repair Instructions must be at least 50 characters.');
+          if (rri.length === 0) errors.push('Rework/Repair Instructions is required when Rework or Repair is selected.');
         }
 
         if (errors.length) {

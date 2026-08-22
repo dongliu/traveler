@@ -69,8 +69,8 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
   if (!b.supplier_name) errors.supplier_name = ['Required'];
   if (!b.wbs_number) errors.wbs_number = ['Required'];
   if (!b.ce_cs_name) errors.ce_cs_name = ['Required'];
-  if (!b.description_of_nonconformance || b.description_of_nonconformance.length < 20)
-    errors.description_of_nonconformance = ['Must be at least 20 characters long'];
+  if (!b.description_of_nonconformance)
+    errors.description_of_nonconformance = ['Required'];
   if (!b.discovery_date)
     errors.discovery_date = ['Required'];
   else if (new Date(b.discovery_date) > new Date())
@@ -186,11 +186,11 @@ router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
   if (b.preventive_actions !== undefined) {
     if (!Array.isArray(b.preventive_actions))
       errors.preventive_actions = ['Must be an array'];
-    else if (b.preventive_actions.some(a => !a || String(a).trim().length < 50))
-      errors.preventive_actions = ['Each action must be at least 50 characters long'];
+    else if (b.preventive_actions.some(a => !a || !String(a).trim()))
+      errors.preventive_actions = ['Each action must not be empty'];
   }
   if (['Rework', 'Repair'].includes(b.parts_disposition)) {
-    if (!b.rework_repair_instructions || b.rework_repair_instructions.length < 50)
+    if (!b.rework_repair_instructions)
       errors.rework_repair_instructions = ["Required when parts_disposition is 'Rework' or 'Repair'"];
   }
 
@@ -351,8 +351,8 @@ router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
     preventive_actions_verified: req.body.preventive_actions_verified,
     traveler_signed_off: req.body.traveler_signed_off,
   };
-  if (!b.closure_notes || b.closure_notes.length < 20)
-    errors.closure_notes = ['Required and must be at least 20 characters'];
+  if (!b.closure_notes)
+    errors.closure_notes = ['Required'];
 
   if (Object.keys(errors).length > 0)
     return res.status(400).json({ success: false, error: 'Validation Error', message: 'Validation failed', details: errors });

@@ -91,7 +91,7 @@ block content
           label.control-label(for='description_of_nonconformance') Description of Nonconformance
             span.text-error *
           .controls
-            textarea#description_of_nonconformance(name='description_of_nonconformance', rows='5', maxlength='2000', required, placeholder='Minimum 20 characters')
+            textarea#description_of_nonconformance(name='description_of_nonconformance', rows='5', maxlength='2000', required)
             span#desc-counter.help-block 0 / 2000
       .control-group
         .controls
@@ -130,7 +130,6 @@ block js
         e.preventDefault();
         var errors = [];
         var desc = $('#description_of_nonconformance').val().trim();
-        if (desc.length < 20) errors.push('Description of Nonconformance must be at least 20 characters.');
         if (!$('input[name="discovery_context"]:checked').val()) errors.push('Discovery Context is required.');
 
         var ceCsName = $('#ce_cs_name').val().trim();

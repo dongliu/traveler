@@ -147,7 +147,7 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
 
     await expect(page.locator('#disp-error')).toBeVisible();
     await expect(page.locator('#disp-error-msg')).toContainText(
-      'Rework/Repair Instructions must be at least 50 characters.'
+      'Rework/Repair Instructions is required when Rework or Repair is selected.'
     );
     await expect(page.locator('#disp-success')).toBeHidden();
 
@@ -213,6 +213,27 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     expect(qaNotificationEvent).toBeTruthy();
   });
 
+  test('AS4c - Preventive Actions and Rework/Repair Instructions of any length are accepted (no minimum character requirement)', async ({ page }) => {
+    const { ncrId } = await createTestNcr();
+    await page.goto(`/ncrs/${ncrId}/disposition`);
+
+    await page.check('input[name="parts_disposition"][value="Rework"]');
+    await page.fill('#rework_repair_instructions', 'Sand it.');
+    await page.locator('.pa-textarea').first().fill('Fix it.');
+
+    await submitDispositionAndWaitForSuccess(page);
+
+    await expect(page.locator('#disp-success')).toBeVisible();
+
+    const { ncr } = await execFixtureCli('get-ncr', {
+      ncrId,
+      fields: ['status', 'disposition', 'preventive_actions'],
+    });
+    expect(ncr.status).toBe('Dispositioned');
+    expect(ncr.disposition.rework_repair_instructions).toBe('Sand it.');
+    expect(ncr.preventive_actions[0].action_description).toBe('Fix it.');
+  });
+
   test('AS4b - submission succeeds with zero Preventive Actions (field is optional)', async ({ page }) => {
     const { ncrId } = await createTestNcr();
     await page.goto(`/ncrs/${ncrId}/disposition`);
@@ -257,7 +278,7 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     const res = await page.request.patch(`/api/ncrs/${ncrId}/disposition`, {
       data: {
         parts_disposition: 'Rework',
-        preventive_actions: ['also too short'],
+        preventive_actions: [''],
       },
     });
 
