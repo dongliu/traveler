@@ -1,0 +1,77 @@
+{
+  "endpoint": "POST /api/wbs-notifications",
+  "description": "Add a new WBS number and its notification email to the registry (FR-002).",
+  "authentication": "Required (session)",
+  "authorization": "Admin role only (reqUtils.requireAdmin())",
+  "request": {
+    "parameters": {},
+    "headers": { "Content-Type": "application/json" },
+    "body": {
+      "type": "object",
+      "properties": {
+        "wbs_number": {
+          "type": "string",
+          "description": "One or more non-empty segments separated by single '.' characters; trimmed before validation (FR-003)"
+        },
+        "notification_email": {
+          "type": "string",
+          "description": "Syntactically valid email address; trimmed before validation (FR-005)"
+        }
+      },
+      "required": ["wbs_number", "notification_email"]
+    }
+  },
+  "response": {
+    "success_201": {
+      "statusCode": 201,
+      "body": {
+        "success": true,
+        "entry": {
+          "wbs_number": "string",
+          "notification_email": "string",
+          "created_by": "string",
+          "created_by_name": "string",
+          "created_at": "ISO date string",
+          "updated_at": "ISO date string"
+        }
+      }
+    },
+    "errors": {
+      "validation_400": {
+        "statusCode": 400,
+        "body": {
+          "success": false,
+          "error": "Validation Error",
+          "message": "Validation failed",
+          "details": {
+            "wbs_number": ["Must be one or more non-empty segments separated by single '.' characters"],
+            "notification_email": ["Must be a syntactically valid email address"]
+          }
+        }
+      },
+      "unauthorized_401": {
+        "statusCode": 401,
+        "body": { "success": false, "error": "Unauthorized", "message": "Authentication required" }
+      },
+      "forbidden_403": {
+        "statusCode": 403,
+        "body": "you are not authorized to access this resource"
+      },
+      "conflict_409": {
+        "statusCode": 409,
+        "body": {
+          "success": false,
+          "error": "Conflict",
+          "message": "WBS number already exists in the registry: {wbs_number}"
+        }
+      }
+    }
+  },
+  "side_effects": [
+    "Creates a new WbsNotification document with created_by/created_by_name set from the session user (FR-010)"
+  ],
+  "notes": [
+    "Uniqueness check (FR-004) is case-sensitive and exact, after trimming — 'WBS.1.2' and 'wbs.1.2' are treated as different entries",
+    "The service-layer pre-check for duplicates produces the clean 409 shown above; the database's own unique index on wbs_number is a second line of defense against a race between two concurrent adds of the same number"
+  ]
+}

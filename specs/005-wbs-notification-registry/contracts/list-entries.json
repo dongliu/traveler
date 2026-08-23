@@ -1,0 +1,45 @@
+{
+  "endpoint": "GET /api/wbs-notifications",
+  "description": "List every WBS Notification Registry entry (FR-001).",
+  "authentication": "Required (session)",
+  "authorization": "Admin role only (reqUtils.requireAdmin())",
+  "request": {
+    "parameters": {},
+    "body": null
+  },
+  "response": {
+    "success_200": {
+      "statusCode": 200,
+      "body": {
+        "success": true,
+        "entries": [
+          {
+            "wbs_number": "string",
+            "notification_email": "string",
+            "created_by": "string",
+            "created_by_name": "string",
+            "updated_by": "string",
+            "updated_by_name": "string",
+            "created_at": "ISO date string",
+            "updated_at": "ISO date string"
+          }
+        ]
+      }
+    },
+    "errors": {
+      "unauthorized_401": {
+        "statusCode": 401,
+        "body": { "success": false, "error": "Unauthorized", "message": "Authentication required" }
+      },
+      "forbidden_403": {
+        "statusCode": 403,
+        "body": "you are not authorized to access this resource"
+      }
+    }
+  },
+  "side_effects": [],
+  "notes": [
+    "Returns an empty array (not an error) when the registry has no entries, per spec.md User Story 1 Acceptance Scenario 2",
+    "No pagination — expected registry size is small (tens to low hundreds of entries) per plan.md Scale/Scope"
+  ]
+}
