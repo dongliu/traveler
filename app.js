@@ -37,6 +37,7 @@ require('./model/traveler');
 require('./model/binder');
 require('./model/history');
 require('./model/ncr');
+require('./model/wbs-notification');
 
 // Connect to mongo database
 let mongoAddress = 'mongodb://';
@@ -185,6 +186,7 @@ require('./routes/profile')(app);
 require('./routes/ldaplogin')(app);
 require('./routes/ncr-view')(app);
 app.use('/api/ncrs', require('./routes/ncr'));
+app.use('/api/wbs-notifications', require('./routes/wbs-notification'));
 
 app.get('/api', function(req, res) {
   res.render('api', {

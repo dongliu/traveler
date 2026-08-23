@@ -19,8 +19,8 @@ Single Express MVC project at repo root — `model/`, `lib/`, `routes/`, `views/
 
 **Purpose**: Register the new model and mount the new route so the rest of the app can see them.
 
-- [ ] T001 Create `model/wbs-notification.js` — Mongoose schema for `WbsNotification` per data-model.md (fields: `wbs_number` unique/trim/required, `notification_email` required/trim, `created_by`, `created_by_name`, `updated_by`, `updated_by_name`, `created_at`/`updated_at` defaulting to `Date.now`); export `{ WbsNotification }` matching the `{ Ncr }` export style in `model/ncr.js`
-- [ ] T002 In `app.js`: add `require('./model/wbs-notification');` alongside the existing `require('./model/ncr');`, and mount `app.use('/api/wbs-notifications', require('./routes/wbs-notification'));` alongside the existing `app.use('/api/ncrs', require('./routes/ncr'));`
+- [X] T001 Create `model/wbs-notification.js` — Mongoose schema for `WbsNotification` per data-model.md (fields: `wbs_number` unique/trim/required, `notification_email` required/trim, `created_by`, `created_by_name`, `updated_by`, `updated_by_name`, `created_at`/`updated_at` defaulting to `Date.now`); export `{ WbsNotification }` matching the `{ Ncr }` export style in `model/ncr.js`
+- [X] T002 In `app.js`: add `require('./model/wbs-notification');` alongside the existing `require('./model/ncr');`, and mount `app.use('/api/wbs-notifications', require('./routes/wbs-notification'));` alongside the existing `app.use('/api/ncrs', require('./routes/ncr'));`
 
 **Checkpoint**: Model registered, route mount point wired (route file created in Phase 2).
 
@@ -32,8 +32,8 @@ Single Express MVC project at repo root — `model/`, `lib/`, `routes/`, `views/
 
 **⚠️ CRITICAL**: No user story route can be implemented until this phase is complete.
 
-- [ ] T003 Create `lib/wbs-notification-service.js` with the WBS-number format validator per research.md Decision 4 (`^[^.]+(\.[^.]+)*$` after trim) and the email-shape validator per research.md Decision 5 (pragmatic `local@domain` check, not full RFC 5322) as internal helper functions, both exported for direct unit testing
-- [ ] T004 In `routes/wbs-notification.js`: scaffold the Express router, import `auth.ensureAuthenticated` and `reqUtils.requireAdmin()`, and register all four routes (`GET /`, `POST /`, `PATCH /:wbsNumber`, `DELETE /:wbsNumber`) each chained with both middlewares per data-model.md's REST Contract table and research.md Decision 1 — bodies implemented in the user-story phases below
+- [X] T003 Create `lib/wbs-notification-service.js` with the WBS-number format validator per research.md Decision 4 (`^[^.]+(\.[^.]+)*$` after trim) and the email-shape validator per research.md Decision 5 (pragmatic `local@domain` check, not full RFC 5322) as internal helper functions, both exported for direct unit testing
+- [X] T004 In `routes/wbs-notification.js`: scaffold the Express router, import `auth.ensureAuthenticated` and `reqUtils.requireAdmin()`, and register all four routes (`GET /`, `POST /`, `PATCH /:wbsNumber`, `DELETE /:wbsNumber`) each chained with both middlewares per data-model.md's REST Contract table and research.md Decision 1 — bodies implemented in the user-story phases below
 
 **Checkpoint**: Validators and route skeleton exist — user story implementation can now begin.
 
@@ -47,14 +47,14 @@ Single Express MVC project at repo root — `model/`, `lib/`, `routes/`, `views/
 
 ### Tests for User Story 1
 
-- [ ] T005 [P] [US1] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `listEntries()` returns all entries sorted in a stable order, and returns `[]` (not an error) when the collection is empty
+- [X] T005 [P] [US1] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `listEntries()` returns all entries sorted in a stable order, and returns `[]` (not an error) when the collection is empty
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Implement `listEntries()` in `lib/wbs-notification-service.js` — `WbsNotification.find({}).lean()`, per data-model.md Service Layer Functions
-- [ ] T007 [US1] Implement `GET /` handler body in `routes/wbs-notification.js` per contracts/list-entries.json: call `listEntries()`, return `200 { success: true, entries }`
-- [ ] T008 [US1] Add "WBS Notifications" tab to `views/admin.jade` — third `li` in the existing `ul.nav.nav-tabs` (alongside `#users`/`#groups`), new `#wbs-notifications.tab-pane` with `table#wbs-notifications-table.table.table-bordered.table-hover`, and `append js` script tag for the new `wbs-notifications.js` client script (mirrors the existing `#groups` tab structure at lines ~68-79)
-- [ ] T009 [US1] Create `public/javascripts/wbs-notifications.js` — on tab load, `fetch('/api/wbs-notifications')` (or `$.ajax`, matching `public/javascripts/groups.js`'s existing style) and populate `#wbs-notifications-table` via DataTables, one row per entry showing WBS number and email
+- [X] T006 [US1] Implement `listEntries()` in `lib/wbs-notification-service.js` — `WbsNotification.find({}).lean()`, per data-model.md Service Layer Functions
+- [X] T007 [US1] Implement `GET /` handler body in `routes/wbs-notification.js` per contracts/list-entries.json: call `listEntries()`, return `200 { success: true, entries }`
+- [X] T008 [US1] Add "WBS Notifications" tab to `views/admin.jade` — third `li` in the existing `ul.nav.nav-tabs` (alongside `#users`/`#groups`), new `#wbs-notifications.tab-pane` with `table#wbs-notifications-table.table.table-bordered.table-hover`, and `append js` script tag for the new `wbs-notifications.js` client script (mirrors the existing `#groups` tab structure at lines ~68-79)
+- [X] T009 [US1] Create `public/javascripts/wbs-notifications.js` — on tab load, `fetch('/api/wbs-notifications')` (or `$.ajax`, matching `public/javascripts/groups.js`'s existing style) and populate `#wbs-notifications-table` via DataTables, one row per entry showing WBS number and email
 
 **Checkpoint**: Registry is viewable end-to-end (empty and populated). Deployable/demoable as-is — no add/update/remove yet.
 
@@ -68,14 +68,14 @@ Single Express MVC project at repo root — `model/`, `lib/`, `routes/`, `views/
 
 ### Tests for User Story 2
 
-- [ ] T010 [P] [US2] Unit tests in `test-unit/lib/wbs-notification-service.test.js` for `addEntry()`: succeeds and sets `created_by`/`created_by_name`/timestamps for a valid, unused WBS number; throws 400 for a WBS number missing/failing the segment-format rule (cases: `''`, `'1..2'`, `'.1.2'`, `'1.2.'`); throws 400 for an invalid email; throws 409 for a WBS number that already exists (case-sensitive exact match, including a same-number-different-case case that should NOT collide)
+- [X] T010 [P] [US2] Unit tests in `test-unit/lib/wbs-notification-service.test.js` for `addEntry()`: succeeds and sets `created_by`/`created_by_name`/timestamps for a valid, unused WBS number; throws 400 for a WBS number missing/failing the segment-format rule (cases: `''`, `'1..2'`, `'.1.2'`, `'1.2.'`); throws 400 for an invalid email; throws 409 for a WBS number that already exists (case-sensitive exact match, including a same-number-different-case case that should NOT collide)
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] Implement `addEntry(data, user)` in `lib/wbs-notification-service.js` per data-model.md: trim inputs, run the format/email validators from T003, check for an existing document with the same `wbs_number` (throw `err.status = 409` if found), otherwise create the document with `created_by`/`created_by_name` from `user`
-- [ ] T012 [US2] Implement `POST /` handler body in `routes/wbs-notification.js` per contracts/add-entry.json: read `wbs_number`/`notification_email` from `req.body`, build `user` from `req.session.userid`/`res.locals.username` (matching the pattern in `routes/ncr.js`'s `POST /`), call `addEntry()`, map `err.status` to the correct response (400/409) the same way `routes/ncr.js`'s `mapServiceError` does, return `201 { success: true, entry }` on success
-- [ ] T013 [US2] Add the inline add-entry form to the `#wbs-notifications` tab in `views/admin.jade` (`form.form-inline` with WBS number + email text inputs and a submit button, mirroring the `#groups` tab's `form.form-inline` add-group form)
-- [ ] T014 [US2] Extend `public/javascripts/wbs-notifications.js`: wire the add-form submit to `POST /api/wbs-notifications`, on success refresh the table, on 400/409 error surface the server's `message`/`details` near the form (mirroring the error-display pattern in `views/ncr-create.jade`'s create-form JS)
+- [X] T011 [US2] Implement `addEntry(data, user)` in `lib/wbs-notification-service.js` per data-model.md: trim inputs, run the format/email validators from T003, check for an existing document with the same `wbs_number` (throw `err.status = 409` if found), otherwise create the document with `created_by`/`created_by_name` from `user`
+- [X] T012 [US2] Implement `POST /` handler body in `routes/wbs-notification.js` per contracts/add-entry.json: read `wbs_number`/`notification_email` from `req.body`, build `user` from `req.session.userid`/`res.locals.username` (matching the pattern in `routes/ncr.js`'s `POST /`), call `addEntry()`, map `err.status` to the correct response (400/409) the same way `routes/ncr.js`'s `mapServiceError` does, return `201 { success: true, entry }` on success
+- [X] T013 [US2] Add the inline add-entry form to the `#wbs-notifications` tab in `views/admin.jade` (`form.form-inline` with WBS number + email text inputs and a submit button, mirroring the `#groups` tab's `form.form-inline` add-group form)
+- [X] T014 [US2] Extend `public/javascripts/wbs-notifications.js`: wire the add-form submit to `POST /api/wbs-notifications`, on success refresh the table, on 400/409 error surface the server's `message`/`details` near the form (mirroring the error-display pattern in `views/ncr-create.jade`'s create-form JS)
 
 **Checkpoint**: Registry is viewable AND addable-to, with all three rejection paths (format/duplicate/email) working end-to-end.
 
@@ -89,14 +89,14 @@ Single Express MVC project at repo root — `model/`, `lib/`, `routes/`, `views/
 
 ### Tests for User Story 3
 
-- [ ] T015 [P] [US3] Unit tests in `test-unit/lib/wbs-notification-service.test.js` for `updateEntry()`: succeeds and sets `notification_email`/`updated_by`/`updated_by_name`/`updated_at` for an existing WBS number; throws 400 for an invalid email and leaves the stored email unchanged; throws 404 for a WBS number not in the registry
+- [X] T015 [P] [US3] Unit tests in `test-unit/lib/wbs-notification-service.test.js` for `updateEntry()`: succeeds and sets `notification_email`/`updated_by`/`updated_by_name`/`updated_at` for an existing WBS number; throws 400 for an invalid email and leaves the stored email unchanged; throws 404 for a WBS number not in the registry
 
 ### Implementation for User Story 3
 
-- [ ] T016 [US3] Implement `updateEntry(wbsNumber, data, user)` in `lib/wbs-notification-service.js` per data-model.md: look up the document by exact `wbs_number` (throw `err.status = 404` if not found), validate the new email via the T003 validator (throw 400, leaving the document untouched, if invalid), otherwise set `notification_email`/`updated_by`/`updated_by_name`/`updated_at` and save
-- [ ] T017 [US3] Implement `PATCH /:wbsNumber` handler body in `routes/wbs-notification.js` per contracts/update-entry.json: decode `req.params.wbsNumber`, read `notification_email` from `req.body`, build `user` the same way as T012, call `updateEntry()`, map `err.status` to 400/404, return `200 { success: true, entry }` on success
-- [ ] T018 [US3] Add an inline "Edit" affordance per row in the `#wbs-notifications-table` (edit icon/button that reveals an email input + save button for that row, mirroring the disposition/preventive-action inline-edit pattern already used in `views/ncr-detail.jade`)
-- [ ] T019 [US3] Extend `public/javascripts/wbs-notifications.js`: wire the per-row edit-save action to `PATCH /api/wbs-notifications/:wbsNumber` (URL-encode the WBS number), on success update just that row, on 400/404 error surface the server's message inline near the row
+- [X] T016 [US3] Implement `updateEntry(wbsNumber, data, user)` in `lib/wbs-notification-service.js` per data-model.md: look up the document by exact `wbs_number` (throw `err.status = 404` if not found), validate the new email via the T003 validator (throw 400, leaving the document untouched, if invalid), otherwise set `notification_email`/`updated_by`/`updated_by_name`/`updated_at` and save
+- [X] T017 [US3] Implement `PATCH /:wbsNumber` handler body in `routes/wbs-notification.js` per contracts/update-entry.json: decode `req.params.wbsNumber`, read `notification_email` from `req.body`, build `user` the same way as T012, call `updateEntry()`, map `err.status` to 400/404, return `200 { success: true, entry }` on success
+- [X] T018 [US3] Add an inline "Edit" affordance per row in the `#wbs-notifications-table` (edit icon/button that reveals an email input + save button for that row, mirroring the disposition/preventive-action inline-edit pattern already used in `views/ncr-detail.jade`)
+- [X] T019 [US3] Extend `public/javascripts/wbs-notifications.js`: wire the per-row edit-save action to `PATCH /api/wbs-notifications/:wbsNumber` (URL-encode the WBS number), on success update just that row, on 400/404 error surface the server's message inline near the row
 
 **Checkpoint**: View, add, and update are all working end-to-end — this is the full P1 scope from spec.md.
 
@@ -110,14 +110,14 @@ Single Express MVC project at repo root — `model/`, `lib/`, `routes/`, `views/
 
 ### Tests for User Story 4
 
-- [ ] T020 [P] [US4] Unit tests in `test-unit/lib/wbs-notification-service.test.js` for `removeEntry()`: deletes an existing entry and it no longer appears in `listEntries()`; throws 404 for a WBS number not in the registry
+- [X] T020 [P] [US4] Unit tests in `test-unit/lib/wbs-notification-service.test.js` for `removeEntry()`: deletes an existing entry and it no longer appears in `listEntries()`; throws 404 for a WBS number not in the registry
 
 ### Implementation for User Story 4
 
-- [ ] T021 [US4] Implement `removeEntry(wbsNumber, user)` in `lib/wbs-notification-service.js` per data-model.md: look up and delete the document by exact `wbs_number` (throw `err.status = 404` if not found)
-- [ ] T022 [US4] Implement `DELETE /:wbsNumber` handler body in `routes/wbs-notification.js` per contracts/remove-entry.json: decode `req.params.wbsNumber`, build `user` the same way as T012 (audit context, even though `removeEntry` itself doesn't persist it), call `removeEntry()`, map `err.status` to 404, return `200 { success: true }` on success
-- [ ] T023 [US4] Add a "Remove" button per row in the `#wbs-notifications-table` with a confirmation prompt (mirroring the "Delete Selected Group(s)" pattern already in the `#groups` tab)
-- [ ] T024 [US4] Extend `public/javascripts/wbs-notifications.js`: wire the per-row remove action to `DELETE /api/wbs-notifications/:wbsNumber`, on success remove the row from the table, on 404 surface a clear message (defensive — should be rare via the UI itself, but exercised directly against the API per quickstart.md Scenario 4)
+- [X] T021 [US4] Implement `removeEntry(wbsNumber, user)` in `lib/wbs-notification-service.js` per data-model.md: look up and delete the document by exact `wbs_number` (throw `err.status = 404` if not found)
+- [X] T022 [US4] Implement `DELETE /:wbsNumber` handler body in `routes/wbs-notification.js` per contracts/remove-entry.json: decode `req.params.wbsNumber`, build `user` the same way as T012 (audit context, even though `removeEntry` itself doesn't persist it), call `removeEntry()`, map `err.status` to 404, return `200 { success: true }` on success
+- [X] T023 [US4] Add a "Remove" button per row in the `#wbs-notifications-table` with a confirmation prompt (mirroring the "Delete Selected Group(s)" pattern already in the `#groups` tab)
+- [X] T024 [US4] Extend `public/javascripts/wbs-notifications.js`: wire the per-row remove action to `DELETE /api/wbs-notifications/:wbsNumber`, on success remove the row from the table, on 404 surface a clear message (defensive — should be rare via the UI itself, but exercised directly against the API per quickstart.md Scenario 4)
 
 **Checkpoint**: All four user stories complete — full CRUD registry, matching spec.md end to end.
 
@@ -127,10 +127,10 @@ Single Express MVC project at repo root — `model/`, `lib/`, `routes/`, `views/
 
 **Purpose**: Authorization coverage and end-to-end verification across all four stories together.
 
-- [ ] T025 [P] Unit tests in `test-unit/lib/wbs-notification-service.test.js`: confirm every service function is pure business logic with no implicit auth assumptions (auth is enforced at the route layer, not the service layer, per data-model.md — so these tests just confirm the functions work correctly given any caller)
-- [ ] T026 [P] Create `e2e/us-wbs-notification-registry.spec.js`: full Admin CRUD flow through the real `/admin/` UI (view empty state → add → duplicate-add rejected → malformed-WBS rejected → invalid-email rejected → update email → update with invalid email leaves it unchanged → update nonexistent WBS returns 404 → remove → remove nonexistent WBS returns 404), plus a non-admin-user 403 check for each of the four API routes hit directly (per quickstart.md Scenario 5)
-- [ ] T027 Run `TRAVELER_CONFIG_REL_PATH=docker npx mocha test-unit/lib/wbs-notification-service.test.js` and confirm all unit tests pass
-- [ ] T028 Run `npx playwright test us-wbs-notification-registry.spec.js` (from `e2e/`, Docker stack running) and confirm all e2e tests pass
+- [X] T025 [P] Unit tests in `test-unit/lib/wbs-notification-service.test.js`: confirm every service function is pure business logic with no implicit auth assumptions (auth is enforced at the route layer, not the service layer, per data-model.md — so these tests just confirm the functions work correctly given any caller)
+- [X] T026 [P] Create `e2e/us-wbs-notification-registry.spec.js`: full Admin CRUD flow through the real `/admin/` UI (view empty state → add → duplicate-add rejected → malformed-WBS rejected → invalid-email rejected → update email → update with invalid email leaves it unchanged → update nonexistent WBS returns 404 → remove → remove nonexistent WBS returns 404), plus a non-admin-user 403 check for each of the four API routes hit directly (per quickstart.md Scenario 5)
+- [X] T027 Run `TRAVELER_CONFIG_REL_PATH=docker npx mocha test-unit/lib/wbs-notification-service.test.js` and confirm all unit tests pass
+- [X] T028 Run `npx playwright test us-wbs-notification-registry.spec.js` (from `e2e/`, Docker stack running) and confirm all e2e tests pass
 
 ---
 

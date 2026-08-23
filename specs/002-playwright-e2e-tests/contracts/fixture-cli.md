@@ -37,6 +37,19 @@ Grants a role to a user by adding to `users.<userId>.roles` (per
 - Args: `{ "userId": "<user _id>", "role": "manager" | "qa_staff" | ... }`
 - Output: `{ "ok": true, "userId": "...", "roles": ["..."] }` (the user's full roles array after the grant)
 
+### `remove-role`
+
+Removes a single role from a user by pulling it out of `users.<userId>.roles`
+— symmetric with `grant-role`, and non-destructive of any other roles the
+user may hold (unlike `reset-user-roles`, which clears the array entirely).
+Used to restore a shared persona's roles after a test temporarily grants a
+role it wouldn't otherwise have (e.g. `admin`, for an access-control test),
+without risking clobbering roles another concurrently-running spec file may
+have granted the same shared user.
+
+- Args: `{ "userId": "<user _id>", "role": "admin" | "manager" | ... }`
+- Output: `{ "ok": true, "userId": "...", "roles": ["..."] }` (the user's full roles array after the removal)
+
 ### `reset-user-roles`
 
 Resets a user's `roles` array to empty (cleanup between scenarios, or to set
