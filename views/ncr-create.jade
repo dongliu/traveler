@@ -17,6 +17,9 @@ block content
         span#ncr-number-display
       | &nbsp; has been submitted successfully.
       div#attachment-status(style='margin-top:8px')
+    #wbs-notification-warning.alert.alert-block(style='display:none')
+      strong Note: &nbsp;
+      | No WBS Notification Registry entry covers this NCR's WBS Number. Ask an Admin to add it under Admin &rarr; WBS Notifications.
     #ncr-error.alert.alert-error(style='display:none')
       strong Error: &nbsp;
       span#ncr-error-msg
@@ -215,6 +218,9 @@ block js
               $('#ncr-number-display').text(data.ncr.ncr_number);
               $('#ncr-number-link').attr('href', prefix + '/ncrs/' + data.ncr.ncr_id);
               $('#ncr-success').show();
+              if (data.wbs_notification_matched === false) {
+                $('#wbs-notification-warning').show();
+              }
               $('#ncr-create-form').hide();
               uploadAttachments(data.ncr.ncr_id);
             }

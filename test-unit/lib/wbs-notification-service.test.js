@@ -8,6 +8,7 @@ const {
   addEntry,
   updateEntry,
   removeEntry,
+  resolveWbsContact,
 } = require('../../lib/wbs-notification-service');
 
 const { WbsNotification } = require('../../model/wbs-notification');
@@ -31,6 +32,23 @@ function thenableWithLean(value) {
     lean: () => Promise.resolve(value),
     then: resolve => resolve(value),
   };
+}
+
+// test-unit/lib/ncr-service.test.js's beforeEach/afterEach are declared at
+// its file's top level (outside any describe()), which Mocha treats as
+// GLOBAL hooks applying to every test in the whole run — including this
+// file's, when both are loaded together (e.g. `mocha test-unit/**/*.test.js`).
+// That global beforeEach already stubs WbsNotification.find fresh before
+// every single test, from either file. So: reuse it via .returns() when it's
+// already a sinon stub (combined-run case), or create a fresh stub when it
+// isn't (this file run standalone, where ncr-service.test.js's hooks never
+// registered).
+function stubWbsFind(returnValue) {
+  if (WbsNotification.find.isSinonProxy) {
+    WbsNotification.find.returns(returnValue);
+    return WbsNotification.find;
+  }
+  return sinon.stub(WbsNotification, 'find').returns(returnValue);
 }
 
 async function expectRejection(promise, status) {
@@ -111,7 +129,7 @@ describe('lib/wbs-notification-service — isValidEmail', () => {
 describe('lib/wbs-notification-service — listEntries', () => {
   it('returns every entry sorted by wbs_number', async () => {
     const sortStub = sinon.stub().returns({ lean: () => Promise.resolve([{ wbs_number: '1.2.3' }]) });
-    sinon.stub(WbsNotification, 'find').returns({ sort: sortStub });
+    stubWbsFind({ sort: sortStub });
 
     const entries = await listEntries();
 
@@ -120,7 +138,7 @@ describe('lib/wbs-notification-service — listEntries', () => {
   });
 
   it('returns an empty array when the registry has no entries', async () => {
-    sinon.stub(WbsNotification, 'find').returns({ sort: () => ({ lean: () => Promise.resolve([]) }) });
+    stubWbsFind({ sort: () => ({ lean: () => Promise.resolve([]) }) });
 
     const entries = await listEntries();
 
@@ -244,5 +262,83 @@ describe('lib/wbs-notification-service — removeEntry', () => {
     const result = await removeEntry('1.2.3');
 
     result.wbs_number.should.equal('1.2.3');
+  });
+});
+
+// ── resolveWbsContact ────────────────────────────────────────────────────────
+
+describe('lib/wbs-notification-service — resolveWbsContact', () => {
+  function stubFind(matches) {
+    return stubWbsFind({ lean: () => Promise.resolve(matches) });
+  }
+
+  it('returns null for an empty/missing wbs number', async () => {
+    stubFind([]);
+    (await resolveWbsContact('') === null).should.be.true;
+    (await resolveWbsContact(undefined) === null).should.be.true;
+  });
+
+  it('returns the exact match when it exists', async () => {
+    const findStub = stubFind([{ wbs_number: '1.2' }]);
+
+    const result = await resolveWbsContact('1.2');
+
+    result.wbs_number.should.equal('1.2');
+    findStub.firstCall.args[0].wbs_number.$in.should.deep.equal(['1.2', '1']);
+  });
+
+  it('falls back to the immediate parent when there is no exact match', async () => {
+    stubFind([{ wbs_number: '1.2' }]);
+
+    const result = await resolveWbsContact('1.2.1');
+
+    result.wbs_number.should.equal('1.2');
+  });
+
+  it('prefers the nearer ancestor when multiple ancestor levels are registered', async () => {
+    stubFind([{ wbs_number: '1' }, { wbs_number: '1.2' }]);
+
+    const result = await resolveWbsContact('1.2.1');
+
+    result.wbs_number.should.equal('1.2');
+  });
+
+  it('never matches a descendant of the given wbs number', async () => {
+    // The query itself only ever includes wbsNumber and its ancestors, so a
+    // descendant like '1.2.1.1' would never be returned by the stubbed
+    // find() in practice — this asserts the candidate list sent to the
+    // query excludes it, which is what guarantees that structurally.
+    const findStub = stubFind([]);
+
+    const result = await resolveWbsContact('1.2.1');
+
+    (result === null).should.be.true;
+    findStub.firstCall.args[0].wbs_number.$in.should.not.include('1.2.1.1');
+  });
+
+  it('returns null for a single-segment wbs number with no possible parent and no exact match', async () => {
+    const findStub = stubFind([]);
+
+    const result = await resolveWbsContact('9');
+
+    (result === null).should.be.true;
+    findStub.firstCall.args[0].wbs_number.$in.should.deep.equal(['9']);
+  });
+
+  it('returns null when neither the exact number nor any ancestor is registered', async () => {
+    stubFind([]);
+
+    const result = await resolveWbsContact('9.9.9');
+
+    (result === null).should.be.true;
+  });
+
+  it('trims surrounding whitespace before building the candidate list', async () => {
+    const findStub = stubFind([{ wbs_number: '1.2' }]);
+
+    const result = await resolveWbsContact('  1.2  ');
+
+    result.wbs_number.should.equal('1.2');
+    findStub.firstCall.args[0].wbs_number.$in.should.deep.equal(['1.2', '1']);
   });
 });

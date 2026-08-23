@@ -27,7 +27,7 @@ Single Express MVC project at repo root — extends the existing `lib/`, `routes
 
 **⚠️ CRITICAL**: No user story can be implemented until this phase is complete.
 
-- [ ] T001 Add `resolveWbsContact(wbsNumber)` to `lib/wbs-notification-service.js` per data-model.md: build the nearest-to-farthest ancestor candidate list by repeatedly trimming the last `.`-delimited segment, query `WbsNotification.find({ wbs_number: { $in: candidates } }).lean()` once, then return the first candidate (in nearest-to-farthest order) that has a match, or `null` if none do. Export it alongside the existing `listEntries`/`addEntry`/`updateEntry`/`removeEntry`/`isValidWbsNumber`/`isValidEmail` exports.
+- [X] T001 Add `resolveWbsContact(wbsNumber)` to `lib/wbs-notification-service.js` per data-model.md: build the nearest-to-farthest ancestor candidate list by repeatedly trimming the last `.`-delimited segment, query `WbsNotification.find({ wbs_number: { $in: candidates } }).lean()` once, then return the first candidate (in nearest-to-farthest order) that has a match, or `null` if none do. Export it alongside the existing `listEntries`/`addEntry`/`updateEntry`/`removeEntry`/`isValidWbsNumber`/`isValidEmail` exports.
 
 **Checkpoint**: `resolveWbsContact` exists and is independently testable — user story implementation can now begin.
 
@@ -41,15 +41,15 @@ Single Express MVC project at repo root — extends the existing `lib/`, `routes
 
 ### Tests for User Story 1
 
-- [ ] T002 [P] [US1] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('1.2')` returns the exact-match entry when `1.2` is registered
-- [ ] T003 [P] [US1] Unit test in `test-unit/lib/ncr-service.test.js`: `createNcr()` appends the resolved contact's email to the `notification.initial` recipients when `data.wbs_number` has an exact registry match, and sets `ncr._wbsNotificationMatched = true`
-- [ ] T004 [P] [US1] Unit test in `test-unit/lib/ncr-service.test.js`: `closeNcr()` appends the resolved contact's email to the `notification.final_distribution` recipients when `ncr.wbs_number` has an exact registry match
+- [X] T002 [P] [US1] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('1.2')` returns the exact-match entry when `1.2` is registered
+- [X] T003 [P] [US1] Unit test in `test-unit/lib/ncr-service.test.js`: `createNcr()` appends the resolved contact's email to the `notification.initial` recipients when `data.wbs_number` has an exact registry match, and sets `ncr._wbsNotificationMatched = true`
+- [X] T004 [P] [US1] Unit test in `test-unit/lib/ncr-service.test.js`: `closeNcr()` appends the resolved contact's email to the `notification.final_distribution` recipients when `ncr.wbs_number` has an exact registry match
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] In `lib/ncr-service.js`'s `createNcr()`: import `resolveWbsContact` from `./wbs-notification-service`; after building `qaEmails` and before calling `sendInitialNotification`, call `resolveWbsContact(data.wbs_number)`, append `wbsMatch.notification_email` to the recipient list passed to `sendInitialNotification` when a match is found, and set `ncr._wbsNotificationMatched = !!wbsMatch` before `return ncr;` — per data-model.md's "Modified Function: createNcr" section
-- [ ] T006 [US1] In `lib/ncr-service.js`'s `closeNcr()`: after building the existing `emails` array and before the `if (emails.length > 0)` block that calls `sendFinalDistribution`, call `resolveWbsContact(ncr.wbs_number)` and push `wbsMatch.notification_email` onto `emails` when a match is found — per data-model.md's "Modified Function: closeNcr" section
-- [ ] T007 [US1] In `routes/ncr.js`'s `POST '/'` handler: add `wbs_notification_matched: !!ncr._wbsNotificationMatched` to the JSON response body, per contracts/create-ncr-response-addition.json
+- [X] T005 [US1] In `lib/ncr-service.js`'s `createNcr()`: import `resolveWbsContact` from `./wbs-notification-service`; after building `qaEmails` and before calling `sendInitialNotification`, call `resolveWbsContact(data.wbs_number)`, append `wbsMatch.notification_email` to the recipient list passed to `sendInitialNotification` when a match is found, and set `ncr._wbsNotificationMatched = !!wbsMatch` before `return ncr;` — per data-model.md's "Modified Function: createNcr" section
+- [X] T006 [US1] In `lib/ncr-service.js`'s `closeNcr()`: after building the existing `emails` array and before the `if (emails.length > 0)` block that calls `sendFinalDistribution`, call `resolveWbsContact(ncr.wbs_number)` and push `wbsMatch.notification_email` onto `emails` when a match is found — per data-model.md's "Modified Function: closeNcr" section
+- [X] T007 [US1] In `routes/ncr.js`'s `POST '/'` handler: add `wbs_notification_matched: !!ncr._wbsNotificationMatched` to the JSON response body, per contracts/create-ncr-response-addition.json
 
 **Checkpoint**: Exact-match NCRs correctly notify the registered contact at both submission and closure, with delivery tracked. This alone is independently demonstrable — register one WBS number, create and close one NCR against it, and see the notification arrive.
 
@@ -63,10 +63,10 @@ Single Express MVC project at repo root — extends the existing `lib/`, `routes
 
 ### Tests for User Story 2
 
-- [ ] T008 [P] [US2] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('1.2.1')` returns `1.2`'s entry when `1.2` is registered and `1.2.1` is not
-- [ ] T009 [P] [US2] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('1.2.1')` returns `1.2`'s entry (not `1`'s) when both `1` and `1.2` are registered — nearer ancestor wins
-- [ ] T010 [P] [US2] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('1.2.1')` returns `null` when only `1.2.1.1` (a descendant) is registered — a descendant registration never satisfies an ancestor lookup
-- [ ] T011 [P] [US2] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('9')` (single segment, no possible parent) returns `null` when `9` is not registered, without erroring
+- [X] T008 [P] [US2] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('1.2.1')` returns `1.2`'s entry when `1.2` is registered and `1.2.1` is not
+- [X] T009 [P] [US2] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('1.2.1')` returns `1.2`'s entry (not `1`'s) when both `1` and `1.2` are registered — nearer ancestor wins
+- [X] T010 [P] [US2] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('1.2.1')` returns `null` when only `1.2.1.1` (a descendant) is registered — a descendant registration never satisfies an ancestor lookup
+- [X] T011 [P] [US2] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('9')` (single segment, no possible parent) returns `null` when `9` is not registered, without erroring
 
 ### Implementation for User Story 2
 
@@ -84,13 +84,13 @@ Single Express MVC project at repo root — extends the existing `lib/`, `routes
 
 ### Tests for User Story 3
 
-- [ ] T012 [P] [US3] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('9.9.9')` returns `null` when neither `9.9.9`, `9.9`, nor `9` is registered
-- [ ] T013 [P] [US3] Unit test in `test-unit/lib/ncr-service.test.js`: `createNcr()` sets `ncr._wbsNotificationMatched = false` and does not throw or fail the notification send when no WBS match exists — existing QA Staff recipients still receive `notification.initial` successfully
-- [ ] T014 [P] [US3] Unit test in `test-unit/lib/ncr-service.test.js`: `closeNcr()` completes `notification.final_distribution` successfully with existing recipients when no WBS match exists — no error, no recipient added
+- [X] T012 [P] [US3] Unit test in `test-unit/lib/wbs-notification-service.test.js`: `resolveWbsContact('9.9.9')` returns `null` when neither `9.9.9`, `9.9`, nor `9` is registered
+- [X] T013 [P] [US3] Unit test in `test-unit/lib/ncr-service.test.js`: `createNcr()` sets `ncr._wbsNotificationMatched = false` and does not throw or fail the notification send when no WBS match exists — existing QA Staff recipients still receive `notification.initial` successfully
+- [X] T014 [P] [US3] Unit test in `test-unit/lib/ncr-service.test.js`: `closeNcr()` completes `notification.final_distribution` successfully with existing recipients when no WBS match exists — no error, no recipient added
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] In `views/ncr-create.jade`'s success-handling JS: when the `POST /api/ncrs` response's `wbs_notification_matched` is `false`, show a non-blocking warning banner (separate from and in addition to the existing `#ncr-success` banner) stating that no WBS Notification Registry entry covers this NCR's WBS number and suggesting an Admin add one — per contracts/create-ncr-response-addition.json's `client_behavior` note. The warning must never replace or hide the success banner, and must never prevent the already-completed NCR creation from being reported as successful.
+- [X] T015 [US3] In `views/ncr-create.jade`'s success-handling JS: when the `POST /api/ncrs` response's `wbs_notification_matched` is `false`, show a non-blocking warning banner (separate from and in addition to the existing `#ncr-success` banner) stating that no WBS Notification Registry entry covers this NCR's WBS number and suggesting an Admin add one — per contracts/create-ncr-response-addition.json's `client_behavior` note. The warning must never replace or hide the success banner, and must never prevent the already-completed NCR creation from being reported as successful.
 
 **Checkpoint**: All three user stories complete — the full spec.md scope is implemented and independently testable.
 
@@ -100,9 +100,9 @@ Single Express MVC project at repo root — extends the existing `lib/`, `routes
 
 **Purpose**: End-to-end verification across all three stories together, through the real UI.
 
-- [ ] T016 [P] Create `e2e/us-wbs-hierarchical-notification-lookup.spec.js`: register a WBS number via the admin registry UI (reusing the pattern from `e2e/us-wbs-notification-registry.spec.js`), create an NCR against it via the real creation form, confirm no warning is shown and the resolved contact appears in the NCR's event log (via `execFixtureCli('get-ncr', { ncrId, fields: ['events'] })`); repeat for a child WBS number with only a registered parent (nearest-ancestor case); repeat for a WBS number with no match anywhere and confirm the warning banner appears while NCR creation still succeeds (per quickstart.md Scenarios 1–3)
-- [ ] T017 Run `TRAVELER_CONFIG_REL_PATH=docker npx mocha test-unit/lib/wbs-notification-service.test.js test-unit/lib/ncr-service.test.js` and confirm all unit tests pass, including the pre-existing ones (no regressions from the `createNcr`/`closeNcr` changes)
-- [ ] T018 Run `npx playwright test us-wbs-hierarchical-notification-lookup.spec.js` (from `e2e/`, Docker stack running) and confirm all e2e tests pass
+- [X] T016 [P] Create `e2e/us-wbs-hierarchical-notification-lookup.spec.js`: register a WBS number via the admin registry UI (reusing the pattern from `e2e/us-wbs-notification-registry.spec.js`), create an NCR against it via the real creation form, confirm no warning is shown and the resolved contact appears in the NCR's event log (via `execFixtureCli('get-ncr', { ncrId, fields: ['events'] })`); repeat for a child WBS number with only a registered parent (nearest-ancestor case); repeat for a WBS number with no match anywhere and confirm the warning banner appears while NCR creation still succeeds (per quickstart.md Scenarios 1–3)
+- [X] T017 Run `TRAVELER_CONFIG_REL_PATH=docker npx mocha test-unit/lib/wbs-notification-service.test.js test-unit/lib/ncr-service.test.js` and confirm all unit tests pass, including the pre-existing ones (no regressions from the `createNcr`/`closeNcr` changes)
+- [X] T018 Run `npx playwright test us-wbs-hierarchical-notification-lookup.spec.js` (from `e2e/`, Docker stack running) and confirm all e2e tests pass
 
 ---
 

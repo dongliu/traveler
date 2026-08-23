@@ -45,6 +45,7 @@ const {
 } = require('../../lib/ncr-service.js');
 
 const { Ncr } = require('../../model/ncr');
+const { WbsNotification } = require('../../model/wbs-notification');
 const User = mongoose.model('User');
 const Group = mongoose.model('Group');
 
@@ -131,11 +132,18 @@ async function expectRejection(promise, status) {
   threw.should.be.true;
 }
 
+function stubWbsMatch(matches) {
+  WbsNotification.find.returns({ lean: () => Promise.resolve(matches) });
+}
+
 beforeEach(() => {
   sinon.stub(Ncr.prototype, 'save').resolves();
   // Default: ncr-qa group not configured — no user is a QA staff member
   const nullChain = { populate: function() { return nullChain; }, lean: () => Promise.resolve(null) };
   sinon.stub(Group, 'findOne').returns(nullChain);
+  // Default: no WBS Notification Registry match — tests that don't care
+  // about the WBS lookup get the same behavior as before this feature.
+  sinon.stub(WbsNotification, 'find').returns({ lean: () => Promise.resolve([]) });
 });
 
 afterEach(() => {
@@ -214,6 +222,33 @@ describe('lib/ncr-service — createNcr', () => {
 
     ncr.traveler_link.initiated_from_traveler.should.be.true;
     ncr.traveler_link.step_number.should.equal(3);
+  });
+
+  it('adds the resolved WBS Notification Registry contact to the initial notification recipients when a match exists', async () => {
+    sinon.stub(Ncr, 'findOne').resolves(null);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@org.com' }] });
+    stubWbsMatch([{ wbs_number: '1.2', notification_email: 'gl@org.com' }]);
+    const data = minimalNcrData({ wbs_number: '1.2' });
+
+    const ncr = await createNcr(data, makeUser());
+
+    const emailArg = sendInitialNotificationStub.lastCall.args[1];
+    emailArg.should.deep.equal(['qa@org.com', 'gl@org.com']);
+    ncr._wbsNotificationMatched.should.be.true;
+  });
+
+  it('does not add any extra recipient and sets _wbsNotificationMatched to false when no WBS match exists', async () => {
+    sinon.stub(Ncr, 'findOne').resolves(null);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@org.com' }] });
+    stubWbsMatch([]);
+    const data = minimalNcrData({ wbs_number: '9.9.9' });
+
+    const ncr = await createNcr(data, makeUser());
+
+    const emailArg = sendInitialNotificationStub.lastCall.args[1];
+    emailArg.should.deep.equal(['qa@org.com']);
+    ncr._wbsNotificationMatched.should.be.false;
+    ncr.status.should.equal('Submitted');
   });
 });
 
@@ -693,6 +728,37 @@ describe('lib/ncr-service — closeNcr', () => {
 
     const emails = sendFinalDistributionStub.lastCall.args[1];
     emails.should.include('des@test.com');
+  });
+
+  it('includes the resolved WBS Notification Registry contact in the final distribution when a match exists', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      wbs_number: '1.2',
+    }));
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+    stubWbsMatch([{ wbs_number: '1.2', notification_email: 'gl@org.com' }]);
+
+    await closeNcr('id1', { closure_notes: 'Closed with a WBS match, verified thoroughly' }, originator);
+
+    const emails = sendFinalDistributionStub.lastCall.args[1];
+    emails.should.include('gl@org.com');
+  });
+
+  it('does not add any extra recipient to final distribution when no WBS match exists', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      wbs_number: '9.9.9',
+    }));
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+    stubWbsMatch([]);
+
+    const result = await closeNcr('id1', { closure_notes: 'Closed with no WBS match, verified.' }, originator);
+
+    const emails = sendFinalDistributionStub.lastCall.args[1];
+    emails.should.deep.equal(['orig@test.com']);
+    result.status.should.equal('Closed');
   });
 });
 

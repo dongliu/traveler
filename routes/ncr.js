@@ -117,6 +117,7 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
         part_name: ncr.part_name,
         part_number: ncr.part_number,
       },
+      wbs_notification_matched: !!ncr._wbsNotificationMatched,
       message: 'NCR created successfully. Initial notification emails sent.',
     });
   } catch (err) {
