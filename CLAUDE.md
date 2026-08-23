@@ -77,6 +77,8 @@ shell commands, and other important information, read the current plan
 - MongoDB via Mongoose — schema field retained, validation constraint removed (004-remove-disposition-rca)
 - JavaScript (Node.js 18+) — unchanged + Express 4, Mongoose 7, Jade/Pug, jQuery + DataTables (005-wbs-notification-registry)
 - MongoDB via Mongoose — one new collection, `wbsnotifications` (005-wbs-notification-registry)
+- JavaScript (Node.js 18+) — unchanged + Express 4, Mongoose 7 — no new dependencies; reuses (006-wbs-hierarchical-notification-lookup)
+- MongoDB via Mongoose — no new collection, no schema change to (006-wbs-hierarchical-notification-lookup)
 
 ## Recent Changes
 - 002-playwright-e2e-tests: Added JavaScript (Node.js 18+, matching the app's existing runtime) + `@playwright/test` (new devDependency); no other new dependency required — Mailpit verification uses Playwright's own built-in `request` fixture, and fixture provisioning reuses the app's own `mongoose`/`model/*.js` inside the `web` container rather than adding a second DB driver
