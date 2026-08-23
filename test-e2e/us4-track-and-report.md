@@ -53,24 +53,20 @@ and Report on Nonconformances" (Priority: P2)
 5. Check "Include Closed" and click "Apply". Confirm closed NCRs now appear
    with a "Closed" status badge.
 
-### Acceptance Scenario 3 — filter by Part Number, Spec/Drawing, Date Range, Root Cause, Disposition Type
+### Acceptance Scenario 3 — filter by Part Number, Spec/Drawing, Date Range, Disposition Type
 
 6. Uncheck "Include Closed", click "Clear" to reset all filters.
 7. In "Part Number", enter one specific test NCR's part number (e.g.
    `BA-E2E-001`) and click "Apply". Confirm only that NCR's row appears.
-8. Click "Clear". In "Root Cause Keyword", enter a keyword you know is
-   present in a Dispositioned NCR's root cause text (e.g. `clamping` from
-   `us2-ce-cs-disposition.md`) and click "Apply". Confirm only matching
-   NCR(s) appear.
-9. Click "Clear". In "Discovery From"/"Discovery To", enter a date range
+8. Click "Clear". In "Discovery From"/"Discovery To", enter a date range
    that should include at least one known NCR, click "Apply", and confirm
    the result matches expectations.
-10. Click "Clear". In "Disposition" dropdown, select "Rework" and click
+9. Click "Clear". In "Disposition" dropdown, select "Rework" and click
     "Apply". Confirm only NCRs with that parts disposition appear.
 
 ### Acceptance Scenario 4 — 30+ day aging shows Escalation Needed
 
-11. Click "Clear" to reset filters. Find the row for the NCR you backdated
+10. Click "Clear" to reset filters. Find the row for the NCR you backdated
     in Setup. Confirm its "Days" cell shows a number ≥ 30 and the red text
     "Escalation Needed" next to it, with the row highlighted (pink/red
     background).
@@ -99,11 +95,9 @@ After the final test step above:
   dashboard** — `views/ncr-dashboard.jade` only renders per-status counts
   and a per-row "Days" column, no aggregate average. Confirm this rather
   than assuming you missed it; it's a spec/implementation gap to flag.
-- Each filter (Part Number, Root Cause keyword, Date Range, Disposition
-  Type) narrows the table correctly. Note that "Root Cause Category" in the
-  spec is implemented as a free-text/regex keyword search against
-  `disposition.root_cause_documentation`, not a predefined category
-  taxonomy — there is no such taxonomy defined elsewhere in the spec either.
+- Each filter (Part Number, Date Range, Disposition Type) narrows the table
+  correctly. The dashboard's Root Cause Keyword filter has been removed —
+  do not expect it to be present.
 - The escalated row is visually distinguished and only appears for NCRs
   open ≥ 30 days and not Closed.
 
@@ -117,6 +111,6 @@ After the final test step above:
 - [ ] Confirm the escalated NCR's `created_at` is indeed more than 30 days
       before today, and it's the only row flagged (assuming no other NCR
       happens to also be that old).
-- [ ] Confirm each of the four filter tests (Part Number, Root Cause,
-      Date Range, Disposition Type) returned exactly the expected NCR(s),
-      not a superset or empty result due to a filter bug.
+- [ ] Confirm each of the three filter tests (Part Number, Date Range,
+      Disposition Type) returned exactly the expected NCR(s), not a
+      superset or empty result due to a filter bug.

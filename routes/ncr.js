@@ -140,7 +140,6 @@ router.get('/', auth.ensureAuthenticated, async (req, res) => {
       from_date: req.query.from_date,
       to_date: req.query.to_date,
       parts_disposition: req.query.parts_disposition,
-      root_cause: req.query.root_cause,
       includeClosed: req.query.includeClosed === 'true' || req.query.includeClosed === true,
       page: req.query.page,
       limit: req.query.limit,
