@@ -26,6 +26,8 @@ block content
         include ./traveler/status.jade 
         if (locals.traveler.devices && traveler.devices.length > 0)
           h4 Tags: !{traveler.devices}
+        .btn-group
+          a.btn.btn-primary#csv-export(data-toggle='tooltip', title='download traveler data as CSV', href='#{prefix}/travelers/#{traveler._id}/csv') Download CSV
         if (locals.traveler.status !== undefined && locals.traveler.status === 2)
           .btn-group
                   a.btn.btn-primary#pdf(data-toggle='tooltip', title='create pdf in print view', href='print', target='#{viewConfig.linkTarget}') Create PDF

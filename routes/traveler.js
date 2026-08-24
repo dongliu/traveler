@@ -67,7 +67,8 @@ const TravelerNote = mongoose.model('TravelerNote');
 const Log = mongoose.model('Log');
 
 const { TravelerError } = require('../lib/error');
-const { stateTransition } = require('../model/traveler');
+const { stateTransition, statusMap } = require('../model/traveler');
+const csv = require('../lib/csv');
 const logger = require('../lib/loggers').getLogger();
 
 function createTraveler(form, req, res) {
@@ -568,6 +569,52 @@ module.exports = function(app) {
           'data'
         )
       );
+    }
+  );
+
+  app.get(
+    '/travelers/:id/csv',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    function(req, res) {
+      const doc = req[req.params.id];
+      return TravelerData.find(
+        {
+          _id: {
+            $in: doc.data,
+          },
+        },
+        'name value inputOn inputBy inputType'
+      ).exec(function(err, travelerDataDocs) {
+        if (err) {
+          logger.error(err);
+          return res.status(500).send(err.message);
+        }
+        const base = req.proxied
+          ? authConfig.proxied_service
+          : authConfig.service;
+        const link = `${base}/travelers/${doc._id}/view`;
+        const fields = csv.resolveTravelerFields(
+          doc.labels,
+          doc.types,
+          travelerDataDocs,
+          base
+        );
+        const body = csv.buildTravelerCsv({
+          link,
+          id: doc._id,
+          title: doc.title,
+          statusLabel: statusMap[`${doc.status}`],
+          fields,
+        });
+        res.set('Content-Type', 'text/csv; charset=utf-8');
+        res.set(
+          'Content-Disposition',
+          `attachment; filename="traveler-${doc._id}.csv"`
+        );
+        return res.status(200).send(body);
+      });
     }
   );
 

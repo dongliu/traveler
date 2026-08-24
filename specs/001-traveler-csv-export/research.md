@@ -78,18 +78,44 @@ codes described in the Constitution's Principle I into display text; no new mapp
 
 ## 6. File-attachment field values (FR-009)
 
-**Decision**: No special-case handling is required. Output `TravelerData.value` as-is for every
-field, including file-type ones.
+**Decision** (superseded 2026-08-23): For a `file`-type field, the Value column is a link to the
+existing `/data/:id` download route (`` `${downloadBaseUrl}/data/${travelerDataDoc._id}` ``, using
+the same `req.proxied ? authConfig.proxied_service : authConfig.service` base as the traveler
+link) rather than the plain filename. `resolveTravelerFields` takes a `downloadBaseUrl` parameter
+to build this.
 
-**Rationale**: Inspecting the file-upload route (`routes/traveler.js`, the handler that creates
-`TravelerData` for `inputType === 'file'`) shows `value: uploaded.originalname` is already set to
-the plain uploaded filename string at write time — the raw binary is stored separately
-(`file.path` on disk) and is never held in `value`. So the general "output the value" path
-already yields a readable filename reference for file fields, satisfying FR-009 with no branch.
+**Rationale**: The user explicitly asked for the file value to be "the link to the data where the
+file can be downloaded," not just a readable name. `/data/:id` (`routes/traveler.js`) already
+serves the underlying file for `inputType === 'file'` `TravelerData` docs via `res.download`, and
+is guarded by the same `auth.ensureAuthenticated` as the export route, so linking to it lets a
+recipient with an active session retrieve the actual file rather than only see its name.
 
-**Alternatives considered**: Building a download link into the CSV cell (e.g., pointing at the
-existing `/data/:id` route) — deferred as an unrequested enhancement; the spec only requires a
-"readable reference," which the plain filename already is.
+**Original decision (superseded)**: Output `TravelerData.value` as-is for every field, since
+`value` already holds the plain uploaded filename (`uploaded.originalname`) at write time — this
+satisfied FR-009's "readable reference" wording but not the follow-up request for an actual
+download link.
+
+## 11. Resubmitted fields: full history vs. latest value only (FR-005, superseded 2026-08-23)
+
+**Decision**: `resolveTravelerFields` emits one row per `TravelerData` doc matching a field's
+`name`, sorted ascending by `inputOn`, instead of collapsing to a single "latest wins" row. A
+field never answered still emits exactly one empty row (FR-006 unchanged).
+
+**Rationale**: The user explicitly asked that "for the same input, output should include all the
+values that have been input." Every submission to `POST /travelers/:id/data/` creates a brand
+new `TravelerData` document and appends it to `traveler.data` (`routes/traveler.js`) — nothing is
+ever overwritten in place — so the full history already exists in the database; the export
+previously discarded it by picking only the most recent entry (the same "latest wins" pattern the
+UI's own `dataForName` helper uses for display purposes, which is appropriate for a live view but
+loses information in an export meant for archival/analysis).
+
+**Alternatives considered**: Keep "latest wins" and add a separate `history.csv` or a repeated
+"previous value" column — rejected as unrequested extra surface area; inline rows are simpler and
+match exactly what was asked.
+
+**Original decision (superseded)**: `resolveTravelerFields` picked only the `TravelerData` doc
+with the latest `inputOn` per field name, matching the existing `dataForName` display logic in
+`routes/traveler.js`.
 
 ## 7. Access control
 

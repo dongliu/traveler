@@ -31,6 +31,8 @@ block content
           h4 Devices: !{traveler.devices}
         if (locals.traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
+        .btn-group
+          a.btn.btn-primary#csv-export(data-toggle='tooltip', title='download traveler data as CSV', href='#{prefix}/travelers/#{traveler._id}/csv') Download CSV
         if (locals.traveler.status !== undefined)
           if ((locals.isOwner != undefined && locals.isOwner) || isAdmin || isManager)
             case locals.traveler.status

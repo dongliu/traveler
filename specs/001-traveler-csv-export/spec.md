@@ -27,7 +27,7 @@ with only this story implemented, the feature already delivers standalone value.
 
 **Independent Test**: Can be fully tested by requesting an export for a traveler that has existing
 data and verifying the resulting CSV contains the traveler's identifying details and one row per
-collected data field.
+value ever submitted for each of its data fields.
 
 **Acceptance Scenarios**:
 
@@ -41,6 +41,9 @@ collected data field.
    fields showing an empty value, input-by, and input-on.
 3. **Given** a traveler the user does NOT have permission to view, **When** the user requests the
    export, **Then** the system denies the request and no traveler data is disclosed.
+4. **Given** a traveler where one field has been submitted more than once (e.g., a corrected
+   reading), **When** the user requests the export, **Then** the CSV includes a separate row for
+   each submitted value for that field, in the order they were entered, not only the latest one.
 
 ---
 
@@ -116,9 +119,11 @@ shown for that field in the traveler's own view.
   status.
 - **FR-004**: The exported CSV MUST render the traveler's status as its human-readable name, not
   an internal numeric code.
-- **FR-005**: The exported CSV MUST include one row for every data field defined in the
-  traveler, each row showing: the field's internal name (a stable reference key), its label, its
-  input type, its recorded value, who entered the value, and when it was entered.
+- **FR-005**: The exported CSV MUST include, for every data field defined in the traveler, one
+  row for each value ever submitted for that field, each row showing: the field's internal name
+  (a stable reference key), its label, its input type, the submitted value, who entered it, and
+  when it was entered. A field submitted more than once MUST produce one row per submission
+  (oldest first), not only its most recent value.
 - **FR-006**: When a data field has not yet been answered, the exported row for that field MUST
   still appear, with the value, input-by, and input-on shown as empty.
 - **FR-007**: The system MUST escape or quote exported values as needed so that commas,
@@ -142,8 +147,8 @@ shown for that field in the traveler's own view.
 
 - **SC-001**: A user with access to a traveler can obtain a complete CSV export of that
   traveler's data in under 5 seconds for typical travelers (up to roughly 200 data fields).
-- **SC-002**: 100% of the data fields defined in a traveler appear as rows in its export, with no
-  fields omitted.
+- **SC-002**: 100% of the data fields defined in a traveler, and 100% of the values ever
+  submitted for each of them, appear as rows in its export, with none omitted.
 - **SC-003**: A person unfamiliar with the source system can correctly identify the exported
   traveler (its id, title, and status) from the file alone within 10 seconds of opening it.
 - **SC-004**: 0 export files are produced for users who lack read access to the requested
@@ -160,7 +165,7 @@ shown for that field in the traveler's own view.
   separate notes or discrepancy log entries.
 - "Traveler link" means a reference (such as a URL) that navigates back to the traveler within
   the application.
-- Each field defined in the traveler contributes exactly one row in the export, reflecting its
-  most recently recorded value, or an empty row if it has not been filled in yet.
+- Each field defined in the traveler contributes one row per value ever submitted for it,
+  ordered oldest first, or a single empty row if it has not been filled in yet.
 - The CSV is generated on demand and reflects the traveler's data at the time of the request,
   rather than being a pre-generated or cached snapshot.

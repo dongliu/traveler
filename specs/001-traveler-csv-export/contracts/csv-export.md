@@ -41,6 +41,10 @@ Constitution Principle III.
 
 See [`../data-model.md`](../data-model.md#csv-output-shape-not-a-persisted-entity--the-response-body)
 for the authoritative row-by-row shape (metadata block, blank separator, data header, data rows).
+The `Input On` column is a Unix timestamp (whole seconds since epoch), not an ISO date string.
+For a `file`-type field, the Value column is a link to the existing `/data/:id` download route,
+not the filename. A field submitted more than once produces one data row per submission (oldest
+first), not only its latest value.
 
 ### Example
 
@@ -60,8 +64,12 @@ Traveler Title,Pump Assembly Torque Check
 Traveler Status,active
 
 Field Name,Label,Type,Value,Input By,Input On
-torque_reading,Torque Reading (Nm),number,42,jdoe,2026-08-20T14:03:11.000Z
+torque_reading,Torque Reading (Nm),number,40,jdoe,1787148191
+torque_reading,Torque Reading (Nm),number,42,jdoe,1787234591
+inspection_photo,Inspection Photo,file,https://traveler.example.org/data/64f1a2b3c4d5e6f7a8b9c0d2,jdoe,1787234591
 inspector_notes,Inspector Notes,textarea,,,
 ```
 
-(Second data row shows a field with no submitted value yet — FR-006.)
+(First two data rows show `torque_reading` submitted twice — both values appear, oldest first,
+per FR-005. Third row shows a `file`-type field, whose Value is a download link rather than a
+filename. Fourth row shows a field with no submitted value yet — FR-006.)
