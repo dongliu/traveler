@@ -40,9 +40,12 @@ const {
   assignPaOwner,
   updatePaStatus,
   closePa,
+  addAttachments,
+  getAttachment,
 } = require('../../lib/ncr-service.js');
 
 const { Ncr } = require('../../model/ncr');
+const { WbsNotification } = require('../../model/wbs-notification');
 const User = mongoose.model('User');
 const Group = mongoose.model('Group');
 
@@ -129,11 +132,18 @@ async function expectRejection(promise, status) {
   threw.should.be.true;
 }
 
+function stubWbsMatch(matches) {
+  WbsNotification.find.returns({ lean: () => Promise.resolve(matches) });
+}
+
 beforeEach(() => {
   sinon.stub(Ncr.prototype, 'save').resolves();
   // Default: ncr-qa group not configured — no user is a QA staff member
   const nullChain = { populate: function() { return nullChain; }, lean: () => Promise.resolve(null) };
   sinon.stub(Group, 'findOne').returns(nullChain);
+  // Default: no WBS Notification Registry match — tests that don't care
+  // about the WBS lookup get the same behavior as before this feature.
+  sinon.stub(WbsNotification, 'find').returns({ lean: () => Promise.resolve([]) });
 });
 
 afterEach(() => {
@@ -213,6 +223,33 @@ describe('lib/ncr-service — createNcr', () => {
     ncr.traveler_link.initiated_from_traveler.should.be.true;
     ncr.traveler_link.step_number.should.equal(3);
   });
+
+  it('adds the resolved WBS Notification Registry contact to the initial notification recipients when a match exists', async () => {
+    sinon.stub(Ncr, 'findOne').resolves(null);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@org.com' }] });
+    stubWbsMatch([{ wbs_number: '1.2', notification_email: 'gl@org.com' }]);
+    const data = minimalNcrData({ wbs_number: '1.2' });
+
+    const ncr = await createNcr(data, makeUser());
+
+    const emailArg = sendInitialNotificationStub.lastCall.args[1];
+    emailArg.should.deep.equal(['qa@org.com', 'gl@org.com']);
+    ncr._wbsNotificationMatched.should.be.true;
+  });
+
+  it('does not add any extra recipient and sets _wbsNotificationMatched to false when no WBS match exists', async () => {
+    sinon.stub(Ncr, 'findOne').resolves(null);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@org.com' }] });
+    stubWbsMatch([]);
+    const data = minimalNcrData({ wbs_number: '9.9.9' });
+
+    const ncr = await createNcr(data, makeUser());
+
+    const emailArg = sendInitialNotificationStub.lastCall.args[1];
+    emailArg.should.deep.equal(['qa@org.com']);
+    ncr._wbsNotificationMatched.should.be.false;
+    ncr.status.should.equal('Submitted');
+  });
 });
 
 // ── submitDisposition ────────────────────────────────────────────────────────
@@ -241,7 +278,6 @@ describe('lib/ncr-service — submitDisposition', () => {
 
     const data = {
       parts_disposition: 'Rework',
-      root_cause_documentation: 'Root cause explanation exceeding fifty characters for validation',
       rework_repair_instructions: 'Detailed rework instructions exceeding fifty characters for validation',
       preventive_actions: ['Update work instruction', 'Retrain operator'],
     };
@@ -257,13 +293,56 @@ describe('lib/ncr-service — submitDisposition', () => {
     result.events.some(e => e.event_type === 'notification.qa_notification').should.be.true;
   });
 
+  it('succeeds without root_cause_documentation (field removed from disposition)', async () => {
+    stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+
+    const data = {
+      parts_disposition: 'Use-As-Is',
+      preventive_actions: ['Preventive action description exceeding fifty characters for validation purposes.'],
+    };
+
+    const result = await submitDisposition('id1', data, user);
+
+    result.status.should.equal('Dispositioned');
+    (result.disposition.root_cause_documentation === undefined).should.be.true;
+  });
+
+  it('succeeds with zero preventive actions (field no longer required)', async () => {
+    stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+
+    const data = {
+      parts_disposition: 'Use-As-Is',
+      preventive_actions: [],
+    };
+
+    const result = await submitDisposition('id1', data, user);
+
+    result.status.should.equal('Dispositioned');
+    result.preventive_actions.should.have.lengthOf(0);
+  });
+
+  it('succeeds when preventive_actions is omitted entirely', async () => {
+    stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+
+    const data = {
+      parts_disposition: 'Use-As-Is',
+    };
+
+    const result = await submitDisposition('id1', data, user);
+
+    result.status.should.equal('Dispositioned');
+    result.preventive_actions.should.have.lengthOf(0);
+  });
+
   it('does not require rework_repair_instructions for a Use-As-Is disposition', async () => {
     stubFindById(newNcr({ status: 'Submitted', ce_cs_id: 'ces1' }));
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
 
     const data = {
       parts_disposition: 'Use-As-Is',
-      root_cause_documentation: 'Root cause explanation exceeding fifty characters for validation',
       preventive_actions: ['Update work instruction'],
     };
 
@@ -527,9 +606,33 @@ describe('lib/ncr-service — closeNcr', () => {
     await expectRejection(closeNcr('id1', { closure_notes: 'x'.repeat(30) }, originator), 409);
   });
 
-  it('throws 400 when closure_notes is missing or too short', async () => {
+  it('throws 400 when closure_notes is missing', async () => {
     stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1' }));
-    await expectRejection(closeNcr('id1', { closure_notes: 'too short' }, originator), 400);
+    await expectRejection(closeNcr('id1', {}, originator), 400);
+  });
+
+  it('throws 400 when closure_notes is empty/whitespace', async () => {
+    stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1' }));
+    await expectRejection(closeNcr('id1', { closure_notes: '   ' }, originator), 400);
+  });
+
+  it('accepts closure_notes of any non-empty length (no minimum character requirement)', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      ce_cs_id: 'ces1',
+      qa_staff_identity: 'qa1',
+    }));
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'ces1', name: 'CES', email: 'ces@test.com' },
+      { _id: 'qa1', name: 'QA', email: 'qa@test.com' },
+    ]);
+
+    const result = await closeNcr('id1', { closure_notes: 'ok' }, originator);
+
+    result.status.should.equal('Closed');
+    result.closure_record.closure_notes.should.equal('ok');
   });
 
   it('throws 400 when a Traveler-linked NCR is closed without traveler_signed_off', async () => {
@@ -625,6 +728,37 @@ describe('lib/ncr-service — closeNcr', () => {
 
     const emails = sendFinalDistributionStub.lastCall.args[1];
     emails.should.include('des@test.com');
+  });
+
+  it('includes the resolved WBS Notification Registry contact in the final distribution when a match exists', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      wbs_number: '1.2',
+    }));
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+    stubWbsMatch([{ wbs_number: '1.2', notification_email: 'gl@org.com' }]);
+
+    await closeNcr('id1', { closure_notes: 'Closed with a WBS match, verified thoroughly' }, originator);
+
+    const emails = sendFinalDistributionStub.lastCall.args[1];
+    emails.should.include('gl@org.com');
+  });
+
+  it('does not add any extra recipient to final distribution when no WBS match exists', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      wbs_number: '9.9.9',
+    }));
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+    stubWbsMatch([]);
+
+    const result = await closeNcr('id1', { closure_notes: 'Closed with no WBS match, verified.' }, originator);
+
+    const emails = sendFinalDistributionStub.lastCall.args[1];
+    emails.should.deep.equal(['orig@test.com']);
+    result.status.should.equal('Closed');
   });
 });
 
@@ -879,6 +1013,110 @@ describe('lib/ncr-service — getNcrById', () => {
     const result = await getNcrById('id1', makeUser({ id: 'ces1', roles: [] }));
 
     result.ce_cs_id.should.equal('ces1');
+  });
+});
+
+// ── addAttachments ───────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — addAttachments', () => {
+  const originator = makeUser({ id: 'orig1', name: 'Origin Person' });
+
+  function makeFile(overrides = {}) {
+    return {
+      originalname: 'inspection-photo.jpg',
+      mimetype: 'image/jpeg',
+      path: '/tmp/uploads/abc123',
+      ...overrides,
+    };
+  }
+
+  it('throws 404 when NCR not found', async () => {
+    stubFindById(null);
+    await expectRejection(addAttachments('id1', [makeFile()], originator), 404);
+  });
+
+  it('throws 403 when user does not have access to the NCR', async () => {
+    stubFindById(newNcr({ originator_id: 'someoneElse', status: 'Submitted' }));
+    await expectRejection(addAttachments('id1', [makeFile()], originator), 403);
+  });
+
+  it('appends each uploaded file as an attachment with uploader identity and timestamp', async () => {
+    stubFindById(newNcr({ originator_id: 'orig1', status: 'Submitted' }));
+
+    const files = [
+      makeFile({ originalname: 'photo.jpg', mimetype: 'image/jpeg', path: '/tmp/uploads/f1' }),
+      makeFile({ originalname: 'report.pdf', mimetype: 'application/pdf', path: '/tmp/uploads/f2' }),
+    ];
+
+    const { ncr, added } = await addAttachments('id1', files, originator);
+
+    added.should.have.lengthOf(2);
+    ncr.attachments.should.have.lengthOf(2);
+    ncr.attachments[0].file_name.should.equal('photo.jpg');
+    ncr.attachments[0].file_type.should.equal('image/jpeg');
+    ncr.attachments[0].file_path.should.equal('/tmp/uploads/f1');
+    ncr.attachments[0].uploaded_by.should.equal('orig1');
+    ncr.attachments[0].uploaded_by_name.should.equal('Origin Person');
+    ncr.attachments[0].upload_timestamp.should.be.instanceOf(Date);
+    ncr.attachments[1].file_name.should.equal('report.pdf');
+  });
+
+  it('records an attachment.uploaded event for each file', async () => {
+    stubFindById(newNcr({ originator_id: 'orig1', status: 'Submitted' }));
+
+    const { ncr } = await addAttachments(
+      'id1',
+      [makeFile(), makeFile({ originalname: 'second.pdf' })],
+      originator
+    );
+
+    const attachmentEvents = ncr.events.filter(e => e.event_type === 'attachment.uploaded');
+    attachmentEvents.should.have.lengthOf(2);
+    attachmentEvents[0].actor_id.should.equal('orig1');
+  });
+
+  it('allows the assigned CE/CS to add attachments', async () => {
+    stubFindById(newNcr({ originator_id: 'someoneElse', ce_cs_id: 'ces1', status: 'Submitted' }));
+
+    const { added } = await addAttachments('id1', [makeFile()], makeUser({ id: 'ces1' }));
+
+    added.should.have.lengthOf(1);
+  });
+});
+
+// ── getAttachment ────────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — getAttachment', () => {
+  const originator = makeUser({ id: 'orig1' });
+
+  it('throws 404 when NCR not found', async () => {
+    stubFindByIdLean(null);
+    await expectRejection(getAttachment('id1', 'file1', originator), 404);
+  });
+
+  it('throws 403 when user does not have access to the NCR', async () => {
+    stubFindByIdLean({ originator_id: 'someoneElse', status: 'Submitted', attachments: [] });
+    await expectRejection(getAttachment('id1', 'file1', originator), 403);
+  });
+
+  it('throws 404 when the attachment is not found', async () => {
+    stubFindByIdLean({ originator_id: 'orig1', status: 'Submitted', attachments: [] });
+    await expectRejection(getAttachment('id1', 'missing', originator), 404);
+  });
+
+  it('returns the matching attachment metadata', async () => {
+    stubFindByIdLean({
+      originator_id: 'orig1',
+      status: 'Submitted',
+      attachments: [
+        { file_id: 'file1', file_name: 'photo.jpg', file_type: 'image/jpeg', file_path: '/tmp/uploads/f1' },
+      ],
+    });
+
+    const attachment = await getAttachment('id1', 'file1', originator);
+
+    attachment.file_name.should.equal('photo.jpg');
+    attachment.file_path.should.equal('/tmp/uploads/f1');
   });
 });
 

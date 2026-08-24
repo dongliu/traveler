@@ -12,8 +12,6 @@ const { SECONDARY_AUTH_STATE } = require('./fixtures/auth-state');
 const CE_CS_ID = 'dong';
 const CE_CS_DISPLAY_NAME = 'Dong Liu';
 
-const ROOT_CAUSE_TEXT =
-  'Root cause traced to inconsistent clamping pressure during the forming operation, producing localized stress concentration at the bracket edge.';
 const REWORK_REPAIR_TEXT =
   'Rework by lightly sanding the affected edge with 400-grit paper, re-inspect under 10x magnification, and re-verify dimensional tolerance per DWG-E2E-100.';
 const PREVENTIVE_ACTION_1 =
@@ -130,7 +128,7 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
       await expect(page.locator(`input[name="parts_disposition"][value="${opt}"]`)).toHaveCount(1);
     }
 
-    await expect(page.locator('#root_cause_documentation')).toBeVisible();
+    await expect(page.locator('#root_cause_documentation')).toHaveCount(0);
     await expect(page.locator('.pa-textarea')).toHaveCount(1);
     await expect(page.locator('#add-pa')).toBeVisible();
     await expect(page.locator('#rework-repair-field')).toBeHidden();
@@ -143,14 +141,13 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     await page.check('input[name="parts_disposition"][value="Rework"]');
     await expect(page.locator('#rework-repair-field')).toBeVisible();
 
-    await page.fill('#root_cause_documentation', ROOT_CAUSE_TEXT);
     await page.locator('.pa-textarea').first().fill(PREVENTIVE_ACTION_1);
     // Rework/Repair Instructions intentionally left empty.
     await page.click('#submit-btn');
 
     await expect(page.locator('#disp-error')).toBeVisible();
     await expect(page.locator('#disp-error-msg')).toContainText(
-      'Rework/Repair Instructions must be at least 50 characters.'
+      'Rework/Repair Instructions is required when Rework or Repair is selected.'
     );
     await expect(page.locator('#disp-success')).toBeHidden();
 
@@ -164,7 +161,6 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
 
     await page.check('input[name="parts_disposition"][value="Rework"]');
     await page.fill('#rework_repair_instructions', REWORK_REPAIR_TEXT);
-    await page.fill('#root_cause_documentation', ROOT_CAUSE_TEXT);
     await page.locator('.pa-textarea').nth(0).fill(PREVENTIVE_ACTION_1);
     await page.click('#add-pa');
     await page.locator('.pa-textarea').nth(1).fill(PREVENTIVE_ACTION_2);
@@ -184,7 +180,6 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
 
     const dispositionSection = page.getByRole('group', { name: 'Disposition', exact: true });
     await expect(dispositionSection).toContainText('Rework');
-    await expect(dispositionSection).toContainText(ROOT_CAUSE_TEXT);
     await expect(dispositionSection).toContainText(REWORK_REPAIR_TEXT);
 
     const paWells = page.locator('[data-pa-id]');
@@ -200,7 +195,6 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     });
     expect(ncr.status).toBe('Dispositioned');
     expect(ncr.disposition.parts_disposition).toBe('Rework');
-    expect(ncr.disposition.root_cause_documentation).toBe(ROOT_CAUSE_TEXT);
     expect(ncr.disposition.rework_repair_instructions).toBe(REWORK_REPAIR_TEXT);
     expect(ncr.disposition.ce_cs_identity).toBe(CE_CS_ID);
     expect(ncr.disposition.ce_cs_timestamp).toBeTruthy();
@@ -219,6 +213,62 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     expect(qaNotificationEvent).toBeTruthy();
   });
 
+  test('AS4c - Preventive Actions and Rework/Repair Instructions of any length are accepted (no minimum character requirement)', async ({ page }) => {
+    const { ncrId } = await createTestNcr();
+    await page.goto(`/ncrs/${ncrId}/disposition`);
+
+    await page.check('input[name="parts_disposition"][value="Rework"]');
+    await page.fill('#rework_repair_instructions', 'Sand it.');
+    await page.locator('.pa-textarea').first().fill('Fix it.');
+
+    await submitDispositionAndWaitForSuccess(page);
+
+    await expect(page.locator('#disp-success')).toBeVisible();
+
+    const { ncr } = await execFixtureCli('get-ncr', {
+      ncrId,
+      fields: ['status', 'disposition', 'preventive_actions'],
+    });
+    expect(ncr.status).toBe('Dispositioned');
+    expect(ncr.disposition.rework_repair_instructions).toBe('Sand it.');
+    expect(ncr.preventive_actions[0].action_description).toBe('Fix it.');
+  });
+
+  test('AS4b - submission succeeds with zero Preventive Actions (field is optional)', async ({ page }) => {
+    const { ncrId } = await createTestNcr();
+    await page.goto(`/ncrs/${ncrId}/disposition`);
+
+    await page.check('input[name="parts_disposition"][value="Use-As-Is"]');
+    // The default Preventive Action textarea is intentionally left blank.
+
+    await submitDispositionAndWaitForSuccess(page);
+
+    await expect(page.locator('#disp-success')).toBeVisible();
+
+    const { ncr } = await execFixtureCli('get-ncr', {
+      ncrId,
+      fields: ['status', 'preventive_actions'],
+    });
+    expect(ncr.status).toBe('Dispositioned');
+    expect(ncr.preventive_actions).toHaveLength(0);
+  });
+
+  test('server accepts a disposition payload that omits preventive_actions entirely', async ({ page }) => {
+    // Defense-in-depth: verifies routes/ncr.js accepts a missing
+    // preventive_actions key directly, bypassing the browser form.
+    const { ncrId } = await createTestNcr();
+
+    const res = await patchDispositionWithRetry(page.request, ncrId, {
+      parts_disposition: 'Use-As-Is',
+    });
+
+    expect(res.status()).toBe(200);
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'preventive_actions'] });
+    expect(ncr.status).toBe('Dispositioned');
+    expect(ncr.preventive_actions).toHaveLength(0);
+  });
+
   test('server rejects an invalid disposition payload independent of client-side checks', async ({ page }) => {
     // Defense-in-depth: verifies routes/ncr.js's own field validation
     // directly, bypassing the browser form entirely, so a regression there is
@@ -228,15 +278,13 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     const res = await page.request.patch(`/api/ncrs/${ncrId}/disposition`, {
       data: {
         parts_disposition: 'Rework',
-        root_cause_documentation: 'too short',
-        preventive_actions: ['also too short'],
+        preventive_actions: [''],
       },
     });
 
     expect(res.status()).toBe(400);
     const body = await res.json();
     expect(body.success).toBe(false);
-    expect(body.details).toHaveProperty('root_cause_documentation');
     expect(body.details).toHaveProperty('preventive_actions');
     expect(body.details).toHaveProperty('rework_repair_instructions');
 
@@ -248,7 +296,6 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     const { ncrId } = await createTestNcr();
     const payload = {
       parts_disposition: 'Use-As-Is',
-      root_cause_documentation: ROOT_CAUSE_TEXT,
       preventive_actions: [PREVENTIVE_ACTION_1],
     };
 
@@ -269,7 +316,6 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     const res = await otherPage.request.patch(`/api/ncrs/${ncrId}/disposition`, {
       data: {
         parts_disposition: 'Use-As-Is',
-        root_cause_documentation: ROOT_CAUSE_TEXT,
         preventive_actions: [PREVENTIVE_ACTION_1],
       },
     });

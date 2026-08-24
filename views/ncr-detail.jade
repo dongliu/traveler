@@ -119,9 +119,6 @@ block content
               if ncr.disposition.ce_cs_timestamp
                 dt Submitted On
                 dd= new Date(ncr.disposition.ce_cs_timestamp).toLocaleString()
-              if ncr.disposition.root_cause_documentation
-                dt Root Cause
-                dd= ncr.disposition.root_cause_documentation
               if ncr.disposition.rework_repair_instructions
                 dt Rework / Repair Instructions
                 dd= ncr.disposition.rework_repair_instructions
@@ -240,13 +237,31 @@ block content
                 dt Notes
                 dd= ncr.closure_record.closure_notes
 
+    if ncr.attachments && ncr.attachments.length
+      .row-fluid
+        .span12
+          fieldset
+            legend Attachments
+            ul.unstyled
+              each file in ncr.attachments
+                li(style='margin-bottom:4px')
+                  a(href='#{prefix}/api/ncrs/#{ncr._id}/attachments/#{file.file_id}')
+                    i.fa.fa-paperclip
+                    | &nbsp;
+                    = file.file_name
+                  | &nbsp;
+                  span.muted
+                    = 'uploaded by ' + (file.uploaded_by_name || file.uploaded_by || 'unknown')
+                    | ,&nbsp;
+                    = new Date(file.upload_timestamp).toLocaleString()
+
     .row-fluid
       .span12
         fieldset
           legend
             | Event Timeline&nbsp;
-            a.btn.btn-mini#timeline-toggle(href='#') Hide
-          .event-timeline#event-timeline
+            a.btn.btn-mini#timeline-toggle(href='#') Show
+          .event-timeline#event-timeline(style='display:none')
             each event in ncr.events.slice().reverse()
               .event-entry
                 span.badge= event.event_type

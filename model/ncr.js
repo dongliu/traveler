@@ -51,6 +51,7 @@ const NCR_EVENT_TYPES = [
   'notification.final_distribution',
   'notification.pa_assigned',
   'notification.designate_assigned',
+  'attachment.uploaded',
 ];
 
 const NcrEventSchema = new Schema({
@@ -135,7 +136,6 @@ const NcrSchema = new Schema({
       type: String,
       enum: ['Rework', 'Repair', 'Return to Vendor', 'Scrap', 'Use-As-Is'],
     },
-    root_cause_documentation: String,
     rework_repair_instructions: String,
     ce_cs_identity: String,
     ce_cs_timestamp: Date,
@@ -179,6 +179,9 @@ const NcrSchema = new Schema({
       file_id: ObjectId,
       file_name: String,
       file_type: String,
+      file_path: String,
+      uploaded_by: String,
+      uploaded_by_name: String,
       upload_timestamp: Date,
     },
   ],

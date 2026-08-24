@@ -163,17 +163,25 @@ test.describe('US1 - NCR creation and submission notifications', () => {
 
   test('AS2 - rejects submission with an invalid field and creates no NCR', async ({ page }) => {
     const data = buildNcrData({
-      // Under the 20-character minimum enforced by the client-side check —
-      // this reliably reaches the app's own validation logic without being
-      // intercepted by native HTML5 constraint validation (the textarea has
-      // no native minlength attribute), unlike most other required fields.
-      description_of_nonconformance: 'too short',
+      // CE/CS Name must match a real user via the typeahead index — this is
+      // a client-side-only check (the input itself has no native constraint
+      // beyond "required"), so it reliably reaches the app's own JS
+      // validation without being intercepted by native HTML5 constraint
+      // validation.
+      ce_cs_name: 'Zzz Nonexistent Person',
     });
     await fillNcrForm(page, data);
 
     await expect(page.locator('#ncr-error')).toBeVisible();
-    await expect(page.locator('#ncr-error-msg')).toContainText('Description of Nonconformance must be at least 20 characters');
+    await expect(page.locator('#ncr-error-msg')).toContainText('CE/CS Name must be selected from the list.');
     await expect(page.locator('#ncr-success')).toBeHidden();
+  });
+
+  test('AS2c - a short (but non-empty) Description of Nonconformance is accepted (no minimum character requirement)', async ({ page }) => {
+    const { ncrId } = await createNcrViaUi(page, { description_of_nonconformance: 'Bad.' });
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['description_of_nonconformance'] });
+    expect(ncr.description_of_nonconformance).toBe('Bad.');
   });
 
   test('AS2b - server rejects an invalid API request independent of client-side checks', async ({ page }) => {

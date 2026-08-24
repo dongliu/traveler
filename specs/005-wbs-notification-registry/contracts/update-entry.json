@@ -1,0 +1,76 @@
+{
+  "endpoint": "PATCH /api/wbs-notifications/:wbsNumber",
+  "description": "Update the notification email address for an existing WBS number, without changing the WBS number itself (FR-006).",
+  "authentication": "Required (session)",
+  "authorization": "Admin role only (reqUtils.requireAdmin())",
+  "request": {
+    "parameters": {
+      "path": {
+        "wbsNumber": {
+          "type": "string",
+          "description": "The existing WBS number to update, URL-encoded (may contain '.' characters)"
+        }
+      }
+    },
+    "headers": { "Content-Type": "application/json" },
+    "body": {
+      "type": "object",
+      "properties": {
+        "notification_email": {
+          "type": "string",
+          "description": "New syntactically valid email address; trimmed before validation (FR-005)"
+        }
+      },
+      "required": ["notification_email"]
+    }
+  },
+  "response": {
+    "success_200": {
+      "statusCode": 200,
+      "body": {
+        "success": true,
+        "entry": {
+          "wbs_number": "string",
+          "notification_email": "string",
+          "updated_by": "string",
+          "updated_by_name": "string",
+          "updated_at": "ISO date string"
+        }
+      }
+    },
+    "errors": {
+      "validation_400": {
+        "statusCode": 400,
+        "body": {
+          "success": false,
+          "error": "Validation Error",
+          "message": "Validation failed",
+          "details": { "notification_email": ["Must be a syntactically valid email address"] }
+        }
+      },
+      "unauthorized_401": {
+        "statusCode": 401,
+        "body": { "success": false, "error": "Unauthorized", "message": "Authentication required" }
+      },
+      "forbidden_403": {
+        "statusCode": 403,
+        "body": "you are not authorized to access this resource"
+      },
+      "not_found_404": {
+        "statusCode": 404,
+        "body": {
+          "success": false,
+          "error": "Not Found",
+          "message": "WBS number not found in registry: {wbsNumber}"
+        }
+      }
+    }
+  },
+  "side_effects": [
+    "Updates notification_email, updated_by, updated_by_name, updated_at on the matching WbsNotification document",
+    "On validation failure, the previously saved email is left unchanged (spec.md User Story 3 Acceptance Scenario 2)"
+  ],
+  "notes": [
+    "wbs_number itself cannot be changed via this endpoint — per spec.md Assumptions, an in-place rename is out of scope; remove + add covers that case"
+  ]
+}

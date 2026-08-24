@@ -251,7 +251,7 @@ categories, aging, and trends without implementation-specific technical metrics.
    open/pending metrics
 3. **Given** a user needs to trend nonconformances, **When** they access the
    Nonconformance Report view, **Then** they can filter by: Product/Part Number,
-   Specification/Drawing, Date Range, Root Cause Category, Disposition Type
+   Specification/Drawing, Date Range, Disposition Type
 4. **Given** 30+ days have passed since NCR submission without approval,
    **When** the aging report is generated, **Then** the NCR appears as
    "Escalation Needed" and is highlighted to management

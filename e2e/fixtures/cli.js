@@ -78,6 +78,17 @@ async function grantRole({ userId, role }) {
   return { userId: user._id, roles: user.roles };
 }
 
+async function removeRole({ userId, role }) {
+  const { User } = require('../../model/user');
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { $pull: { roles: role } },
+    { new: true }
+  );
+  if (!user) throw new Error(`User not found: ${userId}`);
+  return { userId: user._id, roles: user.roles };
+}
+
 async function resetUserRoles({ userId }) {
   const { User } = require('../../model/user');
   const user = await User.findByIdAndUpdate(userId, { roles: [] }, { new: true });
@@ -178,6 +189,7 @@ async function getGroup({ groupId }) {
 
 const COMMANDS = {
   'grant-role': grantRole,
+  'remove-role': removeRole,
   'reset-user-roles': resetUserRoles,
   'add-group-member': addGroupMember,
   'remove-group-member': removeGroupMember,

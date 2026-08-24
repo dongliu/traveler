@@ -1,6 +1,11 @@
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
+const multer = require('multer');
 const auth = require('../lib/auth');
+const config = require('../config/config');
+const { fileFilter } = require('../lib/upload');
 const {
   createNcr,
   submitDisposition,
@@ -16,10 +21,21 @@ const {
   assignPaOwner,
   updatePaStatus,
   closePa,
+  addAttachments,
+  getAttachment,
 } = require('../lib/ncr-service');
 const logger = require('../lib/loggers').getLogger();
 
 const router = express.Router();
+
+const attachmentUpload = multer({
+  dest: config.uploadPath,
+  limits: {
+    files: 10,
+    fileSize: (config.app.upload_size || 10) * 1024 * 1024,
+  },
+  fileFilter,
+});
 
 function isValidId(id) {
   return mongoose.isValidObjectId(id);
@@ -69,8 +85,8 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
   if (!b.supplier_name) errors.supplier_name = ['Required'];
   if (!b.wbs_number) errors.wbs_number = ['Required'];
   if (!b.ce_cs_name) errors.ce_cs_name = ['Required'];
-  if (!b.description_of_nonconformance || b.description_of_nonconformance.length < 20)
-    errors.description_of_nonconformance = ['Must be at least 20 characters long'];
+  if (!b.description_of_nonconformance)
+    errors.description_of_nonconformance = ['Required'];
   if (!b.discovery_date)
     errors.discovery_date = ['Required'];
   else if (new Date(b.discovery_date) > new Date())
@@ -101,6 +117,7 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
         part_name: ncr.part_name,
         part_number: ncr.part_number,
       },
+      wbs_notification_matched: !!ncr._wbsNotificationMatched,
       message: 'NCR created successfully. Initial notification emails sent.',
     });
   } catch (err) {
@@ -123,7 +140,6 @@ router.get('/', auth.ensureAuthenticated, async (req, res) => {
       from_date: req.query.from_date,
       to_date: req.query.to_date,
       parts_disposition: req.query.parts_disposition,
-      root_cause: req.query.root_cause,
       includeClosed: req.query.includeClosed === 'true' || req.query.includeClosed === true,
       page: req.query.page,
       limit: req.query.limit,
@@ -169,13 +185,56 @@ router.get('/:id/events', auth.ensureAuthenticated, async (req, res) => {
   }
 });
 
+router.post('/:id/attachments', auth.ensureAuthenticated, attachmentUpload.any(), async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  if (!req.files || !req.files.length) {
+    return res.status(400).json({ success: false, error: 'Bad Request', message: 'Expected at least one uploaded file' });
+  }
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const { added } = await addAttachments(req.params.id, req.files, user);
+    return res.status(201).json({
+      success: true,
+      attachments: added.map(a => ({
+        file_id: a.file_id,
+        file_name: a.file_name,
+        file_type: a.file_type,
+        upload_timestamp: a.upload_timestamp,
+      })),
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Attachment upload');
+  }
+});
+
+router.get('/:id/attachments/:fileId', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const attachment = await getAttachment(req.params.id, req.params.fileId, user);
+    fs.exists(attachment.file_path, exists => {
+      if (!exists) return res.status(410).json({ success: false, error: 'Gone', message: 'File no longer available' });
+      return res.download(path.resolve(attachment.file_path), attachment.file_name);
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Attachment fetch');
+  }
+});
+
 router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
   if (!isValidId(req.params.id)) return badId(res, 'id');
   const errors = {};
   const PARTS_DISPOSITIONS = ['Rework', 'Repair', 'Return to Vendor', 'Scrap', 'Use-As-Is'];
   const b = {
     parts_disposition: req.body.parts_disposition,
-    root_cause_documentation: sanitizeStr(req.body.root_cause_documentation),
     rework_repair_instructions: sanitizeStr(req.body.rework_repair_instructions),
     preventive_actions: Array.isArray(req.body.preventive_actions)
       ? req.body.preventive_actions.map(a => sanitizeStr(a))
@@ -184,14 +243,14 @@ router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
 
   if (!b.parts_disposition || !PARTS_DISPOSITIONS.includes(b.parts_disposition))
     errors.parts_disposition = [`Must be one of: ${PARTS_DISPOSITIONS.join(', ')}`];
-  if (!b.root_cause_documentation || b.root_cause_documentation.length < 50)
-    errors.root_cause_documentation = ['Must be at least 50 characters long'];
-  if (!Array.isArray(b.preventive_actions) || b.preventive_actions.length < 1)
-    errors.preventive_actions = ['Requires at least 1 action'];
-  else if (b.preventive_actions.some(a => !a || String(a).trim().length < 50))
-    errors.preventive_actions = ['Each action must be at least 50 characters long'];
+  if (b.preventive_actions !== undefined) {
+    if (!Array.isArray(b.preventive_actions))
+      errors.preventive_actions = ['Must be an array'];
+    else if (b.preventive_actions.some(a => !a || !String(a).trim()))
+      errors.preventive_actions = ['Each action must not be empty'];
+  }
   if (['Rework', 'Repair'].includes(b.parts_disposition)) {
-    if (!b.rework_repair_instructions || b.rework_repair_instructions.length < 50)
+    if (!b.rework_repair_instructions)
       errors.rework_repair_instructions = ["Required when parts_disposition is 'Rework' or 'Repair'"];
   }
 
@@ -352,8 +411,8 @@ router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
     preventive_actions_verified: req.body.preventive_actions_verified,
     traveler_signed_off: req.body.traveler_signed_off,
   };
-  if (!b.closure_notes || b.closure_notes.length < 20)
-    errors.closure_notes = ['Required and must be at least 20 characters'];
+  if (!b.closure_notes)
+    errors.closure_notes = ['Required'];
 
   if (Object.keys(errors).length > 0)
     return res.status(400).json({ success: false, error: 'Validation Error', message: 'Validation failed', details: errors });

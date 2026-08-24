@@ -1,0 +1,47 @@
+{
+  "endpoint": "DELETE /api/wbs-notifications/:wbsNumber",
+  "description": "Remove a WBS number from the registry entirely (FR-007).",
+  "authentication": "Required (session)",
+  "authorization": "Admin role only (reqUtils.requireAdmin())",
+  "request": {
+    "parameters": {
+      "path": {
+        "wbsNumber": {
+          "type": "string",
+          "description": "The existing WBS number to remove, URL-encoded (may contain '.' characters)"
+        }
+      }
+    },
+    "body": null
+  },
+  "response": {
+    "success_200": {
+      "statusCode": 200,
+      "body": { "success": true }
+    },
+    "errors": {
+      "unauthorized_401": {
+        "statusCode": 401,
+        "body": { "success": false, "error": "Unauthorized", "message": "Authentication required" }
+      },
+      "forbidden_403": {
+        "statusCode": 403,
+        "body": "you are not authorized to access this resource"
+      },
+      "not_found_404": {
+        "statusCode": 404,
+        "body": {
+          "success": false,
+          "error": "Not Found",
+          "message": "WBS number not found in registry: {wbsNumber}"
+        }
+      }
+    }
+  },
+  "side_effects": [
+    "Permanently deletes the matching WbsNotification document — no soft-delete/undo"
+  ],
+  "notes": [
+    "Removing a WBS number that does not exist returns 404 rather than succeeding silently, per FR-009 and spec.md User Story 4 Acceptance Scenario 2"
+  ]
+}

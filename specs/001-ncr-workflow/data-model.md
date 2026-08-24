@@ -83,6 +83,7 @@ Notification events capture per-recipient delivery status.
 | `pa.owner_assigned` | QA assigns preventive action owner | No |
 | `pa.status_updated` | PA owner updates status | No |
 | `pa.closed` | QA Staff closes preventive action | No |
+| `attachment.uploaded` | User uploads a supporting file to the NCR | No |
 
 ### System Output Events (actor_type: "system")
 
@@ -190,11 +191,16 @@ stream for the NCR's lifecycle.
     distribution_notification_timestamp: Date
   },
 
-  // Attachments
+  // Attachments — uploaded via POST /api/ncrs/:id/attachments (multer disk
+  // storage under config.uploadPath; same allowed-mimetype filter as the
+  // Traveler module's uploads, shared via lib/upload.js)
   attachments: [{
     file_id: ObjectId,
     file_name: String,
     file_type: String,
+    file_path: String,
+    uploaded_by: String,
+    uploaded_by_name: String,
     upload_timestamp: Date
   }],
 

@@ -1,0 +1,26 @@
+{
+  "endpoint": "POST /api/ncrs",
+  "description": "Existing NCR creation endpoint (specs/001-ncr-workflow) — this feature adds one new field to its success response only. Request shape, validation, status codes, and all other response fields are unchanged.",
+  "change_type": "response_addition",
+  "response": {
+    "success_201": {
+      "statusCode": 201,
+      "added_fields": {
+        "wbs_notification_matched": {
+          "type": "boolean",
+          "description": "true if the NCR's wbs_number resolved to an exact or nearest-ancestor entry in the WBS Notification Registry (specs/005-wbs-notification-registry) and that contact was included as a recipient of the initial notification email; false if no match was found at any level of the WBS hierarchy."
+        }
+      }
+    }
+  },
+  "side_effects": [
+    "When wbs_notification_matched is true, the resolved registry entry's notification_email is included as an additional recipient of the notification.initial event (alongside existing QA Staff recipients) and is recorded in that event's per-recipient delivery log the same way every other recipient already is",
+    "When wbs_notification_matched is false, no additional recipient is added — existing recipients (QA Staff, CE/CS disposition request) are unaffected either way"
+  ],
+  "client_behavior": [
+    "views/ncr-create.jade: when wbs_notification_matched === false, show a non-blocking warning banner (in addition to, not instead of, the existing success banner) suggesting an Admin add this WBS number to the registry — per spec.md FR-006/FR-007, this never prevents or reverses the NCR creation that already succeeded"
+  ],
+  "notes": [
+    "This is the only endpoint whose response shape changes. POST /api/ncrs/:id/close also gains the same resolved-contact recipient behavior on notification.final_distribution (data-model.md), but its own response shape is unchanged — the closure-time warning is out of scope per spec.md (the warning is defined only for NCR creation)."
+  ]
+}

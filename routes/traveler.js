@@ -7,28 +7,7 @@ const multer = require('multer');
 const _ = require('lodash');
 
 const config = require('../config/config');
-
-const allowedUploadMimetypes = new Set([
-  'application/pdf',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/vnd.ms-xpsdocument',
-  'application/oxps',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-]);
-
-function travelerUploadFileFilter(req, file, cb) {
-  if (!file.mimetype) {
-    return cb(null, false);
-  }
-  if (/^(image|text)\//i.test(file.mimetype)) {
-    return cb(null, true);
-  }
-  if (allowedUploadMimetypes.has(file.mimetype)) {
-    return cb(null, true);
-  }
-  return cb(null, false);
-}
+const { fileFilter: travelerUploadFileFilter } = require('../lib/upload');
 
 const upload = multer({
   dest: config.uploadPath,

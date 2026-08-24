@@ -30,6 +30,8 @@ block underTopBtn
           a(href='#users', data-toggle='tab') Users
         li
           a(href='#groups', data-toggle='tab') Groups
+        li
+          a(href='#wbs-notifications', data-toggle='tab') WBS Notifications
       .tab-content
         #users.tab-pane.active
           .well
@@ -78,12 +80,33 @@ block underTopBtn
                 | &nbsp;Delete Selected Group(s)
 
           table#groups-table.table.table-bordered.table-hover
+        #wbs-notifications.tab-pane
+          #wbs-notifications-message
+          .well
+            form.form-inline#wbs-notifications-add-form(novalidate)
+              input#wbs-number.input(type='text', placeholder='WBS Number, e.g. 1.2.3', name='wbs_number')
+              != ' '
+              input#wbs-notification-email.input(type='email', placeholder='Notification Email', name='notification_email')
+              != ' '
+              button.btn.btn-primary#wbs-notifications-add(type='submit') Add
+          h3 WBS Notification list
+          table#wbs-notifications-table.table.table-bordered.table-hover
+            thead
+              tr
+                th WBS Number
+                th Notification Email
+                th Last Updated By
+                th Actions
+            tbody#wbs-notifications-tbody
+              tr.wbs-notifications-empty
+                td(colspan='4') No WBS numbers in the registry yet.
 
 
 append js
   script(type='text/javascript', src='#{prefix}/javascripts/users.js')
   script(type='text/javascript', src='#{prefix}/javascripts/groupnames.js')
   script(type='text/javascript', src='#{prefix}/javascripts/groups.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/wbs-notifications.js')
 
 
 

@@ -65,9 +65,6 @@ block content
         .span2
           label Discovery To
           input#f-to(type='date')
-        .span2
-          label Root Cause Keyword
-          input#f-rootcause(type='text', placeholder='regex/keyword')
       .row-fluid(style='margin-top: 6px')
         .span6
           label.checkbox.inline
@@ -122,7 +119,6 @@ block js
           parts_disposition: $('#f-disposition').val(),
           from_date: $('#f-from').val(),
           to_date: $('#f-to').val(),
-          root_cause: $('#f-rootcause').val().trim(),
           includeClosed: $('#f-includeClosed').is(':checked'),
         });
         return p;
@@ -179,7 +175,6 @@ block js
           parts_disposition: $('#f-disposition').val(),
           from_date: $('#f-from').val(),
           to_date: $('#f-to').val(),
-          root_cause: $('#f-rootcause').val().trim(),
           includeClosed: true,
           limit: 1000,
         });
@@ -205,7 +200,7 @@ block js
       });
       $('#apply-filters').on('click', function () { state.page = 1; load(); loadCounts(); });
       $('#clear-filters').on('click', function () {
-        $('#f-part,#f-supplier,#f-rootcause,#f-from,#f-to').val('');
+        $('#f-part,#f-supplier,#f-from,#f-to').val('');
         $('#f-disposition').val('');
         $('#f-includeClosed').prop('checked', false);
         state.page = 1; state.status = '';

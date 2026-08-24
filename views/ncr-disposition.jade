@@ -55,27 +55,17 @@ block content
           label.control-label(for='rework_repair_instructions') Rework / Repair Instructions
             span.text-error *
           .controls
-            textarea#rework_repair_instructions(name='rework_repair_instructions', rows='5', maxlength='5000', placeholder='Minimum 50 characters — detailed step-by-step instructions')
+            textarea#rework_repair_instructions(name='rework_repair_instructions', rows='5', maxlength='5000', placeholder='Detailed step-by-step instructions')
             span#rri-counter.help-block 0 / 5000
 
       fieldset
-        legend Root Cause Analysis
-        .control-group
-          label.control-label(for='root_cause_documentation') Root Cause Documentation
-            span.text-error *
-          .controls
-            textarea#root_cause_documentation(name='root_cause_documentation', rows='6', maxlength='5000', required, placeholder='Minimum 50 characters — use 5-Why or similar methodology')
-            span#rc-counter.help-block 0 / 5000
-
-      fieldset
         legend Preventive Actions
-        p.help-block Each action must be at least 50 characters and describe a measurable corrective step.
+        p.help-block Optional. If provided, describe a measurable corrective step.
         #pa-list
           .pa-entry.control-group
             label.control-label Action 1
-              span.text-error *
             .controls
-              textarea.pa-textarea(rows='3', maxlength='1000', placeholder='Minimum 50 characters')
+              textarea.pa-textarea(rows='3', maxlength='1000')
               span.pa-counter.help-block 0 / 1000
         .control-group
           .controls
@@ -104,9 +94,6 @@ block js
         $(counter).text($(textarea).val().length + ' / ' + $(textarea).attr('maxlength'));
       }
 
-      $('#root_cause_documentation').on('input', function () {
-        updateCounter(this, '#rc-counter');
-      });
       $('#rework_repair_instructions').on('input', function () {
         updateCounter(this, '#rri-counter');
       });
@@ -131,9 +118,9 @@ block js
       $('#add-pa').on('click', function () {
         paCount++;
         var entry = $('<div class="pa-entry control-group">' +
-          '<label class="control-label">Action ' + paCount + ' <span class="text-error">*</span></label>' +
+          '<label class="control-label">Action ' + paCount + '</label>' +
           '<div class="controls">' +
-          '<textarea class="pa-textarea" rows="3" maxlength="1000" placeholder="Minimum 50 characters"></textarea>' +
+          '<textarea class="pa-textarea" rows="3" maxlength="1000"></textarea>' +
           '<span class="pa-counter help-block">0 / 1000</span>' +
           '<button type="button" class="btn btn-sm btn-danger remove-pa" style="margin-top:4px">' +
           '<i class="fa fa-minus"></i> Remove</button>' +
@@ -144,7 +131,7 @@ block js
       $(document).on('click', '.remove-pa', function () {
         $(this).closest('.pa-entry').remove();
         $('#pa-list .pa-entry').each(function (i) {
-          $(this).find('label').first().html('Action ' + (i + 1) + ' <span class="text-error">*</span>');
+          $(this).find('label').first().text('Action ' + (i + 1));
         });
         paCount = $('#pa-list .pa-entry').length;
       });
@@ -156,22 +143,17 @@ block js
         var pd = $('input[name="parts_disposition"]:checked').val();
         if (!pd) errors.push('Parts Disposition is required.');
 
-        var rc = $('#root_cause_documentation').val().trim();
-        if (rc.length < 50) errors.push('Root Cause Documentation must be at least 50 characters.');
-
         var pas = [];
-        var paValid = true;
         $('.pa-textarea').each(function () {
           var v = $(this).val().trim();
-          if (v.length < 50) paValid = false;
+          if (v.length === 0) return;
           pas.push(v);
         });
-        if (!paValid || pas.length === 0) errors.push('Each Preventive Action must be at least 50 characters.');
 
         var rri = '';
         if (pd === 'Rework' || pd === 'Repair') {
           rri = $('#rework_repair_instructions').val().trim();
-          if (rri.length < 50) errors.push('Rework/Repair Instructions must be at least 50 characters.');
+          if (rri.length === 0) errors.push('Rework/Repair Instructions is required when Rework or Repair is selected.');
         }
 
         if (errors.length) {
@@ -183,7 +165,6 @@ block js
 
         var payload = {
           parts_disposition: pd,
-          root_cause_documentation: rc,
           preventive_actions: pas,
         };
         if (rri) payload.rework_repair_instructions = rri;
