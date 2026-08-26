@@ -82,3 +82,4 @@ shell commands, and other important information, read the current plan
 
 ## Recent Changes
 - 002-playwright-e2e-tests: Added JavaScript (Node.js 18+, matching the app's existing runtime) + `@playwright/test` (new devDependency); no other new dependency required — Mailpit verification uses Playwright's own built-in `request` fixture, and fixture provisioning reuses the app's own `mongoose`/`model/*.js` inside the `web` container rather than adding a second DB driver
+- 007-wbs-yaml-config: Added `js-yaml` dependency. WBS-to-email mappings are now loaded from `config/wbs.yaml` (bare Node) or `docker/wbs.yaml` (Docker) at startup — edit the file and restart to change mappings. `model/wbs-notification.js` and its MongoDB collection have been removed. **Breaking change**: `POST/PATCH/DELETE /api/wbs-notifications` no longer exist (return 404); use the YAML file instead.

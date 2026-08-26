@@ -19,7 +19,7 @@
 
 **Purpose**: Add the one new dependency required by this feature.
 
-- [ ] T001 Add `js-yaml` to `package.json` dependencies and install (`npm install js-yaml`)
+- [X] T001 Add `js-yaml` to `package.json` dependencies and install (`npm install js-yaml`)
 
 ---
 
@@ -29,12 +29,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 Implement `lib/wbs-yaml-loader.js` — export a `loadWbsYaml(configPath)` function that: reads `<configPath>/wbs.yaml` via `fs.readFileSync`; parses with `js-yaml.load(content, { schema: yaml.FAILSAFE_SCHEMA })`; validates each entry using the existing `WBS_NUMBER_PATTERN` and `EMAIL_PATTERN` from `lib/wbs-notification-service.js`; skips invalid entries with a per-entry warning log; returns a plain `{ [wbs_number]: email }` object; returns `{}` on missing file (debug log only); returns `{}` and logs an error on YAML parse failure
-- [ ] T003 [P] Write unit tests `test-unit/lib/wbs-yaml-loader.test.js` covering: valid file with multiple entries (correct map returned), missing file (returns `{}`, no error thrown), empty file (returns `{}`), invalid YAML syntax (error logged with file path, returns `{}`), entry with invalid WBS number (warning logged with key+value, entry skipped, valid entries returned), entry with invalid email (warning logged with key+value, entry skipped, valid entries returned), duplicate WBS key (last value wins)
-- [ ] T004 Remove `addEntry`, `updateEntry`, `removeEntry` from `lib/wbs-notification-service.js`; remove the `require('../model/wbs-notification')` import; keep only `isValidWbsNumber`, `isValidEmail`, `resolveWbsContact`, and a stub `listEntries` (to be updated in Phase 3)
-- [ ] T005 [P] Remove POST, PATCH, DELETE route handlers from `routes/wbs-notification.js`; keep only the GET handler stub (implementation updated in Phase 3)
-- [ ] T006 [P] Delete `model/wbs-notification.js` and remove its `require` line from `app.js`
-- [ ] T007 [P] Update `test-unit/lib/wbs-notification-service.test.js` — remove all tests for `addEntry`, `updateEntry`, `removeEntry`; remove stubs that reference `WbsNotification` model; keep `isValidWbsNumber` and `isValidEmail` tests; existing `resolveWbsContact` and `listEntries` tests will be updated in Phase 3
+- [X] T002 Implement `lib/wbs-yaml-loader.js` — export a `loadWbsYaml(configPath)` function that: reads `<configPath>/wbs.yaml` via `fs.readFileSync`; parses with `js-yaml.load(content, { schema: yaml.FAILSAFE_SCHEMA })`; validates each entry using the existing `WBS_NUMBER_PATTERN` and `EMAIL_PATTERN` from `lib/wbs-notification-service.js`; skips invalid entries with a per-entry warning log; returns a plain `{ [wbs_number]: email }` object; returns `{}` on missing file (debug log only); returns `{}` and logs an error on YAML parse failure
+- [X] T003 [P] Write unit tests `test-unit/lib/wbs-yaml-loader.test.js` covering: valid file with multiple entries (correct map returned), missing file (returns `{}`, no error thrown), empty file (returns `{}`), invalid YAML syntax (error logged with file path, returns `{}`), entry with invalid WBS number (warning logged with key+value, entry skipped, valid entries returned), entry with invalid email (warning logged with key+value, entry skipped, valid entries returned), duplicate WBS key (last value wins)
+- [X] T004 Remove `addEntry`, `updateEntry`, `removeEntry` from `lib/wbs-notification-service.js`; remove the `require('../model/wbs-notification')` import; keep only `isValidWbsNumber`, `isValidEmail`, `resolveWbsContact`, and a stub `listEntries` (to be updated in Phase 3)
+- [X] T005 [P] Remove POST, PATCH, DELETE route handlers from `routes/wbs-notification.js`; keep only the GET handler stub (implementation updated in Phase 3)
+- [X] T006 [P] Delete `model/wbs-notification.js` and remove its `require` line from `app.js`
+- [X] T007 [P] Update `test-unit/lib/wbs-notification-service.test.js` — remove all tests for `addEntry`, `updateEntry`, `removeEntry`; remove stubs that reference `WbsNotification` model; keep `isValidWbsNumber` and `isValidEmail` tests; existing `resolveWbsContact` and `listEntries` tests will be updated in Phase 3
 
 **Checkpoint**: Codebase compiles; `npm test` may have failures in service tests (expected — Phase 3 will fix them); CRUD routes return 404; loader module exists with tests passing.
 
@@ -46,14 +46,14 @@
 
 **Independent Test**: Place `wbs.yaml` with two valid entries, restart, call `GET /wbs-notifications/` and verify both entries appear with `source: "config"`; trigger NCR for a mapped WBS number and confirm email resolves correctly.
 
-- [ ] T008 Wire YAML loader into `config/config.js` — at the end of `module.exports.load()`, call `require('./wbs-yaml-loader').loadWbsYaml(this.configPath)` and assign the result to `module.exports.wbsYaml`; log `[wbs-yaml] Loaded N WBS notification mapping(s) from wbs.yaml` when N > 0
-- [ ] T009 Rewrite `lib/wbs-notification-service.js → resolveWbsContact` — remove the MongoDB query; build the same candidate list (exact match first, then ancestor walk) and look up each candidate in `config.wbsYaml`; return `{ wbs_number, notification_email, source: 'config' }` for the first match found, or `null` if none
-- [ ] T010 Rewrite `lib/wbs-notification-service.js → listEntries` — return entries from `config.wbsYaml` as an array of `{ wbs_number, notification_email, source: 'config' }` objects sorted by `wbs_number` ascending; no DB call
-- [ ] T011 Update the GET handler in `routes/wbs-notification.js` — call the new `listEntries()` and return `{ success: true, entries }` (response shape matches contract in [contracts/wbs-notification-api.md](contracts/wbs-notification-api.md))
-- [ ] T012 [P] Update `test-unit/lib/wbs-notification-service.test.js` — add tests for the new `resolveWbsContact` (YAML map match, YAML ancestor match, no match returns null) and new `listEntries` (returns YAML entries sorted, empty array when config.wbsYaml is empty); stub `config.wbsYaml` directly (no Mongoose stubs needed)
-- [ ] T013 [P] Create example files `config/wbs.yaml` and `docker/wbs.yaml` — each with a comment header explaining the format, two sample commented-out entries, and a note that the file is optional
-- [ ] T014 Update the admin WBS page Jade view — locate the WBS notification section in `views/` or `builderview/`; remove the add-entry form and the edit/delete controls from the table; render a simple read-only table of `{ wbs_number, notification_email }` pairs populated from the GET endpoint; add a note "Mappings are loaded from `wbs.yaml` — edit the file and restart to change"
-- [ ] T015 Rewrite `public/javascripts/wbs-notifications.js` — remove all POST/PATCH/DELETE AJAX calls and button handlers; replace with a simple read-only fetch of `GET /wbs-notifications/` and render-to-table logic; no edit or delete buttons
+- [X] T008 Wire YAML loader into `config/config.js` — at the end of `module.exports.load()`, call `require('./wbs-yaml-loader').loadWbsYaml(this.configPath)` and assign the result to `module.exports.wbsYaml`; log `[wbs-yaml] Loaded N WBS notification mapping(s) from wbs.yaml` when N > 0
+- [X] T009 Rewrite `lib/wbs-notification-service.js → resolveWbsContact` — remove the MongoDB query; build the same candidate list (exact match first, then ancestor walk) and look up each candidate in `config.wbsYaml`; return `{ wbs_number, notification_email, source: 'config' }` for the first match found, or `null` if none
+- [X] T010 Rewrite `lib/wbs-notification-service.js → listEntries` — return entries from `config.wbsYaml` as an array of `{ wbs_number, notification_email, source: 'config' }` objects sorted by `wbs_number` ascending; no DB call
+- [X] T011 Update the GET handler in `routes/wbs-notification.js` — call the new `listEntries()` and return `{ success: true, entries }` (response shape matches contract in [contracts/wbs-notification-api.md](contracts/wbs-notification-api.md))
+- [X] T012 [P] Update `test-unit/lib/wbs-notification-service.test.js` — add tests for the new `resolveWbsContact` (YAML map match, YAML ancestor match, no match returns null) and new `listEntries` (returns YAML entries sorted, empty array when config.wbsYaml is empty); stub `config.wbsYaml` directly (no Mongoose stubs needed)
+- [X] T013 [P] Create example files `config/wbs.yaml` and `docker/wbs.yaml` — each with a comment header explaining the format, two sample commented-out entries, and a note that the file is optional
+- [X] T014 Update the admin WBS page Jade view — locate the WBS notification section in `views/` or `builderview/`; remove the add-entry form and the edit/delete controls from the table; render a simple read-only table of `{ wbs_number, notification_email }` pairs populated from the GET endpoint; add a note "Mappings are loaded from `wbs.yaml` — edit the file and restart to change"
+- [X] T015 Rewrite `public/javascripts/wbs-notifications.js` — remove all POST/PATCH/DELETE AJAX calls and button handlers; replace with a simple read-only fetch of `GET /wbs-notifications/` and render-to-table logic; no edit or delete buttons
 
 **Checkpoint**: `npm test` fully passes. `GET /wbs-notifications/` returns YAML entries. Admin page shows read-only list. NCR resolution uses YAML email.
 
@@ -65,8 +65,8 @@
 
 **Independent Test**: Remove `docker/wbs.yaml`, restart the application, confirm clean startup logs, confirm `GET /wbs-notifications/` returns `{ "entries": [] }`.
 
-- [ ] T016 [US2] Confirm the debug-level "not found" log message is present in `lib/wbs-yaml-loader.js` when the file is absent (review T002 output; add if missing)
-- [ ] T017 [US2] Run `TRAVELER_CONFIG_REL_PATH=docker npm test` with no `wbs.yaml` in the `docker/` directory and confirm all tests pass — fix any regressions from Phase 3 changes
+- [X] T016 [US2] Confirm the debug-level "not found" log message is present in `lib/wbs-yaml-loader.js` when the file is absent (review T002 output; add if missing)
+- [X] T017 [US2] Run `TRAVELER_CONFIG_REL_PATH=docker npm test` with no `wbs.yaml` in the `docker/` directory and confirm all tests pass — fix any regressions from Phase 3 changes
 
 **Checkpoint**: Full test suite passes with no YAML file present.
 
@@ -78,8 +78,8 @@
 
 **Independent Test**: Provide a syntactically invalid `wbs.yaml`; confirm startup log error contains the file path and error text. Provide a file with one bad email entry; confirm a warning names the entry.
 
-- [ ] T018 [US3] Review and finalize all log message wording in `lib/wbs-yaml-loader.js`: YAML parse-failure message must include full file path and underlying error text; per-entry warning must include the WBS key, the problematic value, and the rejection reason (e.g., `[wbs-yaml] Skipping entry "2.2": invalid email "not-an-email"`)
-- [ ] T019 [P] [US3] Extend `test-unit/lib/wbs-yaml-loader.test.js` — add logger spy assertions: YAML parse failure log contains file path substring; invalid WBS entry warning contains the key; invalid email entry warning contains the key and the bad value
+- [X] T018 [US3] Review and finalize all log message wording in `lib/wbs-yaml-loader.js`: YAML parse-failure message must include full file path and underlying error text; per-entry warning must include the WBS key, the problematic value, and the rejection reason (e.g., `[wbs-yaml] Skipping entry "2.2": invalid email "not-an-email"`)
+- [X] T019 [P] [US3] Extend `test-unit/lib/wbs-yaml-loader.test.js` — add logger spy assertions: YAML parse failure log contains file path substring; invalid WBS entry warning contains the key; invalid email entry warning contains the key and the bad value
 
 **Checkpoint**: All three user stories independently functional and tested.
 
@@ -89,8 +89,8 @@
 
 **Purpose**: Update e2e tests that exercised the now-removed admin CRUD flow to instead validate the YAML-based approach.
 
-- [ ] T020 Update `e2e/us-wbs-notification-registry.spec.js` — replace the CRUD fixture setup (API POST calls to create entries) with YAML file fixture setup (write `docker/wbs.yaml` in `beforeAll`, delete in `afterAll`); verify GET returns correct entries and POST returns 404
-- [ ] T021 [P] Update `e2e/us-wbs-hierarchical-notification-lookup.spec.js` — replace DB-seeded WBS entries with YAML file fixture entries; verify hierarchical resolution behavior (ancestor matching) still works end-to-end
+- [X] T020 Update `e2e/us-wbs-notification-registry.spec.js` — replace the CRUD fixture setup (API POST calls to create entries) with YAML file fixture setup (write `docker/wbs.yaml` in `beforeAll`, delete in `afterAll`); verify GET returns correct entries and POST returns 404
+- [X] T021 [P] Update `e2e/us-wbs-hierarchical-notification-lookup.spec.js` — replace DB-seeded WBS entries with YAML file fixture entries; verify hierarchical resolution behavior (ancestor matching) still works end-to-end
 
 **Checkpoint**: e2e test suite passes with the YAML-based setup.
 
@@ -100,8 +100,8 @@
 
 **Purpose**: Documentation, linting, and end-to-end validation.
 
-- [ ] T022 [P] Update `CLAUDE.md` — add `js-yaml` to dependencies section; document `config/wbs.yaml` and `docker/wbs.yaml` as optional config files; note that POST/PATCH/DELETE `/wbs-notifications/` are removed (breaking change)
-- [ ] T023 Run `npx eslint .` and fix any linting errors introduced by new or modified files
+- [X] T022 [P] Update `CLAUDE.md` — add `js-yaml` to dependencies section; document `config/wbs.yaml` and `docker/wbs.yaml` as optional config files; note that POST/PATCH/DELETE `/wbs-notifications/` are removed (breaking change)
+- [X] T023 Run `npx eslint .` and fix any linting errors introduced by new or modified files
 - [ ] T024 Run quickstart validation — execute Scenarios 1–7 from [quickstart.md](quickstart.md) against the running Docker environment and confirm all pass
 
 ---

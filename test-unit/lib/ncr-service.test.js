@@ -45,7 +45,7 @@ const {
 } = require('../../lib/ncr-service.js');
 
 const { Ncr } = require('../../model/ncr');
-const { WbsNotification } = require('../../model/wbs-notification');
+const config = require('../../config/config');
 const User = mongoose.model('User');
 const Group = mongoose.model('Group');
 
@@ -133,7 +133,9 @@ async function expectRejection(promise, status) {
 }
 
 function stubWbsMatch(matches) {
-  WbsNotification.find.returns({ lean: () => Promise.resolve(matches) });
+  const map = {};
+  matches.forEach(function (m) { map[m.wbs_number] = m.notification_email; });
+  config.wbsYaml = map;
 }
 
 beforeEach(() => {
@@ -143,7 +145,7 @@ beforeEach(() => {
   sinon.stub(Group, 'findOne').returns(nullChain);
   // Default: no WBS Notification Registry match — tests that don't care
   // about the WBS lookup get the same behavior as before this feature.
-  sinon.stub(WbsNotification, 'find').returns({ lean: () => Promise.resolve([]) });
+  config.wbsYaml = {};
 });
 
 afterEach(() => {

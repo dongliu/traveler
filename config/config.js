@@ -25,6 +25,7 @@
 
 const fs = require('fs');
 const optionalRequire = require('optional-require')(require);
+const { loadWbsYaml } = require('../lib/wbs-yaml-loader');
 
 module.exports.configPath = '';
 module.exports.uploadPath = '';
@@ -139,4 +140,5 @@ module.exports.load = function() {
     this.app.user_key === undefined ? true : this.app.user_key;
   viewConfig.NODE_ENV = process.env.NODE_ENV || 'development';
   module.exports.viewConfig = viewConfig;
+  module.exports.wbsYaml = loadWbsYaml(configPath);
 };

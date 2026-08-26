@@ -37,7 +37,6 @@ require('./model/traveler');
 require('./model/binder');
 require('./model/history');
 require('./model/ncr');
-require('./model/wbs-notification');
 
 // Connect to mongo database
 let mongoAddress = 'mongodb://';

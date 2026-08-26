@@ -1,0 +1,20 @@
+# WBS Notification Registry
+#
+# Optional file — the application loads this at startup if present.
+# Each line maps a WBS number to a notification email address.
+# Format: <wbs_number>: <email>
+#
+# The application performs hierarchical lookup: if no exact match is found,
+# it walks up the WBS hierarchy and notifies the nearest registered ancestor.
+#
+# Example entries (remove the leading # to activate):
+# Numeric WBS numbers are supported — js-yaml's FAILSAFE_SCHEMA keeps them as strings.
+# 1: site-lead@example.com
+# 1.2: team-lead@example.com
+# 1.2.3: qa-group@example.com
+
+# ── e2e test fixtures (used by e2e/us-wbs-hierarchical-notification-lookup.spec.js) ──
+# Numeric WBS numbers: an NCR filed under 1.2.3 falls back to 1.2, then 1.
+1: e2e-root@example.com
+1.2: e2e-child@example.com
+1.2.3: e2e-exact@example.com
