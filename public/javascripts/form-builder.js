@@ -15,8 +15,6 @@ import { table_edit, binding_table_events } from './lib/table-builder.js';
 
 const mceConfig = {
   base_url: '/tinymce',
-  license_key: 'gpl',
-  promotion: false,
   suffix: '.min',
 
   // Required in v6+
@@ -31,7 +29,7 @@ const mceConfig = {
 
   toolbar: 'undo redo | charmap | link image | bullist numlist outdent indent | formatselect bold italic underline strikethrough | removeformat',
 
-  // v8: Promise-based upload handler
+  // v6+: Promise-based upload handler
   images_upload_handler: async (blobInfo) => {
     const formData = new FormData();
     formData.append('file', blobInfo.blob(), blobInfo.filename());
