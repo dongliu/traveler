@@ -1,5 +1,8 @@
-/* global ajax401: false, prefix: false, updateAjaxURL: false, baseHtml: false,
-selectColumn: false, titleColumn: false, versionColumn: false */
+/* global ajax401: false, prefix: false, updateAjaxURL: false, id: false,
+baseHtml: false, selectColumn: false, titleColumn: false, versionColumn: false,
+releasedOnColumn: false, releasedByColumn: false, releasedFormVersionColumn: false,
+releasedFormLinkColumn: false, selectMultiEvent: false, fnGetSelectedInPage: false,
+fnSelectAll: false, sDomPage: false */
 
 $(function() {
   updateAjaxURL(prefix);
@@ -19,6 +22,52 @@ $(function() {
     aoColumns: [selectColumn, titleColumn, versionColumn],
     bPaginate: false,
   });
+
+  const priorCompositionsTable = $('#prior-compositions').dataTable({
+    sAjaxSource: `/released-forms/${id}/compositions/json`,
+    sAjaxDataProp: '',
+    bProcessing: true,
+    oLanguage: {
+      sLoadingRecords: 'Please wait - loading data from the server ...',
+    },
+    aoColumns: [
+      selectColumn,
+      titleColumn,
+      releasedOnColumn,
+      releasedByColumn,
+      releasedFormVersionColumn,
+      releasedFormLinkColumn,
+    ],
+    iDisplayLength: 2,
+    sDom: sDomPage,
+    fnInitComplete() {
+      fnSelectAll(priorCompositionsTable, 'row-selected', 'select-row', true);
+    },
+  });
+  selectMultiEvent('#prior-compositions');
+
+  function archivePriorCompositions(target) {
+    Object.keys(target).forEach(function archiveOne(releasedFormId) {
+      $.ajax({
+        url: `/released-forms/${releasedFormId}/status`,
+        type: 'PUT',
+        async: false,
+        data: JSON.stringify(target[releasedFormId]),
+        contentType: 'application/json',
+        processData: false,
+      })
+        .done(function onArchiveSuccess(data) {
+          $('#message').append(
+            `<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>${data}</div>`
+          );
+        })
+        .fail(function onArchiveFail(data) {
+          $('#message').append(
+            `<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>${data.responseText}</div>`
+          );
+        });
+    });
+  }
 
   function escapeHtml(text) {
     return String(text)
@@ -97,6 +146,18 @@ $(function() {
   });
 
   $('#compose-confirm').click(function onConfirm() {
+    const toArchive = fnGetSelectedInPage(
+      priorCompositionsTable,
+      'row-selected',
+      false
+    );
+    const target = {};
+    $(toArchive).each(function collectTarget(s) {
+      const data = priorCompositionsTable.fnGetData(s);
+      target[data._id] = { version: data.ver, status: 2 };
+    });
+    archivePriorCompositions(target);
+
     const json = {
       title: $('#release-title').val(),
       aclFormIds: selected.map(function toId(acl) {

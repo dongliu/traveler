@@ -61,6 +61,26 @@ pickers in `form-builder.js`).
 `GET /released-forms/normal/json` (already exists, `routes/form-management.js:188-205`) is reused
 unmodified to populate the base-form picker — no change needed there.
 
+## `GET /released-forms/:id/compositions/json`
+
+New endpoint. `:id` is the base `ReleasedForm._id` (the same one used for the compose page/action).
+Returns every existing `ReleasedForm` with `formType: 'normal_acl'`, `status: 1`, whose own `base._id`
+matches the current base's `base.base._id` — i.e., every other still-active composition built from the
+same underlying base form template, regardless of title or ACL set. Used to populate a "choose prior
+composition(s) to archive" picker on the compose page, mirroring the "choose prior version(s) to
+archive" step in `form-builder.js`'s `#release` handler (`public/javascripts/form-builder.js:1607`),
+which does the analogous thing for the standard release path via `GET /forms/:id/released/json`
+(`routes/form.js:431-452`, matched by `base._id` against the draft form).
+
+The compose page's client JS defaults every row in this picker to selected (mirroring
+`fnSelectAll(priorVersionsTable, 'row-selected', 'select-row', true)` in `form-builder.js`), and on
+Compose, archives whatever remains selected via the existing `PUT /released-forms/:id/status`
+(`{ status: 2, version: <its ver> }`) for each — the same mechanism `form-builder.js`'s
+`archive_prior_released_forms` already uses — before submitting the compose request itself. Archiving
+a given prior composition is still subject to the existing `isOwnerOrAdminMw` check on that endpoint;
+a failure there surfaces as an inline error message and does not block the new composition from being
+created.
+
 ## `GET /released-forms/:id/` (existing route, extended render data)
 
 `routes/form-management.js:80-100` already renders `released-form` with `base`/`discrepancy`/etc.

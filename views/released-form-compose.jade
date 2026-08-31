@@ -12,11 +12,14 @@ block head
 
 block content
   script(type='text/javascript').
+    var id = !{JSON.stringify(id)};
     var baseHtml = !{JSON.stringify(baseHtml)};
     var baseVer = !{JSON.stringify(baseVer)};
   .container-fluid
     #message
     h3 Compose a released #{viewConfig.terminology.form} from: #{title}
+    h4 Choose prior composition(s) of this #{viewConfig.terminology.form} to archive
+    table#prior-compositions.table.table-bordered.table-hover
     .row-fluid
       .span3#list
         h4 Available ACL #{viewConfig.terminology.form}s

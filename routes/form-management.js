@@ -132,6 +132,26 @@ module.exports = function(app) {
     }
   );
 
+  app.get(
+    '/released-forms/:id/compositions/json',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', ReleasedForm),
+    async function(req, res) {
+      const base = req[req.params.id];
+      try {
+        const compositions = await ReleasedForm.find({
+          formType: 'normal_acl',
+          status: 1,
+          'base._id': base.base._id,
+        }).exec();
+        return res.status(200).json(compositions);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
   app.put(
     '/released-forms/:id/status',
     auth.ensureAuthenticated,
