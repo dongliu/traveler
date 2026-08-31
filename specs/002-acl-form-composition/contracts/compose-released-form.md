@@ -34,10 +34,12 @@ New endpoint. `:id` is the `ReleasedForm._id` of the **base** form (must be `for
    (spec Edge Cases: self-reference and duplicate-selection rejection).
 5. Input `name` attributes across the base form's `html` and every selected ACL form's `html` must be
    disjoint (`research.md` §5) — otherwise `400` naming the colliding input name.
-6. Compute `ver = "<id>"` or `"<id>:<sortedAclId1>,<sortedAclId2>,..."` (`research.md` §1) and check
-   `ReleasedForm.findOne({ title, formType: 'normal_acl', ver, status: 1 })` — if found, `400`
-   "A form with the same title and composition was already released in `<existingId>`." (mirrors the
-   existing duplicate message at `routes/form.js:1105-1111`).
+6. Compute `compositionKey = "<id>"` or `"<id>:<sortedAclId1>,<sortedAclId2>,..."` (`research.md` §1)
+   and check `ReleasedForm.findOne({ title, formType: 'normal_acl', compositionKey, status: 1 })` — if
+   found, `400` "A form with the same title and composition was already released in `<existingId>`."
+   (mirrors the existing duplicate message at `routes/form.js:1105-1111`). Separately compute the
+   human-readable `ver = "base: <baseVer>[, acl: <aclVer1>, <aclVer2>, ...]"` (ACL versions in
+   placement order) — this is for display only and is never used for the duplicate check.
 
 **On success**: creates a new `ReleasedForm` with `formType: 'normal_acl'`, `base` copied from the
 selected base's own `base` field, `aclForms` copied from each selected ACL's own `base` field, saved

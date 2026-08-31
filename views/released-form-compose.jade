@@ -1,0 +1,53 @@
+extends layout
+
+block head
+  meta(charset='urf-8')
+  title #{orgName} - forms - #{id} - compose
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  script(type='text/javascript').
+    var baseHtml = !{JSON.stringify(baseHtml)};
+    var baseVer = !{JSON.stringify(baseVer)};
+  .container-fluid
+    #message
+    h3 Compose a released #{viewConfig.terminology.form} from: #{title}
+    .row-fluid
+      .span3#list
+        h4 Available ACL #{viewConfig.terminology.form}s
+        table#acl-table.table.table-bordered.table-hover
+      .span9
+        .control-group
+          label.control-label Title
+          .controls
+            input#release-title(type='text', value=title)
+        h4 Composed #{viewConfig.terminology.form} preview
+        p.muted Drag the ACL sections below to change their placement. The base #{viewConfig.terminology.form} always stays last.
+        #preview.well-large
+          .control-group.acl-section-legend
+            legend ACL
+          div#acl-preview-list
+          .control-group.base-legend
+            legend Base
+          form.form-horizontal#base-preview
+        .btn-group
+          button.btn.btn-primary#compose-confirm Compose
+          a.btn(href='#{prefix}/released-forms/#{id}/') Cancel
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/jquery-ui-1.14.2.custom/jquery-ui.min.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/jquery.dataTables.js')
+  script(type='text/javascript', src='#{prefix}/datatables/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/table.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/released-form-compose.js')

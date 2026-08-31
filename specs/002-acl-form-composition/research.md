@@ -6,42 +6,54 @@ each has a decision, rationale, and rejected alternatives.
 
 ## 1. Version identifier / duplicate-detection scheme
 
-**Decision**: For a composed released form, `ver` is a deterministic string built from the **source
-released-form ids** the user selected — not from version numbers:
+**Decision**: Split display from duplicate detection into two separate fields, since a single string
+cannot serve both well:
 
-```text
-ver = "<baseReleasedFormId>"                                   // zero ACL forms
-ver = "<baseReleasedFormId>:<aclId1>,<aclId2>,...,<aclIdN>"    // ACL ids sorted ascending, one or more
-```
+- `ver` — a **human-readable display string** built from version *numbers*, in the placement order
+  the user composed them in:
 
-The existing duplicate check (`ReleasedForm.findOne({ title, formType, ver, status: 1 })`, today at
-`routes/form.js:1096-1103`) is reused unmodified for the compose path — only the *contents* of `ver`
-differ from the `base_v[:discrepancy_v]` scheme used by the standard release path. Because `formType`
-is part of the lookup key too, there is no risk of a composed `ver` (built from ObjectId hex strings)
-ever colliding with a numeric-version `ver` from the standard/discrepancy path.
+  ```text
+  ver = "base: <baseVer>"                                    // zero ACL forms
+  ver = "base: <baseVer>, acl: <aclVer1>, <aclVer2>, ..."     // one or more, in placement order
+  ```
 
-**Rationale**: A source released-form id already uniquely identifies *both* "which form" and "which
-version of it" as one atomic value (each release event creates a new `ReleasedForm` document with a
-fresh `_id`). Comparing sorted id sets directly:
-- Is order-independent by construction (sorting before joining), satisfying spec User Story 3,
-  Acceptance Scenario 2.
-- Never collides two different ACL combinations, even when their underlying version numbers happen
-  to coincide — this is exactly the failure mode the original `base_v[:discrepancy_v]` concatenation
-  scheme could not avoid for a variable-length ACL set, which is what the user flagged as broken.
-- Requires no new query mechanism, no new indexed field, and no schema migration — it reuses the
-  `title + formType + ver + status` duplicate-check exactly as it exists today.
-- Composing the same base/ACL *forms* again after any of them gets a new release (a new
-  `ReleasedForm._id`) is correctly treated as a *new*, non-duplicate composition — which is the
-  desired behavior (re-releasing an ACL form and recomposing with the new version should be allowed).
+- `compositionKey` — a separate, **not displayed**, deterministic string built from the **source
+  released-form ids** the user selected, used only for duplicate detection:
+
+  ```text
+  compositionKey = "<baseReleasedFormId>"                                // zero ACL forms
+  compositionKey = "<baseReleasedFormId>:<aclId1>,<aclId2>,...,<aclIdN>" // ids sorted ascending
+  ```
+
+The duplicate check becomes `ReleasedForm.findOne({ title, formType, compositionKey, status: 1 })` —
+the same shape as the existing check (today at `routes/form.js:1096-1103`), just pointed at
+`compositionKey` instead of `ver`.
+
+**Rationale**: The first version of this decision used the id-based scheme for `ver` itself, since a
+source released-form id uniquely identifies *both* "which form" and "which version of it." That
+correctly solved duplicate detection, but produced raw ObjectId strings on the released-form detail
+page (e.g., `5f2a1c...:64b7e2...,9c0f31...`) — unreadable to a human trying to understand what version
+of what was released. Switching `ver` to human version numbers directly reintroduces the *original*
+ambiguity this whole scheme exists to avoid: two different ACL forms can validly share the same
+version number (e.g., two different forms both at their own "v1"), so a version-number-only string
+cannot always tell two different compositions apart. Rather than accept that ambiguity or keep the
+unreadable id string, splitting the two concerns keeps both intact: `ver` is now genuinely readable to
+a human ("base: 3, acl: 1, 2"), while `compositionKey` keeps the original id-based guarantees —
+order-independent, and never collides two different ACL combinations, even when their version numbers
+happen to coincide — entirely out of the user's sight. Listing ACL versions in placement (not sorted)
+order in `ver` also makes the display match what the user actually composed, which sorted ids alone
+could never do (order was deliberately discarded there to keep duplicate detection reliable).
 
 **Alternatives considered**:
-- *Version-number concatenation* (`base_v:acl_v1,acl_v2,...`) — rejected: cannot distinguish which
-  specific ACL forms are included when two different forms happen to share a version number (e.g.,
-  two different ACL forms both at their own "v1"); this is the exact ambiguity called out as the
-  reason the existing discrepancy-only scheme "will not work out of box."
-- *Short hash of the sorted id set* (`base:H(sortedIds)`) — rejected: adds a hashing dependency/step
-  for no benefit over just joining the ids directly (ObjectId hex strings are already short and
-  stable); direct id concatenation is also easier to eyeball during debugging/audit.
+- *Single id-based string doing both jobs* (the original decision) — rejected on human-readability
+  grounds, per above.
+- *Single version-number string doing both jobs* (`base: 3, acl: 1, 2` used for duplicate detection
+  too) — rejected: reintroduces the exact ambiguity that made the original `base_v[:discrepancy_v]`
+  concatenation scheme unworkable for a variable-length ACL set, which is what motivated this whole
+  decision in the first place.
+- *Short hash of the sorted id set* for `compositionKey` (`base:H(sortedIds)`) — rejected: adds a
+  hashing dependency/step for no benefit over just joining the ids directly (ObjectId hex strings are
+  already short and stable); direct id concatenation is also easier to eyeball during debugging/audit.
 
 ## 2. Where the composed content lives on `ReleasedForm`
 

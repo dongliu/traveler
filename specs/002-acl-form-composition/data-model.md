@@ -25,11 +25,21 @@ attachment, unchanged).
 |-------------|---------------------------------------------------------------------------------------------------|
 | `formType`  | Enum extended: `['normal', 'discrepancy', 'normal_discrepancy', 'ACL', 'normal_acl']`             |
 | `aclForms`  | **New**: `[formContent]`, default `[]` — immutable content snapshots of every attached ACL form   |
-| `ver`       | No schema change (still `String`) — for `formType: 'normal_acl'`, its *contents* follow the id-set scheme from `research.md` §1 instead of the `base_v[:discrepancy_v]` scheme |
+| `ver`       | No schema change (still `String`) — for `formType: 'normal_acl'`, a human-readable `"base: <v>[, acl: <v>, ...]"` string per `research.md` §1, instead of the `base_v[:discrepancy_v]` scheme |
+| `compositionKey` | **New**: `String` — `formType: 'normal_acl'` only; the id-set based duplicate-detection key `ver` used to hold, now separated out since it's not human-readable (see below) |
 
-`formContent` sub-schema (`html`, `mapping`, `labels`, `types`, `formType`, `_v`) is reused as-is for
-`aclForms` entries — its own `formType` enum must also be extended to include `'ACL'` since it is
-shared between `base`, `discrepancy`, and (new) `aclForms` entries:
+`formContent` sub-schema (`title`, `html`, `mapping`, `labels`, `types`, `formType`, `_v`) is reused
+as-is for `aclForms` entries — its own `formType` enum must also be extended to include `'ACL'` since
+it is shared between `base`, `discrepancy`, and (new) `aclForms` entries. `title` is a new field on
+`formContent` itself (previously it only carried content, not identity) — added so each attached ACL
+form's *original template title* survives the snapshot and can be displayed wherever `aclForms` is
+rendered (`views/released-form.jade`, `views/traveler.jade`), rather than a generic "ACL N" label.
+The `Traveler` model's own `form` sub-schema (`model/traveler.js`, shared by `forms`,
+`discrepancyForms`, and `aclForms`) gets the same `title: String` addition, since a plain object
+assignment into that sub-schema is cast against its own fields — without it, `title` would be
+silently dropped when a released form's `aclForms` snapshot is copied into a traveler. Existing
+released forms and travelers created before this field existed simply have `title: undefined`; views
+fall back to the generic "ACL N" label in that case:
 
 ```text
 formContent.formType enum: ['normal', 'discrepancy', 'ACL']
@@ -54,17 +64,27 @@ Both plugin configurations (`fieldsToVersion`, `fieldsToWatch`) must include `ac
 existing `title`, `description`, `base`, `discrepancy` so that composing correctly bumps `_v` and is
 captured in the audit history the same way attaching a discrepancy form is today.
 
-### Duplicate-detection key (unchanged mechanism, new `ver` contents)
+### `ver` vs. `compositionKey` (display vs. duplicate-detection)
 
-The existing check remains:
+`ver` and duplicate detection are split into two fields for `formType: 'normal_acl'`, since a single
+string cannot be both human-readable and collision-free (per `research.md` §1):
 
-```js
-ReleasedForm.findOne({ title, formType, ver, status: 1 })
-```
+- `ver` — human-readable, built from **version numbers** in the placement order the user composed
+  them in: `"base: <baseVer>[, acl: <aclVer1>, <aclVer2>, ...]"`. Shown to users (released-form detail
+  page, etc.); never used for duplicate detection.
+- `compositionKey` — **new field**, not displayed, built from the **source released-form ids** (the
+  base `ReleasedForm`'s `_id` and the sorted `_id`s of the selected ACL `ReleasedForm`s). The
+  duplicate check becomes:
 
-For `formType: 'normal_acl'`, `ver` is computed per `research.md` §1 from the **source released-form
-ids** the user selected (the `_id` of the base `ReleasedForm` and the sorted `_id`s of the selected
-ACL `ReleasedForm`s) — not from the embedded snapshots' own `_v` values.
+  ```js
+  ReleasedForm.findOne({ title, formType, compositionKey, status: 1 })
+  ```
+
+  the same shape as the existing check, just pointed at `compositionKey` instead of `ver`.
+
+For the standard release path (`normal` / `discrepancy` / `normal_discrepancy`), nothing changes:
+`ver` keeps its existing `base_v[:discrepancy_v]` format and remains the duplicate-detection key
+(`compositionKey` is simply unset for those `formType`s).
 
 ## Traveler (`model/traveler.js`)
 
@@ -104,7 +124,8 @@ Form (formType: 'normal')
                                    v
                 ReleasedForm (formType: 'normal_acl', base: <base snapshot>,
                                aclForms: [<ACL snapshot>, ...],
-                               ver: "<baseId>:<sortedAclId1>,<sortedAclId2>,...")
+                               ver: "base: <v>, acl: <v>, <v>, ...",  // human-readable
+                               compositionKey: "<baseId>:<sortedAclId1>,...")  // dedup key
                                    |
                                    |  createTraveler
                                    v
