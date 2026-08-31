@@ -17,35 +17,48 @@ cannot serve both well:
   ver = "base: <baseVer>, acl: <aclVer1>, <aclVer2>, ..."     // one or more, in placement order
   ```
 
-- `compositionKey` — a separate, **not displayed**, deterministic string built from the **source
-  released-form ids** the user selected, used only for duplicate detection:
+- `compositionKey` — a separate, **not displayed**, deterministic string built from the **underlying
+  draft form ids** (not the released-form ids) of the base and each selected ACL form, used only for
+  duplicate detection:
 
   ```text
-  compositionKey = "<baseReleasedFormId>"                                // zero ACL forms
-  compositionKey = "<baseReleasedFormId>:<aclId1>,<aclId2>,...,<aclIdN>" // ids sorted ascending
+  compositionKey = "<baseFormId>"                                // zero ACL forms
+  compositionKey = "<baseFormId>:<aclFormId1>,<aclFormId2>,...>" // ids sorted ascending
   ```
+
+  Each id here is `formContent._id` (`base.base._id` for the base, `f.base._id` for each ACL form) —
+  the embedded snapshot's own id, which `new FormContent(form)` sets to the *original draft `Form`
+  document's* stable id at release time (see `formContent.js` model), not `base._id`/`f._id` (the
+  specific `ReleasedForm` document picked, which is different every time that draft form is released
+  again).
 
 The duplicate check becomes `ReleasedForm.findOne({ title, formType, compositionKey, status: 1 })` —
 the same shape as the existing check (today at `routes/form.js:1096-1103`), just pointed at
 `compositionKey` instead of `ver`.
 
-**Rationale**: The first version of this decision used the id-based scheme for `ver` itself, since a
-source released-form id uniquely identifies *both* "which form" and "which version of it." That
-correctly solved duplicate detection, but produced raw ObjectId strings on the released-form detail
-page (e.g., `5f2a1c...:64b7e2...,9c0f31...`) — unreadable to a human trying to understand what version
-of what was released. Switching `ver` to human version numbers directly reintroduces the *original*
-ambiguity this whole scheme exists to avoid: two different ACL forms can validly share the same
-version number (e.g., two different forms both at their own "v1"), so a version-number-only string
-cannot always tell two different compositions apart. Rather than accept that ambiguity or keep the
-unreadable id string, splitting the two concerns keeps both intact: `ver` is now genuinely readable to
-a human ("base: 3, acl: 1, 2"), while `compositionKey` keeps the original id-based guarantees —
-order-independent, and never collides two different ACL combinations, even when their version numbers
-happen to coincide — entirely out of the user's sight. Listing ACL versions in placement (not sorted)
-order in `ver` also makes the display match what the user actually composed, which sorted ids alone
-could never do (order was deliberately discarded there to keep duplicate detection reliable).
+**Rationale**: The first version of this decision used *released-form* ids for the id-based scheme,
+which produced raw ObjectId strings directly in `ver` — unreadable to a human trying to understand
+what version of what was released (e.g., `5f2a1c...:64b7e2...,9c0f31...`). Splitting `ver` (human,
+version-number-based) from `compositionKey` (id-based, hidden) fixed the readability problem — but
+switching `compositionKey` from released-form ids to the underlying *draft form* ids was a second,
+separate correction, needed for a different reason: released-form ids are minted fresh every time a
+draft form is released again, so composing the exact same base and ACL *forms* a second time — after
+either got a new release — would never collide with the earlier composition, silently leaving two
+active compositions of the same form set around at once. Keying on the draft form ids instead means
+composing the same forms again is *always* treated as a duplicate of the still-active prior
+composition, regardless of which version of each was picked — which is the behavior actually wanted,
+and is exactly why composing now offers a "prior compositions of this base" step to archive the old
+one first (mirroring how the standard release flow offers to archive prior versions of a draft form):
+archiving flips its `status` away from `1`, so it drops out of the `status: 1` duplicate lookup and a
+new composition of the same forms can proceed. Listing ACL versions in placement (not sorted) order in
+`ver` also makes the display match what the user actually composed, which sorted ids alone could never
+do (order is deliberately discarded in `compositionKey` to keep duplicate detection reliable).
 
 **Alternatives considered**:
-- *Single id-based string doing both jobs* (the original decision) — rejected on human-readability
+- *`compositionKey` keyed on released-form ids* (an earlier version of this decision) — rejected: lets
+  the same base/ACL form set accumulate multiple simultaneously-active compositions across re-releases,
+  with nothing forcing the "prior compositions" archive step to actually matter.
+- *Single id-based string doing both jobs* (`ver` itself id-based) — rejected on human-readability
   grounds, per above.
 - *Single version-number string doing both jobs* (`base: 3, acl: 1, 2` used for duplicate detection
   too) — rejected: reintroduces the exact ambiguity that made the original `base_v[:discrepancy_v]`

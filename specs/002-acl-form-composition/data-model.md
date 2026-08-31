@@ -26,7 +26,7 @@ attachment, unchanged).
 | `formType`  | Enum extended: `['normal', 'discrepancy', 'normal_discrepancy', 'ACL', 'normal_acl']`             |
 | `aclForms`  | **New**: `[formContent]`, default `[]` — immutable content snapshots of every attached ACL form   |
 | `ver`       | No schema change (still `String`) — for `formType: 'normal_acl'`, a human-readable `"base: <v>[, acl: <v>, ...]"` string per `research.md` §1, instead of the `base_v[:discrepancy_v]` scheme |
-| `compositionKey` | **New**: `String` — `formType: 'normal_acl'` only; the id-set based duplicate-detection key `ver` used to hold, now separated out since it's not human-readable (see below) |
+| `compositionKey` | **New**: `String` — `formType: 'normal_acl'` only; the duplicate-detection key `ver` used to hold, now separated out since it's not human-readable, and keyed on the underlying draft form ids rather than released-form ids (see below) |
 
 `formContent` sub-schema (`title`, `html`, `mapping`, `labels`, `types`, `formType`, `_v`) is reused
 as-is for `aclForms` entries — its own `formType` enum must also be extended to include `'ACL'` since
@@ -72,9 +72,14 @@ string cannot be both human-readable and collision-free (per `research.md` §1):
 - `ver` — human-readable, built from **version numbers** in the placement order the user composed
   them in: `"base: <baseVer>[, acl: <aclVer1>, <aclVer2>, ...]"`. Shown to users (released-form detail
   page, etc.); never used for duplicate detection.
-- `compositionKey` — **new field**, not displayed, built from the **source released-form ids** (the
-  base `ReleasedForm`'s `_id` and the sorted `_id`s of the selected ACL `ReleasedForm`s). The
-  duplicate check becomes:
+- `compositionKey` — **new field**, not displayed, built from the **underlying draft form ids**, not
+  the released-form ids: `base.base._id` for the base and the sorted `f.base._id`s of the selected ACL
+  forms (each `formContent._id`, which traces back to the *original draft `Form` document*, stable
+  across every time that form gets released again — unlike `base._id`/`f._id`, the specific
+  `ReleasedForm` document picked, which is fresh on every release). This means composing the same
+  underlying forms again — even at newer versions — collides with the existing active composition
+  unless it's archived first (see "prior compositions" below); it is *not* enough to just pick newer
+  releases of the same forms to sidestep the duplicate check. The duplicate check becomes:
 
   ```js
   ReleasedForm.findOne({ title, formType, compositionKey, status: 1 })
@@ -125,7 +130,8 @@ Form (formType: 'normal')
                 ReleasedForm (formType: 'normal_acl', base: <base snapshot>,
                                aclForms: [<ACL snapshot>, ...],
                                ver: "base: <v>, acl: <v>, <v>, ...",  // human-readable
-                               compositionKey: "<baseId>:<sortedAclId1>,...")  // dedup key
+                               compositionKey: "<baseFormId>:<sortedAclFormId1>,...")  // dedup key,
+                                                                                       // draft form ids
                                    |
                                    |  createTraveler
                                    v
