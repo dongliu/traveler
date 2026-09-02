@@ -1,1 +1,3 @@
-{"feature_directory":"specs/006-wbs-hierarchical-notification-lookup"}
+{
+  "feature_directory": "specs/007-wbs-yaml-config"
+}

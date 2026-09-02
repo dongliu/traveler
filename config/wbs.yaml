@@ -1,0 +1,12 @@
+# WBS Notification Registry
+#
+# Optional file — the application loads this at startup if present.
+# Each line maps a WBS number to a notification email address.
+# Format: <wbs_number>: <email>
+#
+# The application performs hierarchical lookup: if no exact match is found,
+# it walks up the WBS hierarchy and notifies the nearest registered ancestor.
+#
+# Example entries (remove the leading # to activate):
+# 1.2: team-lead@example.com
+# 3.1.4: qa-group@example.com

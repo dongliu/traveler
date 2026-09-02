@@ -82,24 +82,19 @@ block underTopBtn
           table#groups-table.table.table-bordered.table-hover
         #wbs-notifications.tab-pane
           #wbs-notifications-message
-          .well
-            form.form-inline#wbs-notifications-add-form(novalidate)
-              input#wbs-number.input(type='text', placeholder='WBS Number, e.g. 1.2.3', name='wbs_number')
-              != ' '
-              input#wbs-notification-email.input(type='email', placeholder='Notification Email', name='notification_email')
-              != ' '
-              button.btn.btn-primary#wbs-notifications-add(type='submit') Add
-          h3 WBS Notification list
+          p.text-muted
+            | Mappings are loaded from&nbsp;
+            code wbs.yaml
+            | &nbsp;in the config directory — edit the file and restart the application to make changes.
+          h3 Active WBS Notification Mappings
           table#wbs-notifications-table.table.table-bordered.table-hover
             thead
               tr
                 th WBS Number
                 th Notification Email
-                th Last Updated By
-                th Actions
             tbody#wbs-notifications-tbody
               tr.wbs-notifications-empty
-                td(colspan='4') No WBS numbers in the registry yet.
+                td(colspan='2') No WBS notification mappings loaded (wbs.yaml not found or empty).
 
 
 append js
