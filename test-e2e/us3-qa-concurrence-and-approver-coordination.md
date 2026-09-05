@@ -44,7 +44,9 @@ Concurrence and Approver Coordination" (Priority: P1)
    `http://localhost:3001/ncrs/<ncr-a-id>/concurrence`.
 2. Confirm the page shows "QA Concurrence" as heading, and the NCR Summary
    + Engineering Disposition sections match NCR-A's disposition data (AS1).
-3. Confirm the Additional Approvers table shows: "No additional approvers —
+3. Confirm the Additional Approvers table has a **"Username"** column only —
+   there is no "Role" column and no role input field anywhere on the page.
+   Confirm the table shows: "No additional approvers —
    concurring will move NCR directly to Final Approval." — and that you
    *could* add one here if you wanted to (AS2 capability, not exercised on
    this NCR).
@@ -54,8 +56,9 @@ Concurrence and Approver Coordination" (Priority: P1)
 ### Acceptance Scenarios 5, 6, 8 — QA designates an approver; approver approves (NCR-B1)
 
 6. Navigate to `http://localhost:3001/ncrs/<ncr-b1-id>/concurrence`.
-7. In the "username" field, enter `<approver-username>`; in the role field,
-   enter `Project Manager`. Click "Add". Confirm the row appears (AS2).
+7. In the **"username"** field (the only input in the add-approver row),
+   enter `<approver-username>`. Click "Add". Confirm the row appears with
+   just the username — no role column or role value is shown (AS2).
 8. Click "Concur" (AS5).
 9. Read the resulting success message.
 10. Log out, log back in as `<approver-username>`.
@@ -140,8 +143,9 @@ After the final test step above:
       `events` contains `qa.concurred` (new_status "Final Approval") and
       `notification.issuance`.
 - [ ] NCR-B1: `status: "Final Approval"`,
-      `additional_approvers[0].approval_status: "Approved"`, `events`
-      contains `qa.concurred` (new_status "Approved"),
+      `additional_approvers[0].approval_status: "Approved"`,
+      `additional_approvers[0].approver_role` is **absent** (field no longer
+      stored), `events` contains `qa.concurred` (new_status "Approved"),
       `approvers.designated`, `notification.approval_request`,
       `approval.approved`, and a second `notification.issuance`.
 - [ ] NCR-B2: `status: "Approved"` (after resubmit),
@@ -153,3 +157,5 @@ After the final test step above:
       after the call and diff the document.
 - [ ] Flag AS9 (QA rejection back to CE/CS) as not implemented in your test
       report, rather than assuming you missed a button.
+- [ ] Confirm the Additional Approvers table has no "Role" column header and
+      no role input field in the add-approver row anywhere in the session.
