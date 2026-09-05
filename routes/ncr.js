@@ -259,7 +259,8 @@ router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
 
   try {
     const user = { id: req.session.userid, name: res.locals.username };
-    const ncr = await submitDisposition(req.params.id, b, user);
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await submitDisposition(req.params.id, b, user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {
@@ -320,7 +321,8 @@ router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
       email: res.locals.userEmail || '',
       roles: res.locals.roles || [],
     };
-    const ncr = await submitConcurrence(req.params.id, additionalApprovers || [], user);
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await submitConcurrence(req.params.id, additionalApprovers || [], user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {
@@ -362,9 +364,10 @@ router.patch('/:id/approve', auth.ensureAuthenticated, async (req, res) => {
       name: res.locals.username,
       roles: res.locals.roles || [],
     };
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
     const ncr = action === 'approve'
-      ? await submitApproval(req.params.id, user)
-      : await returnForComment(req.params.id, comments, user);
+      ? await submitApproval(req.params.id, user, webBaseUrl)
+      : await returnForComment(req.params.id, comments, user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {
@@ -387,7 +390,8 @@ router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
       name: res.locals.username,
       roles: res.locals.roles || [],
     };
-    const ncr = await qaResubmit(req.params.id, user);
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await qaResubmit(req.params.id, user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {
@@ -423,7 +427,8 @@ router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
       name: res.locals.username,
       roles: res.locals.roles || [],
     };
-    const ncr = await closeNcr(req.params.id, b, user);
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await closeNcr(req.params.id, b, user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {
