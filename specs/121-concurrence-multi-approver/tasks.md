@@ -15,7 +15,7 @@
 
 **Purpose**: Confirm baseline — no new dependencies or infrastructure required for this feature.
 
-- [ ] T001 Verify `docker compose up` starts cleanly and an NCR can be loaded in the browser before any changes
+- [x] T001 Verify `docker compose up` starts cleanly and an NCR can be loaded in the browser before any changes
 
 ---
 
@@ -33,12 +33,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T002 [US1] In `routes/ncr.js` (~line 306): remove `!a.approver_role` from the per-entry validation condition; update the error detail message to `'Each entry requires approver_id'`
-- [ ] T003 [P] [US1] In `lib/ncr-service.js` `submitConcurrence` (~line 278–286): remove `approver_role: a.approver_role` from the mapped `additional_approvers` object returned to the NCR document
-- [ ] T004 [P] [US1] In `lib/ncr-service.js` `submitConcurrence` (~line 301–305): remove `approver_role: a.approver_role` from the `qa.concurred` event payload's `additional_approvers` map
-- [ ] T005 [P] [US1] In `lib/ncr-service.js` `submitApproval` and `returnForComment` (~lines 363, 367, 431, 437): remove `actor_role: approverEntry.approver_role` and `approver_role: approverEntry.approver_role` from event fields and payload — leave the fields absent rather than undefined
-- [ ] T006 [US1] In `views/ncr-concurrence.jade`: remove the `th Role` column header; remove the `input#new-approver-role` table cell and input; update the empty-state `colspan="3"` to `colspan="2"`; remove the `$('<td></td>').text(a.approver_role)` append in `render()`; remove `var role = $('#new-approver-role').val().trim()` and the `!role` guard from the add-click handler; remove `$('#new-approver-role').val('')` from the post-add clear
-- [ ] T007 [US1] In `test-unit/lib/ncr-service.test.js`: add or update `submitConcurrence` test cases to cover (a) entries with only `approver_id` and no `approver_role` are accepted and persisted, and (b) empty approvers array advances NCR to Final Approval
+- [x] T002 [US1] In `routes/ncr.js` (~line 306): remove `!a.approver_role` from the per-entry validation condition; update the error detail message to `'Each entry requires approver_id'`
+- [x] T003 [P] [US1] In `lib/ncr-service.js` `submitConcurrence` (~line 278–286): remove `approver_role: a.approver_role` from the mapped `additional_approvers` object returned to the NCR document
+- [x] T004 [P] [US1] In `lib/ncr-service.js` `submitConcurrence` (~line 301–305): remove `approver_role: a.approver_role` from the `qa.concurred` event payload's `additional_approvers` map
+- [x] T005 [P] [US1] In `lib/ncr-service.js` `submitApproval` and `returnForComment` (~lines 363, 367, 431, 437): remove `actor_role: approverEntry.approver_role` and `approver_role: approverEntry.approver_role` from event fields and payload — leave the fields absent rather than undefined
+- [x] T006 [US1] In `views/ncr-concurrence.jade`: remove the `th Role` column header; remove the `input#new-approver-role` table cell and input; update the empty-state `colspan="3"` to `colspan="2"`; remove the `$('<td></td>').text(a.approver_role)` append in `render()`; remove `var role = $('#new-approver-role').val().trim()` and the `!role` guard from the add-click handler; remove `$('#new-approver-role').val('')` from the post-add clear
+- [x] T007 [US1] In `test-unit/lib/ncr-service.test.js`: add or update `submitConcurrence` test cases to cover (a) entries with only `approver_id` and no `approver_role` are accepted and persisted, and (b) empty approvers array advances NCR to Final Approval
 
 **Checkpoint**: User Story 1 is fully functional. The concurrence form shows username-only input, route accepts `approver_id`-only entries, service persists without role. Validate with quickstart.md Scenarios 1–2.
 
@@ -52,7 +52,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] In `views/ncr-concurrence.jade`: confirm the duplicate guard (`approvers.some(function (a) { return a.approver_id === id; })`) is preserved after T006 changes and requires no edit — if the guard was inadvertently removed, restore it
+- [x] T008 [US2] In `views/ncr-concurrence.jade`: confirm the duplicate guard (`approvers.some(function (a) { return a.approver_id === id; })`) is preserved after T006 changes and requires no edit — if the guard was inadvertently removed, restore it
 
 **Checkpoint**: Adding the same username twice leaves only one entry. Validate with quickstart.md Scenario 3.
 
@@ -66,7 +66,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T009 [US3] In `views/ncr-concurrence.jade`: confirm the Remove button click handler (`approvers.splice(i, 1); render()`) is intact after T006 changes — the splice logic is unrelated to role and should require no edit; verify visually after changes
+- [x] T009 [US3] In `views/ncr-concurrence.jade`: confirm the Remove button click handler (`approvers.splice(i, 1); render()`) is intact after T006 changes — the splice logic is unrelated to role and should require no edit; verify visually after changes
 
 **Checkpoint**: Remove button works correctly. Validate with quickstart.md Scenario 4.
 
@@ -74,8 +74,8 @@
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T010 Run ESLint on modified files: `npx eslint routes/ncr.js lib/ncr-service.js`
-- [ ] T011 [P] Run full unit test suite: `TRAVELER_CONFIG_REL_PATH=docker npm test`
+- [x] T010 Run ESLint on modified files: `npx eslint routes/ncr.js lib/ncr-service.js`
+- [x] T011 [P] Run full unit test suite: `TRAVELER_CONFIG_REL_PATH=docker npm test`
 - [ ] T012 [P] Execute quickstart.md validation scenarios end-to-end in Docker dev environment
 
 ---

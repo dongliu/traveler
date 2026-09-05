@@ -67,15 +67,12 @@ block content
         thead
           tr
             th Username
-            th Role
             th(style='width: 80px')
         tbody#approvers-list
         tfoot
           tr
             td
               input#new-approver-id.input-medium(type='text', placeholder='username')
-            td
-              input#new-approver-role.input-medium(type='text', placeholder='e.g. Project Manager')
             td
               button#add-approver.btn.btn-sm(type='button')
                 i.fa.fa-plus
@@ -107,13 +104,12 @@ block js
       function render() {
         var $tbody = $('#approvers-list').empty();
         if (approvers.length === 0) {
-          $tbody.append('<tr><td colspan="3" class="muted">No additional approvers — concurring will move NCR directly to Final Approval.</td></tr>');
+          $tbody.append('<tr><td colspan="2" class="muted">No additional approvers — concurring will move NCR directly to Final Approval.</td></tr>');
           return;
         }
         approvers.forEach(function (a, i) {
           var $tr = $('<tr></tr>');
           $tr.append($('<td></td>').text(a.approver_id));
-          $tr.append($('<td></td>').text(a.approver_role));
           var $rm = $('<button type="button" class="btn btn-sm btn-danger">Remove</button>').on('click', function () {
             approvers.splice(i, 1);
             render();
@@ -125,12 +121,10 @@ block js
 
       $('#add-approver').on('click', function () {
         var id = $('#new-approver-id').val().trim();
-        var role = $('#new-approver-role').val().trim();
-        if (!id || !role) return;
+        if (!id) return;
         if (approvers.some(function (a) { return a.approver_id === id; })) return;
-        approvers.push({ approver_id: id, approver_role: role });
+        approvers.push({ approver_id: id });
         $('#new-approver-id').val('');
-        $('#new-approver-role').val('');
         render();
       });
 

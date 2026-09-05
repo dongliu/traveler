@@ -404,20 +404,21 @@ describe('lib/ncr-service — submitConcurrence', () => {
     emails.should.include('des@test.com');
   });
 
-  it('transitions to Approved and requests approval from designated approvers', async () => {
+  it('transitions to Approved and requests approval from designated approvers (username only, no role)', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
     stubUserFind([{ _id: 'appr1', name: 'Approver One', email: 'a1@test.com' }]);
 
     const result = await submitConcurrence(
       'id1',
-      [{ approver_id: 'appr1', approver_role: 'Manager' }],
+      [{ approver_id: 'appr1' }],
       qaUser
     );
 
     result.status.should.equal('Approved');
     result.additional_approvers.should.have.lengthOf(1);
     result.additional_approvers[0].approval_status.should.equal('Pending');
+    (result.additional_approvers[0].approver_role == null).should.be.true;
     result.events.some(e => e.event_type === 'approvers.designated').should.be.true;
     result.events.some(e => e.event_type === 'notification.approval_request').should.be.true;
   });

@@ -303,12 +303,12 @@ router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
   }
   if (Array.isArray(additionalApprovers)) {
     for (const a of additionalApprovers) {
-      if (!a || !a.approver_id || !a.approver_role) {
+      if (!a || !a.approver_id) {
         return res.status(400).json({
           success: false,
           error: 'Validation Error',
           message: 'Validation failed',
-          details: { additional_approvers: ['Each entry requires approver_id and approver_role'] },
+          details: { additional_approvers: ['Each entry requires approver_id'] },
         });
       }
     }
