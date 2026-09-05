@@ -13,8 +13,16 @@ Concurrence and Approver Coordination" (Priority: P1)
   - **NCR-B1**: for Acceptance Scenarios 5, 6, 8 (approve path).
   - **NCR-B2**: for Acceptance Scenario 7 + the resubmit loop (return for
     comment, then QA resubmit).
-- **Required fixture edit**: add `"qa_staff"` to your test user's `roles`
-  array (mongo-express), per README "Test fixture setup".
+- **Required fixture edits**:
+  - Add `"qa_staff"` to your test user's `roles` array (mongo-express), per
+    README "Test fixture setup".
+  - Add your test user to the `ncr-qa` group document in mongo-express
+    (collection `groups`, `_id: "ncr-qa"`, push user id into `members`).
+    `submitConcurrence` calls `isQaStaffMember` which checks this group; if
+    the user is absent the request returns 403.
+- Use `wbs_number: 1.2.3` on every test NCR — this entry is pre-registered
+  in `docker/wbs.yaml` so all notification paths (issuance, approval request)
+  resolve a contact correctly.
 - Pick a second username, `<approver-username>`, to act as the designated
   approver for NCR-B1 and NCR-B2 (any existing user document; no special
   role needed — the approval check is per-assignment, not role-based).

@@ -9,6 +9,10 @@ const QA_STAFF_ID = 'dong';
 const APPROVER_ID = 'bob';
 const APPROVER_DISPLAY_NAME = 'Bob Dalesio';
 
+// Predefined WBS entry from docker/wbs.yaml — ensures the WBS notification
+// registry resolves a contact so all email notification paths trigger correctly.
+const E2E_WBS = '1.2.3';
+
 function todayIsoDate() {
   return new Date().toISOString().split('T')[0];
 }
@@ -20,7 +24,7 @@ async function createDispositionedNcr(overrides = {}) {
     ncrData: {
       part_name: `Concurrence Test Part ${id}`,
       part_number: `PN-${id}`,
-      wbs_number: `WBS-${id}`,
+      wbs_number: E2E_WBS,
       supplier_name: `Supplier ${id}`,
       originator_id: 'guobao',
       originator_name: 'Guobao Shen',
@@ -220,7 +224,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
     await approverPage.goto(`/ncrs/${ncrId}/approve`);
 
-    await expect(approverPage.locator('h3')).toContainText('Approver Action');
+    await expect(approverPage.locator('h3')).toContainText('NCR Approval');
     await expect(approverPage.locator('button:has-text("Approve")')).toBeVisible();
     await expect(approverPage.locator('button:has-text("Return for Comment")')).toBeVisible();
 
@@ -255,7 +259,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     // Approver returns for comment
     const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
     await approverPage.goto(`/ncrs/${ncrId}/approve`);
-    await approverPage.fill('textarea[name="comments"]', RETURN_COMMENT);
+    await approverPage.fill('#comments', RETURN_COMMENT);
     await approverPage.click('button:has-text("Return for Comment")');
     await expect(approverPage.locator('.alert-success')).toBeVisible({ timeout: 10000 });
     await expect(approverPage.locator('.alert-success')).toContainText('Returned for comment');
