@@ -26,7 +26,7 @@ block content
           | #{ncr.ncr_number}&nbsp;
           span.label(class='badge-#{ncr.status.replace(/ /g, "")}')= ncr.status
       .span4.text-right
-        if ncr.status === 'Submitted' || ncr.status === 'Dispositioned'
+        if ncr.status === 'Submitted'
           a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Submit Disposition
         if ncr.status === 'Dispositioned'
           a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
