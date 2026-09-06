@@ -64,9 +64,13 @@ Concurrence and Approver Coordination" (Priority: P1)
 ### Acceptance Scenarios 5, 6, 8 — QA designates an approver; approver approves (NCR-B1)
 
 6. Navigate to `http://localhost:3001/ncrs/<ncr-b1-id>/concurrence`.
-7. In the **"username"** field (the only input in the add-approver row),
-   enter `<approver-username>`. Click "Add". Confirm the row appears with
-   just the username — no role column or role value is shown (AS2).
+7. In the **"username"** field (the only input in the add-approver row,
+   now typeahead-enabled against the AD username cache), start typing
+   `<approver-username>`'s display name. Confirm a suggestion dropdown
+   appears. Either select the suggestion or type the full display name and
+   click "Add". Confirm the row appears with the resolved **username**
+   (not the display name you typed) — no role column or role value is
+   shown (AS2).
 8. Click "Concur" (AS5).
 9. Read the resulting success message.
 10. Log out, log back in as `<approver-username>`.

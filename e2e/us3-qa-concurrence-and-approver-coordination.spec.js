@@ -137,6 +137,26 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(ncr.events.some(e => e.event_type === 'notification.approval_request')).toBe(true);
   });
 
+  test('AS2 - typing the approver\'s full display name resolves via typeahead to their username', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await page.goto(`/ncrs/${ncrId}/concurrence`);
+
+    await page.fill('#new-approver-id', APPROVER_DISPLAY_NAME);
+    await page.waitForSelector('.tt-suggestion', { timeout: 5000 }).catch(() => {});
+    await page.click('#add-approver');
+
+    // Row shows the resolved username (bob), not the typed display name
+    const row = page.locator('#approvers-list tr').first();
+    await expect(row).toContainText(APPROVER_ID);
+    await expect(row).not.toContainText(APPROVER_DISPLAY_NAME);
+
+    await page.click('#concur-btn');
+    await expect(page.locator('#conc-success')).toBeVisible({ timeout: 10000 });
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['additional_approvers'] });
+    expect(ncr.additional_approvers[0].approver_id).toBe(APPROVER_ID);
+  });
+
   // ── US2: duplicate username silently ignored ──────────────────────────────
 
   test('US2 - adding the same username twice leaves only one entry in the list', async ({ page }) => {

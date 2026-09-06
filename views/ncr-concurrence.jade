@@ -96,6 +96,9 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script.
     $(function () {
       var ncrId = '#{ncr._id}';
@@ -119,12 +122,35 @@ block js
         });
       }
 
+      if (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames) {
+        travelerGlobal.usernames.initialize();
+        $('#new-approver-id').typeahead(
+          { minLength: 1, highlight: true, hint: true },
+          { name: 'usernames', display: 'displayName', limit: 20, source: travelerGlobal.usernames }
+        );
+      }
+
+      // Same reasoning as the Designate assignment field on the NCR detail
+      // page: the suggestion dropdown renders directly below this input and
+      // can still be open when "Add" is clicked, so close it on mousedown
+      // (fires before click) to make sure the click lands on the button.
+      $('#add-approver').on('mousedown', function () {
+        $('#new-approver-id').typeahead('close');
+      });
+
       $('#add-approver').on('click', function () {
-        var id = $('#new-approver-id').val().trim();
-        if (!id) return;
+        var input = $('#new-approver-id').val().trim();
+        if (!input) return;
+        var id = input;
+        var users = (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames)
+          ? travelerGlobal.usernames.get(input)
+          : [];
+        if (users && users.length > 0) {
+          id = users[0].uid;
+        }
         if (approvers.some(function (a) { return a.approver_id === id; })) return;
         approvers.push({ approver_id: id });
-        $('#new-approver-id').val('');
+        $('#new-approver-id').typeahead('val', '');
         render();
       });
 
