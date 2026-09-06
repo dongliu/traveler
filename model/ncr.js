@@ -151,6 +151,7 @@ const NcrSchema = new Schema({
     {
       approver_id: String,
       approver_name: String,
+      approver_email: String,
       designated_timestamp: Date,
       approval_status: {
         type: String,

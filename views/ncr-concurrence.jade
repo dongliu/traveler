@@ -143,15 +143,17 @@ block js
         if (!input) return;
         var id = input;
         var name = input;
+        var email = '';
         var users = (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames)
           ? travelerGlobal.usernames.get(input)
           : [];
         if (users && users.length > 0) {
           id = users[0].uid;
           name = users[0].displayName;
+          email = users[0].mail;
         }
         if (approvers.some(function (a) { return a.approver_id === id; })) return;
-        approvers.push({ approver_id: id, approver_name: name });
+        approvers.push({ approver_id: id, approver_name: name, approver_email: email });
         $('#new-approver-id').typeahead('val', '');
         render();
       });

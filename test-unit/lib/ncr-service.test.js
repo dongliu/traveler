@@ -18,7 +18,7 @@ const ncrEmailModule = require('../../lib/ncr-email');
 const sendInitialNotificationStub = sinon.stub(ncrEmailModule, 'sendInitialNotification').resolves({ results: [], cc: [] });
 const sendDispositionRequestStub = sinon.stub(ncrEmailModule, 'sendDispositionRequest').resolves({ results: [], cc: [] });
 sinon.stub(ncrEmailModule, 'sendQaNotification').resolves([]);
-sinon.stub(ncrEmailModule, 'sendApprovalRequest').resolves([]);
+const sendApprovalRequestStub = sinon.stub(ncrEmailModule, 'sendApprovalRequest').resolves([]);
 const sendIssuanceStub = sinon.stub(ncrEmailModule, 'sendIssuance').resolves([]);
 const sendFinalDistributionStub = sinon.stub(ncrEmailModule, 'sendFinalDistribution').resolves([]);
 sinon.stub(ncrEmailModule, 'sendPaAssigned').resolves([]);
@@ -440,6 +440,33 @@ describe('lib/ncr-service — submitConcurrence', () => {
     result.additional_approvers[0].approver_name.should.equal('Approver One');
   });
 
+  it('stores and sends to the client-submitted approver_email without querying the local User collection', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned' }));
+    const userFindStub = stubUserFind([]);
+
+    const result = await submitConcurrence(
+      'id1',
+      [{ approver_id: 'appr1', approver_name: 'Approver One', approver_email: 'appr1@ad.example.com' }],
+      qaUser
+    );
+
+    result.additional_approvers[0].approver_email.should.equal('appr1@ad.example.com');
+    userFindStub.called.should.be.false;
+    const sentEmails = sendApprovalRequestStub.lastCall.args[1];
+    sentEmails.should.include('appr1@ad.example.com');
+  });
+
+  it('falls back to a local User lookup for email only when approver_email is not submitted', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned' }));
+    stubUserFind([{ _id: 'appr1', name: 'Approver One', email: 'fallback@test.com' }]);
+
+    const result = await submitConcurrence('id1', [{ approver_id: 'appr1', approver_name: 'Approver One' }], qaUser);
+
+    result.additional_approvers[0].approver_email.should.equal('fallback@test.com');
+  });
+
   it('falls back to approver_id as the name when no approver_name is submitted', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
@@ -613,6 +640,24 @@ describe('lib/ncr-service — qaResubmit', () => {
     result.additional_approvers[1].approval_status.should.equal('Approved');
     result.events.some(e => e.event_type === 'qa.resubmitted').should.be.true;
     result.events.some(e => e.event_type === 'notification.approval_request').should.be.true;
+  });
+
+  it('uses the approver_email already persisted on the document, without needing a local User record', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
+    stubFindById(newNcr({
+      status: 'Returned for Comment',
+      additional_approvers: [
+        { approver_id: 'appr1', approver_email: 'appr1@ad.example.com', approval_status: 'Returned for Comment' },
+      ],
+    }));
+    const userFindStub = stubUserFind([]);
+
+    const result = await qaResubmit('id1', qaUser);
+
+    result.status.should.equal('Approved');
+    userFindStub.called.should.be.false;
+    const sentEmails = sendApprovalRequestStub.lastCall.args[1];
+    sentEmails.should.include('appr1@ad.example.com');
   });
 });
 
