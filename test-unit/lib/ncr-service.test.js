@@ -423,10 +423,13 @@ describe('lib/ncr-service — submitConcurrence', () => {
     result.events.some(e => e.event_type === 'notification.approval_request').should.be.true;
   });
 
-  it('uses the client-submitted approver_name when the approver has no local User record', async () => {
+  it('stores the client-submitted approver_name (resolved client-side via AD typeahead) without querying the local User collection', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
-    stubUserFind([]); // approver not yet synced to the local User collection
+    // The approver has no local User record -- e.g. they've never logged
+    // into the app -- so findUsers (used only for email lookup) returns
+    // nothing; approver_name must still come from the submitted payload.
+    stubUserFind([]);
 
     const result = await submitConcurrence(
       'id1',
@@ -437,7 +440,7 @@ describe('lib/ncr-service — submitConcurrence', () => {
     result.additional_approvers[0].approver_name.should.equal('Approver One');
   });
 
-  it('falls back to approver_id as the name when neither a local User record nor a submitted approver_name exists', async () => {
+  it('falls back to approver_id as the name when no approver_name is submitted', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
     stubUserFind([]);
