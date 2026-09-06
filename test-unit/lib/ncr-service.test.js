@@ -422,6 +422,30 @@ describe('lib/ncr-service — submitConcurrence', () => {
     result.events.some(e => e.event_type === 'approvers.designated').should.be.true;
     result.events.some(e => e.event_type === 'notification.approval_request').should.be.true;
   });
+
+  it('uses the client-submitted approver_name when the approver has no local User record', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned' }));
+    stubUserFind([]); // approver not yet synced to the local User collection
+
+    const result = await submitConcurrence(
+      'id1',
+      [{ approver_id: 'appr1', approver_name: 'Approver One' }],
+      qaUser
+    );
+
+    result.additional_approvers[0].approver_name.should.equal('Approver One');
+  });
+
+  it('falls back to approver_id as the name when neither a local User record nor a submitted approver_name exists', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned' }));
+    stubUserFind([]);
+
+    const result = await submitConcurrence('id1', [{ approver_id: 'appr1' }], qaUser);
+
+    result.additional_approvers[0].approver_name.should.equal('appr1');
+  });
 });
 
 // ── submitApproval ───────────────────────────────────────────────────────────
