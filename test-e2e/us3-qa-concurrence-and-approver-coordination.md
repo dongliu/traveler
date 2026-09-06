@@ -52,7 +52,7 @@ Concurrence and Approver Coordination" (Priority: P1)
    `http://localhost:3001/ncrs/<ncr-a-id>/concurrence`.
 2. Confirm the page shows "QA Concurrence" as heading, and the NCR Summary
    + Engineering Disposition sections match NCR-A's disposition data (AS1).
-3. Confirm the Additional Approvers table has a **"Username"** column only —
+3. Confirm the Additional Approvers table has an **"Approver"** column only —
    there is no "Role" column and no role input field anywhere on the page.
    Confirm the table shows: "No additional approvers —
    concurring will move NCR directly to Final Approval." — and that you
@@ -64,13 +64,12 @@ Concurrence and Approver Coordination" (Priority: P1)
 ### Acceptance Scenarios 5, 6, 8 — QA designates an approver; approver approves (NCR-B1)
 
 6. Navigate to `http://localhost:3001/ncrs/<ncr-b1-id>/concurrence`.
-7. In the **"username"** field (the only input in the add-approver row,
-   now typeahead-enabled against the AD username cache), start typing
-   `<approver-username>`'s display name. Confirm a suggestion dropdown
-   appears. Either select the suggestion or type the full display name and
-   click "Add". Confirm the row appears with the resolved **username**
-   (not the display name you typed) — no role column or role value is
-   shown (AS2).
+7. In the add-approver field (typeahead-enabled against the AD username
+   cache, placeholder "Last, First"), start typing `<approver-username>`'s
+   display name. Confirm a suggestion dropdown appears. Either select the
+   suggestion or type the full display name and click "Add". Confirm the
+   row appears with the approver's **display name** (not their raw
+   username) — no role column or role value is shown (AS2).
 8. Click "Concur" (AS5).
 9. Read the resulting success message.
 10. Log out, log back in as `<approver-username>`.

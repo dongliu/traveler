@@ -59,16 +59,16 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
 
   // ── AS1: UI presents username-only approver input ─────────────────────────
 
-  test('AS1 - concurrence page shows Username column only; no Role column or role input', async ({ page }) => {
+  test('AS1 - concurrence page shows Approver column only; no Role column or role input', async ({ page }) => {
     const { ncrId } = await createDispositionedNcr();
     await page.goto(`/ncrs/${ncrId}/concurrence`);
 
     await expect(page.locator('h3')).toContainText('QA Concurrence');
 
-    // Table has exactly one data column header: Username
+    // Table has exactly one data column header: Approver
     const headers = page.locator('#approvers-table thead th');
-    await expect(headers).toHaveCount(2); // Username + action column
-    await expect(headers.nth(0)).toHaveText('Username');
+    await expect(headers).toHaveCount(2); // Approver + action column
+    await expect(headers.nth(0)).toHaveText('Approver');
 
     // No role input exists anywhere
     await expect(page.locator('#new-approver-role')).toHaveCount(0);
@@ -145,10 +145,10 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await page.waitForSelector('.tt-suggestion', { timeout: 5000 }).catch(() => {});
     await page.click('#add-approver');
 
-    // Row shows the resolved username (bob), not the typed display name
+    // Row shows the resolved display name, not the raw username
     const row = page.locator('#approvers-list tr').first();
-    await expect(row).toContainText(APPROVER_ID);
-    await expect(row).not.toContainText(APPROVER_DISPLAY_NAME);
+    await expect(row).toContainText(APPROVER_DISPLAY_NAME);
+    await expect(row).not.toContainText(APPROVER_ID);
 
     await page.click('#concur-btn');
     await expect(page.locator('#conc-success')).toBeVisible({ timeout: 10000 });

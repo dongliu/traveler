@@ -66,13 +66,13 @@ block content
       table#approvers-table.table.table-bordered.table-condensed
         thead
           tr
-            th Username
+            th Approver
             th(style='width: 80px')
         tbody#approvers-list
         tfoot
           tr
             td
-              input#new-approver-id.input-medium(type='text', placeholder='username')
+              input#new-approver-id.input-medium(type='text', placeholder='Last, First', autocomplete='off')
             td
               button#add-approver.btn.btn-sm(type='button')
                 i.fa.fa-plus
@@ -112,7 +112,7 @@ block js
         }
         approvers.forEach(function (a, i) {
           var $tr = $('<tr></tr>');
-          $tr.append($('<td></td>').text(a.approver_id));
+          $tr.append($('<td></td>').text(a.approver_name || a.approver_id));
           var $rm = $('<button type="button" class="btn btn-sm btn-danger">Remove</button>').on('click', function () {
             approvers.splice(i, 1);
             render();
@@ -142,14 +142,16 @@ block js
         var input = $('#new-approver-id').val().trim();
         if (!input) return;
         var id = input;
+        var name = input;
         var users = (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames)
           ? travelerGlobal.usernames.get(input)
           : [];
         if (users && users.length > 0) {
           id = users[0].uid;
+          name = users[0].displayName;
         }
         if (approvers.some(function (a) { return a.approver_id === id; })) return;
-        approvers.push({ approver_id: id });
+        approvers.push({ approver_id: id, approver_name: name });
         $('#new-approver-id').typeahead('val', '');
         render();
       });
