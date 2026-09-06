@@ -132,7 +132,6 @@ block content
               thead
                 tr
                   th Approver
-                  th Role
                   th Status
                   th Timestamp
                   th Comments
@@ -140,7 +139,6 @@ block content
                 each approver in ncr.additional_approvers
                   tr
                     td= approver.approver_name
-                    td= approver.approver_role
                     td
                       span.label= approver.approval_status
                     td= approver.approval_timestamp ? new Date(approver.approval_timestamp).toLocaleString() : '—'
