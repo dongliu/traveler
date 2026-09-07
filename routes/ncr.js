@@ -13,6 +13,8 @@ const {
   submitApproval,
   returnForComment,
   qaResubmit,
+  addApprover,
+  removeApprover,
   closeNcr,
   assignDesignate,
   removeDesignate,
@@ -403,6 +405,72 @@ router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
     });
   } catch (err) {
     return mapServiceError(err, res, 'QA resubmit');
+  }
+});
+
+router.post('/:id/approvers', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  const approverId = sanitizeStr(req.body.approver_id);
+  const approverName = sanitizeStr(req.body.approver_name);
+  const approverEmail = sanitizeStr(req.body.approver_email);
+  if (!approverId) {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation Error',
+      message: 'Validation failed',
+      details: { approver_id: ['Required'] },
+    });
+  }
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await addApprover(
+      req.params.id,
+      { approver_id: approverId, approver_name: approverName, approver_email: approverEmail },
+      user,
+      webBaseUrl
+    );
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        additional_approvers: ncr.additional_approvers,
+      },
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Add approver');
+  }
+});
+
+router.delete('/:id/approvers/:approverId', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await removeApprover(req.params.id, req.params.approverId, user, webBaseUrl);
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        additional_approvers: ncr.additional_approvers,
+      },
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Remove approver');
   }
 });
 

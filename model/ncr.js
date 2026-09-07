@@ -34,6 +34,8 @@ const NCR_EVENT_TYPES = [
   'delegate.removed',
   'qa.concurred',
   'approvers.designated',
+  'approver.added',
+  'approver.removed',
   'qa.rejected',
   'approval.approved',
   'approval.returned_for_comment',

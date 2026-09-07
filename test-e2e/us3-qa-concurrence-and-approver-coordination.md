@@ -2,17 +2,21 @@
 
 **Spec reference**: `specs/001-ncr-workflow/spec.md`, "User Story 3 - QA
 Concurrence and Approver Coordination" (Priority: P1)
-**Files under test**: `views/ncr-concurrence.jade`, `views/ncr-approval.jade`, `routes/ncr.js` (`PATCH /api/ncrs/:id/concurrence`, `PATCH /api/ncrs/:id/approve`, `PATCH /api/ncrs/:id/resubmit`), `lib/ncr-service.js` (`submitConcurrence`, `submitApproval`, `returnForComment`, `qaResubmit`)
+**Files under test**: `views/ncr-concurrence.jade`, `views/ncr-approval.jade`, `routes/ncr.js` (`PATCH /api/ncrs/:id/concurrence`, `PATCH /api/ncrs/:id/approve`, `PATCH /api/ncrs/:id/resubmit`, `POST /api/ncrs/:id/approvers`, `DELETE /api/ncrs/:id/approvers/:approverId`), `lib/ncr-service.js` (`submitConcurrence`, `submitApproval`, `returnForComment`, `qaResubmit`, `addApprover`, `removeApprover`)
 
 ## Setup
 
-- Requires **three** NCRs in `Dispositioned` status (repeat
-  `us1`+`us2` three times, or duplicate one in mongo-express and reset
+- Requires **four** NCRs in `Dispositioned` status (repeat
+  `us1`+`us2` four times, or duplicate one in mongo-express and reset
   `status` to `Dispositioned`, clearing `additional_approvers`):
   - **NCR-A**: for Acceptance Scenarios 1–4 (no additional approvers path).
   - **NCR-B1**: for Acceptance Scenarios 5, 6, 8 (approve path).
   - **NCR-B2**: for Acceptance Scenario 7 + the resubmit loop (return for
     comment, then QA resubmit).
+  - **NCR-C**: for the Manage Approvers section (add/remove approvers
+    before issuance).
+- A *third* username, `<second-approver-username>`, distinct from
+  `<approver-username>`, is needed for the Manage Approvers section.
 - **Required fixture edits**:
   - Add `"qa_staff"` to your test user's `roles` array (mongo-express), per
     README "Test fixture setup".
@@ -113,6 +117,49 @@ Concurrence and Approver Coordination" (Priority: P1)
     ```
 
 
+### Manage Approvers — QA adds/removes approvers before issuance (requires a fourth NCR, NCR-C)
+
+Requires a fourth NCR, **NCR-C**, dispositioned like the others, plus a
+*third* username, `<second-approver-username>`, distinct from
+`<approver-username>`.
+
+22. As QA Staff, navigate to `http://localhost:3001/ncrs/<ncr-c-id>/concurrence`
+    and designate `<approver-username>` only, then click "Concur". NCR-C is
+    now `Approved` with one Pending approver.
+23. Navigate to `http://localhost:3001/ncrs/<ncr-c-id>/approve`. Confirm a
+    **"Manage Approvers"** fieldset is visible below "Approver Status",
+    with a typeahead-enabled add field and an "Add Approver" button, and
+    confirm the existing approver's row has a **"Remove"** button.
+24. In the Manage Approvers field, type `<second-approver-username>`'s
+    display name and click "Add Approver". Confirm the page reloads and a
+    second row appears in Approver Status with status "Pending" — NCR-C
+    status remains `Approved`.
+25. Click "Remove" on `<second-approver-username>`'s row; accept the
+    confirmation dialog. Confirm the page reloads, that row is gone, and
+    NCR-C status remains `Approved` (one Pending approver — `<approver-username>` —
+    remains).
+26. Click "Remove" on the one remaining approver's row; accept the
+    confirmation dialog. Confirm the page reloads, the Approver Status
+    table is now empty, the **"Manage Approvers" fieldset is gone**
+    (NCR-C is no longer `Approved`), and the NCR status badge now reads
+    `Final Approval`.
+27. Log out, log back in as `<approver-username>` (not QA staff). Create or
+    reuse a Dispositioned NCR, designate them as the sole approver, and
+    concur. Navigate to that NCR's `/approve` page logged in as
+    `<approver-username>`. Confirm **no** "Manage Approvers" fieldset and
+    **no** "Remove" buttons are visible to them.
+28. In DevTools Console (still logged in as `<approver-username>`), confirm
+    the backend also rejects the action, not just the UI:
+
+    ```js
+    fetch('/api/ncrs/<any-approved-ncr-id>/approvers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ approver_id: 'someone' }),
+    }).then(r => r.json()).then(console.log);
+    ```
+
 ### End of Session — Save Artifacts, Report
 
 After the final test step above:
@@ -140,6 +187,11 @@ After the final test step above:
   Staff has been notified." Status → `Returned for Comment`. After
   Resubmit, message "Resubmitted to approvers. New approval requests
   sent." Status → `Approved` again, with the approver reset to "Pending".
+- **NCR-C**: after step 24, `additional_approvers` has 2 entries, status
+  `Approved`. After step 25, back to 1 entry, still `Approved`. After step
+  26 (removing the last Pending approver), status → `Final Approval` and
+  an issuance email is sent — removing the last blocking approver behaves
+  the same as that approver clicking Approve themselves.
 - **AS9**: expect **no** Reject control anywhere in the UI, and the
   `PATCH .../concurrence` endpoint to either ignore the unrecognized
   `action`/`comments` fields entirely or return a generic success without
@@ -170,3 +222,9 @@ After the final test step above:
       report, rather than assuming you missed a button.
 - [ ] Confirm the Additional Approvers table has no "Role" column header and
       no role input field in the add-approver row anywhere in the session.
+- [ ] NCR-C: `events` contains `approver.added` (step 24), `approver.removed`
+      (steps 25 and 26), and a `notification.issuance` after step 26.
+      `additional_approvers` is an empty array after step 26, and `status`
+      is `Final Approval`.
+- [ ] Confirm step 28's API call returns 403 and does not append an
+      `approver.added` event to that NCR.

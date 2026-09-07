@@ -319,4 +319,140 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
       expect(ncr.status).toBe('Final Approval');
     }
   });
+
+  // ── Manage Approvers: QA can add/remove approvers before issuance ────────
+
+  /** Concurs via the API with the given approver ids (username-only), returning the resulting NCR. */
+  async function concurWithApprovers(page, ncrId, approverIds) {
+    const res = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
+      data: { additional_approvers: approverIds.map(id => ({ approver_id: id })) },
+    });
+    expect(res.status()).toBe(200);
+    return res.json();
+  }
+
+  test('QA sees a Manage Approvers section with Remove buttons while the NCR is Approved', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]);
+
+    await page.goto(`/ncrs/${ncrId}/approve`);
+
+    await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toBeVisible();
+    await expect(page.locator('#new-approver-id')).toBeVisible();
+    await expect(page.locator('.remove-approver-btn')).toHaveCount(1);
+  });
+
+  test('a designated approver (non-QA) does not see the Manage Approvers section', async ({ browser }) => {
+    const { ncrId } = await createDispositionedNcr();
+
+    // Uses the project's default (primary/QA) storage state to concur.
+    const setupPage = await browser.newPage();
+    await concurWithApprovers(setupPage, ncrId, [APPROVER_ID]);
+    await setupPage.close();
+
+    const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    await approverPage.goto(`/ncrs/${ncrId}/approve`);
+
+    await expect(approverPage.locator('fieldset:has(legend:text("Manage Approvers"))')).toHaveCount(0);
+    await expect(approverPage.locator('.remove-approver-btn')).toHaveCount(0);
+    await approverPage.close();
+  });
+
+  test('QA adds an approver from the approval page and it appears Pending without moving the NCR out of Approved', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]);
+
+    await page.goto(`/ncrs/${ncrId}/approve`);
+    await page.fill('#new-approver-id', 'guobao');
+    await page.click('#add-approver-btn');
+
+    await page.waitForURL(new RegExp(`/ncrs/${ncrId}/approve$`));
+    await expect(page.locator('table:has(th:text("Approver")) tbody tr')).toHaveCount(2);
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers', 'events'] });
+    expect(ncr.status).toBe('Approved');
+    expect(ncr.additional_approvers).toHaveLength(2);
+    const added = ncr.additional_approvers.find(a => a.approver_id === 'guobao');
+    expect(added).toBeTruthy();
+    expect(added.approval_status).toBe('Pending');
+    expect(ncr.events.some(e => e.event_type === 'approver.added')).toBe(true);
+  });
+
+  test('QA removes a non-blocking approver and the NCR stays Approved', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID, 'guobao']);
+
+    await page.goto(`/ncrs/${ncrId}/approve`);
+    page.once('dialog', dialog => dialog.accept());
+    await page.locator('.remove-approver-btn').first().click();
+
+    await page.waitForURL(new RegExp(`/ncrs/${ncrId}/approve$`));
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers', 'events'] });
+    expect(ncr.status).toBe('Approved');
+    expect(ncr.additional_approvers).toHaveLength(1);
+    expect(ncr.events.some(e => e.event_type === 'approver.removed')).toBe(true);
+  });
+
+  test('QA removing the last Pending approver advances the NCR to Final Approval', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]);
+
+    await page.goto(`/ncrs/${ncrId}/approve`);
+    page.once('dialog', dialog => dialog.accept());
+    await page.locator('.remove-approver-btn').first().click();
+
+    await page.waitForURL(new RegExp(`/ncrs/${ncrId}/approve$`));
+    // Manage Approvers section is gone now that the NCR is no longer Approved
+    await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toHaveCount(0);
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers', 'events'] });
+    expect(ncr.status).toBe('Final Approval');
+    expect(ncr.additional_approvers).toHaveLength(0);
+    expect(ncr.events.some(e => e.event_type === 'notification.issuance')).toBe(true);
+  });
+
+  test('API: add-approver is rejected for a non-QA user, a non-Approved NCR, and a duplicate approver', async ({ page, browser }) => {
+    const { ncrId: dispositionedNcrId } = await createDispositionedNcr();
+    const notApprovedRes = await page.request.post(`/api/ncrs/${dispositionedNcrId}/approvers`, {
+      data: { approver_id: APPROVER_ID },
+    });
+    expect(notApprovedRes.status()).toBe(409);
+
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]);
+
+    // bob (the secondary persona) is a pre-existing member of the shared
+    // ncr-qa group in this dev database — remove them for this assertion
+    // only, restoring membership afterward (same pattern used elsewhere in
+    // this suite for temporarily emptying/altering the ncr-qa group).
+    await execFixtureCli('remove-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    try {
+      const nonQaPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+      const forbiddenRes = await nonQaPage.request.post(`/api/ncrs/${ncrId}/approvers`, {
+        data: { approver_id: 'guobao' },
+      });
+      expect(forbiddenRes.status()).toBe(403);
+      await nonQaPage.close();
+    } finally {
+      await execFixtureCli('add-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    }
+
+    const duplicateRes = await page.request.post(`/api/ncrs/${ncrId}/approvers`, {
+      data: { approver_id: APPROVER_ID },
+    });
+    expect(duplicateRes.status()).toBe(409);
+  });
+
+  test('API: remove-approver is rejected for a non-existent approver and a non-Approved NCR', async ({ page }) => {
+    const { ncrId: dispositionedNcrId } = await createDispositionedNcr();
+    const notApprovedRes = await page.request.delete(`/api/ncrs/${dispositionedNcrId}/approvers/${APPROVER_ID}`);
+    expect(notApprovedRes.status()).toBe(409);
+
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]);
+
+    const notFoundRes = await page.request.delete(`/api/ncrs/${ncrId}/approvers/no-such-user`);
+    expect(notFoundRes.status()).toBe(404);
+  });
 });
