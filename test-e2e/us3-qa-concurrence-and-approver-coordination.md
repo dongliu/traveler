@@ -6,8 +6,8 @@ Concurrence and Approver Coordination" (Priority: P1)
 
 ## Setup
 
-- Requires **four** NCRs in `Dispositioned` status (repeat
-  `us1`+`us2` four times, or duplicate one in mongo-express and reset
+- Requires **five** NCRs in `Dispositioned` status (repeat
+  `us1`+`us2` five times, or duplicate one in mongo-express and reset
   `status` to `Dispositioned`, clearing `additional_approvers`):
   - **NCR-A**: for Acceptance Scenarios 1–4 (no additional approvers path).
   - **NCR-B1**: for Acceptance Scenarios 5, 6, 8 (approve path).
@@ -15,6 +15,8 @@ Concurrence and Approver Coordination" (Priority: P1)
     comment, then QA resubmit).
   - **NCR-C**: for the Manage Approvers section (add/remove approvers
     before issuance).
+  - **NCR-D**: for the Manage Approvers section while status is
+    `Returned for Comment`.
 - A *third* username, `<second-approver-username>`, distinct from
   `<approver-username>`, is needed for the Manage Approvers section.
 - **Required fixture edits**:
@@ -160,6 +162,27 @@ Requires a fourth NCR, **NCR-C**, dispositioned like the others, plus a
     }).then(r => r.json()).then(console.log);
     ```
 
+### Manage Approvers while Returned for Comment (requires a fifth NCR, NCR-D)
+
+Requires a fifth NCR, **NCR-D**, dispositioned like the others. Designate
+**both** `<approver-username>` and `<second-approver-username>` at
+concurrence and click "Concur" — NCR-D is now `Approved` with two Pending
+approvers.
+
+29. Log in as `<approver-username>`, navigate to
+    `http://localhost:3001/ncrs/<ncr-d-id>/approve`, enter any comment, and
+    click "Return for Comment". NCR-D status is now `Returned for Comment`.
+30. Log back in as QA Staff, navigate to the same `/approve` page. Confirm
+    the **"Manage Approvers"** fieldset is still visible (it is no longer
+    restricted to `Approved` status), and both approver rows — including
+    `<approver-username>`'s row showing status "Returned for Comment" —
+    have a "Remove" button.
+31. Click "Remove" on `<approver-username>`'s row (the one that returned
+    for comment); accept the confirmation dialog. Confirm the page
+    reloads and the NCR status badge now reads `Approved` again (not
+    still `Returned for Comment`, and not stuck) — `<second-approver-username>`'s
+    Pending entry is the only one left.
+
 ### End of Session — Save Artifacts, Report
 
 After the final test step above:
@@ -192,6 +215,13 @@ After the final test step above:
   26 (removing the last Pending approver), status → `Final Approval` and
   an issuance email is sent — removing the last blocking approver behaves
   the same as that approver clicking Approve themselves.
+- **NCR-D**: after step 29, status `Returned for Comment` with
+  `<approver-username>`'s entry showing that status and the comment text.
+  After step 31 (removing that specific blocking entry), status →
+  `Approved` (not stuck, and not skipped ahead to `Final Approval` since
+  `<second-approver-username>` is still `Pending`) — the NCR resumes
+  normal waiting instead of staying blocked on a decision that can no
+  longer arrive.
 - **AS9**: expect **no** Reject control anywhere in the UI, and the
   `PATCH .../concurrence` endpoint to either ignore the unrecognized
   `action`/`comments` fields entirely or return a generic success without
@@ -228,3 +258,7 @@ After the final test step above:
       is `Final Approval`.
 - [ ] Confirm step 28's API call returns 403 and does not append an
       `approver.added` event to that NCR.
+- [ ] NCR-D: `events` contains `approval.returned_for_comment` (step 29)
+      and `approver.removed` (step 31), `status` is `Approved` after step
+      31, and `additional_approvers` has exactly one entry
+      (`<second-approver-username>`, `approval_status: "Pending"`).

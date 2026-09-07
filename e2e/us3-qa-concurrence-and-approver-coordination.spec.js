@@ -412,6 +412,43 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(ncr.events.some(e => e.event_type === 'notification.issuance')).toBe(true);
   });
 
+  test('QA can manage approvers while Returned for Comment, and removing the blocking approver unblocks back to Approved', async ({ page, browser }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID, 'guobao']);
+
+    // bob returns for comment, blocking the NCR
+    const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    const returnRes = await approverPage.request.patch(`/api/ncrs/${ncrId}/approve`, {
+      data: { action: 'return_for_comment', comments: 'Please clarify the rework instructions.' },
+    });
+    expect(returnRes.status()).toBe(200);
+    await approverPage.close();
+
+    let ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status'] })).ncr;
+    expect(ncr.status).toBe('Returned for Comment');
+
+    // QA still sees Manage Approvers with both rows while blocked
+    await page.goto(`/ncrs/${ncrId}/approve`);
+    await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toBeVisible();
+    await expect(page.locator('.remove-approver-btn')).toHaveCount(2);
+
+    // Remove bob's (the blocking) row specifically -- concurWithApprovers
+    // doesn't submit an approver_name, so the table falls back to showing
+    // the raw approver_id.
+    const bobRow = page.locator('#approver-status-list tr', { hasText: APPROVER_ID });
+    page.once('dialog', dialog => dialog.accept());
+    await bobRow.locator('.remove-approver-btn').click();
+
+    await page.waitForURL(new RegExp(`/ncrs/${ncrId}/approve$`));
+
+    ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] })).ncr;
+    expect(ncr.status).toBe('Approved');
+    expect(ncr.additional_approvers).toHaveLength(1);
+    expect(ncr.additional_approvers[0].approver_id).toBe('guobao');
+    // Manage Approvers remains visible now that status is back to Approved
+    await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toBeVisible();
+  });
+
   test('API: add-approver is rejected for a non-QA user, a non-Approved NCR, and a duplicate approver', async ({ page, browser }) => {
     const { ncrId: dispositionedNcrId } = await createDispositionedNcr();
     const notApprovedRes = await page.request.post(`/api/ncrs/${dispositionedNcrId}/approvers`, {

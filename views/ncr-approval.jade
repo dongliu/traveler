@@ -55,7 +55,7 @@ block content
           dt Concurred On
           dd= new Date(ncr.qa_concurrence_timestamp).toLocaleString()
 
-    - var canManageApprovers = isQa && ncr.status === 'Approved'
+    - var canManageApprovers = isQa && (ncr.status === 'Approved' || ncr.status === 'Returned for Comment')
 
     fieldset
       legend Approver Status

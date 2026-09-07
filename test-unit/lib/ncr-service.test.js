@@ -733,6 +733,25 @@ describe('lib/ncr-service — addApprover', () => {
 
     result.additional_approvers[0].approver_email.should.equal('fallback@test.com');
   });
+
+  it('is also allowed while the NCR is Returned for Comment (issuance has not happened)', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
+    stubFindById(newNcr({
+      status: 'Returned for Comment',
+      additional_approvers: [{ approver_id: 'appr1', approval_status: 'Returned for Comment' }],
+    }));
+    stubUserFind([]);
+
+    const result = await addApprover(
+      'id1',
+      { approver_id: 'appr2', approver_name: 'Approver Two', approver_email: 'appr2@ad.example.com' },
+      qaUser
+    );
+
+    result.status.should.equal('Returned for Comment');
+    result.additional_approvers.should.have.lengthOf(2);
+    result.additional_approvers[1].approval_status.should.equal('Pending');
+  });
 });
 
 // ── removeApprover ───────────────────────────────────────────────────────────
@@ -812,6 +831,59 @@ describe('lib/ncr-service — removeApprover', () => {
 
     result.status.should.equal('Final Approval');
     result.additional_approvers.should.have.lengthOf(0);
+  });
+
+  it('removing a non-blocking approver while Returned for Comment leaves the NCR Returned for Comment', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
+    stubFindById(newNcr({
+      status: 'Returned for Comment',
+      additional_approvers: [
+        { approver_id: 'appr1', approval_status: 'Returned for Comment', comments: 'Needs clarification' },
+        { approver_id: 'appr2', approval_status: 'Pending' },
+      ],
+    }));
+
+    const result = await removeApprover('id1', 'appr2', qaUser);
+
+    result.status.should.equal('Returned for Comment');
+    result.additional_approvers.should.have.lengthOf(1);
+    result.additional_approvers[0].approver_id.should.equal('appr1');
+  });
+
+  it('removing the blocking approver unblocks the NCR back to Approved when other approvers are still Pending', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
+    stubFindById(newNcr({
+      status: 'Returned for Comment',
+      additional_approvers: [
+        { approver_id: 'appr1', approval_status: 'Returned for Comment', comments: 'Needs clarification' },
+        { approver_id: 'appr2', approval_status: 'Pending' },
+      ],
+    }));
+
+    const result = await removeApprover('id1', 'appr1', qaUser);
+
+    result.status.should.equal('Approved');
+    result.additional_approvers.should.have.lengthOf(1);
+    result.additional_approvers[0].approver_id.should.equal('appr2');
+  });
+
+  it('removing the blocking approver advances straight to Final Approval when everyone remaining has already approved', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
+    stubFindById(newNcr({
+      status: 'Returned for Comment',
+      originator_id: 'orig1',
+      additional_approvers: [
+        { approver_id: 'appr1', approval_status: 'Returned for Comment', comments: 'Needs clarification' },
+        { approver_id: 'appr2', approval_status: 'Approved' },
+      ],
+    }));
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+
+    const result = await removeApprover('id1', 'appr1', qaUser);
+
+    result.status.should.equal('Final Approval');
+    result.additional_approvers.should.have.lengthOf(1);
+    result.events.some(e => e.event_type === 'notification.issuance').should.be.true;
   });
 });
 
