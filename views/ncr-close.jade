@@ -54,12 +54,6 @@ block content
       fieldset
         legend Closure
         .control-group
-          label.control-label(for='closure_notes') Closure Notes
-            span.text-error *
-          .controls
-            textarea#closure_notes(name='closure_notes', rows='5', maxlength='2000', required, placeholder='Describe disposition execution and verification')
-            span#cn-counter.help-block 0 / 2000
-        .control-group
           .controls
             label.checkbox
               input#disposition_execution_verified(type='checkbox')
@@ -97,13 +91,8 @@ block js
       var ncrId = '#{ncr._id}';
       var isTraveler = #{JSON.stringify(!!(ncr.traveler_link && ncr.traveler_link.initiated_from_traveler))};
 
-      $('#closure_notes').on('input', function () {
-        $('#cn-counter').text($(this).val().length + ' / 2000');
-      });
-
       $('#close-form').on('submit', function (e) {
         e.preventDefault();
-        var notes = $('#closure_notes').val().trim();
         var errors = [];
         if (isTraveler && !$('#traveler_signed_off').is(':checked'))
           errors.push('Traveler sign-off confirmation is required.');
@@ -116,7 +105,6 @@ block js
         $('#close-error').hide();
 
         var payload = {
-          closure_notes: notes,
           disposition_execution_verified: $('#disposition_execution_verified').is(':checked'),
           preventive_actions_verified: $('#preventive_actions_verified').is(':checked'),
         };

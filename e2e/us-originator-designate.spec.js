@@ -261,7 +261,6 @@ test.describe('Originator Designate - Designate exercises Originator authority (
 
     const closeRes = await designatePage.request.patch(`/api/ncrs/${ncrId}/close`, {
       data: {
-        closure_notes: 'Closed by the Designate as part of automated verification.',
         disposition_execution_verified: true,
         preventive_actions_verified: true,
         traveler_signed_off: true,
@@ -285,7 +284,6 @@ test.describe('Originator Designate - Designate exercises Originator authority (
 
     await designatePage.request.patch(`/api/ncrs/${ncrId}/close`, {
       data: {
-        closure_notes: 'Closed to verify final distribution recipiency.',
         disposition_execution_verified: true,
         preventive_actions_verified: true,
         traveler_signed_off: true,

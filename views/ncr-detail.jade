@@ -13,12 +13,14 @@ block head
     .event-entry::before { content: ''; width: 10px; height: 10px; background: #999; border-radius: 50%; position: absolute; left: -19px; top: 4px; }
     .badge-Submitted { background-color: #5bc0de; }
     .badge-Dispositioned { background-color: #f0ad4e; }
-    .badge-Approved { background-color: #5cb85c; }
+    .badge-ApprovalRequested { background-color: #5cb85c; }
     .badge-Returned { background-color: #d9534f; }
     .badge-Final { background-color: #428bca; }
     .badge-Closed { background-color: #777; }
 
 block content
+  - var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
+
   .container(style='margin-top: 10px')
     .row-fluid
       .span8
@@ -26,11 +28,11 @@ block content
           | #{ncr.ncr_number}&nbsp;
           span.label(class='badge-#{ncr.status.replace(/ /g, "")}')= ncr.status
       .span4.text-right
-        if ncr.status === 'Submitted' || ncr.status === 'Dispositioned'
+        if ncr.status === 'Submitted'
           a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Submit Disposition
         if ncr.status === 'Dispositioned'
           a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
-        if ncr.status === 'Approved'
+        if ncr.status === 'Approval Requested'
           a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
         if ncr.status === 'Final Approval'
           a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR
@@ -123,7 +125,7 @@ block content
                 dt Rework / Repair Instructions
                 dd= ncr.disposition.rework_repair_instructions
 
-    if ncr.additional_approvers && ncr.additional_approvers.length
+    if (ncr.additional_approvers && ncr.additional_approvers.length) || canManageApprovers
       .row-fluid
         .span12
           fieldset
@@ -132,22 +134,42 @@ block content
               thead
                 tr
                   th Approver
-                  th Role
                   th Status
                   th Timestamp
                   th Comments
-              tbody
-                each approver in ncr.additional_approvers
+                  if canManageApprovers
+                    th(style='width: 80px')
+              tbody#approver-status-list
+                if !ncr.additional_approvers || ncr.additional_approvers.length === 0
                   tr
-                    td= approver.approver_name
-                    td= approver.approver_role
-                    td
-                      span.label= approver.approval_status
-                    td= approver.approval_timestamp ? new Date(approver.approval_timestamp).toLocaleString() : '—'
-                    td= approver.comments || '—'
+                    td(colspan=canManageApprovers ? '5' : '4').muted No additional approvers were designated.
+                else
+                  each approver in ncr.additional_approvers
+                    tr
+                      td= approver.approver_name
+                      td
+                        span.label= approver.approval_status
+                      td= approver.approval_timestamp ? new Date(approver.approval_timestamp).toLocaleString() : '—'
+                      td= approver.comments || '—'
+                      if canManageApprovers
+                        td
+                          button.btn.btn-sm.btn-danger.remove-approver-btn(type='button', data-approver-id=approver.approver_id)
+                            | Remove
+
+          if canManageApprovers
+            fieldset
+              legend Manage Approvers
+              p.help-block Add an approver, or remove one from the table above, while this NCR awaits approval.
+              #approver-mgmt-error.alert.alert-error(style='display:none')
+                span#approver-mgmt-error-msg
+              .control-group
+                .controls
+                  input#new-approver-id.input-medium(type='text', placeholder='Last, First', autocomplete='off')
+                  button#add-approver-btn.btn.btn-sm(type='button', style='margin-left: 5px')
+                    i.fa.fa-plus
+                    | &nbsp; Add Approver
 
     if ncr.preventive_actions && ncr.preventive_actions.length
-      - var isQa = (locals.roles && locals.roles.indexOf('qa_staff') !== -1)
       .row-fluid
         .span12
           fieldset
@@ -233,9 +255,6 @@ block content
               dd= ncr.closure_record.closed_by_name
               dt Closure Date
               dd= new Date(ncr.closure_record.closure_date).toLocaleDateString()
-              if ncr.closure_record.closure_notes
-                dt Notes
-                dd= ncr.closure_record.closure_notes
 
     if ncr.attachments && ncr.attachments.length
       .row-fluid
@@ -512,6 +531,73 @@ block js
           error: function(xhr) {
             var resp = xhr.responseJSON || {};
             showDesignateError(resp.message || resp.error || 'Failed to remove Designate.');
+          }
+        });
+      });
+
+      if (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames) {
+        $('#new-approver-id').typeahead(
+          { minLength: 1, highlight: true, hint: true },
+          { name: 'usernames', display: 'displayName', limit: 20, source: travelerGlobal.usernames }
+        );
+      }
+
+      function showApproverMgmtError(msg) {
+        $('#approver-mgmt-error-msg').text(msg);
+        $('#approver-mgmt-error').show();
+      }
+
+      $('#add-approver-btn').on('mousedown', function() {
+        $('#new-approver-id').typeahead('close');
+      });
+
+      $('#add-approver-btn').on('click', function() {
+        var input = $('#new-approver-id').val().trim();
+        if (!input) return;
+        var id = input;
+        var name = input;
+        var email = '';
+        var users = (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames)
+          ? travelerGlobal.usernames.get(input)
+          : [];
+        if (users && users.length > 0) {
+          id = users[0].uid;
+          name = users[0].displayName;
+          email = users[0].mail;
+        }
+
+        $('#approver-mgmt-error').hide();
+        var btn = $(this);
+        btn.prop('disabled', true);
+        $.ajax({
+          url: '#{prefix}/api/ncrs/#{ncr._id}/approvers',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ approver_id: id, approver_name: name, approver_email: email }),
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var resp = xhr.responseJSON || {};
+            showApproverMgmtError(resp.message || resp.error || 'Failed to add approver.');
+            btn.prop('disabled', false);
+          }
+        });
+      });
+
+      $('#approver-status-list').on('click', '.remove-approver-btn', function() {
+        var approverId = $(this).data('approver-id');
+        if (!confirm('Remove this approver from the NCR?')) return;
+
+        $('#approver-mgmt-error').hide();
+        var btn = $(this);
+        btn.prop('disabled', true);
+        $.ajax({
+          url: '#{prefix}/api/ncrs/#{ncr._id}/approvers/' + encodeURIComponent(approverId),
+          method: 'DELETE',
+          success: function() { location.reload(); },
+          error: function(xhr) {
+            var resp = xhr.responseJSON || {};
+            showApproverMgmtError(resp.message || resp.error || 'Failed to remove approver.');
+            btn.prop('disabled', false);
           }
         });
       });

@@ -13,6 +13,8 @@ const {
   submitApproval,
   returnForComment,
   qaResubmit,
+  addApprover,
+  removeApprover,
   closeNcr,
   assignDesignate,
   removeDesignate,
@@ -259,7 +261,8 @@ router.patch('/:id/disposition', auth.ensureAuthenticated, async (req, res) => {
 
   try {
     const user = { id: req.session.userid, name: res.locals.username };
-    const ncr = await submitDisposition(req.params.id, b, user);
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await submitDisposition(req.params.id, b, user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {
@@ -302,12 +305,12 @@ router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
   }
   if (Array.isArray(additionalApprovers)) {
     for (const a of additionalApprovers) {
-      if (!a || !a.approver_id || !a.approver_role) {
+      if (!a || !a.approver_id) {
         return res.status(400).json({
           success: false,
           error: 'Validation Error',
           message: 'Validation failed',
-          details: { additional_approvers: ['Each entry requires approver_id and approver_role'] },
+          details: { additional_approvers: ['Each entry requires approver_id'] },
         });
       }
     }
@@ -320,7 +323,8 @@ router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
       email: res.locals.userEmail || '',
       roles: res.locals.roles || [],
     };
-    const ncr = await submitConcurrence(req.params.id, additionalApprovers || [], user);
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await submitConcurrence(req.params.id, additionalApprovers || [], user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {
@@ -362,9 +366,10 @@ router.patch('/:id/approve', auth.ensureAuthenticated, async (req, res) => {
       name: res.locals.username,
       roles: res.locals.roles || [],
     };
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
     const ncr = action === 'approve'
-      ? await submitApproval(req.params.id, user)
-      : await returnForComment(req.params.id, comments, user);
+      ? await submitApproval(req.params.id, user, webBaseUrl)
+      : await returnForComment(req.params.id, comments, user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {
@@ -387,7 +392,8 @@ router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
       name: res.locals.username,
       roles: res.locals.roles || [],
     };
-    const ncr = await qaResubmit(req.params.id, user);
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await qaResubmit(req.params.id, user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {
@@ -402,20 +408,19 @@ router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
   }
 });
 
-router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
+router.post('/:id/approvers', auth.ensureAuthenticated, async (req, res) => {
   if (!isValidId(req.params.id)) return badId(res, 'id');
-  const errors = {};
-  const b = {
-    closure_notes: sanitizeStr(req.body.closure_notes),
-    disposition_execution_verified: req.body.disposition_execution_verified,
-    preventive_actions_verified: req.body.preventive_actions_verified,
-    traveler_signed_off: req.body.traveler_signed_off,
-  };
-  if (!b.closure_notes)
-    errors.closure_notes = ['Required'];
-
-  if (Object.keys(errors).length > 0)
-    return res.status(400).json({ success: false, error: 'Validation Error', message: 'Validation failed', details: errors });
+  const approverId = sanitizeStr(req.body.approver_id);
+  const approverName = sanitizeStr(req.body.approver_name);
+  const approverEmail = sanitizeStr(req.body.approver_email);
+  if (!approverId) {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation Error',
+      message: 'Validation failed',
+      details: { approver_id: ['Required'] },
+    });
+  }
 
   try {
     const user = {
@@ -423,7 +428,68 @@ router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
       name: res.locals.username,
       roles: res.locals.roles || [],
     };
-    const ncr = await closeNcr(req.params.id, b, user);
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await addApprover(
+      req.params.id,
+      { approver_id: approverId, approver_name: approverName, approver_email: approverEmail },
+      user,
+      webBaseUrl
+    );
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        additional_approvers: ncr.additional_approvers,
+      },
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Add approver');
+  }
+});
+
+router.delete('/:id/approvers/:approverId', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await removeApprover(req.params.id, req.params.approverId, user, webBaseUrl);
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        additional_approvers: ncr.additional_approvers,
+      },
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Remove approver');
+  }
+});
+
+router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  const b = {
+    disposition_execution_verified: req.body.disposition_execution_verified,
+    preventive_actions_verified: req.body.preventive_actions_verified,
+    traveler_signed_off: req.body.traveler_signed_off,
+  };
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await closeNcr(req.params.id, b, user, webBaseUrl);
     return res.status(200).json({
       success: true,
       ncr: {

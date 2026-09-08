@@ -9,10 +9,9 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  - var isQa = (locals.roles && locals.roles.indexOf('qa_staff') !== -1)
   - var isReturnedForComment = (ncr.status === 'Returned for Comment')
   - var myEntry = (ncr.additional_approvers || []).filter(function(a){ return a.approver_id === locals.userid; })[0]
-  - var canActAsApprover = !!myEntry && ncr.status === 'Approved' && myEntry.approval_status === 'Pending'
+  - var canActAsApprover = !!myEntry && ncr.status === 'Approval Requested' && myEntry.approval_status === 'Pending'
 
   .container(style='margin-top: 10px')
     h3 NCR Approval
@@ -55,29 +54,46 @@ block content
           dt Concurred On
           dd= new Date(ncr.qa_concurrence_timestamp).toLocaleString()
 
+    - var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
+
     fieldset
       legend Approver Status
       table.table.table-bordered.table-condensed
         thead
           tr
             th Approver
-            th Role
             th Status
             th Decided On
             th Comments
-        tbody
+            if canManageApprovers
+              th(style='width: 80px')
+        tbody#approver-status-list
           if !ncr.additional_approvers || ncr.additional_approvers.length === 0
             tr
-              td(colspan='5').muted No additional approvers were designated.
+              td(colspan=canManageApprovers ? '5' : '4').muted No additional approvers were designated.
           else
             each a in ncr.additional_approvers
               tr
                 td= a.approver_name
-                td= a.approver_role
                 td
                   span.label= a.approval_status
                 td= a.approval_timestamp ? new Date(a.approval_timestamp).toLocaleString() : '—'
                 td= a.comments || '—'
+                if canManageApprovers
+                  td
+                    button.btn.btn-sm.btn-danger.remove-approver-btn(type='button', data-approver-id=a.approver_id)
+                      | Remove
+
+    if canManageApprovers
+      fieldset
+        legend Manage Approvers
+        p.help-block Add an approver, or remove one from the table above, while this NCR awaits approval.
+        .control-group
+          .controls
+            input#new-approver-id.input-medium(type='text', placeholder='Last, First', autocomplete='off')
+            button#add-approver-btn.btn.btn-sm(type='button', style='margin-left: 5px')
+              i.fa.fa-plus
+              | &nbsp; Add Approver
 
     #app-success.alert.alert-success(style='display:none')
       strong Done.&nbsp;
@@ -121,6 +137,9 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/global.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/usernames.js')
   script.
     $(function () {
       var ncrId = '#{ncr._id}';
@@ -173,6 +192,75 @@ block js
       $('#resubmit-btn').on('click', function () {
         send({ _endpoint: '/resubmit' }, $(this), function () {
           return 'Resubmitted to approvers. New approval requests sent.';
+        });
+      });
+
+      if (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames) {
+        travelerGlobal.usernames.initialize();
+        $('#new-approver-id').typeahead(
+          { minLength: 1, highlight: true, hint: true },
+          { name: 'usernames', display: 'displayName', limit: 20, source: travelerGlobal.usernames }
+        );
+      }
+
+      $('#add-approver-btn').on('mousedown', function () {
+        $('#new-approver-id').typeahead('close');
+      });
+
+      $('#add-approver-btn').on('click', function () {
+        var input = $('#new-approver-id').val().trim();
+        if (!input) return;
+        var id = input;
+        var name = input;
+        var email = '';
+        var users = (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames)
+          ? travelerGlobal.usernames.get(input)
+          : [];
+        if (users && users.length > 0) {
+          id = users[0].uid;
+          name = users[0].displayName;
+          email = users[0].mail;
+        }
+
+        $('#app-error').hide();
+        var btn = $(this);
+        btn.prop('disabled', true);
+        $.ajax({
+          url: prefix + '/api/ncrs/' + ncrId + '/approvers',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ approver_id: id, approver_name: name, approver_email: email }),
+          success: function () {
+            location.reload();
+          },
+          error: function (xhr) {
+            var resp = xhr.responseJSON || {};
+            $('#app-error-msg').text(resp.message || resp.error || 'Failed to add approver.');
+            $('#app-error').show();
+            btn.prop('disabled', false);
+          },
+        });
+      });
+
+      $('#approver-status-list').on('click', '.remove-approver-btn', function () {
+        var approverId = $(this).data('approver-id');
+        if (!window.confirm('Remove this approver from the NCR?')) return;
+
+        $('#app-error').hide();
+        var btn = $(this);
+        btn.prop('disabled', true);
+        $.ajax({
+          url: prefix + '/api/ncrs/' + ncrId + '/approvers/' + encodeURIComponent(approverId),
+          method: 'DELETE',
+          success: function () {
+            location.reload();
+          },
+          error: function (xhr) {
+            var resp = xhr.responseJSON || {};
+            $('#app-error-msg').text(resp.message || resp.error || 'Failed to remove approver.');
+            $('#app-error').show();
+            btn.prop('disabled', false);
+          },
         });
       });
     });

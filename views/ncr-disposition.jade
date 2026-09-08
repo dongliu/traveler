@@ -51,7 +51,7 @@ block content
                 input(type='radio', name='parts_disposition', value=opt, required)
                 | &nbsp; #{opt}
 
-        #rework-repair-field.control-group(style='display:none')
+        #rework-repair-field.control-group
           label.control-label(for='rework_repair_instructions') Rework / Repair Instructions
             span.text-error *
           .controls
@@ -76,7 +76,7 @@ block content
       .control-group
         .controls
           .btn-group
-            button#submit-btn.btn.btn-primary(type='submit') Submit Disposition
+            button#submit-btn.btn.btn-primary(type='submit') Create Disposition
           .btn-group(style='margin-left: 5px')
             a.btn(href='#{prefix}/ncrs/#{ncr._id}') Cancel
 
@@ -104,14 +104,7 @@ block js
 
       $('input[name="parts_disposition"]').on('change', function () {
         var val = $(this).val();
-        if (val === 'Rework' || val === 'Repair') {
-          $('#rework-repair-field').show();
-          $('#rework_repair_instructions').prop('required', true);
-        } else {
-          $('#rework-repair-field').hide();
-          $('#rework_repair_instructions').prop('required', false).val('');
-          $('#rri-counter').text('0 / 5000');
-        }
+        $('#rework_repair_instructions').prop('required', val === 'Rework' || val === 'Repair');
       });
 
       var paCount = 1;
@@ -150,10 +143,9 @@ block js
           pas.push(v);
         });
 
-        var rri = '';
-        if (pd === 'Rework' || pd === 'Repair') {
-          rri = $('#rework_repair_instructions').val().trim();
-          if (rri.length === 0) errors.push('Rework/Repair Instructions is required when Rework or Repair is selected.');
+        var rri = $('#rework_repair_instructions').val().trim();
+        if ((pd === 'Rework' || pd === 'Repair') && rri.length === 0) {
+          errors.push('Rework/Repair Instructions is required when Rework or Repair is selected.');
         }
 
         if (errors.length) {
@@ -194,7 +186,7 @@ block js
             }
             $('#disp-error-msg').text(msg);
             $('#disp-error').show();
-            $('#submit-btn').prop('disabled', false).text('Submit Disposition');
+            $('#submit-btn').prop('disabled', false).text('Create Disposition');
           },
         });
       });

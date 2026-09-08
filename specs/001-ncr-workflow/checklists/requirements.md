@@ -55,7 +55,7 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
   closure) are independent and provide incremental value
 - Specification supports full NCR lifecycle with comment resolution loops:
   Create → Forward/Notify → CE/CS Disposition (with Root Cause Analysis) → QA
-  Review/Approved (with Approver Designation) → Final Approval (by Designated
+  Review/Approval Requested (with Approver Designation) → Final Approval (by Designated
   Approvers, with "Return for Comment" capability) → NCR Originator Executes &
   Closes (with auto-distribution) → Close → Report
 - **Enhanced with NCR Originator specifics**: User Story 1 includes detailed
@@ -87,7 +87,7 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
   status; QA Staff resolves concerns through CE/CS consultation, then resubmits;
   resolved NCRs progress to "Final Approval" status
 - **NCR Originator Execution and Closure** (User Story 5): Originator or
-  designee executes authorized disposition, closes NCR with closure notes; upon
+  designee executes authorized disposition, closes NCR; upon
   closure, system automatically distributes closed NCR to all designated
   Approvers and Distribution Personnel; for Traveler-linked NCRs, a
   self-attestation checkbox on the NCR closure form confirms Traveler sign-off

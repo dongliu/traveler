@@ -34,6 +34,8 @@ const NCR_EVENT_TYPES = [
   'delegate.removed',
   'qa.concurred',
   'approvers.designated',
+  'approver.added',
+  'approver.removed',
   'qa.rejected',
   'approval.approved',
   'approval.returned_for_comment',
@@ -89,7 +91,7 @@ const NcrEventSchema = new Schema({
 const NCR_STATUSES = [
   'Submitted',
   'Dispositioned',
-  'Approved',
+  'Approval Requested',
   'Returned for Comment',
   'Final Approval',
   'Closed',
@@ -151,7 +153,7 @@ const NcrSchema = new Schema({
     {
       approver_id: String,
       approver_name: String,
-      approver_role: String,
+      approver_email: String,
       designated_timestamp: Date,
       approval_status: {
         type: String,
@@ -166,7 +168,6 @@ const NcrSchema = new Schema({
     closed_by: String,
     closed_by_name: String,
     closure_date: Date,
-    closure_notes: String,
     closure_timestamp: Date,
     distribution_notification_timestamp: Date,
     disposition_execution_verified: Boolean,

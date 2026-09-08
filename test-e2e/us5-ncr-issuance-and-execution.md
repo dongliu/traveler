@@ -56,18 +56,16 @@ Issuance and Execution" (Priority: P2)
    Preventive Actions section lists both actions with status (AS2/AS3).
 5. Confirm there is **no** "Traveler Sign-Off" section on this page (NCR-A
    is not Traveler-linked).
-6. In "Closure Notes", enter: `Rework completed per instructions, re-inspected under magnification, dimensions verified within tolerance. Both preventive actions implemented and confirmed.`
-7. Check both checkboxes: "I have verified the disposition has been
+6. Check both checkboxes: "I have verified the disposition has been
    executed" and "I have verified the preventive actions have been
    completed".
-8. Click "Close NCR" (AS4).
-9. Read the success message. Click "View NCR". Confirm the status badge
-   reads "Closed" and a "Closure" section shows your name, today's date,
-   and the closure notes.
+7. Click "Close NCR" (AS4).
+8. Read the success message. Click "View NCR". Confirm the status badge
+   reads "Closed" and a "Closure" section shows your name and today's date.
 
 ### Acceptance Scenario 5 — Traveler-linked NCR requires sign-off confirmation before closing
 
-10. Open DevTools Console (any authenticated page) and run:
+9. Open DevTools Console (any authenticated page) and run:
 
     ```js
     fetch('/api/ncrs', {
@@ -90,21 +88,21 @@ Issuance and Execution" (Priority: P2)
       }),
     }).then(r => r.json()).then(console.log);
     ```
-11. Record `ncr.ncr_number` / `ncr.ncr_id`. In mongo-express, open that
+10. Record `ncr.ncr_number` / `ncr.ncr_id`. In mongo-express, open that
     document and confirm it already has `traveler_link: { traveler_id:
     "507f1f77bcf86cd799439011", step_number: 7, initiated_from_traveler:
     true }` (set automatically because `traveler_id` was in the request).
-12. Edit the document: set `status` to `"Final Approval"` (fast-forwarding
+11. Edit the document: set `status` to `"Final Approval"` (fast-forwarding
     past disposition/QA/approval, already covered by other user-story
     tests, to isolate this test to the closure step).
-13. Navigate to `http://localhost:3001/ncrs/<that-ncr-id>/close`.
-14. Confirm a "Traveler Sign-Off" section is visible with the text: "This
+12. Navigate to `http://localhost:3001/ncrs/<that-ncr-id>/close`.
+13. Confirm a "Traveler Sign-Off" section is visible with the text: "This
     NCR was initiated from a Traveler. Electronic confirmation of traveler
     sign-off is required before closure." and a checkbox: "I confirm the
     associated Traveler step has been signed off".
-15. Enter closure notes (≥ 20 characters), leave the sign-off checkbox
-    **unchecked**, click "Close NCR". Read the error.
-16. Check the sign-off checkbox and click "Close NCR" again. Read the
+14. Leave the sign-off checkbox **unchecked**, click "Close NCR". Read the
+    error.
+15. Check the sign-off checkbox and click "Close NCR" again. Read the
     success message.
 
 
@@ -143,7 +141,6 @@ After the final test step above:
 ## Human Verification Checklist
 
 - [ ] NCR-A (`ncrs` document): `status: "Closed"`,
-      `closure_record.closure_notes` matches the text entered,
       `closure_record.disposition_execution_verified: true`,
       `closure_record.preventive_actions_verified: true`. `events`
       contains `ncr.closed` and `notification.final_distribution`, but

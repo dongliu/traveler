@@ -7,8 +7,8 @@ and Report on Nonconformances" (Priority: P2)
 ## Setup
 
 - Requires several NCRs already existing across different statuses from
-  earlier user-story tests (Submitted, Dispositioned, Approved, Final
-  Approval, Closed). If any status is missing, create a bare Submitted NCR
+  earlier user-story tests (Submitted, Dispositioned, Approval Requested,
+  Final Approval, Closed). If any status is missing, create a bare Submitted NCR
   via `/ncr/new` to fill the gap.
 - **Escalation fixture**: in mongo-express, pick one non-Closed NCR and edit
   its `created_at` field to a date more than 30 days before today (e.g. 35
@@ -41,7 +41,7 @@ and Report on Nonconformances" (Priority: P2)
 
 1. Navigate to `http://localhost:3001/ncrs`.
 2. Read the status-card row at the top: All, Submitted, Dispositioned,
-   Approved, Returned, Final Approval, Closed — each with a count.
+   Approval Requested, Returned, Final Approval, Closed — each with a count.
 3. Look for any "average time in workflow" statistic anywhere on the page.
    Report whether one exists.
 

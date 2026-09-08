@@ -94,13 +94,14 @@ state and notification, independent of any other scenario.
    directly to "Final Approval" and an issuance notification is recorded
 3. **Given** a Dispositioned NCR, **When** the suite records QA concurrence
    with one or more designated approvers, **Then** it confirms the NCR
-   transitions to "Approved" and an approval-request notification is recorded
-   for each designated approver
-4. **Given** an Approved NCR, **When** the suite has an approver return it for
-   comment, **Then** it confirms the NCR transitions to "Returned for Comment"
-   and, after QA resubmits it, back to "Approved"
-5. **Given** an NCR in "Final Approval" status, **When** the suite closes it
-   with closure notes, **Then** it confirms the NCR transitions to "Closed",
+   transitions to "Approval Requested" and an approval-request notification is
+   recorded for each designated approver
+4. **Given** an Approval Requested NCR, **When** the suite has an approver
+   return it for comment, **Then** it confirms the NCR transitions to
+   "Returned for Comment" and, after QA resubmits it, back to
+   "Approval Requested"
+5. **Given** an NCR in "Final Approval" status, **When** the suite closes it,
+   **Then** it confirms the NCR transitions to "Closed",
    a closure record is persisted, and a final-distribution notification is
    recorded for the required recipient groups
 6. **Given** a Traveler-linked NCR reaches closure, **When** the suite attempts

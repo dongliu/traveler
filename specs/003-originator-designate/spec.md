@@ -76,7 +76,7 @@ it; and verifying the Originator can later change or remove the Designate.
 A user who has been assigned as Designate on an NCR performs the same
 Originator-scoped actions the Originator themselves could perform on that
 specific NCR: viewing it (including in their own dashboard/NCR list), closing
-it with closure notes (and, for Traveler-linked NCRs, the sign-off
+it (and, for Traveler-linked NCRs, the sign-off
 self-attestation), and receiving the notifications an Originator would
 receive for that NCR (the NCR ISSUANCE email and the FINAL NCR DISTRIBUTION
 email). The Designate's authority is limited to the specific NCR(s) they were
@@ -103,7 +103,7 @@ not assigned as Designate on.
    assigned, **When** the system sends the NCR ISSUANCE email, **Then** it is
    sent to both the Originator and the Designate
 3. **Given** a user is the Designate on an NCR in "Final Approval" status,
-   **When** they provide closure notes and select "Close NCR" (completing the
+   **When** they select "Close NCR" (completing the
    Traveler sign-off self-attestation if the NCR is Traveler-linked), **Then**
    the NCR transitions to "Closed" exactly as if the Originator had closed it,
    and the closure record identifies the Designate (not the Originator) as
@@ -173,7 +173,7 @@ not assigned as Designate on.
   in that user's NCR dashboard/list, alongside NCRs where they are the
   Originator
 - **FR-010**: System MUST allow the Designate to close an NCR under the same
-  conditions the Originator could (closure notes required; Traveler sign-off
+  conditions the Originator could (Traveler sign-off
   self-attestation required for Traveler-linked NCRs), producing the same
   "Closed" state transition
 - **FR-011**: System MUST record the Designate's own identity — not the

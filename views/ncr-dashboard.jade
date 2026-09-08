@@ -33,8 +33,8 @@ block content
         span.count.count-Submitted 0
       span.status-card(data-status='Dispositioned', style='background:#f0ad4e') Dispositioned&nbsp;
         span.count.count-Dispositioned 0
-      span.status-card(data-status='Approved', style='background:#5cb85c') Approved&nbsp;
-        span.count.count-Approved 0
+      span.status-card(data-status='Approval Requested', style='background:#5cb85c') Approval Requested&nbsp;
+        span.count.count-ApprovalRequested 0
       span.status-card(data-status='Returned for Comment', style='background:#d9534f') Returned&nbsp;
         span.count.count-Returned 0
       span.status-card(data-status='Final Approval', style='background:#428bca') Final Approval&nbsp;
@@ -129,7 +129,7 @@ block js
       }
 
       function statusBadge(s) {
-        var bg = { 'Submitted':'#5bc0de','Dispositioned':'#f0ad4e','Approved':'#5cb85c','Returned for Comment':'#d9534f','Final Approval':'#428bca','Closed':'#777' }[s] || '#999';
+        var bg = { 'Submitted':'#5bc0de','Dispositioned':'#f0ad4e','Approval Requested':'#5cb85c','Returned for Comment':'#d9534f','Final Approval':'#428bca','Closed':'#777' }[s] || '#999';
         return '<span class="label" style="background:' + bg + '">' + escapeHtml(s) + '</span>';
       }
 
@@ -179,12 +179,12 @@ block js
           limit: 1000,
         });
         $.getJSON(prefix + '/api/ncrs?' + q, function (data) {
-          var counts = { 'Submitted':0,'Dispositioned':0,'Approved':0,'Returned for Comment':0,'Final Approval':0,'Closed':0 };
+          var counts = { 'Submitted':0,'Dispositioned':0,'Approval Requested':0,'Returned for Comment':0,'Final Approval':0,'Closed':0 };
           (data.ncrs || []).forEach(function (n) { if (counts.hasOwnProperty(n.status)) counts[n.status]++; });
           $('.count-all').text(data.total || 0);
           $('.count-Submitted').text(counts['Submitted']);
           $('.count-Dispositioned').text(counts['Dispositioned']);
-          $('.count-Approved').text(counts['Approved']);
+          $('.count-ApprovalRequested').text(counts['Approval Requested']);
           $('.count-Returned').text(counts['Returned for Comment']);
           $('.count-Final').text(counts['Final Approval']);
           $('.count-Closed').text(counts['Closed']);

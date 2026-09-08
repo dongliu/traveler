@@ -23,6 +23,7 @@ const {
   sendIssuance,
   sendFinalDistribution,
   sendPaAssigned,
+  sendDesignateAssigned,
 } = require('../../lib/ncr-email.js');
 
 function makeNcr(overrides = {}) {
@@ -36,6 +37,13 @@ function makeNcr(overrides = {}) {
     description_of_nonconformance: 'Crack found on surface',
     ...overrides,
   };
+}
+
+function capturedHtml() {
+  return sendNotificationStub.firstCall.args[0].html;
+}
+function capturedSubject() {
+  return sendNotificationStub.firstCall.args[0].subject;
 }
 
 beforeEach(() => {
@@ -187,5 +195,229 @@ describe('lib/ncr-email — sendPaAssigned', () => {
     sendNotificationStub.firstCall.args[0].recipients.should.equal('owner1@test.com');
     results.should.have.lengthOf(1);
     results[0].recipient_email.should.equal('owner1@test.com');
+  });
+});
+
+// ── Email format / content tests (spec: specs/emais.md) ──────────────────────
+
+describe('lib/ncr-email — sendInitialNotification format (spec email 2)', () => {
+  it('uses the correct subject line', async () => {
+    await sendInitialNotification(makeNcr(), ['qa@test.com'], 'http://app/ncrs/1');
+    capturedSubject().should.equal('NCR NCR-2026-0001 Initiated — Bracket');
+  });
+
+  it('body mentions NCR number, part, supplier, originator and CE/CS', async () => {
+    await sendInitialNotification(makeNcr(), ['qa@test.com'], 'http://app/ncrs/1');
+    const html = capturedHtml();
+    html.should.include('NCR-2026-0001');
+    html.should.include('Bracket');
+    html.should.include('Acme');
+    html.should.include('Origin Person');
+    html.should.include('CE Person');
+    html.should.include('forwarded to');
+    html.should.include('engineering disposition');
+  });
+
+  it('body includes the problem description', async () => {
+    await sendInitialNotification(makeNcr(), ['qa@test.com'], 'http://app/ncrs/1');
+    capturedHtml().should.include('Crack found on surface');
+  });
+
+  it('includes an NCR link when ncrUrl is provided', async () => {
+    await sendInitialNotification(makeNcr(), ['qa@test.com'], 'http://app/ncrs/42');
+    const html = capturedHtml();
+    html.should.include('href="http://app/ncrs/42"');
+    html.should.include('following the link below');
+  });
+
+  it('omits the link section when ncrUrl is absent', async () => {
+    await sendInitialNotification(makeNcr(), ['qa@test.com'], '');
+    capturedHtml().should.not.include('href=');
+  });
+});
+
+describe('lib/ncr-email — sendDispositionRequest format (spec email 1)', () => {
+  it('uses the correct subject line', async () => {
+    await sendDispositionRequest(makeNcr(), 'cecs@test.com', 'http://app/ncrs/1', 'orig@test.com');
+    capturedSubject().should.equal('Action Required — Engineering Disposition for NCR NCR-2026-0001');
+  });
+
+  it('body addresses CE/CS by name', async () => {
+    await sendDispositionRequest(makeNcr(), 'cecs@test.com', 'http://app/ncrs/1');
+    capturedHtml().should.include('CE Person');
+  });
+
+  it('body asks CE/CS to complete the section and includes originator name', async () => {
+    await sendDispositionRequest(makeNcr(), 'cecs@test.com', 'http://app/ncrs/1');
+    const html = capturedHtml();
+    html.should.include('Please complete the CE/CS');
+    html.should.include('Origin Person');
+    html.should.include('Acme');
+  });
+
+  it('includes an NCR link when ncrUrl is provided', async () => {
+    await sendDispositionRequest(makeNcr(), 'cecs@test.com', 'http://app/ncrs/7');
+    capturedHtml().should.include('href="http://app/ncrs/7"');
+  });
+
+  it('uses fallback text when ncrUrl is absent', async () => {
+    await sendDispositionRequest(makeNcr(), 'cecs@test.com', '');
+    capturedHtml().should.include('Please log in');
+  });
+});
+
+describe('lib/ncr-email — sendQaNotification format (spec email 3)', () => {
+  it('uses the correct subject for the default path', async () => {
+    await sendQaNotification(makeNcr(), ['qa@test.com'], null, 'http://app/ncrs/1');
+    capturedSubject().should.equal('NCR NCR-2026-0001 Ready for QA Concurrence');
+  });
+
+  it('body opens with "QA Admin:" greeting', async () => {
+    await sendQaNotification(makeNcr(), ['qa@test.com'], null, 'http://app/ncrs/1');
+    capturedHtml().should.include('QA Admin');
+  });
+
+  it('body states CE/CS section was completed by CE/CS name', async () => {
+    await sendQaNotification(makeNcr(), ['qa@test.com'], null, 'http://app/ncrs/1');
+    const html = capturedHtml();
+    html.should.include('CE Person');
+    html.should.include('completed by');
+    html.should.include('Please complete the QA section');
+  });
+
+  it('includes an NCR link when ncrUrl is provided', async () => {
+    await sendQaNotification(makeNcr(), ['qa@test.com'], null, 'http://app/ncrs/5');
+    capturedHtml().should.include('href="http://app/ncrs/5"');
+  });
+
+  it('omits the link when ncrUrl is absent', async () => {
+    await sendQaNotification(makeNcr(), ['qa@test.com']);
+    capturedHtml().should.not.include('href=');
+  });
+
+  it('uses the returned_for_comment subject and body when context is set', async () => {
+    await sendQaNotification(makeNcr(), ['qa@test.com'], 'returned_for_comment', 'http://app/ncrs/1');
+    capturedSubject().should.equal('NCR NCR-2026-0001 Returned for Comment — QA Action Required');
+    capturedHtml().should.include('returned');
+    capturedHtml().should.include('href="http://app/ncrs/1"');
+  });
+});
+
+describe('lib/ncr-email — sendApprovalRequest format (spec email 5)', () => {
+  it('uses the correct subject line', async () => {
+    await sendApprovalRequest(makeNcr(), ['appr@test.com'], 'http://app/ncrs/1');
+    capturedSubject().should.equal('Action Required — Approval Needed for NCR NCR-2026-0001');
+  });
+
+  it('body opens with "Approvers:" greeting', async () => {
+    await sendApprovalRequest(makeNcr(), ['appr@test.com'], 'http://app/ncrs/1');
+    capturedHtml().should.include('Approvers');
+  });
+
+  it('body mentions NCR, part, supplier and approved-by name', async () => {
+    await sendApprovalRequest(makeNcr(), ['appr@test.com'], 'http://app/ncrs/1', 'Jane QA');
+    const html = capturedHtml();
+    html.should.include('NCR-2026-0001');
+    html.should.include('Bracket');
+    html.should.include('Acme');
+    html.should.include('Jane QA');
+    html.should.include('ready for');
+  });
+
+  it('falls back to "QA Admin" when approvedByName is omitted', async () => {
+    await sendApprovalRequest(makeNcr(), ['appr@test.com'], 'http://app/ncrs/1');
+    capturedHtml().should.include('QA Admin');
+  });
+
+  it('includes an NCR link when ncrUrl is provided', async () => {
+    await sendApprovalRequest(makeNcr(), ['appr@test.com'], 'http://app/ncrs/9');
+    capturedHtml().should.include('href="http://app/ncrs/9"');
+  });
+
+  it('omits the link when ncrUrl is absent', async () => {
+    await sendApprovalRequest(makeNcr(), ['appr@test.com']);
+    capturedHtml().should.not.include('href=');
+  });
+});
+
+describe('lib/ncr-email — sendIssuance format (spec email 6)', () => {
+  it('uses the correct subject line', async () => {
+    await sendIssuance(makeNcr(), ['orig@test.com'], 'http://app/ncrs/1');
+    capturedSubject().should.equal('NCR NCR-2026-0001 — Final Approval Reached');
+  });
+
+  it('body addresses the originator by name', async () => {
+    await sendIssuance(makeNcr(), ['orig@test.com'], 'http://app/ncrs/1');
+    capturedHtml().should.include('Origin Person');
+  });
+
+  it('body states NCR was approved by all members and asks to execute disposition', async () => {
+    await sendIssuance(makeNcr(), ['orig@test.com'], 'http://app/ncrs/1');
+    const html = capturedHtml();
+    html.should.include('approved by all associated members');
+    html.should.include('execute the parts');
+    html.should.include('close out the report');
+  });
+
+  it('includes an NCR link when ncrUrl is provided', async () => {
+    await sendIssuance(makeNcr(), ['orig@test.com'], 'http://app/ncrs/3');
+    capturedHtml().should.include('href="http://app/ncrs/3"');
+  });
+
+  it('omits the link when ncrUrl is absent', async () => {
+    await sendIssuance(makeNcr(), ['orig@test.com']);
+    capturedHtml().should.not.include('href=');
+  });
+});
+
+describe('lib/ncr-email — sendFinalDistribution format (spec email 7)', () => {
+  it('uses the correct subject line', async () => {
+    await sendFinalDistribution(makeNcr(), ['a@test.com'], 'http://app/ncrs/1');
+    capturedSubject().should.equal('NCR NCR-2026-0001 — Closed');
+  });
+
+  it('body states the NCR has been closed and includes part and supplier', async () => {
+    await sendFinalDistribution(makeNcr(), ['a@test.com'], 'http://app/ncrs/1');
+    const html = capturedHtml();
+    html.should.include('NCR-2026-0001');
+    html.should.include('Bracket');
+    html.should.include('Acme');
+    html.should.include('closed');
+  });
+
+  it('includes an NCR link when ncrUrl is provided', async () => {
+    await sendFinalDistribution(makeNcr(), ['a@test.com'], 'http://app/ncrs/11');
+    capturedHtml().should.include('href="http://app/ncrs/11"');
+  });
+
+  it('omits the link when ncrUrl is absent', async () => {
+    await sendFinalDistribution(makeNcr(), ['a@test.com']);
+    capturedHtml().should.not.include('href=');
+  });
+});
+
+describe('lib/ncr-email — sendDesignateAssigned format', () => {
+  it('uses the correct subject line', async () => {
+    await sendDesignateAssigned(makeNcr(), 'designate@test.com', 'http://app/ncrs/1');
+    capturedSubject().should.equal('You Have Been Assigned as Designate — NCR NCR-2026-0001');
+  });
+
+  it('body mentions the originator, part, supplier and designate authority', async () => {
+    await sendDesignateAssigned(makeNcr(), 'designate@test.com', 'http://app/ncrs/1');
+    const html = capturedHtml();
+    html.should.include('Origin Person');
+    html.should.include('Bracket');
+    html.should.include('Acme');
+    html.should.include('Designate');
+  });
+
+  it('includes an NCR link when ncrUrl is provided', async () => {
+    await sendDesignateAssigned(makeNcr(), 'designate@test.com', 'http://app/ncrs/8');
+    capturedHtml().should.include('href="http://app/ncrs/8"');
+  });
+
+  it('omits the link when ncrUrl is absent', async () => {
+    await sendDesignateAssigned(makeNcr(), 'designate@test.com', '');
+    capturedHtml().should.not.include('href=');
   });
 });
