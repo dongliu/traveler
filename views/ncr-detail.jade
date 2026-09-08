@@ -255,9 +255,6 @@ block content
               dd= ncr.closure_record.closed_by_name
               dt Closure Date
               dd= new Date(ncr.closure_record.closure_date).toLocaleDateString()
-              if ncr.closure_record.closure_notes
-                dt Notes
-                dd= ncr.closure_record.closure_notes
 
     if ncr.attachments && ncr.attachments.length
       .row-fluid

@@ -100,8 +100,8 @@ state and notification, independent of any other scenario.
    return it for comment, **Then** it confirms the NCR transitions to
    "Returned for Comment" and, after QA resubmits it, back to
    "Approval Requested"
-5. **Given** an NCR in "Final Approval" status, **When** the suite closes it
-   with closure notes, **Then** it confirms the NCR transitions to "Closed",
+5. **Given** an NCR in "Final Approval" status, **When** the suite closes it,
+   **Then** it confirms the NCR transitions to "Closed",
    a closure record is persisted, and a final-distribution notification is
    recorded for the required recipient groups
 6. **Given** a Traveler-linked NCR reaches closure, **When** the suite attempts

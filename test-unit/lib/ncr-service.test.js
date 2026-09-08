@@ -904,36 +904,7 @@ describe('lib/ncr-service — closeNcr', () => {
 
   it('throws 409 when NCR is not in Final Approval status', async () => {
     stubFindById(newNcr({ status: 'Approval Requested', originator_id: 'orig1' }));
-    await expectRejection(closeNcr('id1', { closure_notes: 'x'.repeat(30) }, originator), 409);
-  });
-
-  it('throws 400 when closure_notes is missing', async () => {
-    stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1' }));
-    await expectRejection(closeNcr('id1', {}, originator), 400);
-  });
-
-  it('throws 400 when closure_notes is empty/whitespace', async () => {
-    stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1' }));
-    await expectRejection(closeNcr('id1', { closure_notes: '   ' }, originator), 400);
-  });
-
-  it('accepts closure_notes of any non-empty length (no minimum character requirement)', async () => {
-    stubFindById(newNcr({
-      status: 'Final Approval',
-      originator_id: 'orig1',
-      ce_cs_id: 'ces1',
-      qa_staff_identity: 'qa1',
-    }));
-    stubUserFind([
-      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
-      { _id: 'ces1', name: 'CES', email: 'ces@test.com' },
-      { _id: 'qa1', name: 'QA', email: 'qa@test.com' },
-    ]);
-
-    const result = await closeNcr('id1', { closure_notes: 'ok' }, originator);
-
-    result.status.should.equal('Closed');
-    result.closure_record.closure_notes.should.equal('ok');
+    await expectRejection(closeNcr('id1', {}, originator), 409);
   });
 
   it('throws 400 when a Traveler-linked NCR is closed without traveler_signed_off', async () => {
@@ -943,7 +914,7 @@ describe('lib/ncr-service — closeNcr', () => {
       traveler_link: { traveler_id: 'trav1', step_number: 2, initiated_from_traveler: true },
     }));
 
-    await expectRejection(closeNcr('id1', { closure_notes: 'x'.repeat(30) }, originator), 400);
+    await expectRejection(closeNcr('id1', {}, originator), 400);
   });
 
   it('closes a standalone NCR and sends final distribution', async () => {
@@ -959,14 +930,9 @@ describe('lib/ncr-service — closeNcr', () => {
       { _id: 'qa1', name: 'QA', email: 'qa@test.com' },
     ]);
 
-    const result = await closeNcr(
-      'id1',
-      { closure_notes: 'Rework completed and verified thoroughly' },
-      originator
-    );
+    const result = await closeNcr('id1', {}, originator);
 
     result.status.should.equal('Closed');
-    result.closure_record.closure_notes.should.equal('Rework completed and verified thoroughly');
     result.events.some(e => e.event_type === 'ncr.closed').should.be.true;
     result.events.some(e => e.event_type === 'traveler.signed_off').should.be.false;
     result.events.some(e => e.event_type === 'notification.final_distribution').should.be.true;
@@ -982,7 +948,7 @@ describe('lib/ncr-service — closeNcr', () => {
 
     const result = await closeNcr(
       'id1',
-      { closure_notes: 'Signed off in traveler and verified', traveler_signed_off: true },
+      { traveler_signed_off: true },
       originator
     );
 
@@ -996,7 +962,7 @@ describe('lib/ncr-service — closeNcr', () => {
     stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1', originator_designate_id: 'des1' }));
     stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
 
-    const result = await closeNcr('id1', { closure_notes: 'Closed by the Designate, verified' }, designate);
+    const result = await closeNcr('id1', {}, designate);
 
     result.status.should.equal('Closed');
   });
@@ -1006,7 +972,7 @@ describe('lib/ncr-service — closeNcr', () => {
     stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1', originator_designate_id: 'des1' }));
     stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
 
-    const result = await closeNcr('id1', { closure_notes: 'Closed by the Designate, verified' }, designate);
+    const result = await closeNcr('id1', {}, designate);
 
     result.closure_record.closed_by.should.equal('des1');
     result.closure_record.closed_by_name.should.equal('Des Person');
@@ -1025,7 +991,7 @@ describe('lib/ncr-service — closeNcr', () => {
       { _id: 'des1', name: 'Designate', email: 'des@test.com' },
     ]);
 
-    await closeNcr('id1', { closure_notes: 'Closed with a Designate assigned, verified' }, originator);
+    await closeNcr('id1', {}, originator);
 
     const emails = sendFinalDistributionStub.lastCall.args[1];
     emails.should.include('des@test.com');
@@ -1040,7 +1006,7 @@ describe('lib/ncr-service — closeNcr', () => {
     stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
     stubWbsMatch([{ wbs_number: '1.2', notification_email: 'gl@org.com' }]);
 
-    await closeNcr('id1', { closure_notes: 'Closed with a WBS match, verified thoroughly' }, originator);
+    await closeNcr('id1', {}, originator);
 
     const emails = sendFinalDistributionStub.lastCall.args[1];
     emails.should.include('gl@org.com');
@@ -1055,7 +1021,7 @@ describe('lib/ncr-service — closeNcr', () => {
     stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
     stubWbsMatch([]);
 
-    const result = await closeNcr('id1', { closure_notes: 'Closed with no WBS match, verified.' }, originator);
+    const result = await closeNcr('id1', {}, originator);
 
     const emails = sendFinalDistributionStub.lastCall.args[1];
     emails.should.deep.equal(['orig@test.com']);

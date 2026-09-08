@@ -186,7 +186,6 @@ stream for the NCR's lifecycle.
     closed_by: ObjectId,
     closed_by_name: String,
     closure_date: Date,
-    closure_notes: String,
     closure_timestamp: Date,
     distribution_notification_timestamp: Date
   },
@@ -245,7 +244,6 @@ Embedded in NCR document.
   closed_by: ObjectId,
   closed_by_name: String,
   closure_date: Date,
-  closure_notes: String,
   closure_timestamp: Date,
 
   disposition_execution_verified: Boolean,
@@ -474,7 +472,6 @@ Submitted
 4. **Closure**:
 
    - Cannot close without Final Approval status
-   - Closure Notes required, minimum 20 characters
    - Cannot close a Traveler-linked NCR without the `traveler_signed_off`
      self-attestation checkbox being checked on the NCR closure form
 

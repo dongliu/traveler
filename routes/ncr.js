@@ -476,18 +476,11 @@ router.delete('/:id/approvers/:approverId', auth.ensureAuthenticated, async (req
 
 router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
   if (!isValidId(req.params.id)) return badId(res, 'id');
-  const errors = {};
   const b = {
-    closure_notes: sanitizeStr(req.body.closure_notes),
     disposition_execution_verified: req.body.disposition_execution_verified,
     preventive_actions_verified: req.body.preventive_actions_verified,
     traveler_signed_off: req.body.traveler_signed_off,
   };
-  if (!b.closure_notes)
-    errors.closure_notes = ['Required'];
-
-  if (Object.keys(errors).length > 0)
-    return res.status(400).json({ success: false, error: 'Validation Error', message: 'Validation failed', details: errors });
 
   try {
     const user = {

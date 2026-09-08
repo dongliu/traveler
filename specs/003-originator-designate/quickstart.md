@@ -26,7 +26,7 @@ exactly as if they were the Originator, but only for that NCR.
    confirm this is rejected (only User A, the actual Originator, can).
 7. Bring the NCR to "Final Approval" status. Confirm the ISSUANCE email goes
    to both User A and User B.
-8. As User B, close the NCR with closure notes. Confirm the NCR transitions
+8. As User B, close the NCR. Confirm the NCR transitions
    to "Closed", and the closure record/audit trail identifies User B (not
    User A) as the one who closed it.
 9. Confirm the FINAL NCR DISTRIBUTION email (sent on closure) goes to both

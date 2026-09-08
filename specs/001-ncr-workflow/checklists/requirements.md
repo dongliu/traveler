@@ -87,7 +87,7 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
   status; QA Staff resolves concerns through CE/CS consultation, then resubmits;
   resolved NCRs progress to "Final Approval" status
 - **NCR Originator Execution and Closure** (User Story 5): Originator or
-  designee executes authorized disposition, closes NCR with closure notes; upon
+  designee executes authorized disposition, closes NCR; upon
   closure, system automatically distributes closed NCR to all designated
   Approvers and Distribution Personnel; for Traveler-linked NCRs, a
   self-attestation checkbox on the NCR closure form confirms Traveler sign-off

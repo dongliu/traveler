@@ -168,7 +168,6 @@ const NcrSchema = new Schema({
     closed_by: String,
     closed_by_name: String,
     closure_date: Date,
-    closure_notes: String,
     closure_timestamp: Date,
     distribution_notification_timestamp: Date,
     disposition_execution_verified: Boolean,

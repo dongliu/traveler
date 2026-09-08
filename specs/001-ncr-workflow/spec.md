@@ -246,8 +246,8 @@ categories, aging, and trends without implementation-specific technical metrics.
    accesses the NCR Dashboard, **Then** they see: total open NCRs, NCRs by
    status (Submitted, Dispositioned, Approval Requested, Returned for Comment,
    Final Approval, Closed), and average time in workflow
-2. **Given** an NCR has been approved, **When** it is marked as "Closed" with
-   closure notes, **Then** it appears in closed NCR reports and is excluded from
+2. **Given** an NCR has been approved, **When** it is marked as "Closed",
+   **Then** it appears in closed NCR reports and is excluded from
    open/pending metrics
 3. **Given** a user needs to trend nonconformances, **When** they access the
    Nonconformance Report view, **Then** they can filter by: Product/Part Number,
@@ -287,7 +287,7 @@ actions.
 **Independent Test**: Can be fully tested by completing the approval workflow
 (submit → disposition → QA concurrence → approval, if needed) and then verifying
 the NCR Originator receives an issuance email with link to NCR, can access all
-disposition details, mark the NCR as closed with closure notes, and the NCR
+disposition details, mark the NCR as closed, and the NCR
 transitions to "Closed" status.
 
 **Acceptance Scenarios**:
@@ -301,10 +301,10 @@ transitions to "Closed" status.
    rework/repair instructions
 3. **Given** the NCR Originator is preparing to execute the disposition,
    **When** they access the NCR, **Then** they see the option to mark the NCR as
-   "Closed" with execution completion notes
+   "Closed"
 4. **Given** an NCR Originator or designee selects "Close NCR", **When** they
-   provide closure notes (e.g., "Rework completed and verified"), **Then** the
-   NCR transitions to "Closed" with closure date and notes recorded
+   confirm disposition execution and preventive action completion, **Then**
+   the NCR transitions to "Closed" with closure date recorded
 5. **Given** an NCR is linked to a Traveler (Traveler ID/step number recorded at
    creation), **When** the NCR Originator or designee attempts to close it,
    **Then** the NCR close form requires them to check a confirmation stating
@@ -577,11 +577,11 @@ notifications as actions progress to completion.
   disposition and subsequent closure
 - **FR-040**: System MUST allow NCR Originator or designee to mark the NCR as
   "Closed" upon completion of the disposition execution
-- **FR-041**: System MUST require closure notes documenting completion status
-  and verification that corrective actions from the CE/CS disposition have been
-  implemented
+- **FR-041**: System MUST require explicit confirmation that disposition
+  execution and preventive action completion have been verified before
+  closure is permitted
 - **FR-042**: System MUST transition closed NCRs to "Closed" status, record
-  closure date, notes, and originator identity
+  closure date and originator identity
 - **FR-043**: System MUST, for Traveler-linked NCRs, require the Originator or
   designee to check a self-attestation confirmation on the NCR closure form
   stating that the associated Traveler step has been signed off, and MUST
@@ -712,9 +712,8 @@ notifications as actions progress to completion.
 
 - Represents execution of the authorized disposition and formal closure of the
   NCR by the NCR Originator or designee
-- Attributes: Closure Date, Closure Notes (documenting disposition execution
-  verification), Closed By (NCR Originator or designee identity), Closure
-  Timestamp, Distribution Notification Timestamp (when auto-distributed)
+- Attributes: Closure Date, Closed By (NCR Originator or designee identity),
+  Closure Timestamp, Distribution Notification Timestamp (when auto-distributed)
 - Relationships: Associated with one Final-Approved NCR, References Executed
   Corrective Actions, Tracks Closure Notifications to Approvers and Distribution
   Personnel
