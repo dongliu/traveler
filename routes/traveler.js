@@ -1154,7 +1154,7 @@ module.exports = function(app) {
     '/travelers/:id/devices/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
+    reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     reqUtils.filter('body', ['newdevice']),
@@ -1187,7 +1187,7 @@ module.exports = function(app) {
     '/travelers/:id/devices/:number',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
+    reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     function(req, res) {
