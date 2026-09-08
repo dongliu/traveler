@@ -1,5 +1,6 @@
 const auth = require('../lib/auth');
 const { Ncr } = require('../model/ncr');
+const { isQaStaffMember } = require('../lib/ncr-service');
 const routesUtilities = require('../utilities/routes');
 const logger = require('../lib/loggers').getLogger();
 
@@ -29,7 +30,8 @@ module.exports = function(app) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();
       if (!ncr) return res.status(404).send('NCR not found');
-      const renderObj = routesUtilities.getRenderObject(req, { ncr });
+      const isQa = await isQaStaffMember(req.session.userid);
+      const renderObj = routesUtilities.getRenderObject(req, { ncr, isQa });
       return res.render('ncr-approval', renderObj);
     } catch (err) {
       logger.error('NCR approval view failed:', err);
@@ -67,7 +69,8 @@ module.exports = function(app) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();
       if (!ncr) return res.status(404).send('NCR not found');
-      const renderObj = routesUtilities.getRenderObject(req, { ncr });
+      const isQa = await isQaStaffMember(req.session.userid);
+      const renderObj = routesUtilities.getRenderObject(req, { ncr, isQa });
       return res.render('ncr-detail', renderObj);
     } catch (err) {
       logger.error('NCR detail fetch failed:', err);

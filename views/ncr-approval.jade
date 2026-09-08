@@ -9,7 +9,6 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  - var isQa = (locals.roles && locals.roles.indexOf('qa_staff') !== -1)
   - var isReturnedForComment = (ncr.status === 'Returned for Comment')
   - var myEntry = (ncr.additional_approvers || []).filter(function(a){ return a.approver_id === locals.userid; })[0]
   - var canActAsApprover = !!myEntry && ncr.status === 'Approval Requested' && myEntry.approval_status === 'Pending'

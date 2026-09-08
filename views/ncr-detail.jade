@@ -19,7 +19,6 @@ block head
     .badge-Closed { background-color: #777; }
 
 block content
-  - var isQa = (locals.roles && locals.roles.indexOf('qa_staff') !== -1)
   - var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
 
   .container(style='margin-top: 10px')

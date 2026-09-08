@@ -49,13 +49,10 @@ async function createDispositionedNcr(overrides = {}) {
 }
 
 test.describe('US3 - QA Concurrence and Approver Coordination', () => {
-  test.beforeAll(async () => {
-    await execFixtureCli('grant-role', { userId: QA_STAFF_ID, role: 'qa_staff' });
-  });
-
-  test.afterAll(async () => {
-    await execFixtureCli('remove-role', { userId: QA_STAFF_ID, role: 'qa_staff' });
-  });
+  // QA authorization (both server-side isQaStaffMember and the isQa-gated
+  // UI sections) is based on ncr-qa group membership, not a role -- dong
+  // (the primary persona) is already a member of that shared dev group, so
+  // no per-file role grant/revoke is needed here.
 
   // ── AS1: UI presents username-only approver input ─────────────────────────
 
@@ -245,10 +242,10 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await approverPage.goto(`/ncrs/${ncrId}/approve`);
 
     await expect(approverPage.locator('h3')).toContainText('NCR Approval');
-    await expect(approverPage.locator('button:has-text("Approve")')).toBeVisible();
+    await expect(approverPage.locator('#approve-btn')).toBeVisible();
     await expect(approverPage.locator('button:has-text("Return for Comment")')).toBeVisible();
 
-    await approverPage.click('button:has-text("Approve")');
+    await approverPage.click('#approve-btn');
     await expect(approverPage.locator('.alert-success')).toBeVisible({ timeout: 10000 });
     await expect(approverPage.locator('.alert-success')).toContainText('All approvers have approved');
 
@@ -350,12 +347,20 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await concurWithApprovers(setupPage, ncrId, [APPROVER_ID]);
     await setupPage.close();
 
-    const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
-    await approverPage.goto(`/ncrs/${ncrId}/approve`);
+    // bob is a pre-existing member of the shared ncr-qa group in this dev
+    // database -- remove them for this assertion only, restoring
+    // membership afterward (same pattern used elsewhere in this suite).
+    await execFixtureCli('remove-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    try {
+      const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+      await approverPage.goto(`/ncrs/${ncrId}/approve`);
 
-    await expect(approverPage.locator('fieldset:has(legend:text("Manage Approvers"))')).toHaveCount(0);
-    await expect(approverPage.locator('.remove-approver-btn')).toHaveCount(0);
-    await approverPage.close();
+      await expect(approverPage.locator('fieldset:has(legend:text("Manage Approvers"))')).toHaveCount(0);
+      await expect(approverPage.locator('.remove-approver-btn')).toHaveCount(0);
+      await approverPage.close();
+    } finally {
+      await execFixtureCli('add-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    }
   });
 
   test('QA adds an approver from the approval page and it appears Pending without moving the NCR out of Approval Requested', async ({ page }) => {
@@ -543,11 +548,19 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await concurWithApprovers(setupPage, ncrId, [APPROVER_ID]);
     await setupPage.close();
 
-    const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
-    await approverPage.goto(`/ncrs/${ncrId}`);
+    // bob is a pre-existing member of the shared ncr-qa group in this dev
+    // database -- remove them for this assertion only, restoring
+    // membership afterward (same pattern used elsewhere in this suite).
+    await execFixtureCli('remove-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    try {
+      const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+      await approverPage.goto(`/ncrs/${ncrId}`);
 
-    await expect(approverPage.locator('fieldset:has(legend:text("Manage Approvers"))')).toHaveCount(0);
-    await expect(approverPage.locator('.remove-approver-btn')).toHaveCount(0);
-    await approverPage.close();
+      await expect(approverPage.locator('fieldset:has(legend:text("Manage Approvers"))')).toHaveCount(0);
+      await expect(approverPage.locator('.remove-approver-btn')).toHaveCount(0);
+      await approverPage.close();
+    } finally {
+      await execFixtureCli('add-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    }
   });
 });
