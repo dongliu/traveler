@@ -91,7 +91,7 @@ const NcrEventSchema = new Schema({
 const NCR_STATUSES = [
   'Submitted',
   'Dispositioned',
-  'Approved',
+  'Approval Requested',
   'Returned for Comment',
   'Final Approval',
   'Closed',

@@ -12,7 +12,7 @@ block content
   - var isQa = (locals.roles && locals.roles.indexOf('qa_staff') !== -1)
   - var isReturnedForComment = (ncr.status === 'Returned for Comment')
   - var myEntry = (ncr.additional_approvers || []).filter(function(a){ return a.approver_id === locals.userid; })[0]
-  - var canActAsApprover = !!myEntry && ncr.status === 'Approved' && myEntry.approval_status === 'Pending'
+  - var canActAsApprover = !!myEntry && ncr.status === 'Approval Requested' && myEntry.approval_status === 'Pending'
 
   .container(style='margin-top: 10px')
     h3 NCR Approval
@@ -55,7 +55,7 @@ block content
           dt Concurred On
           dd= new Date(ncr.qa_concurrence_timestamp).toLocaleString()
 
-    - var canManageApprovers = isQa && (ncr.status === 'Approved' || ncr.status === 'Returned for Comment')
+    - var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
 
     fieldset
       legend Approver Status

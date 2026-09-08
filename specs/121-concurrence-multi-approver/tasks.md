@@ -29,7 +29,7 @@
 
 **Goal**: QA can submit concurrence with zero or more approvers identified by username only; no role field appears or is required anywhere in the flow.
 
-**Independent Test**: Open a Dispositioned NCR as QA, confirm no role column/input on the concurrence screen, add two usernames, submit — both receive approval requests and NCR moves to Approved. See quickstart.md Scenarios 1–2.
+**Independent Test**: Open a Dispositioned NCR as QA, confirm no role column/input on the concurrence screen, add two usernames, submit — both receive approval requests and NCR moves to Approval Requested. See quickstart.md Scenarios 1–2.
 
 ### Implementation for User Story 1
 

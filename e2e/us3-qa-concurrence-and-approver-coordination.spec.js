@@ -105,9 +105,9 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(ncr.events.some(e => e.event_type === 'notification.issuance')).toBe(true);
   });
 
-  // ── AS2/AS5: add approver by username only → Approved ────────────────────
+  // ── AS2/AS5: add approver by username only → Approval Requested ──────────
 
-  test('AS2/AS5 - designating an approver by username only moves NCR to Approved with no role stored', async ({ page }) => {
+  test('AS2/AS5 - designating an approver by username only moves NCR to Approval Requested with no role stored', async ({ page }) => {
     const { ncrId } = await createDispositionedNcr();
     await page.goto(`/ncrs/${ncrId}/concurrence`);
 
@@ -128,7 +128,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
       ncrId,
       fields: ['status', 'additional_approvers', 'events'],
     });
-    expect(ncr.status).toBe('Approved');
+    expect(ncr.status).toBe('Approval Requested');
     expect(ncr.additional_approvers).toHaveLength(1);
     expect(ncr.additional_approvers[0].approver_id).toBe(APPROVER_ID);
     expect(ncr.additional_approvers[0].approval_status).toBe('Pending');
@@ -198,7 +198,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await expect(page.locator('#conc-success')).toBeVisible({ timeout: 10000 });
 
     const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] });
-    expect(ncr.status).toBe('Approved');
+    expect(ncr.status).toBe('Approval Requested');
     expect(ncr.additional_approvers).toHaveLength(1);
     expect(ncr.additional_approvers[0].approver_id).toBe('guobao');
     expect(ncr.additional_approvers.some(a => a.approver_id === APPROVER_ID)).toBe(false);
@@ -225,7 +225,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(res.status()).toBe(200);
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.ncr.status).toBe('Approved');
+    expect(body.ncr.status).toBe('Approval Requested');
     expect(body.ncr.additional_approvers[0].approver_id).toBe(APPROVER_ID);
   });
 
@@ -297,7 +297,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await expect(page.locator('.alert-success')).toContainText('Resubmitted');
 
     ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers', 'events'] })).ncr;
-    expect(ncr.status).toBe('Approved');
+    expect(ncr.status).toBe('Approval Requested');
     expect(ncr.additional_approvers[0].approval_status).toBe('Pending');
     expect(ncr.events.some(e => e.event_type === 'qa.resubmitted')).toBe(true);
   });
@@ -331,7 +331,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     return res.json();
   }
 
-  test('QA sees a Manage Approvers section with Remove buttons while the NCR is Approved', async ({ page }) => {
+  test('QA sees a Manage Approvers section with Remove buttons while the NCR is Approval Requested', async ({ page }) => {
     const { ncrId } = await createDispositionedNcr();
     await concurWithApprovers(page, ncrId, [APPROVER_ID]);
 
@@ -358,7 +358,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await approverPage.close();
   });
 
-  test('QA adds an approver from the approval page and it appears Pending without moving the NCR out of Approved', async ({ page }) => {
+  test('QA adds an approver from the approval page and it appears Pending without moving the NCR out of Approval Requested', async ({ page }) => {
     const { ncrId } = await createDispositionedNcr();
     await concurWithApprovers(page, ncrId, [APPROVER_ID]);
 
@@ -370,7 +370,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await expect(page.locator('table:has(th:text("Approver")) tbody tr')).toHaveCount(2);
 
     const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers', 'events'] });
-    expect(ncr.status).toBe('Approved');
+    expect(ncr.status).toBe('Approval Requested');
     expect(ncr.additional_approvers).toHaveLength(2);
     const added = ncr.additional_approvers.find(a => a.approver_id === 'guobao');
     expect(added).toBeTruthy();
@@ -378,7 +378,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(ncr.events.some(e => e.event_type === 'approver.added')).toBe(true);
   });
 
-  test('QA removes a non-blocking approver and the NCR stays Approved', async ({ page }) => {
+  test('QA removes a non-blocking approver and the NCR stays Approval Requested', async ({ page }) => {
     const { ncrId } = await createDispositionedNcr();
     await concurWithApprovers(page, ncrId, [APPROVER_ID, 'guobao']);
 
@@ -389,7 +389,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await page.waitForURL(new RegExp(`/ncrs/${ncrId}/approve$`));
 
     const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers', 'events'] });
-    expect(ncr.status).toBe('Approved');
+    expect(ncr.status).toBe('Approval Requested');
     expect(ncr.additional_approvers).toHaveLength(1);
     expect(ncr.events.some(e => e.event_type === 'approver.removed')).toBe(true);
   });
@@ -403,7 +403,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await page.locator('.remove-approver-btn').first().click();
 
     await page.waitForURL(new RegExp(`/ncrs/${ncrId}/approve$`));
-    // Manage Approvers section is gone now that the NCR is no longer Approved
+    // Manage Approvers section is gone now that the NCR is no longer Approval Requested
     await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toHaveCount(0);
 
     const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers', 'events'] });
@@ -412,7 +412,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(ncr.events.some(e => e.event_type === 'notification.issuance')).toBe(true);
   });
 
-  test('QA can manage approvers while Returned for Comment, and removing the blocking approver unblocks back to Approved', async ({ page, browser }) => {
+  test('QA can manage approvers while Returned for Comment, and removing the blocking approver unblocks back to Approval Requested', async ({ page, browser }) => {
     const { ncrId } = await createDispositionedNcr();
     await concurWithApprovers(page, ncrId, [APPROVER_ID, 'guobao']);
 
@@ -442,19 +442,19 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await page.waitForURL(new RegExp(`/ncrs/${ncrId}/approve$`));
 
     ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] })).ncr;
-    expect(ncr.status).toBe('Approved');
+    expect(ncr.status).toBe('Approval Requested');
     expect(ncr.additional_approvers).toHaveLength(1);
     expect(ncr.additional_approvers[0].approver_id).toBe('guobao');
-    // Manage Approvers remains visible now that status is back to Approved
+    // Manage Approvers remains visible now that status is back to Approval Requested
     await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toBeVisible();
   });
 
-  test('API: add-approver is rejected for a non-QA user, a non-Approved NCR, and a duplicate approver', async ({ page, browser }) => {
+  test('API: add-approver is rejected for a non-QA user, a non-Approval-Requested NCR, and a duplicate approver', async ({ page, browser }) => {
     const { ncrId: dispositionedNcrId } = await createDispositionedNcr();
-    const notApprovedRes = await page.request.post(`/api/ncrs/${dispositionedNcrId}/approvers`, {
+    const wrongStatusRes = await page.request.post(`/api/ncrs/${dispositionedNcrId}/approvers`, {
       data: { approver_id: APPROVER_ID },
     });
-    expect(notApprovedRes.status()).toBe(409);
+    expect(wrongStatusRes.status()).toBe(409);
 
     const { ncrId } = await createDispositionedNcr();
     await concurWithApprovers(page, ncrId, [APPROVER_ID]);
@@ -481,10 +481,10 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(duplicateRes.status()).toBe(409);
   });
 
-  test('API: remove-approver is rejected for a non-existent approver and a non-Approved NCR', async ({ page }) => {
+  test('API: remove-approver is rejected for a non-existent approver and a non-Approval-Requested NCR', async ({ page }) => {
     const { ncrId: dispositionedNcrId } = await createDispositionedNcr();
-    const notApprovedRes = await page.request.delete(`/api/ncrs/${dispositionedNcrId}/approvers/${APPROVER_ID}`);
-    expect(notApprovedRes.status()).toBe(409);
+    const wrongStatusRes = await page.request.delete(`/api/ncrs/${dispositionedNcrId}/approvers/${APPROVER_ID}`);
+    expect(wrongStatusRes.status()).toBe(409);
 
     const { ncrId } = await createDispositionedNcr();
     await concurWithApprovers(page, ncrId, [APPROVER_ID]);
@@ -495,7 +495,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
 
   // ── Manage Approvers is also available on the NCR detail page ───────────
 
-  test('QA sees Manage Approvers on the NCR detail page (not just /approve) while Approved', async ({ page }) => {
+  test('QA sees Manage Approvers on the NCR detail page (not just /approve) while Approval Requested', async ({ page }) => {
     const { ncrId } = await createDispositionedNcr();
     await concurWithApprovers(page, ncrId, [APPROVER_ID]);
 
@@ -518,11 +518,11 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await expect(page.locator('#approver-status-list tr')).toHaveCount(2);
 
     const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] });
-    expect(ncr.status).toBe('Approved');
+    expect(ncr.status).toBe('Approval Requested');
     expect(ncr.additional_approvers).toHaveLength(2);
   });
 
-  test('QA removes a non-blocking approver from the NCR detail page and the NCR stays Approved', async ({ page }) => {
+  test('QA removes a non-blocking approver from the NCR detail page and the NCR stays Approval Requested', async ({ page }) => {
     const { ncrId } = await createDispositionedNcr();
     await concurWithApprovers(page, ncrId, [APPROVER_ID, 'guobao']);
 
@@ -533,7 +533,7 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await page.waitForURL(new RegExp(`/ncrs/${ncrId}$`));
 
     const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] });
-    expect(ncr.status).toBe('Approved');
+    expect(ncr.status).toBe('Approval Requested');
     expect(ncr.additional_approvers).toHaveLength(1);
   });
 

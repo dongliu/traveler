@@ -22,7 +22,7 @@ Dispositioned
     ▼  QA submits concurrence
     ├── (0 approvers) ──────────────────────────────▶ Final Approval
     │
-    └── (1+ approvers) ──▶ Approved (pending) ──▶ Final Approval
+    └── (1+ approvers) ──▶ Approval Requested (pending) ──▶ Final Approval
                                                    (all approved)
 ```
 
@@ -49,7 +49,7 @@ Dispositioned
   "ncr": {
     "ncr_id": "...",
     "ncr_number": "NCR-001",
-    "status": "Approved",
+    "status": "Approval Requested",
     "additional_approvers": [...]
   }
 }

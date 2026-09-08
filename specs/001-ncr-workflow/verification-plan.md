@@ -28,7 +28,7 @@ Each user story gets checked in two passes, producing two separate outputs
 | US1.5 | Send Initial Notification | Notification sent to QA Staff, Group Leader, Division Director/PM on submission; delivery status visible per recipient | |
 | US1.6 | Request Engineering Disposition | Separate CE/CS disposition-request email sent with NCR link; CE/CS assignment recorded; Originator Delegate can be designated | |
 | US2 | CE/CS Performs Engineering Disposition | Disposition form exposes all mandatory fields; Rework/Repair requires instructions; submission records identity, timestamp, details; incomplete submission blocked | |
-| US3 | QA Concurrence and Approver Coordination | No-approvers path → Final Approval; with-approvers path → Approved + notifications; approve; return-for-comment; QA resubmit; QA Reject | |
+| US3 | QA Concurrence and Approver Coordination | No-approvers path → Final Approval; with-approvers path → Approval Requested + notifications; approve; return-for-comment; QA resubmit; QA Reject | |
 | US4 | Track and Report on Nonconformances | Dashboard status counts; filters (Part Number/Root Cause/Date/Disposition); 30+ day escalation flag; average-time-in-workflow figure | |
 | US5 | NCR Issuance and Execution | Issuance email; access to approved disposition; close-with-notes; Traveler-linked closure blocks until sign-off confirmed | |
 | US6 | Final NCR Distribution and Closure Archive | Final-distribution email reaches all 5 required recipient groups; closed NCR excluded from active list but remains searchable | |

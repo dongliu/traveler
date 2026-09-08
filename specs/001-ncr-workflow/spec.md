@@ -209,7 +209,7 @@ approvers automatically with appropriate access and notification.
    designated, **When** the NCR is recorded, **Then** it transitions to "Final
    Approval" status and NCR Originator is notified to execute/close
 5. **Given** QA Staff has designated additional Approvers, **When** concurrence
-   is recorded, **Then** the NCR transitions to "Approved" status and each
+   is recorded, **Then** the NCR transitions to "Approval Requested" status and each
    designated Approver receives an email requesting their approval
 6. **Given** a Designated Approver reviews the NCR, **When** they access it,
    **Then** they see the complete nonconformance, CE/CS disposition, and QA
@@ -244,8 +244,8 @@ categories, aging, and trends without implementation-specific technical metrics.
 
 1. **Given** there are multiple NCRs in the system, **When** a Quality Manager
    accesses the NCR Dashboard, **Then** they see: total open NCRs, NCRs by
-   status (Submitted, Dispositioned, Approved, Returned for Comment, Final
-   Approval, Closed), and average time in workflow
+   status (Submitted, Dispositioned, Approval Requested, Returned for Comment,
+   Final Approval, Closed), and average time in workflow
 2. **Given** an NCR has been approved, **When** it is marked as "Closed" with
    closure notes, **Then** it appears in closed NCR reports and is excluded from
    open/pending metrics
@@ -542,7 +542,7 @@ notifications as actions progress to completion.
 - **FR-029**: System MUST transition NCRs with no additional approvers to "Final
   Approval" status upon QA Staff concurrence
 - **FR-030**: System MUST transition NCRs with designated additional approvers
-  to "Approved" status and automatically send approval requests to each
+  to "Approval Requested" status and automatically send approval requests to each
   designated approver
 - **FR-031**: System MUST allow designated approvers to review QA Staff's
   concurrence, CE/CS disposition, and all supporting documentation
@@ -623,8 +623,8 @@ notifications as actions progress to completion.
 #### Reporting and Visibility
 
 - **FR-053**: System MUST provide a dashboard showing counts of NCRs by status
-  (Submitted, Dispositioned, Approved, Returned for Comment, Final Approval,
-  Closed)
+  (Submitted, Dispositioned, Approval Requested, Returned for Comment,
+  Final Approval, Closed)
 - **FR-054**: System MUST generate aging reports showing time elapsed since NCR
   submission for open NCRs
 - **FR-055**: System MUST support filtering and searching NCRs by: Item/Part
@@ -669,7 +669,7 @@ notifications as actions progress to completion.
   Cognizant Engineer/Scientist (CE/CS) Name, Specification/Drawing/PO Reference,
   Description of Nonconformance, Discovery Date, Discovery Context (incoming
   inspection / in-house assembly / in-house inspection), Status
-  (Submitted/Dispositioned/Approved/Returned for Comment/Final Approval/Closed),
+  (Submitted/Dispositioned/Approval Requested/Returned for Comment/Final Approval/Closed),
   Originator Identity, Creation Timestamp, Traveler Link (if applicable:
   Traveler ID, step number), Parts Disposition (Rework/Repair/Return to
   Vendor/Scrap/Use-As-Is), Root Cause Documentation, Preventive Actions,
@@ -815,7 +815,7 @@ planned:
 - **SC-002**: 100% of created NCRs are successfully stored and retrievable in
   the system
 - **SC-003**: NCRs transition through workflow states (Submitted → Dispositioned
-  → Approved → Final Approval → Closed) automatically upon user action with zero
+  → Approval Requested → Final Approval → Closed) automatically upon user action with zero
   data loss; Returned for Comment status enables comment resolution loops
 - **SC-004**: NCR search and filtering returns matching records in under 2
   seconds for repositories with 10,000+ NCRs

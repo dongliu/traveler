@@ -43,4 +43,4 @@ Session-authenticated (same as all web routes).
 | Approvers count | Resulting NCR status |
 |-----------------|----------------------|
 | 0 (empty array) | `Final Approval` |
-| 1+ | `Approved` (pending all designated approvers) |
+| 1+ | `Approval Requested` (pending all designated approvers) |

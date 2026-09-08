@@ -103,10 +103,10 @@ function createNcrStateMachine(currentStatus) {
     transitions: [
       { name: 'submitDisposition',   from: 'Submitted',             to: 'Dispositioned'        },
       { name: 'concurNoApprovers',   from: 'Dispositioned',         to: 'Final Approval'       },
-      { name: 'concurWithApprovers', from: 'Dispositioned',         to: 'Approved'             },
-      { name: 'returnForComment',    from: 'Approved',              to: 'Returned for Comment' },
-      { name: 'resubmitToApprovers', from: 'Returned for Comment',  to: 'Approved'             },
-      { name: 'finalApprove',        from: 'Approved',              to: 'Final Approval'       },
+      { name: 'concurWithApprovers', from: 'Dispositioned',         to: 'Approval Requested'   },
+      { name: 'returnForComment',    from: 'Approval Requested',    to: 'Returned for Comment' },
+      { name: 'resubmitToApprovers', from: 'Returned for Comment',  to: 'Approval Requested'   },
+      { name: 'finalApprove',        from: 'Approval Requested',    to: 'Final Approval'       },
       { name: 'close',               from: 'Final Approval',        to: 'Closed'               },
     ],
   });

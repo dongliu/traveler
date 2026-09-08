@@ -21,7 +21,7 @@ When a QA user submits a concurrence on a dispositioned NCR, they can designate 
 **Acceptance Scenarios**:
 
 1. **Given** an NCR in Dispositioned status, **When** the QA opens the concurrence screen, **Then** a panel to add approvers by username is visible with no role field present.
-2. **Given** the QA has entered one or more valid usernames, **When** they submit the concurrence, **Then** each designated user receives an approval request and the NCR moves to Approved status pending their responses.
+2. **Given** the QA has entered one or more valid usernames, **When** they submit the concurrence, **Then** each designated user receives an approval request and the NCR moves to Approval Requested status pending their responses.
 3. **Given** the QA has added no approvers, **When** they submit the concurrence, **Then** the NCR advances directly to Final Approval without waiting for additional approvals.
 
 ---
@@ -75,7 +75,7 @@ The QA can remove a previously added approver from the list before submitting th
 
 ### Key Entities
 
-- **NCR (Non-Conformance Report)**: The work record being concurred; its status transitions from Dispositioned → Approved (pending approvals) or directly to Final Approval (no approvers).
+- **NCR (Non-Conformance Report)**: The work record being concurred; its status transitions from Dispositioned → Approval Requested (pending approvals) or directly to Final Approval (no approvers).
 - **Additional Approver**: A person designated by QA at concurrence time, identified by username only (no role). Each approver must take action before the NCR advances.
 
 ## Success Criteria *(mandatory)*

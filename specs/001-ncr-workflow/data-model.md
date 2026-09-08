@@ -72,12 +72,12 @@ Notification events capture per-recipient delivery status.
 | `disposition.submitted` | CE/CS submits engineering disposition | → Dispositioned |
 | `delegate.assigned` | Originator assigns a Designate | No |
 | `delegate.removed` | Originator removes the Designate | No |
-| `qa.concurred` | QA Staff gives concurrence | → Approved or Final Approval |
+| `qa.concurred` | QA Staff gives concurrence | → Approval Requested or Final Approval |
 | `approvers.designated` | QA Staff designates additional approvers | No (part of qa.concurred payload) |
 | `qa.rejected` | QA Staff rejects disposition (back to CE/CS) | → Submitted |
 | `approval.approved` | Designated approver approves | → Final Approval (when all approved) |
 | `approval.returned_for_comment` | Designated approver returns for comment | → Returned for Comment |
-| `qa.resubmitted` | QA resubmits after comment resolution | → Approved |
+| `qa.resubmitted` | QA resubmits after comment resolution | → Approval Requested |
 | `ncr.closed` | Originator/designee closes NCR | → Closed |
 | `traveler.signed_off` | Originator self-attests Traveler sign-off on the NCR closure form (not performed inside the eTraveler UI) | → Closed (traveler-linked) |
 | `pa.owner_assigned` | QA assigns preventive action owner | No |
@@ -136,7 +136,7 @@ stream for the NCR's lifecycle.
   description_of_nonconformance: String,  // Mandatory
 
   // Status & Workflow (denormalized read model; source of truth is events[])
-  status: String,             // "Submitted" | "Dispositioned" | "Approved" | "Returned for Comment" | "Final Approval" | "Closed"
+  status: String,             // "Submitted" | "Dispositioned" | "Approval Requested" | "Returned for Comment" | "Final Approval" | "Closed"
 
   // Traveler Reference (API-only; not exposed on the standalone NCR creation
   // page, reserved for a future eTraveler-launched creation flow — see
@@ -350,13 +350,13 @@ Submitted
   → [CE/CS: disposition.submitted]
   → Dispositioned
     → [QA: qa.concurred + approvers designated]
-    → Approved (additional approvers required)
+    → Approval Requested (additional approvers required)
       → [Approver: approval.approved — all approved]
       → Final Approval
       → [Approver: approval.returned_for_comment]
       → Returned for Comment
         → [QA: qa.resubmitted]
-        → Approved (loop)
+        → Approval Requested (loop)
     → Final Approval (no additional approvers — direct from QA concurrence)
       → [Originator: ncr.closed]
       → Closed
@@ -437,7 +437,7 @@ Submitted
   actor_name: 'Dave Approver',
   actor_role: 'Designated Approver',
   timestamp: ISODate('2026-03-12T14:30:00Z'),
-  previous_status: 'Approved',
+  previous_status: 'Approval Requested',
   new_status: 'Returned for Comment',
   payload: {
     comments: 'Root cause analysis is insufficient. Please clarify material traceability.',

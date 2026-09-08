@@ -55,7 +55,7 @@ to planning **Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
   closure) are independent and provide incremental value
 - Specification supports full NCR lifecycle with comment resolution loops:
   Create → Forward/Notify → CE/CS Disposition (with Root Cause Analysis) → QA
-  Review/Approved (with Approver Designation) → Final Approval (by Designated
+  Review/Approval Requested (with Approver Designation) → Final Approval (by Designated
   Approvers, with "Return for Comment" capability) → NCR Originator Executes &
   Closes (with auto-distribution) → Close → Report
 - **Enhanced with NCR Originator specifics**: User Story 1 includes detailed

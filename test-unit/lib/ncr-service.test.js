@@ -406,7 +406,7 @@ describe('lib/ncr-service — submitConcurrence', () => {
     emails.should.include('des@test.com');
   });
 
-  it('transitions to Approved and requests approval from designated approvers (username only, no role)', async () => {
+  it('transitions to Approval Requested and requests approval from designated approvers (username only, no role)', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
     stubUserFind([{ _id: 'appr1', name: 'Approver One', email: 'a1@test.com' }]);
@@ -417,7 +417,7 @@ describe('lib/ncr-service — submitConcurrence', () => {
       qaUser
     );
 
-    result.status.should.equal('Approved');
+    result.status.should.equal('Approval Requested');
     result.additional_approvers.should.have.lengthOf(1);
     result.additional_approvers[0].approval_status.should.equal('Pending');
     (result.additional_approvers[0].approver_role == null).should.be.true;
@@ -490,14 +490,14 @@ describe('lib/ncr-service — submitApproval', () => {
     await expectRejection(submitApproval('id1', approver), 404);
   });
 
-  it('throws 409 when NCR is not Approved', async () => {
+  it('throws 409 when NCR is not Approval Requested', async () => {
     stubFindById(newNcr({ status: 'Dispositioned' }));
     await expectRejection(submitApproval('id1', approver), 409);
   });
 
   it('throws 403 when user is not a designated approver', async () => {
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       additional_approvers: [{ approver_id: 'someoneElse', approval_status: 'Pending' }],
     }));
     await expectRejection(submitApproval('id1', approver), 403);
@@ -505,15 +505,15 @@ describe('lib/ncr-service — submitApproval', () => {
 
   it('throws 409 when the approver has already approved', async () => {
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       additional_approvers: [{ approver_id: 'appr1', approval_status: 'Approved' }],
     }));
     await expectRejection(submitApproval('id1', approver), 409);
   });
 
-  it('stays Approved and sends no issuance when other approvers are still pending', async () => {
+  it('stays Approval Requested and sends no issuance when other approvers are still pending', async () => {
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       additional_approvers: [
         { approver_id: 'appr1', approval_status: 'Pending' },
         { approver_id: 'appr2', approval_status: 'Pending' },
@@ -522,14 +522,14 @@ describe('lib/ncr-service — submitApproval', () => {
 
     const result = await submitApproval('id1', approver);
 
-    result.status.should.equal('Approved');
+    result.status.should.equal('Approval Requested');
     result.additional_approvers[0].approval_status.should.equal('Approved');
     result.events.some(e => e.event_type === 'notification.issuance').should.be.false;
   });
 
   it('transitions to Final Approval and sends issuance when all approvers have approved', async () => {
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       originator_id: 'orig1',
       additional_approvers: [{ approver_id: 'appr1', approval_status: 'Pending' }],
     }));
@@ -543,7 +543,7 @@ describe('lib/ncr-service — submitApproval', () => {
 
   it('includes the Designate\'s email in the issuance send when one is assigned', async () => {
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       originator_id: 'orig1',
       originator_designate_id: 'des1',
       additional_approvers: [{ approver_id: 'appr1', approval_status: 'Pending' }],
@@ -575,14 +575,14 @@ describe('lib/ncr-service — returnForComment', () => {
     await expectRejection(returnForComment('id1', 'concerns', approver), 404);
   });
 
-  it('throws 409 when NCR is not Approved', async () => {
+  it('throws 409 when NCR is not Approval Requested', async () => {
     stubFindById(newNcr({ status: 'Dispositioned' }));
     await expectRejection(returnForComment('id1', 'concerns', approver), 409);
   });
 
   it('throws 403 when user is not a designated approver', async () => {
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       additional_approvers: [{ approver_id: 'someoneElse', approval_status: 'Pending' }],
     }));
     await expectRejection(returnForComment('id1', 'concerns', approver), 403);
@@ -590,7 +590,7 @@ describe('lib/ncr-service — returnForComment', () => {
 
   it('transitions to Returned for Comment and notifies QA Staff', async () => {
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       additional_approvers: [{ approver_id: 'appr1', approval_status: 'Pending' }],
     }));
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
@@ -620,7 +620,7 @@ describe('lib/ncr-service — qaResubmit', () => {
 
   it('throws 409 when NCR is not Returned for Comment', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
-    stubFindById(newNcr({ status: 'Approved' }));
+    stubFindById(newNcr({ status: 'Approval Requested' }));
     await expectRejection(qaResubmit('id1', qaUser), 409);
   });
 
@@ -637,7 +637,7 @@ describe('lib/ncr-service — qaResubmit', () => {
 
     const result = await qaResubmit('id1', qaUser);
 
-    result.status.should.equal('Approved');
+    result.status.should.equal('Approval Requested');
     result.additional_approvers[0].approval_status.should.equal('Pending');
     result.additional_approvers[1].approval_status.should.equal('Approved');
     result.events.some(e => e.event_type === 'qa.resubmitted').should.be.true;
@@ -656,7 +656,7 @@ describe('lib/ncr-service — qaResubmit', () => {
 
     const result = await qaResubmit('id1', qaUser);
 
-    result.status.should.equal('Approved');
+    result.status.should.equal('Approval Requested');
     userFindStub.called.should.be.false;
     const sentEmails = sendApprovalRequestStub.lastCall.args[1];
     sentEmails.should.include('appr1@ad.example.com');
@@ -686,7 +686,7 @@ describe('lib/ncr-service — addApprover', () => {
     await expectRejection(addApprover('id1', { approver_id: 'appr1' }, qaUser), 404);
   });
 
-  it('throws 409 when NCR is not Approved', async () => {
+  it('throws 409 when NCR is not Approval Requested', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
     await expectRejection(addApprover('id1', { approver_id: 'appr1' }, qaUser), 409);
@@ -695,7 +695,7 @@ describe('lib/ncr-service — addApprover', () => {
   it('throws 409 when the approver is already designated', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       additional_approvers: [{ approver_id: 'appr1', approval_status: 'Pending' }],
     }));
     await expectRejection(addApprover('id1', { approver_id: 'appr1' }, qaUser), 409);
@@ -703,7 +703,7 @@ describe('lib/ncr-service — addApprover', () => {
 
   it('adds the approver using client-submitted name/email, without a User lookup, and sends an approval request', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
-    stubFindById(newNcr({ status: 'Approved', additional_approvers: [] }));
+    stubFindById(newNcr({ status: 'Approval Requested', additional_approvers: [] }));
     const userFindStub = stubUserFind([]);
 
     const result = await addApprover(
@@ -726,7 +726,7 @@ describe('lib/ncr-service — addApprover', () => {
 
   it('falls back to a User lookup for email when approver_email is not submitted', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
-    stubFindById(newNcr({ status: 'Approved', additional_approvers: [] }));
+    stubFindById(newNcr({ status: 'Approval Requested', additional_approvers: [] }));
     stubUserFind([{ _id: 'appr2', name: 'Approver Two', email: 'fallback@test.com' }]);
 
     const result = await addApprover('id1', { approver_id: 'appr2', approver_name: 'Approver Two' }, qaUser);
@@ -769,7 +769,7 @@ describe('lib/ncr-service — removeApprover', () => {
     await expectRejection(removeApprover('id1', 'appr1', qaUser), 404);
   });
 
-  it('throws 409 when NCR is not Approved', async () => {
+  it('throws 409 when NCR is not Approval Requested', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
     await expectRejection(removeApprover('id1', 'appr1', qaUser), 409);
@@ -777,14 +777,14 @@ describe('lib/ncr-service — removeApprover', () => {
 
   it('throws 404 when the approver is not designated on this NCR', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
-    stubFindById(newNcr({ status: 'Approved', additional_approvers: [] }));
+    stubFindById(newNcr({ status: 'Approval Requested', additional_approvers: [] }));
     await expectRejection(removeApprover('id1', 'appr1', qaUser), 404);
   });
 
-  it('removes the approver and leaves the NCR Approved when other approvers remain Pending', async () => {
+  it('removes the approver and leaves the NCR Approval Requested when other approvers remain Pending', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       additional_approvers: [
         { approver_id: 'appr1', approval_status: 'Pending' },
         { approver_id: 'appr2', approval_status: 'Pending' },
@@ -793,7 +793,7 @@ describe('lib/ncr-service — removeApprover', () => {
 
     const result = await removeApprover('id1', 'appr1', qaUser);
 
-    result.status.should.equal('Approved');
+    result.status.should.equal('Approval Requested');
     result.additional_approvers.should.have.lengthOf(1);
     result.additional_approvers[0].approver_id.should.equal('appr2');
     result.events.some(e => e.event_type === 'approver.removed').should.be.true;
@@ -802,7 +802,7 @@ describe('lib/ncr-service — removeApprover', () => {
   it('advances to Final Approval and sends issuance when removing the last Pending approver', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       originator_id: 'orig1',
       additional_approvers: [
         { approver_id: 'appr1', approval_status: 'Approved' },
@@ -821,7 +821,7 @@ describe('lib/ncr-service — removeApprover', () => {
   it('advances to Final Approval when removing the only designated approver', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
     stubFindById(newNcr({
-      status: 'Approved',
+      status: 'Approval Requested',
       originator_id: 'orig1',
       additional_approvers: [{ approver_id: 'appr1', approval_status: 'Pending' }],
     }));
@@ -850,7 +850,7 @@ describe('lib/ncr-service — removeApprover', () => {
     result.additional_approvers[0].approver_id.should.equal('appr1');
   });
 
-  it('removing the blocking approver unblocks the NCR back to Approved when other approvers are still Pending', async () => {
+  it('removing the blocking approver unblocks the NCR back to Approval Requested when other approvers are still Pending', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
     stubFindById(newNcr({
       status: 'Returned for Comment',
@@ -862,7 +862,7 @@ describe('lib/ncr-service — removeApprover', () => {
 
     const result = await removeApprover('id1', 'appr1', qaUser);
 
-    result.status.should.equal('Approved');
+    result.status.should.equal('Approval Requested');
     result.additional_approvers.should.have.lengthOf(1);
     result.additional_approvers[0].approver_id.should.equal('appr2');
   });
@@ -903,7 +903,7 @@ describe('lib/ncr-service — closeNcr', () => {
   });
 
   it('throws 409 when NCR is not in Final Approval status', async () => {
-    stubFindById(newNcr({ status: 'Approved', originator_id: 'orig1' }));
+    stubFindById(newNcr({ status: 'Approval Requested', originator_id: 'orig1' }));
     await expectRejection(closeNcr('id1', { closure_notes: 'x'.repeat(30) }, originator), 409);
   });
 

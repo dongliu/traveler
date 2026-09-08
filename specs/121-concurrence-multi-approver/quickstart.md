@@ -16,7 +16,7 @@
 5. Type a second valid username and click **Add**.
 6. **Verify**: Both usernames appear in the table with a Remove button. No role is shown or requested.
 7. Click **Concur**.
-8. **Expected**: Success banner appears. NCR status changes to `Approved`. Both designated users receive an approval-request email.
+8. **Expected**: Success banner appears. NCR status changes to `Approval Requested`. Both designated users receive an approval-request email.
 
 ## Scenario 2 — Zero Approvers → Direct Final Approval
 
@@ -47,7 +47,7 @@ curl -s -X PATCH http://localhost:3002/api/ncrs/<NCR_ID>/concurrence \
   -H "Content-Type: application/json" \
   -u <api_user>:<api_password> \
   -d '{"additional_approvers":[{"approver_id":"jdoe"},{"approver_id":"msmith"}]}'
-# Expected: HTTP 200, status "Approved"
+# Expected: HTTP 200, status "Approval Requested"
 
 # Concur with no approvers
 curl -s -X PATCH http://localhost:3002/api/ncrs/<NCR_ID>/concurrence \

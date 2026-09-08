@@ -127,7 +127,7 @@ Requires a fourth NCR, **NCR-C**, dispositioned like the others, plus a
 
 22. As QA Staff, navigate to `http://localhost:3001/ncrs/<ncr-c-id>/concurrence`
     and designate `<approver-username>` only, then click "Concur". NCR-C is
-    now `Approved` with one Pending approver.
+    now `Approval Requested` with one Pending approver.
 23. Navigate to `http://localhost:3001/ncrs/<ncr-c-id>/approve`. Confirm a
     **"Manage Approvers"** fieldset is visible below "Approver Status",
     with a typeahead-enabled add field and an "Add Approver" button, and
@@ -139,15 +139,15 @@ Requires a fourth NCR, **NCR-C**, dispositioned like the others, plus a
 24. In the Manage Approvers field, type `<second-approver-username>`'s
     display name and click "Add Approver". Confirm the page reloads and a
     second row appears in Approver Status with status "Pending" — NCR-C
-    status remains `Approved`.
+    status remains `Approval Requested`.
 25. Click "Remove" on `<second-approver-username>`'s row; accept the
     confirmation dialog. Confirm the page reloads, that row is gone, and
-    NCR-C status remains `Approved` (one Pending approver — `<approver-username>` —
+    NCR-C status remains `Approval Requested` (one Pending approver — `<approver-username>` —
     remains).
 26. Click "Remove" on the one remaining approver's row; accept the
     confirmation dialog. Confirm the page reloads, the Approver Status
     table is now empty, the **"Manage Approvers" fieldset is gone**
-    (NCR-C is no longer `Approved`), and the NCR status badge now reads
+    (NCR-C is no longer `Approval Requested`), and the NCR status badge now reads
     `Final Approval`.
 27. Log out, log back in as `<approver-username>` (not QA staff). Create or
     reuse a Dispositioned NCR, designate them as the sole approver, and
@@ -170,7 +170,7 @@ Requires a fourth NCR, **NCR-C**, dispositioned like the others, plus a
 
 Requires a fifth NCR, **NCR-D**, dispositioned like the others. Designate
 **both** `<approver-username>` and `<second-approver-username>` at
-concurrence and click "Concur" — NCR-D is now `Approved` with two Pending
+concurrence and click "Concur" — NCR-D is now `Approval Requested` with two Pending
 approvers.
 
 29. Log in as `<approver-username>`, navigate to
@@ -178,12 +178,12 @@ approvers.
     click "Return for Comment". NCR-D status is now `Returned for Comment`.
 30. Log back in as QA Staff, navigate to the same `/approve` page. Confirm
     the **"Manage Approvers"** fieldset is still visible (it is no longer
-    restricted to `Approved` status), and both approver rows — including
+    restricted to `Approval Requested` status), and both approver rows — including
     `<approver-username>`'s row showing status "Returned for Comment" —
     have a "Remove" button.
 31. Click "Remove" on `<approver-username>`'s row (the one that returned
     for comment); accept the confirmation dialog. Confirm the page
-    reloads and the NCR status badge now reads `Approved` again (not
+    reloads and the NCR status badge now reads `Approval Requested` again (not
     still `Returned for Comment`, and not stuck) — `<second-approver-username>`'s
     Pending entry is the only one left.
 
@@ -207,22 +207,22 @@ After the final test step above:
 - **NCR-A**: success message "NCR moved to Final Approval; issuance email
   sent." Status `Dispositioned` → `Final Approval` directly.
 - **NCR-B1**: after Concur, success message "Approval requests sent to 1
-  approver(s)." Status → `Approved`. After Approve, message: "You approved.
+  approver(s)." Status → `Approval Requested`. After Approve, message: "You approved.
   All approvers have approved — NCR moved to Final Approval." Status →
   `Final Approval`.
 - **NCR-B2**: after Return for Comment, message "Returned for comment. QA
   Staff has been notified." Status → `Returned for Comment`. After
   Resubmit, message "Resubmitted to approvers. New approval requests
-  sent." Status → `Approved` again, with the approver reset to "Pending".
+  sent." Status → `Approval Requested` again, with the approver reset to "Pending".
 - **NCR-C**: after step 24, `additional_approvers` has 2 entries, status
-  `Approved`. After step 25, back to 1 entry, still `Approved`. After step
+  `Approval Requested`. After step 25, back to 1 entry, still `Approval Requested`. After step
   26 (removing the last Pending approver), status → `Final Approval` and
   an issuance email is sent — removing the last blocking approver behaves
   the same as that approver clicking Approve themselves.
 - **NCR-D**: after step 29, status `Returned for Comment` with
   `<approver-username>`'s entry showing that status and the comment text.
   After step 31 (removing that specific blocking entry), status →
-  `Approved` (not stuck, and not skipped ahead to `Final Approval` since
+  `Approval Requested` (not stuck, and not skipped ahead to `Final Approval` since
   `<second-approver-username>` is still `Pending`) — the NCR resumes
   normal waiting instead of staying blocked on a decision that can no
   longer arrive.
@@ -242,10 +242,10 @@ After the final test step above:
 - [ ] NCR-B1: `status: "Final Approval"`,
       `additional_approvers[0].approval_status: "Approved"`,
       `additional_approvers[0].approver_role` is **absent** (field no longer
-      stored), `events` contains `qa.concurred` (new_status "Approved"),
+      stored), `events` contains `qa.concurred` (new_status "Approval Requested"),
       `approvers.designated`, `notification.approval_request`,
       `approval.approved`, and a second `notification.issuance`.
-- [ ] NCR-B2: `status: "Approved"` (after resubmit),
+- [ ] NCR-B2: `status: "Approval Requested"` (after resubmit),
       `additional_approvers[0].approval_status: "Pending"`, `events`
       contains `approval.returned_for_comment` (with the exact comment
       text) and `qa.resubmitted`.
@@ -263,6 +263,6 @@ After the final test step above:
 - [ ] Confirm step 28's API call returns 403 and does not append an
       `approver.added` event to that NCR.
 - [ ] NCR-D: `events` contains `approval.returned_for_comment` (step 29)
-      and `approver.removed` (step 31), `status` is `Approved` after step
+      and `approver.removed` (step 31), `status` is `Approval Requested` after step
       31, and `additional_approvers` has exactly one entry
       (`<second-approver-username>`, `approval_status: "Pending"`).

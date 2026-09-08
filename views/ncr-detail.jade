@@ -13,14 +13,14 @@ block head
     .event-entry::before { content: ''; width: 10px; height: 10px; background: #999; border-radius: 50%; position: absolute; left: -19px; top: 4px; }
     .badge-Submitted { background-color: #5bc0de; }
     .badge-Dispositioned { background-color: #f0ad4e; }
-    .badge-Approved { background-color: #5cb85c; }
+    .badge-ApprovalRequested { background-color: #5cb85c; }
     .badge-Returned { background-color: #d9534f; }
     .badge-Final { background-color: #428bca; }
     .badge-Closed { background-color: #777; }
 
 block content
   - var isQa = (locals.roles && locals.roles.indexOf('qa_staff') !== -1)
-  - var canManageApprovers = isQa && (ncr.status === 'Approved' || ncr.status === 'Returned for Comment')
+  - var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
 
   .container(style='margin-top: 10px')
     .row-fluid
@@ -33,7 +33,7 @@ block content
           a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Submit Disposition
         if ncr.status === 'Dispositioned'
           a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
-        if ncr.status === 'Approved'
+        if ncr.status === 'Approval Requested'
           a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
         if ncr.status === 'Final Approval'
           a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR

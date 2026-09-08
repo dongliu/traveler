@@ -48,8 +48,8 @@
 
 ### Architecture
 
-- **State Machine**: 6 states (Submitted → Dispositioned → Approved → Returned
-  for Comment → Final Approval → Closed)
+- **State Machine**: 6 states (Submitted → Dispositioned → Approval Requested →
+  Returned for Comment → Final Approval → Closed)
 - **Workflow Steps**: 7 (Origination → Initial Notification → Eng Disposition
   Request → QA Concurrence → Approval → Issuance → Final Distribution)
 - **Database Collections**: 1 (`ncrs` — all data embedded: `events[]`, `preventive_actions[]`, `disposition`, `additional_approvers[]`, `closure_record`)
