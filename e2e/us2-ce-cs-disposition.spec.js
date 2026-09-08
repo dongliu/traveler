@@ -131,7 +131,10 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     await expect(page.locator('#root_cause_documentation')).toHaveCount(0);
     await expect(page.locator('.pa-textarea')).toHaveCount(1);
     await expect(page.locator('#add-pa')).toBeVisible();
-    await expect(page.locator('#rework-repair-field')).toBeHidden();
+    // Rework/Repair Instructions is visible for all disposition types, not
+    // just Rework/Repair -- it's only required (not shown/hidden) based on
+    // the selected disposition.
+    await expect(page.locator('#rework-repair-field')).toBeVisible();
   });
 
   test('AS3 - selecting Rework reveals the instructions field, and submitting without it is blocked with the NCR left Submitted', async ({ page }) => {

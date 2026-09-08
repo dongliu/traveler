@@ -492,4 +492,62 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     const notFoundRes = await page.request.delete(`/api/ncrs/${ncrId}/approvers/no-such-user`);
     expect(notFoundRes.status()).toBe(404);
   });
+
+  // ── Manage Approvers is also available on the NCR detail page ───────────
+
+  test('QA sees Manage Approvers on the NCR detail page (not just /approve) while Approved', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]);
+
+    await page.goto(`/ncrs/${ncrId}`);
+
+    await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toBeVisible();
+    await expect(page.locator('#new-approver-id')).toBeVisible();
+    await expect(page.locator('.remove-approver-btn')).toHaveCount(1);
+  });
+
+  test('QA adds an approver from the NCR detail page', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]);
+
+    await page.goto(`/ncrs/${ncrId}`);
+    await page.fill('#new-approver-id', 'guobao');
+    await page.click('#add-approver-btn');
+
+    await page.waitForURL(new RegExp(`/ncrs/${ncrId}$`));
+    await expect(page.locator('#approver-status-list tr')).toHaveCount(2);
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] });
+    expect(ncr.status).toBe('Approved');
+    expect(ncr.additional_approvers).toHaveLength(2);
+  });
+
+  test('QA removes a non-blocking approver from the NCR detail page and the NCR stays Approved', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID, 'guobao']);
+
+    await page.goto(`/ncrs/${ncrId}`);
+    page.once('dialog', dialog => dialog.accept());
+    await page.locator('.remove-approver-btn').first().click();
+
+    await page.waitForURL(new RegExp(`/ncrs/${ncrId}$`));
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] });
+    expect(ncr.status).toBe('Approved');
+    expect(ncr.additional_approvers).toHaveLength(1);
+  });
+
+  test('a designated approver (non-QA) does not see Manage Approvers on the NCR detail page', async ({ browser }) => {
+    const { ncrId } = await createDispositionedNcr();
+    const setupPage = await browser.newPage();
+    await concurWithApprovers(setupPage, ncrId, [APPROVER_ID]);
+    await setupPage.close();
+
+    const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    await approverPage.goto(`/ncrs/${ncrId}`);
+
+    await expect(approverPage.locator('fieldset:has(legend:text("Manage Approvers"))')).toHaveCount(0);
+    await expect(approverPage.locator('.remove-approver-btn')).toHaveCount(0);
+    await approverPage.close();
+  });
 });

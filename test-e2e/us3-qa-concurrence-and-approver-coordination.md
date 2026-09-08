@@ -2,7 +2,7 @@
 
 **Spec reference**: `specs/001-ncr-workflow/spec.md`, "User Story 3 - QA
 Concurrence and Approver Coordination" (Priority: P1)
-**Files under test**: `views/ncr-concurrence.jade`, `views/ncr-approval.jade`, `routes/ncr.js` (`PATCH /api/ncrs/:id/concurrence`, `PATCH /api/ncrs/:id/approve`, `PATCH /api/ncrs/:id/resubmit`, `POST /api/ncrs/:id/approvers`, `DELETE /api/ncrs/:id/approvers/:approverId`), `lib/ncr-service.js` (`submitConcurrence`, `submitApproval`, `returnForComment`, `qaResubmit`, `addApprover`, `removeApprover`)
+**Files under test**: `views/ncr-concurrence.jade`, `views/ncr-approval.jade`, `views/ncr-detail.jade`, `routes/ncr.js` (`PATCH /api/ncrs/:id/concurrence`, `PATCH /api/ncrs/:id/approve`, `PATCH /api/ncrs/:id/resubmit`, `POST /api/ncrs/:id/approvers`, `DELETE /api/ncrs/:id/approvers/:approverId`), `lib/ncr-service.js` (`submitConcurrence`, `submitApproval`, `returnForComment`, `qaResubmit`, `addApprover`, `removeApprover`)
 
 ## Setup
 
@@ -131,7 +131,11 @@ Requires a fourth NCR, **NCR-C**, dispositioned like the others, plus a
 23. Navigate to `http://localhost:3001/ncrs/<ncr-c-id>/approve`. Confirm a
     **"Manage Approvers"** fieldset is visible below "Approver Status",
     with a typeahead-enabled add field and an "Add Approver" button, and
-    confirm the existing approver's row has a **"Remove"** button.
+    confirm the existing approver's row has a **"Remove"** button. Then
+    navigate to `http://localhost:3001/ncrs/<ncr-c-id>` (the main NCR
+    detail page, not `/approve`) and confirm the **identical**
+    "Approval Status" table with "Manage Approvers" fieldset appears
+    there too — QA can manage approvers from either page.
 24. In the Manage Approvers field, type `<second-approver-username>`'s
     display name and click "Add Approver". Confirm the page reloads and a
     second row appears in Approver Status with status "Pending" — NCR-C
