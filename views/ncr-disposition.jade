@@ -76,7 +76,7 @@ block content
       .control-group
         .controls
           .btn-group
-            button#submit-btn.btn.btn-primary(type='submit') Create Disposition
+            button#submit-btn.btn.btn-primary(type='submit') Submit Disposition
           .btn-group(style='margin-left: 5px')
             a.btn(href='#{prefix}/ncrs/#{ncr._id}') Cancel
 
@@ -186,7 +186,7 @@ block js
             }
             $('#disp-error-msg').text(msg);
             $('#disp-error').show();
-            $('#submit-btn').prop('disabled', false).text('Create Disposition');
+            $('#submit-btn').prop('disabled', false).text('Submit Disposition');
           },
         });
       });
