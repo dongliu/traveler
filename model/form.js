@@ -80,7 +80,7 @@ const form = new Schema({
   formType: {
     type: String,
     default: 'normal',
-    enum: ['normal', 'discrepancy'],
+    enum: ['normal', 'discrepancy', 'ACL'],
   },
 });
 

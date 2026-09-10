@@ -27,6 +27,12 @@ block content
               legend Discrepancy
             form.form-horizontal#discrepancy
               != discrepancy.html
+          if (locals.aclForms && aclForms.length > 0)
+            each aclForm, index in aclForms
+              .control-group.acl-legend
+                legend #{aclForm.title || 'ACL ' + (index + 1)} (version #{aclForm._v})
+              form.form-horizontal(id='acl-' + index)
+                != aclForm.html
           .control-group#discrepancy-legend
               legend Base
           form.form-horizontal#output
@@ -40,6 +46,9 @@ block content
       if (status === 1)
         .btn-group
           button.btn.btn-warning#obsolete(data-toggle='tooltip', title='Obsolete the released form') Obsolete
+      if (status === 1 && formType === 'normal')
+        .btn-group
+          a.btn.btn-primary#compose(data-toggle='tooltip', title='Compose this form with ACL forms', href='#{prefix}/released-forms/#{id}/compose') Compose
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')

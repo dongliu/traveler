@@ -109,6 +109,11 @@ block content
         form.form-horizontal#form
           div.control-group#traveler-legend
             legend Traveler
+          if (locals.traveler.aclForms && traveler.aclForms.length > 0)
+            each aclForm, index in traveler.aclForms
+              .control-group.acl-legend
+                legend #{aclForm.title || 'ACL ' + (index + 1)}
+              != aclForm.html
           if (traveler.forms.length === 1)
             != traveler.forms[0].html
           else if (traveler.forms.id(traveler.activeForm))

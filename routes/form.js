@@ -848,7 +848,7 @@ module.exports = function(app) {
     auth.requireRoles(req => {
       return (
         req.body.hasOwnProperty('formType') &&
-        req.body.formType === 'discrepancy'
+        (req.body.formType === 'discrepancy' || req.body.formType === 'ACL')
       );
     }, 'admin'),
     reqUtils.sanitize('body', ['html']),
@@ -894,6 +894,7 @@ module.exports = function(app) {
       form.updatedBy = req.session.userid;
       form.updatedOn = Date.now();
       form.clonedFrom = doc._id;
+      form._v = doc._v;
       form.formType = doc.formType;
       form.sharedWith = [];
       form.tags = doc.tags;

@@ -264,6 +264,30 @@ function addBase(base, traveler) {
   traveler.types = base.types;
   traveler.totalInput = _.size(base.labels);
 }
+
+// unlike addDiscrepancy/addBase, every entry is rendered and fillable at
+// once, so their mapping/labels/types are merged into the traveler-level
+// fields (already populated by addBase) rather than only the first entry
+function addAclForms(aclForms, traveler) {
+  traveler.aclForms = aclForms;
+  traveler.aclForms.forEach(function setReference(entry) {
+    // set reference for compatibility, same as addBase/addDiscrepancy
+    entry.reference = entry._id;
+  });
+
+  var mergedMapping = _.assign({}, traveler.mapping);
+  var mergedLabels = _.assign({}, traveler.labels);
+  var mergedTypes = _.assign({}, traveler.types);
+  aclForms.forEach(function mergeAclForm(aclForm) {
+    _.assign(mergedMapping, aclForm.mapping);
+    _.assign(mergedLabels, aclForm.labels);
+    _.assign(mergedTypes, aclForm.types);
+  });
+  traveler.mapping = mergedMapping;
+  traveler.labels = mergedLabels;
+  traveler.types = mergedTypes;
+  traveler.totalInput = _.size(mergedLabels);
+}
 var traveler = {
   /**
    * get the map of input name -> label in the form
@@ -307,7 +331,8 @@ var traveler = {
     if (
       form.formType &&
       form.formType !== 'normal' &&
-      form.formType !== 'normal_discrepancy'
+      form.formType !== 'normal_discrepancy' &&
+      form.formType !== 'normal_acl'
     ) {
       return newTravelerCallBack(
         new TravelerError(
@@ -351,6 +376,9 @@ var traveler = {
     addBase(form.base, traveler);
     if (form.discrepancy) {
       addDiscrepancy(form.discrepancy, traveler);
+    }
+    if (form.aclForms && form.aclForms.length > 0) {
+      addAclForms(form.aclForms, traveler);
     }
     traveler.save(newTravelerCallBack);
   },
@@ -489,7 +517,12 @@ var traveler = {
       if (!(activeForm.labels && _.size(activeForm.labels) > 0)) {
         activeForm.labels = traveler.inputLabels(activeForm.html);
       }
-      labels = activeForm.labels;
+      labels = _.assign({}, activeForm.labels);
+      if (doc.aclForms && doc.aclForms.length > 0) {
+        doc.aclForms.forEach(function mergeAclLabels(aclForm) {
+          _.assign(labels, aclForm.labels);
+        });
+      }
       // empty the current touched input list
       doc.touchedInputs = [];
       data.forEach(function(d) {

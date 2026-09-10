@@ -11,6 +11,12 @@ const reqUtils = require('../lib/req-utils');
 const logger = require('../lib/loggers').getLogger();
 const config = require('../config/config');
 const { stateTransition } = require('../model/released-form');
+const { Manager, Admin } = require('../lib/role');
+const {
+  computeVer,
+  computeCompositionKey,
+  findInputNameCollisions,
+} = require('../lib/composed-released-form');
 
 const authConfig = config.auth;
 
@@ -94,8 +100,55 @@ module.exports = function(app) {
           ver: releasedForm.ver,
           base: releasedForm.base,
           discrepancy: releasedForm.discrepancy,
+          aclForms: releasedForm.aclForms,
         })
       );
+    }
+  );
+
+  app.get(
+    '/released-forms/:id/compose',
+    auth.ensureAuthenticated,
+    auth.verifyRole(Manager, Admin),
+    reqUtils.exist('id', ReleasedForm),
+    function(req, res) {
+      const base = req[req.params.id];
+      if (base.formType !== 'normal' || base.status !== 1) {
+        return res
+          .status(400)
+          .send(
+            `${base.id} is not a released normal form and cannot be composed`
+          );
+      }
+      return res.render(
+        'released-form-compose',
+        routesUtilities.getRenderObject(req, {
+          id: req.params.id,
+          title: base.title,
+          baseHtml: base.base.html,
+          baseVer: base.ver,
+        })
+      );
+    }
+  );
+
+  app.get(
+    '/released-forms/:id/compositions/json',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', ReleasedForm),
+    async function(req, res) {
+      const base = req[req.params.id];
+      try {
+        const compositions = await ReleasedForm.find({
+          formType: 'normal_acl',
+          status: 1,
+          'base._id': base.base._id,
+        }).exec();
+        return res.status(200).json(compositions);
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
     }
   );
 
@@ -185,6 +238,131 @@ module.exports = function(app) {
     }
   );
 
+  app.post(
+    '/released-forms/:id/compose',
+    auth.ensureAuthenticated,
+    auth.verifyRole(Manager, Admin),
+    reqUtils.exist('id', ReleasedForm),
+    function(req, res, next) {
+      const base = req[req.params.id];
+      if (base.formType !== 'normal') {
+        return res.status(400).send(`${base.id} is not a normal form`);
+      }
+      if (base.status !== 1) {
+        return res.status(400).send(`${base.id} is not released`);
+      }
+      return next();
+    },
+    async function compose(req, res) {
+      const base = req[req.params.id];
+      const aclFormIds = _.uniq(req.body.aclFormIds || []);
+
+      if (aclFormIds.indexOf(req.params.id) !== -1) {
+        return res
+          .status(400)
+          .send('cannot attach a form to itself as an ACL form');
+      }
+
+      let aclForms = [];
+      try {
+        if (aclFormIds.length > 0) {
+          aclForms = await ReleasedForm.find({ _id: { $in: aclFormIds } });
+        }
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
+
+      const foundIds = aclForms.map(f => `${f._id}`);
+      const missing = aclFormIds.filter(id => foundIds.indexOf(id) === -1);
+      if (missing.length > 0) {
+        return res
+          .status(400)
+          .send(`cannot find released ACL form(s): ${missing.join(', ')}`);
+      }
+
+      const invalid = aclForms.find(
+        f => f.formType !== 'ACL' || f.status !== 1
+      );
+      if (invalid) {
+        return res.status(400).send(`${invalid.id} is not a released ACL form`);
+      }
+
+      // ReleasedForm.find({ _id: { $in: aclFormIds } }) does not preserve
+      // aclFormIds' order, so re-order the results to match the placement
+      // the user chose before it is persisted (and later rendered) in order
+      const aclFormsById = {};
+      aclForms.forEach(f => {
+        aclFormsById[`${f._id}`] = f;
+      });
+      const orderedAclForms = aclFormIds.map(id => aclFormsById[id]);
+
+      const entries = [{ label: base.title, html: base.base.html }].concat(
+        orderedAclForms.map(f => ({ label: f.title, html: f.base.html }))
+      );
+      const collisions = findInputNameCollisions(entries);
+      if (collisions.length > 0) {
+        const names = collisions.map(c => c.name).join(', ');
+        return res
+          .status(400)
+          .send(`duplicated input name(s) across the composed forms: ${names}`);
+      }
+
+      // compositionKey is based on the underlying form ids (base.base._id /
+      // f.base._id), not the released-form ids, so composing the same base
+      // and ACL forms again after any of them gets a new release is still
+      // treated as a duplicate of the existing active composition, unless
+      // that one is archived first (see the "prior compositions" step)
+      const sortedAclFormIds = orderedAclForms.map(f => `${f.base._id}`).sort();
+      const composed = {};
+      composed.title = req.body.title || base.title;
+      composed.description = base.description;
+      composed.tags = base.tags;
+      composed.formType = 'normal_acl';
+      composed.base = base.base;
+      composed.aclForms = orderedAclForms.map(f => f.base);
+      composed.ver = computeVer(
+        base.ver,
+        orderedAclForms.map(f => f.ver)
+      );
+      composed.compositionKey = computeCompositionKey(
+        `${base.base._id}`,
+        sortedAclFormIds
+      );
+      composed.releasedBy = req.session.userid;
+      composed.releasedOn = Date.now();
+
+      try {
+        const existingForm = await ReleasedForm.findOne({
+          title: composed.title,
+          formType: composed.formType,
+          compositionKey: composed.compositionKey,
+          // only search the active released form, not archived
+          status: 1,
+        });
+        if (existingForm) {
+          return res
+            .status(400)
+            .send(
+              `A form with the same title and composition was already released in ${existingForm._id}.`
+            );
+        }
+        const saveForm = await new ReleasedForm(composed).saveWithHistory(
+          req.session.userid
+        );
+        const url = `${
+          req.proxied ? authConfig.proxied_service : authConfig.service
+        }/released-forms/${saveForm._id}/`;
+        return res.status(201).json({
+          location: url,
+        });
+      } catch (error) {
+        logger.error(error);
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
   app.get('/released-forms/normal/json', auth.ensureAuthenticated, function(
     req,
     res
@@ -223,6 +401,25 @@ module.exports = function(app) {
       });
     }
   );
+
+  app.get('/released-forms/acl/json', auth.ensureAuthenticated, function(
+    req,
+    res
+  ) {
+    ReleasedForm.find(
+      {
+        status: 1,
+        formType: 'ACL',
+      },
+      'title formType status tags _v releasedOn releasedBy base'
+    ).exec(function(err, forms) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      return res.status(200).json(forms);
+    });
+  });
 
   app.get(
     '/released-forms/:id/json',
