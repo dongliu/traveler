@@ -848,7 +848,7 @@ module.exports = function(app) {
     auth.requireRoles(req => {
       return (
         req.body.hasOwnProperty('formType') &&
-        req.body.formType === 'discrepancy'
+        (req.body.formType === 'discrepancy' || req.body.formType === 'ACL')
       );
     }, 'admin'),
     reqUtils.sanitize('body', ['html']),
