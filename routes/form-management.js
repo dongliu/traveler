@@ -220,6 +220,7 @@ module.exports = function(app) {
       clonedForm.updatedOn = Date.now();
       clonedForm.clonedFrom = base._id;
       clonedForm.formType = base.formType;
+      clonedForm._v = base._v;
       clonedForm.sharedWith = [];
       clonedForm.tags = releasedForm.tags;
       new Form(clonedForm).save(function(saveErr, newform) {
