@@ -1164,10 +1164,14 @@ module.exports = function(app) {
       if (!newdevice) {
         return res.status(400).send('the new device name not accepted');
       }
+      const parts = newdevice.split('/').map(s => s.trim()).filter(Boolean);
+      if (parts.length === 0) {
+        return res.status(400).send('the new device name not accepted');
+      }
       const doc = req[req.params.id];
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      const added = doc.devices.addToSet(newdevice);
+      const added = parts.reduce((acc, part) => acc.concat(doc.devices.addToSet(part)), []);
       if (added.length === 0) {
         return res.status(204).send();
       }
@@ -1177,7 +1181,7 @@ module.exports = function(app) {
           return res.status(500).send(saveErr.message);
         }
         return res.status(200).json({
-          device: newdevice,
+          device: parts.join('/'),
         });
       });
     }

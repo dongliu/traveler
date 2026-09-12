@@ -66,10 +66,11 @@ block content
           button.btn.btn-small.btn-warning.removeLocation
             i.fa.fa-trash-o.fa-lg
     h4 Devices
+    p.muted Use <code>/</code> to separate multiple devices (e.g., <code>device1/device2</code>)
     ul#devices
-      each device in traveler.devices
+      if (traveler.devices && traveler.devices.length > 0)
         li
-          span.device #{device}
+          span.device !{traveler.devices.join('/')}
           = ' '
           button.btn.btn-small.btn-warning.removeDevice
             i.fa.fa-trash-o.fa-lg

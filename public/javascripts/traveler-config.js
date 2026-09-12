@@ -172,11 +172,16 @@ $(function() {
               return;
             }
             if (jqXHR.status === 200) {
-              $('#devices').append(
-                '<li><span class="device">' +
-                  data.device +
-                  '</span> <button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button></li>'
-              );
+              var $span = $('#devices span.device');
+              if ($span.length) {
+                $span.text($span.text() + '/' + data.device);
+              } else {
+                $('#devices').append(
+                  '<li><span class="device">' +
+                    data.device +
+                    '</span> <button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button></li>'
+                );
+              }
             }
           })
           .fail(function(jqXHR) {
@@ -199,23 +204,28 @@ $(function() {
   $('#devices').on('click', '.removeDevice', function(e) {
     e.preventDefault();
     var $that = $(this);
-    $.ajax({
-      url:
-        './devices/' + encodeURIComponent($that.siblings('span.device').text()),
-      type: 'DELETE',
-    })
-      .done(function() {
-        $that.closest('li').remove();
+    var parts = $that.siblings('span.device').text().split('/').map(function(s) { return s.trim(); }).filter(Boolean);
+    var remaining = parts.length;
+    parts.forEach(function(part) {
+      $.ajax({
+        url: './devices/' + encodeURIComponent(part),
+        type: 'DELETE',
       })
-      .fail(function(jqXHR) {
-        if (jqXHR.status !== 401) {
-          $('#message').append(
-            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>'
-          );
-          $(window).scrollTop($('#message div:last-child').offset().top - 40);
-        }
-      })
-      .always();
+        .fail(function(jqXHR) {
+          if (jqXHR.status !== 401) {
+            $('#message').append(
+              '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot remove the device</div>'
+            );
+            $(window).scrollTop($('#message div:last-child').offset().top - 40);
+          }
+        })
+        .always(function() {
+          remaining--;
+          if (remaining === 0) {
+            $that.closest('li').remove();
+          }
+        });
+    });
   });
 
   var tags;

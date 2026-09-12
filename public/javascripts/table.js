@@ -1122,7 +1122,7 @@ const deviceColumn = {
     if (type === 'sort' || type === 'filter') {
       return data.join(' ');
     }
-    return data.join('; ');
+    return data.join('/');
   },
   bFilter: true,
 };
