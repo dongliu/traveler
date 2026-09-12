@@ -72,11 +72,14 @@ block content
         li
           span.device !{traveler.devices.join('/')}
           = ' '
+          button.btn.btn-small.btn-primary.editDevice
+            i.fa.fa-pencil.fa-lg
+          = ' '
           button.btn.btn-small.btn-warning.removeDevice
             i.fa.fa-trash-o.fa-lg
     br
     .btn-group
-      button.btn.btn-primary#add Add device
+      button.btn.btn-primary#add(style=(traveler.devices && traveler.devices.length > 0 ? 'display:none' : '')) Add device
     h4 Tags
     ul#tags.tag-list
       each tag in traveler.tags

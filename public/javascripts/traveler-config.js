@@ -172,16 +172,12 @@ $(function() {
               return;
             }
             if (jqXHR.status === 200) {
-              var $span = $('#devices span.device');
-              if ($span.length) {
-                $span.text($span.text() + '/' + data.device);
-              } else {
-                $('#devices').append(
-                  '<li><span class="device">' +
-                    data.device +
-                    '</span> <button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button></li>'
-                );
-              }
+              $('#devices').append(
+                '<li><span class="device">' +
+                  data.device +
+                  '</span> <button class="btn btn-small btn-primary editDevice"><i class="fa fa-pencil fa-lg"></i></button> <button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button></li>'
+              );
+              $('#add').hide();
             }
           })
           .fail(function(jqXHR) {
@@ -223,8 +219,67 @@ $(function() {
           remaining--;
           if (remaining === 0) {
             $that.closest('li').remove();
+            $('#add').show();
           }
         });
+    });
+  });
+
+  $('#devices').on('click', '.editDevice', function(e) {
+    e.preventDefault();
+    var $li = $(this).closest('li');
+    var currentText = $li.children('span.device').text();
+    $li.html(
+      '<form class="form-inline">' +
+        '<input id="editDeviceInput" type="text" value="' + currentText + '"> ' +
+        '<button id="editConfirm" class="btn btn-primary">Confirm</button> ' +
+        '<button id="editCancel" class="btn">Cancel</button>' +
+      '</form>'
+    );
+
+    function restoreLi(text) {
+      $li.html(
+        '<span class="device">' + text + '</span> ' +
+        '<button class="btn btn-small btn-primary editDevice"><i class="fa fa-pencil fa-lg"></i></button> ' +
+        '<button class="btn btn-small btn-warning removeDevice"><i class="fa fa-trash-o fa-lg"></i></button>'
+      );
+    }
+
+    $('#editCancel').click(function(cancelE) {
+      cancelE.preventDefault();
+      restoreLi(currentText);
+    });
+
+    $('#editConfirm').click(function(confirmE) {
+      confirmE.preventDefault();
+      var newValue = $('#editDeviceInput').val().trim();
+      if (!newValue) { return; }
+
+      var existingParts = currentText.split('/').map(function(s) { return s.trim(); }).filter(Boolean);
+      var deleteRequests = existingParts.map(function(part) {
+        return $.ajax({ url: './devices/' + encodeURIComponent(part), type: 'DELETE' });
+      });
+
+      $.when.apply($, deleteRequests).always(function() {
+        $.ajax({
+          url: './devices/',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ newdevice: newValue }),
+        })
+          .done(function(data, textStatus, jqXHR) {
+            restoreLi(jqXHR.status === 200 ? data.device : newValue);
+          })
+          .fail(function(jqXHR) {
+            if (jqXHR.status !== 401) {
+              $('#message').append(
+                '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot update the device</div>'
+              );
+              $(window).scrollTop($('#message div:last-child').offset().top - 40);
+            }
+            restoreLi(currentText);
+          });
+      });
     });
   });
 
