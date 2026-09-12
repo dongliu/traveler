@@ -97,15 +97,20 @@ export function generateFileHistoryTableHtml(records) {
   const rows = records.map(r => {
     const link = `${prefix}/data/${r._id}`;
     const mimetype = (r.file && r.file.mimetype) ? r.file.mimetype : '';
+    const previewCell = /^image\//i.test(mimetype)
+      ? `<td><button class="btn btn-small btn-info file-preview-btn" type="button" ` +
+        `data-preview-src="${link}/preview"><i class="fa fa-eye fa-lg"></i></button></td>`
+      : `<td></td>`;
     return `<tr data-data-id="${r._id}">` +
-      `<td><a href="${link}" class="file-history-link" data-mimetype="${escapeHtml(mimetype)}" download="${escapeHtml(r.value)}">${escapeHtml(r.value)}</a></td>` +
+      `<td><a href="${link}" class="file-history-link" download="${escapeHtml(r.value)}">${escapeHtml(r.value)}</a></td>` +
       `<td>${livespan(r.inputOn, false)}</td>` +
       `<td>${escapeHtml(r.inputBy)}</td>` +
+      previewCell +
       `<td><button class="btn btn-small btn-warning file-history-remove" type="button"><i class="fa fa-trash-o fa-lg"></i></button></td>` +
       `</tr>`;
   }).join('');
   return `<table class="table table-condensed file-history-table">` +
-    `<thead><tr><th>File</th><th>Uploaded On</th><th>Uploaded By</th><th></th></tr></thead>` +
+    `<thead><tr><th>File</th><th>Uploaded On</th><th>Uploaded By</th><th></th><th></th></tr></thead>` +
     `<tbody>${rows}</tbody>` +
     `</table>`;
 }

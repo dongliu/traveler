@@ -1222,7 +1222,7 @@ module.exports = function(app) {
             $in: doc.data,
           },
         },
-        'name value inputType inputBy inputOn'
+        'name value inputType file.mimetype file.encoding inputBy inputOn'
       ).exec(function(dataErr, docs) {
         if (dataErr) {
           logger.error(dataErr);
@@ -1442,6 +1442,29 @@ module.exports = function(app) {
         logger.error(err);
         return res.status(500).send(err.message);
       }
+    }
+  );
+
+  app.get(
+    '/data/:id/preview',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', TravelerData),
+    function(req, res) {
+      const data = req[req.params.id];
+      if (data.inputType !== 'file' || !data.file || !data.file.path) {
+        return res.status(400).send('not a file');
+      }
+      if (!data.file.mimetype || !/^image\//i.test(data.file.mimetype)) {
+        return res.status(400).send('not an image');
+      }
+      fs.exists(data.file.path, function(exists) {
+        if (!exists) {
+          return res.status(410).send('gone');
+        }
+        res.set('Content-Type', data.file.mimetype);
+        res.set('Content-Disposition', 'inline');
+        return res.sendFile(path.resolve(data.file.path));
+      });
     }
   );
 

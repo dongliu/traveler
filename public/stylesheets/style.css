@@ -803,3 +803,7 @@ form.form-horizontal .tinymce table td {
 .caps {
   text-transform: capitalize;
 }
+
+.file-preview-popover.popover {
+  max-width: 520px;
+}

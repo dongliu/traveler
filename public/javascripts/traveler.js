@@ -897,13 +897,18 @@ $(function() {
           );
         }
         var newDataId = json.location.split('/').pop();
+        var newFileMime = input.files[0].type || '';
+        var newFilePreviewCell = /^image\//i.test(newFileMime)
+          ? '<td><button class="btn btn-small btn-info file-preview-btn" type="button"' +
+            ' data-preview-src="' + json.location + '/preview"><i class="fa fa-eye fa-lg"></i></button></td>'
+          : '<td></td>';
         var newFileRow =
           '<tr data-data-id="' + newDataId + '">' +
           '<td><a href="' + json.location + '" class="file-history-link"' +
-          ' data-mimetype="' + input.files[0].type + '"' +
           ' download="' + input.files[0].name + '">' + input.files[0].name + '</a></td>' +
           '<td>' + livespan(timestamp, false) + '</td>' +
           '<td>you</td>' +
+          newFilePreviewCell +
           '<td><button class="btn btn-small btn-warning file-history-remove" type="button">' +
           '<i class="fa fa-trash-o fa-lg"></i></button></td>' +
           '</tr>';
@@ -913,7 +918,7 @@ $(function() {
         } else {
           $history.html(
             '<table class="table table-condensed file-history-table">' +
-            '<thead><tr><th>File</th><th>Uploaded On</th><th>Uploaded By</th><th></th></tr></thead>' +
+            '<thead><tr><th>File</th><th>Uploaded On</th><th>Uploaded By</th><th></th><th></th></tr></thead>' +
             '<tbody>' + newFileRow + '</tbody></table>'
           );
         }
@@ -977,19 +982,24 @@ $(function() {
             '</div>'
         );
         var newCellDataId = json.location.split('/').pop();
+        var newCellMime = input.files[0].type || '';
+        var newCellPreviewCell = /^image\//i.test(newCellMime)
+          ? '<td><button class="btn btn-small btn-info file-preview-btn" type="button"' +
+            ' data-preview-src="' + json.location + '/preview"><i class="fa fa-eye fa-lg"></i></button></td>'
+          : '<td></td>';
         var newCellRow =
           '<tr data-data-id="' + newCellDataId + '">' +
           '<td><a href="' + json.location + '" class="file-history-link"' +
-          ' data-mimetype="' + input.files[0].type + '"' +
           ' download="' + input.files[0].name + '">' + input.files[0].name + '</a></td>' +
           '<td>' + livespan(timestamp, false) + '</td>' +
           '<td>you</td>' +
+          newCellPreviewCell +
           '<td><button class="btn btn-small btn-warning file-history-remove" type="button">' +
           '<i class="fa fa-trash-o fa-lg"></i></button></td>' +
           '</tr>';
         var newCellTable =
           '<table class="table table-condensed file-history-table">' +
-          '<thead><tr><th>File</th><th>Uploaded On</th><th>Uploaded By</th><th></th></tr></thead>' +
+          '<thead><tr><th>File</th><th>Uploaded On</th><th>Uploaded By</th><th></th><th></th></tr></thead>' +
           '<tbody>' + newCellRow + '</tbody></table>';
         var $historySection = $tableGroup.find('.table-history-section');
         if ($historySection.length) {
@@ -1086,23 +1096,26 @@ $(function() {
       });
   });
 
-  $('#form').on('mouseenter', '.file-history-link', function() {
-    var $this = $(this);
-    if ($this.data('popover')) { return; }
-    var mimetype = $this.data('mimetype') || '';
-    var content;
-    if (/^image\//i.test(mimetype)) {
-      content = '<img src="' + $this.attr('href') + '" style="max-width:300px;max-height:300px;">';
-    } else {
-      content = '<i class="fa fa-file-o fa-lg"></i> ' + $this.text();
+  $('#form').on('click', '.file-preview-btn', function(e) {
+    e.stopPropagation();
+    var $btn = $(this);
+    $('.file-preview-btn').not($btn).filter(function() {
+      return $(this).data('popover');
+    }).popover('hide');
+    if (!$btn.data('popover')) {
+      $btn.popover({
+        trigger: 'manual',
+        placement: 'left',
+        html: true,
+        template: '<div class="popover file-preview-popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
+        content: '<img src="' + $btn.data('preview-src') + '" style="width:500px;height:240px;object-fit:contain;">',
+      });
     }
-    $this.popover({
-      trigger: 'hover',
-      placement: 'right',
-      html: true,
-      content: content,
-    });
-    $this.popover('show');
+    $btn.popover('toggle');
+  });
+
+  $(document).on('click.file-preview', function() {
+    $('.file-preview-btn').popover('hide');
   });
 
   $('#form').on('click', 'button[value="table-cell-cancel"]', function(e) {

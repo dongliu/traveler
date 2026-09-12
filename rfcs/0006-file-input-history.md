@@ -89,16 +89,18 @@ Because the table always shows all uploads sorted newest-first, the `.file-curre
 that previously highlighted the latest file next to the input element is removed. The top
 row of the table serves the same purpose.
 
-#### Hover preview
+#### Preview button
 
-Attach a Bootstrap `popover` to each `.file-history-link`:
+For image files (`image/*`), a dedicated preview button is shown in a separate column of
+the file history table. Clicking the button opens a Bootstrap popover showing the image at
+160 × 120 px with `object-fit:contain`. The image is fetched from `GET /data/:id/preview`
+(inline Content-Disposition) via `data-preview-src` on the button element.
 
-- **Image types** (`image/*`): popover content is `<img src="<prefix>/data/<id>"
-  style="max-width:300px;max-height:300px">`. The image is fetched lazily on first hover.
-- **PDF**: popover shows a PDF icon and the filename.
-- **Other types**: popover shows a generic file icon and the filename.
+Clicking anywhere outside the popover (document click handler) dismisses it. Clicking a
+different preview button dismisses any open popover first.
 
-Use `trigger: 'hover'`, `placement: 'right'`, `html: true`.
+Use `trigger: 'manual'`, `placement: 'left'`, `html: true`. Non-image files have no
+preview button (empty cell).
 
 #### Remove action
 
