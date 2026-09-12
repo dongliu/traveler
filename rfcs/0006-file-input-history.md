@@ -85,6 +85,10 @@ input, call `generateFileHistoryTableHtml` instead of the inline `generateHistor
 loop. The existing `.input-history` div is replaced with the table. Newest entry stays at
 the top by prepending each new row on upload success.
 
+Because the table always shows all uploads sorted newest-first, the `.file-current` span
+that previously highlighted the latest file next to the input element is removed. The top
+row of the table serves the same purpose.
+
 #### Hover preview
 
 Attach a Bootstrap `popover` to each `.file-history-link`:

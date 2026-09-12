@@ -1405,6 +1405,46 @@ module.exports = function(app) {
     }
   );
 
+  app.delete(
+    '/travelers/:id/data/:dataId',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canWriteMw('id'),
+    reqUtils.status('id', [1]),
+    async function(req, res) {
+      const doc = req[req.params.id];
+      const { dataId } = req.params;
+      try {
+        const data = await TravelerData.findOne({
+          _id: dataId,
+          traveler: doc._id,
+        });
+        if (!data) {
+          return res.status(404).send('data not found');
+        }
+        if (data.inputType !== 'file') {
+          return res.status(400).send('not a file input');
+        }
+        if (data.file && data.file.path) {
+          fs.unlink(data.file.path, function(unlinkErr) {
+            if (unlinkErr && unlinkErr.code !== 'ENOENT') {
+              logger.error(unlinkErr);
+            }
+          });
+        }
+        doc.data.pull(dataId);
+        doc.updatedBy = req.session.userid;
+        doc.updatedOn = Date.now();
+        await doc.save();
+        await TravelerData.deleteOne({ _id: dataId });
+        return res.status(204).send();
+      } catch (err) {
+        logger.error(err);
+        return res.status(500).send(err.message);
+      }
+    }
+  );
+
   app.get(
     '/data/:id',
     auth.ensureAuthenticated,
