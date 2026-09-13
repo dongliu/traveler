@@ -1115,7 +1115,9 @@ $(function() {
   });
 
   $(document).on('click.file-preview', function() {
-    $('.file-preview-btn').popover('hide');
+    $('.file-preview-btn').filter(function() {
+      return $(this).data('popover');
+    }).popover('hide');
   });
 
   $('#form').on('click', 'button[value="table-cell-cancel"]', function(e) {
