@@ -58,9 +58,6 @@ block content
             label.checkbox
               input#disposition_execution_verified(type='checkbox')
               | I have verified the disposition has been executed
-            label.checkbox
-              input#preventive_actions_verified(type='checkbox')
-              | I have verified the preventive actions have been completed
 
       if isTraveler
         fieldset
@@ -106,7 +103,6 @@ block js
 
         var payload = {
           disposition_execution_verified: $('#disposition_execution_verified').is(':checked'),
-          preventive_actions_verified: $('#preventive_actions_verified').is(':checked'),
         };
         if (isTraveler) payload.traveler_signed_off = true;
 
