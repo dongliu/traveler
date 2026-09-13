@@ -5,7 +5,8 @@ keysColumn, fnAddFilterFoot, sDomNoTools, reviewersColumn, firstReviewRequestedO
 fnGetSelected, selectEvent, filterEvent, formShareLinkColumn, formStatusColumn,
 formTypeColumn, versionColumn, releasedFormStatusColumn,
 releasedFormVersionColumn, releasedByColumn, releasedOnColumn,
-archivedByColumn, archivedOnColumn, releasedFormLinkColumn
+archivedByColumn, archivedOnColumn, releasedFormLinkColumn,
+formSubsystemColumn, formDeviceColumn, formActivityColumn
 */
 
 function cloneFromModal(formTable) {
@@ -104,6 +105,9 @@ $(function() {
     releasedFormStatusColumn,
     releasedFormVersionColumn,
     tagsColumn,
+    formSubsystemColumn,
+    formDeviceColumn,
+    formActivityColumn,
     releasedByColumn,
     releasedOnColumn,
   ];
@@ -127,7 +131,7 @@ $(function() {
     },
     bDeferRender: true,
     aoColumns: releasedFormAoColumns,
-    aaSorting: [[8, 'desc']],
+    aaSorting: [[11, 'desc']],
     sDom: sDomNoTools,
   });
   fnAddFilterFoot('#released-form-table', releasedFormAoColumns);

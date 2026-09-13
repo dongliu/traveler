@@ -21,6 +21,29 @@ block content
         h4 status: #{statusText}
         h4 version:&nbsp;
           span#version #{ver}
+        #metadata.control-group
+          if (locals.isOwner || isAdmin)
+            form.form-horizontal#metadata-form
+              .control-group
+                label.control-label Subsystem
+                .controls
+                  input#subsystem-value(type='text', value=subsystem)
+              .control-group
+                label.control-label Device
+                .controls
+                  input#device-value(type='text', value=device)
+              .control-group
+                label.control-label Activity
+                .controls
+                  input#activity-value(type='text', value=activity)
+              button.btn.btn-primary#save-metadata(type='button') Save
+          else
+            h4 Subsystem:&nbsp;
+              span#subsystem-value #{subsystem}
+            h4 Device:&nbsp;
+              span#device-value #{device}
+            h4 Activity:&nbsp;
+              span#activity-value #{activity}
         .well-large
           if (discrepancy)
             .control-group#discrepancy-legend

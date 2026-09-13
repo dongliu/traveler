@@ -197,7 +197,7 @@ module.exports = function(app) {
           $exists: false,
         },
       },
-      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping'
+      'title description status devices device tags sharedWith sharedGroup publicAccess locations createdOn updatedOn updatedBy manPower finishedInput totalInput mapping'
     )
       .lean()
       .exec(function(err, docs) {
@@ -220,7 +220,7 @@ module.exports = function(app) {
           $ne: true,
         },
       },
-      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput'
+      'title description status devices device tags sharedWith sharedGroup publicAccess locations createdOn transferredOn updatedOn updatedBy manPower finishedInput totalInput'
     )
       .lean()
       .exec(function(err, travelers) {
@@ -258,7 +258,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
+        'title description status devices device tags locations createdBy createdOn owner updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
       )
         .lean()
         .exec(function(tErr, travelers) {
@@ -304,7 +304,7 @@ module.exports = function(app) {
             $in: travelerIds,
           },
         },
-        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
+        'title description status devices device tags locations createdBy createdOn owner updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
       )
         .lean()
         .exec(function(tErr, travelers) {
@@ -411,7 +411,7 @@ module.exports = function(app) {
     };
     Traveler.find(
       search,
-      'title description status devices locations archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput'
+      'title description status devices device locations archivedOn updatedBy updatedOn sharedWith sharedGroup manPower finishedInput totalInput'
     )
       .lean()
       .exec(function(err, travelers) {
@@ -1033,15 +1033,35 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
-    reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['title', 'description', 'deadline']),
-    reqUtils.sanitize('body', ['title', 'description', 'deadline']),
+    reqUtils.filter('body', [
+      'title',
+      'description',
+      'subsystem',
+      'device',
+      'activity',
+      'machineArea',
+      'sector',
+      'windchillId',
+    ]),
+    reqUtils.sanitize('body', [
+      'title',
+      'description',
+      'subsystem',
+      'device',
+      'activity',
+      'machineArea',
+      'sector',
+      'windchillId',
+    ]),
     function(req, res) {
       const doc = req[req.params.id];
-      if (
-        reqUtils.isOwner(req, doc) ||
-        routesUtilities.checkUserRole(req, 'admin')
-      ) {
+      const isAdmin = routesUtilities.checkUserRole(req, 'admin');
+      if (!isAdmin && [0, 1, 1.5].indexOf(doc.status) === -1) {
+        return res
+          .status(400)
+          .send(`request is not allowed for item ${req.params.id} status ${doc.status}`);
+      }
+      if (reqUtils.isOwner(req, doc) || isAdmin) {
         Object.keys(req.body).forEach(k => {
           doc[k] = req.body[k];
         });

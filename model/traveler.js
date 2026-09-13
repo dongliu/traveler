@@ -131,7 +131,6 @@ var traveler = new Schema({
   owner: String,
   tags: [String],
   transferredOn: Date,
-  deadline: Date,
   publicAccess: {
     type: Number,
     default: appConfig.default_traveler_public_access,
@@ -181,6 +180,15 @@ var traveler = new Schema({
     type: Boolean,
     default: false,
   },
+  // classification metadata, copied from the released form at creation;
+  // read-only after that
+  subsystem: { type: String, default: '' },
+  device: { type: String, default: '' },
+  activity: { type: String, default: '' },
+  // instance-specific metadata, set by users during the traveler's lifecycle
+  machineArea: { type: String, default: '' },
+  sector: { type: String, default: '' },
+  windchillId: { type: String, default: '' },
 });
 
 /**

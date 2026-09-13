@@ -9,9 +9,9 @@ $(function() {
    *
    * @return  {void}
    */
-  function sendRequest(data, cb) {
+  function sendRequest(data, cb, suffix) {
     var path = window.location.pathname;
-    var url = path + 'status';
+    var url = path + (suffix || 'status');
     var type = 'PUT';
     $.ajax({
       url: url,
@@ -47,6 +47,18 @@ $(function() {
         window.location.reload(true);
       },
       'status'
+    );
+  });
+
+  $('#save-metadata').click(function() {
+    sendRequest(
+      {
+        subsystem: $('#subsystem-value').val(),
+        device: $('#device-value').val(),
+        activity: $('#activity-value').val(),
+      },
+      null,
+      'metadata'
     );
   });
 

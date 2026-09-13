@@ -55,7 +55,7 @@ module.exports = function(app) {
       {
         status: 1,
       },
-      'title formType status tags ver releasedOn releasedBy'
+      'title formType status tags ver releasedOn releasedBy subsystem device activity'
     ).exec(function(err, forms) {
       if (err) {
         logger.error(err);
@@ -101,6 +101,10 @@ module.exports = function(app) {
           base: releasedForm.base,
           discrepancy: releasedForm.discrepancy,
           aclForms: releasedForm.aclForms,
+          subsystem: releasedForm.subsystem,
+          device: releasedForm.device,
+          activity: releasedForm.activity,
+          isOwner: reqUtils.isOwner(req, releasedForm),
         })
       );
     }
@@ -198,6 +202,34 @@ module.exports = function(app) {
         return res
           .status(200)
           .send(`released form ${req.params.id} status updated to ${s}`);
+      } catch (error) {
+        return res.status(500).send(error.message);
+      }
+    }
+  );
+
+  app.put(
+    '/released-forms/:id/metadata',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', ReleasedForm),
+    reqUtils.isOwnerOrAdminMw('id'),
+    reqUtils.filter('body', ['subsystem', 'device', 'activity']),
+    reqUtils.sanitize('body', ['subsystem', 'device', 'activity']),
+    async function updateMetadata(req, res) {
+      const f = req[req.params.id];
+      const fields = ['subsystem', 'device', 'activity'];
+      fields.forEach(field => {
+        if (req.body[field] !== null && req.body[field] !== undefined) {
+          f[field] = req.body[field];
+        }
+      });
+      try {
+        await f.saveWithHistory(req.session.userid);
+        const out = {};
+        fields.forEach(field => {
+          out[field] = f.get(field);
+        });
+        return res.status(200).json(out);
       } catch (error) {
         return res.status(500).send(error.message);
       }

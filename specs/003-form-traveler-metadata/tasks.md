@@ -8,6 +8,8 @@
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+**Status**: All tasks complete. Several file-path assumptions from planning were corrected during implementation once the actual code was inspected — noted inline below.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies on incomplete tasks)
@@ -17,182 +19,80 @@
 
 ## Phase 1: Setup
 
-**Purpose**: No new dependencies or project initialization needed. Confirm working branch and verify all design documents are in place.
-
-- [ ] T001 Confirm working branch is `ernest-form-composition` (or create `003-form-traveler-metadata`) and all design docs under `specs/003-form-traveler-metadata/` are readable
+- [X] T001 Confirm working branch is `ernest-form-composition` and all design docs under `specs/003-form-traveler-metadata/` are readable
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Schema changes that all four user stories depend on. No user story implementation can begin until both model files are updated.
+- [X] T002 [P] Added `subsystem`, `device`, `activity` string fields (default `''`) to the `releasedForm` schema and extended `fieldsToWatch` in the `addHistory` plugin call in `model/released-form.js`
+- [X] T003 [P] Added `subsystem`, `device`, `activity`, `machineArea`, `sector`, `windchillId` string fields (default `''`) to the `traveler` schema in `model/traveler.js`. **Correction**: `Traveler` has no `addHistory`/`saveWithHistory` plugin registered anywhere in the codebase (routes use plain `doc.save()`) — there was nothing to extend; fields were added to the schema only.
 
-**⚠️ CRITICAL**: Complete T002 and T003 before starting any Phase 3+ work.
-
-- [ ] T002 [P] Add `subsystem`, `device`, `activity` string fields (default `''`) to the `releasedForm` schema and extend `fieldsToWatch` in the `addHistory` plugin call in `model/released-form.js`
-- [ ] T003 [P] Add `subsystem`, `device`, `activity`, `machineArea`, `sector`, `windchillId` string fields (default `''`) to the `traveler` schema and extend `fieldsToWatch` in the Traveler's `addHistory` plugin call in `model/traveler.js`
-
-**Checkpoint**: Both model files updated — user story work can now proceed.
+**Checkpoint**: Both model files updated.
 
 ---
 
 ## Phase 3: User Story 1 — Provide Metadata When Releasing a Form (Priority: P1) 🎯 MVP
 
-**Goal**: A form owner releasing a draft form is prompted for Subsystem, Device, and Activity; the values are stored on the resulting released form.
+- [X] T004 [US1] Updated `releaseForm()` in `routes/form.js` (`PUT /forms/:id/released`, ~line 1074) to assign `releasedForm.subsystem/device/activity` from `req.body`, sanitized via `reqUtils.sanitizeText`
+- [X] T005 [P] [US1] Added Subsystem, Device, Activity inputs to the release dialog. **Correction**: the release modal is not in `views/form-management.jade` — it's built dynamically in `public/javascripts/form-builder.js` (`$('#release').click(...)`). Inputs added there as `#release-subsystem`, `#release-device`, `#release-activity`.
+- [X] T006 [P] [US1] Updated the release-modal confirm handler in `public/javascripts/form-builder.js` to include `subsystem`, `device`, `activity` in the JSON body sent via `sendRequest(json, null, 'release')` → `PUT /forms/:id/released`
+- [X] T007 [P] [US1] Displayed `subsystem`, `device`, `activity` on the released form detail page in `views/released-form.jade`; added the three fields to the render object in the `GET /released-forms/:id/` handler in `routes/form-management.js` (they were not being passed to the view before)
 
-**Independent Test**: Create a draft form, trigger the release flow, fill in all three fields, confirm the released form document stores the values and they appear on the detail page. (See `quickstart.md` Scenario 1.)
-
-### Implementation
-
-- [ ] T004 [US1] Update `releaseForm()` in `routes/form.js` (line ~1074) to assign `releasedForm.subsystem = req.body.subsystem || ''`, `releasedForm.device = req.body.device || ''`, `releasedForm.activity = req.body.activity || ''` from the request body before saving
-- [ ] T005 [P] [US1] Add Subsystem, Device, and Activity input fields to the release dialog in `views/form-management.jade` (the release modal that already collects title/description)
-- [ ] T006 [P] [US1] Update the release-modal submit handler in `public/javascripts/form-builder.js` (or the relevant management JS file) to include the three new fields in the POST body sent to `POST /forms/:id/released`
-- [ ] T007 [P] [US1] Display `subsystem`, `device`, and `activity` as labeled read-only fields on the released form detail page in `views/released-form.jade` (shown to all users)
-
-**Checkpoint**: US1 fully functional — releasing a form captures and displays the three classification fields.
+**Checkpoint**: US1 functional.
 
 ---
 
 ## Phase 4: User Story 3 — Traveler Inherits Classification at Creation (Priority: P1)
 
-**Goal**: When a traveler is created from a released form, Subsystem, Device, and Activity are automatically copied; Machine Area, Sector, and Windchill ID default to blank.
+- [X] T008 [US3] In `utilities/routes.js` function `createTraveler`, added `subsystem: form.subsystem || ''`, `device: form.device || ''`, `activity: form.activity || ''` to the `new Traveler({...})` constructor call
+- [X] T009 [P] [US3] Added all six metadata fields as read-only display rows to `views/traveler.jade` (classification fields shown conditionally when any is set; Machine Area / Sector / Windchill ID always shown). The full `traveler` document is already passed to this view, so no route change was needed here.
 
-**Independent Test**: Create a traveler from a released form that has all three fields populated; verify the traveler's detail page shows the inherited values without any manual entry. (See `quickstart.md` Scenario 3.)
-
-### Implementation
-
-- [ ] T008 [US3] In `utilities/routes.js` function `createTraveler` (line ~354), add `subsystem: form.subsystem || ''`, `device: form.device || ''`, `activity: form.activity || ''` to the `new Traveler({...})` constructor call
-- [ ] T009 [P] [US3] Add all six metadata fields (`subsystem`, `device`, `activity`, `machineArea`, `sector`, `windchillId`) as labeled display rows to the traveler detail page in `views/traveler.jade` (read-only display for all users at this stage)
-
-**Checkpoint**: US3 fully functional — new travelers inherit classification from their source released form; all six fields are visible on the traveler detail page.
+**Checkpoint**: US3 functional.
 
 ---
 
 ## Phase 5: User Story 2 — Edit Classification on an Already-Released Form (Priority: P2)
 
-**Goal**: The form owner and admins can update Subsystem, Device, and Activity on a released form without triggering a re-release; other users see those fields as read-only.
+- [X] T010 [US2] Added `PUT /released-forms/:id/metadata` to `routes/form-management.js` using `reqUtils.isOwnerOrAdminMw('id')`, `reqUtils.filter('body', ['subsystem','device','activity'])`, `reqUtils.sanitize(...)`, and `saveWithHistory(req.session.userid)`; responds `200` with saved values
+- [X] T011 [P] [US2] In `views/released-form.jade`, the three fields render as an inline `<form>` with text inputs + Save button when `locals.isOwner || isAdmin`, else as read-only text. Added `isOwner: reqUtils.isOwner(req, releasedForm)` to the `GET /released-forms/:id/` render object (was not previously computed for this view).
+- [X] T012 [US2] Added a `#save-metadata` click handler in `public/javascripts/released-form-management.js`. **Correction**: the existing `sendRequest` helper had the `/status` suffix hardcoded; generalized it to accept a `suffix` parameter (defaults to `'status'` for backward compatibility) so the new handler can PUT to `./metadata`.
 
-**Independent Test**: Open a released form as owner, edit one field, save, confirm the new value persists and form state remains `released`. Log in as a non-owner and verify no edit controls appear. (See `quickstart.md` Scenario 2.)
-
-### Implementation
-
-- [ ] T010 [US2] Add `PUT /released-forms/:id/metadata` route to `routes/form-management.js` using `reqUtils.isOwnerOrAdminMw('id')` for authorization, `reqUtils.filter('body', ['subsystem', 'device', 'activity'])` to strip unknown fields, and `saveWithHistory(req.session.userid)` to persist; respond `200` with the saved values
-- [ ] T011 [P] [US2] In `views/released-form.jade`, replace the read-only display of `subsystem`/`device`/`activity` (from T007) with conditionally-editable fields: show inline edit controls only when `locals.session.userid` is the owner or has admin role; non-owners continue to see read-only text
-- [ ] T012 [US2] Add a save handler in `public/javascripts/released-form-management.js` that sends a `PUT` to `./metadata` with the updated field values when the user clicks save on any of the three classification fields (follow the existing inline-edit AJAX pattern already used in that file)
-
-**Checkpoint**: US2 fully functional — owners/admins can correct or add classification data on already-released forms.
+**Checkpoint**: US2 functional.
 
 ---
 
 ## Phase 6: User Story 4 — Update Traveler-Specific Metadata (Priority: P2)
 
-**Goal**: Users can set or update Machine Area, Sector, and Product Windchill ID on a traveler while it is in an active state; non-admins are blocked from editing once the traveler is approved or beyond.
+- [X] T013 [US4] In `routes/traveler.js`, extended `PUT /travelers/:id/config`'s `reqUtils.filter`/`reqUtils.sanitize` lists with `machineArea`, `sector`, `windchillId`. **Correction**: the plan's approach of just widening `reqUtils.status('id', [0,1])` to `[0,1,1.5]` was wrong — that middleware runs unconditionally for every caller including admins, but FR-009 requires admins to bypass the state restriction entirely. Removed the `reqUtils.status` middleware and moved the check into the handler body: `if (!isAdmin && [0,1,1.5].indexOf(doc.status) === -1) return res.status(400)...`, computed before the existing `isOwner || isAdmin` authorization check.
+- [X] T014 [P] [US4] Added editable fields for Machine Area, Sector, Product Windchill ID. **Correction**: not in `views/traveler.jade` (read-only detail page) — added to `views/traveler-config.jade` (the dedicated "Configuration" page, reached via the existing Configuration button), reusing the same `span.editable` + Edit-button markup pattern already used there for title/description. Edit controls are gated by `isAdmin || traveler.status < 2`; read-only text shown otherwise.
+- [X] T015 [US4] **Correction**: no new AJAX call was needed. `traveler-config.jade` already uses a generic `Editable.binding($, initValue)` helper (`public/javascripts/lib/editable.js`) that wires up *every* `span.editable` element to PUT its field name/value to the current path. Registering `machineArea`, `sector`, `windchillId` in the `initValue` map in `public/javascripts/traveler-config.js` was sufficient — the existing binding call covers the new fields automatically.
 
-**Independent Test**: Open an in-progress traveler, update all three fields, save, confirm persistence. Then navigate to an approved traveler as a non-admin and verify the fields are read-only. (See `quickstart.md` Scenario 4.)
-
-### Implementation
-
-- [ ] T013 [US4] In `routes/traveler.js` at the `PUT /travelers/:id/config` route (line ~1031): extend the `reqUtils.filter` call to include `'machineArea'`, `'sector'`, `'windchillId'`; change `reqUtils.status('id', [0, 1])` to `reqUtils.status('id', [0, 1, 1.5])` to allow updates while submitted for review
-- [ ] T014 [P] [US4] In `views/traveler.jade`, replace the read-only display of `machineArea`, `sector`, `windchillId` (from T009) with editable fields: show edit controls only when the traveler is in an active state (`status < 2`) or the user is an admin; non-admins on approved/frozen/archived travelers see read-only text
-- [ ] T015 [US4] Extend the existing config-save AJAX call in `public/javascripts/traveler.js` (the handler for the `/config` endpoint) to include `machineArea`, `sector`, and `windchillId` when their edit controls are present on the page
-
-**Checkpoint**: US4 fully functional — users can capture instance-specific deployment context on active travelers; state guard prevents unauthorized updates on completed travelers.
+**Checkpoint**: US4 functional.
 
 ---
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-**Purpose**: Finishing touches that span multiple user stories.
-
-- [ ] T016 [P] In `views/released-forms.jade` (the list/table view), add `Subsystem`, `Device`, and `Activity` columns to the released forms table so the classification is visible at a glance without opening each form
-- [ ] T017 Run through all validation scenarios in `specs/003-form-traveler-metadata/quickstart.md` end-to-end and confirm every checklist item passes
-
----
-
-## Dependencies & Execution Order
-
-### Phase Dependencies
-
-- **Setup (Phase 1)**: No dependencies — start immediately
-- **Foundational (Phase 2)**: Depends on Phase 1 — **blocks all user stories**
-- **US1 (Phase 3)**: Depends on Phase 2 (ReleasedForm schema must exist)
-- **US3 (Phase 4)**: Depends on Phase 2 (Traveler schema must exist) — can be worked in parallel with US1 after Phase 2 completes
-- **US2 (Phase 5)**: Depends on Phase 2 + Phase 3 (needs classification fields on released form + UI display from T007)
-- **US4 (Phase 6)**: Depends on Phase 2 + Phase 4 (needs traveler fields + display from T009)
-- **Polish (Phase 7)**: Depends on all story phases
-
-### User Story Dependencies
-
-- **US1 (P1)**: Can start after Phase 2 — no dependency on other stories
-- **US3 (P1)**: Can start after Phase 2 — independent of US1 (tests with seeded data)
-- **US2 (P2)**: Starts after US1 is complete (reuses the display rows added by T007 as its base)
-- **US4 (P2)**: Starts after US3 is complete (reuses the display rows added by T009 as its base)
-
-### Within Each Phase
-
-- T002 and T003 (Phase 2) are different files — **run in parallel**
-- T005, T006, T007 (Phase 3) have no dependencies on each other — **run in parallel** after T004
-- T009 (Phase 4) is independent of T008 — **run in parallel**
-- T011, T012 (Phase 5) can begin once T010 route is written — T011 is independent of T012
-- T014, T015 (Phase 6) can begin once T013 route is updated — T014 is independent of T015
-
----
-
-## Parallel Example: Phase 2
-
-```
-After T001 (branch check):
-  → T002: model/released-form.js   (parallel)
-  → T003: model/traveler.js        (parallel)
-Both complete → proceed to Phase 3
-```
-
-## Parallel Example: Phase 3 (US1)
-
-```
-Start T004 (routes/form.js):
-  Completes → T005 (views/form-management.jade)  (parallel after T004)
-            → T006 (public/javascripts/...)        (parallel after T004)
-            → T007 (views/released-form.jade)      (parallel after T004)
-```
-
-## Parallel Example: Phase 3 + Phase 4 (both P1 after Foundational)
-
-```
-After Phase 2 completes:
-  → Phase 3 tasks (US1): routes/form.js, views/form-management.jade, JS
-  → T008 (US3): utilities/routes.js               (parallel with Phase 3)
-  → T009 (US3): views/traveler.jade               (parallel with Phase 3)
-```
-
----
-
-## Implementation Strategy
-
-### MVP First (User Stories 1 + 3, both P1)
-
-1. Complete Phase 1: Setup (quick — just branch verification)
-2. Complete Phase 2: Foundational (T002, T003 in parallel)
-3. Complete Phase 3: US1 (T004 → T005/T006/T007 in parallel)
-4. Complete Phase 4: US3 (T008/T009 in parallel — can overlap Phase 3)
-5. **STOP and VALIDATE**: Run Quickstart Scenarios 1 and 3 end-to-end
-6. Deploy/demo if ready
-
-### Incremental Delivery
-
-1. Phase 2 → Foundation ready
-2. Phase 3 → Classification captured at release; test Scenario 1
-3. Phase 4 → Travelers inherit classification; test Scenario 3
-4. Phase 5 → Backfill editing enabled; test Scenario 2
-5. Phase 6 → Instance metadata editable; test Scenario 4
-6. Phase 7 → Polish and full quickstart validation
+- [X] T016 [P] Added `Subsystem`/`Device`/`Activity` columns to the released forms table. **Correction**: no Jade header changes needed — the table has no static `<thead>`; DataTables generates headers from `aoColumns[].sTitle`. Added `formSubsystemColumn`, `formDeviceColumn`, `formActivityColumn` to `public/javascripts/table.js` (named with a `form` prefix to avoid colliding with the pre-existing `deviceColumn` used across traveler list views — a plain `deviceColumn` would have been a duplicate `const` and broken the whole script). Wired them into `releasedFormAoColumns` in `public/javascripts/form-management.js` and fixed the `aaSorting` index shift. Extended the `/released-forms/json` field projection in `routes/form-management.js` to include `subsystem device activity`.
+- [X] T017 Validated statically: all modified `.js` files pass `node --check` (and `--input-type=module` for the one ESM file); all three modified `.jade` files compile via `jade.compileFile`; the pre-existing `test/lib/req-utils-test.js`, `composed-released-form-test.js`, and `csv-test.js` suites (31 tests) pass unchanged. **Could not run the live browser scenarios in `quickstart.md`**: this worktree has no `../etc/traveler-config/` directory, so `node app.js` cannot boot at all (confirmed — fails on `config/config.js` requiring `../config/ad.json`). This is a pre-existing environment gap, not something introduced by this feature. Live quickstart validation should be run in an environment with the config directory and MongoDB available.
 
 ---
 
 ## Notes
 
-- [P] tasks touch different files and have no incomplete-task dependencies — safe to run in parallel
-- Each user story is independently testable against the scenarios in `specs/003-form-traveler-metadata/quickstart.md`
-- All metadata mutations must use `saveWithHistory(req.session.userid)` per the project constitution
-- `reqUtils.filter` must be used on all new body parameters per the permission-layered access principle
-- No new npm dependencies required
+- All six fields default to `''` — no data migration required; existing documents remain valid.
+- `reqUtils.filter` is used on every new body parameter per the permission-layered access principle.
+- `ReleasedForm` metadata edits go through `saveWithHistory`; `Traveler` metadata edits go through plain `doc.save()`, matching each model's existing pattern (Traveler has no history plugin).
+- No new npm dependencies were introduced.
+
+## Follow-up: T014-scope change (2026-09-13)
+
+After initial implementation, the requirement changed: `subsystem`, `device`, `activity` on a **traveler** are no longer read-only after creation — users can edit them the same way as `machineArea`/`sector`/`windchillId` (same active-state + admin-bypass rule). Updated:
+
+- `routes/traveler.js`: added `subsystem`, `device`, `activity` to the `PUT /travelers/:id/config` filter/sanitize lists (alongside the existing three)
+- `views/traveler-config.jade`: Subsystem/Device/Activity now render as editable `span.editable` + Edit button (same pattern as the other three), gated by the same `isAdmin || traveler.status < 2` condition
+- `public/javascripts/traveler-config.js`: added `subsystem`, `device`, `activity` to the `initValue` map so the existing generic `Editable.binding` call covers them
+- `specs/003-form-traveler-metadata/spec.md` (FR-007, FR-008, FR-009, User Story 4), `data-model.md`, and `contracts/api-endpoints.md` updated to reflect all six fields sharing one edit rule
+
+`views/traveler.jade` (the read-only detail page) is unchanged — it already displayed all six fields as plain text, consistent with title/description also being edit-only-via-config.

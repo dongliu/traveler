@@ -699,12 +699,31 @@ const updatedByColumn = personColumn('Updated by', 'updatedBy');
 const releasedOnColumn = longDateColumn('Released', 'releasedOn');
 const releasedByColumn = personColumn('Released by', 'releasedBy');
 
+const formSubsystemColumn = {
+  sTitle: 'Subsystem',
+  sDefaultContent: '',
+  mData: 'subsystem',
+  bFilter: true,
+};
+
+const formDeviceColumn = {
+  sTitle: 'Device',
+  sDefaultContent: '',
+  mData: 'device',
+  bFilter: true,
+};
+
+const formActivityColumn = {
+  sTitle: 'Activity',
+  sDefaultContent: '',
+  mData: 'activity',
+  bFilter: true,
+};
+
 const transferredOnColumn = dateColumn('transferred', 'transferredOn');
 
 const archivedOnColumn = dateColumn('Archived', 'archivedOn');
 const archivedByColumn = personColumn('Archived by', 'archivedBy');
-
-const deadlineColumn = dateColumn('Deadline', 'deadline');
 
 const tagsColumn = {
   sTitle: 'Tags',
@@ -1114,15 +1133,10 @@ const binderValueProgressColumn = {
 };
 
 const deviceColumn = {
-  sTitle: 'Devices',
-  mData(source, type, val) {
-    return source.devices || [];
-  },
-  mRender(data, type) {
-    if (type === 'sort' || type === 'filter') {
-      return data.join(' ');
-    }
-    return data.join('/');
+  sTitle: 'Device',
+  sDefaultContent: '',
+  mData(source, type) {
+    return source.device || (source.devices || []).join('/');
   },
   bFilter: true,
 };

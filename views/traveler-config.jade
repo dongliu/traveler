@@ -7,10 +7,10 @@ block head
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
-  link(rel='stylesheet', href='#{prefix}/bootstrap-datepicker/css/datepicker.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
+  - var deviceDisplay = traveler.device || ((traveler.devices && traveler.devices.length > 0) ? traveler.devices.join('/') : '');
   .container
     #message
     h3 Title:
@@ -29,14 +29,62 @@ block content
         span#description.editable !{traveler.description}
       = ' '
       button.btn.btn-primary.editable Edit
-    h4 Deadline:
-      = ' '
-      span.form-inline
-        if (locals.traveler.deadline == undefined)
-          input#deadline(type='date')
-        else
-          input#deadline(type='date', value='#{traveler.deadline}')
+    if (isAdmin || traveler.status < 2)
+      h4 Subsystem:
         = ' '
+        if (locals.traveler.subsystem == undefined || traveler.subsystem === '')
+          span#subsystem.editable No subsystem
+        else
+          span#subsystem.editable !{traveler.subsystem}
+        = ' '
+        button.btn.btn-primary.editable Edit
+      h4 Device:
+        = ' '
+        if (deviceDisplay === '')
+          span#device.editable No device
+        else
+          span#device.editable !{deviceDisplay}
+        = ' '
+        button.btn.btn-primary.editable Edit
+      h4 Activity:
+        = ' '
+        if (locals.traveler.activity == undefined || traveler.activity === '')
+          span#activity.editable No activity
+        else
+          span#activity.editable !{traveler.activity}
+        = ' '
+        button.btn.btn-primary.editable Edit
+      h4 Machine Area:
+        = ' '
+        if (locals.traveler.machineArea == undefined || traveler.machineArea === '')
+          span#machineArea.editable No machine area
+        else
+          span#machineArea.editable !{traveler.machineArea}
+        = ' '
+        button.btn.btn-primary.editable Edit
+      h4 Sector:
+        = ' '
+        if (locals.traveler.sector == undefined || traveler.sector === '')
+          span#sector.editable No sector
+        else
+          span#sector.editable !{traveler.sector}
+        = ' '
+        button.btn.btn-primary.editable Edit
+      h4 Product Windchill ID:
+        = ' '
+        if (locals.traveler.windchillId == undefined || traveler.windchillId === '')
+          span#windchillId.editable No Windchill ID
+        else
+          span#windchillId.editable !{traveler.windchillId}
+        = ' '
+        button.btn.btn-primary.editable Edit
+    else
+      h4 Subsystem: #{traveler.subsystem}
+      h4 Device: #{deviceDisplay}
+      h4 Activity: #{traveler.activity}
+      h4 Machine Area: #{traveler.machineArea}
+      h4 Sector: #{traveler.sector}
+      h4 Product Windchill ID: #{traveler.windchillId}
     p Created on
       = ' '
       span.time #{traveler.createdOn}
@@ -65,21 +113,6 @@ block content
           = ' '
           button.btn.btn-small.btn-warning.removeLocation
             i.fa.fa-trash-o.fa-lg
-    h4 Devices
-    p.muted Use <code>/</code> to separate multiple devices (e.g., <code>device1/device2</code>)
-    ul#devices
-      if (traveler.devices && traveler.devices.length > 0)
-        li
-          span.device !{traveler.devices.join('/')}
-          = ' '
-          button.btn.btn-small.btn-primary.editDevice
-            i.fa.fa-pencil.fa-lg
-          = ' '
-          button.btn.btn-small.btn-warning.removeDevice
-            i.fa.fa-trash-o.fa-lg
-    br
-    .btn-group
-      button.btn.btn-primary#add(style=(traveler.devices && traveler.devices.length > 0 ? 'display:none' : '')) Add device
     h4 Tags
     ul#tags.tag-list
       each tag in traveler.tags
@@ -104,10 +137,7 @@ block js
   script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
   script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/typeahead.bundle.js')
-  script(type='text/javascript', src='#{prefix}/dependencies/modernizr.js')
   script(type='text/javascript', src='#{prefix}/jquery/jquery.jeditable.js')
   script(type='text/javascript', src='#{prefix}/dependencies/moment.js')
-  script(type='text/javascript', src='#{prefix}/bootstrap-datepicker/js/bootstrap-datepicker.js')
   script(type='text/javascript', src='#{prefix}/javascripts/ajax-helper.js')
   script(type='module', src='#{prefix}/javascripts/traveler-config.js')

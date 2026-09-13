@@ -67,25 +67,26 @@ All fields are optional; only fields present in the body are updated (via `Objec
 
 **`PUT /travelers/:id/config`** *(existing endpoint, extended)*
 
-Already handles `title`, `description`, `deadline`. Now also accepts three new instance-specific fields.
+Already handles `title`, `description`, `deadline`. Now also accepts all six metadata fields — the three inherited classification fields (now correctable on the traveler instance) and the three traveler-specific fields.
 
 ### Request Body Changes (additions)
 
 ```json
 {
+  "subsystem":   "Vacuum",
+  "device":      "Turbo Pump",
+  "activity":    "Repair",
   "machineArea": "Sector B",
   "sector":      "IR8",
   "windchillId": "WT-00123456"
 }
 ```
 
-New fields may be included alongside existing fields or alone in a request. Unknown fields are stripped by `reqUtils.filter`.
+Any subset of these six fields may be included alongside `title`/`description`/`deadline` or alone in a request. Unknown fields are stripped by `reqUtils.filter`. Editing `subsystem`/`device`/`activity` here changes only the traveler's copy — the source `ReleasedForm` document is never touched by this endpoint.
 
 ### State Guard Change
 
-The existing `reqUtils.status('id', [0, 1])` guard is updated to `reqUtils.status('id', [0, 1, 1.5])` to allow updates while the traveler is in the submitted-for-review state.
-
-Admin callers bypass the state guard per the existing `isOwner || admin` check in the handler body.
+The original `reqUtils.status('id', [0, 1])` middleware guard is removed. The state check moves into the handler body so admins can bypass it entirely (required for FR-009): `if (!isAdmin && [0, 1, 1.5].indexOf(doc.status) === -1) return res.status(400)...`, evaluated before the existing `isOwner || admin` authorization check.
 
 ### Response (unchanged)
 

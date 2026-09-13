@@ -74,6 +74,11 @@ const releasedForm = new Schema({
   // normal_acl only: "<base released form id>[:<sorted acl released form ids>]"
   // used to detect duplicate compositions; not displayed to users
   compositionKey: String,
+  // classification metadata, collected at release time; editable afterward
+  // by the owner or admin
+  subsystem: { type: String, default: '' },
+  device: { type: String, default: '' },
+  activity: { type: String, default: '' },
 });
 
 releasedForm.plugin(addVersion, {
@@ -90,6 +95,9 @@ releasedForm.plugin(addHistory, {
     'discrepancy',
     'aclForms',
     '_v',
+    'subsystem',
+    'device',
+    'activity',
   ],
 });
 

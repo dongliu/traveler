@@ -44,12 +44,14 @@ releasedForm.plugin(addHistory, {
 
 | Field | Type | Required | Default | Source | Editable After Creation |
 |-------|------|----------|---------|--------|------------------------|
-| `subsystem` | String | No | `''` | Copied from released form | No (read-only after creation) |
-| `device` | String | No | `''` | Copied from released form | No (read-only after creation) |
-| `activity` | String | No | `''` | Copied from released form | No (read-only after creation) |
+| `subsystem` | String | No | `''` | Initially copied from released form | Yes (active states only) |
+| `device` | String | No | `''` | Initially copied from released form | Yes (active states only) |
+| `activity` | String | No | `''` | Initially copied from released form | Yes (active states only) |
 | `machineArea` | String | No | `''` | User-provided | Yes (active states only) |
 | `sector` | String | No | `''` | User-provided | Yes (active states only) |
 | `windchillId` | String | No | `''` | User-provided | Yes (active states only) |
+
+All six fields share the same edit rule: editable while the traveler is in an active state, and editable by admins at any state. Editing `subsystem`/`device`/`activity` on the traveler only changes that traveler's copy — it never writes back to the source `ReleasedForm`.
 
 **"Active states"**: `0` (not started), `1` (in progress), `1.5` (submitted for review). Fields become read-only for non-admins once the traveler reaches state `2` (approved) or beyond.
 

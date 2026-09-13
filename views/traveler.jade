@@ -10,6 +10,7 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
+  - var deviceDisplay = traveler.device || ((locals.traveler.devices && traveler.devices.length > 0) ? traveler.devices.join('/') : '');
   script(type='text/javascript').
     var traveler = !{JSON.stringify(traveler)};
     var travelerStatus = !{JSON.stringify(traveler.status)};
@@ -27,10 +28,17 @@ block content
       .span9
         h3 Traveler title:  !{traveler.title}
         include ./traveler/status.jade
-        if (locals.traveler.devices && traveler.devices.length > 0)
-          h4 Devices: !{traveler.devices.join('/')}
         if (locals.traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{locals.traveler.referenceReleasedFormVer}
+        h4 Subsystem: #{traveler.subsystem}
+        h4 Device: #{deviceDisplay}
+        h4 Activity: #{traveler.activity}
+        h4 Machine Area:&nbsp;
+          span#machine-area-value #{traveler.machineArea}
+        h4 Sector:&nbsp;
+          span#sector-value #{traveler.sector}
+        h4 Product Windchill ID:&nbsp;
+          span#windchill-id-value #{traveler.windchillId}
         .btn-group
           a.btn.btn-primary#csv-export(data-toggle='tooltip', title='download traveler data as CSV', href='#{prefix}/travelers/#{traveler._id}/csv') Download CSV
         if (locals.traveler.status !== undefined)
@@ -82,10 +90,6 @@ block content
               a(href='#{prefix}/released-forms/#{locals.traveler.referenceReleasedForm}/', target='#{viewConfig.linkTarget}') Released #{viewConfig.terminology.form}
           if (locals.traveler.description !== undefined)
             h4 Description: #{traveler.description}
-          if (locals.traveler.deadline !== undefined)
-            p Deadline:
-              = ' '
-              span.time #{traveler.deadline}
           p Created by #{traveler.createdBy}
             = ' '
             if (locals.traveler.clonedBy !== undefined)

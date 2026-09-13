@@ -60,17 +60,18 @@ When a traveler is created from a released form, the Subsystem, Device, and Acti
 
 ### User Story 4 - Update Traveler-Specific Metadata (Priority: P2)
 
-A user working on a traveler can set or update three traveler-specific fields — Machine Area, Sector, and Product Windchill ID — at any point during the traveler's active lifecycle, allowing instance-specific context to be captured alongside the classification inherited from the form.
+A user working on a traveler can set or update all six metadata fields — the inherited Subsystem, Device, and Activity, as well as the traveler-specific Machine Area, Sector, and Product Windchill ID — at any point during the traveler's active lifecycle. This lets a user correct an inherited classification value (e.g., the released form's Subsystem no longer matches this specific instance) alongside capturing instance-specific deployment context.
 
-**Why this priority**: These three fields capture deployment context (where and what product the traveler applies to) that is specific to each work instance and cannot be known at form-release time.
+**Why this priority**: Inherited values are a starting point, not a permanent lock — the traveler instance sometimes needs a different Subsystem/Device/Activity than its source form (e.g., the form is reused across a slightly different scope). The three traveler-specific fields capture deployment context (where and what product the traveler applies to) that is specific to each work instance and cannot be known at form-release time.
 
-**Independent Test**: Can be fully tested by opening a traveler in any active state and verifying that Machine Area, Sector, and Product Windchill ID are editable, changes persist, and the fields are shown on the traveler detail page.
+**Independent Test**: Can be fully tested by opening a traveler in any active state and verifying that all six fields (Subsystem, Device, Activity, Machine Area, Sector, Product Windchill ID) are editable, changes persist, and the fields are shown on the traveler detail page.
 
 **Acceptance Scenarios**:
 
-1. **Given** a traveler in any active state (not started, in progress, or submitted for review), **When** the user updates Machine Area, Sector, or Product Windchill ID, **Then** the new values are saved and shown on the traveler.
-2. **Given** a traveler in an approved or frozen state, **When** a non-admin user attempts to update these fields, **Then** the system rejects the update (fields are read-only for non-admins once approved).
+1. **Given** a traveler in any active state (not started, in progress, or submitted for review), **When** the user updates any of the six metadata fields, **Then** the new values are saved and shown on the traveler.
+2. **Given** a traveler in an approved or frozen state, **When** a non-admin user attempts to update any of the six fields, **Then** the system rejects the update (fields are read-only for non-admins once approved).
 3. **Given** a traveler where Product Windchill ID is set, **When** the user views the traveler, **Then** the Windchill ID is displayed in a way that distinguishes it from free-text fields (e.g., labeled clearly).
+4. **Given** a traveler that inherited Subsystem/Device/Activity from its released form, **When** the user edits one of those fields on the traveler, **Then** the traveler's value changes but the source released form's value is unaffected.
 
 ---
 
@@ -95,10 +96,10 @@ A user working on a traveler can set or update three traveler-specific fields �
 
 **Traveler — Inherited and Instance Fields**
 
-- **FR-006**: When a traveler is created from a released form, the system MUST automatically copy Subsystem, Device, and Activity from the released form to the new traveler.
-- **FR-007**: The traveler data model MUST include Subsystem, Device, and Activity fields (inherited) and three additional optional fields: Machine Area, Sector, and Product Windchill ID.
-- **FR-008**: Users with write access MUST be able to set or update Machine Area, Sector, and Product Windchill ID on a traveler that is in an active state (not started, in progress, or submitted for review).
-- **FR-009**: Traveler metadata updates (Machine Area, Sector, Product Windchill ID) MUST be rejected for travelers in approved, frozen, or archived states unless the requesting user is an admin.
+- **FR-006**: When a traveler is created from a released form, the system MUST automatically copy Subsystem, Device, and Activity from the released form to the new traveler as the traveler's initial values.
+- **FR-007**: The traveler data model MUST include Subsystem, Device, and Activity fields (initially populated from the released form) and three additional optional fields: Machine Area, Sector, and Product Windchill ID.
+- **FR-008**: Users with write access MUST be able to set or update any of the six metadata fields (Subsystem, Device, Activity, Machine Area, Sector, Product Windchill ID) on a traveler that is in an active state (not started, in progress, or submitted for review). Editing these fields on the traveler MUST NOT change the source released form's values.
+- **FR-009**: Traveler metadata updates (any of the six fields) MUST be rejected for travelers in approved, frozen, or archived states unless the requesting user is an admin.
 - **FR-010**: All six metadata fields MUST be visible on the traveler detail view.
 
 ### Key Entities
