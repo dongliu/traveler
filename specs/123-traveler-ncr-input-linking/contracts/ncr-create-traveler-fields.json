@@ -1,0 +1,29 @@
+{
+  "endpoint": "POST /api/ncrs",
+  "description": "Existing NCR creation endpoint. This feature renames one dead body field and adds one new optional body field so the endpoint can record which specific traveler input an NCR was initiated from. No other part of this endpoint's contract changes (all currently-mandatory fields remain mandatory, per spec.md FR-005).",
+  "change_summary": {
+    "removed_field": {
+      "traveler_step_number": "Optional Number; never populated by any UI, only by test fixtures. Removed — see research.md Decision 1."
+    },
+    "added_or_renamed_fields": {
+      "traveler_input_name": "Optional string. The name of the traveler input this NCR was initiated from (replaces traveler_step_number's intended purpose — its own prior schema comment already said it should hold this).",
+      "traveler_input_label": "Optional string. The input's human-readable label at the moment 'Initiate NCR' was clicked on the traveler page. Ignored if traveler_id is absent."
+    },
+    "unchanged_field": {
+      "traveler_id": "Optional string (MongoDB ObjectId of a Traveler). Unchanged."
+    }
+  },
+  "response": {
+    "success_201": {
+      "statusCode": 201,
+      "note": "Unchanged shape — see specs/001-ncr-workflow's own contract for the full existing response body. traveler_input_name/traveler_input_label are not echoed back in the creation response; they become visible on the created NCR's own detail page (User Story 3) and via GET /api/ncrs/:id and GET /travelers/:id/ncr-links/."
+    }
+  },
+  "side_effects": [
+    "When traveler_id is present, ncr.traveler_link is set to {traveler_id, input_name: traveler_input_name, input_label: traveler_input_label, initiated_from_traveler: true} — same gate (`if (data.traveler_id)`) and shape as today, with the two renamed/added fields",
+    "No change to which fields are required for a valid NCR creation request — the traveler fields are purely additive metadata"
+  ],
+  "notes": [
+    "The traveler page's 'Initiate NCR' link (views/traveler.jade's rendered form) opens /ncrs/new?traveler_id=<id>&input_name=<name>&input_label=<label> — views/ncr-create.jade reads these three query parameters on load and merges them into the same JSON body it already builds for this endpoint (research.md Decision 2). This is a client-side change only; the query parameters are not a new part of this endpoint's own contract."
+  ]
+}

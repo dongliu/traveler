@@ -1,0 +1,44 @@
+{
+  "endpoint": "GET /travelers/:id/ncr-links/",
+  "description": "Returns every NCR linked to any input on this traveler, as a flat array the client filters by input name — same shape convention as the existing GET /travelers/:id/notes/ endpoint. New endpoint; no existing route changes.",
+  "authentication": "Required (session)",
+  "authorization": "Same as viewing the traveler itself — reqUtils.canReadMw('id') (the traveler's own existing read-access gate). No additional NCR-specific access check, per spec.md's resolved clarification that traveler access alone governs visibility of a linked NCR's link/status.",
+  "request": {
+    "parameters": {
+      "path": {
+        "id": {
+          "type": "string",
+          "description": "MongoDB ObjectId of the Traveler document"
+        }
+      }
+    }
+  },
+  "response": {
+    "success_200": {
+      "statusCode": 200,
+      "body": [
+        {
+          "input_name": "string — matches a TravelerData.name / form.labels key on this traveler",
+          "ncr_id": "string",
+          "ncr_number": "string",
+          "status": "string — one of the existing NCR_STATUSES"
+        }
+      ]
+    },
+    "errors": {
+      "not_found_404": {
+        "statusCode": 404,
+        "body": "Traveler not found (reqUtils.exist('id', Traveler)'s existing behavior)"
+      },
+      "forbidden_403": {
+        "statusCode": 403,
+        "body": "Not authorized to read this traveler (reqUtils.canReadMw('id')'s existing behavior)"
+      }
+    }
+  },
+  "notes": [
+    "Query: Ncr.find({'traveler_link.traveler_id': id, 'traveler_link.initiated_from_traveler': true}, {ncr_number:1, status:1, 'traveler_link.input_name':1}).lean(), reshaped to the flat array above",
+    "An input with zero linked NCRs simply has no entries in the array — the client shows only the 'Initiate NCR' action (if touched) and no badges",
+    "Multiple entries can share the same input_name (spec.md FR-008 — an input can accumulate more than one linked NCR over time); the client groups/filters by input_name client-side, exactly as the existing notes endpoint's array is filtered by name"
+  ]
+}
