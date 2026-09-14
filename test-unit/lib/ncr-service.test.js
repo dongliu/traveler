@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const sinon = require('sinon');
+const fs = require('fs');
+const path = require('path');
 require('chai').should();
 
 process.env.TRAVELER_CONFIG_REL_PATH = 'docker';
@@ -44,6 +46,7 @@ const {
   closePa,
   addAttachments,
   getAttachment,
+  deleteNcr,
 } = require('../../lib/ncr-service.js');
 
 const { Ncr } = require('../../model/ncr');
@@ -1514,5 +1517,70 @@ describe('lib/ncr-service — closePa', () => {
     pa.status.should.equal('Completed');
     pa.actual_completion_date.should.be.instanceOf(Date);
     result.events.some(e => e.event_type === 'pa.closed').should.be.true;
+  });
+});
+
+// ── deleteNcr ────────────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — deleteNcr', () => {
+  const admin = makeUser({ id: 'admin1', roles: ['admin'] });
+
+  it('throws 403 when user does not have the admin role, without looking up the NCR', async () => {
+    const findByIdSpy = sinon.stub(Ncr, 'findById');
+
+    await expectRejection(deleteNcr('id1', makeUser({ roles: [] })), 403);
+
+    findByIdSpy.called.should.be.false;
+  });
+
+  it('throws 404 when NCR not found', async () => {
+    stubFindById(null);
+    await expectRejection(deleteNcr('id1', admin), 404);
+  });
+
+  it('unlinks every attachment file and deletes the document, regardless of status (e.g. Closed)', async () => {
+    const ncr = newNcr({
+      status: 'Closed',
+      attachments: [
+        { file_id: new mongoose.Types.ObjectId(), file_name: 'a.jpg', file_path: '/tmp/uploads/a' },
+        { file_id: new mongoose.Types.ObjectId(), file_name: 'b.pdf', file_path: '/tmp/uploads/b' },
+      ],
+    });
+    stubFindById(ncr);
+    const unlinkStub = sinon.stub(fs.promises, 'unlink').resolves();
+    const deleteOneStub = sinon.stub(Ncr.prototype, 'deleteOne').resolves();
+
+    await deleteNcr('id1', admin);
+
+    unlinkStub.callCount.should.equal(2);
+    unlinkStub.getCall(0).args[0].should.equal(path.resolve('/tmp/uploads/a'));
+    unlinkStub.getCall(1).args[0].should.equal(path.resolve('/tmp/uploads/b'));
+    deleteOneStub.calledOnce.should.be.true;
+  });
+
+  it('still deletes the document when an attachment file is already missing (unlink rejects)', async () => {
+    const ncr = newNcr({
+      attachments: [
+        { file_id: new mongoose.Types.ObjectId(), file_name: 'a.jpg', file_path: '/tmp/uploads/missing' },
+      ],
+    });
+    stubFindById(ncr);
+    sinon.stub(fs.promises, 'unlink').rejects(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
+    const deleteOneStub = sinon.stub(Ncr.prototype, 'deleteOne').resolves();
+
+    await deleteNcr('id1', admin);
+
+    deleteOneStub.calledOnce.should.be.true;
+  });
+
+  it('deletes the document with no attachments without attempting any unlink', async () => {
+    stubFindById(newNcr({ attachments: [] }));
+    const unlinkStub = sinon.stub(fs.promises, 'unlink').resolves();
+    const deleteOneStub = sinon.stub(Ncr.prototype, 'deleteOne').resolves();
+
+    await deleteNcr('id1', admin);
+
+    unlinkStub.called.should.be.false;
+    deleteOneStub.calledOnce.should.be.true;
   });
 });

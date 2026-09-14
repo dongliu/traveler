@@ -18,6 +18,7 @@
 
 process.env.TRAVELER_CONFIG_REL_PATH = process.env.TRAVELER_CONFIG_REL_PATH || 'docker';
 
+const fs = require('fs');
 const mongoose = require('mongoose');
 const config = require('../../config/config');
 
@@ -187,6 +188,13 @@ async function getGroup({ groupId }) {
   return { groupId: group._id, members: group.members || [] };
 }
 
+// Checks the `web` container's own filesystem — used to prove a file was
+// actually unlinked from disk (not just that a record referencing it is
+// gone), which Playwright's page.request cannot observe on its own.
+async function fileExists({ filePath }) {
+  return { exists: fs.existsSync(filePath) };
+}
+
 const COMMANDS = {
   'grant-role': grantRole,
   'remove-role': removeRole,
@@ -199,6 +207,7 @@ const COMMANDS = {
   'get-ncr': getNcr,
   'get-user': getUser,
   'get-group': getGroup,
+  'file-exists': fileExists,
 };
 
 // ── entry point ──────────────────────────────────────────────────────────

@@ -25,6 +25,7 @@ const {
   closePa,
   addAttachments,
   getAttachment,
+  deleteNcr,
 } = require('../lib/ncr-service');
 const logger = require('../lib/loggers').getLogger();
 
@@ -166,6 +167,21 @@ router.get('/:id', auth.ensureAuthenticated, async (req, res) => {
     return res.status(200).json({ success: true, ncr });
   } catch (err) {
     return mapServiceError(err, res, 'NCR fetch');
+  }
+});
+
+router.delete('/:id', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    await deleteNcr(req.params.id, user);
+    return res.status(200).json({ success: true, message: 'NCR deleted successfully.' });
+  } catch (err) {
+    return mapServiceError(err, res, 'NCR deletion');
   }
 });
 
