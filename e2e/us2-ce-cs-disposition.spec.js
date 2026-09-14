@@ -312,6 +312,25 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     expect(ncr.status).toBe('Dispositioned');
   });
 
+  test('a user who is not the assigned CE/CS sees a warning banner and no form when loading the disposition page; the assigned CE/CS sees neither', async ({ page, browser }) => {
+    const { ncrId } = await createTestNcr();
+
+    const otherPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    await otherPage.goto(`/ncrs/${ncrId}/disposition`);
+
+    await expect(otherPage.locator('#disp-access-warning')).toBeVisible();
+    await expect(otherPage.locator('#disp-access-warning')).toContainText(CE_CS_DISPLAY_NAME);
+    await expect(otherPage.locator('#disp-access-warning')).toContainText(
+      'can open this page and submit the disposition'
+    );
+    await expect(otherPage.locator('#disp-form')).toHaveCount(0);
+    await otherPage.close();
+
+    await page.goto(`/ncrs/${ncrId}/disposition`);
+    await expect(page.locator('#disp-access-warning')).toHaveCount(0);
+    await expect(page.locator('#disp-form')).toBeVisible();
+  });
+
   test('a user who is not the assigned CE/CS cannot submit disposition', async ({ browser }) => {
     const { ncrId } = await createTestNcr();
 
