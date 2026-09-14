@@ -77,7 +77,8 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
     discovery_date: req.body.discovery_date,
     discovery_context: req.body.discovery_context,
     traveler_id: req.body.traveler_id,
-    traveler_step_number: req.body.traveler_step_number,
+    traveler_input_name: sanitizeStr(req.body.traveler_input_name),
+    traveler_input_label: sanitizeStr(req.body.traveler_input_label),
   };
 
   if (!b.part_name) errors.part_name = ['Required'];

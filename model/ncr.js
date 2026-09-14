@@ -125,8 +125,8 @@ const NcrSchema = new Schema({
 
   traveler_link: {
     traveler_id: ObjectId,
-    // this need to be the input unique name
-    step_number: Number,
+    input_name: String,
+    input_label: String,
     initiated_from_traveler: Boolean,
   },
 
@@ -204,6 +204,7 @@ NcrSchema.index({ 'events.event_type': 1 });
 NcrSchema.index({ 'events.timestamp': 1 });
 NcrSchema.index({ 'preventive_actions.status': 1 });
 NcrSchema.index({ 'preventive_actions.owner_id': 1 });
+NcrSchema.index({ 'traveler_link.traveler_id': 1, 'traveler_link.input_name': 1 });
 
 const Ncr = mongoose.model('Ncr', NcrSchema);
 

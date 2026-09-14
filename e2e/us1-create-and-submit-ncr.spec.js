@@ -141,7 +141,7 @@ test.describe('US1 - NCR creation and submission notifications', () => {
       },
       status: 'Submitted',
       travelerId: '507f1f77bcf86cd799439000',
-      stepNumber: 1,
+      inputName: 'field_1',
     });
 
     expect((await page.request.get(`/ncrs/${ncrId}`)).status()).toBe(200);

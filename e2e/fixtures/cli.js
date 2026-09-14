@@ -139,7 +139,7 @@ async function backdateNcr({ ncrId, daysAgo }) {
   return { ncrId: ncr._id.toString(), created_at: ncr.created_at.toISOString() };
 }
 
-async function createTravelerLinkedNcr({ ncrData, status, travelerId, stepNumber }) {
+async function createTravelerLinkedNcr({ ncrData, status, travelerId, inputName, inputLabel }) {
   const { Ncr } = require('../../model/ncr');
   const now = new Date();
   // Date.now() alone is millisecond-resolution, so concurrent invocations
@@ -153,15 +153,69 @@ async function createTravelerLinkedNcr({ ncrData, status, travelerId, stepNumber
     status: status || 'Submitted',
     created_at: now,
     creation_timestamp: now,
-    traveler_link: {
-      traveler_id: travelerId,
-      step_number: stepNumber,
-      initiated_from_traveler: true,
-    },
+    // Mirrors createNcr()'s own `if (data.traveler_id)` gate (lib/ncr-service.js)
+    // — omitting travelerId yields a genuinely standalone NCR, not one with
+    // initiated_from_traveler:true pointing at an undefined traveler.
+    ...(travelerId
+      ? {
+          traveler_link: {
+            traveler_id: travelerId,
+            input_name: inputName,
+            input_label: inputLabel,
+            initiated_from_traveler: true,
+          },
+        }
+      : {}),
     ...ncrData,
   });
   await ncr.save();
   return { ncrId: ncr._id.toString(), ncr_number: ncr.ncr_number };
+}
+
+// Creates a real, writable Traveler with one text input, bypassing the
+// Form -> ReleasedForm -> Traveler UI pipeline (that pipeline is exercised
+// elsewhere; this fixture only needs a traveler whose live page renders one
+// fillable field for 123-traveler-ncr-input-linking's own e2e coverage).
+// publicAccess: 0 (this app's actual default, per config/docker's app.json)
+// grants read to any authenticated user while restricting writes to
+// createdBy — exactly the split this feature's access model relies on.
+async function createFillableTraveler({ createdBy, title, inputName, inputLabel }) {
+  // model/traveler.js -> model/review.js expects `User` already registered
+  // (it does `mongoose.model('User')` at require-time, not lazily) — every
+  // other command that touches Traveler-side models is reached via a route
+  // that already loaded model/user.js first at app startup; this fixture
+  // CLI has no such guarantee, so require it explicitly first.
+  require('../../model/user');
+  const { Traveler } = require('../../model/traveler');
+  const now = new Date();
+  const name = inputName || 'field_1';
+  const label = inputLabel || 'Field One';
+  const html =
+    '<div class="control-group">' +
+    `<label class="control-label"><span>${label}</span></label>` +
+    `<div class="controls"><input type="text" name="${name}"></div>` +
+    '</div>';
+  const traveler = new Traveler({
+    title: title || 'E2E Fillable Traveler',
+    status: 1,
+    createdBy,
+    createdOn: now,
+    publicAccess: 0,
+    forms: [
+      {
+        html,
+        labels: { [name]: label },
+        mapping: { [name]: name },
+        reference: new mongoose.Types.ObjectId(),
+        activatedOn: [now],
+      },
+    ],
+    totalInput: 1,
+    finishedInput: 0,
+    touchedInputs: [],
+  });
+  await traveler.save();
+  return { travelerId: traveler._id.toString() };
 }
 
 async function getNcr({ ncrId, fields }) {
@@ -204,6 +258,7 @@ const COMMANDS = {
   'set-ce-cs': setCeCs,
   'backdate-ncr': backdateNcr,
   'create-traveler-linked-ncr': createTravelerLinkedNcr,
+  'create-fillable-traveler': createFillableTraveler,
   'get-ncr': getNcr,
   'get-user': getUser,
   'get-group': getGroup,

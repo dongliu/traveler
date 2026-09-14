@@ -223,12 +223,17 @@ describe('lib/ncr-service — createNcr', () => {
   it('stores a traveler_link when traveler_id is provided', async () => {
     sinon.stub(Ncr, 'findOne').resolves(null);
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
-    const data = minimalNcrData({ traveler_id: 'trav1', traveler_step_number: 3 });
+    const data = minimalNcrData({
+      traveler_id: '507f191e810c19729de860ea',
+      traveler_input_name: 'part_qty',
+      traveler_input_label: 'Part Quantity',
+    });
 
     const ncr = await createNcr(data, makeUser());
 
     ncr.traveler_link.initiated_from_traveler.should.be.true;
-    ncr.traveler_link.step_number.should.equal(3);
+    ncr.traveler_link.input_name.should.equal('part_qty');
+    ncr.traveler_link.input_label.should.equal('Part Quantity');
   });
 
   it('adds the resolved WBS Notification Registry contact to the initial notification recipients when a match exists', async () => {
@@ -914,7 +919,7 @@ describe('lib/ncr-service — closeNcr', () => {
     stubFindById(newNcr({
       status: 'Final Approval',
       originator_id: 'orig1',
-      traveler_link: { traveler_id: 'trav1', step_number: 2, initiated_from_traveler: true },
+      traveler_link: { traveler_id: '507f191e810c19729de860ea', input_name: 'field_1', initiated_from_traveler: true },
     }));
 
     await expectRejection(closeNcr('id1', {}, originator), 400);
@@ -945,7 +950,7 @@ describe('lib/ncr-service — closeNcr', () => {
     stubFindById(newNcr({
       status: 'Final Approval',
       originator_id: 'orig1',
-      traveler_link: { traveler_id: 'trav1', step_number: 2, initiated_from_traveler: true },
+      traveler_link: { traveler_id: '507f191e810c19729de860ea', input_name: 'field_1', initiated_from_traveler: true },
     }));
     stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
 
@@ -957,7 +962,10 @@ describe('lib/ncr-service — closeNcr', () => {
 
     result.status.should.equal('Closed');
     result.closure_record.traveler_signed_off.should.be.true;
-    result.events.some(e => e.event_type === 'traveler.signed_off').should.be.true;
+    const signOffEvent = result.events.find(e => e.event_type === 'traveler.signed_off');
+    signOffEvent.should.not.be.undefined;
+    String(signOffEvent.payload.traveler_id).should.equal('507f191e810c19729de860ea');
+    signOffEvent.payload.input_name.should.equal('field_1');
   });
 
   it('allows the Designate (not just the Originator) to close the NCR', async () => {
