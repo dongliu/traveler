@@ -43,7 +43,7 @@ async function createDispositionedNcr(overrides = {}) {
     },
     status: 'Dispositioned',
     travelerId: '507f1f77bcf86cd799439000',
-    stepNumber: 1,
+    inputName: 'field_1',
   });
   return { ncrId, ncrNumber };
 }

@@ -65,6 +65,12 @@ block content
             if ncr.po_reference
               dt PO Reference
               dd= ncr.po_reference
+            if ncr.traveler_link && ncr.traveler_link.initiated_from_traveler
+              dt Traveler
+              dd
+                a(href='#{prefix}/travelers/#{ncr.traveler_link.traveler_id}/') View Traveler
+              dt Input
+              dd= ncr.traveler_link.input_label
             dt CE/CS
             dd= ncr.ce_cs_name
             dt Originator

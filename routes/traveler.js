@@ -41,6 +41,7 @@ const Group = mongoose.model('Group');
 const Traveler = mongoose.model('Traveler');
 const TravelerData = mongoose.model('TravelerData');
 const TravelerNote = mongoose.model('TravelerNote');
+const { Ncr } = require('../model/ncr');
 const Log = mongoose.model('Log');
 const reviewLib = require('../lib/review');
 const travelerLib = require('../lib/traveler');
@@ -1213,6 +1214,38 @@ module.exports = function(app) {
         }
         return res.status(200).json(docs);
       });
+    }
+  );
+
+  app.get(
+    '/travelers/:id/ncr-links/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    function(req, res) {
+      Ncr.find(
+        {
+          'traveler_link.traveler_id': req.params.id,
+          'traveler_link.initiated_from_traveler': true,
+        },
+        { ncr_number: 1, status: 1, 'traveler_link.input_name': 1 }
+      )
+        .lean()
+        .exec(function(ncrErr, docs) {
+          if (ncrErr) {
+            logger.error(ncrErr);
+            return res.status(500).send(ncrErr.message);
+          }
+          const links = docs.map(function(doc) {
+            return {
+              input_name: doc.traveler_link.input_name,
+              ncr_id: doc._id,
+              ncr_number: doc.ncr_number,
+              status: doc.status,
+            };
+          });
+          return res.status(200).json(links);
+        });
     }
   );
 

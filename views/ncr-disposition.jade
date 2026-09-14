@@ -15,6 +15,14 @@ block content
       strong= ncr.ncr_number
       |  &mdash; #{ncr.part_name} (#{ncr.part_number})
 
+    if !isAssignedCeCs
+      .alert.alert-warning#disp-access-warning
+        strong Restricted:&nbsp;
+        | Only the assigned CE/CS
+        if ncr.ce_cs_name
+          |  (#{ncr.ce_cs_name})
+        | &nbsp;can open this page and submit the disposition for this NCR. You are viewing a read-only summary.
+
     .well
       dl.dl-horizontal
         dt Supplier
@@ -30,55 +38,59 @@ block content
         dt Description of Nonconformance
         dd= ncr.description_of_nonconformance
 
-    #disp-success.alert.alert-success(style='display:none')
-      strong Disposition submitted.&nbsp;
-      | QA Staff have been notified for concurrence review.
-      |  &nbsp;
-      a(id='disp-detail-link', href='#') View NCR
-    #disp-error.alert.alert-error(style='display:none')
-      strong Error:&nbsp;
-      span#disp-error-msg
+    if isAssignedCeCs
+      #disp-success.alert.alert-success(style='display:none')
+        strong Disposition submitted.&nbsp;
+        | QA Staff have been notified for concurrence review.
+        |  &nbsp;
+        a(id='disp-detail-link', href='#') View NCR
+      #disp-error.alert.alert-error(style='display:none')
+        strong Error:&nbsp;
+        span#disp-error-msg
 
-    form#disp-form.form-horizontal(novalidate)
-      fieldset
-        legend Parts Disposition
-        .control-group
-          label.control-label Parts Disposition
-            span.text-error *
-          .controls
-            each opt in ['Rework', 'Repair', 'Return to Vendor', 'Scrap', 'Use-As-Is']
-              label.radio
-                input(type='radio', name='parts_disposition', value=opt, required)
-                | &nbsp; #{opt}
-
-        #rework-repair-field.control-group
-          label.control-label(for='rework_repair_instructions') Rework / Repair Instructions
-            span.text-error *
-          .controls
-            textarea#rework_repair_instructions(name='rework_repair_instructions', rows='5', maxlength='5000', placeholder='Detailed step-by-step instructions')
-            span#rri-counter.help-block 0 / 5000
-
-      fieldset
-        legend Preventive Actions
-        p.help-block Optional. If provided, describe a measurable corrective step.
-        #pa-list
-          .pa-entry.control-group
-            label.control-label Action 1
+      form#disp-form.form-horizontal(novalidate)
+        fieldset
+          legend Parts Disposition
+          .control-group
+            label.control-label Parts Disposition
+              span.text-error *
             .controls
-              textarea.pa-textarea(rows='3', maxlength='1000')
-              span.pa-counter.help-block 0 / 1000
+              each opt in ['Rework', 'Repair', 'Return to Vendor', 'Scrap', 'Use-As-Is']
+                label.radio
+                  input(type='radio', name='parts_disposition', value=opt, required)
+                  | &nbsp; #{opt}
+
+          #rework-repair-field.control-group
+            label.control-label(for='rework_repair_instructions') Rework / Repair Instructions
+              span.text-error *
+            .controls
+              textarea#rework_repair_instructions(name='rework_repair_instructions', rows='5', maxlength='5000', placeholder='Detailed step-by-step instructions')
+              span#rri-counter.help-block 0 / 5000
+
+        fieldset
+          legend Preventive Actions
+          p.help-block Optional. If provided, describe a measurable corrective step.
+          #pa-list
+            .pa-entry.control-group
+              label.control-label Action 1
+              .controls
+                textarea.pa-textarea(rows='3', maxlength='1000')
+                span.pa-counter.help-block 0 / 1000
+          .control-group
+            .controls
+              button#add-pa.btn.btn-sm(type='button')
+                i.fa.fa-plus
+                | &nbsp; Add Another Action
+
         .control-group
           .controls
-            button#add-pa.btn.btn-sm(type='button')
-              i.fa.fa-plus
-              | &nbsp; Add Another Action
-
-      .control-group
-        .controls
-          .btn-group
-            button#submit-btn.btn.btn-primary(type='submit') Submit Disposition
-          .btn-group(style='margin-left: 5px')
-            a.btn(href='#{prefix}/ncrs/#{ncr._id}') Cancel
+            .btn-group
+              button#submit-btn.btn.btn-primary(type='submit') Submit Disposition
+            .btn-group(style='margin-left: 5px')
+              a.btn(href='#{prefix}/ncrs/#{ncr._id}') Cancel
+    else
+      .form-actions
+        a.btn(href='#{prefix}/ncrs/#{ncr._id}') Back to NCR
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')

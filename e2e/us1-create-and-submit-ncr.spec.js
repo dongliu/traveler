@@ -141,7 +141,7 @@ test.describe('US1 - NCR creation and submission notifications', () => {
       },
       status: 'Submitted',
       travelerId: '507f1f77bcf86cd799439000',
-      stepNumber: 1,
+      inputName: 'field_1',
     });
 
     expect((await page.request.get(`/ncrs/${ncrId}`)).status()).toBe(200);
@@ -212,7 +212,7 @@ test.describe('US1 - NCR creation and submission notifications', () => {
     expect(body.details).toHaveProperty('quantity');
   });
 
-  test('AS3 - sends the CE/CS disposition-request email TO CE/CS, CC Originator', async () => {
+  test('AS3 - sends the CE/CS disposition-request email TO CE/CS, CC Originator, linking directly to the disposition page', async () => {
     const apiContext = await request.newContext();
     const mailpitClient = createMailpitClient(apiContext, env.mailBaseUrl);
 
@@ -224,6 +224,9 @@ test.describe('US1 - NCR creation and submission notifications', () => {
     expect(bodyText).toContain(sharedNcr.ncrNumber);
     expect(bodyText).toContain(sharedNcr.data.part_name);
     expect(bodyText).toContain(sharedNcr.data.supplier_name);
+    // The link must land the CE/CS directly on the disposition form, not the
+    // general NCR detail page, so they can act without an extra click.
+    expect(bodyText).toContain(`/ncrs/${sharedNcr.ncrId}/disposition`);
 
     await apiContext.dispose();
   });

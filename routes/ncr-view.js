@@ -57,7 +57,8 @@ module.exports = function(app) {
       const ncr = await Ncr.findById(req.params.id).lean();
       if (!ncr) return res.status(404).send('NCR not found');
       if (ncr.status !== 'Submitted') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncrs/${req.params.id}`);
-      const renderObj = routesUtilities.getRenderObject(req, { ncr });
+      const isAssignedCeCs = ncr.ce_cs_id === req.session.userid;
+      const renderObj = routesUtilities.getRenderObject(req, { ncr, isAssignedCeCs });
       return res.render('ncr-disposition', renderObj);
     } catch (err) {
       logger.error('NCR disposition view failed:', err);

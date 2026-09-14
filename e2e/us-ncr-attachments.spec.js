@@ -128,7 +128,7 @@ test.describe('NCR Attachments', () => {
       },
       status: 'Submitted',
       travelerId: '507f1f77bcf86cd799439000',
-      stepNumber: 1,
+      inputName: 'field_1',
     });
 
     const otherPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });

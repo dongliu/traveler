@@ -7,7 +7,7 @@ livespan, Modernizr, createSideNav, generateHistoryRecordHtml, travelerGlobal
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
-import { renderHistory } from './lib/traveler.js';
+import { renderHistory, appendInitiateNcrLink } from './lib/traveler.js';
 
 // temporary solution for the dirty forms
 function cleanForm() {
@@ -640,6 +640,10 @@ $(function() {
           $history = $($history[0]);
         } else {
           incrementFinished();
+          if (traveler.touchedInputs.indexOf(input.name) === -1) {
+            traveler.touchedInputs.push(input.name);
+          }
+          appendInitiateNcrLink(input);
           $history = $('<div class="input-history"/>').appendTo(
             $this.closest('.controls')
           );
@@ -822,6 +826,10 @@ $(function() {
         } else {
           // add an input-history div
           incrementFinished();
+          if (traveler.touchedInputs.indexOf(input.name) === -1) {
+            traveler.touchedInputs.push(input.name);
+          }
+          appendInitiateNcrLink(input);
           $history = $('<div class="input-history"/>').appendTo(
             $this.closest('.control-group-wrap').find('.controls')
           );
