@@ -1,0 +1,69 @@
+{
+  "endpoint": "DELETE /api/ncrs/:id",
+  "description": "Permanently delete a single NCR — its entire record and every file attached to it. The dashboard's multi-select 'Delete Selected' action calls this endpoint once per selected NCR (see research.md Decision 2); there is no separate batch endpoint.",
+  "authentication": "Required (session)",
+  "authorization": "Only a user whose session roles include 'admin' (lib/role.js's Admin constant) — not the NCR's Originator, CE/CS, QA Staff, or any Approver, regardless of their relationship to this specific NCR",
+  "request": {
+    "parameters": {
+      "path": {
+        "id": {
+          "type": "string",
+          "description": "MongoDB ObjectId of the NCR document to delete"
+        }
+      }
+    }
+  },
+  "response": {
+    "success_200": {
+      "statusCode": 200,
+      "body": {
+        "success": true,
+        "message": "NCR deleted successfully."
+      }
+    },
+    "errors": {
+      "bad_request_400": {
+        "statusCode": 400,
+        "body": {
+          "success": false,
+          "error": "Bad Request",
+          "message": "Invalid id format"
+        }
+      },
+      "unauthorized_401": {
+        "statusCode": 401,
+        "body": {
+          "success": false,
+          "error": "Unauthorized",
+          "message": "Authentication required"
+        }
+      },
+      "forbidden_403": {
+        "statusCode": 403,
+        "body": {
+          "success": false,
+          "error": "Forbidden",
+          "message": "Only an Admin can delete an NCR"
+        }
+      },
+      "not_found_404": {
+        "statusCode": 404,
+        "body": {
+          "success": false,
+          "error": "Not Found",
+          "message": "NCR not found: {id}"
+        }
+      }
+    }
+  },
+  "side_effects": [
+    "Every file referenced by attachments[].file_path on this NCR is unlinked from disk on a best-effort basis — a missing or failing unlink is logged, never thrown, and never blocks document deletion (research.md Decision 3)",
+    "The Ncr document is permanently deleted — its disposition, preventive actions, approvers, closure record, and full events[] audit trail are removed along with it",
+    "Nothing is written anywhere else: no new event, no History record, no deletion-audit entry of any kind (research.md Decision 4 / spec.md FR-012) — after this call, no trace of the NCR remains in the system"
+  ],
+  "notes": [
+    "Deletion is unconditional with respect to NCR status — a 'Closed' NCR can be deleted the same as one in any other status (spec.md FR-011)",
+    "A 404 on one id in a multi-select batch (e.g., another admin already deleted it) does not imply anything about the other ids in that batch — the dashboard issues one independent request per selected NCR and tallies results itself (spec.md FR-009)",
+    "This is a hard, unrecoverable delete — there is no soft-delete/archived flag and no way to undo it through any user-facing feature (spec.md FR-010)"
+  ]
+}
