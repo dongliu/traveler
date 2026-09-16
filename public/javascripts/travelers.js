@@ -11,7 +11,7 @@ sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
 createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn:
 false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn:
 false, deviceColumn: false, fnGetSelected: false, selectEvent: false,
-filterEvent: false, ownerColumn: false, deadlineColumn: false,
+filterEvent: false, ownerColumn: false,
 travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false,
 tagsColumn: false, sDomNoTNoR: false*/
 
@@ -95,7 +95,6 @@ $(function() {
     sharedWithColumn,
     sharedGroupColumn,
     createdOnColumn,
-    deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -123,7 +122,7 @@ $(function() {
     aoColumns: travelerAoColumns,
     aaSorting: [
       [11, 'desc'],
-      [14, 'desc'],
+      [13, 'desc'],
     ],
     sDom: sDomNoTools,
   });
@@ -142,7 +141,6 @@ $(function() {
     sharedGroupColumn,
     createdOnColumn,
     transferredOnColumn,
-    deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -170,7 +168,7 @@ $(function() {
     aaSorting: [
       [10, 'desc'],
       [11, 'desc'],
-      [14, 'desc'],
+      [13, 'desc'],
     ],
     sDom: sDomNoTools,
   });
@@ -188,7 +186,6 @@ $(function() {
     sharedGroupColumn,
     ownerColumn,
     createdOnColumn,
-    deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -215,7 +212,7 @@ $(function() {
     bDeferRender: true,
     aoColumns: sharedTravelerAoColumns,
     aaSorting: [
-      [12, 'desc'],
+      [11, 'desc'],
       [9, 'desc'],
     ],
     sDom: sDomNoTools,
@@ -231,7 +228,6 @@ $(function() {
     sharedGroupColumn,
     ownerColumn,
     createdOnColumn,
-    deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -258,7 +254,7 @@ $(function() {
     bDeferRender: true,
     aoColumns: groupSharedTravelerAoColumns,
     aaSorting: [
-      [12, 'desc'],
+      [11, 'desc'],
       [9, 'desc'],
     ],
     sDom: sDomNoTools,
@@ -273,7 +269,6 @@ $(function() {
     sharedWithColumn,
     sharedGroupColumn,
     createdOnColumn,
-    deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -301,7 +296,7 @@ $(function() {
     aoColumns: archivedTravelerAoColumns,
     aaSorting: [
       [3, 'desc'],
-      [11, 'desc'],
+      [10, 'desc'],
     ],
     sDom: sDomNoTools,
   });

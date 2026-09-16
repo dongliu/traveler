@@ -197,7 +197,7 @@ module.exports = function(app) {
           $exists: false,
         },
       },
-      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping'
+      'title description status devices device tags sharedWith sharedGroup publicAccess locations createdOn updatedOn updatedBy manPower finishedInput totalInput mapping'
     )
       .lean()
       .exec(function(err, docs) {
@@ -220,7 +220,7 @@ module.exports = function(app) {
           $ne: true,
         },
       },
-      'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn transferredOn deadline updatedOn updatedBy manPower finishedInput totalInput'
+      'title description status devices device tags sharedWith sharedGroup publicAccess locations createdOn transferredOn updatedOn updatedBy manPower finishedInput totalInput'
     )
       .lean()
       .exec(function(err, travelers) {
@@ -258,7 +258,7 @@ module.exports = function(app) {
             $ne: true,
           },
         },
-        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
+        'title description status devices device tags locations createdBy createdOn owner updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
       )
         .lean()
         .exec(function(tErr, travelers) {
@@ -304,7 +304,7 @@ module.exports = function(app) {
             $in: travelerIds,
           },
         },
-        'title description status devices tags locations createdBy createdOn owner deadline updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
+        'title description status devices device tags locations createdBy createdOn owner updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
       )
         .lean()
         .exec(function(tErr, travelers) {
@@ -411,7 +411,7 @@ module.exports = function(app) {
     };
     Traveler.find(
       search,
-      'title description status devices locations archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput'
+      'title description status devices device locations archivedOn updatedBy updatedOn sharedWith sharedGroup manPower finishedInput totalInput'
     )
       .lean()
       .exec(function(err, travelers) {
@@ -1033,15 +1033,35 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
-    reqUtils.status('id', [0, 1]),
-    reqUtils.filter('body', ['title', 'description', 'deadline']),
-    reqUtils.sanitize('body', ['title', 'description', 'deadline']),
+    reqUtils.filter('body', [
+      'title',
+      'description',
+      'subsystem',
+      'device',
+      'activity',
+      'machineArea',
+      'sector',
+      'windchillId',
+    ]),
+    reqUtils.sanitize('body', [
+      'title',
+      'description',
+      'subsystem',
+      'device',
+      'activity',
+      'machineArea',
+      'sector',
+      'windchillId',
+    ]),
     function(req, res) {
       const doc = req[req.params.id];
-      if (
-        reqUtils.isOwner(req, doc) ||
-        routesUtilities.checkUserRole(req, 'admin')
-      ) {
+      const isAdmin = routesUtilities.checkUserRole(req, 'admin');
+      if (!isAdmin && [0, 1, 1.5].indexOf(doc.status) === -1) {
+        return res
+          .status(400)
+          .send(`request is not allowed for item ${req.params.id} status ${doc.status}`);
+      }
+      if (reqUtils.isOwner(req, doc) || isAdmin) {
         Object.keys(req.body).forEach(k => {
           doc[k] = req.body[k];
         });
@@ -1154,7 +1174,7 @@ module.exports = function(app) {
     '/travelers/:id/devices/',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
+    reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     reqUtils.filter('body', ['newdevice']),
@@ -1164,10 +1184,14 @@ module.exports = function(app) {
       if (!newdevice) {
         return res.status(400).send('the new device name not accepted');
       }
+      const parts = newdevice.split('/').map(s => s.trim()).filter(Boolean);
+      if (parts.length === 0) {
+        return res.status(400).send('the new device name not accepted');
+      }
       const doc = req[req.params.id];
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      const added = doc.devices.addToSet(newdevice);
+      const added = parts.reduce((acc, part) => acc.concat(doc.devices.addToSet(part)), []);
       if (added.length === 0) {
         return res.status(204).send();
       }
@@ -1177,7 +1201,7 @@ module.exports = function(app) {
           return res.status(500).send(saveErr.message);
         }
         return res.status(200).json({
-          device: newdevice,
+          device: parts.join('/'),
         });
       });
     }
@@ -1187,7 +1211,7 @@ module.exports = function(app) {
     '/travelers/:id/devices/:number',
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
-    reqUtils.isOwnerMw('id'),
+    reqUtils.canWriteMw('id'),
     reqUtils.archived('id', false),
     reqUtils.status('id', [0, 1]),
     function(req, res) {
@@ -1218,7 +1242,7 @@ module.exports = function(app) {
             $in: doc.data,
           },
         },
-        'name value inputType inputBy inputOn'
+        'name value inputType file.mimetype file.encoding inputBy inputOn'
       ).exec(function(dataErr, docs) {
         if (dataErr) {
           logger.error(dataErr);
@@ -1397,6 +1421,69 @@ module.exports = function(app) {
             location: url,
           });
         });
+      });
+    }
+  );
+
+  app.delete(
+    '/travelers/:id/data/:dataId',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canWriteMw('id'),
+    reqUtils.status('id', [1]),
+    async function(req, res) {
+      const doc = req[req.params.id];
+      const { dataId } = req.params;
+      try {
+        const data = await TravelerData.findOne({
+          _id: dataId,
+          traveler: doc._id,
+        });
+        if (!data) {
+          return res.status(404).send('data not found');
+        }
+        if (data.inputType !== 'file') {
+          return res.status(400).send('not a file input');
+        }
+        if (data.file && data.file.path) {
+          fs.unlink(data.file.path, function(unlinkErr) {
+            if (unlinkErr && unlinkErr.code !== 'ENOENT') {
+              logger.error(unlinkErr);
+            }
+          });
+        }
+        doc.data.pull(dataId);
+        doc.updatedBy = req.session.userid;
+        doc.updatedOn = Date.now();
+        await doc.save();
+        await TravelerData.deleteOne({ _id: dataId });
+        return res.status(204).send();
+      } catch (err) {
+        logger.error(err);
+        return res.status(500).send(err.message);
+      }
+    }
+  );
+
+  app.get(
+    '/data/:id/preview',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', TravelerData),
+    function(req, res) {
+      const data = req[req.params.id];
+      if (data.inputType !== 'file' || !data.file || !data.file.path) {
+        return res.status(400).send('not a file');
+      }
+      if (!data.file.mimetype || !/^image\//i.test(data.file.mimetype)) {
+        return res.status(400).send('not an image');
+      }
+      fs.exists(data.file.path, function(exists) {
+        if (!exists) {
+          return res.status(410).send('gone');
+        }
+        res.set('Content-Type', data.file.mimetype);
+        res.set('Content-Disposition', 'inline');
+        return res.sendFile(path.resolve(data.file.path));
       });
     }
   );

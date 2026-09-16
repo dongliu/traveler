@@ -638,7 +638,7 @@ module.exports = function(app) {
                 $in: tids,
               },
             },
-            'title mapping devices tags locations manPower status createdBy owner sharedWith finishedInput totalInput'
+            'title mapping devices device tags locations manPower status createdBy owner sharedWith finishedInput totalInput'
           )
             .lean()
             .exec();

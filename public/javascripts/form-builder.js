@@ -1609,7 +1609,7 @@ function binding_events() {
     $('#modal .modal-body').empty();
     const defaultTitle = $('#formtitle').text();
     $('#modal .modal-body').append(
-      `<form class="form-horizontal" id="modalform"> <div class="control-group"> <label class="control-label">Form title</label> <div class="controls"><input id="release-title" type="text" value="${defaultTitle}" class="input"> </div> </div> </form>`
+      `<form class="form-horizontal" id="modalform"> <div class="control-group"> <label class="control-label">Form title</label> <div class="controls"><input id="release-title" type="text" value="${defaultTitle}" class="input"> </div> </div> <div class="control-group"> <label class="control-label">Subsystem</label> <div class="controls"><input id="release-subsystem" type="text" class="input"> </div> </div> <div class="control-group"> <label class="control-label">Device</label> <div class="controls"><input id="release-device" type="text" class="input"> </div> </div> <div class="control-group"> <label class="control-label">Activity</label> <div class="controls"><input id="release-activity" type="text" class="input"> </div> </div> </form>`
     );
 
     let priorVersionsTable = null;
@@ -1706,6 +1706,9 @@ function binding_events() {
       const title = $('#release-title').val();
       const json = {
         title,
+        subsystem: $('#release-subsystem').val(),
+        device: $('#release-device').val(),
+        activity: $('#release-activity').val(),
       };
       if (discrepancyTable) {
         // get only current page after filtered

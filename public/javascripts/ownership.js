@@ -7,7 +7,7 @@ sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
 createdOnColumn: false, travelerConfigLinkColumn: false,
 travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn: false,
 deviceColumn: false, fnGetSelected: false, selectEvent: false, filterEvent:
-false, deadlineColumn: false, travelerProgressColumn: false, tagsColumn: false,
+false, travelerProgressColumn: false, tagsColumn: false,
 keysColumn: false, fnSelectAll: false, fnDeselect: false */
 
 /* global transferFromModal, modalScroll */
@@ -48,7 +48,6 @@ $(function() {
     sharedWithColumn,
     sharedGroupColumn,
     createdOnColumn,
-    deadlineColumn,
     filledByColumn,
     updatedOnColumn,
     travelerProgressColumn,
@@ -76,7 +75,7 @@ $(function() {
     aoColumns: travelerAoColumns,
     aaSorting: [
       [11, 'desc'],
-      [14, 'desc'],
+      [13, 'desc'],
     ],
     sDom: sDomNoTools,
   });

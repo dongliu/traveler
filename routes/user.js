@@ -404,7 +404,7 @@ module.exports = function(app) {
         };
         const travelers = await Traveler.find(
           search,
-          'title description status devices tags sharedWith sharedGroup publicAccess locations createdOn deadline updatedOn updatedBy manPower finishedInput totalInput mapping'
+          'title description status devices device tags sharedWith sharedGroup publicAccess locations createdOn updatedOn updatedBy manPower finishedInput totalInput mapping'
         )
           .lean()
           .exec();

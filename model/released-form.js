@@ -62,6 +62,11 @@ const releasedForm = new Schema({
   discrepancy: { type: formContent, default: null },
   // ver format: base_v[:discrepancy_v]
   ver: String,
+  // classification metadata, collected at release time; editable afterward
+  // by the owner or admin
+  subsystem: { type: String, default: '' },
+  device: { type: String, default: '' },
+  activity: { type: String, default: '' },
 });
 
 releasedForm.plugin(addVersion, {
@@ -77,6 +82,9 @@ releasedForm.plugin(addHistory, {
     'base',
     'discrepancy',
     '_v',
+    'subsystem',
+    'device',
+    'activity',
   ],
 });
 

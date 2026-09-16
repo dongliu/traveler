@@ -896,23 +896,34 @@ $(function() {
             $this.closest('.control-group-wrap').find('.controls')
           );
         }
-        $history.html(
-          '<strong><a href=' +
-            json.location +
-            ' target="' +
-            linkTarget +
-            '">' +
-            input.files[0].name +
-            '</a></strong> uploaded by you ' +
-            livespan(timestamp, false) +
-            '; ' +
-            $history.html()
-        );
+        var newDataId = json.location.split('/').pop();
+        var newFileMime = input.files[0].type || '';
+        var newFilePreviewCell = /^image\//i.test(newFileMime)
+          ? '<td><button class="btn btn-small btn-info file-preview-btn" type="button"' +
+            ' data-preview-src="' + json.location + '/preview"><i class="fa fa-eye fa-lg"></i></button></td>'
+          : '<td></td>';
+        var newFileRow =
+          '<tr data-data-id="' + newDataId + '">' +
+          '<td><a href="' + json.location + '" class="file-history-link"' +
+          ' download="' + input.files[0].name + '">' + input.files[0].name + '</a></td>' +
+          '<td>' + livespan(timestamp, false) + '</td>' +
+          '<td>you</td>' +
+          newFilePreviewCell +
+          '<td><button class="btn btn-small btn-warning file-history-remove" type="button">' +
+          '<i class="fa fa-trash-o fa-lg"></i></button></td>' +
+          '</tr>';
+        var $fht = $history.find('.file-history-table');
+        if ($fht.length) {
+          $fht.find('tbody').prepend(newFileRow);
+        } else {
+          $history.html(
+            '<table class="table table-condensed file-history-table">' +
+            '<thead><tr><th>File</th><th>Uploaded On</th><th>Uploaded By</th><th></th><th></th></tr></thead>' +
+            '<tbody>' + newFileRow + '</tbody></table>'
+          );
+        }
         // $.livestamp.resume();
-        $(input).siblings('.file-current').remove();
-        $(input).after(
-          '<span class="file-current"><a href="' + json.location + '" target="' + linkTarget + '">' + input.files[0].name + '</a></span>'
-        );
+        $(input).val('');
         $this.closest('.control-group-buttons').remove();
       })
       .fail(function(jqXHR) {
@@ -970,23 +981,38 @@ $(function() {
             livespan(timestamp, false) +
             '</div>'
         );
-        var newRecord =
-          '<strong><a href=' +
-          json.location +
-          ' target="' +
-          linkTarget +
-          '">' +
-          input.files[0].name +
-          '</a></strong> uploaded by you ' +
-          livespan(timestamp, false) +
-          '; ';
+        var newCellDataId = json.location.split('/').pop();
+        var newCellMime = input.files[0].type || '';
+        var newCellPreviewCell = /^image\//i.test(newCellMime)
+          ? '<td><button class="btn btn-small btn-info file-preview-btn" type="button"' +
+            ' data-preview-src="' + json.location + '/preview"><i class="fa fa-eye fa-lg"></i></button></td>'
+          : '<td></td>';
+        var newCellRow =
+          '<tr data-data-id="' + newCellDataId + '">' +
+          '<td><a href="' + json.location + '" class="file-history-link"' +
+          ' download="' + input.files[0].name + '">' + input.files[0].name + '</a></td>' +
+          '<td>' + livespan(timestamp, false) + '</td>' +
+          '<td>you</td>' +
+          newCellPreviewCell +
+          '<td><button class="btn btn-small btn-warning file-history-remove" type="button">' +
+          '<i class="fa fa-trash-o fa-lg"></i></button></td>' +
+          '</tr>';
+        var newCellTable =
+          '<table class="table table-condensed file-history-table">' +
+          '<thead><tr><th>File</th><th>Uploaded On</th><th>Uploaded By</th><th></th><th></th></tr></thead>' +
+          '<tbody>' + newCellRow + '</tbody></table>';
         var $historySection = $tableGroup.find('.table-history-section');
         if ($historySection.length) {
           var $item = $historySection.find(
             '.cell-history-item[data-input-name="' + input.name + '"]'
           );
           if ($item.length) {
-            $item.find('.cell-history-records').prepend(newRecord);
+            var $cellFht = $item.find('.file-history-table');
+            if ($cellFht.length) {
+              $cellFht.find('tbody').prepend(newCellRow);
+            } else {
+              $item.find('.cell-history-records').html(newCellTable);
+            }
           } else {
             var $tbl = $tableGroup.find('.form-table');
             var rowLabel =
@@ -998,7 +1024,7 @@ $(function() {
             $historySection.find('.table-history-content').append(
               '<div class="cell-history-item" data-input-name="' + input.name + '">' +
                 '<strong>' + rowLabel + ' &times; ' + colLabel + ':</strong> ' +
-                '<span class="cell-history-records">' + newRecord + '</span>' +
+                '<span class="cell-history-records">' + newCellTable + '</span>' +
                 '</div>'
             );
           }
@@ -1019,14 +1045,11 @@ $(function() {
               '<div class="table-history-content">' +
               '<div class="cell-history-item" data-input-name="' + input.name + '">' +
               '<strong>' + rowLabel2 + ' &times; ' + colLabel2 + ':</strong> ' +
-              '<span class="cell-history-records">' + newRecord + '</span>' +
+              '<span class="cell-history-records">' + newCellTable + '</span>' +
               '</div></div></div></div>'
           );
         }
-        $(input).siblings('.file-current').remove();
-        $(input).after(
-          '<span class="file-current"><a href="' + json.location + '" target="' + linkTarget + '">' + input.files[0].name + '</a></span>'
-        );
+        $(input).val('');
         if (isFirstSave) incrementFinished();
         $cell.removeClass('table-cell-editing');
         $cell.children('.table-cell-buttons').remove();
@@ -1045,6 +1068,56 @@ $(function() {
         $('#form input,textarea').prop('disabled', false);
         $('#complete').prop('disabled', false);
       });
+  });
+
+  $('#form').on('click', '.file-history-remove', function(e) {
+    e.preventDefault();
+    var $btn = $(this);
+    var $row = $btn.closest('tr');
+    var dataId = $row.data('data-id');
+    $.ajax({
+      url: './data/' + dataId,
+      type: 'DELETE',
+    })
+      .done(function() {
+        var $tbody = $row.closest('tbody');
+        $row.remove();
+        if (!$tbody.children('tr').length) {
+          $tbody.closest('.file-history-table').remove();
+        }
+      })
+      .fail(function(jqXHR) {
+        if (jqXHR.status !== 401) {
+          $('#message').append(
+            '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot remove the file</div>'
+          );
+          $(window).scrollTop($('#message div:last-child').offset().top - 40);
+        }
+      });
+  });
+
+  $('#form').on('click', '.file-preview-btn', function(e) {
+    e.stopPropagation();
+    var $btn = $(this);
+    $('.file-preview-btn').not($btn).filter(function() {
+      return $(this).data('popover');
+    }).popover('hide');
+    if (!$btn.data('popover')) {
+      $btn.popover({
+        trigger: 'manual',
+        placement: 'left',
+        html: true,
+        template: '<div class="popover file-preview-popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
+        content: '<img src="' + $btn.data('preview-src') + '" style="width:500px;height:240px;object-fit:contain;">',
+      });
+    }
+    $btn.popover('toggle');
+  });
+
+  $(document).on('click.file-preview', function() {
+    $('.file-preview-btn').filter(function() {
+      return $(this).data('popover');
+    }).popover('hide');
   });
 
   $('#form').on('click', 'button[value="table-cell-cancel"]', function(e) {
