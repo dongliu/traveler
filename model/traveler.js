@@ -27,7 +27,6 @@ var Binder = mongoose.model('Binder');
  */
 
 var form = new Schema({
-  title: String,
   html: String,
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
@@ -145,9 +144,6 @@ var traveler = new Schema({
   referenceReleasedFormVer: String,
   forms: [form],
   discrepancyForms: [form],
-  // every attached ACL form is rendered and fillable at once, unlike
-  // discrepancyForms which only ever has one "active" entry
-  aclForms: [form],
   mapping: Schema.Types.Mixed,
   labels: Schema.Types.Mixed,
   types: Schema.Types.Mixed,
