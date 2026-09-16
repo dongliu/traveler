@@ -341,12 +341,7 @@ module.exports = function(app) {
           .send(`duplicated input name(s) across the composed forms: ${names}`);
       }
 
-      // compositionKey is based on the underlying form ids (base.base._id /
-      // f.base._id), not the released-form ids, so composing the same base
-      // and ACL forms again after any of them gets a new release is still
-      // treated as a duplicate of the existing active composition, unless
-      // that one is archived first (see the "prior compositions" step)
-      const sortedAclFormIds = orderedAclForms.map(f => `${f.base._id}`).sort();
+      const sortedAclIds = aclFormIds.slice().sort();
       const composed = {};
       composed.title = req.body.title || base.title;
       composed.description = base.description;
@@ -359,8 +354,8 @@ module.exports = function(app) {
         orderedAclForms.map(f => f.ver)
       );
       composed.compositionKey = computeCompositionKey(
-        `${base.base._id}`,
-        sortedAclFormIds
+        `${base._id}`,
+        sortedAclIds
       );
       composed.releasedBy = req.session.userid;
       composed.releasedOn = Date.now();
