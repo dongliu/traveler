@@ -104,14 +104,18 @@ grounded in the code as it exists on the `Ernest` branch.
 
 ## D5 — Performance
 
-- **Decision**: No new index. Validate SC-001 in the quickstart with a realistic data volume.
+- **Decision**: No new index. Validate SC-001 with a realistic data volume (about 5,000 public
+  travelers with realistic embedded forms) **at the User Story 1 gate**, before the filters, CSV,
+  and dashboard build on the pipeline, and again once everything is built.
 - **Rationale**: The computed sort key cannot use an index, and at the stated volume (a few
   thousand public travelers) a project-then-sort over one collection scan is well inside 3
   seconds. Adding an index would change production collections for no measured need. `default_traveler_public_access` is `0` (public read) in
   `config/app_change.json`, so many deployments have a high public fraction, which the volume
   assumption already covers.
-- **Risk / mitigation**: If a deployment holds far more travelers, the escape hatch in D4
-  (persist `updatedOn` at creation plus an index) applies. The counts pipeline reads only `status`
+- **Risk / mitigation**: The riskiest choice is querying without an index, so it is measured
+  early: a failure at the US1 gate is fixed before anything else depends on the pipeline. If a
+  deployment holds far more travelers, the escape hatch in D4 (persist `updatedOn` at creation
+  plus an index) applies. The counts pipeline reads only `status`
   and `archived`, so it is cheap.
 
 ## D6 — Filter parsing and safety
@@ -193,10 +197,10 @@ grounded in the code as it exists on the `Ernest` branch.
   Bootstrap 2 grid classes already in the project. Keep DataTables **only as a row container**
   (paging, filtering, sorting, and the length menu turned off). Paging, page size, and filtering
   are driven by the server through the new endpoint.
-- **Rationale**: The row-selection helpers (`selectEvent`, `fnGetSelected`, `fnSelectAll`,
-  `fnDeselect`) and the binder modal (`AddBinder.addModal`) call DataTables methods such as
-  `fnGetNodes` and `fnGetData`. Keeping a DataTable instance preserves FR-030 with no change to
-  those shared helpers, which other pages also use. `upton`'s NCR dashboard uses a plain table
+- **Rationale**: The row-selection helper (`selectEvent`, `fnGetSelected`) and the binder modal
+  (`AddBinder.addModal`) call DataTables methods such as `fnGetNodes` and `fnGetData`. Keeping a
+  DataTable instance preserves FR-030 (generate report, add to binder) with no change to those
+  shared helpers, which other pages also use. `upton`'s NCR dashboard uses a plain table
   with inline script; here a static module file follows Constitution V and the existing page.
 - **Details**:
   - **Escaping**: all record values are escaped before insertion, because titles, tags, and the
@@ -207,6 +211,11 @@ grounded in the code as it exists on the `Ernest` branch.
     renders, so rapid filter changes cannot show old results.
   - **CSV download**: navigate to `/publictravelers/list?format=csv&<current filters>` with no
     paging parameters, so it returns every matching traveler (FR-029).
+  - **Select all / Select none dropped**: the dashboard has no such buttons (clarified with the
+    maintainer), so the `fnSelectAll` / `fnDeselect` handlers are not carried over. The report
+    and add-to-binder handlers reach the table by id (`$('#public-travelers-table')`) instead of
+    through today's `#publictravelers.table.active` wrapper, so the rewritten view needs no
+    wrapper.
   - **Columns dropped**: per-column sorting, sharing, keys, and filled-by columns, per the spec's
     assumption. The status column shows the effective status name; a local column is needed
     because `statusColumn` and `travelerProgressColumn` read a numeric `status`.
@@ -215,11 +224,17 @@ grounded in the code as it exists on the `Ernest` branch.
 
 - **Decision**: Add `views/docs/api/public-travelers.md` and include it from
   `views/docs/api.jade` (which the `/docs/` page pulls in through `views/doc-in-one.jade`). Add `test/lib/public-travelers-test.js` (parsing, pipeline building,
-  record mapping, CSV, and `list` against a fake model) plus handler smoke tests that call the
-  factory's handler with stub `req`/`res` (no supertest needed; the project has none).
+  record mapping, CSV, and `list` against a fake model) plus **real-HTTP handler smoke tests**:
+  a tiny Express app on an ephemeral port mounts the factory's handler with a fake model, and the
+  tests call it with Node's built-in `http` (no supertest or other new dependency; the project has
+  none). Also add `publicAccessMatch` tests to `test/lib/req-utils-test.js`.
 - **Rationale**: The constitution requires tests for new `lib/` functions and a happy-path smoke
   test for new routes. The existing tests are dependency-free unit tests run with mocha, and
-  the fake-model approach follows that.
+  the fake-model approach follows that. Real HTTP is used for the smoke tests because Express
+  parses the query string itself: `subsystem[$ne]=x` reaches the handler as an object, which is
+  exactly the injection case D6 defends against, and a stubbed `req` cannot show that. Route
+  mounting and authentication are still checked by the quickstart, since the route files load
+  config, auth, and models at import and are brittle to import in a unit test.
 - **Environment note**: `npx mocha test/lib/` fails before this feature on
   `test/lib/ldap-client-test.js` (`Cannot find module '../../config/ad.json'`, a git-ignored
   config file). Run the new and related test files explicitly; the quickstart does.
@@ -230,3 +245,51 @@ grounded in the code as it exists on the `Ernest` branch.
   `??`. The project uses Prettier 1.19, so run `npx prettier --write` on touched files. New lib
   functions stay under the project's complexity limit of 20 by keeping parse, build, and format
   steps separate.
+
+## D14 — The public-tier match is shared, and follows the configured default
+
+- **Decision**: Export `publicAccessMatch(defaultAccess)` from `lib/req-utils.js`, next to
+  `getAccess`, and use it in the first `$match` of every pipeline in `lib/public-travelers.js`.
+  `defaultAccess` defaults to `config.app.default_traveler_public_access` (tests pass it
+  explicitly). When that default is `0` or `1` the match is
+  `{$or: [{publicAccess: {$in: [0, 1]}}, {publicAccess: {$exists: false}}]}`; otherwise it is
+  `{publicAccess: {$in: [0, 1]}}`. The result is combined with the other conditions under `$and`
+  so its `$or` cannot collide with the date-range `$or`.
+- **Rationale**:
+  - **Principle II.** The constitution wants access patterns to fit the permission hierarchy and
+    extend it "through shared middleware — never around it". A predicate private to a new lib file
+    sits beside the hierarchy rather than in it. Putting the rule in `lib/req-utils.js`, where
+    `getAccess` defines the tiers, keeps the definition of "public" in one place.
+  - **Legacy travelers.** `getAccess` reads `doc.publicAccess` from a hydrated Mongoose document.
+    A path that is missing from the stored document takes the schema default
+    (`appConfig.default_traveler_public_access`, `0` in `config/app_change.json`), so an old
+    traveler with no stored value is publicly readable. A database query only sees stored values,
+    so the query behind today's page (`{publicAccess: {$in: [0, 1]}}`) never lists such a
+    traveler. Matching the missing field when the default is public makes the listing agree with
+    what people can actually read. A stored `null` is *not* defaulted by Mongoose, so it stays
+    non-public: the match uses `$exists: false`, not `null`.
+- **Difference from today's page**: legacy travelers with no stored value now appear whenever the
+  configured default is public. This is the intended correction, recorded in the spec's
+  Clarifications and Assumptions.
+- **Alternatives considered**: *Keep the predicate inside the lib with a comment and a pinning
+  test*: rejected because the rule could still drift from `getAccess`. *Match stored values only,
+  as today's page does, and document the gap*: rejected because those travelers are readable
+  but not listed. *Count the affected documents first
+  (`db.travelers.countDocuments({publicAccess: {$exists: false}})`)*: still worth running, but it
+  no longer decides the design.
+
+## D15 — A missing status counts as initialized
+
+- **Decision**: The effective status is `archived` (4) when the traveler is archived, otherwise
+  the stored status when it is one of 1, 1.5, 2, or 3, and otherwise `0` (initialized). No
+  "unknown" status exists. The counts `$group` id uses that expression, and the *initialized*
+  status match is `{archived: {$ne: true}, status: {$nin: [1, 1.5, 2, 3, 4]}}`, which also matches
+  a document with no `status`.
+- **Rationale**: `total` is the sum of the per-status counts and the items pipeline lists every
+  matching traveler, so a traveler that no status group counted would appear in the pages but not
+  in `total`, breaking SC-003 and SC-009. The schema default for `status` is `0`, so a missing value
+  is initialized in every other respect. Only legacy documents with no `status` field are affected,
+  and the state machine cannot produce any other value.
+- **Alternatives considered**: *Report `unknown` and add an Unknown card*: more transparent about
+  bad data but adds an API key and a UI element for a rare case. *Accept the mismatch*: rejected
+  because it makes the paging and totals claims false for those records.

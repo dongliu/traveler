@@ -87,6 +87,8 @@ time), ties broken by id so paging is repeatable.
   `includeArchived`).
 - `limit` is the page size actually applied.
 - A page beyond the last returns `travelers: []` with the correct `total`.
+- A traveler with no recorded status is reported, filtered, and counted as `initialized`, so
+  `total`, the pages, and `statusCounts` always agree.
 
 ## Response: CSV (`200`)
 
@@ -139,9 +141,13 @@ No partial data is returned with an error.
 ## Access rules
 
 - Only travelers with public read or write access are ever returned, for every caller including
-  owners and admins (they see non-public travelers through the existing lists).
-- The visibility predicate is applied inside the shared library; neither route can widen it, and
-  no query parameter can change it.
+  owners and admins (they see non-public travelers through the existing lists). A traveler with no
+  stored public-access value counts as public when the application's configured default for new
+  travelers is read or write, exactly as it does everywhere else in the application; a stored
+  "none" (or `null`) is never listed.
+- The visibility rule is one shared helper (`publicAccessMatch()` in `lib/req-utils.js`, next to
+  `getAccess`), applied inside the shared library; neither route can widen it, and no query
+  parameter can change it.
 
 ## Examples
 

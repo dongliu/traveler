@@ -49,16 +49,28 @@ Computed from the stored `archived` flag and `status`:
 |---|---|---|
 | `archived === true` **or** `status === 4` | `4` | `archived` |
 | otherwise `status` | `0` / `1` / `1.5` / `2` / `3` | `initialized` / `active` / `submitted for completion` / `completed` / `frozen` |
-| `status` missing or not in the map | none | `unknown` (not counted in `statusCounts`) |
+| `status` missing, or not one of the above (and not archived) | `0` | `initialized` |
 
-Names come from `statusMap` exported by `model/traveler.js`. This is the same rule the existing
-`/archivedtravelers/json` route uses to find archived travelers.
+Names come from `statusMap` exported by `model/traveler.js`. The archived rule is the same one the
+existing `/archivedtravelers/json` route uses. There is no "unknown" status: `0` is the schema
+default for `status`, so a traveler with no recorded status is initialized, and `total`, the
+pages, and the counts always agree (research D15).
 
 ## Public access (the visibility rule)
 
 A traveler is public when `publicAccess ∈ {0, 1}` (public read or public write); `-1` means no
-public access. This is the same predicate today's page uses. It is part of every pipeline's first
-`$match` and is not caller-configurable, so no request can widen it (FR-001, SC-005).
+public access. The match comes from one shared helper, `publicAccessMatch()` in `lib/req-utils.js`
+next to `getAccess` (research D14):
+
+- Default for new travelers is `0` or `1` (the configured `default_traveler_public_access`):
+  `{$or: [{publicAccess: {$in: [0, 1]}}, {publicAccess: {$exists: false}}]}`. A traveler with no
+  stored value takes that default when the application loads it, so it is public everywhere else
+  and is listed here. A stored `null` or `-1` is not public.
+- Any other default: `{publicAccess: {$in: [0, 1]}}`.
+
+It is combined under `$and` with the other conditions in every pipeline's first `$match` and is
+not caller-configurable, so no request can widen it (FR-001, SC-005). This differs from today's
+page only for legacy travelers with no stored value.
 
 ## Listing Query
 
@@ -100,14 +112,16 @@ returns every matching record).
 
 ## Query construction (shape only)
 
-Let `F` be the raw-field filters (public access, archived rule, six text filters, tags, and the
-date range), and `S` the status match. All values are built typed by the lib.
+Let `F` be the raw-field filters (the public-tier match, archived rule, six text filters, tags,
+and the date range, combined under `$and`), and `S` the status match. All values are built typed
+by the lib.
 
 - **Archived rule** (effective include-archived false): `{archived: {$ne: true}, status: {$ne: 4}}`.
   When true, no archived restriction is added.
-- **Status match `S`** for a set of codes: non-archived codes match
-  `{archived: {$ne: true}, status: {$in: [...non-4 codes]}}`; code `4` matches
-  `{$or: [{archived: true}, {status: 4}]}`; multiple parts are OR-ed.
+- **Status match `S`** for a set of codes, OR-ed together: codes 1, 1.5, 2, 3 match
+  `{archived: {$ne: true}, status: {$in: [...]}}`; code `0` (initialized) matches
+  `{archived: {$ne: true}, status: {$nin: [1, 1.5, 2, 3, 4]}}`, which includes a missing status;
+  code `4` matches `{$or: [{archived: true}, {status: 4}]}`.
 - **Date range**: `{$or: [{updatedOn: {$gte: from, $lte: to}}, {updatedOn: null, createdOn: {$gte: from, $lte: to}}]}`,
   with either bound omitted when not supplied.
 
@@ -116,7 +130,8 @@ Pipelines:
 1. **Items**: `$match(F ∧ S)` → `$project(record fields, _sortKey = ifNull(updatedOn, createdOn))` →
    `$sort({_sortKey: -1, _id: -1})` → `$skip` → `$limit`. `allowDiskUse: true`.
 2. **Counts**: `$match(F)` → `$group({_id: effectiveStatusExpr, n: {$sum: 1}})`, where
-   `effectiveStatusExpr = $cond([archived == true OR status == 4], 4, $status)`.
+   `effectiveStatusExpr` = `4` when `archived == true` or `status == 4`, else `$status` when it is
+   one of 1, 1.5, 2, 3, else `0`.
 
 The items and counts pipelines run in parallel and are not transactional; a write landing between
 them can make `total` differ by one from the items shown, which is acceptable for a listing.

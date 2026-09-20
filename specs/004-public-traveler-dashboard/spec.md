@@ -8,6 +8,14 @@
 
 **Input**: User description: "create an API lib that 1) can list all the public travelers with paging option sorted by update timestamp; 2) can support output of json or CSV; 3) includes the following properties: title, status, createdBy, createdOn, updatedBy, updatedOn,archivedOn, owner, tags, totalInput, finishedInput, subsystem, device, activity, machineArea, sector, windchillId; 4) support query by update timestamp range, subsystem, device, activity, machineArea, sector, windchillId, status, tags. Based on the API, the public traveler page at views/public-travelers.jade can transformed into a dashboard like views/ncr-dashboard.jade in the `upton` branch. Clarify if needed."
 
+## Clarifications
+
+### Session 2026-09-20
+
+- Q: A traveler with no stored public-access value: is it listed? → A: Follow the application's configured default for new travelers. When that default is read or write, such a traveler is public (it is treated as public everywhere else in the application) and is listed. A traveler whose stored value is "none" is never listed.
+- Q: A traveler with no recorded status: how is it counted? → A: As initialized, the default status for new travelers, so it is listed, filtered, and counted like any initialized traveler and totals, pages, and cards always agree.
+- Q: Should the dashboard keep the Select all and Select none buttons? → A: No. Users pick rows with each row's own checkbox; Generate report and Add to binder work on the rows picked.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Retrieve public travelers a page at a time, newest update first (Priority: P1)
@@ -87,7 +95,7 @@ A signed-in user opens the public travelers page and sees a dashboard modeled on
 4. **Given** more results than fit on a page, **When** the user moves next or previous, **Then** the adjacent page is shown. The previous control is disabled on the first page and the next control on the last.
 5. **Given** a traveler in the table, **When** the user selects its title, **Then** that traveler opens.
 6. **Given** applied filters, **When** the user chooses to download CSV, **Then** the file contains every traveler matching the filters, not just the current page.
-7. **Given** selected rows, **When** the user chooses "Generate report" or "Add to binder", **Then** the action runs on the selected travelers exactly as it does today. "Select all" and "Select none" continue to act on the rows in the current view.
+7. **Given** selected rows, **When** the user chooses "Generate report" or "Add to binder", **Then** the action runs on the selected travelers exactly as it does today. Rows are selected with their own checkboxes.
 8. **Given** the option to include archived travelers is turned on, **When** filters are applied, **Then** archived public travelers appear and their archive date is shown.
 9. **Given** the data cannot be loaded, **When** the dashboard tries to load it, **Then** a clear message says so and the user can retry. The table is not silently left blank.
 10. **Given** filters that match nothing, **When** they are applied, **Then** the dashboard shows a "no matching travelers" message.
@@ -122,6 +130,7 @@ Above the table, the dashboard shows a summary card for "All" and for each trave
 - **Traveler with no update timestamp**: sorted using its creation timestamp.
 - **Traveler updated while someone is paging**: the user may see it move between pages on later requests. This is expected, and no error occurs.
 - **Traveler with no total inputs**: its progress shows as not applicable rather than a divide-by-zero or a misleading percentage.
+- **Traveler with no recorded status**: listed, filtered, and counted as initialized, so totals, pages, and cards always agree.
 - **Filtering on a property a traveler has left blank**: that traveler does not match a filter on that property.
 - **Public access removed from a traveler**: the traveler no longer appears in any later request.
 - **Archived card with archived travelers excluded**: the dashboard's "archived" summary card is shown only when archived travelers are included, so a card never shows a count that its own selection would contradict.
@@ -173,7 +182,7 @@ Above the table, the dashboard shows a summary card for "All" and for each trave
 - **FR-027**: The dashboard MUST show a paged table with previous and next controls, a range indicator (such as "26–50 of 132"), and a choice of page sizes. The table MUST show the title as a link to the traveler, status, progress (finished of total inputs), subsystem, device, activity, machine area, sector, Windchill ID, tags, owner, created by/on, and updated by/on, plus the archive date when archived travelers are included.
 - **FR-028**: The dashboard MUST show summary cards for "All" and each status, with counts per FR-022. Selecting a card MUST filter the table to that status and highlight the card. The other filters MUST keep updating all the cards. The "archived" card MUST appear only when archived travelers are included.
 - **FR-029**: The dashboard MUST offer a CSV download of every traveler matching the current filters, not only the current page.
-- **FR-030**: The dashboard MUST keep the existing bulk actions: select all and select none in the current view, generate a report for selected travelers, and add selected travelers to a binder.
+- **FR-030**: The dashboard MUST keep the existing bulk actions on rows the user selects with their checkboxes: generate a report for the selected travelers, and add the selected travelers to a binder. It does not need Select all or Select none buttons.
 - **FR-031**: The dashboard MUST show a loading indicator while data loads, a clear message with a retry option when loading fails, and a "no matching travelers" message when nothing matches.
 
 ### Key Entities
@@ -193,12 +202,12 @@ Above the table, the dashboard shows a summary card for "All" and for each trave
 - **SC-005**: Zero travelers without public access appear in any output (JSON, CSV, or dashboard), and zero unauthenticated requests receive traveler data.
 - **SC-006**: A CSV file opens in common spreadsheet applications with every value in its correct column, text containing commas, quotes, and line breaks intact, and no cell interpreted as a formula from user-entered text.
 - **SC-007**: A dashboard user can find a specific traveler by combining filters in under 30 seconds without leaving the page.
-- **SC-008**: 100% of the bulk actions available on today's public travelers page (select all, select none, generate report, add to binder) remain available and work on dashboard selections.
+- **SC-008**: Both bulk actions the dashboard keeps from today's public travelers page (generate report, add to binder) remain available and work on rows selected on the dashboard.
 - **SC-009**: On the dashboard, the per-status counts add up to the "All" count for every filter combination.
 
 ## Assumptions
 
-- **What "public" means**: a traveler is public when its public access is set to read or write, the same rule the current public travelers page uses. The listing never reveals travelers with no public access, even to their owners or administrators. Those users see them through the existing traveler lists.
+- **What "public" means**: a traveler is public when its public access is set to read or write, the same rule the current public travelers page uses. A traveler that has no stored public-access value counts as public whenever the application's configured default for new travelers is read or write, because that is the value the rest of the application applies to it; a stored value of "none" is never public. The listing never reveals travelers with no public access, even to their owners or administrators. Those users see them through the existing traveler lists.
 - **Archived travelers**: excluded by default, matching today's page, and included through an opt-in option or by filtering on the "archived" status. A traveler counts as archived if it has been marked archived or has the archived status, the same rule the existing archived-travelers list uses. An archived traveler is always reported with the status "archived", whatever status it had before, so each traveler falls under exactly one status card. Its archive date is shown only while it is marked archived, because a date left over from an earlier archive must not appear on a traveler that has since been restored. One consequence: a traveler with the archived status that is not marked archived, which today's page still lists, is hidden by default.
 - **Who can call it**: signed-in application users, using the same sign-in as the rest of the application, and external systems using the existing API credentials. Anonymous access is out of scope, and "public" refers to the traveler's access setting, not to being reachable without signing in. One shared listing capability serves both audiences so the data is always identical.
 - **Volume and paging defaults**: the collection is expected to stay within a few thousand public travelers. The default page size is 25 and the maximum is 500, which is enough at that volume.
@@ -208,6 +217,7 @@ Above the table, the dashboard shows a summary card for "All" and for each trave
 - **People properties**: createdBy, updatedBy, and owner are shown as recorded in the system (user IDs), with no lookup of display names.
 - **Extra identifier property**: a stable traveler identifier is included in addition to the 17 requested properties, because the dashboard needs it to link and select travelers and because CSV consumers need a reliable key.
 - **Sort order**: newest update first is the only ordering offered. Sorting by other columns is out of scope, so the dashboard drops the per-column sorting and the sharing and key columns that today's page has. That information is still available on each traveler.
+- **Bulk selection**: the dashboard has no Select all or Select none buttons; users pick rows with each row's checkbox, and the report and binder actions work on the rows picked.
 - **Existing traveler data**: the six classification properties come from the metadata already added to travelers (feature 003). Travelers created before that feature simply have them empty.
 - **Existing endpoints**: the current public travelers data endpoint that feeds today's page is retired, since the dashboard replaces its only user. The existing API endpoint that lists travelers is unchanged.
 - **Owner**: where a traveler has no explicit owner, its creator is reported as the owner, as the rest of the application treats ownership.

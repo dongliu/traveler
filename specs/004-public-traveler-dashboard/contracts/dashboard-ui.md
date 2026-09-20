@@ -7,7 +7,8 @@ Bootstrap 2 styling, status names, and column set. Exact pixel design is left to
 
 ## Regions, top to bottom
 
-1. **Toolbar**: Select all, Select none, Generate report, Add to binder, Download CSV.
+1. **Toolbar**: Generate report, Add to binder, Download CSV. There are no Select all / Select
+   none buttons; rows are selected with their own checkboxes.
 2. **Message area** (`#message`): where the shared `ajax401` helper writes errors.
 3. **Status cards**: "All" plus one card per status, each with a count.
 4. **Filter bar**: the filters below, with Apply and Clear.
@@ -67,7 +68,6 @@ included).
 
 | Action | Behavior |
 |---|---|
-| Select all / Select none | Act on the rows in the current view, exactly as today. |
 | Generate report | Posts the selected rows' `_id`s to `/travelers/report/` (unchanged form). With nothing selected, shows the existing "no traveler has been selected" alert. |
 | Add to binder | Opens the existing binder modal for the selected rows (`AddBinder.addModal`). |
 | Download CSV | Navigates to `/publictravelers/list?format=csv` plus the current filters and status, with **no** `page` or `limit`, so the file holds every matching traveler. |
@@ -84,6 +84,8 @@ included).
 ## Preserved from today's page
 
 Address, the traveler link target (`viewConfig.linkTarget`), the binder and report flows, and the
-`#modal` markup. Removed: per-column sorting and the column filters, the "shared with" and
-"shared group" columns, the reporting-ID (keys) column, and the "filled by" column (recorded in the
-spec's Assumptions).
+`#modal` markup. Removed: the Select all / Select none buttons, per-column sorting and the column
+filters, the "shared with" and "shared group" columns, the reporting-ID (keys) column, and the
+"filled by" column (recorded in the spec's Assumptions). The old `#publictravelers.table.active`
+wrapper is not kept: the report and add-to-binder handlers reach the table by id
+(`#public-travelers-table`).

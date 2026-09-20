@@ -20,13 +20,15 @@ In the commands below, `$API` is `https://<host>:<api-port>` with `-u <api-user>
 
 ```bash
 npx mocha test/lib/public-travelers-test.js test/lib/csv-test.js test/lib/req-utils-test.js
-npx eslint lib/public-travelers.js routes/traveler.js routes/api.js public/javascripts/public-travelers.js
-npx prettier --check "lib/public-travelers.js" "test/lib/public-travelers-test.js"
+npx eslint lib/public-travelers.js lib/req-utils.js lib/csv.js routes/traveler.js routes/api.js public/javascripts/public-travelers.js
+npx prettier --check "lib/public-travelers.js" "lib/req-utils.js" "test/lib/public-travelers-test.js"
 ```
 
 Expected: all pass, with no lint errors. The new test file covers query parsing and validation,
 pipeline construction, record mapping (effective status, owner fallback, `archivedOn` rule), CSV
-escaping and formula neutralization, `list` against a fake model, and the handler smoke tests.
+escaping and formula neutralization, `list` against a fake model, and the handler smoke tests,
+which send real HTTP requests to a tiny Express app on an ephemeral port (so Express itself parses
+the query string). `test/lib/req-utils-test.js` also covers `publicAccessMatch`.
 
 > `npx mocha test/lib/` (the whole directory) fails **before and after** this feature on
 > `test/lib/ldap-client-test.js` (`Cannot find module '../../config/ad.json'`, a git-ignored
@@ -47,6 +49,9 @@ these cases (only the fields that matter are listed; leave the rest at their def
 | F | `Status four` | 0 | 4 | false | archived by status, no flag |
 | G | `=SUM(A1), "draft"` | 0 | 2 | false | formula + comma + quote in the title |
 | H | `Legacy` | 0 | 1 | false | **no** subsystem/device/etc. and no `owner` |
+| I | `No access field` | *(field absent)* | 1 | false | insert **without** the `publicAccess` key; listed only when `default_traveler_public_access` is 0 or 1 |
+| J | `No status field` | 0 | *(field absent)* | false | insert **without** the `status` key; must count as initialized |
+| K | `Stored null` | `null` | 1 | false | `publicAccess` stored as an explicit `null`; must never appear |
 
 Then add 60 more public, non-archived travelers with distinct `updatedOn` values for paging
 (a short `mongosh` loop that runs `db.travelers.insertMany(...)` is enough).
@@ -57,7 +62,7 @@ Each scenario lists the spec item it proves.
 
 | # | Run | Expect |
 |---|---|---|
-| 1 | `curl $API/apis/publictravelers/` | 200 JSON `{travelers,page:1,limit:25,total,statusCounts}`. **C** is first (newest by creation time); **D**, **E**, **F** absent; every record has all keys (US1, SC-002, SC-005). |
+| 1 | `curl $API/apis/publictravelers/` | 200 JSON `{travelers,page:1,limit:25,total,statusCounts}`. **C** is first (newest by creation time); **D**, **E**, **F**, **K** absent; **I** and **J** present; every record has all keys (US1, SC-002, SC-005). |
 | 2 | Page through the 60+ set at `limit=25` (`page=1,2,3…`) | Pages hold 25, 25, remainder; no traveler repeats or is skipped; order is descending by update time (US1, SC-003). |
 | 3 | `page=999` | 200, `travelers: []`, correct `total` (US1). |
 | 4 | `updatedFrom=2026-09-01&updatedTo=2026-09-15` | Only travelers updated in that window, including **A** (14 Sept) and **B**; the end date's whole day counts (US2). |
@@ -78,6 +83,8 @@ Each scenario lists the spec item it proves.
 | 19 | Same query from `$WEB/publictravelers/list` (signed in) | Same records as the REST call; the CSV differs only by a leading BOM (FR-023). |
 | 20 | **H** in JSON | `subsystem`, `device`, `activity` etc. are `""`, and `owner` equals `createdBy` (data-model). |
 | 21 | Set a traveler to `publicAccess: -1` | It disappears from the next request. |
+| 22 | List, then look for **I** and **K** | With `default_traveler_public_access` at 0 or 1: **I** (no stored value) is listed and **K** (stored `null`) never is. Set the default to `-1`, restart, and **I** disappears (spec Clarifications; research D14). |
+| 23 | **J** in the list, then `status=initialized` | **J** reports `status: "initialized"`, `statusCode: 0`, appears under `status=initialized`, and is counted in `statusCounts.initialized`; the counts sum to `total` (research D15, SC-009). |
 
 Open the CSV in Excel or Numbers: columns align, the comma/quote title stays in one cell, and
 **G** displays as text rather than a formula (SC-006).
@@ -98,9 +105,9 @@ Open `$WEB/publictravelers/`.
 6. Click a title: the traveler opens (US4-5).
 7. **Download CSV** with a filter active: the file holds all matching rows, not just the visible
    page (US4-6, FR-029).
-8. Select a few rows, then **Generate report** and **Add to binder**: both work as before; with
-   nothing selected the existing alert appears. **Select all/none** act on the visible rows
-   (US4-7, SC-008).
+8. Tick a few rows with their checkboxes, then **Generate report** and **Add to binder**: both
+   work as before; with nothing selected the existing alert appears. There are no Select all /
+   Select none buttons (US4-7, SC-008).
 9. Stop the server (or block the request) and Apply a filter: an error with a Retry control
    appears and the table isn't blanked (US4-9).
 10. Apply a filter that matches nothing: "No public travelers match the current filters." appears
@@ -121,11 +128,16 @@ Open `$WEB/publictravelers/`.
 
 ## 6. Performance (SC-001)
 
+Run this **twice**: at the User Story 1 gate, before the filters, CSV, and dashboard are built on
+the pipeline, and again when everything is built. It is the riskiest choice in the design (no
+index, computed sort key), so a failure should be found early.
+
 With roughly 5,000 public travelers loaded (a `mongosh` loop that clones a representative
 document; include realistic embedded `forms` so document size is representative):
 
-- `time curl` for page 1, a filtered page, and `format=csv` with no paging should each finish in
-  under 3 seconds.
+- At the US1 gate: `time curl` for page 1, a deep page (for example `page=100&limit=50`), and
+  `limit=500` should each finish in under 3 seconds.
+- At the end: also a filtered page and `format=csv` with no paging, each under 3 seconds.
 - Watch the server log during the run for "Sort exceeded memory limit" errors; there should be
   none.
 
