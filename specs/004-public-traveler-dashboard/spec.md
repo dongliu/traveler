@@ -163,7 +163,7 @@ Above the table, the dashboard shows a summary card for "All" and for each trave
 
 **Access**
 
-- **FR-023**: The listing MUST require authentication. Signed-in application users and consumers with valid API credentials MUST be served, and everyone else MUST be denied without any traveler data being disclosed. The two kinds of requester MUST get identical results for identical requests.
+- **FR-023**: The listing MUST require authentication. Signed-in application users and consumers with valid API credentials MUST be served, and everyone else MUST be denied without any traveler data being disclosed. The two kinds of requester MUST get the same travelers, in the same order, with the same values, for identical requests. (The only permitted difference is that a CSV downloaded from the dashboard may carry a leading encoding marker so spreadsheet applications read international characters correctly.)
 - **FR-024**: The listing MUST be read-only. It MUST NOT change any traveler.
 
 **Dashboard**
@@ -199,8 +199,8 @@ Above the table, the dashboard shows a summary card for "All" and for each trave
 ## Assumptions
 
 - **What "public" means**: a traveler is public when its public access is set to read or write, the same rule the current public travelers page uses. The listing never reveals travelers with no public access, even to their owners or administrators. Those users see them through the existing traveler lists.
-- **Archived travelers**: excluded by default, matching today's page, and included through an opt-in option or by filtering on the "archived" status. A traveler counts as archived if it has been archived (it has an archive date or the archived status). Planning will settle how the two indications map onto each other.
-- **Who can call it**: signed-in application users, using the same sign-in as the rest of the application, and external systems using the existing API credentials. Anonymous access is out of scope, and "public" refers to the traveler's access setting, not to being reachable without signing in. One shared listing capability serves both audiences so results are always identical.
+- **Archived travelers**: excluded by default, matching today's page, and included through an opt-in option or by filtering on the "archived" status. A traveler counts as archived if it has been marked archived or has the archived status, the same rule the existing archived-travelers list uses. An archived traveler is always reported with the status "archived", whatever status it had before, so each traveler falls under exactly one status card. Its archive date is shown only while it is marked archived, because a date left over from an earlier archive must not appear on a traveler that has since been restored. One consequence: a traveler with the archived status that is not marked archived, which today's page still lists, is hidden by default.
+- **Who can call it**: signed-in application users, using the same sign-in as the rest of the application, and external systems using the existing API credentials. Anonymous access is out of scope, and "public" refers to the traveler's access setting, not to being reachable without signing in. One shared listing capability serves both audiences so the data is always identical.
 - **Volume and paging defaults**: the collection is expected to stay within a few thousand public travelers. The default page size is 25 and the maximum is 500, which is enough at that volume.
 - **CSV size**: a CSV request without paging returns the complete matching set, which is acceptable at the expected volume.
 - **Matching rules**: the six classification filters match partial text, ignoring letter case, because these are free-text fields with no fixed vocabulary. Tags match whole labels, ignoring letter case, because they are discrete labels. All supplied filters combine as "and".
@@ -209,6 +209,7 @@ Above the table, the dashboard shows a summary card for "All" and for each trave
 - **Extra identifier property**: a stable traveler identifier is included in addition to the 17 requested properties, because the dashboard needs it to link and select travelers and because CSV consumers need a reliable key.
 - **Sort order**: newest update first is the only ordering offered. Sorting by other columns is out of scope, so the dashboard drops the per-column sorting and the sharing and key columns that today's page has. That information is still available on each traveler.
 - **Existing traveler data**: the six classification properties come from the metadata already added to travelers (feature 003). Travelers created before that feature simply have them empty.
-- **Existing endpoints**: the current public travelers data endpoint that feeds today's page may be retired once the dashboard uses the new listing. Whether to remove it or leave it in place is a planning decision.
+- **Existing endpoints**: the current public travelers data endpoint that feeds today's page is retired, since the dashboard replaces its only user. The existing API endpoint that lists travelers is unchanged.
+- **Owner**: where a traveler has no explicit owner, its creator is reported as the owner, as the rest of the application treats ownership.
 - **Dashboard visual design**: it follows the NCR dashboard on the `upton` branch (summary cards, filter bar, paged table, previous/next navigation) but uses the traveler status names and this application's existing look and feel. Pixel-level layout is left to design.
 - **Out of scope**: changing travelers through the API, saved filters, sharing filtered views by link, scheduled or emailed exports, and per-user column choices.

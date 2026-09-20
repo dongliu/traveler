@@ -44,9 +44,9 @@
   - partial text match for the six classification fields, whole-label match for tags, all tags required
   - page size default 25 and maximum 500
   - dashboard drops per-column sorting and the sharing/key columns of the current page, and keeps select/report/add-to-binder
-- **Items for `/speckit-plan` to settle** (recorded in Assumptions, not spec gaps):
-  - how the archived flag and the archived status map onto each other
-  - whether to retire the current public travelers data endpoint
-  - how the shared listing capability is exposed to the web app and to the separate API server, given the two-server separation principle in the constitution
+- **Items deferred to `/speckit-plan`** (all settled there; see `research.md`, and the spec's Assumptions were updated to match):
+  - how the archived flag and the archived status map onto each other: D3
+  - whether to retire the current public travelers data endpoint: D2 (retired)
+  - how the shared listing capability is exposed to the web app and to the separate API server, given the two-server separation principle in the constitution: D1
 - **Dependency**: relies on the six classification properties added by feature 003 (form-traveler-metadata).
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.
