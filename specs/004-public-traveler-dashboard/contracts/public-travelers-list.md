@@ -128,10 +128,10 @@ Errors are JSON, `{ "error": "<message>" }`, whatever `format` was requested.
 
 | Status | Condition | Example message |
 |---|---|---|
-| `400` | Invalid `page` / `limit` | `page must be an integer between 1 and 100000` |
+| `400` | Invalid `page` / `limit` | `page must be an integer between 1 and 100000`, `limit must be a whole number of 1 or more` |
 | `400` | Unparseable date, or `updatedFrom` after `updatedTo` | `updatedFrom must be a date (YYYY-MM-DD) or an ISO 8601 timestamp` |
 | `400` | Unknown `status` value | `unknown status "done"; use one of: initialized, active, submitted for completion, completed, frozen, archived (or codes 0, 1, 1.5, 2, 3, 4)` |
-| `400` | Unknown `format`, invalid `includeArchived`, over-long text filter, or a non-string value | `format must be json or csv` |
+| `400` | Unknown `format`, invalid `includeArchived`, over-long text filter, a non-string value, or a value with a null character | `format must be json or csv`, `subsystem must not contain a null character` |
 | `401` (REST) | Missing or unknown credentials | Empty body, `WWW-Authenticate: Basic realm="api"` |
 | redirect (web) | No session | Standard login redirect from `auth.ensureAuthenticated` |
 | `500` | Unexpected failure | `{ "error": "internal error" }`; details go to the application log only |

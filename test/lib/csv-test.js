@@ -284,4 +284,51 @@ describe('csv', function() {
       output.should.not.match(/Traveler Status,1(\n|$)/);
     });
   });
+
+  describe('#neutralizeFormula', function() {
+    it('should prefix a single quote to text that starts a formula', function() {
+      ['=1+1', '+1', '-1', '@SUM(A1)', '\t=1', '\r=1'].forEach(function(value) {
+        csv.neutralizeFormula(value).should.equal("'" + value);
+      });
+    });
+
+    it('should leave other text untouched', function() {
+      ['hello', '', ' =1', 'a=b', 'a+b', "'quoted", '1-2', '#tag'].forEach(
+        function(value) {
+          csv.neutralizeFormula(value).should.equal(value);
+        }
+      );
+    });
+
+    it('should leave values that are not text untouched', function() {
+      csv.neutralizeFormula(5).should.equal(5);
+      csv.neutralizeFormula(-5).should.equal(-5);
+      (csv.neutralizeFormula(null) === null).should.be.true;
+      (csv.neutralizeFormula(undefined) === undefined).should.be.true;
+      var date = new Date();
+      csv.neutralizeFormula(date).should.equal(date);
+    });
+  });
+
+  describe('#toSafeCsvRow', function() {
+    it('should neutralize a formula and still escape it', function() {
+      csv
+        .toSafeCsvRow(['=SUM(A1), "draft"', 5])
+        .should.equal('"\'=SUM(A1), ""draft""",5');
+    });
+
+    it('should neutralize each value of the row', function() {
+      csv.toSafeCsvRow(['ok', '=1', '@x', '-3']).should.equal("ok,'=1,'@x,'-3");
+    });
+
+    it('should agree with toCsvRow when nothing needs neutralizing', function() {
+      var values = ['a', 'b,c', 'd"e', 7, null];
+      csv.toSafeCsvRow(values).should.equal(csv.toCsvRow(values));
+    });
+
+    it('should not change what toCsvRow and escapeCsvValue do', function() {
+      csv.escapeCsvValue('=1').should.equal('=1');
+      csv.toCsvRow(['=1', '-2']).should.equal('=1,-2');
+    });
+  });
 });

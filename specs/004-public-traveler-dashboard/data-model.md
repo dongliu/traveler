@@ -90,6 +90,9 @@ Cross-cutting rules:
 
 - All parameters must arrive as strings (or arrays of strings for `status` and `tags`); a parsed
   object such as `subsystem[$ne]=x` is a 400. This is the defence against operator injection.
+- No parameter may contain a null character (`%00`): MongoDB cannot match a regular expression
+  that contains one, so it is refused with a 400 (`<name> must not contain a null character`)
+  instead of failing in the database. Other control characters and any Unicode text are accepted.
 - **Effective include-archived** = `includeArchived` **or** the `status` list contains `archived`.
   This single value drives both pipelines, so the counts and the items always agree.
 - Filters combine with AND. Unknown query parameters are ignored.

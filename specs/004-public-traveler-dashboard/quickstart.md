@@ -30,6 +30,12 @@ escaping and formula neutralization, `list` against a fake model, and the handle
 which send real HTTP requests to a tiny Express app on an ephemeral port (so Express itself parses
 the query string). `test/lib/req-utils-test.js` also covers `publicAccessMatch`.
 
+> `npx eslint` cannot run with the project's own configuration in every environment: ESLint 9 needs
+> a flat config, and the legacy `.eslintrc` extends `airbnb-base`, which may not be installed. When
+> it cannot run, lint with an equivalent config that enforces the same constraints (ES2017 syntax for
+> server code, `no-undef`, complexity of 20 or less, no `console` in new code). `npx prettier --check`
+> works as written.
+
 > `npx mocha test/lib/` (the whole directory) fails **before and after** this feature on
 > `test/lib/ldap-client-test.js` (`Cannot find module '../../config/ad.json'`, a git-ignored
 > config file). That is unrelated; run files explicitly as above.
@@ -74,7 +80,7 @@ Each scenario lists the spec item it proves.
 | 10 | `includeArchived=true` and `status=archived` | **E** and **F** appear; **E** has `archivedOn`, **F** has `archivedOn: null`; both report `status: "archived"` (US2, research D3). |
 | 11 | Without `includeArchived`, check `statusCounts` | No `archived` key. With it, `archived` is present and the counts sum to `total` (FR-022, SC-009). |
 | 12 | `subsystem=(` , `subsystem=.*` | 200, treated as literal text, no error (FR-020). |
-| 13 | `subsystem[$ne]=x` , `limit=0` , `page=abc` , `status=done` , `updatedFrom=nope` , `updatedFrom=2026-09-15&updatedTo=2026-09-01` , `format=xml` | Each returns 400 with a `{error}` message naming the problem (FR-021). |
+| 13 | `subsystem[$ne]=x` , `limit=0` , `page=abc` , `status=done` , `updatedFrom=nope` , `updatedFrom=2026-09-15&updatedTo=2026-09-01` , `format=xml` , `subsystem=%00` | Each returns 400 with a `{error}` message naming the problem (FR-021). |
 | 14 | `limit=9999` | 200 and `limit` is `500` in the response (FR-004). |
 | 15 | `curl $API/apis/publictravelers/` with no credentials | 401 with `WWW-Authenticate: Basic realm="api"`, no data (FR-023). |
 | 16 | `format=csv` | 200 `text/csv`, `Content-Disposition` attachment, header row then all matching travelers (no `page`/`limit` → everything); **G**'s title appears as `"'=SUM(A1), ""draft"""` (US3, FR-012/13). |

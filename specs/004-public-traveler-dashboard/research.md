@@ -112,6 +112,16 @@ grounded in the code as it exists on the `Ernest` branch.
   seconds. Adding an index would change production collections for no measured need. `default_traveler_public_access` is `0` (public read) in
   `config/app_change.json`, so many deployments have a high public fraction, which the volume
   assumption already covers.
+- **Measured at the US1 gate (2026-09-20)**: MongoDB 6.0.14 (arm64) with 5,000 travelers of
+  about 40 KB each (203 MB, 4,258 of them public and not archived), through the repo's own
+  Mongoose 5.13 `Traveler.aggregate`: page 1 with counts about 18 ms, page 80 at 50 per page about
+  20 ms, 500 per page about 20 ms, and an un-paged fetch of every match about 40 ms, against a
+  3-second budget. Run with disk use disabled, the project-then-sort pipeline sorts all 4,258
+  documents in memory. A naive whole-document sort also fit on 6.0, because that server's
+  optimizer pushes the projection down, so the explicit projection is defensive (it matters for
+  older servers and costs nothing) rather than the thing that makes it work. No index was needed.
+  The data was local and warm, so treat the absolute numbers as an upper bound on the pipeline's
+  own cost, not a prediction for a busy production database.
 - **Risk / mitigation**: The riskiest choice is querying without an index, so it is measured
   early: a failure at the US1 gate is fixed before anything else depends on the pipeline. If a
   deployment holds far more travelers, the escape hatch in D4 (persist `updatedOn` at creation
