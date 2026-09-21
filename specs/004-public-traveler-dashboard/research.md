@@ -196,6 +196,10 @@ grounded in the code as it exists on the `Ernest` branch.
   - The BOM makes Excel read UTF-8 correctly for the human download from the dashboard; API
     scripts (for example pandas) would see the BOM as part of the first header, so the REST route
     omits it. The data is identical; only that leading byte order mark differs.
+- **Update (2026-09-20)**: the column list and the cell formatter now live in `lib/csv.js`
+  (`RECORD_COLUMNS`, `recordCell`) and are shared with the single-traveler export of feature 001,
+  whose top section is now a header row and one row in the same columns plus `url`. The list
+  export's output is unchanged.
 - **Observation, out of scope**: the feature 001 export puts user-entered field values through
   `escapeCsvValue` with no formula protection, so it has the same exposure. This plan does not
   change it; it is worth a follow-up.

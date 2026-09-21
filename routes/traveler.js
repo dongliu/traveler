@@ -67,7 +67,7 @@ const TravelerNote = mongoose.model('TravelerNote');
 const Log = mongoose.model('Log');
 
 const { TravelerError } = require('../lib/error');
-const { stateTransition, statusMap } = require('../model/traveler');
+const { stateTransition } = require('../model/traveler');
 const csv = require('../lib/csv');
 const publicTravelers = require('../lib/public-travelers');
 const logger = require('../lib/loggers').getLogger();
@@ -593,10 +593,8 @@ module.exports = function(app) {
           base
         );
         const body = csv.buildTravelerCsv({
-          link,
-          id: doc._id,
-          title: doc.title,
-          statusLabel: statusMap[`${doc.status}`],
+          record: publicTravelers.toRecord(doc),
+          url: link,
           fields,
         });
         res.set('Content-Type', 'text/csv; charset=utf-8');

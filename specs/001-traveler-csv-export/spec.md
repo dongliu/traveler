@@ -14,6 +14,10 @@
 
 - Q: When you say "add date field name in the output for reference," do you mean adding the internal field name/key as its own column, or adding a header row so each column is labeled by name? → A: Add a new column with the field's internal name/key (e.g., `name`) next to Label, for every data row — a stable reference identifier.
 
+### Session 2026-09-20
+
+- Q: What replaces the four-row block at the top of the export (traveler link, id, title, status)? → A: A header row of `_id, url, title, status, createdBy, createdOn, updatedBy, updatedOn, archivedOn, owner, tags, totalInput, finishedInput, subsystem, device, activity, machineArea, sector, windchillId`, followed by one row with this traveler's values. These are the columns of the public travelers list export, plus `url` (the link to the traveler) after `_id`. The status is its name, dates are ISO 8601 UTC, tags are joined with semicolons, and text that would start a spreadsheet formula is shown as text. The data section below it is unchanged, including its Unix-seconds `Input On`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Export a traveler's data for sharing or record-keeping (Priority: P1)
@@ -62,8 +66,8 @@ they can identify which traveler it is and its current status without any other 
 **Acceptance Scenarios**:
 
 1. **Given** an exported CSV file, **When** it is opened in a spreadsheet application, **Then**
-   the traveler's link, id, title, and current status are visible at the top of the file, before
-   any collected data rows.
+   a header row and one row of the traveler's properties, including its link, id, title, and
+   current status, are visible at the top of the file, before any collected data rows.
 
 ---
 
@@ -114,9 +118,12 @@ shown for that field in the traveler's own view.
 - **FR-002**: System MUST deny the export request when the requesting user does not have read
   access to the traveler, consistent with the traveler's existing access rules (owner, reviewer,
   shared user/group, or public access).
-- **FR-003**: The exported CSV MUST identify the source traveler by including its link (a
-  reference that navigates back to the traveler within the application), id, title, and current
-  status.
+- **FR-003**: The exported CSV MUST identify and describe the source traveler at the top of the
+  file, with a header row and one row of its properties: `_id`, `url` (a reference that navigates
+  back to the traveler within the application), `title`, `status`, `createdBy`, `createdOn`,
+  `updatedBy`, `updatedOn`, `archivedOn`, `owner`, `tags`, `totalInput`, `finishedInput`,
+  `subsystem`, `device`, `activity`, `machineArea`, `sector`, and `windchillId`. *(Amended
+  2026-09-20; it was the link, id, title, and status.)*
 - **FR-004**: The exported CSV MUST render the traveler's status as its human-readable name, not
   an internal numeric code.
 - **FR-005**: The exported CSV MUST include, for every data field defined in the traveler, one

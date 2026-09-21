@@ -220,68 +220,244 @@ describe('csv', function() {
   });
 
   describe('#buildTravelerCsv', function() {
-    it('should include the metadata block, blank separator, header, and data rows', function() {
-      var output = csv.buildTravelerCsv({
-        link: 'https://traveler.example.org/travelers/abc123/view',
-        id: 'abc123',
-        title: 'Pump Assembly Torque Check',
-        statusLabel: 'active',
-        fields: [
-          {
-            name: 'torque',
-            label: 'Torque Reading',
-            type: 'number',
-            value: 42,
-            inputBy: 'jdoe',
-            inputOn: 1787234591,
-          },
-          {
-            name: 'notes',
-            label: 'Inspector Notes',
-            type: 'textarea',
-            value: '',
-            inputBy: '',
-            inputOn: '',
-          },
-        ],
-      });
-      var lines = output.split('\n');
-      lines[0].should.equal(
-        'Traveler Link,https://traveler.example.org/travelers/abc123/view'
+    var HEADER =
+      '_id,url,title,status,createdBy,createdOn,updatedBy,updatedOn,archivedOn,owner,tags,totalInput,finishedInput,subsystem,device,activity,machineArea,sector,windchillId';
+    var DATA_HEADER = 'Field Name,Label,Type,Value,Input By,Input On';
+    var URL = 'https://traveler.example.org/travelers/abc123/view';
+    var FIELDS = [
+      {
+        name: 'torque',
+        label: 'Torque Reading',
+        type: 'number',
+        value: 42,
+        inputBy: 'jdoe',
+        inputOn: 1787234591,
+      },
+      {
+        name: 'notes',
+        label: 'Inspector Notes',
+        type: 'textarea',
+        value: '',
+        inputBy: '',
+        inputOn: '',
+      },
+    ];
+
+    function record(over) {
+      return Object.assign(
+        {
+          _id: 'abc123',
+          title: 'Pump Assembly Torque Check',
+          status: 'active',
+          createdBy: 'jdoe',
+          createdOn: new Date('2026-08-30T14:02:11.000Z'),
+          updatedBy: 'smith',
+          updatedOn: new Date('2026-09-14T09:41:03.000Z'),
+          archivedOn: null,
+          owner: 'jdoe',
+          tags: ['torque', 'pump'],
+          totalInput: 36,
+          finishedInput: 12,
+          subsystem: 'Cryogenics',
+          device: 'CM-02',
+          activity: 'Acceptance test',
+          machineArea: 'Linac tunnel',
+          sector: 'S4',
+          windchillId: 'WC-0012345',
+        },
+        over
       );
-      lines[1].should.equal('Traveler Id,abc123');
-      lines[2].should.equal('Traveler Title,Pump Assembly Torque Check');
-      lines[3].should.equal('Traveler Status,active');
-      lines[4].should.equal('');
-      lines[5].should.equal('Field Name,Label,Type,Value,Input By,Input On');
-      lines[6].should.equal('torque,Torque Reading,number,42,jdoe,1787234591');
-      lines[7].should.equal('notes,Inspector Notes,textarea,,,');
-      lines.should.have.lengthOf(8);
+    }
+
+    it('should name the metadata columns in the documented order, with url after _id', function() {
+      csv.TRAVELER_COLUMNS.join(',').should.equal(HEADER);
+      csv.TRAVELER_COLUMNS[0].should.equal('_id');
+      csv.TRAVELER_COLUMNS[1].should.equal('url');
+      csv.TRAVELER_COLUMNS.should.have.lengthOf(19);
     });
 
-    it('should still include the data header row when there are no fields', function() {
+    it('should write the metadata header and row, a blank separator, the data header, and the data rows', function() {
       var output = csv.buildTravelerCsv({
-        link: 'https://traveler.example.org/travelers/abc123/view',
-        id: 'abc123',
-        title: 'Empty Traveler',
-        statusLabel: 'initialized',
+        record: record(),
+        url: URL,
+        fields: FIELDS,
+      });
+      var lines = output.split('\n');
+      lines[0].should.equal(HEADER);
+      lines[1].should.equal(
+        'abc123,https://traveler.example.org/travelers/abc123/view,Pump Assembly Torque Check,active,jdoe,2026-08-30T14:02:11.000Z,smith,2026-09-14T09:41:03.000Z,,jdoe,torque;pump,36,12,Cryogenics,CM-02,Acceptance test,Linac tunnel,S4,WC-0012345'
+      );
+      lines[2].should.equal('');
+      lines[3].should.equal(DATA_HEADER);
+      lines[4].should.equal('torque,Torque Reading,number,42,jdoe,1787234591');
+      lines[5].should.equal('notes,Inspector Notes,textarea,,,');
+      lines.should.have.lengthOf(6);
+    });
+
+    it('should not write the old four-row metadata block', function() {
+      var output = csv.buildTravelerCsv({
+        record: record(),
+        url: URL,
+        fields: FIELDS,
+      });
+      output.should.not.include('Traveler Link');
+      output.should.not.include('Traveler Id');
+      output.should.not.include('Traveler Title');
+      output.should.not.include('Traveler Status');
+    });
+
+    it('should still write the data header row when there are no fields', function() {
+      var output = csv.buildTravelerCsv({
+        record: record({ title: 'Empty Traveler', status: 'initialized' }),
+        url: URL,
         fields: [],
       });
       var lines = output.split('\n');
-      lines.should.have.lengthOf(6);
-      lines[5].should.equal('Field Name,Label,Type,Value,Input By,Input On');
+      lines.should.have.lengthOf(4);
+      lines[0].should.equal(HEADER);
+      lines[2].should.equal('');
+      lines[3].should.equal(DATA_HEADER);
     });
 
-    it('should never emit a raw numeric status code', function() {
+    it('should write the status by name, never as a number', function() {
       var output = csv.buildTravelerCsv({
-        link: 'https://traveler.example.org/travelers/abc123/view',
-        id: 'abc123',
-        title: 'Pump Assembly Torque Check',
-        statusLabel: 'active',
+        record: record({ status: 'completed' }),
+        url: URL,
         fields: [],
       });
-      output.should.include('Traveler Status,active');
-      output.should.not.match(/Traveler Status,1(\n|$)/);
+      var cells = output.split('\n')[1].split(',');
+      cells[3].should.equal('completed');
+      output.split('\n')[1].should.not.match(/,\d(\.\d)?,jdoe,/);
+    });
+
+    it('should write dates as ISO 8601 UTC and tags joined with semicolons', function() {
+      var cells = csv
+        .buildTravelerCsv({
+          record: record({
+            archivedOn: new Date('2026-09-20T01:02:03.004Z'),
+            tags: ['a', 'b', 'c'],
+          }),
+          url: URL,
+          fields: [],
+        })
+        .split('\n')[1]
+        .split(',');
+      cells[5].should.equal('2026-08-30T14:02:11.000Z');
+      cells[7].should.equal('2026-09-14T09:41:03.000Z');
+      cells[8].should.equal('2026-09-20T01:02:03.004Z');
+      cells[10].should.equal('a;b;c');
+    });
+
+    it('should leave a missing value as an empty cell, and keep the url', function() {
+      var cells = csv
+        .buildTravelerCsv({ record: {}, url: URL, fields: [] })
+        .split('\n')[1]
+        .split(',');
+      cells.should.have.lengthOf(19);
+      cells[0].should.equal('');
+      cells[1].should.equal(URL);
+      cells.slice(2).forEach(function(cell) {
+        cell.should.equal('');
+      });
+    });
+
+    it('should write a zero count as 0', function() {
+      var cells = csv
+        .buildTravelerCsv({
+          record: record({ totalInput: 0, finishedInput: 0 }),
+          url: URL,
+          fields: [],
+        })
+        .split('\n')[1]
+        .split(',');
+      cells[11].should.equal('0');
+      cells[12].should.equal('0');
+    });
+
+    it('should show text that starts a formula as text in the metadata row', function() {
+      var output = csv.buildTravelerCsv({
+        record: record({
+          title: '=SUM(A1), "draft"',
+          owner: '@boss',
+          subsystem: '-1+2',
+          tags: ['=1', 'ok'],
+        }),
+        url: URL,
+        fields: [],
+      });
+      output.should.include('"\'=SUM(A1), ""draft"""');
+      output.should.include(",'@boss,");
+      output.should.include(",'-1+2,");
+      output.should.include(",'=1;ok,");
+    });
+
+    it('should keep a comma, a quote, and a line break in one metadata cell', function() {
+      var output = csv.buildTravelerCsv({
+        record: record({ title: 'a, "b"\nc' }),
+        url: URL,
+        fields: [],
+      });
+      output.should.include('"a, ""b""\nc"');
+    });
+
+    it('should keep international characters intact', function() {
+      var output = csv.buildTravelerCsv({
+        record: record({ title: 'Kühlung – 冷却 ✓' }),
+        url: URL,
+        fields: [],
+      });
+      output.should.include('Kühlung – 冷却 ✓');
+    });
+
+    it('should not change the record it is given', function() {
+      var original = record({ title: '=1', tags: ['x'] });
+      var copy = JSON.parse(JSON.stringify(original));
+      csv.buildTravelerCsv({ record: original, url: URL, fields: [] });
+      JSON.parse(JSON.stringify(original)).should.deep.equal(copy);
+      original.should.not.have.property('url');
+    });
+  });
+
+  describe('#recordCell', function() {
+    it('should give an empty cell for a missing value', function() {
+      csv.recordCell({}, 'title').should.equal('');
+      csv.recordCell({ title: null }, 'title').should.equal('');
+    });
+
+    it('should write a date as ISO 8601 UTC', function() {
+      csv
+        .recordCell({ d: new Date('2026-01-02T03:04:05.006Z') }, 'd')
+        .should.equal('2026-01-02T03:04:05.006Z');
+    });
+
+    it('should join a list with semicolons', function() {
+      csv.recordCell({ tags: ['a', 'b'] }, 'tags').should.equal('a;b');
+      csv.recordCell({ tags: [] }, 'tags').should.equal('');
+    });
+
+    it('should write an identifier object as its text', function() {
+      var id = {
+        toString: function() {
+          return '64f1a2b3c4d5e6f7a8b9c0d1';
+        },
+      };
+      csv
+        .recordCell({ _id: id }, '_id')
+        .should.equal('64f1a2b3c4d5e6f7a8b9c0d1');
+    });
+
+    it('should keep numbers as numbers, including zero, and text as it is', function() {
+      csv.recordCell({ n: 0 }, 'n').should.equal(0);
+      csv.recordCell({ n: 36 }, 'n').should.equal(36);
+      csv.recordCell({ s: 'abc' }, 's').should.equal('abc');
+    });
+
+    it('should name the record columns, and TRAVELER_COLUMNS adds only url', function() {
+      csv.RECORD_COLUMNS.should.have.lengthOf(18);
+      csv.RECORD_COLUMNS[0].should.equal('_id');
+      csv.TRAVELER_COLUMNS.filter(function(c) {
+        return c !== 'url';
+      }).should.deep.equal(csv.RECORD_COLUMNS);
     });
   });
 

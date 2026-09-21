@@ -58,17 +58,20 @@ within the SC-001 performance budget.
 ## CSV Output Shape (not a persisted entity — the response body)
 
 ```
-Traveler Link,<link>
-Traveler Id,<id>
-Traveler Title,<title>
-Traveler Status,<status label>
+_id,url,title,status,createdBy,createdOn,updatedBy,updatedOn,archivedOn,owner,tags,totalInput,finishedInput,subsystem,device,activity,machineArea,sector,windchillId
+<id>,<link>,<title>,<status name>,<createdBy>,<createdOn>,<updatedBy>,<updatedOn>,<archivedOn>,<owner>,<tags>,<totalInput>,<finishedInput>,<subsystem>,<device>,<activity>,<machineArea>,<sector>,<windchillId>
 
 Field Name,Label,Type,Value,Input By,Input On
 <name>,<label>,<type>,<value>,<inputBy>,<inputOn>
 ...
 ```
 
-- Metadata block: 4 rows, `Fact,Value` shape.
+- Metadata section (amended 2026-09-20; it was four `Fact,Value` rows): 1 header row and 1 row
+  of this traveler's values, in the columns above. They are the record columns of the public
+  travelers list export, with `url` after `_id`, built by `toRecord` in `lib/public-travelers.js`
+  and written by `buildTravelerCsv` in `lib/csv.js`. `status` is its name, `archivedOn` is set
+  only while the traveler is archived, `owner` falls back to the creator, dates are ISO 8601 UTC,
+  `tags` are joined with `;`, and text that starts a formula is shown as text.
 - 1 blank separator row.
 - 1 header row for the data table.
 - N data rows: one per value ever submitted for each field defined in `traveler.labels`, or one

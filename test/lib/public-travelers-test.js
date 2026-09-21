@@ -2340,4 +2340,130 @@ describe('public-travelers', function() {
         });
     });
   });
+
+  describe('the individual traveler export, from a Mongoose document', function() {
+    var Traveler = require('../../model/traveler').Traveler;
+    var csvLib = require('../../lib/csv');
+    var URL = 'https://traveler.example.org/travelers/abc/view';
+
+    function exportOf(fields, fieldsRows) {
+      var doc = new Traveler(fields);
+      var output = csvLib.buildTravelerCsv({
+        record: publicTravelers.toRecord(doc),
+        url: URL,
+        fields: fieldsRows || [],
+      });
+      return { doc: doc, lines: output.split('\n'), output: output };
+    }
+
+    it('should write the header and one metadata row from a real document', function() {
+      var made = exportOf({
+        title: 'Pump Assembly',
+        status: 2,
+        createdBy: 'liud',
+        createdOn: new Date('2026-08-30T14:02:11.000Z'),
+        updatedBy: 'smith',
+        updatedOn: new Date('2026-09-14T09:41:03.000Z'),
+        tags: ['torque', 'pump'],
+        totalInput: 36,
+        finishedInput: 12,
+        subsystem: 'Cryogenics',
+        device: 'CM-02',
+        activity: 'Acceptance test',
+        machineArea: 'Linac tunnel',
+        sector: 'S4',
+        windchillId: 'WC-0012345',
+      });
+      made.lines[0].should.equal(csvLib.TRAVELER_COLUMNS.join(','));
+      made.lines[1].should.equal(
+        made.doc.id +
+          ',' +
+          URL +
+          ',Pump Assembly,completed,liud,2026-08-30T14:02:11.000Z,smith,2026-09-14T09:41:03.000Z,,liud,torque;pump,36,12,Cryogenics,CM-02,Acceptance test,Linac tunnel,S4,WC-0012345'
+      );
+    });
+
+    it('should write the identifier as the 24-character text of the id', function() {
+      var made = exportOf({ title: 'x' });
+      made.lines[1].split(',')[0].should.match(/^[0-9a-f]{24}$/);
+      made.lines[1].split(',')[0].should.equal(String(made.doc._id));
+    });
+
+    it('should write the status by name for every status, and initialized when none was set', function() {
+      [
+        [0, 'initialized'],
+        [1, 'active'],
+        [1.5, 'submitted for completion'],
+        [2, 'completed'],
+        [3, 'frozen'],
+        [4, 'archived'],
+      ].forEach(function(pair) {
+        exportOf({ title: 't', status: pair[0] })
+          .lines[1].split(',')[3]
+          .should.equal(pair[1]);
+      });
+      exportOf({ title: 't' })
+        .lines[1].split(',')[3]
+        .should.equal('initialized');
+    });
+
+    it('should write an archived traveler as archived, with its archive date', function() {
+      var made = exportOf({
+        title: 't',
+        status: 2,
+        archived: true,
+        archivedOn: new Date('2026-09-20T01:02:03.004Z'),
+      });
+      var cells = made.lines[1].split(',');
+      cells[3].should.equal('archived');
+      cells[8].should.equal('2026-09-20T01:02:03.004Z');
+    });
+
+    it('should leave out a stale archive date once a traveler is restored', function() {
+      var cells = exportOf({
+        title: 't',
+        status: 1,
+        archived: false,
+        archivedOn: new Date('2026-01-01T00:00:00.000Z'),
+      }).lines[1].split(',');
+      cells[3].should.equal('active');
+      cells[8].should.equal('');
+    });
+
+    it('should use the creator as the owner when there is none, and the owner when there is one', function() {
+      exportOf({ title: 't', createdBy: 'liud' })
+        .lines[1].split(',')[9]
+        .should.equal('liud');
+      exportOf({ title: 't', createdBy: 'liud', owner: 'smith' })
+        .lines[1].split(',')[9]
+        .should.equal('smith');
+    });
+
+    it('should show text that starts a formula as text, from a real document', function() {
+      var made = exportOf({
+        title: '=SUM(A1), "draft"',
+        tags: ['@x', 'ok'],
+      });
+      made.output.should.include('"\'=SUM(A1), ""draft"""');
+      made.output.should.include("'@x;ok");
+    });
+
+    it('should keep the data section after the metadata section', function() {
+      var made = exportOf({ title: 't' }, [
+        {
+          name: 'torque',
+          label: 'Torque',
+          type: 'number',
+          value: 42,
+          inputBy: 'jdoe',
+          inputOn: 1787234591,
+        },
+      ]);
+      made.lines[2].should.equal('');
+      made.lines[3].should.equal(
+        'Field Name,Label,Type,Value,Input By,Input On'
+      );
+      made.lines[4].should.equal('torque,Torque,number,42,jdoe,1787234591');
+    });
+  });
 });
