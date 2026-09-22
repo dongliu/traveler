@@ -576,7 +576,7 @@ module.exports = function(app) {
             $in: doc.data,
           },
         },
-        'name value inputOn inputBy inputType'
+        'name value inputOn inputBy inputType file'
       ).exec(function(err, travelerDataDocs) {
         if (err) {
           logger.error(err);
@@ -589,8 +589,7 @@ module.exports = function(app) {
         const fields = csv.resolveTravelerFields(
           doc.labels,
           doc.types,
-          travelerDataDocs,
-          base
+          travelerDataDocs
         );
         const body = csv.buildTravelerCsv({
           record: publicTravelers.toRecord(doc),

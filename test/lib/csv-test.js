@@ -149,7 +149,89 @@ describe('csv', function() {
       byName.inspector.should.equal('Inspector Notes');
     });
 
-    it('should turn a file field value into a download link', function() {
+    it("should turn a file field's value into its data id, and add the file details", function() {
+      var labels = { photo: 'Photo' };
+      var types = { photo: 'file' };
+      var data = [
+        {
+          _id: '507f1f77bcf86cd799439011',
+          name: 'photo',
+          value: 'inspection.jpg',
+          inputBy: 'jdoe',
+          inputOn: new Date('2026-01-02'),
+          file: {
+            path: '/var/traveler-uploads/a1b2c3d4',
+            encoding: '7bit',
+            mimetype: 'image/jpeg',
+          },
+        },
+      ];
+      var fields = csv.resolveTravelerFields(labels, types, data);
+      fields[0].value.should.equal('507f1f77bcf86cd799439011');
+      fields[0].originalFileName.should.equal('inspection.jpg');
+      fields[0].fileName.should.equal('a1b2c3d4');
+      fields[0].encoding.should.equal('7bit');
+      fields[0].mimetype.should.equal('image/jpeg');
+    });
+
+    it('should take the file name from the stored path, not the original name', function() {
+      var labels = { photo: 'Photo' };
+      var types = { photo: 'file' };
+      var data = [
+        {
+          _id: '507f1f77bcf86cd799439011',
+          name: 'photo',
+          value: 'a photo with spaces.jpg',
+          inputBy: 'jdoe',
+          inputOn: new Date('2026-01-02'),
+          file: { path: '/var/traveler-uploads/f8e7d6c5' },
+        },
+      ];
+      var fields = csv.resolveTravelerFields(labels, types, data);
+      fields[0].originalFileName.should.equal('a photo with spaces.jpg');
+      fields[0].fileName.should.equal('f8e7d6c5');
+    });
+
+    it('should give each re-submitted file its own id and its own file details', function() {
+      var labels = { photo: 'Photo' };
+      var types = { photo: 'file' };
+      var data = [
+        {
+          _id: '507f1f77bcf86cd799439011',
+          name: 'photo',
+          value: 'first.jpg',
+          inputBy: 'jdoe',
+          inputOn: new Date('2026-01-01'),
+          file: {
+            path: '/uploads/111',
+            encoding: '7bit',
+            mimetype: 'image/jpeg',
+          },
+        },
+        {
+          _id: '507f1f77bcf86cd799439022',
+          name: 'photo',
+          value: 'second.jpg',
+          inputBy: 'jdoe',
+          inputOn: new Date('2026-01-02'),
+          file: {
+            path: '/uploads/222',
+            encoding: '7bit',
+            mimetype: 'image/png',
+          },
+        },
+      ];
+      var fields = csv.resolveTravelerFields(labels, types, data);
+      fields.should.have.lengthOf(2);
+      fields[0].value.should.equal('507f1f77bcf86cd799439011');
+      fields[0].fileName.should.equal('111');
+      fields[0].mimetype.should.equal('image/jpeg');
+      fields[1].value.should.equal('507f1f77bcf86cd799439022');
+      fields[1].fileName.should.equal('222');
+      fields[1].mimetype.should.equal('image/png');
+    });
+
+    it('should tolerate a file entry with no file sub-document', function() {
       var labels = { photo: 'Photo' };
       var types = { photo: 'file' };
       var data = [
@@ -161,61 +243,37 @@ describe('csv', function() {
           inputOn: new Date('2026-01-02'),
         },
       ];
-      var fields = csv.resolveTravelerFields(
-        labels,
-        types,
-        data,
-        'https://traveler.example.org'
-      );
-      fields[0].value.should.equal(
-        'https://traveler.example.org/data/507f1f77bcf86cd799439011'
-      );
+      var fields = csv.resolveTravelerFields(labels, types, data);
+      fields[0].fileName.should.equal('');
+      fields[0].encoding.should.equal('');
+      fields[0].mimetype.should.equal('');
     });
 
-    it('should give each re-submitted file a link to its own download', function() {
+    it('should leave an unanswered file field empty, with no file details', function() {
       var labels = { photo: 'Photo' };
       var types = { photo: 'file' };
+      var fields = csv.resolveTravelerFields(labels, types, []);
+      fields[0].value.should.equal('');
+      fields[0].should.not.have.property('originalFileName');
+      fields[0].should.not.have.property('fileName');
+      fields[0].should.not.have.property('encoding');
+      fields[0].should.not.have.property('mimetype');
+    });
+
+    it('should not add file details to a non-file field', function() {
+      var labels = { notes: 'Notes' };
+      var types = { notes: 'textarea' };
       var data = [
         {
-          _id: '507f1f77bcf86cd799439011',
-          name: 'photo',
-          value: 'first.jpg',
-          inputBy: 'jdoe',
-          inputOn: new Date('2026-01-01'),
-        },
-        {
-          _id: '507f1f77bcf86cd799439022',
-          name: 'photo',
-          value: 'second.jpg',
+          name: 'notes',
+          value: 'looks fine',
           inputBy: 'jdoe',
           inputOn: new Date('2026-01-02'),
         },
       ];
-      var fields = csv.resolveTravelerFields(
-        labels,
-        types,
-        data,
-        'https://traveler.example.org'
-      );
-      fields.should.have.lengthOf(2);
-      fields[0].value.should.equal(
-        'https://traveler.example.org/data/507f1f77bcf86cd799439011'
-      );
-      fields[1].value.should.equal(
-        'https://traveler.example.org/data/507f1f77bcf86cd799439022'
-      );
-    });
-
-    it('should leave an unanswered file field empty (no link)', function() {
-      var labels = { photo: 'Photo' };
-      var types = { photo: 'file' };
-      var fields = csv.resolveTravelerFields(
-        labels,
-        types,
-        [],
-        'https://traveler.example.org'
-      );
-      fields[0].value.should.equal('');
+      var fields = csv.resolveTravelerFields(labels, types, data);
+      fields[0].value.should.equal('looks fine');
+      fields[0].should.not.have.property('originalFileName');
     });
   });
 
@@ -223,6 +281,7 @@ describe('csv', function() {
     var HEADER =
       '_id,url,title,status,createdBy,createdOn,updatedBy,updatedOn,archivedOn,owner,tags,totalInput,finishedInput,subsystem,device,activity,machineArea,sector,windchillId';
     var DATA_HEADER = 'Field Name,Label,Type,Value,Input By,Input On';
+    var FILES_HEADER = 'Id,Original File Name,File Name,Encoding,Mimetype';
     var URL = 'https://traveler.example.org/travelers/abc123/view';
     var FIELDS = [
       {
@@ -291,7 +350,9 @@ describe('csv', function() {
       lines[3].should.equal(DATA_HEADER);
       lines[4].should.equal('torque,Torque Reading,number,42,jdoe,1787234591');
       lines[5].should.equal('notes,Inspector Notes,textarea,,,');
-      lines.should.have.lengthOf(6);
+      lines[6].should.equal('');
+      lines[7].should.equal(FILES_HEADER);
+      lines.should.have.lengthOf(8);
     });
 
     it('should not write the old four-row metadata block', function() {
@@ -306,17 +367,95 @@ describe('csv', function() {
       output.should.not.include('Traveler Status');
     });
 
-    it('should still write the data header row when there are no fields', function() {
+    it('should still write the data and files headers when there are no fields', function() {
       var output = csv.buildTravelerCsv({
         record: record({ title: 'Empty Traveler', status: 'initialized' }),
         url: URL,
         fields: [],
       });
       var lines = output.split('\n');
-      lines.should.have.lengthOf(4);
+      lines.should.have.lengthOf(6);
       lines[0].should.equal(HEADER);
       lines[2].should.equal('');
       lines[3].should.equal(DATA_HEADER);
+      lines[4].should.equal('');
+      lines[5].should.equal(FILES_HEADER);
+    });
+
+    it('should add a Files row for each file submission, in the same order as the data rows', function() {
+      var output = csv.buildTravelerCsv({
+        record: record(),
+        url: URL,
+        fields: FIELDS.concat([
+          {
+            name: 'photo',
+            label: 'Photo',
+            type: 'file',
+            value: '507f1f77bcf86cd799439011',
+            inputBy: 'jdoe',
+            inputOn: 1787234591,
+            originalFileName: 'inspection.jpg',
+            fileName: 'a1b2c3d4',
+            encoding: '7bit',
+            mimetype: 'image/jpeg',
+          },
+        ]),
+      });
+      var lines = output.split('\n');
+      lines[6].should.equal(
+        'photo,Photo,file,507f1f77bcf86cd799439011,jdoe,1787234591'
+      );
+      lines[7].should.equal('');
+      lines[8].should.equal(FILES_HEADER);
+      lines[9].should.equal(
+        '507f1f77bcf86cd799439011,inspection.jpg,a1b2c3d4,7bit,image/jpeg'
+      );
+      lines.should.have.lengthOf(10);
+    });
+
+    it('should skip an unanswered file field and a non-file field in the Files section', function() {
+      var output = csv.buildTravelerCsv({
+        record: record(),
+        url: URL,
+        fields: FIELDS.concat([
+          {
+            name: 'photo',
+            label: 'Photo',
+            type: 'file',
+            value: '',
+            inputBy: '',
+            inputOn: '',
+          },
+        ]),
+      });
+      var lines = output.split('\n');
+      lines[lines.length - 1].should.equal(FILES_HEADER);
+      lines.should.have.lengthOf(9);
+    });
+
+    it('should show a hostile original or on-disk file name as text in the Files section', function() {
+      var output = csv.buildTravelerCsv({
+        record: record(),
+        url: URL,
+        fields: [
+          {
+            name: 'photo',
+            label: 'Photo',
+            type: 'file',
+            value: '507f1f77bcf86cd799439011',
+            inputBy: 'jdoe',
+            inputOn: 1787234591,
+            originalFileName: '=SUM(A1), "draft".jpg',
+            fileName: '@calc.tmp',
+            encoding: '7bit',
+            mimetype: 'image/jpeg',
+          },
+        ],
+      });
+      var filesRow = output.split('\n').pop();
+      filesRow.should.equal(
+        '507f1f77bcf86cd799439011,"\'=SUM(A1), ""draft"".jpg",\'@calc.tmp,7bit,image/jpeg'
+      );
     });
 
     it('should write the status by name, never as a number', function() {
