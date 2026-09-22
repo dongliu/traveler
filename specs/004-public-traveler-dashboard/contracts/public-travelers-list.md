@@ -29,7 +29,7 @@ Query parameters (all optional):
 | `limit` | `50` | Integer ≥ 1. Default 25, maximum 500 (larger is reduced to 500). |
 | `updatedFrom` | `2026-09-01` | Inclusive lower bound on the update time. Date or ISO 8601 timestamp. |
 | `updatedTo` | `2026-09-15` | Inclusive upper bound. A date includes the whole day. |
-| `subsystem` | `cryo` | Case-insensitive partial match. Same for `device`, `activity`, `machineArea`, `sector`, `windchillId`. |
+| `subsystem` | `cryo` | Case-insensitive partial match. Same for `device`, `activity`, `machineArea`, `sector`, `windchillId`. A traveler with no `device` of its own is shown, and found by the `device` filter, through its older list of devices (its names joined with `/`). |
 | `status` | `active,completed` | Names or codes; comma-separated or repeated (`status=active&status=1.5`). |
 | `tags` | `leak-check,vacuum` | Whole tag labels; every tag must be present. Comma-separated or repeated. |
 | `includeArchived` | `true` | Also list archived travelers. Filtering on `status=archived` implies it. |

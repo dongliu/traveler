@@ -16,6 +16,10 @@
 - Q: A traveler with no recorded status: how is it counted? → A: As initialized, the default status for new travelers, so it is listed, filtered, and counted like any initialized traveler and totals, pages, and cards always agree.
 - Q: Should the dashboard keep the Select all and Select none buttons? → A: No. Users pick rows with each row's own checkbox; Generate report and Add to binder work on the rows picked.
 
+### Session 2026-09-21
+
+- Q: A traveler from before the single device property has only the older list of devices. What does the listing show and filter on? → A: Its device is that list's names joined with "/", as the rest of the application shows it, in the list, the dashboard, and both CSV exports. The device filter also finds a traveler through that list, but only when the traveler has no device of its own.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Retrieve public travelers a page at a time, newest update first (Priority: P1)
@@ -218,6 +222,7 @@ Above the table, the dashboard shows a summary card for "All" and for each trave
 - **Extra identifier property**: a stable traveler identifier is included in addition to the 17 requested properties, because the dashboard needs it to link and select travelers and because CSV consumers need a reliable key.
 - **Sort order**: newest update first is the only ordering offered. Sorting by other columns is out of scope, so the dashboard drops the per-column sorting and the sharing and key columns that today's page has. That information is still available on each traveler.
 - **Bulk selection**: the dashboard has no Select all or Select none buttons; users pick rows with each row's checkbox, and the report and binder actions work on the rows picked.
+- **Devices from before the single device property**: a traveler that only has the older list of devices is shown with those names joined by "/", exactly as the rest of the application shows it, and its `device` in the JSON and CSV is that text. The device filter matches the names in that list, but only for a traveler with no device of its own, so a filter never finds a traveler by something the list does not show for it. Because matching is per name, a filter such as `DEV-1/DEV-2` does not match a traveler whose list holds those two names.
 - **Existing traveler data**: the six classification properties come from the metadata already added to travelers (feature 003). Travelers created before that feature simply have them empty.
 - **Existing endpoints**: the current public travelers data endpoint that feeds today's page is retired, since the dashboard replaces its only user. The existing API endpoint that lists travelers is unchanged.
 - **Owner**: where a traveler has no explicit owner, its creator is reported as the owner, as the rest of the application treats ownership.

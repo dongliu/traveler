@@ -8,8 +8,8 @@ response). The six classification properties already exist on `Traveler` from fe
 ## Source fields read from `Traveler`
 
 `_id`, `title`, `status`, `archived`, `createdBy`, `createdOn`, `updatedBy`, `updatedOn`,
-`archivedOn`, `owner`, `tags`, `totalInput`, `finishedInput`, `subsystem`, `device`, `activity`,
-`machineArea`, `sector`, `windchillId`, `publicAccess`.
+`archivedOn`, `owner`, `tags`, `totalInput`, `finishedInput`, `subsystem`, `device`, `devices`,
+`activity`, `machineArea`, `sector`, `windchillId`, `publicAccess`.
 
 Nothing else is projected, so the heavy embedded arrays (`forms`, `data`, `mapping`, and so on)
 never leave the database.
@@ -32,7 +32,7 @@ never leave the database.
 | `totalInput` | `totalInput` | `0` |
 | `finishedInput` | `finishedInput` | `0` |
 | `subsystem` | `subsystem` | `''` (travelers created before feature 003 lack the field) |
-| `device` | `device` | `''` |
+| `device` | `device`, else the older `devices` list joined with `/` | `''`. Same rule as `deviceColumn` in `table.js` and `views/traveler.jade`. Blank and non-text names are dropped. `devices` itself is not in the record. |
 | `activity` | `activity` | `''` |
 | `machineArea` | `machineArea` | `''` |
 | `sector` | `sector` | `''` |
@@ -81,7 +81,7 @@ page only for legacy travelers with no stored value.
 | `limit` | integer ≥ 1 | `25` | Non-numeric, zero, negative → 400. Above `500` → reduced to `500`; the response reports the applied value. |
 | `updatedFrom` | `YYYY-MM-DD` or ISO 8601 timestamp | none | Date-only = start of that local day. Unparseable → 400. |
 | `updatedTo` | `YYYY-MM-DD` or ISO 8601 timestamp | none | Date-only = end of that local day. Unparseable → 400. `updatedFrom` after `updatedTo` → 400. |
-| `subsystem`, `device`, `activity`, `machineArea`, `sector`, `windchillId` | string | none | Case-insensitive **partial** match. Max 200 characters (longer → 400). Blank ignored. Treated literally. |
+| `subsystem`, `device`, `activity`, `machineArea`, `sector`, `windchillId` | string | none | Case-insensitive **partial** match. Max 200 characters (longer → 400). Blank ignored. Treated literally. `device` also matches a name in the older `devices` list, but only for a traveler with no `device` of its own (null, missing, or blank), which is the only case where that list is what the record shows. |
 | `status` | status name or numeric code; comma-separated or repeated | none | Names case-insensitive. An unknown value → 400 listing the accepted values. A record matches if its effective status is any of the given. |
 | `tags` | tag label; comma-separated or repeated | none | Whole-label, case-insensitive; **all** given tags must be present. Blank ignored. |
 | `includeArchived` | `true` / `false` / `1` / `0` | `false` | Anything else → 400. |

@@ -57,7 +57,9 @@ empty string, an empty list, `0`, or `null` (for a date). `status` is the name
 of the status (`initialized`, `active`, `submitted for completion`, `completed`,
 `frozen`, or `archived`) and `statusCode` its number (`0`, `1`, `1.5`, `2`, `3`,
 or `4`). `owner` is the creator when a traveler has no explicit owner.
-`archivedOn` is set only while a traveler is archived. Timestamps are ISO 8601
+`archivedOn` is set only while a traveler is archived. `device` is the
+traveler's device; a traveler from before that property, which only has the
+older list of devices, has those names joined with `/`. Timestamps are ISO 8601
 UTC. The traveler id can be used to retrieve more details of a traveler,
 https://hostname:port/apis/travelers/:id/ for the JSON representation and
 http://hostname:port/travelers/:id/ for the HTML representation.
@@ -85,8 +87,9 @@ a blank value is ignored.
 - `subsystem`, `device`, `activity`, `machineArea`, `sector`, and `windchillId`:
   travelers whose value contains the given text, ignoring letter case.
   `subsystem=cryo` finds `Cryogenics` and `CRYO-2`. The text is taken literally,
-  so characters such as `(`, `*`, and `.` have no special meaning. At most 200
-  characters, and no null character (`%00`).
+  so characters such as `(`, `*`, and `.` have no special meaning. `device` also
+  finds a traveler through its older list of devices, when it has no device of
+  its own. At most 200 characters, and no null character (`%00`).
 - `status`: travelers in a status, given by name (`initialized`, `active`,
   `submitted for completion`, `completed`, `frozen`, or `archived`, in any
   letter case) or by code (`0`, `1`, `1.5`, `2`, `3`, or `4`). Several statuses

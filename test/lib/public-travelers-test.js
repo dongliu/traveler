@@ -122,7 +122,8 @@ function matches(doc, cond) {
         return have !== arg;
       }
       if (name === '$in') {
-        return arg.indexOf(have) !== -1;
+        // a missing field matches null, as in MongoDB
+        return arg.indexOf(have === undefined ? null : have) !== -1;
       }
       if (name === '$nin') {
         return arg.indexOf(have) === -1;
@@ -2464,6 +2465,176 @@ describe('public-travelers', function() {
         'Field Name,Label,Type,Value,Input By,Input On'
       );
       made.lines[4].should.equal('torque,Torque,number,42,jdoe,1787234591');
+    });
+  });
+
+  describe('the device, with the older devices list', function() {
+    var Traveler = require('../../model/traveler').Traveler;
+    var csvLib = require('../../lib/csv');
+    var DEVICE_CELL = csvLib.TRAVELER_COLUMNS.indexOf('device');
+
+    it("should report the traveler's own device", function() {
+      publicTravelers
+        .toRecord({ device: 'CM-02' })
+        .device.should.equal('CM-02');
+    });
+
+    it('should fall back to the older list, joined with a slash', function() {
+      publicTravelers
+        .toRecord({ devices: ['DEV-1', 'DEV-2'] })
+        .device.should.equal('DEV-1/DEV-2');
+      publicTravelers
+        .toRecord({ devices: ['DEV-1'] })
+        .device.should.equal('DEV-1');
+    });
+
+    it("should prefer the traveler's own device when there is also a list", function() {
+      publicTravelers
+        .toRecord({ device: 'CM-02', devices: ['DEV-1'] })
+        .device.should.equal('CM-02');
+    });
+
+    it('should fall back when the own device is blank', function() {
+      publicTravelers
+        .toRecord({ device: '', devices: ['DEV-1'] })
+        .device.should.equal('DEV-1');
+      publicTravelers
+        .toRecord({ device: null, devices: ['DEV-1'] })
+        .device.should.equal('DEV-1');
+    });
+
+    it('should leave the device empty when there is neither', function() {
+      publicTravelers.toRecord({}).device.should.equal('');
+      publicTravelers.toRecord({ devices: [] }).device.should.equal('');
+      publicTravelers.toRecord({ devices: 'DEV-1' }).device.should.equal('');
+      publicTravelers.toRecord({ devices: null }).device.should.equal('');
+    });
+
+    it('should drop blank and non-text names from the list', function() {
+      publicTravelers
+        .toRecord({ devices: ['', 'DEV-1', null, 5, 'DEV-2'] })
+        .device.should.equal('DEV-1/DEV-2');
+      publicTravelers.toRecord({ devices: ['', ''] }).device.should.equal('');
+    });
+
+    it('should not put the older list in the record', function() {
+      publicTravelers
+        .toRecord({ devices: ['DEV-1'] })
+        .should.not.have.property('devices');
+    });
+
+    it('should read the older list from the database', function() {
+      publicTravelers.RECORD_FIELDS.should.include('devices');
+      publicTravelers.RECORD_FIELDS.should.include('device');
+    });
+
+    it('should show it in the list export and the traveler export', function() {
+      var doc = new Traveler({ title: 't', devices: ['DEV-1', 'DEV-2'] });
+      var record = publicTravelers.toRecord(doc);
+      publicTravelers
+        .toCsv([record])
+        .split('\n')[1]
+        .should.include(',DEV-1/DEV-2,');
+      var single = csvLib
+        .buildTravelerCsv({ record: record, url: 'u', fields: [] })
+        .split('\n')[1]
+        .split(',');
+      single[DEVICE_CELL].should.equal('DEV-1/DEV-2');
+    });
+
+    it('should show its own device in the exports when the document has both', function() {
+      var doc = new Traveler({
+        title: 't',
+        device: 'CM-02',
+        devices: ['DEV-1'],
+      });
+      var single = csvLib
+        .buildTravelerCsv({
+          record: publicTravelers.toRecord(doc),
+          url: 'u',
+          fields: [],
+        })
+        .split('\n')[1]
+        .split(',');
+      single[DEVICE_CELL].should.equal('CM-02');
+    });
+
+    describe('the device filter', function() {
+      function filterMatch(text) {
+        return publicTravelers.buildBaseMatch({
+          includeArchived: true,
+          textFilters: { device: text },
+        });
+      }
+      function traveler(over) {
+        return Object.assign({ publicAccess: 0 }, over);
+      }
+
+      it('should look in the device, or in the older list when there is no device', function() {
+        var condition = filterMatch('dev').$and[1];
+        condition.should.deep.equal({
+          $or: [
+            { device: { $regex: 'dev', $options: 'i' } },
+            {
+              device: { $in: [null, ''] },
+              devices: { $regex: 'dev', $options: 'i' },
+            },
+          ],
+        });
+      });
+
+      it('should find a traveler by its own device, ignoring case', function() {
+        matches(traveler({ device: 'CM-02' }), filterMatch('cm-0')).should.be
+          .true;
+        matches(traveler({ device: 'RF-1' }), filterMatch('cm-0')).should.be
+          .false;
+      });
+
+      it('should find a traveler that has only the older list, by any of its devices', function() {
+        var legacy = traveler({ devices: ['DEV-1', 'Pump-7'] });
+        matches(legacy, filterMatch('dev-1')).should.be.true;
+        matches(legacy, filterMatch('PUMP')).should.be.true;
+        matches(legacy, filterMatch('zzz')).should.be.false;
+      });
+
+      it('should find a traveler whose own device is blank or null through the older list', function() {
+        matches(
+          traveler({ device: '', devices: ['DEV-1'] }),
+          filterMatch('dev')
+        ).should.be.true;
+        matches(
+          traveler({ device: null, devices: ['DEV-1'] }),
+          filterMatch('dev')
+        ).should.be.true;
+      });
+
+      it('should not look in the older list when the traveler has its own device, since that is not what is shown', function() {
+        var both = traveler({ device: 'CM-02', devices: ['DEV-1'] });
+        matches(both, filterMatch('dev-1')).should.be.false;
+        matches(both, filterMatch('cm-02')).should.be.true;
+      });
+
+      it('should not match a traveler with no device at all', function() {
+        matches(traveler({}), filterMatch('dev')).should.be.false;
+        matches(traveler({ devices: [] }), filterMatch('dev')).should.be.false;
+      });
+
+      it('should take the text literally', function() {
+        matches(traveler({ devices: ['DEV-1'] }), filterMatch('.*')).should.be
+          .false;
+        matches(traveler({ devices: ['a.*b'] }), filterMatch('.*')).should.be
+          .true;
+      });
+
+      it('should leave the other text filters as they were', function() {
+        var match = publicTravelers.buildBaseMatch({
+          includeArchived: true,
+          textFilters: { subsystem: 'cryo' },
+        });
+        match.$and[1].should.deep.equal({
+          subsystem: { $regex: 'cryo', $options: 'i' },
+        });
+      });
     });
   });
 });

@@ -307,3 +307,24 @@ grounded in the code as it exists on the `Ernest` branch.
 - **Alternatives considered**: *Report `unknown` and add an Unknown card*: more transparent about
   bad data but adds an API key and a UI element for a rare case. *Accept the mismatch*: rejected
   because it makes the paging and totals claims false for those records.
+
+## D16 — Travelers from before the single `device` property
+
+- **Decision**: The record's `device` is the traveler's own `device`, else its older `devices` list
+  joined with `/` (blank and non-text names dropped). The list is read by the projection but is not
+  itself in the record. The `device` filter looks at `device`, and at `devices` only for a traveler
+  whose `device` is null, missing, or blank.
+- **Rationale**: The rest of the application already does this in the presentation layer
+  (`deviceColumn` in `public/javascripts/table.js`, `deviceDisplay` in `views/traveler.jade` and
+  `views/traveler-config.jade`). The old public page got it for free because its rows were whole
+  documents; the dashboard's rows are projected records with no `devices`, so a column-only fix in
+  the browser has nothing to fall back to. Doing it where the record is built keeps the dashboard,
+  the JSON, and both CSV exports in agreement, and the filter follows what is shown: a traveler is
+  never found by a device the list does not display for it. The projection reads `devices`, but the
+  record does not carry it, so the JSON keeps its 19 keys.
+- **Limits**: matching is per name, so a filter such as `DEV-1/DEV-2` does not match a traveler whose
+  list holds those two names (a filter of `DEV-1` does). Blank names are dropped, which differs from
+  a bare `join('/')` only for a list that contains an empty string.
+- **Alternatives considered**: *Send `devices` in the record and fall back in `textColumn`*: fixes
+  only the dashboard and leaves the CSV and JSON blank for these travelers. *Match `devices` for
+  every traveler in the filter*: would find a traveler by a device its own `device` hides.

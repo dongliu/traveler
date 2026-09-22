@@ -70,7 +70,8 @@ Field Name,Label,Type,Value,Input By,Input On
   of this traveler's values, in the columns above. They are the record columns of the public
   travelers list export, with `url` after `_id`, built by `toRecord` in `lib/public-travelers.js`
   and written by `buildTravelerCsv` in `lib/csv.js`. `status` is its name, `archivedOn` is set
-  only while the traveler is archived, `owner` falls back to the creator, dates are ISO 8601 UTC,
+  only while the traveler is archived, `owner` falls back to the creator, `device` falls back to
+  the older `devices` list joined with `/`, dates are ISO 8601 UTC,
   `tags` are joined with `;`, and text that starts a formula is shown as text.
 - 1 blank separator row.
 - 1 header row for the data table.
