@@ -67,8 +67,9 @@ const TravelerNote = mongoose.model('TravelerNote');
 const Log = mongoose.model('Log');
 
 const { TravelerError } = require('../lib/error');
-const { stateTransition, statusMap } = require('../model/traveler');
+const { stateTransition } = require('../model/traveler');
 const csv = require('../lib/csv');
+const publicTravelers = require('../lib/public-travelers');
 const logger = require('../lib/loggers').getLogger();
 
 function createTraveler(form, req, res) {
@@ -321,25 +322,15 @@ module.exports = function(app) {
     res.render('public-travelers', routesUtilities.getRenderObject(req));
   });
 
-  app.get('/publictravelers/json', auth.ensureAuthenticated, function(
-    req,
-    res
-  ) {
-    Traveler.find({
-      publicAccess: {
-        $in: [0, 1],
-      },
-      archived: {
-        $ne: true,
-      },
-    }).exec(function(err, travelers) {
-      if (err) {
-        logger.error(err);
-        return res.status(500).send(err.message);
-      }
-      return res.status(200).json(travelers);
-    });
-  });
+  // paged, filterable list of public travelers; the same listing is served to
+  // the REST API at /apis/publictravelers/ (see lib/public-travelers.js)
+  app.get(
+    '/publictravelers/list',
+    auth.ensureAuthenticated,
+    // a CSV download from the web app starts with a UTF-8 byte order mark, so
+    // that a spreadsheet application reads international characters correctly
+    publicTravelers.listHandler(Traveler, { bom: true })
+  );
 
   /*  app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
       var search = {
@@ -585,7 +576,7 @@ module.exports = function(app) {
             $in: doc.data,
           },
         },
-        'name value inputOn inputBy inputType'
+        'name value inputOn inputBy inputType file'
       ).exec(function(err, travelerDataDocs) {
         if (err) {
           logger.error(err);
@@ -598,14 +589,11 @@ module.exports = function(app) {
         const fields = csv.resolveTravelerFields(
           doc.labels,
           doc.types,
-          travelerDataDocs,
-          base
+          travelerDataDocs
         );
         const body = csv.buildTravelerCsv({
-          link,
-          id: doc._id,
-          title: doc.title,
-          statusLabel: statusMap[`${doc.status}`],
+          record: publicTravelers.toRecord(doc),
+          url: link,
           fields,
         });
         res.set('Content-Type', 'text/csv; charset=utf-8');

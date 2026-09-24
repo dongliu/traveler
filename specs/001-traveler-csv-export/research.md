@@ -153,6 +153,14 @@ every other data column) an explicit header, so the file is self-describing per 
 describes a single downloadable file per traveler id, and a single file is simpler for a
 recipient to handle.
 
+**Update (2026-09-20)**: The four-row metadata block was replaced by a header row and one row of
+the traveler's values, in the columns of the public travelers list export with `url` after `_id`
+(spec Clarifications, FR-003). The layout is otherwise as decided above. The row is built from the
+same `toRecord` record and written by the same cell formatter as the list export
+(`RECORD_COLUMNS` and `recordCell` in `lib/csv.js`), so the two cannot drift apart, and, since it
+carries user-entered text, it goes through the formula guard (`toSafeCsvRow`). The data rows are
+unchanged.
+
 ## 10. Testing approach
 
 **Decision**: Unit-test `lib/csv.js`'s escaping/row-building functions in `test/lib/csv-test.js`

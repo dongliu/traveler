@@ -8,18 +8,24 @@ block head
   link(rel='stylesheet', href='#{prefix}/datatables/css/dataTables.bootstrap.css')
   link(rel='stylesheet', href='#{prefix}/font-awesome-4.3.0/css/font-awesome.css')
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+  style.
+    .filter-bar { padding:10px 10px 0 10px; background:#f5f5f5; border-radius:4px; margin-bottom:10px; }
+    .filter-bar label { display:block; font-size:0.9em; margin-bottom:2px; }
+    .filter-bar input[type='text'], .filter-bar input[type='date'] { width:90%; }
+    .filter-bar .filter-actions { padding-top:20px; }
+    #public-travelers-table td { vertical-align:middle; }
+    #public-travelers-table .progress { margin:0 0 2px 0; min-width:70px; }
+    #table-scroll { overflow-x:auto; }
+    #status-summary { margin-bottom:6px; }
+    .status-card { display:inline-block; min-width:130px; margin:4px 6px 4px 0; padding:8px 12px; border:0; border-radius:4px; cursor:pointer; color:#fff; text-align:left; font-size:inherit; line-height:1.3; }
+    .status-card.active { box-shadow:0 0 0 2px #333 inset; }
+    .status-card .count { font-size:1.6em; font-weight:bold; display:block; }
 
 block content
   .container-fluid
+    h3 Public accessible travelers
+    #message
     .btn-toolbar
-      .btn-group
-        button.btn.btn-info.select-all(data-toggle='tooltip', title='select all the rows in the current view')
-          i.fa.fa-list.fa-lg
-          | &nbsp;Select all
-      .btn-group
-        button.btn.btn-info.deselect-all(data-toggle='tooltip', title='deselect all the rows')
-          i.fa.fa-list.fa-lg
-          | &nbsp;Select none
       .btn-group
         button.btn.btn-primary#report(data-toggle='tooltip', title='generate report for selected travelers')
           i.fa.fa-table.fa-large
@@ -28,10 +34,79 @@ block content
         button.btn.btn-primary#add-to-binder(data-toggle='tooltip', title='add selected travelers into a binder')
           i.fa.fa-briefcase.fa-lg
           | &nbsp;Add to binder
-    #publictravelers.table.active
-      #message
-      h3 Public accessible travelers
+      .btn-group
+        button.btn.btn-info#download-csv(data-toggle='tooltip', title='download every traveler that matches the filters as a CSV file')
+          i.fa.fa-download.fa-lg
+          | &nbsp;Download CSV
+
+    #status-summary(role='group', aria-label='Filter by status')
+
+    .filter-bar
+      .row-fluid
+        .span2
+          label(for='f-updated-from') Updated from
+          input#f-updated-from(type='date')
+        .span2
+          label(for='f-updated-to') Updated to
+          input#f-updated-to(type='date')
+        .span2
+          label(for='f-subsystem') Subsystem
+          input#f-subsystem(type='text', maxlength='200')
+        .span2
+          label(for='f-device') Device
+          input#f-device(type='text', maxlength='200')
+        .span2
+          label(for='f-activity') Activity
+          input#f-activity(type='text', maxlength='200')
+        .span2
+          label(for='f-machine-area') Machine area
+          input#f-machine-area(type='text', maxlength='200')
+      .row-fluid
+        .span2
+          label(for='f-sector') Sector
+          input#f-sector(type='text', maxlength='200')
+        .span2
+          label(for='f-windchill-id') Windchill ID
+          input#f-windchill-id(type='text', maxlength='200')
+        .span3
+          label(for='f-tags') Tags (separate with commas)
+          input#f-tags(type='text', maxlength='200')
+        .span2
+          .filter-actions
+            label.checkbox
+              input#f-include-archived(type='checkbox')
+              | &nbsp;Include archived
+        .span3
+          .filter-actions.pull-right
+            button.btn.btn-primary#apply-filters(type='button')
+              i.fa.fa-search
+              | &nbsp;Apply
+            button.btn#clear-filters(type='button', style='margin-left:5px') Clear
+
+    #loading.muted(style='display:none', role='status')
+      i.fa.fa-spinner.fa-spin
+      | &nbsp;Loading&hellip;
+    #table-scroll
       table#public-travelers-table.table.table-bordered.table-hover
+
+    .row-fluid
+      .span4
+        span#range-info
+      .span4.text-center
+        label.inline(for='page-size') Travelers per page&nbsp;
+        select#page-size.input-mini
+          option(value='10') 10
+          option(value='25', selected) 25
+          option(value='50') 50
+          option(value='100') 100
+      .span4
+        .btn-group.pull-right
+          button.btn#prev-page(type='button', disabled)
+            i.fa.fa-chevron-left
+            | &nbsp;Prev
+          button.btn#next-page(type='button', disabled) Next&nbsp;
+            i.fa.fa-chevron-right
+
     #modal.modal.hide.fade(tabindex='-1',role='dialog',data-backdrop='static',aria-labelledby='modalLabel',aria-hidden='true')
       .modal-header
         h3#modalLabel

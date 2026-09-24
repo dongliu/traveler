@@ -66,6 +66,7 @@ Each route file exports `function(app)` and is mounted in `app.js`. Key files:
 ### Shared libraries (`/lib/`)
 
 - `req-utils.js` — Middleware factories used heavily in routes: `exist(param, Model)`, `canReadMw(param)`, `isOwnerMw(param)`, `requireAdmin()`, `status(param, [allowed])`, `isAdmin(req)`, `isOwner(req, doc)`.
+- `public-travelers.js` — Paged, filterable list of public travelers (JSON or CSV), one `listHandler(Traveler, options)` mounted on both the web app (`/publictravelers/list`) and the REST API (`/apis/publictravelers/`). The public tier itself is `reqUtils.publicAccessMatch()` in `req-utils.js`, next to `getAccess`; never write a `publicAccess` query condition elsewhere.
 - `review.js` — `addReviewResult`, `addReviewRequest`, `removeReviewRequest` — shared between form and traveler routes.
 - `auth/index.js` — Sets `res.locals.roles`, `res.locals.permissions`, `res.locals.userid` from session. `isAdmin` in views is derived from `roles.indexOf('admin') !== -1` in `views/layout.jade`.
 - `role.js` — Role constants: `Manager`, `Admin`, `Reviewer`.

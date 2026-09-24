@@ -34,7 +34,8 @@ Each maps to an Acceptance Scenario in `spec.md`.
 1. **Happy path (US1, Scenario 1)** — As a user with access, visit
    `http://localhost:<port>/travelers/<id>/csv` in a browser (or `curl -b <session-cookie>
    http://localhost:<port>/travelers/<id>/csv -o export.csv`). Open the file: confirm the
-   metadata block (link/id/title/status) appears before the data rows, and each filled-in field
+   metadata section (a header row of `_id, url, title, status, ...` and one row of the traveler's
+   values) appears before the data rows, and each filled-in field
    shows its internal field name, label, type, value, input-by, and input-on.
 
 2. **Unanswered field (US1, Scenario 2)** — Pick a traveler with at least one field never filled

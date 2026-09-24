@@ -7,6 +7,7 @@ var routesUtilities = require('../utilities/routes.js');
 var _ = require('lodash');
 var form = require('../model/form');
 var reqUtils = require('../lib/req-utils');
+var publicTravelers = require('../lib/public-travelers');
 var logger = require('../lib/loggers').getLogger();
 const mqttUtilities = require('../utilities/mqtt.js');
 const DataError = require('../lib/error').DataError;
@@ -103,6 +104,10 @@ function performFindEntityReferencedContentsByParentEntityId(
 }
 
 module.exports = function(app) {
+  // paged, filterable list of public travelers; the same listing is served to
+  // the web app at /publictravelers/list (see lib/public-travelers.js)
+  app.get('/apis/publictravelers/', publicTravelers.listHandler(Traveler));
+
   app.get('/apis/travelers/', function(req, res) {
     var search = {
       archived: {
