@@ -1,0 +1,59 @@
+{
+  "name": "Open-NCR refusal of traveler completion",
+  "description": "One refusal shape returned by every code path that can move a traveler to 'submitted for completion' (1.5) or 'completed' (2) while any linked NCR is not Closed (spec FR-013 to FR-016). Produced by lib/traveler-ncr.js assertNoOpenNcrs(); the four call sites below all return it unchanged. No role, including administrators and managers, bypasses it (FR-015).",
+  "applies_to": [
+    {
+      "endpoint": "PUT /travelers/:id/status",
+      "handler": "lib/traveler.js updateStatus",
+      "when": "req.body.status is 1.5 or 2 (after the existing transition and authorization checks, before the save)",
+      "authentication": "session"
+    },
+    {
+      "endpoint": "PUT /apis/travelers/:id/status/",
+      "handler": "routes/api.js",
+      "when": "req.body.status is 1.5 or 2",
+      "authentication": "API (Basic) — unchanged"
+    },
+    {
+      "endpoint": "POST /apis/update/traveler/:id/",
+      "handler": "routes/api.js -> utilities/routes.js updateTravelerStatus",
+      "when": "body.status parses to 1.5 or 2; checked before updateTravelerStatus runs (whose case 2 accepts 1 -> 2 directly)",
+      "authentication": "API (Basic) — unchanged"
+    },
+    {
+      "endpoint": "POST /travelers/:id/review/results",
+      "handler": "lib/review.js addReviewResult",
+      "when": "the document is a Traveler and the result is an approval (result == '1'). Checked BEFORE the reviewer's result is recorded, so a refused approval leaves the review state untouched and can be retried once the NCRs close.",
+      "authentication": "session"
+    }
+  ],
+  "response": {
+    "statusCode": 409,
+    "body": {
+      "success": false,
+      "error": "Conflict",
+      "code": "OPEN_NCRS",
+      "message": "This traveler cannot be completed while 2 linked NCRs are not Closed.",
+      "open_ncrs": [
+        {
+          "ncr_id": "string",
+          "ncr_number": "string",
+          "status": "string — one of Submitted | Dispositioned | Approval Requested | Returned for Comment | Final Approval",
+          "input_name": "string | null — null for a legacy link with no input",
+          "input_label": "string | null"
+        }
+      ]
+    }
+  },
+  "client_behaviour": {
+    "public/javascripts/traveler.js setStatus": "On 409 with code OPEN_NCRS render an alert listing each NCR as a link (prefix + '/ncrs/' + ncr_id) with its status and input label. Build with DOM/.text(); never concatenate response text into HTML. Other failures keep the existing 'Cannot change the status: ...' text.",
+    "public/javascripts/traveler.js complete": "Re-enable the form inputs it disabled before calling setStatus(1.5) when the request fails.",
+    "public/javascripts/traveler.js submitReview": "Add a failure handler; show the same message for a refused approval (today the call has only a success handler)."
+  },
+  "not_refused": [
+    "1.5 -> 1 (rejection back to active)",
+    "1 -> 3 (freeze)",
+    "any -> 4 (archive)",
+    "1 -> 1.5 or 1.5 -> 2 when every linked NCR is Closed, or the traveler has none (spec FR-016; the traveler's other completion rules are unchanged)"
+  ]
+}
