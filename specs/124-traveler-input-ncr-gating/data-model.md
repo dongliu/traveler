@@ -58,13 +58,13 @@ travelerNcrPdf.index({ traveler: 1, ncr_id: 1 }, { unique: true });
 |---|---|
 | **Linked NCR** (of a traveler) | An `Ncr` with `traveler_link.traveler_id` = the traveler's `_id` and `traveler_link.initiated_from_traveler === true` — the same selector `GET /travelers/:id/ncr-links/` uses. |
 | **Open NCR** | A linked NCR whose `status !== 'Closed'` (`Submitted`, `Dispositioned`, `Approval Requested`, `Returned for Comment`, `Final Approval`). |
-| **Open-NCR input names** (of a traveler) | The distinct, non-empty `traveler_link.input_name` values of its open NCRs. An open NCR with no `input_name` (a legacy/fixture record) blocks completion but blocks no input. |
+| **Open-NCR input names** (of a traveler) | The distinct, non-empty `traveler_link.input_name` values of its open NCRs. An open NCR with no `input_name` (a legacy/fixture record) blocks submission for completion approval but blocks no input. |
 | **Active traveler** | `Traveler.status === 1` (`statusMap['1'] === 'active'`). |
 
 Queries (both use the existing index `{traveler_link.traveler_id, traveler_link.input_name}` as a prefix on `traveler_id`):
 
 ```js
-// open NCRs for the completion refusal (FR-014)
+// open NCRs for the submission refusal (FR-014)
 Ncr.find(
   { 'traveler_link.traveler_id': id, 'traveler_link.initiated_from_traveler': true, status: { $ne: 'Closed' } },
   { ncr_number: 1, status: 1, 'traveler_link.input_name': 1, 'traveler_link.input_label': 1 }
@@ -100,18 +100,21 @@ traveler's own labels map, never a client-supplied string.
 
 ## Which traveler statuses allow what
 
-| Traveler status | Initiate NCR (both paths) | Submit for completion (→ 1.5) | Mark completed (→ 2) |
-|---|---|---|---|
-| 0 initialized | refused (`TRAVELER_NOT_ACTIVE`) | n/a (not a valid transition) | n/a |
-| **1 active** | **allowed** | refused if any open linked NCR | n/a (1 → 2 only via the legacy API helper, gated the same) |
-| 1.5 submitted for completion | refused | n/a | refused if any open linked NCR |
-| 2 completed | refused | n/a | n/a |
-| 3 frozen | refused | n/a | n/a |
-| 4 archived | refused | n/a | n/a |
+| Traveler status | Initiate NCR (both paths) | Submit for completion approval (→ 1.5) |
+|---|---|---|
+| 0 initialized | refused (`TRAVELER_NOT_ACTIVE`) | n/a (not a valid transition) |
+| **1 active** | **allowed** | refused if any open linked NCR |
+| 1.5 submitted for completion | refused | n/a |
+| 2 completed | refused | n/a |
+| 3 frozen | refused | n/a |
+| 4 archived | refused | n/a |
 
-The completion refusal (`OPEN_NCRS`, 409) is raised on **target status 1.5 or 2**
-by all four paths listed in research.md Decision 4. It is not raised for
-1.5 → 1 (rejection back to active), 1 → 3, or any → 4.
+The refusal (`OPEN_NCRS`, 409) is raised when a traveler is moved out of active
+toward completion: target status **1.5**, and target **2 from status 1** (the
+legacy API helper's direct route), on the three paths listed in research.md
+Decision 4. It is **not** raised for approval (1.5 → 2), rejection back to
+active (1.5 → 1), 1 → 3, or any → 4: NCR initiation requires an active
+traveler, so none can be opened after submission (spec Assumptions).
 
 ## Progress figure
 

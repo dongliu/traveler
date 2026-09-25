@@ -11,14 +11,13 @@ Grounded in the running code: `lib/traveler.js`, `lib/review.js`, `lib/ncr-servi
 
 Two findings from the code shape most decisions below:
 
-> **Finding A — a traveler can reach "submitted" or "completed" by four
-> different code paths, not one.** `PUT /travelers/:id/status`
-> (`lib/traveler.js` `updateStatus`), `PUT /apis/travelers/:id/status/` and
+> **Finding A — a traveler can be put forward for completion by three code
+> paths, not one.** `PUT /travelers/:id/status` (`lib/traveler.js`
+> `updateStatus`), and `PUT /apis/travelers/:id/status/` and
 > `POST /apis/update/traveler/:id/` (both `routes/api.js`, the latter via
-> `utilities/routes.js` `updateTravelerStatus`, whose `case 2` even permits
-> 1 → 2 directly), and reviewer approval (`lib/review.js` `allApproveFlow`
-> sets `status = 2` when every reviewer approves). A gate placed only on the
-> web status route would leave three ways around it.
+> `utilities/routes.js` `updateTravelerStatus`, whose `case 2` even lets an
+> *active* traveler go straight to completed, 1 → 2, skipping submission). A
+> gate placed only on the web status route would leave two ways around it.
 >
 > **Finding B — "finished input" is a stored counter, and binders roll it up
 > from that stored value.** `Traveler.finishedInput` is written by
@@ -32,9 +31,9 @@ Two findings from the code shape most decisions below:
 
 **Decision**: Add `lib/traveler-ncr.js` holding every rule this feature
 introduces — reference parsing/formatting, reference resolution (existence,
-read access, active status), the open-NCR queries, the completion refusal,
-and the progress refresh. Routes, `lib/ncr-service.js`, `lib/traveler.js`,
-`lib/review.js` and `routes/api.js` call it; none re-implement a rule.
+read access, active status), the open-NCR queries, the submission refusal,
+and the progress refresh. Routes, `lib/ncr-service.js`, `lib/traveler.js`
+and `routes/api.js` call it; none re-implement a rule.
 
 **Rationale**: Finding A. The constitution asks for logic in `lib/`, not in
 routes, and FR-007 requires the rules to hold "by any route", not just the
@@ -49,7 +48,7 @@ models), so no cycle. Inside `lib/ncr-service.js` the module is
 order is unaffected.
 
 **Alternatives considered**:
-- *Put the checks in each route/handler*: rejected — four completion paths
+- *Put the checks in each route/handler*: rejected — three submission paths
   plus two creation paths would each carry a copy.
 - *Extend `lib/traveler.js`*: rejected — it is the status-update handler
   (takes `req`/`res`); the rules also run from `lib/ncr-service.js`, which
@@ -117,49 +116,55 @@ user could fill in anyway.
 **Alternatives considered**: *Disabled button with a tooltip* — rejected as
 extra UI for a state in which the page's inputs are already disabled.
 
-## Decision 4: The completion gate is one shared refusal, applied to all four paths
+## Decision 4: The submission gate is one shared refusal, applied to every route into "submitted for completion approval"
 
 **Decision**: `assertNoOpenNcrs(travelerId)` returns nothing when every linked
 NCR (`traveler_link.traveler_id` = id, `initiated_from_traveler` true) has
 status `Closed`, and otherwise throws a `409` carrying `code: 'OPEN_NCRS'` and
 `open_ncrs: [{ncr_id, ncr_number, status, input_name, input_label}]`. It runs
-when the target status is **1.5 or 2** on:
+when a traveler is being moved out of *active* toward completion — target
+status **1.5**, and target **2 when the current status is 1** (the legacy API
+helper's direct route) — on:
 
-1. `lib/traveler.js` `updateStatus` (web) — before the save.
-2. `routes/api.js` `PUT /apis/travelers/:id/status/`.
+1. `lib/traveler.js` `updateStatus` (web) — before the save. Target 1.5 only:
+   the shared `stateTransition` table does not allow 1 → 2.
+2. `routes/api.js` `PUT /apis/travelers/:id/status/` — target 1.5 only, same table.
 3. `routes/api.js` `POST /apis/update/traveler/:id/` — before
-   `updateTravelerStatus` when the requested status is 1.5 or 2.
-4. `lib/review.js` `addReviewResult` — for a **Traveler** and an *approve*
-   result, **before** the review result is recorded.
+   `updateTravelerStatus`, when the requested status is 1.5, or 2 while the
+   traveler's current status is 1.
 
 Applies to every role; no override (FR-015).
 
-**Why (4) is before recording, not inside `allApproveFlow`**: `addReviewResult`
-saves the reviewer's approval first, then `allApproveFlow` sets status 2. A
-refusal *inside* the flow would leave every reviewer recorded as "approved"
-while the traveler is stuck at 1.5 with nothing to re-trigger completion.
-Refusing the approval attempt itself leaves the review state untouched, so it
-can simply be retried once the NCRs close.
+**Approval is deliberately not gated.** The spec (Assumptions, confirmed by the
+requester) puts the rule at submission: NCR initiation requires an *active*
+traveler (FR-009), so no NCR can be opened once a traveler has been submitted
+and an approver has nothing new to check. Reviewer approval (`lib/review.js`),
+1.5 → 2, and the review UI are therefore untouched. A traveler sent back for
+more work (1.5 → 1) is active again and is checked again on its next
+submission (US3 scenario 5).
 
 **Client fixes this exposes** (both are latent today, the refusal makes them
-reachable):
+reachable). The "Submit for completion" button (`#complete2`) calls `complete()`:
 - `complete()` in `public/javascripts/traveler.js` disables every form input
   *before* it calls `setStatus(1.5)`. On a refusal the inputs would stay
   disabled until reload. The failure handler must re-enable them.
 - `setStatus`'s failure handler concatenates `jqXHR.responseText` into HTML;
   it needs a branch for `OPEN_NCRS` that builds the list with `.text()` /
   attribute setters (never string-concatenated HTML) and links each NCR.
-- `submitReview` has **no** `.fail` handler, so a refused approval would do
-  nothing visible. Add one that shows the same message.
 
 **Residual race (accepted)**: NCR creation checks `status === 1` and
 submission checks "no open NCRs"; there is no cross-collection transaction, so
 a create and a submit landing in the same instant could leave a traveler at
-1.5 with an open NCR. That is exactly what the second gate (1.5 → 2 and the
-approval) catches, and the spec (US3 scenario 2) requires it.
+1.5 with an open NCR. The spec accepts this (Assumptions: "an NCR created at
+the very same instant as a submission is not guarded against"); it is not
+re-checked at approval.
 
 **Alternatives considered**:
-- *Gate only 1 → 1.5*: rejected — spec FR-013 and the race above.
+- *Also gate approval (1.5 → 2 and reviewer approval)*: rejected by the
+  requester — the rule is at submission. It would also have needed a check
+  *before* the reviewer's result is recorded (`lib/review.js` saves the
+  approval, then sets status 2), or a refusal there would strand a traveler
+  with every reviewer recorded as approved.
 - *Mongoose pre-save hook on `Traveler.status`*: rejected — hooks have no
   `req`, cannot return a structured 409 to the caller, and would also fire on
   unrelated saves.

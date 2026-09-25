@@ -11,7 +11,8 @@ status on the input), a user can now:
    traveler and paste it into the NCR initiation form.
 2. **Only against active travelers** — both entry paths refuse a traveler that
    is not active.
-3. **Completion is blocked** while any linked NCR is not Closed; the refusal lists them.
+3. **Submitting the traveler for completion approval is blocked** while any linked
+   NCR is not Closed; the refusal lists them.
 4. **Input progress** does not count an input that has an open NCR.
 5. **Closure PDF** — closing a traveler-linked NCR attaches a PDF of it to the input.
 
@@ -63,17 +64,22 @@ Design detail: [data-model.md](./data-model.md). Endpoint changes:
 3. Open `/ncrs/new` with an active traveler's reference, then (in another tab)
    move that traveler out of active, then submit. Confirm it is refused.
 
-### 3 — Completion is blocked (User Story 3)
+### 3 — Submission for completion approval is blocked (User Story 3)
 
-1. With an open NCR linked to input A, click **Complete** on the traveler.
-   Confirm it is refused, the message lists the NCR (number, status, input,
-   link), and the form inputs are **still editable** (not left disabled).
+1. With an open NCR linked to input A, click **Submit for completion** on the
+   traveler. Confirm it is refused and the traveler stays active, the message
+   lists the NCR (number, status, input, link), and the form inputs are
+   **still editable** (not left disabled).
 2. As an administrator, try the same. Confirm it is still refused.
 3. Repeat with two NCRs, closing only one. Still refused until both are Closed.
-4. Close every linked NCR and click **Complete** again. Confirm it proceeds.
-5. (Approval path) With a traveler already submitted for completion and an open
-   NCR linked to it (create it via the fixture), have a reviewer approve. Confirm
-   the approval is refused with a visible message and the review state is unchanged.
+4. Close every linked NCR and click **Submit for completion** again. Confirm it
+   goes through to approval exactly as before.
+5. (Resubmission) With no open NCRs, submit the traveler and have a reviewer
+   reject it, so it returns to active. Raise a new NCR against it and submit
+   again. Confirm the second submission is refused.
+6. (Legacy API) With an open NCR linked, use the REST API to set the traveler's
+   status to 1.5, and to 2 while it is still active. Confirm both are refused
+   with `409 OPEN_NCRS`.
 
 ### 4 — Input progress (User Story 4)
 

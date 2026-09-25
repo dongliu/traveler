@@ -10,13 +10,13 @@ Extends `specs/123-traveler-ncr-input-linking` so a traveler input and the NCRs
 raised against it hold each other to account. A user can link a directly-initiated
 NCR to an input by pasting a `traveler_id::input_name` reference (copied from any
 input on the traveler) into the NCR form; NCRs can only be raised against an
-*active* traveler; a traveler cannot be submitted for completion or completed, and
+*active* traveler; a traveler cannot be submitted for completion approval, and
 an input does not count as finished, while a linked NCR is not Closed; and closing
 a traveler-linked NCR attaches a PDF of it to the input.
 
 Approach: one server-side rules module (`lib/traveler-ncr.js`) that every entry
-point calls, so no rule lives only in the UI or in one route — there are **four**
-code paths that can complete a traveler, and both ways a user links an NCR (the
+point calls, so no rule lives only in the UI or in one route — there are **three**
+code paths that can submit a traveler for completion approval, and both ways a user links an NCR (the
 traveler's "Initiate NCR" action and a pasted reference) end in the same
 `POST /api/ncrs` (research.md Findings A/B). "Not finished" changes the *stored* `finishedInput`
 counter (lists and binders read it) rather than only the page. The PDF is built by
@@ -58,7 +58,7 @@ user without read access (FR-008); `POST /travelers/:id/data/` still returns `20
 unchanged (SC-007).
 
 **Scale/Scope**: 5 user stories / 29 functional requirements / 7 success criteria.
-Touches 18 existing files (including `package.json`/`package-lock.json`) and adds 5 new
+Touches 17 existing files (including `package.json`/`package-lock.json`) and adds 5 new
 files: 2 source, 2 unit-test, 1 e2e (below).
 
 ## Constitution Check
@@ -70,7 +70,7 @@ files: 2 source, 2 unit-test, 1 e2e (below).
 | I. Automated testing | PASS | New unit tests for both new `lib/` files (≥ 80% coverage target); `ncr-service` tests extended for the PDF hook and delete-refresh; new e2e spec for every user story plus a checkbox-set input and a cross-traveler PDF-id check. Regression test for the `complete()` disabled-inputs defect that the refusal exposes. |
 | II. Code quality | PASS | Rules in `lib/traveler-ncr.js`, not routes; async/await; camelCase/PascalCase as elsewhere; ESLint clean. `lib/ncr-service.js` requires the new module lazily so the existing test stubbing order is unaffected (research.md Decision 1). |
 | III. Security | PASS | Reference validated at the boundary (trim, ≤ 256 chars, ObjectId checked *before* any query); read access enforced with a uniform not-found; PDF text is drawn as text only (no HTML/CSS/URL rendering); PDF download scoped by `{_id, traveler}` (no cross-traveler id); file paths server-generated, never user-supplied, never returned to the client; failure reasons carry no paths or stacks. Run `npm audit` on the two new dependencies. |
-| IV. Versioning & breaking changes | PASS, with release notes | MINOR (new feature). Behaviour changes to call out: the four status paths — including the Basic-auth REST API — now return `409 OPEN_NCRS`, so an integration that completes travelers programmatically is refused while NCRs are open; `POST /api/ncrs` legacy `traveler_*` fields are a deprecated alias for one release and `traveler_id` without an input name is now a 400. The repo has no `CHANGELOG`; record these in the PR description and `CLAUDE.md` Recent Changes, as prior features did. |
+| IV. Versioning & breaking changes | PASS, with release notes | MINOR (new feature). Behaviour changes to call out: the three status paths — including the Basic-auth REST API — now return `409 OPEN_NCRS`, so an integration that submits or completes travelers programmatically is refused while NCRs are open; `POST /api/ncrs` legacy `traveler_*` fields are a deprecated alias for one release and `traveler_id` without an input name is now a 400. The repo has no `CHANGELOG`; record these in the PR description and `CLAUDE.md` Recent Changes, as prior features did. |
 | V. Documentation | PASS | Five contract files, data model, quickstart; JSDoc on `lib/traveler-ncr.js` (the check order and the "why `doc.save()`" reasoning are non-obvious); `CLAUDE.md` refreshed by the optional agent-context hook. |
 
 *Post-Phase-1 re-check*: No change to the gates. Phase 1 added two items to
@@ -91,7 +91,7 @@ specs/124-traveler-input-ncr-gating/
 ├── contracts/
 │   ├── traveler-input-lookup.json          # GET  /api/ncrs/traveler-input  (new)
 │   ├── ncr-create-traveler-input-ref.json  # POST /api/ncrs                 (field added; aliases deprecated)
-│   ├── traveler-completion-refusal.json    # 409 OPEN_NCRS on four paths    (new behaviour)
+│   ├── traveler-completion-refusal.json    # 409 OPEN_NCRS on three paths   (new behaviour)
 │   ├── traveler-ncr-pdfs.json              # GET  /travelers/:id/ncr-pdfs/[:pdfId] (new) + PDF content list
 │   └── ncr-close-response.json             # PATCH /api/ncrs/:id/close      (closure_pdf added)
 ├── checklists/requirements.md   # from /speckit-specify
@@ -133,9 +133,7 @@ lib/ncr-service.js                   # createNcr: refreshTravelerProgress after 
                                      # closeNcr: after the final save → attachClosurePdf →
                                      # refreshTravelerProgress; sets transient ncr._closurePdf.
                                      # deleteNcr: read traveler_link first, refresh progress after.
-lib/traveler.js                      # updateStatus: assertNoOpenNcrs when target is 1.5 or 2
-lib/review.js                        # addReviewResult: assertNoOpenNcrs for a Traveler approval,
-                                     # before the reviewer's result is recorded
+lib/traveler.js                      # updateStatus: assertNoOpenNcrs when the target is 1.5
 
 routes/ncr.js                        # POST /: traveler_input_ref → resolveInputRef (after field
                                      # validation), legacy traveler_* alias, label ignored;
@@ -143,7 +141,8 @@ routes/ncr.js                        # POST /: traveler_input_ref → resolveInp
                                      # closure_pdf; 400/404/409 mapped with details.traveler_input_ref
 routes/traveler.js                   # + GET /travelers/:id/ncr-pdfs/ and /:pdfId (canReadMw)
 routes/api.js                        # PUT /apis/travelers/:id/status/ and POST
-                                     # /apis/update/traveler/:id/: assertNoOpenNcrs on 1.5 / 2
+                                     # /apis/update/traveler/:id/: assertNoOpenNcrs on 1.5, and on 2
+                                     # while the traveler is still active (the helper's 1 → 2 route)
 
 public/javascripts/lib/traveler.js   # renderNcrLinks(): Copy-reference control on every input;
                                      # fetch ./ncr-pdfs/ and render PDF links; "Not finished —
@@ -151,7 +150,7 @@ public/javascripts/lib/traveler.js   # renderNcrLinks(): Copy-reference control 
                                      # → /ncrs/new?traveler_input_ref=…, not rendered unless
                                      # traveler.status === 1
 public/javascripts/traveler.js       # setStatus: OPEN_NCRS list (DOM-built, links); complete():
-                                     # re-enable inputs on failure; submitReview: add .fail;
+                                     # re-enable inputs on failure;
                                      # skip incrementFinished for an open-NCR input
 
 views/ncr-create.jade                # replace #traveler-link-banner + 3 URL params with the
@@ -175,6 +174,7 @@ model/binder.js, public/javascripts/table.js  # consume the stored finishedInput
 views/ncr-detail.jade                # timeline renders event_type as a badge, so the new events
                                      # show; the traveler/input reference display is 123's
 lib/req-utils.js                     # canRead/canReadMw reused as-is
+lib/review.js                        # reviewer approval is deliberately not gated (spec Assumptions)
 lib/upload.js, routes/ncr-view.js    # PDF is server-generated (no upload filter); /ncrs/new serves the same page
 ```
 
