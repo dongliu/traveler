@@ -38,7 +38,8 @@
 - The `traveler_id::input_name` format appears in the spec because it is a
   user-visible convention the requester specified, not an implementation choice.
 - Interpretations recorded under Assumptions for the requester to correct if
-  wrong: "completed" blocks both submit-for-completion and mark-completed; the
+  wrong: the open-NCR rule applies at submission for completion approval only,
+  not again at approval (corrected by the requester on 2026-09-24); the
   reference path accepts any existing input while the in-traveler "Initiate
   NCR" action stays limited to filled-in inputs; a PDF failure does not block
   NCR closure.

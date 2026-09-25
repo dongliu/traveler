@@ -12,7 +12,8 @@ NCR's link and status on that input. This feature keeps all of that and adds:
 (a) a second way to link an NCR to a traveler input — by typing or pasting a
 reference on the NCR initiation form; (b) a rule that only *active* travelers
 can have NCRs initiated against them; (c) two "an open NCR holds work back"
-rules, one for the input and one for the whole traveler; and (d) an
+rules, one for the input and one for submitting the traveler for completion
+approval; and (d) an
 automatically produced PDF record of each closed NCR, attached back to the
 traveler input it was raised against.
 
@@ -83,10 +84,10 @@ initialized, already submitted for completion, completed, frozen, or archived
 "Initiate NCR" action on the traveler, or a pasted reference on the NCR
 initiation form.
 
-**Why this priority**: This is the guard that makes the completion rule in
-User Story 3 coherent. If NCRs could be opened against a traveler that is
-already submitted or completed, the traveler could be left holding a
-nonconformance nobody can resolve within its own workflow.
+**Why this priority**: This is the guard that makes the submission rule in
+User Story 3 hold. Without it, an NCR could be opened against a traveler
+after it had already passed the submission check, leaving a traveler that is
+under approval or completed holding an unresolved nonconformance.
 
 **Independent Test**: Can be fully tested by attempting to initiate an NCR
 (via both entry paths) against travelers in each non-active status and
@@ -111,41 +112,44 @@ then repeating against an active traveler and confirming it succeeds.
 
 ---
 
-### User Story 3 - A Traveler Cannot Be Completed While Any Linked NCR Is Open (Priority: P1)
+### User Story 3 - A Traveler Cannot Be Submitted for Completion Approval While Any Linked NCR Is Open (Priority: P1)
 
-A traveler with even one linked NCR that is not yet Closed cannot be
-completed. The person trying to submit the traveler for completion (or an
-approver trying to mark it completed) is stopped and shown exactly which NCRs
-are still open, so they know what has to be resolved. Once every linked NCR is
-Closed, completion proceeds under the existing rules.
+A traveler with even one linked NCR that is not yet Closed cannot be submitted
+for completion approval. The person trying to submit it is stopped and shown
+exactly which NCRs are still open, so they know what has to be resolved. Once
+every linked NCR is Closed, submission proceeds under the existing rules and
+the traveler goes on to its normal approval.
 
 **Why this priority**: This is the core quality control the feature exists to
-enforce — product work cannot be signed off as complete while a recorded
+enforce — product work cannot be put forward for sign-off while a recorded
 nonconformance against it is still unresolved.
 
 **Independent Test**: Can be fully tested by linking an NCR to an active
-traveler, attempting to submit the traveler for completion and confirming the
-attempt is refused with the open NCR listed, then closing the NCR and
-confirming the traveler can be submitted and completed normally.
+traveler, attempting to submit the traveler for completion approval and
+confirming the attempt is refused with the open NCR listed, then closing the
+NCR and confirming the traveler can be submitted and goes through its normal
+approval.
 
 **Acceptance Scenarios**:
 
 1. **Given** an active traveler has at least one linked NCR that is not
-   Closed, **When** a user attempts to submit it for completion, **Then** the
-   attempt is refused
-2. **Given** a traveler has been submitted for completion and a linked NCR is
-   somehow still not Closed, **When** an approver attempts to mark it
-   completed, **Then** the attempt is refused
-3. **Given** a completion attempt is refused, **When** the user sees the
+   Closed, **When** a user attempts to submit it for completion approval,
+   **Then** the attempt is refused and the traveler stays active
+2. **Given** a submission attempt is refused, **When** the user sees the
    message, **Then** it lists each open linked NCR by number, current status,
    and the input it is linked to, with a link to each
-4. **Given** the traveler has several linked NCRs, some Closed and some not,
-   **When** a user attempts to complete it, **Then** the attempt is refused
+3. **Given** the traveler has several linked NCRs, some Closed and some not,
+   **When** a user attempts to submit it, **Then** the attempt is refused
    until every one of them is Closed
-5. **Given** every linked NCR is Closed (or the traveler has none), **When** a
-   user attempts to complete it, **Then** the NCR rule does not stand in the
-   way, and the traveler's other existing completion rules apply as before
-6. **Given** the person attempting completion is an administrator or manager,
+4. **Given** every linked NCR is Closed (or the traveler has none), **When** a
+   user attempts to submit it, **Then** the NCR rule does not stand in the
+   way, and the traveler's other existing submission and approval rules apply
+   as before
+5. **Given** a traveler that was submitted has been sent back for more work,
+   and an NCR raised against it since is still open, **When** a user attempts
+   to resubmit it, **Then** the attempt is refused exactly as for a first
+   submission
+6. **Given** the person attempting submission is an administrator or manager,
    **When** a linked NCR is not Closed, **Then** the attempt is refused
    exactly as for any other user — there is no override
 
@@ -161,8 +165,8 @@ linked to it is Closed.
 
 **Why this priority**: It gives everyone looking at a traveler — and at binders
 and lists that roll traveler progress up — an accurate at-a-glance picture,
-and it reinforces the completion rule in User Story 3. It is secondary
-because the hard block (User Story 3) already prevents bad completions;
+and it reinforces the submission rule in User Story 3. It is secondary
+because the hard block (User Story 3) already prevents bad submissions;
 this makes the reason visible earlier and continuously.
 
 **Independent Test**: Can be fully tested by filling in an input (progress
@@ -264,17 +268,20 @@ standalone NCR closes without producing any traveler attachment.
   and that check decides (User Story 2, scenario 3).
 - What happens if an NCR was raised against an active traveler and the traveler
   is then frozen or returned for work before the NCR closes? It keeps
-  blocking the traveler's completion, and it can still be worked through to
-  Closed; when it closes, its PDF is still attached to the traveler input,
-  whatever the traveler's status at that moment.
+  blocking the traveler's submission for completion approval (a frozen
+  traveler must be made active again first, and one sent back for more work
+  is checked again on its next submission), and it can still be worked
+  through to Closed; when it closes, its PDF is still attached to the
+  traveler input, whatever the traveler's status at that moment.
 - What happens when a linked NCR was created in error? There is no
   cancel/void status for an NCR today; the existing administrator-only NCR
   deletion (`specs/122-admin-delete-ncrs`) is the only way to clear such an
   NCR, and once it is deleted it stops blocking the input and the traveler.
 - What happens to NCRs, travelers, and PDFs that already exist when this
   feature ships? Travelers already completed stay completed. Active travelers
-  that already have open linked NCRs are subject to the completion and
-  "not finished" rules from that point on. NCRs already Closed are not given
+  that already have open linked NCRs are subject to the submission and
+  "not finished" rules from that point on; travelers already submitted for
+  completion approval are not re-checked. NCRs already Closed are not given
   PDFs retroactively.
 - What happens if the same NCR reference is used by two different users for
   two different NCRs? Both NCRs link to the same input; an input can hold many
@@ -331,19 +338,20 @@ standalone NCR closes without producing any traveler attachment.
 - **FR-012**: The traveler's status MUST be checked at the moment of
   submission, and that check is the one that counts.
 
-**Completion gating (User Story 3)**
+**Submission gating (User Story 3)**
 
 - **FR-013**: The system MUST NOT allow a traveler to be submitted for
-  completion, or marked completed, while any NCR linked to any of its inputs
-  has a status other than Closed.
+  completion approval while any NCR linked to any of its inputs has a status
+  other than Closed, including when it is resubmitted after having been sent
+  back for more work.
 - **FR-014**: A refusal under FR-013 MUST list each open linked NCR with its
   number, current status, and the input it is linked to, each with a link to
   the NCR.
 - **FR-015**: FR-013 MUST apply to every user, including administrators and
   managers; there is no override.
 - **FR-016**: Once every linked NCR is Closed or removed, the NCR rule MUST no
-  longer block completion, and the traveler's other existing completion rules
-  remain unchanged.
+  longer block submission for completion approval, and the traveler's other
+  existing submission and approval rules remain unchanged.
 
 **Input progress (User Story 4)**
 
@@ -400,10 +408,11 @@ standalone NCR closes without producing any traveler attachment.
 - **Traveler (status)**: A work instance with a lifecycle status (initialized,
   active, submitted for completion, completed, frozen, archived). Its status
   decides whether NCRs may be initiated against it (FR-009) and, together with
-  the status of its linked NCRs, whether it may be completed (FR-013).
+  the status of its linked NCRs, whether it may be submitted for completion
+  approval (FR-013).
 - **Linked NCR**: An NCR associated with a specific traveler input. Its status
   (Closed or not) drives whether the input counts as finished (FR-017) and
-  whether the traveler may be completed (FR-013).
+  whether the traveler may be submitted for completion approval (FR-013).
 - **NCR Closure PDF**: A read-only snapshot of one NCR's full details,
   produced at the moment that NCR is closed and attached to the traveler input
   the NCR was linked to. An input can hold many, one per closed linked NCR.
@@ -420,9 +429,9 @@ standalone NCR closes without producing any traveler attachment.
 - **SC-002**: 100% of NCR initiation attempts against a traveler that is not
   active are refused with the traveler's status named, across both entry
   paths, and none of them creates an NCR.
-- **SC-003**: 0 travelers reach the completed state while any linked NCR is
-  not Closed, and 100% of refused completion attempts show the user every open
-  NCR that caused the refusal.
+- **SC-003**: 0 travelers are submitted for completion approval while any
+  linked NCR is not Closed, and 100% of refused submission attempts show the
+  user every open NCR that caused the refusal.
 - **SC-004**: A traveler's finished-input figure never includes an input that
   has an open linked NCR, and matches the true state on the next view after
   any NCR is created, closed, or removed — in the traveler, in lists, and in
@@ -448,11 +457,14 @@ standalone NCR closes without producing any traveler attachment.
   from `specs/001-ncr-workflow`.
 - The reference field on the NCR initiation form is optional. Blank means a
   standalone NCR, as today.
-- "Completed" in the user's request is read as covering both steps that move
-  a traveler toward completion: submitting it for completion, and marking it
-  completed. Blocking both closes the gap where a traveler is submitted with
-  no open NCR and one appears before approval (for instance after being sent
-  back for work and resubmitted).
+- "Completed" in the user's request means the point where a traveler is
+  submitted for completion approval, so the open-NCR rule is enforced at
+  submission (confirmed by the requester). It is not checked again when
+  approvers approve: because NCRs can only be initiated against an active
+  traveler (FR-009), none can be opened once a traveler has been submitted. A
+  traveler sent back for more work becomes active again and is checked again
+  on its next submission. An NCR created at the very same instant as a
+  submission is not guarded against.
 - "Associated NCR" for the traveler-level rule means an NCR linked to *any*
   input on that traveler; for the input-level rule it means an NCR linked to
   *that* input.
