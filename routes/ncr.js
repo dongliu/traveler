@@ -27,6 +27,13 @@ const {
   getAttachment,
   deleteNcr,
 } = require('../lib/ncr-service');
+const {
+  TravelerNcrError,
+  errorBody,
+  formatInputRef,
+  resolveInputRef,
+  statusLabel,
+} = require('../lib/traveler-ncr');
 const logger = require('../lib/loggers').getLogger();
 
 const router = express.Router();
@@ -53,6 +60,40 @@ function badId(res, param) {
   return res.status(400).json({ success: false, error: 'Bad Request', message: `Invalid ${param} format` });
 }
 
+/**
+ * The traveler input reference a create request asks for: `traveler_input_ref`,
+ * or — for one release, deprecated — the spec-123 body fields `traveler_id` +
+ * `traveler_input_name` folded into one. Both go through the same resolver, so
+ * neither can link an NCR to a traveler the caller cannot read, that is not
+ * active, or whose input does not exist. A client-supplied label is never
+ * used: the label is taken from the traveler.
+ * @param  {Object} body the request body
+ * @return {String|undefined} the reference, or undefined for a standalone NCR
+ */
+function requestedTravelerRef(body) {
+  const ref = sanitizeStr(body.traveler_input_ref);
+  if (ref) return ref;
+  if (body.traveler_id) {
+    return formatInputRef(String(body.traveler_id), sanitizeStr(body.traveler_input_name) || '');
+  }
+  return undefined;
+}
+
+/**
+ * The closure-PDF outcome as the API reports it (contracts/ncr-close-response.json):
+ * the service's `pdfId` becomes `pdf_id`, like every other field in the response.
+ */
+function closurePdfBody(outcome) {
+  if (!outcome) return { status: 'not_applicable' };
+  const { pdfId, ...rest } = outcome;
+  return pdfId ? { ...rest, pdf_id: pdfId } : rest;
+}
+
+/** Answers a rule refusal for a traveler input reference, keyed to the form field. */
+function sendTravelerRefError(res, err) {
+  return res.status(err.status).json({ ...errorBody(err), details: { traveler_input_ref: [err.message] } });
+}
+
 const DISCOVERY_CONTEXTS = [
   'incoming_inspection',
   'in_house_assembly',
@@ -76,9 +117,6 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
     description_of_nonconformance: sanitizeStr(req.body.description_of_nonconformance),
     discovery_date: req.body.discovery_date,
     discovery_context: req.body.discovery_context,
-    traveler_id: req.body.traveler_id,
-    traveler_input_name: sanitizeStr(req.body.traveler_input_name),
-    traveler_input_label: sanitizeStr(req.body.traveler_input_label),
   };
 
   if (!b.part_name) errors.part_name = ['Required'];
@@ -109,6 +147,13 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
       email: res.locals.userEmail || '',
     };
     const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const travelerRef = requestedTravelerRef(req.body);
+    if (travelerRef) {
+      const resolved = await resolveInputRef(req, travelerRef);
+      b.traveler_id = resolved.travelerId;
+      b.traveler_input_name = resolved.inputName;
+      b.traveler_input_label = resolved.inputLabel;
+    }
     const ncr = await createNcr(b, user, webBaseUrl);
     return res.status(201).json({
       success: true,
@@ -125,6 +170,7 @@ router.post('/', auth.ensureAuthenticated, async (req, res) => {
       message: 'NCR created successfully. Initial notification emails sent.',
     });
   } catch (err) {
+    if (err instanceof TravelerNcrError) return sendTravelerRefError(res, err);
     logger.error('NCR creation failed:', err);
     return res.status(500).json({ success: false, error: 'Internal Server Error', message: err.message });
   }
@@ -152,6 +198,30 @@ router.get('/', auth.ensureAuthenticated, async (req, res) => {
     return res.status(200).json({ success: true, ...result });
   } catch (err) {
     logger.error('NCR list failed:', err);
+    return res.status(500).json({ success: false, error: 'Internal Server Error', message: err.message });
+  }
+});
+
+// Resolves a traveler input reference for the NCR form's live preview. It uses
+// the same resolver as POST /, so the preview cannot disagree with what a
+// submission will accept. Registered before '/:id' so 'traveler-input' is not
+// taken for an NCR id.
+router.get('/traveler-input', auth.ensureAuthenticated, async (req, res) => {
+  try {
+    const { traveler, travelerId, inputName, inputLabel } = await resolveInputRef(req, req.query.ref);
+    return res.status(200).json({
+      success: true,
+      traveler: {
+        id: travelerId,
+        title: traveler.title,
+        status: traveler.status,
+        status_label: statusLabel(traveler.status),
+      },
+      input: { name: inputName, label: inputLabel },
+    });
+  } catch (err) {
+    if (err instanceof TravelerNcrError) return sendTravelerRefError(res, err);
+    logger.error('Traveler input lookup failed:', err);
     return res.status(500).json({ success: false, error: 'Internal Server Error', message: err.message });
   }
 });
@@ -515,6 +585,9 @@ router.patch('/:id/close', auth.ensureAuthenticated, async (req, res) => {
         status: ncr.status,
         closure_record: ncr.closure_record,
       },
+      // the PDF record attached to the traveler input (spec 124); the NCR is
+      // closed whatever happened to it
+      closure_pdf: closurePdfBody(ncr._closurePdf),
       message: 'NCR closed successfully. Final distribution sent to all stakeholders.',
     });
   } catch (err) {

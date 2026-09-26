@@ -11,9 +11,6 @@ block head
 block content
   .container(style='margin-top: 10px')
     h3 New Nonconformance Report
-    #traveler-link-banner.alert.alert-info(style='display:none')
-      strong Linked Input: &nbsp;
-      span#traveler-link-input-label
     #ncr-success.alert.alert-success(style='display:none')
       strong NCR Created: &nbsp;
       a#ncr-number-link(href='#')
@@ -69,6 +66,12 @@ block content
           label.control-label(for='po_reference') PO Reference
           .controls
             input#po_reference(type='text', name='po_reference', maxlength='255')
+        .control-group
+          label.control-label(for='traveler_input_ref') Traveler Input
+          .controls
+            input#traveler_input_ref.input-xlarge(type='text', name='traveler_input_ref', maxlength='256', placeholder='traveler_id::input_name', autocomplete='off')
+            span.help-block Optional. Use <strong>Copy NCR reference</strong> on an input in a traveler, then paste it here.
+            #traveler-ref-preview.help-block
         .control-group
           label.control-label(for='ce_cs_name') CE/CS Name
             span.text-error *
@@ -128,14 +131,49 @@ block js
       var maxDate = new Date().toISOString().split('T')[0];
       $('#discovery_date').attr('max', maxDate);
 
-      var travelerParams = new URLSearchParams(location.search);
-      var travelerId = travelerParams.get('traveler_id');
-      var travelerInputName = travelerParams.get('input_name');
-      var travelerInputLabel = travelerParams.get('input_label');
-      if (travelerId) {
-        $('#traveler-link-input-label').text(travelerInputLabel || travelerInputName || '');
-        $('#traveler-link-banner').show();
+      // Traveler input reference (optional): pre-filled by a traveler's
+      // "Initiate NCR" action (?traveler_input_ref=...) or pasted by the user.
+      // The preview only helps the user confirm what the reference points at;
+      // the server resolves and enforces it again on submit.
+      var lookupTimer = null;
+      var lookupSeq = 0;
+      function showRefPreview(text, isError) {
+        $('#traveler-ref-preview')
+          .text(text)
+          .toggleClass('text-error', !!isError)
+          .toggleClass('text-success', !isError && !!text);
       }
+      function lookupTravelerRef() {
+        var ref = $('#traveler_input_ref').val().trim();
+        var seq = ++lookupSeq;
+        if (!ref) {
+          showRefPreview('');
+          return;
+        }
+        $.getJSON(prefix + '/api/ncrs/traveler-input', { ref: ref })
+          .done(function (data) {
+            if (seq !== lookupSeq) return;
+            showRefPreview('Traveler "' + data.traveler.title + '" — Input "' + data.input.label + '"', false);
+          })
+          .fail(function (xhr) {
+            if (seq !== lookupSeq) return;
+            var resp = xhr.responseJSON || {};
+            showRefPreview(resp.message || 'This reference could not be checked.', true);
+          });
+      }
+      var initialRef = new URLSearchParams(location.search).get('traveler_input_ref');
+      if (initialRef) {
+        $('#traveler_input_ref').val(initialRef);
+        lookupTravelerRef();
+      }
+      $('#traveler_input_ref').on('input', function () {
+        clearTimeout(lookupTimer);
+        lookupTimer = setTimeout(lookupTravelerRef, 300);
+      });
+      $('#traveler_input_ref').on('blur', function () {
+        clearTimeout(lookupTimer);
+        lookupTravelerRef();
+      });
 
       if (travelerGlobal.usernames) {
         travelerGlobal.usernames.initialize();
@@ -216,10 +254,9 @@ block js
           discovery_context: $('input[name="discovery_context"]:checked').val(),
           description_of_nonconformance: desc,
         };
-        if (travelerId) {
-          payload.traveler_id = travelerId;
-          payload.traveler_input_name = travelerInputName || undefined;
-          payload.traveler_input_label = travelerInputLabel || undefined;
+        var travelerRef = $('#traveler_input_ref').val().trim();
+        if (travelerRef) {
+          payload.traveler_input_ref = travelerRef;
         }
 
         $('#submit-btn').prop('disabled', true).text('Submitting...');
@@ -245,7 +282,9 @@ block js
           error: function (xhr) {
             var resp = xhr.responseJSON || {};
             var msg = resp.message || resp.error || 'Submission failed. Please try again.';
-            if (resp.details) {
+            // a reference error's message already says it all; the generic
+            // "— field: message" suffix would only repeat it
+            if (resp.details && !resp.details.traveler_input_ref) {
               var fields = Object.keys(resp.details).map(function (k) {
                 return k + ': ' + resp.details[k].join(', ');
               });

@@ -41,6 +41,7 @@ const Group = mongoose.model('Group');
 const Traveler = mongoose.model('Traveler');
 const TravelerData = mongoose.model('TravelerData');
 const TravelerNote = mongoose.model('TravelerNote');
+const TravelerNcrPdf = mongoose.model('TravelerNcrPdf');
 const { Ncr } = require('../model/ncr');
 const Log = mongoose.model('Log');
 const reviewLib = require('../lib/review');
@@ -1230,6 +1231,8 @@ module.exports = function(app) {
         },
         { ncr_number: 1, status: 1, 'traveler_link.input_name': 1 }
       )
+        // newest first: the page lists an input's NCRs in this order
+        .sort({ created_at: -1, _id: -1 })
         .lean()
         .exec(function(ncrErr, docs) {
           if (ncrErr) {
@@ -1245,6 +1248,81 @@ module.exports = function(app) {
             };
           });
           return res.status(200).json(links);
+        });
+    }
+  );
+
+  // The closure PDFs of the NCRs raised against this traveler's inputs
+  // (spec 124). A separate list from ncr-links on purpose: a PDF must still be
+  // listed after its NCR has been deleted, and ncr-links is derived from live NCRs.
+  app.get(
+    '/travelers/:id/ncr-pdfs/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    function(req, res) {
+      TravelerNcrPdf.find({ traveler: req.params.id })
+        .sort({ generatedOn: 1 })
+        .lean()
+        .exec(function(pdfErr, docs) {
+          if (pdfErr) {
+            logger.error(pdfErr);
+            return res.status(500).send(pdfErr.message);
+          }
+          return res.status(200).json(
+            docs.map(function(doc) {
+              return {
+                pdf_id: doc._id,
+                input_name: doc.input_name,
+                ncr_id: doc.ncr_id,
+                ncr_number: doc.ncr_number,
+                file_name: doc.file_name,
+                generated_on: doc.generatedOn,
+              };
+            })
+          );
+        });
+    }
+  );
+
+  app.get(
+    '/travelers/:id/ncr-pdfs/:pdfId',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    function(req, res) {
+      if (!/^[0-9a-fA-F]{24}$/.test(req.params.pdfId)) {
+        return res.status(404).send('not found');
+      }
+      // scoped to THIS traveler, so an id cannot be fetched through another
+      // traveler's URL
+      return TravelerNcrPdf.findOne({
+        _id: req.params.pdfId,
+        traveler: req.params.id,
+      })
+        .lean()
+        .exec(function(pdfErr, record) {
+          if (pdfErr) {
+            logger.error(pdfErr);
+            return res.status(500).send(pdfErr.message);
+          }
+          if (!record) {
+            return res.status(404).send('not found');
+          }
+          const filePath = path.resolve(record.file.path);
+          return fs.access(filePath, function(accessErr) {
+            if (accessErr) {
+              // logged here; the response does not reveal the server path
+              logger.error(`closure PDF file missing: ${filePath}`);
+              return res.status(410).send('gone');
+            }
+            res.type('application/pdf');
+            res.set(
+              'Content-Disposition',
+              `inline; filename="${record.file_name}"`
+            );
+            return res.sendFile(filePath);
+          });
         });
     }
   );

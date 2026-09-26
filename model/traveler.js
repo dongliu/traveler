@@ -312,15 +312,48 @@ var travelerNote = new Schema({
   updatedOn: Date,
 });
 
+/**
+ * The PDF record of a closed NCR that was raised against one of the traveler's
+ * inputs (spec 124). It lives on the traveler side, in its own collection:
+ *  - not as a TravelerData row, which IS the input's value — it would overwrite
+ *    it and make an unfilled input look finished;
+ *  - not on the NCR, whose attachments are deleted with it — the record must
+ *    survive the NCR being deleted (FR-028);
+ *  - not as an array on the traveler, which collides with concurrent per-field
+ *    saves and re-fires the binder hook.
+ * `ncr_id` and `ncr_number` are stored by value so the record stands alone.
+ * The unique (traveler, ncr_id) index makes attaching idempotent.
+ */
+var travelerNcrPdf = new Schema({
+  traveler: { type: ObjectId, required: true, index: true },
+  input_name: String,
+  ncr_id: { type: ObjectId, required: true },
+  ncr_number: String,
+  // shown to users, e.g. NCR-2026-0007.pdf
+  file_name: String,
+  file: {
+    // server-generated name under the upload path, never user supplied
+    path: String,
+    mimetype: { type: String, default: 'application/pdf' },
+    size: Number,
+  },
+  generatedOn: Date,
+  // the id of the user who closed the NCR
+  generatedBy: String,
+});
+travelerNcrPdf.index({ traveler: 1, ncr_id: 1 }, { unique: true });
+
 var Traveler = mongoose.model('Traveler', traveler);
 var TravelerData = mongoose.model('TravelerData', travelerData);
 var TravelerNote = mongoose.model('TravelerNote', travelerNote);
+var TravelerNcrPdf = mongoose.model('TravelerNcrPdf', travelerNcrPdf);
 var Log = mongoose.model('Log', log);
 
 module.exports = {
   Traveler: Traveler,
   TravelerData: TravelerData,
   TravelerNote: TravelerNote,
+  TravelerNcrPdf: TravelerNcrPdf,
   Log: Log,
   statusMap: statusMap,
   stateTransition: stateTransition,

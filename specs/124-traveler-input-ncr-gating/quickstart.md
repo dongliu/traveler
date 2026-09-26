@@ -84,8 +84,8 @@ Design detail: [data-model.md](./data-model.md). Endpoint changes:
 ### 4 — Input progress (User Story 4)
 
 1. Note the "N inputs finished out of M" figure with A and B filled in (2).
-2. Raise an NCR against A. Reload: the figure drops to 1, and A is marked
-   **Not finished — open NCR**. Edit A's value to confirm editing still works.
+2. Raise an NCR against A. Reload: the figure drops to 1, and A's NCR is listed
+   in a warning box under the input. Edit A's value to confirm editing still works.
 3. Raise an NCR against **unfilled** C by reference. Fill C: the figure does
    not rise while that NCR is open.
 4. Check the same traveler in the travelers list and, if it is in a binder, the
@@ -97,8 +97,11 @@ Design detail: [data-model.md](./data-model.md). Endpoint changes:
 
 1. Take an NCR linked to input A through to **Final Approval**, then close it as
    the originator (traveler sign-off box ticked).
-2. Open the traveler: input A shows a PDF link named for the NCR number beside
-   the NCR badge. As the view-only user, confirm the link is also visible and opens.
+2. Open the traveler: input A's warning box shows the NCR on its own row, and on
+   that same row, after **Close report:**, a PDF link named for the NCR number. As
+   the view-only user, confirm the link is also visible and opens. Delete the NCR
+   as an administrator and reload: the report is still there, on a row of its own
+   with the NCR's number and no NCR link.
 3. Open the PDF. Confirm it lists: NCR number/status/dates, the traveler and
    input, part/supplier/PO, description and discovery, CE/CS, disposition,
    approvals, preventive actions, the closure record with the traveler sign-off,

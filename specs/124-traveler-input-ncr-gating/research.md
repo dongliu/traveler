@@ -191,8 +191,7 @@ not bump the array version, so it cannot collide with a concurrent
 per-field save (which does modify `data`).
 
 **Client**: `renderNcrLinks()` already fetches `./ncr-links/`; it derives the
-open-input set from the statuses, marks those inputs "Not finished — open NCR"
-(`label label-warning`, beside the NCR badges), and `incrementFinished()` is
+open-input set from the statuses, and `incrementFinished()` is
 skipped for an input in that set (possible now that an unfilled input can be
 linked by reference). Editing is untouched (FR-021).
 
@@ -204,14 +203,23 @@ linked by reference). Editing is untouched (FR-021).
 
 ## Decision 6: Copy control — every input block that already gets notes/NCR controls
 
-**Decision**: `renderNcrLinks()` appends a "Copy NCR reference" button to the
-same per-input `.ncr-links` container (`getOrCreateNcrLinksContainer`) for every
-`#form .controls` block that contains an `input`/`textarea`. The value is
-`${traveler._id}::${element.name}`. Copy uses `navigator.clipboard.writeText`
-when available and falls back to a hidden `textarea` + `document.execCommand('copy')`
-(the clipboard API needs a secure context; dev runs on plain http). Feedback is a
-transient "Copied" label; on total failure the reference is shown selected in a
-read-only field so it can still be copied by hand.
+**Decision**: `renderNcrLinks()` adds a "Copy NCR reference" button for every
+`#form .controls` block that contains an `input`/`textarea`. It sits to the right
+of the input on the same row (`refButtonAnchor()` in `public/javascripts/lib/traveler.js`
+inserts it after the input, or after the wrapper the input is drawn inside — a
+unit box, or a checkbox/radio label), not in the per-input `.ncr-links` container,
+which keeps only "Initiate NCR" and the warning box that lists the input's NCRs.
+The value is `${traveler._id}::${element.name}`.
+
+Clicking the button is two steps: it opens a Bootstrap popover that *reveals* the
+reference in a read-only field (selected, so Ctrl/Cmd+C works at once), and the
+popover's own Copy button puts it on the clipboard. The user can equally select
+and copy by hand. Copy uses `navigator.clipboard.writeText` when available and
+falls back to a hidden `textarea` + `document.execCommand('copy')` (the clipboard
+API needs a secure context; dev runs on plain http). Feedback is a transient
+"Copied" label on the popover's button; on total failure the popover says to press
+Ctrl/Cmd+C on the already-selected text. One popover is open at a time; it closes
+on Escape, a mousedown elsewhere, or the button again.
 
 **Coverage check (spec FR-003 "every input")**: by inspection of the templates and
 loops, the existing code skips only the outer wrapper of a checkbox set
@@ -306,9 +314,14 @@ through this one.
   concurrent per-field saves (array versioning) and fires the binder post-save
   hook.
 
-**Display**: `renderNcrLinks()` also fetches `./ncr-pdfs/` and appends
-`<a class="ncr-pdf-link">` (Font Awesome 4.3.0, which the traveler page loads, has `fa-file-pdf-o`) into that input's
-`.ncr-links` container beside the NCR badge.
+**Display**: `renderNcrLinks()` also fetches `./ncr-pdfs/` and, once both it and
+`./ncr-links/` are in, draws each input's NCRs in a warning box, one row per NCR.
+A closed NCR's row ends with `Close report: <a class="ncr-pdf-link">` (Font
+Awesome 4.3.0, which the traveler page loads, has `fa-file-pdf-o`), matched to the
+NCR by `ncr_id` — there is at most one PDF per NCR. A PDF whose NCR has been
+deleted still shows, on a row of its own with the NCR's number and no NCR link,
+after the live NCRs. A list that fails to load is treated as empty (its error
+alert is already up), so the other is still drawn.
 
 ## Decision 10: PDF generation is a best-effort step after the closure is saved
 

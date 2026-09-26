@@ -8,6 +8,7 @@ var config = require('../config/config.js');
 
 var Traveler = require('../model/traveler').Traveler;
 const TravelerData = require('../model/traveler').TravelerData;
+const { Ncr } = require('../model/ncr');
 var Binder = require('../model/binder').Binder;
 var _ = require('lodash');
 var cheer = require('cheerio');
@@ -340,6 +341,50 @@ var traveler = {
     }
     return map;
   },
+  /**
+   * The labels (input name -> label) of the traveler's active form — the
+   * definitive list of "the inputs of this form". A traveler with one form
+   * uses it, otherwise the form whose id is `activeForm`. When the form has no
+   * stored labels they are extracted from its html and, as `resetTouched` has
+   * always done, kept on the form.
+   * @param  {Traveler} doc the traveler document
+   * @return {Object}       the map of input name -> label, {} if there is no
+   *                        active form
+   */
+  /**
+   * How many inputs count as finished: those with a submitted value, except
+   * any that has an open NCR (spec 124). `touchedInputs` itself keeps meaning
+   * "has a submitted value" — the "Initiate NCR" action depends on that.
+   * @param  {Array<String>}       touchedInputs   names with a submitted value
+   * @param  {Array|Set<String>}   openInputNames  names with a linked NCR that
+   *                                               is not Closed
+   * @return {Number}
+   */
+  finishedCount: function(touchedInputs, openInputNames) {
+    var open = new Set(openInputNames || []);
+    return (touchedInputs || []).filter(function(name) {
+      return !open.has(name);
+    }).length;
+  },
+  activeFormLabels: function(doc) {
+    var activeForm;
+    if (doc.forms.length === 1) {
+      activeForm = doc.forms[0];
+    } else if (typeof doc.forms.id === 'function') {
+      activeForm = doc.forms.id(doc.activeForm);
+    } else {
+      activeForm = doc.forms.find(function(f) {
+        return String(f._id) === String(doc.activeForm);
+      });
+    }
+    if (!activeForm) {
+      return {};
+    }
+    if (!(activeForm.labels && _.size(activeForm.labels) > 0)) {
+      activeForm.labels = traveler.inputLabels(activeForm.html);
+    }
+    return activeForm.labels;
+  },
   createTraveler: function(form, title, userId, devices, newTravelerCallBack) {
     if (
       form.formType &&
@@ -513,31 +558,36 @@ var traveler = {
         logger.error(dataErr);
         return cb(dataErr);
       }
-      // reset the touched input name list and the finished input number
-      logger.info('reset the touched inputs for traveler ' + doc._id);
-      var labels = {};
-      var activeForm;
-      if (doc.forms.length === 1) {
-        activeForm = doc.forms[0];
-      } else {
-        activeForm = doc.forms.id(doc.activeForm);
-      }
-
-      if (!(activeForm.labels && _.size(activeForm.labels) > 0)) {
-        activeForm.labels = traveler.inputLabels(activeForm.html);
-      }
-      labels = activeForm.labels;
-      // empty the current touched input list
-      doc.touchedInputs = [];
-      data.forEach(function(d) {
-        // check if the data is for the active form
-        if (Object.hasOwn(labels, d.name)) {
-          addInputName(d.name, doc.touchedInputs);
+      // An input that has an open NCR is not finished (spec 124), so the finished
+      // figure is the touched inputs minus those. Fetched before anything on the
+      // document is changed, so a failure here leaves it untouched.
+      Ncr.distinct('traveler_link.input_name', {
+        'traveler_link.traveler_id': doc._id,
+        'traveler_link.initiated_from_traveler': true,
+        status: { $ne: 'Closed' },
+      }).exec(function(ncrErr, openInputNames) {
+        if (ncrErr) {
+          logger.error(ncrErr);
+          return cb(ncrErr);
         }
+        // reset the touched input name list and the finished input number
+        logger.info('reset the touched inputs for traveler ' + doc._id);
+        var labels = traveler.activeFormLabels(doc);
+        // empty the current touched input list
+        doc.touchedInputs = [];
+        data.forEach(function(d) {
+          // check if the data is for the active form
+          if (Object.hasOwn(labels, d.name)) {
+            addInputName(d.name, doc.touchedInputs);
+          }
+        });
+        // finished input
+        doc.finishedInput = traveler.finishedCount(
+          doc.touchedInputs,
+          openInputNames
+        );
+        cb();
       });
-      // finished input
-      doc.finishedInput = doc.touchedInputs.length;
-      cb();
     });
   },
 };

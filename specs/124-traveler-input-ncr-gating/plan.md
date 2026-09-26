@@ -145,8 +145,8 @@ routes/api.js                        # PUT /apis/travelers/:id/status/ and POST
                                      # while the traveler is still active (the helper's 1 → 2 route)
 
 public/javascripts/lib/traveler.js   # renderNcrLinks(): Copy-reference control on every input;
-                                     # fetch ./ncr-pdfs/ and render PDF links; "Not finished —
-                                     # open NCR" label; expose the open-input set; Initiate NCR link
+                                     # fetch ./ncr-pdfs/ and render PDF links; list an input's
+                                     # NCRs in a warning box; expose the open-input set; Initiate NCR link
                                      # → /ncrs/new?traveler_input_ref=…, not rendered unless
                                      # traveler.status === 1
 public/javascripts/traveler.js       # setStatus: OPEN_NCRS list (DOM-built, links); complete():
@@ -192,3 +192,13 @@ stay thin, and the one new model sits beside its sibling `TravelerNote` in
 |----------|------------|-------------------------------------|
 | Runtime dependencies `pdfkit` + `dejavu-fonts-ttf` | Requirement 6 needs a PDF and the app has no PDF capability; engineering text needs `Ω`, `≥`, `Δ`, which pdfkit's built-in Latin-1 fonts cannot draw | Headless Chromium rendering the existing detail page: hundreds of MB in `node:20-alpine`, sandbox flags, launch latency, and a browser on a server that has none. `pdfmake` wraps pdfkit and adds nothing since pdfkit 0.20 has tables. (research.md Decision 8, with spike results) |
 | New collection `TravelerNcrPdf` | The PDF must survive deletion of its NCR (FR-028) and must not change the input's value or finished state (FR-021, US4) | `TravelerData` file entry: a data row *is* the value, so it would overwrite it and make an unfilled input look finished. `Ncr.attachments`: deleted with the NCR. Array on `Traveler`: version conflicts with per-field saves and re-fires the binder hook. (research.md Decision 9) |
+
+## As Built — where the implementation went beyond or differed from this plan
+
+- **`public/javascripts/ajax-helper.js`** (not in the file list above): `ajax401()` installs a global `ajaxError` handler that appends a generic "HTTP request failed. Reason: <raw response>" alert for any 4xx/5xx, so a refused submission showed the open-NCR list *and* a second alert containing raw JSON. It now skips a failure whose request set `jqXHR.handledByCaller` (jQuery runs a request's own `.fail()` before the global event, on the same object); `setStatus` sets it for `OPEN_NCRS`. No other caller is affected.
+- **`utilities/routes.js`** gained `finishedCount()` (the pure formula) as well as `activeFormLabels()`; `resetTouched` fetches the open-NCR input names before it changes anything on the document.
+- **`isSubmissionTransition(current, target)`** returns false when `current === target`: `POST /apis/update/traveler/:id/` accepts an unchanged status, so a plain title update of a submitted traveler must not be refused.
+- **`routes/ncr.js`** translates the service's `pdfId` to the contract's `pdf_id` in the close response (`closurePdfBody`).
+- **Empty input labels**: a checkbox inside a checkbox set stores an empty label, so `resolveInputRef` falls back to the input name (as the traveler page already did).
+- **Test-only additions**: `e2e/fixtures/ncr-ui.js` (shared page helpers), and fixture commands `create-binder-with-traveler` / `get-binder` (a permanent regression test that a traveler's recounted figure reaches its binder). The e2e for "a user without read access gets the not-found answer" (FR-008) is **not** possible in this Docker configuration — every authenticated user holds the default role that grants write access to every traveler — so that rule is covered at unit level with `canRead` stubbed.
+- **Known limits, accepted**: pdfkit lays tables out at ~13 ms per row, so a very long event history is slow to render (about 1.3 s at 100 events, 6 s at 500; a real NCR has tens) and it runs synchronously inside the close request; characters outside DejaVu Sans (e.g. CJK) render as the missing-glyph box.
