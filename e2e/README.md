@@ -122,7 +122,16 @@ Run it only against that stack, never against a shared or production database.
 
 - `playwright-report/index.html`: a pass/fail report; failed tests link to their
   trace, video and screenshot. `playwright-report/results.json` has the same in
-  machine-readable form.
+  machine-readable form. Each run overwrites it.
+  - A run that fails in an interactive terminal opens the report in your browser
+    by itself. In every other case (a passing run, CI, or a run by a coding agent
+    such as Claude Code) the report is still written but not opened: open it with
+    `npx playwright show-report`.
+  - `--reporter=<name>` replaces the reporters set in `playwright.config.js`, so a
+    run started with it (for example `--reporter=line`) writes no report and
+    leaves the previous one in place.
+  - `--list` does write a report, one that shows every listed test as skipped, and
+    it replaces the last real report.
 - `test-results/<test>/`: the trace (`trace.zip`), video and screenshot of each
   failed test.
 - Replay a failure step by step, with DOM snapshots, network calls and the

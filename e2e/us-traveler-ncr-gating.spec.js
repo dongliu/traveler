@@ -78,6 +78,12 @@ test.describe('US1 — link an NCR to a traveler input by reference', () => {
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await page.goto(`/travelers/${travelerId}/`);
 
+    // Measure only once the page has stopped moving: each input's notes row is
+    // added after the first paint and pushes the inputs below it down, so a
+    // position read before then is stale by the time the button is read.
+    await expect(page.locator('.copy-ncr-ref')).toHaveCount(4);
+    await expect(page.locator('.note-buttons')).toHaveCount(4);
+
     // a text input (A) and a checkbox (D): the button is beside the field, not below it
     for (const [index, field] of [
       [0, 'input[name="input_a"]'],
