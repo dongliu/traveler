@@ -17,13 +17,22 @@ docker compose up
 # Lint
 npx eslint .
 
-# Tests
-npm test                   # all unit tests (mocha test-unit/**/*.test.js)
+# Unit tests
+npm run unit               # all unit tests (mocha test-unit/**/*.test.js)
 npx mocha test-unit/lib/permission.test.js   # single test file
 
 # Unit tests require this env var when run outside Docker
-TRAVELER_CONFIG_REL_PATH=docker npm test
+TRAVELER_CONFIG_REL_PATH=docker npm run unit
+
+# End-to-end tests: Playwright, in e2e/ — the way to test the app end to end.
+# Needs the Docker stack up (docker compose up) and E2E_USER/E2E_PASS/E2E_USER2/
+# E2E_PASS2 in .env (see .env.example); first time, `npx playwright install chromium`.
+npm run e2e                # full suite
+npm run e2e -- e2e/us1-create-and-submit-ncr.spec.js -g AS3   # one file / scenario
 ```
+
+See [e2e/README.md](e2e/README.md) for the suite's setup, layout, how to write a
+test, and debugging.
 
 ## Architecture
 

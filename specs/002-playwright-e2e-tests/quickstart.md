@@ -2,20 +2,20 @@
 
 **Feature**: `002-playwright-e2e-tests` | **Spec**: [spec.md](./spec.md)
 
+The suite's day-to-day guide now lives in [`e2e/README.md`](../../e2e/README.md).
+
 ## Prerequisites
 
 - The local Docker Compose stack is already running (`docker compose up`),
-  including the `web`, `mongo`, `mongo-express`, and mail-catcher services —
-  same prerequisite as `test-e2e/README.md`. This suite never starts, stops,
-  or reconfigures containers.
+  including the `web`, `mongo`, `mongo-express`, and mail-catcher services.
+  This suite never starts, stops, or reconfigures containers.
 - Node.js 18+ on the host (matching the app's own requirement).
 - A local `.env` file (gitignored) with, in addition to the existing
   `WEB_PORT`/`API_PORT`/`MONGO_EXPRESS_PORT`/`E2E_USER`/`E2E_PASS` variables:
   - `MAIL_PORT` (default `8025` if unset)
   - `E2E_USER2` / `E2E_PASS2` — a **second** real LDAP-backed test identity,
     distinct from `E2E_USER`, used only for the designated-approver scenarios
-    (see research.md Decision 4). Any existing user document works, same as
-    the manual suite's `<approver-username>` convention.
+    (see research.md Decision 4). Any existing user document works.
 
 ## One-time setup
 
@@ -30,11 +30,11 @@ npx playwright install chromium   # downloads the browser binary Playwright driv
 # Full suite
 npm run e2e
 
-# A single user story's scenarios (equivalent to running one test-e2e/*.md file)
-npx playwright test e2e/us1-create-and-submit-ncr.spec.js
+# A single user story's scenarios
+npm run e2e -- e2e/us1-create-and-submit-ncr.spec.js
 
 # A single acceptance scenario within a file
-npx playwright test e2e/us1-create-and-submit-ncr.spec.js -g "AS3"
+npm run e2e -- e2e/us1-create-and-submit-ncr.spec.js -g "AS3"
 ```
 
 Each run resolves `WEB_PORT`/`API_PORT`/`MONGO_EXPRESS_PORT`/`MAIL_PORT`/
@@ -55,18 +55,17 @@ than proceeding into misleading per-scenario failures.
 ## Debugging a failure
 
 ```bash
-npx playwright show-trace playwright-report/<failed-test>/trace.zip
+npx playwright show-trace test-results/<failed-test>/trace.zip
 ```
 
 Opens Playwright's trace viewer — a full timeline of the failing scenario's
 DOM snapshots, network requests (including the Mailpit API calls the
 scenario made), and console output, without re-running anything.
 
-## How this relates to `test-e2e/`
+## History: the manual `test-e2e/` scripts
 
-The existing `test-e2e/*.md` files (driven manually via the Claude-in-Chrome
-extension) are **not replaced or deleted** by this suite — they remain as
-human-readable reference documentation. This suite is a separate,
-automated, unattended equivalent; see spec.md's Coverage Mapping table for
-which file maps to which automated scenario. Deciding whether to eventually
-retire the manual suite is a future decision, out of scope here.
+This suite replaced the manual `test-e2e/*.md` scripts, which were driven by
+hand through a browser skill. They have been removed (commit `84216a09`); this
+Playwright suite is the only end-to-end approach. spec.md's Coverage Mapping
+table records which manual file each automated scenario superseded, and the
+files remain readable in git history (`git show 84216a09^:test-e2e/README.md`).
