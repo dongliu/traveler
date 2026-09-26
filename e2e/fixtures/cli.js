@@ -172,14 +172,24 @@ async function createTravelerLinkedNcr({ ncrData, status, travelerId, inputName,
   return { ncrId: ncr._id.toString(), ncr_number: ncr.ncr_number };
 }
 
-// Creates a real, writable Traveler with one text input, bypassing the
-// Form -> ReleasedForm -> Traveler UI pipeline (that pipeline is exercised
-// elsewhere; this fixture only needs a traveler whose live page renders one
-// fillable field for 123-traveler-ncr-input-linking's own e2e coverage).
+// Creates a real, writable Traveler, bypassing the Form -> ReleasedForm ->
+// Traveler UI pipeline (that pipeline is exercised elsewhere; this fixture
+// only needs a traveler whose live page renders fillable fields for the
+// traveler-NCR e2e coverage of specs 123 and 124).
 // publicAccess: 0 (this app's actual default, per config/docker's app.json)
 // grants read to any authenticated user while restricting writes to
-// createdBy — exactly the split this feature's access model relies on.
-async function createFillableTraveler({ createdBy, title, inputName, inputLabel }) {
+// createdBy — exactly the split this feature's access model relies on;
+// publicAccess: -1 leaves the traveler visible to its owner only.
+//
+// Without `inputs` this builds the original single text input (`inputName` /
+// `inputLabel`), so every existing spec is unaffected. With `inputs` — an
+// array of { name, label, kind } where kind is 'text' (default) or
+// 'checkbox-in-set' — it builds one control group per input. All
+// checkbox-in-set inputs go into one checkbox set, marked up like
+// inputview/checkbox_in_set.jade: the set's own .controls directly contains
+// .checkbox-set-controls, and each checkbox is a nested .control-group.
+// `status` defaults to 1 (active).
+async function createFillableTraveler({ createdBy, title, inputName, inputLabel, status, publicAccess, inputs }) {
   // model/traveler.js -> model/review.js expects `User` already registered
   // (it does `mongoose.model('User')` at require-time, not lazily) — every
   // other command that touches Traveler-side models is reached via a route
@@ -188,34 +198,145 @@ async function createFillableTraveler({ createdBy, title, inputName, inputLabel 
   require('../../model/user');
   const { Traveler } = require('../../model/traveler');
   const now = new Date();
-  const name = inputName || 'field_1';
-  const label = inputLabel || 'Field One';
-  const html =
-    '<div class="control-group">' +
-    `<label class="control-label"><span>${label}</span></label>` +
-    `<div class="controls"><input type="text" name="${name}"></div>` +
-    '</div>';
+  const specs =
+    Array.isArray(inputs) && inputs.length > 0
+      ? inputs.map(i => ({ name: i.name, label: i.label || i.name, kind: i.kind || 'text' }))
+      : [{ name: inputName || 'field_1', label: inputLabel || 'Field One', kind: 'text' }];
+
+  const textHtml = specs
+    .filter(spec => spec.kind !== 'checkbox-in-set')
+    .map(
+      spec =>
+        '<div class="control-group">' +
+        `<label class="control-label"><span>${spec.label}</span></label>` +
+        `<div class="controls"><input type="text" name="${spec.name}"></div>` +
+        '</div>'
+    )
+    .join('');
+  const setSpecs = specs.filter(spec => spec.kind === 'checkbox-in-set');
+  const setHtml =
+    setSpecs.length > 0
+      ? '<div class="control-group checkbox-set">' +
+        '<div class="control-label"><span>Checkbox set</span></div>' +
+        '<div class="controls"><div class="checkbox-set-controls">' +
+        setSpecs
+          .map(
+            spec =>
+              '<div class="control-group output-control-group"><div class="controls">' +
+              `<label class="checkbox"><input type="checkbox" name="${spec.name}"><span>${spec.label}</span></label>` +
+              '</div></div>'
+          )
+          .join('') +
+        '</div></div></div>'
+      : '';
+
+  const labels = {};
+  const mapping = {};
+  specs.forEach(spec => {
+    labels[spec.name] = spec.label;
+    mapping[spec.name] = spec.name;
+  });
+
   const traveler = new Traveler({
     title: title || 'E2E Fillable Traveler',
-    status: 1,
+    status: status === undefined ? 1 : status,
     createdBy,
     createdOn: now,
-    publicAccess: 0,
+    publicAccess: publicAccess === undefined ? 0 : publicAccess,
     forms: [
       {
-        html,
-        labels: { [name]: label },
-        mapping: { [name]: name },
+        html: textHtml + setHtml,
+        labels,
+        mapping,
         reference: new mongoose.Types.ObjectId(),
         activatedOn: [now],
       },
     ],
-    totalInput: 1,
+    totalInput: specs.length,
     finishedInput: 0,
     touchedInputs: [],
   });
   await traveler.save();
   return { travelerId: traveler._id.toString() };
+}
+
+// Moves a traveler to any status directly, bypassing the status route's
+// transition and authorization rules — for arranging test preconditions
+// (e.g. a submitted/frozen traveler) and for simulating a status change that
+// happens while a form is open.
+async function setTravelerStatus({ travelerId, status }) {
+  require('../../model/user');
+  const { Traveler } = require('../../model/traveler');
+  await Traveler.updateOne({ _id: travelerId }, { $set: { status } });
+  return { travelerId, status };
+}
+
+// Reads the stored progress figures — the ones traveler lists and binders
+// read — rather than what a page happens to render.
+async function getTraveler({ travelerId }) {
+  require('../../model/user');
+  const { Traveler } = require('../../model/traveler');
+  const traveler = await Traveler.findById(travelerId, 'status finishedInput totalInput touchedInputs').lean();
+  if (!traveler) {
+    throw new Error(`Traveler not found: ${travelerId}`);
+  }
+  return {
+    status: traveler.status,
+    finishedInput: traveler.finishedInput,
+    totalInput: traveler.totalInput,
+    touchedInputs: traveler.touchedInputs,
+  };
+}
+
+// A binder holding one traveler, its progress rolled up from that traveler — for
+// checking that a change to the traveler's finished-input count reaches the
+// binders that contain it (spec 124 FR-019).
+async function createBinderWithTraveler({ travelerId, createdBy }) {
+  require('../../model/user');
+  const { Traveler } = require('../../model/traveler');
+  require('../../model/binder');
+  const Binder = mongoose.model('Binder');
+  const traveler = await Traveler.findById(travelerId);
+  if (!traveler) {
+    throw new Error(`Traveler not found: ${travelerId}`);
+  }
+  const binder = new Binder({
+    title: `E2E Binder ${travelerId}`,
+    createdBy,
+    createdOn: new Date(),
+    works: [
+      {
+        _id: traveler._id,
+        refType: 'traveler',
+        status: traveler.status,
+        value: 10,
+        addedOn: new Date(),
+        addedBy: createdBy,
+      },
+    ],
+  });
+  binder.updateWorkProgress(traveler);
+  await new Promise((resolve, reject) => binder.updateProgress(err => (err ? reject(err) : resolve())));
+  return { binderId: binder._id.toString() };
+}
+
+async function getBinder({ binderId }) {
+  require('../../model/user');
+  require('../../model/binder');
+  const binder = await mongoose.model('Binder').findById(binderId, 'finishedInput totalInput').lean();
+  if (!binder) {
+    throw new Error(`Binder not found: ${binderId}`);
+  }
+  return { finishedInput: binder.finishedInput, totalInput: binder.totalInput };
+}
+
+// Sets an NCR's status directly (e.g. to 'Closed'), bypassing the workflow.
+// Deliberately does NOT go through closeNcr(), so it neither attaches a PDF
+// nor refreshes the traveler's progress — use the real close endpoint for that.
+async function setNcrStatus({ ncrId, status }) {
+  const { Ncr } = require('../../model/ncr');
+  await Ncr.updateOne({ _id: ncrId }, { $set: { status } });
+  return { ncrId, status };
 }
 
 async function getNcr({ ncrId, fields }) {
@@ -259,6 +380,11 @@ const COMMANDS = {
   'backdate-ncr': backdateNcr,
   'create-traveler-linked-ncr': createTravelerLinkedNcr,
   'create-fillable-traveler': createFillableTraveler,
+  'set-traveler-status': setTravelerStatus,
+  'get-traveler': getTraveler,
+  'set-ncr-status': setNcrStatus,
+  'create-binder-with-traveler': createBinderWithTraveler,
+  'get-binder': getBinder,
   'get-ncr': getNcr,
   'get-user': getUser,
   'get-group': getGroup,
