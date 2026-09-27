@@ -40,61 +40,68 @@ other scenario.
 **Acceptance Scenarios**:
 
 1. **Given** an authenticated user, **When** they create a new draft form with
-   at least one input field and save it, **Then** the form exists in "draft"
+   a title and at least one input field, **Then** the form exists in "draft"
    status with the fields as entered.
-2. **Given** a draft form, **When** its owner submits it for review, **Then**
-   the form transitions to "under review" and appears in the assigned
-   reviewer's review queue.
-3. **Given** a form under review, **When** a reviewer approves and releases
-   it, **Then** the form transitions to "released" and a released-form
-   snapshot is created capturing its current fields.
-4. **Given** a released form, **When** the underlying draft form is later
+2. **Given** a draft form, **When** its owner submits it for review and
+   designates a user holding the reviewer role as a reviewer, **Then** the
+   form transitions to "under review" and the request appears in that
+   reviewer's queue.
+3. **Given** a form under review, **When** its designated reviewer submits an
+   approval, **Then** the approval is recorded for the form's current version,
+   and once every designated reviewer has approved, the form's owner can
+   release it — creating a released-form snapshot of its current fields and
+   transitioning the form to "released".
+4. **Given** a form under review with a designated reviewer, **When** that
+   reviewer instead requests changes, **Then** the form reverts to "draft",
+   its review requests are cleared, and it is not releasable until
+   resubmitted and re-approved.
+5. **Given** a released form, **When** the underlying draft form is later
    edited, **Then** the previously released snapshot remains unchanged.
-5. **Given** a draft form missing a mandatory field (e.g. no title), **When**
-   a user attempts to submit it for review, **Then** the submission is
-   rejected with field-level validation messages and the form remains in
-   "draft".
-6. **Given** a released form, **When** its owner archives it, **Then** the
+6. **Given** a new form submitted without a title, **When** a user attempts
+   to create it, **Then** the creation is rejected and no form is saved.
+7. **Given** a released form, **When** its owner archives it, **Then** the
    form transitions to "archived" and no longer appears in the active
    released-forms list.
 
 ---
 
-### User Story 2 - Automated Verification of the Traveler Data-Entry and Approval Lifecycle (Priority: P1)
+### User Story 2 - Automated Verification of the Traveler Data-Entry and Completion Lifecycle (Priority: P1)
 
 A developer wants confidence that a change anywhere in the traveler creation →
-data entry → submission → review → approval chain hasn't broken any step, end
-to end, in a single run.
+data entry → submission for completion → completion-approval chain hasn't
+broken any step, end to end, in a single run.
 
 **Why this priority**: This is the core value-delivering path of the entire
-application — a released form that can never become a completed, approved
-traveler is a broken product. Second only to the form pipeline itself, and
-exercises the traveler state machine, the other non-negotiable constitutional
-principle.
+application — a released form that can never become a completed traveler is a
+broken product. Second only to the form pipeline itself, and exercises the
+traveler state machine, the other non-negotiable constitutional principle.
 
 **Independent Test**: Can be fully tested by creating its own traveler
-instance from a released form, filling in the required data entries, and
-driving it through submission, review, and approval, confirming each
-transition's recorded state — independent of any other scenario.
+instance from a released form, filling in data entries, and driving it
+through submission and completion, confirming each transition's recorded
+state — independent of any other scenario.
 
 **Acceptance Scenarios**:
 
 1. **Given** a released form, **When** a user creates a new traveler instance
-   from it, **Then** the traveler exists in "not started" status with the
-   fields copied from the released form.
-2. **Given** a traveler in progress, **When** a user enters data for a
-   required input, **Then** the value, the entering user, and the entry
-   timestamp are recorded and the traveler is/remains "in progress".
-3. **Given** a traveler with all required fields completed, **When** its
-   owner submits it for review, **Then** it transitions to "submitted for
-   review".
-4. **Given** a traveler submitted for review, **When** a reviewer approves
-   it, **Then** it transitions to "approved".
-5. **Given** an approved traveler, **When** it is frozen, **Then** it
-   transitions to "frozen" and its data entries can no longer be edited.
-6. **Given** a traveler missing a required data entry, **When** a user
-   attempts to submit it for review, **Then** the submission is rejected
-   identifying the missing field, and the traveler remains "in progress".
+   from it, **Then** the traveler is created and the fields are copied from
+   the released form.
+2. **Given** an active traveler, **When** a user enters data for an input,
+   **Then** the value, the entering user, and the entry timestamp are
+   recorded.
+3. **Given** an active traveler, **When** a user with write access to it
+   submits it for completion, **Then** it transitions to "submitted for
+   completion".
+4. **Given** a traveler submitted for completion, **When** a user holding the
+   admin or manager role approves it, **Then** it transitions to "completed";
+   **When** such a user instead rejects it, **Then** it returns to "active".
+5. **Given** a traveler submitted for completion, **When** a user who holds
+   neither the admin nor the manager role attempts to approve or reject it,
+   **Then** the request is rejected with an authorization error and the
+   traveler remains "submitted for completion".
+6. **Given** an active traveler, **When** an authorized user freezes it,
+   **Then** it transitions to "frozen" and its data entries can no longer be
+   edited; **When** it is later unfrozen, **Then** it returns to "active".
 
 ---
 
@@ -131,9 +138,9 @@ other scenario depending on it.
    suite provisions that fixture, **Then** the document's access
    configuration is set accordingly before the scenario begins.
 4. **Given** a scenario needs a traveler already in a specific lifecycle
-   status (e.g. "submitted for review"), **When** the suite provisions that
-   fixture, **Then** the traveler exists in that status without the scenario
-   having to drive every prior UI step itself.
+   status (e.g. "submitted for completion"), **When** the suite provisions
+   that fixture, **Then** the traveler exists in that status without the
+   scenario having to drive every prior UI step itself.
 5. **Given** the suite has finished a run, **When** the next run starts,
    **Then** fixtures and documents created by the previous run do not cause
    the new run's scenarios to fail or produce ambiguous results (e.g. two
@@ -143,9 +150,11 @@ other scenario depending on it.
 
 ### User Story 4 - Automated Verification of Access Control (Priority: P2)
 
-A developer wants confirmation that the shared owner → reviewer → shared-with
-→ shared-group → public-access permission hierarchy is still enforced after a
-change touching routes or middleware.
+A developer wants confirmation that the layered permission model — public
+access, ownership, blanket manager/admin roles, per-document sharing with a
+user or a group, and (for forms specifically) a designated reviewer's access
+to the form under review — is still enforced after a change touching routes
+or middleware.
 
 **Why this priority**: A silently broken permission check is high-impact — it
 can expose sensitive work documents — but the surface it covers is narrower
@@ -169,10 +178,10 @@ data.
    basis as a direct per-user share.
 4. **Given** a document with public access enabled, **When** any
    authenticated user accesses it, **Then** access is granted without an
-   explicit owner, reviewer, or share grant.
-5. **Given** a user with the admin role, **When** they access a document they
-   neither own nor have been granted access to, **Then** access is granted on
-   the basis of the admin role.
+   explicit owner, role, or share grant.
+5. **Given** a user with the admin or the manager role, **When** they access
+   a document they neither own nor have been granted access to, **Then**
+   access is granted on the basis of that role alone.
 
 ---
 
@@ -360,6 +369,12 @@ failing step and its cause without re-running.
   database is outside this feature's control.
 - Session-based authentication against the LDAP service already configured
   for local Docker development is the login path exercised.
+- The manager and admin roles grant blanket write access across forms,
+  travelers, and binders alike; a designated reviewer's access is scoped to
+  the specific form(s) they were asked to review, not travelers or binders.
+  This suite's access-control scenarios (User Story 4) test both the blanket
+  roles and, within User Story 1, the form-specific reviewer grant, rather
+  than treating "reviewer" as a fourth blanket role alongside manager/admin.
 - No workflow in this branch currently sends outbound notification emails as
   part of form, traveler, or review actions — the mail-sending library exists
   as infrastructure but is not yet called from any route — so this suite does

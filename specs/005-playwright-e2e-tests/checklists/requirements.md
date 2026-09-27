@@ -40,5 +40,14 @@
   LDAP-backed login setup) describe *existing system behavior* this suite
   must work against, not implementation choices *of* this feature — kept
   minimal and confined to Edge Cases and Assumptions.
-- All items pass on first draft; no spec updates were required after the
-  initial validation pass.
+- All items passed the initial content/structure validation. A second pass,
+  done while grounding the `/speckit-plan` Technical Context in the actual
+  route and model code (`routes/form.js`, `routes/traveler.js`,
+  `lib/req-utils.js`, `model/review.js`), found the first draft had guessed
+  wrong on several verifiable facts: traveler status labels and transition
+  paths (e.g. freezing only occurs from "active", not from "completed"), who
+  is authorized to approve/release at each step, and the actual precedence
+  and scope of the access-control layers. Those were corrected in User
+  Stories 1, 2, and 4 and the Assumptions section before proceeding to
+  planning; the acceptance scenarios below reflect the verified behavior, not
+  the original guesses.
