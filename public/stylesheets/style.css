@@ -307,6 +307,72 @@ figcaption {
   background-color: #f5f6ce;
 }
 
+/* "Copy NCR reference": a small button on the same row as its input, right of
+   it. Inside form-horizontal a form control has no bottom margin, so a plain
+   left margin keeps the two centred on each other. */
+.copy-ncr-ref {
+  margin: 0 0 0 8px;
+  vertical-align: middle;
+}
+
+textarea + .copy-ncr-ref {
+  vertical-align: top;
+}
+
+/* the NCRs linked to an input, one per row, in a warning box (Bootstrap's .alert)
+   sized to its content, under the input. Plain text in it takes the page's grey,
+   as .alert's own gold is faint on its yellow. */
+.ncr-links-existing {
+  width: fit-content;
+  min-width: 220px;
+  margin: 4px 0 8px;
+  padding: 6px 14px;
+  color: #595959;
+}
+
+/* "Close report: <PDF>" on the same row as its NCR's link */
+.ncr-close-report {
+  margin-left: 8px;
+}
+
+/* a checkbox / radio label is block-level: let the button share its line */
+label.ncr-ref-row {
+  display: inline-block;
+}
+
+/* the popup that reveals the reference; wide enough for a whole reference */
+.ncr-ref-popover {
+  max-width: 480px;
+}
+
+.ncr-ref-popup .input-append {
+  margin-bottom: 5px;
+}
+
+.ncr-ref-popup .ncr-ref-value {
+  width: 340px;
+  height: 30px;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-size: 12px;
+  background-color: #fff;
+  cursor: text;
+}
+
+.ncr-ref-popup .ncr-ref-copy {
+  height: 30px;
+  font-size: 14px;
+}
+
+.ncr-ref-popup .ncr-ref-status {
+  margin-bottom: 0;
+}
+
+.ncr-ref-popup .ncr-ref-status:empty {
+  display: none;
+}
+
 .table-hover tbody tr:hover.row-selected > td {
   background-color: #c09853;
   opacity: 0.75;

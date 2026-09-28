@@ -10,6 +10,12 @@ var reqUtils = require('../lib/req-utils');
 var logger = require('../lib/loggers').getLogger();
 const mqttUtilities = require('../utilities/mqtt.js');
 const DataError = require('../lib/error').DataError;
+const {
+  TravelerNcrError,
+  errorBody,
+  isSubmissionTransition,
+  assertNoOpenNcrs,
+} = require('../lib/traveler-ncr');
 
 var Form = mongoose.model('Form');
 var ReleasedForm = mongoose.model('ReleasedForm');
@@ -313,7 +319,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
     checkWritePermissions,
-    function(req, res) {
+    async function(req, res) {
       var doc = req[req.params.id];
 
       if ([1, 1.5, 2, 3, 4].indexOf(req.body.status) === -1) {
@@ -332,6 +338,20 @@ module.exports = function(app) {
 
       if (target.to.indexOf(req.body.status) === -1) {
         return res.status(400).send('invalid status change');
+      }
+
+      // A linked NCR that is not Closed holds the traveler back from completion
+      // approval (spec 124).
+      if (isSubmissionTransition(doc.status, req.body.status)) {
+        try {
+          await assertNoOpenNcrs(doc._id);
+        } catch (err) {
+          if (err instanceof TravelerNcrError) {
+            return res.status(err.status).json(errorBody(err));
+          }
+          logger.error(err);
+          return res.status(500).send(err.message);
+        }
       }
 
       doc.status = req.body.status;
@@ -681,34 +701,53 @@ module.exports = function(app) {
 
       Traveler.findById(req.params.id, function(travelerErr, traveler) {
         performMongoResponse(travelerErr, traveler, res, function() {
-          routesUtilities.traveler.updateTravelerStatus(
-            req,
-            res,
-            traveler,
-            status,
-            false,
-            function() {
-              var deadline = req.body.deadline;
-              if (deadline === '') {
-                traveler.deadline = undefined;
-              } else {
-                traveler.deadline = deadline;
-              }
-              traveler.title = req.body.title;
-              traveler.description = req.body.description;
-              traveler.updatedBy = req.body.userName;
-              traveler.updatedOn = Date.now();
-              if (req.body.devices) {
-                traveler.devices = req.body.devices;
-              }
+          var updateTraveler = function() {
+            routesUtilities.traveler.updateTravelerStatus(
+              req,
+              res,
+              traveler,
+              status,
+              false,
+              function() {
+                var deadline = req.body.deadline;
+                if (deadline === '') {
+                  traveler.deadline = undefined;
+                } else {
+                  traveler.deadline = deadline;
+                }
+                traveler.title = req.body.title;
+                traveler.description = req.body.description;
+                traveler.updatedBy = req.body.userName;
+                traveler.updatedOn = Date.now();
+                if (req.body.devices) {
+                  traveler.devices = req.body.devices;
+                }
 
-              traveler.save(function(err) {
-                performMongoResponse(err, traveler, res, function() {
-                  return res.status(200).json(traveler);
+                traveler.save(function(err) {
+                  performMongoResponse(err, traveler, res, function() {
+                    return res.status(200).json(traveler);
+                  });
                 });
-              });
+              }
+            );
+          };
+
+          // A linked NCR that is not Closed holds the traveler back from
+          // completion approval (spec 124). The helper's case 2 lets an active
+          // traveler go straight to completed, which would skip submission, so
+          // that route is gated too.
+          if (!isSubmissionTransition(traveler.status, status)) {
+            return updateTraveler();
+          }
+          return assertNoOpenNcrs(traveler._id).then(updateTraveler, function(
+            err
+          ) {
+            if (err instanceof TravelerNcrError) {
+              return res.status(err.status).json(errorBody(err));
             }
-          );
+            logger.error(err);
+            return res.status(500).send(err.message);
+          });
         });
       });
     }

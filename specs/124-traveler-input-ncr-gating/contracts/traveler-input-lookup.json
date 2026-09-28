@@ -1,0 +1,64 @@
+{
+  "endpoint": "GET /api/ncrs/traveler-input",
+  "description": "Resolves a traveler input reference (traveler_id::input_name) so the NCR initiation form can show the traveler's title and the input's label before the user submits (spec FR-004). Read-only; creates nothing. Must be registered before router.get('/:id') in routes/ncr.js so 'traveler-input' is not treated as an NCR id. Uses exactly the same resolver as POST /api/ncrs, so the preview can never disagree with what submission will accept.",
+  "authentication": "Required (session) — auth.ensureAuthenticated",
+  "authorization": "The caller must have at least read access to the referenced traveler (reqUtils.canRead). A caller without it receives the SAME response as for a nonexistent traveler, so a traveler's existence, title and input labels are never disclosed (spec FR-008).",
+  "request": {
+    "query": {
+      "ref": {
+        "type": "string",
+        "required": true,
+        "description": "The reference, format traveler_id::input_name. Leading/trailing whitespace ignored; split at the first '::'; at most 256 characters after trimming."
+      }
+    }
+  },
+  "response": {
+    "success_200": {
+      "statusCode": 200,
+      "body": {
+        "success": true,
+        "traveler": {
+          "id": "string — the Traveler ObjectId",
+          "title": "string",
+          "status": "number — 1 (only an active traveler resolves successfully)",
+          "status_label": "string — 'active'"
+        },
+        "input": {
+          "name": "string — key of the traveler's active-form labels",
+          "label": "string — the human-readable label the NCR will record"
+        }
+      }
+    },
+    "errors": {
+      "bad_reference_400": {
+        "statusCode": 400,
+        "code": "BAD_REFERENCE",
+        "body": { "success": false, "error": "Validation Error", "code": "BAD_REFERENCE", "message": "Enter the reference as traveler_id::input_name.", "details": { "traveler_input_ref": ["<same message>"] } },
+        "when": "missing/blank ref, longer than 256 characters, no '::', empty traveler id or input name, or a traveler id that is not a valid ObjectId"
+      },
+      "traveler_not_found_404": {
+        "statusCode": 404,
+        "code": "TRAVELER_NOT_FOUND",
+        "body": { "success": false, "error": "Not Found", "code": "TRAVELER_NOT_FOUND", "message": "No traveler matches this reference.", "details": { "traveler_input_ref": ["<same message>"] } },
+        "when": "no such traveler, OR the caller lacks read access to it (deliberately identical)"
+      },
+      "input_not_found_404": {
+        "statusCode": 404,
+        "code": "INPUT_NOT_FOUND",
+        "body": { "success": false, "error": "Not Found", "code": "INPUT_NOT_FOUND", "message": "Traveler \"<title>\" has no input named \"<input_name>\".", "details": { "traveler_input_ref": ["<same message>"] } },
+        "when": "the traveler exists and the caller can read it, but the input name is not in its active form's labels. Only returned after the read-access check passes."
+      },
+      "traveler_not_active_409": {
+        "statusCode": 409,
+        "code": "TRAVELER_NOT_ACTIVE",
+        "body": { "success": false, "error": "Conflict", "code": "TRAVELER_NOT_ACTIVE", "message": "Traveler \"<title>\" is <status_label>; an NCR can only be initiated against an active traveler.", "details": { "traveler_input_ref": ["<same message>"] } },
+        "when": "the traveler is readable and the input exists, but Traveler.status !== 1. status_label comes from model/traveler.js statusMap (e.g. 'submitted for completion')."
+      }
+    }
+  },
+  "notes": [
+    "Check order is fixed: parse -> ObjectId validity -> load -> read access -> input exists -> active. See data-model.md.",
+    "The same error body shape as POST /api/ncrs (success/error/message/details), so views/ncr-create.jade's existing renderer handles it.",
+    "The client debounces (~300 ms) and calls this on input and blur. It never blocks submit: the server re-resolves on POST (spec FR-007)."
+  ]
+}

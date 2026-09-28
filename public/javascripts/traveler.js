@@ -7,7 +7,11 @@ livespan, Modernizr, createSideNav, generateHistoryRecordHtml, travelerGlobal
 
 /*eslint max-nested-callbacks: [2, 4], complexity: [2, 20]*/
 
-import { renderHistory, appendInitiateNcrLink } from './lib/traveler.js';
+import {
+  renderHistory,
+  appendInitiateNcrLink,
+  isInputBlockedByOpenNcr,
+} from './lib/traveler.js';
 
 // temporary solution for the dirty forms
 function cleanForm() {
@@ -74,8 +78,35 @@ function notify() {
   });
 }
 
+// Tells the user a traveler cannot be put forward for completion approval and
+// lists each NCR that is still open, each linking to the NCR. Every value from
+// the response is set with .text()/.attr(), never concatenated into HTML.
+function showOpenNcrs(response) {
+  var $alert = $('<div class="alert alert-error"></div>');
+  $alert.append('<button class="close" data-dismiss="alert">x</button>');
+  $alert.append($('<div class="open-ncrs-message"></div>').text(response.message));
+  var $list = $('<ul class="open-ncrs"></ul>');
+  (response.open_ncrs || []).forEach(function(ncr) {
+    var $item = $('<li></li>');
+    $('<a></a>')
+      .attr('href', prefix + '/ncrs/' + encodeURIComponent(ncr.ncr_id))
+      .attr('target', linkTarget)
+      .text(ncr.ncr_number)
+      .appendTo($item);
+    $item.append(
+      document.createTextNode(
+        ' — ' + ncr.status + (ncr.input_label ? ' — ' + ncr.input_label : '')
+      )
+    );
+    $list.append($item);
+  });
+  $alert.append($list);
+  $('#message').append($alert);
+  $(window).scrollTop($alert.offset().top - 40);
+}
+
 function setStatus(s) {
-  $.ajax({
+  return $.ajax({
     url: './status',
     type: 'PUT',
     contentType: 'application/json',
@@ -87,20 +118,33 @@ function setStatus(s) {
       document.location.href = window.location.pathname;
     })
     .fail(function(jqXHR) {
-      if (jqXHR.status !== 401) {
-        $('#message').append(
-          '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' +
-            jqXHR.responseText +
-            '</div>'
-        );
-        $(window).scrollTop($('#message div:last-child').offset().top - 40);
+      if (jqXHR.status === 401) {
+        return;
       }
+      var body = jqXHR.responseJSON;
+      if (jqXHR.status === 409 && body && body.code === 'OPEN_NCRS') {
+        showOpenNcrs(body);
+        // shown above; keep ajax-helper's generic alert (raw JSON) off the page
+        jqXHR.handledByCaller = true;
+        return;
+      }
+      $('#message').append(
+        '<div class="alert alert-error"><button class="close" data-dismiss="alert">x</button>Cannot change the status: ' +
+          jqXHR.responseText +
+          '</div>'
+      );
+      $(window).scrollTop($('#message div:last-child').offset().top - 40);
     });
 }
 
 function complete() {
-  $('#form input,textarea').prop('disabled', true);
-  setStatus(1.5);
+  // Only re-enable what this disabled, so anything deliberately disabled stays so.
+  var $enabled = $('#form input,textarea').filter(':enabled');
+  $enabled.prop('disabled', true);
+  return setStatus(1.5).fail(function() {
+    // a refused submission (e.g. an open NCR) must leave the form editable
+    $enabled.prop('disabled', false);
+  });
 }
 
 function submitReview(reviewResult) {
@@ -639,7 +683,10 @@ $(function() {
         if ($history.length > 0) {
           $history = $($history[0]);
         } else {
-          incrementFinished();
+          // an input that has an open NCR does not count as finished (spec 124)
+          if (!isInputBlockedByOpenNcr(input.name)) {
+            incrementFinished();
+          }
           if (traveler.touchedInputs.indexOf(input.name) === -1) {
             traveler.touchedInputs.push(input.name);
           }
@@ -825,7 +872,10 @@ $(function() {
           $history = $($history[0]);
         } else {
           // add an input-history div
-          incrementFinished();
+          // an input that has an open NCR does not count as finished (spec 124)
+          if (!isInputBlockedByOpenNcr(input.name)) {
+            incrementFinished();
+          }
           if (traveler.touchedInputs.indexOf(input.name) === -1) {
             traveler.touchedInputs.push(input.name);
           }

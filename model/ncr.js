@@ -42,6 +42,8 @@ const NCR_EVENT_TYPES = [
   'qa.resubmitted',
   'ncr.closed',
   'traveler.signed_off',
+  'traveler.pdf_attached',
+  'traveler.pdf_failed',
   'pa.owner_assigned',
   'pa.status_updated',
   'pa.closed',

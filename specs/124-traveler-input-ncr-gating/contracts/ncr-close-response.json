@@ -1,0 +1,40 @@
+{
+  "endpoint": "PATCH /api/ncrs/:id/close",
+  "description": "Existing NCR closure endpoint. Its request body, authorization (originator or designate only), preconditions (status must be 'Final Approval'; traveler sign-off for traveler-initiated NCRs) and error responses are unchanged. This feature adds one field to the success response, and a best-effort step that runs after the closure has been saved (spec FR-022, FR-027, FR-029).",
+  "response": {
+    "success_200_added_field": {
+      "closure_pdf": {
+        "status": "'attached' | 'failed' | 'not_applicable'",
+        "message": "string — present only when status is 'failed'; a short human-readable reason (never a stack trace or a file path)",
+        "pdf_id": "string — present only when status is 'attached'"
+      }
+    },
+    "example_attached": {
+      "success": true,
+      "ncr": { "ncr_id": "…", "ncr_number": "NCR-2026-0007", "status": "Closed", "closure_record": { "…": "unchanged" } },
+      "closure_pdf": { "status": "attached", "pdf_id": "…" },
+      "message": "NCR closed successfully. Final distribution sent to all stakeholders."
+    },
+    "example_failed": {
+      "success": true,
+      "ncr": { "…": "…", "status": "Closed" },
+      "closure_pdf": { "status": "failed", "message": "The traveler this NCR was linked to no longer exists." },
+      "message": "NCR closed successfully. Final distribution sent to all stakeholders."
+    }
+  },
+  "semantics": {
+    "not_applicable": "The NCR is not traveler-linked. No attachment is produced and no event is written (spec FR-026).",
+    "attached": "The PDF was written, its TravelerNcrPdf record inserted, and a 'traveler.pdf_attached' event appended to the NCR.",
+    "failed": "Closure is NOT undone or blocked (spec FR-027). A 'traveler.pdf_failed' event with the reason is appended to the NCR, the failure is logged, and any partially written file is removed. Reasons include: traveler removed, input no longer in the traveler's form, render error, disk or database error.",
+    "duplicate": "If a TravelerNcrPdf already exists for (traveler, ncr_id) the step reports 'attached' without creating a second one (unique index)."
+  },
+  "client_behaviour": {
+    "views/ncr-close.jade": "Read data.closure_pdf in the AJAX success handler. When status is 'failed', show a warning alert (separate from #close-error) with the message and the text that the NCR itself was closed. When 'attached' or 'not_applicable', no extra UI."
+  },
+  "event_types_added": ["traveler.pdf_attached", "traveler.pdf_failed"],
+  "notes": [
+    "Sequence inside closeNcr: existing steps -> await ncr.save() -> attachClosurePdf (guarded, cannot throw) -> refreshTravelerProgress (guarded) -> return.",
+    "The PDF is built from the NCR as saved, so it includes the 'ncr.closed' and final-distribution events but not its own attach event.",
+    "The PDF step runs regardless of the traveler's status at that moment (spec FR-029)."
+  ]
+}

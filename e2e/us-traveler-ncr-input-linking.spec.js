@@ -74,8 +74,9 @@ test.describe('Traveler-Initiated NCRs Linked to a Specific Input', () => {
     await page.click('.initiate-ncr-link');
     await page.waitForURL(/\/ncrs\/new\?/);
 
-    await expect(page.locator('#traveler-link-banner')).toBeVisible();
-    await expect(page.locator('#traveler-link-banner')).toContainText(inputLabel);
+    // spec 124: the banner became the "Traveler Input" reference field + preview
+    await expect(page.locator('#traveler_input_ref')).toHaveValue(new RegExp(`^${travelerId}::field_1$`));
+    await expect(page.locator('#traveler-ref-preview')).toContainText(inputLabel);
 
     const id = runId();
     const ncrId = await completeNcrCreation(page, `PN-${id}`);
@@ -120,7 +121,7 @@ test.describe('Traveler-Initiated NCRs Linked to a Specific Input', () => {
     await expect(page.locator('.ncr-link-badge')).toContainText('Dispositioned');
   });
 
-  test('AS4 - a second NCR from the same input is never blocked; both show distinctly', async ({ page }) => {
+  test('AS4 - a second NCR from the same input is never blocked; both show distinctly, one row each, latest on top', async ({ page }) => {
     const { travelerId } = await createFillableTraveler();
     const idA = runId();
     const idB = runId();
@@ -141,6 +142,23 @@ test.describe('Traveler-Initiated NCRs Linked to a Specific Input', () => {
     const text = await badges.allTextContents();
     expect(text.join(' ')).toContain(ncrNumberA);
     expect(text.join(' ')).toContain(ncrNumberB);
+
+    // B was raised after A, so B is the top row and A the one below it
+    expect(text[0]).toContain(ncrNumberB);
+    expect(text[1]).toContain(ncrNumberA);
+    const top = await badges.nth(0).boundingBox();
+    const below = await badges.nth(1).boundingBox();
+    expect(below.y).toBeGreaterThanOrEqual(top.y + top.height);
+
+    // both sit together in one warning box for the input, above its notes row
+    const box = page.locator('.ncr-links-existing');
+    await expect(box).toHaveCount(1);
+    await expect(box).toHaveClass(/\balert\b/);
+    await expect(box.locator('.ncr-link-badge')).toHaveCount(2);
+    await expect(page.locator('.note-buttons')).toBeVisible();
+    const boxRect = await box.boundingBox();
+    const notesRect = await page.locator('.note-buttons').boundingBox();
+    expect(boxRect.y + boxRect.height).toBeLessThanOrEqual(notesRect.y);
   });
 
   test('AS5 - the NCR detail page shows the traveler link + input label; a standalone NCR shows neither', async ({ page }) => {

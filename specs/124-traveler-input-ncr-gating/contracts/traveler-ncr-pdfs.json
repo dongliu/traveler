@@ -1,0 +1,74 @@
+{
+  "endpoints": [
+    {
+      "endpoint": "GET /travelers/:id/ncr-pdfs/",
+      "description": "Lists the closure PDFs attached to this traveler's inputs, as a flat array the client filters by input_name — the same convention as GET /travelers/:id/ncr-links/ and GET /travelers/:id/notes/. Deliberately a separate endpoint from ncr-links: a PDF must still be listed after its NCR has been deleted, and ncr-links is derived from live NCR documents.",
+      "authentication": "Required (session)",
+      "authorization": "Same as viewing the traveler: auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'). No NCR-specific access check (spec FR-024).",
+      "response": {
+        "success_200": {
+          "statusCode": 200,
+          "body": [
+            {
+              "pdf_id": "string — TravelerNcrPdf _id",
+              "input_name": "string",
+              "ncr_id": "string",
+              "ncr_number": "string",
+              "file_name": "string — e.g. NCR-2026-0007.pdf",
+              "generated_on": "ISO-8601 date-time"
+            }
+          ]
+        },
+        "errors": {
+          "not_found_404": "reqUtils.exist('id', Traveler) — existing behaviour",
+          "forbidden_403": "reqUtils.canReadMw('id') — existing behaviour"
+        }
+      },
+      "notes": [
+        "Query: TravelerNcrPdf.find({ traveler: id }).sort({ generatedOn: 1 }).lean(). An input with no closed linked NCR simply has no entries.",
+        "Several entries may share an input_name — each closed NCR has its own PDF (spec FR-025)."
+      ]
+    },
+    {
+      "endpoint": "GET /travelers/:id/ncr-pdfs/:pdfId",
+      "description": "Serves one closure PDF for viewing or download.",
+      "authentication": "Required (session)",
+      "authorization": "Same as above — read access to the traveler.",
+      "response": {
+        "success_200": {
+          "statusCode": 200,
+          "headers": {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": "inline; filename=\"<file_name>\""
+          },
+          "body": "the PDF bytes (res.sendFile of the server-side path, resolved with path.resolve — the same idiom routes/traveler.js already uses for record files)"
+        },
+        "errors": {
+          "not_found_404": "pdfId is not a valid ObjectId, no such record, or the record belongs to a DIFFERENT traveler. The lookup is { _id: pdfId, traveler: :id } so an id cannot be fetched through another traveler's URL.",
+          "gone_410": "the record exists but its file is missing on disk (logged server-side; the response does not reveal the path)"
+        }
+      }
+    }
+  ],
+  "pdf_content": {
+    "spec": "FR-023",
+    "sections_in_order": [
+      "Header: NCR number, status, creation and closure dates",
+      "Traveler and input: traveler title and id, input label and name",
+      "Part, supplier and PO information, WBS number, specification/drawing reference",
+      "Nonconformance: description, discovery date and context",
+      "Originator (and Designate if any) and the assigned CE/CS",
+      "Disposition: parts disposition, rework/repair instructions, CE/CS identity and timestamp",
+      "Review and approval outcomes: QA concurrence, each approver's status, timestamp and comments",
+      "Preventive actions: description, owner, target and actual dates, status, comments",
+      "Closure record: closed by, closure date, disposition-execution and preventive-action verification, traveler sign-off",
+      "Attachments: file names only — contents are not embedded",
+      "Event history: every event in order with timestamp, actor and status change"
+    ],
+    "properties": [
+      "A snapshot as of closure; never regenerated or edited afterwards (FR-028)",
+      "Text only, drawn with an embedded Unicode font; no HTML/CSS/URL is rendered from NCR content",
+      "Characters outside the font (e.g. CJK) render as the font's missing-glyph box and never fail generation"
+    ]
+  }
+}

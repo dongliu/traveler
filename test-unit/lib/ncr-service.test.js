@@ -50,6 +50,7 @@ const {
 } = require('../../lib/ncr-service.js');
 
 const { Ncr } = require('../../model/ncr');
+const travelerNcr = require('../../lib/traveler-ncr');
 const config = require('../../config/config');
 const User = mongoose.model('User');
 const Group = mongoose.model('Group');
@@ -221,6 +222,8 @@ describe('lib/ncr-service — createNcr', () => {
   });
 
   it('stores a traveler_link when traveler_id is provided', async () => {
+    // a traveler-linked NCR recounts its traveler's progress; not what is tested here
+    sinon.stub(travelerNcr, 'refreshTravelerProgress').resolves();
     sinon.stub(Ncr, 'findOne').resolves(null);
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
     const data = minimalNcrData({
@@ -947,6 +950,9 @@ describe('lib/ncr-service — closeNcr', () => {
   });
 
   it('closes a Traveler-linked NCR and records the traveler.signed_off event when signed off', async () => {
+    // closing a traveler-linked NCR attaches a PDF and recounts its traveler's progress; not what is tested here
+    sinon.stub(travelerNcr, 'attachClosurePdf').resolves({ status: 'attached' });
+    sinon.stub(travelerNcr, 'refreshTravelerProgress').resolves();
     stubFindById(newNcr({
       status: 'Final Approval',
       originator_id: 'orig1',
@@ -1590,5 +1596,208 @@ describe('lib/ncr-service — deleteNcr', () => {
 
     unlinkStub.called.should.be.false;
     deleteOneStub.calledOnce.should.be.true;
+  });
+});
+
+// ── traveler progress refresh (spec 124) ─────────────────────────────────────
+
+describe('lib/ncr-service — traveler progress refresh', () => {
+  const TRAVELER_ID = '507f191e810c19729de860ea';
+  const originator = makeUser({ id: 'orig1' });
+  const admin = makeUser({ id: 'admin1', roles: ['admin'] });
+  let refresh;
+
+  beforeEach(() => {
+    // called through the module object, so stubbing it here is enough
+    refresh = sinon.stub(travelerNcr, 'refreshTravelerProgress').resolves();
+    // closing a traveler-linked NCR also attaches a PDF — covered in its own describe below
+    sinon.stub(travelerNcr, 'attachClosurePdf').resolves({ status: 'attached' });
+  });
+
+  describe('createNcr', () => {
+    beforeEach(() => {
+      sinon.stub(Ncr, 'findOne').resolves(null);
+      stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
+    });
+
+    it('refreshes the traveler once, after saving a traveler-linked NCR', async () => {
+      await createNcr(
+        minimalNcrData({ traveler_id: TRAVELER_ID, traveler_input_name: 'field_1', traveler_input_label: 'Field One' }),
+        makeUser()
+      );
+
+      refresh.calledOnce.should.be.true;
+      String(refresh.firstCall.args[0]).should.equal(TRAVELER_ID);
+      Ncr.prototype.save.calledBefore(refresh).should.be.true;
+    });
+
+    it('does not touch any traveler for a standalone NCR', async () => {
+      await createNcr(minimalNcrData(), makeUser());
+
+      refresh.called.should.be.false;
+    });
+
+    it('still creates the NCR when the refresh fails', async () => {
+      refresh.rejects(new Error('boom'));
+
+      const ncr = await createNcr(
+        minimalNcrData({ traveler_id: TRAVELER_ID, traveler_input_name: 'field_1' }),
+        makeUser()
+      );
+
+      ncr.status.should.equal('Submitted');
+    });
+  });
+
+  describe('closeNcr', () => {
+    function linkedNcr() {
+      return newNcr({
+        status: 'Final Approval',
+        originator_id: 'orig1',
+        traveler_link: { traveler_id: TRAVELER_ID, input_name: 'field_1', initiated_from_traveler: true },
+      });
+    }
+
+    it('refreshes the traveler once, after the NCR is saved as Closed', async () => {
+      stubFindById(linkedNcr());
+      stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+
+      const result = await closeNcr('id1', { traveler_signed_off: true }, originator);
+
+      result.status.should.equal('Closed');
+      refresh.calledOnce.should.be.true;
+      String(refresh.firstCall.args[0]).should.equal(TRAVELER_ID);
+      Ncr.prototype.save.calledBefore(refresh).should.be.true;
+    });
+
+    it('does not touch any traveler when a standalone NCR is closed', async () => {
+      stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1' }));
+      stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+
+      await closeNcr('id1', {}, originator);
+
+      refresh.called.should.be.false;
+    });
+
+    it('still closes the NCR when the refresh fails', async () => {
+      refresh.rejects(new Error('boom'));
+      stubFindById(linkedNcr());
+      stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+
+      const result = await closeNcr('id1', { traveler_signed_off: true }, originator);
+
+      result.status.should.equal('Closed');
+    });
+  });
+
+  describe('deleteNcr', () => {
+    it('reads the traveler link before deleting, and refreshes that traveler afterwards', async () => {
+      stubFindById(
+        newNcr({
+          status: 'Submitted',
+          traveler_link: { traveler_id: TRAVELER_ID, input_name: 'field_1', initiated_from_traveler: true },
+        })
+      );
+      const deleteOne = sinon.stub(Ncr.prototype, 'deleteOne').resolves();
+
+      await deleteNcr('id1', admin);
+
+      deleteOne.calledOnce.should.be.true;
+      refresh.calledOnce.should.be.true;
+      String(refresh.firstCall.args[0]).should.equal(TRAVELER_ID);
+      deleteOne.calledBefore(refresh).should.be.true;
+    });
+
+    it('does not touch any traveler when a standalone NCR is deleted', async () => {
+      stubFindById(newNcr({ status: 'Submitted' }));
+      sinon.stub(Ncr.prototype, 'deleteOne').resolves();
+
+      await deleteNcr('id1', admin);
+
+      refresh.called.should.be.false;
+    });
+
+    it('still deletes the NCR when the refresh fails', async () => {
+      refresh.rejects(new Error('boom'));
+      stubFindById(
+        newNcr({ traveler_link: { traveler_id: TRAVELER_ID, input_name: 'field_1', initiated_from_traveler: true } })
+      );
+      const deleteOne = sinon.stub(Ncr.prototype, 'deleteOne').resolves();
+
+      await deleteNcr('id1', admin);
+
+      deleteOne.calledOnce.should.be.true;
+    });
+  });
+});
+
+// ── closure PDF (spec 124) ───────────────────────────────────────────────────
+
+describe('lib/ncr-service — closeNcr closure PDF', () => {
+  const TRAVELER_ID = '507f191e810c19729de860ea';
+  const originator = makeUser({ id: 'orig1' });
+  let attach;
+  let refresh;
+
+  function linkedNcr() {
+    return newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      traveler_link: { traveler_id: TRAVELER_ID, input_name: 'field_1', initiated_from_traveler: true },
+    });
+  }
+
+  beforeEach(() => {
+    attach = sinon.stub(travelerNcr, 'attachClosurePdf').resolves({ status: 'attached', pdfId: 'pdf1' });
+    refresh = sinon.stub(travelerNcr, 'refreshTravelerProgress').resolves();
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+  });
+
+  it('attaches the PDF after the NCR is saved as Closed and before the progress recount, and reports the outcome', async () => {
+    stubFindById(linkedNcr());
+
+    const result = await closeNcr('id1', { traveler_signed_off: true }, originator);
+
+    result.status.should.equal('Closed');
+    attach.calledOnce.should.be.true;
+    attach.firstCall.args[0].should.equal(result);
+    attach.firstCall.args[1].should.equal(originator);
+    result._closurePdf.should.deep.equal({ status: 'attached', pdfId: 'pdf1' });
+    Ncr.prototype.save.calledBefore(attach).should.be.true;
+    attach.calledBefore(refresh).should.be.true;
+  });
+
+  it('closes the NCR and reports the failure when the PDF cannot be attached', async () => {
+    attach.resolves({ status: 'failed', message: 'The traveler this NCR was linked to no longer exists.' });
+    stubFindById(linkedNcr());
+
+    const result = await closeNcr('id1', { traveler_signed_off: true }, originator);
+
+    result.status.should.equal('Closed');
+    result._closurePdf.should.deep.equal({
+      status: 'failed',
+      message: 'The traveler this NCR was linked to no longer exists.',
+    });
+  });
+
+  it('closes the NCR even if the attach step itself blows up unexpectedly', async () => {
+    attach.rejects(new Error('boom'));
+    stubFindById(linkedNcr());
+
+    const result = await closeNcr('id1', { traveler_signed_off: true }, originator);
+
+    result.status.should.equal('Closed');
+    result._closurePdf.should.deep.equal({ status: 'failed', message: 'The PDF could not be attached.' });
+    refresh.calledOnce.should.be.true;
+  });
+
+  it('produces nothing for a standalone NCR', async () => {
+    stubFindById(newNcr({ status: 'Final Approval', originator_id: 'orig1' }));
+
+    const result = await closeNcr('id1', {}, originator);
+
+    result.status.should.equal('Closed');
+    attach.called.should.be.false;
+    result._closurePdf.should.deep.equal({ status: 'not_applicable' });
   });
 });

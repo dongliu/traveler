@@ -46,6 +46,9 @@ block content
       | Final distribution sent to all stakeholders.
       |  &nbsp;
       a(id='close-detail-link', href='#') View NCR
+    #close-warning.alert.alert-block(style='display:none')
+      strong Note:&nbsp;
+      span#close-warning-msg
     #close-error.alert.alert-error(style='display:none')
       strong Error:&nbsp;
       span#close-error-msg
@@ -112,10 +115,19 @@ block js
           method: 'PATCH',
           contentType: 'application/json',
           data: JSON.stringify(payload),
-          success: function () {
+          success: function (data) {
             $('#close-detail-link').attr('href', prefix + '/ncrs/' + ncrId);
             $('#close-success').show();
             $('#close-form').hide();
+            // the NCR is closed either way; say so if its PDF record could not be
+            // attached to the traveler input
+            if (data && data.closure_pdf && data.closure_pdf.status === 'failed') {
+              $('#close-warning-msg').text(
+                'The NCR was closed, but its PDF could not be attached to the traveler: ' +
+                  (data.closure_pdf.message || 'unknown reason')
+              );
+              $('#close-warning').show();
+            }
           },
           error: function (xhr) {
             var resp = xhr.responseJSON || {};

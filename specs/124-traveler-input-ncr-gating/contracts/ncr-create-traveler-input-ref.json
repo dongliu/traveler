@@ -1,0 +1,39 @@
+{
+  "endpoint": "POST /api/ncrs",
+  "description": "Existing NCR creation endpoint. This feature adds ONE optional body field, traveler_input_ref, which links the new NCR to a traveler input; every existing field, required-field validation and success response is unchanged (spec FR-006, FR-007, SC-007). It also changes how the 123 fields traveler_id / traveler_input_name / traveler_input_label are treated (see 'deprecated'). See contracts/traveler-input-lookup.json for the resolver's error codes.",
+  "authentication": "Required (session) — unchanged",
+  "authorization": "Unchanged for NCR creation. When traveler_input_ref is present the caller must also have at least read access to that traveler (spec FR-008).",
+  "request": {
+    "body_added": {
+      "traveler_input_ref": {
+        "type": "string",
+        "required": false,
+        "description": "traveler_id::input_name. Omitted or blank = a standalone NCR exactly as before. When present it is resolved by the server (parse, read access, input exists, traveler active) BEFORE the NCR is created; any failure creates nothing."
+      }
+    },
+    "deprecated": {
+      "traveler_id": "Still accepted for one release. Combined with traveler_input_name into a synthesized reference and sent through the same resolver. A traveler_id with no traveler_input_name is now a 400 BAD_REFERENCE (an NCR links to an input, not just a traveler).",
+      "traveler_input_name": "Deprecated alias input, as above.",
+      "traveler_input_label": "Ignored. The label is now taken from the traveler's own form labels, never from the client."
+    }
+  },
+  "response": {
+    "success_201": "Unchanged: { success: true, ncr: { ncr_number, ncr_id, status, creation_timestamp, originator_id, part_name, part_number }, wbs_notification_matched, message }",
+    "errors": {
+      "validation_400": "Unchanged for the existing required fields. Reported first: if any required field is invalid this is returned before the reference is resolved.",
+      "bad_reference_400": "{ success:false, error:'Validation Error', code:'BAD_REFERENCE', message, details:{ traveler_input_ref:[message] } }",
+      "traveler_not_found_404": "{ ..., code:'TRAVELER_NOT_FOUND' } — nonexistent traveler OR no read access (identical)",
+      "input_not_found_404": "{ ..., code:'INPUT_NOT_FOUND' }",
+      "traveler_not_active_409": "{ ..., code:'TRAVELER_NOT_ACTIVE' } — evaluated at submission time (spec FR-012)"
+    }
+  },
+  "behaviour_changes": [
+    "The stored traveler_link.input_label now always comes from the traveler's labels (server-derived).",
+    "An NCR can no longer be created linked to a non-active traveler, a traveler the caller cannot read, or an input that does not exist.",
+    "Legacy callers that sent traveler_id without an input name now receive 400 instead of an NCR with an input-less link."
+  ],
+  "notes": [
+    "lib/ncr-service.js createNcr(data, user, webBaseUrl) keeps its signature: the route passes it the already-resolved { traveler_id, traveler_input_name, traveler_input_label }.",
+    "After a traveler-linked NCR is saved, the traveler's stored finishedInput is refreshed (spec FR-017/FR-020)."
+  ]
+}

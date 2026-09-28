@@ -39,6 +39,7 @@
   "notes": [
     "Query: Ncr.find({'traveler_link.traveler_id': id, 'traveler_link.initiated_from_traveler': true}, {ncr_number:1, status:1, 'traveler_link.input_name':1}).lean(), reshaped to the flat array above",
     "An input with zero linked NCRs simply has no entries in the array — the client shows only the 'Initiate NCR' action (if touched) and no badges",
-    "Multiple entries can share the same input_name (spec.md FR-008 — an input can accumulate more than one linked NCR over time); the client groups/filters by input_name client-side, exactly as the existing notes endpoint's array is filtered by name"
+    "Multiple entries can share the same input_name (spec.md FR-008 — an input can accumulate more than one linked NCR over time); the client groups/filters by input_name client-side, exactly as the existing notes endpoint's array is filtered by name",
+    "Entries are sorted newest first (Ncr.created_at descending, _id descending as the tie-break); the client keeps that order and shows each NCR of an input in its own row, so the latest is on top"
   ]
 }

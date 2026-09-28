@@ -17,13 +17,22 @@ docker compose up
 # Lint
 npx eslint .
 
-# Tests
-npm test                   # all unit tests (mocha test-unit/**/*.test.js)
+# Unit tests
+npm run unit               # all unit tests (mocha test-unit/**/*.test.js)
 npx mocha test-unit/lib/permission.test.js   # single test file
 
 # Unit tests require this env var when run outside Docker
-TRAVELER_CONFIG_REL_PATH=docker npm test
+TRAVELER_CONFIG_REL_PATH=docker npm run unit
+
+# End-to-end tests: Playwright, in e2e/ — the way to test the app end to end.
+# Needs the Docker stack up (docker compose up) and E2E_USER/E2E_PASS/E2E_USER2/
+# E2E_PASS2 in .env (see .env.example); first time, `npx playwright install chromium`.
+npm run e2e                # full suite
+npm run e2e -- e2e/us1-create-and-submit-ncr.spec.js -g AS3   # one file / scenario
 ```
+
+See [e2e/README.md](e2e/README.md) for the suite's setup, layout, how to write a
+test, and debugging.
 
 ## Architecture
 
@@ -83,3 +92,4 @@ shell commands, and other important information, read the current plan
 ## Recent Changes
 - 002-playwright-e2e-tests: Added JavaScript (Node.js 18+, matching the app's existing runtime) + `@playwright/test` (new devDependency); no other new dependency required — Mailpit verification uses Playwright's own built-in `request` fixture, and fixture provisioning reuses the app's own `mongoose`/`model/*.js` inside the `web` container rather than adding a second DB driver
 - 007-wbs-yaml-config: Added `js-yaml` dependency. WBS-to-email mappings are now loaded from `config/wbs.yaml` (bare Node) or `docker/wbs.yaml` (Docker) at startup — edit the file and restart to change mappings. `model/wbs-notification.js` and its MongoDB collection have been removed. **Breaking change**: `POST/PATCH/DELETE /api/wbs-notifications` no longer exist (return 404); use the YAML file instead.
+- 124-traveler-input-ncr-gating: Added runtime dependencies `pdfkit` (PDF generation) and `dejavu-fonts-ttf` (embedded Unicode font); a new collection `TravelerNcrPdf` (in `model/traveler.js`); and `lib/traveler-ncr.js`, the single module holding the rules that tie traveler inputs to their NCRs. An NCR can be linked to a traveler input by a `traveler_id::input_name` reference on the NCR form (`traveler_input_ref`), only against an *active* traveler; a traveler cannot be submitted for completion approval while any linked NCR is not Closed; an input with an open NCR does not count as finished (the stored `finishedInput` is recounted when a linked NCR is created, closed or deleted); and closing a traveler-linked NCR attaches a PDF to the traveler input. **Behaviour changes**: `PUT /travelers/:id/status`, `PUT /apis/travelers/:id/status/` and `POST /apis/update/traveler/:id/` now answer `409` `{code: 'OPEN_NCRS', open_ncrs: [...]}` when the target is 1.5, or 2 straight from active, while a linked NCR is open — including for the Basic-auth REST API, so an integration that submits or completes travelers programmatically is refused; reviewer approval is deliberately not gated. On `POST /api/ncrs` the 123 body fields `traveler_id` / `traveler_input_name` / `traveler_input_label` are a deprecated alias for one release: they go through the same resolver, the client label is ignored (the label comes from the traveler), and a `traveler_id` with no input name is now a 400. `PATCH /api/ncrs/:id/close` adds `closure_pdf`; a PDF failure never blocks closure. See `specs/124-traveler-input-ncr-gating/`.

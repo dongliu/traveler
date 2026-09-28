@@ -16,7 +16,7 @@ Remove the approver role field from the QA concurrence flow. The UI, route valid
 
 **Storage**: MongoDB via Mongoose — `additional_approvers` subdocument on the `Ncr` collection; `approver_role` field left in schema, simply unpopulated on new records
 
-**Testing**: Mocha (unit — `test-unit/`), Playwright (e2e — `test-e2e/` / `e2e/`)
+**Testing**: Mocha (unit — `test-unit/`), Playwright (e2e — `e2e/`)
 
 **Target Platform**: Linux server (Docker dev; `docker compose up`)
 

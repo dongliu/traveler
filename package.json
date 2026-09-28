@@ -13,7 +13,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/dongliu/traveler.git",
-    "release": "5.0.4"
+    "release": "5.0.5"
   },
   "dependencies": {
     "@tinymce/tinymce-jquery": "^2.0.0",
@@ -24,6 +24,7 @@
     "connect-mongo": "^4.6.0",
     "cookie-parser": "1.4.4",
     "debug": "^4.3.2",
+    "dejavu-fonts-ttf": "^2.37.3",
     "errorhandler": "1.5.0",
     "express": "^4.17.1",
     "express-session": "1.15.6",
@@ -47,6 +48,7 @@
     "nodemailer": "^6.9.14",
     "optional-require": "^1.0.2",
     "pause": "0.0.1",
+    "pdfkit": "^0.20.2",
     "request": "2.34.0",
     "sanitize-html": "^1.20.0",
     "serve-favicon": "2.5.0",

@@ -20,8 +20,8 @@ independent implementation and testing of each story.
 ## Path Conventions
 
 Single project — new top-level `e2e/` directory (Playwright suite, separate
-from the existing `test-e2e/` manual scripts and `test-unit/` mocha suite),
-per plan.md's Project Structure.
+from the `test-unit/` mocha suite and from the manual `test-e2e/` scripts that
+existed then and have since been removed), per plan.md's Project Structure.
 
 ---
 
@@ -155,7 +155,7 @@ per plan.md's Project Structure.
 **Purpose**: Consistency, documentation, and a real end-to-end validation run.
 
 - [ ] T040 [P] Run `npx eslint e2e/` and fix any reported issues; confirm `e2e/**/*.js` conforms to the repo's existing Prettier configuration
-- [ ] T041 [P] Add a short `e2e/README.md` (or extend `test-e2e/README.md`) cross-linking to `specs/002-playwright-e2e-tests/quickstart.md` and clarifying the manual suite (`test-e2e/`) and this automated suite (`e2e/`) are both maintained, per spec.md's Assumptions
+- [X] T041 [P] Add a short `e2e/README.md` cross-linking to `specs/002-playwright-e2e-tests/quickstart.md`. The manual `test-e2e/` suite has been removed (commit `84216a09`), so this Playwright suite (`e2e/`) is the only e2e approach; the README should say so
 - [ ] T042 Run `npm run e2e` end-to-end against the running local Docker stack per quickstart.md, confirm all 6 spec files pass, and record the actual wall-clock duration against SC-006's ~15-minute target
 - [ ] T043 Run `npm run e2e` a second consecutive time (no manual cleanup in between) and confirm the result matches the first run, validating SC-003 (repeat-run consistency) and FR-009 (no cross-run interference) against the real shared database
 - [ ] T044 [P] Reconcile spec.md's Coverage Mapping table against the final `e2e/*.spec.js` file names if any diverged during implementation

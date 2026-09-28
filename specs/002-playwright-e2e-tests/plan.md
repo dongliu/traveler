@@ -87,7 +87,7 @@ specs/002-playwright-e2e-tests/
 ### Source Code (repository root)
 
 ```text
-e2e/                              # NEW — Playwright suite (fully separate from test-e2e/, which is untouched)
+e2e/                              # NEW — Playwright suite (separate from the manual test-e2e/ scripts, since removed)
 ├── playwright.config.js          # baseURL from resolved .env ports, trace/video/screenshot-on-failure, reporters
 ├── global-setup.js               # logs in as E2E_USER and E2E_USER2 once, saves storageState per persona
 ├── fixtures/
@@ -114,11 +114,12 @@ purely additive test tooling. `package.json` gains one devDependency
 `.gitignore` gains `playwright-report/` and `test-results/`.
 
 **Structure Decision**: Single new top-level `e2e/` directory, mirroring the
-existing top-level `test-e2e/` (manual) and `test-unit/` (mocha) directories
-— consistent with this repo's existing pattern of one top-level directory per
-test type/tool, rather than nesting under `test-e2e/` (which would blur the
-line between the manual markdown scripts and this automated suite) or under
-`lib/`/`routes/` (which are production code, not test code).
+top-level `test-unit/` (mocha) directory and the `test-e2e/` (manual, since
+removed) directory that existed at the time — consistent with this repo's
+pattern of one top-level directory per test type/tool, rather than nesting
+under `test-e2e/` (which would have blurred the line between the manual
+markdown scripts and this automated suite) or under `lib/`/`routes/` (which
+are production code, not test code).
 
 ## Complexity Tracking
 

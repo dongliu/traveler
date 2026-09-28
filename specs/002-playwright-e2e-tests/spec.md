@@ -8,6 +8,12 @@
 
 **Input**: User description: "design and implement an approach to do e2e test with playwright in the local docker setup. The e2e tests should be equivalent to the tests described in `test-e2e`."
 
+> **Update**: the manual `test-e2e/` scripts this spec was written against have
+> since been removed (commit `84216a09`). The Playwright suite in `e2e/` is now
+> the only end-to-end test approach. Mentions of `test-e2e/` in this directory
+> are historical; the files can still be read from git history, e.g.
+> `git show 84216a09^:test-e2e/README.md`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Automated Verification of NCR Creation and Submission Notifications (Priority: P1)
@@ -249,10 +255,10 @@ failing step and its cause without re-running.
 
 ### Coverage Mapping
 
-Every existing manual test file has an automated equivalent among the six
-user stories above (satisfies FR-003 / SC-002):
+Every manual test file that existed when this spec was written has an automated
+equivalent among the six user stories above (satisfies FR-003 / SC-002):
 
-| Existing file (`test-e2e/`) | Automated equivalent |
+| Former manual file (`test-e2e/`, since removed) | Automated equivalent |
 |---|---|
 | `us1-create-and-submit-ncr.md` | User Story 1 (AS1, AS2) |
 | `us1.5-send-initial-notification.md` | User Story 1 (AS3–AS6) |
@@ -406,10 +412,10 @@ user stories above (satisfies FR-003 / SC-002):
 - LDAP-backed authentication, as already configured for local Docker
   development, is the authentication path exercised; CAS and other auth
   strategies are out of scope for this suite.
-- The existing `test-e2e/*.md` manual scripts remain in place as
-  human-readable reference documentation after this suite exists; deciding
-  whether to eventually retire them is a separate, future decision and out of
-  scope here.
+- The `test-e2e/*.md` manual scripts were kept as human-readable reference
+  documentation while this suite was built. Once the suite superseded them they
+  were removed (commit `84216a09`); the Playwright suite is now the only e2e
+  approach.
 - This suite targets local developer execution, as stated in the feature
   request ("in the local docker setup"); wiring it into a CI pipeline is out
   of scope for this specification.
