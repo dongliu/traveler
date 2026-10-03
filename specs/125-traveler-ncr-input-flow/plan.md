@@ -81,8 +81,11 @@ lib/
 routes/
 ├── traveler.js                # + GET /travelers/:id/live-status/
 ├── api.js                     # submit gate call sites (lines ~345 and ~739)
-└── ncr.js                     # + GET /ncrs/:id/live-status, + GET /ncrs/:id/fragment;
+├── ncr.js                     # JSON API (/api/ncrs): no change to POST / (REST link kept);
                                #   GET /traveler-input kept (used for the read-only banner)
+└── ncr-view.js                # Web pages: GET /ncrs/:id renders ncr-detail (HTML). + GET
+                               #   /ncrs/:id/live-status and + GET /ncrs/:id/fragment go here,
+                               #   beside it, so they reuse its locals (isQa) and session auth
 
 views/
 ├── ncr-create.jade            # remove "Traveler Input" field and preview; add read-only banner
