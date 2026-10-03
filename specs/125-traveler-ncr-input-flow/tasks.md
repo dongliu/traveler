@@ -135,19 +135,19 @@
 
 ### Tests for User Story 4 (write first; must fail)
 
-- [ ] T035 [P] [US4] Add to `e2e/us-traveler-input-flow.spec.js` a `describe` for US4 covering spec US4 acceptance 1–7: button disabled and listing reasons for an empty input; listing open NCRs with links; disabled while an input has unsaved changes; enabled when all satisfied; administrator refused the same way
-- [ ] T036 [P] [US4] Add to `e2e/us-traveler-input-flow.spec.js` an API-level test: `PUT /apis/travelers/:id/status/` (Basic auth, port 3002) with `status: 1.5` on a traveler that has an empty input and no NCRs returns `409` with `code: "INPUTS_MISSING"`, `missing_inputs` naming that input, and `open_ncrs: []` (contracts/traveler-completion-refusal.json). The same call succeeds after the input is filled
-- [ ] T037 [P] [US4] In `e2e/us-traveler-ncr-gating.spec.js`, update any assertion that expects the "submit anyway" confirmation dialog to expect the disabled button instead (spec FR-024)
+- [X] T035 [P] [US4] Add to `e2e/us-traveler-input-flow.spec.js` a `describe` for US4 covering spec US4 acceptance 1–7: button disabled and listing reasons for an empty input; listing open NCRs with links; disabled while an input has unsaved changes; enabled when all satisfied; administrator refused the same way
+- [X] T036 [P] [US4] Add to `e2e/us-traveler-input-flow.spec.js` an API-level test: `PUT /apis/travelers/:id/status/` (Basic auth, port 3002) with `status: 1.5` on a traveler that has an empty input and no NCRs returns `409` with `code: "INPUTS_MISSING"`, `missing_inputs` naming that input, and `open_ncrs: []` (contracts/traveler-completion-refusal.json). The same call succeeds after the input is filled
+- [X] T037 [P] [US4] In `e2e/us-traveler-ncr-gating.spec.js`, update any assertion that expects the "submit anyway" confirmation dialog to expect the disabled button instead (spec FR-024)
 
 ### Implementation for User Story 4
 
-- [ ] T038 [US4] In `lib/traveler.js` (the status handler, around lines 62–75), replace `assertNoOpenNcrs(doc._id)` with `assertSubmittable(doc._id)` and keep the existing `TravelerNcrError` response path
-- [ ] T039 [US4] In `routes/api.js` around lines 343–356 (`PUT /apis/travelers/:id/status/`), replace `assertNoOpenNcrs` with `assertSubmittable`
-- [ ] T040 [US4] In `routes/api.js` around lines 737–752 (`POST /apis/update/traveler/:id/`), replace `assertNoOpenNcrs` with `assertSubmittable`, preserving the `!isSubmissionTransition` short-circuit
-- [ ] T041 [US4] In `views/traveler.jade` near line 179, add an empty `ul#submit-blockers.help-block` above the **Submit for completion** button (`#complete2`), and set the button to `disabled` by default in the markup
-- [ ] T042 [US4] In `public/javascripts/traveler.js`, add `updateSubmitState(liveStatus)` that sets `#complete2` and `#complete` disabled unless `submit_ready` is true and no input is in Input mode with unsaved changes; renders reasons into `#submit-blockers` (each open NCR as a link with number, status, input label; each missing input by label). Call it on page load and after each Save, Reset and status change
-- [ ] T043 [US4] In `public/javascripts/traveler.js`, replace the `completeClick` confirmation (around lines 402–411, `showConfirmation(complete)` for incomplete inputs) so the handler only calls `complete()` when the button is enabled (spec FR-024)
-- [ ] T044 [US4] In `public/javascripts/traveler.js`, extend `showOpenNcrs(response)` (around line 84) to render `response.missing_inputs` as a second list, and extend `setStatus` error handling (around line 125) so `code === 'INPUTS_MISSING'` shows the missing-input list under the same alert
+- [X] T038 [US4] In `lib/traveler.js` (the status handler, around lines 62–75), replace `assertNoOpenNcrs(doc._id)` with `assertSubmittable(doc._id)` and keep the existing `TravelerNcrError` response path
+- [X] T039 [US4] In `routes/api.js` around lines 343–356 (`PUT /apis/travelers/:id/status/`), replace `assertNoOpenNcrs` with `assertSubmittable`
+- [X] T040 [US4] In `routes/api.js` around lines 737–752 (`POST /apis/update/traveler/:id/`), replace `assertNoOpenNcrs` with `assertSubmittable`, preserving the `!isSubmissionTransition` short-circuit
+- [X] T041 [US4] In `views/traveler.jade` near line 179, add an empty `ul#submit-blockers.help-block` above the **Submit for completion** button (`#complete2`), and set the button to `disabled` by default in the markup
+- [X] T042 [US4] In `public/javascripts/traveler.js`, add `updateSubmitState(liveStatus)` that sets `#complete2` and `#complete` disabled unless `submit_ready` is true and no input is in Input mode with unsaved changes; renders reasons into `#submit-blockers` (each open NCR as a link with number, status, input label; each missing input by label). Call it on page load and after each Save, Reset and status change
+- [X] T043 [US4] In `public/javascripts/traveler.js`, replace the `completeClick` confirmation (around lines 402–411, `showConfirmation(complete)` for incomplete inputs) so the handler only calls `complete()` when the button is enabled (spec FR-024)
+- [X] T044 [US4] In `public/javascripts/traveler.js`, extend `showOpenNcrs(response)` (around line 84) to render `response.missing_inputs` as a second list, and extend `setStatus` error handling (around line 125) so `code === 'INPUTS_MISSING'` shows the missing-input list under the same alert
 
 **Checkpoint**: US4 complete. Submission refused on every route when a condition is unmet.
 
@@ -161,17 +161,17 @@
 
 ### Tests for User Story 5 (write first; must fail)
 
-- [ ] T045 [P] [US5] Create `e2e/us-traveler-live-status.spec.js` with scenarios for spec US5 acceptance 1–7. Use Playwright `page.clock` to advance 30 seconds without waiting. Assert: a poll request to `/travelers/:id/live-status/` fires per 30 s; an NCR status change applied; another user's saved value shown; an input in Input mode with typed text keeps its text; a traveler moved away from active removes the options and disables submit; a 500 response keeps the last state and shows no error alert; `document.hidden` pauses polling (use `page.evaluate` to stub `document.hidden`)
-- [ ] T046 [P] [US5] Add a scenario to `e2e/us-traveler-live-status.spec.js`: opening a traveler that is not active (for example one in status 1.5) issues no `live-status` requests over 60 seconds on `page.clock` (spec FR-031)
+- [X] T045 [P] [US5] Create `e2e/us-traveler-live-status.spec.js` with scenarios for spec US5 acceptance 1–7. Use Playwright `page.clock` to advance 30 seconds without waiting. Assert: a poll request to `/travelers/:id/live-status/` fires per 30 s; an NCR status change applied; another user's saved value shown; an input in Input mode with typed text keeps its text; a traveler moved away from active removes the options and disables submit; a 500 response keeps the last state and shows no error alert; `document.hidden` pauses polling (use `page.evaluate` to stub `document.hidden`)
+- [X] T046 [P] [US5] Add a scenario to `e2e/us-traveler-live-status.spec.js`: opening a traveler that is not active (for example one in status 1.5) issues no `live-status` requests over 60 seconds on `page.clock` (spec FR-031)
 
 ### Implementation for User Story 5
 
-- [ ] T047 [US5] In `routes/traveler.js`, add `app.get('/travelers/:id/live-status/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), handler)` where the handler calls `buildLiveStatus` from `lib/traveler-ncr.js` and returns 200 JSON, logging and returning 500 on error. Place it beside `GET /travelers/:id/ncr-links/` (around line 1221)
-- [ ] T048 [US5] In `public/javascripts/traveler.js`, add `applyLiveStatus(payload)`: updates `#finished-input` and the total; updates each input's options and waiting marker using `payload.inputs`; updates NCR badges by re-running the link rendering; calls `updateSubmitState` (T042); when the traveler's `status` is no longer 1, stops the timer and removes the input options and `#complete2`
-- [ ] T049 [US5] In `public/javascripts/traveler.js`, track each input's last seen `revision` in a map. When `applyLiveStatus` sees a changed revision for an input that is not in Input mode, fetch `GET ./data/` once and update that input's value and its history line. Skip the fetch and the update for an input in Input mode; apply it after Save or Reset (FR-027)
-- [ ] T050 [US5] In `public/javascripts/traveler.js`, start the timer on page load with `startLiveRefresh(pollLiveStatus)` from `public/javascripts/lib/live-refresh.js` only when `traveler.status === 1`. `pollLiveStatus` calls `GET ./live-status/`; on failure, it does nothing except leave the last state in place (FR-029)
-- [ ] T051 [P] [US5] In `views/traveler.jade`, add `span#live-status-updated.help-block` beside the status line; `applyLiveStatus` writes "Updated HH:MM:SS" on each successful poll (FR-029)
-- [ ] T052 [US5] Add `public/javascripts/lib/live-refresh.js` to the traveler page's script list in `views/traveler.jade` `block js`, before `traveler.js`
+- [X] T047 [US5] In `routes/traveler.js`, add `app.get('/travelers/:id/live-status/', auth.ensureAuthenticated, reqUtils.exist('id', Traveler), reqUtils.canReadMw('id'), handler)` where the handler calls `buildLiveStatus` from `lib/traveler-ncr.js` and returns 200 JSON, logging and returning 500 on error. Place it beside `GET /travelers/:id/ncr-links/` (around line 1221)
+- [X] T048 [US5] In `public/javascripts/traveler.js`, add `applyLiveStatus(payload)`: updates `#finished-input` and the total; updates each input's options and waiting marker using `payload.inputs`; updates NCR badges by re-running the link rendering; calls `updateSubmitState` (T042); when the traveler's `status` is no longer 1, stops the timer and removes the input options and `#complete2`
+- [X] T049 [US5] In `public/javascripts/traveler.js`, track each input's last seen `revision` in a map. When `applyLiveStatus` sees a changed revision for an input that is not in Input mode, fetch `GET ./data/` once and update that input's value and its history line. Skip the fetch and the update for an input in Input mode; apply it after Save or Reset (FR-027)
+- [X] T050 [US5] In `public/javascripts/traveler.js`, start the timer on page load with `startLiveRefresh(pollLiveStatus)` from `public/javascripts/lib/live-refresh.js` only when `traveler.status === 1`. `pollLiveStatus` calls `GET ./live-status/`; on failure, it does nothing except leave the last state in place (FR-029)
+- [X] T051 [P] [US5] In `views/traveler.jade`, add `span#live-status-updated.help-block` beside the status line; `applyLiveStatus` writes "Updated HH:MM:SS" on each successful poll (FR-029)
+- [X] T052 [US5] Add `public/javascripts/lib/live-refresh.js` to the traveler page's script list in `views/traveler.jade` `block js`, before `traveler.js`
 
 **Checkpoint**: US5 complete. The active traveler page stays current without reload.
 
@@ -185,16 +185,16 @@
 
 ### Tests for User Story 6 (write first; must fail)
 
-- [ ] T053 [P] [US6] Create `e2e/us-ncr-live-refresh.spec.js` with scenarios for spec US6 acceptance 1–5: status and history update within 30 s via `page.clock`; typed comment preserved across a refresh; an open modal defers the body swap until closed; a failed `live-status` keeps the page and shows no error; a closed NCR is still polled (and a PDF added later appears)
+- [X] T053 [P] [US6] Create `e2e/us-ncr-live-refresh.spec.js` with scenarios for spec US6 acceptance 1–5: status and history update within 30 s via `page.clock`; typed comment preserved across a refresh; an open modal defers the body swap until closed; a failed `live-status` keeps the page and shows no error; a closed NCR is still polled (and a PDF added later appears)
 
 ### Implementation for User Story 6
 
-- [ ] T054 [US6] In `routes/ncr-view.js`, add `app.get('/ncrs/:id/live-status', auth.ensureAuthenticated, …)` returning `{ncr_id, status, updated_at, event_count}` from `Ncr.findById(id, {status, updated_at, 'events': 1}).lean()`; 404 when the NCR is missing. Same authorization as `GET /ncrs/:id` on this route (the web route checks sign-in only — do not widen it; see the Notes)
-- [ ] T055 [US6] Move the body of `views/ncr-detail.jade` (everything inside the page's main content container, excluding the layout `block js`) into `views/ncr-detail-body.jade`, and have `ncr-detail.jade` include it. Render output must be unchanged: check with `e2e/us1-create-and-submit-ncr.spec.js`
-- [ ] T056 [US6] In `routes/ncr-view.js`, extract the locals built for `GET /ncrs/:id` (`ncr`, `isQa`, and `getRenderObject`) into a helper and add `app.get('/ncrs/:id/fragment', …)` that renders `ncr-detail-body` with the same locals, without the layout (`res.render('ncr-detail-body', …)` is a partial when the layout is set per-view; confirm by checking `routesUtilities.getRenderObject`)
-- [ ] T057 [US6] In `views/ncr-detail.jade` `block js`, move the page's inline handlers into a function `bindNcrPage($scope)` that binds within `$scope` (default `document`), so the body can be re-bound after a swap. Use event delegation where a handler is bound per element
-- [ ] T058 [US6] In `views/ncr-detail.jade` `block js`, start `startLiveRefresh(pollNcr)` (from `lib/live-refresh.js`). `pollNcr` calls `./live-status`; when `updated_at` or `event_count` changed since the last poll, and the page has no dirty form control (value differs from its loaded value) and no visible `.modal`, it fetches `./fragment` and replaces `#ncr-body` (or the container used in T055), then calls `bindNcrPage(#ncr-body)`. If dirty or a modal is open, it leaves the swap pending and retries on the next tick (FR-033)
-- [ ] T059 [P] [US6] Confirm no other script on `views/ncr-detail.jade` (for example the `location.reload()` calls at lines 407–602 after actions) conflicts with the poll. Those reloads remain; they run after explicit user actions
+- [X] T054 [US6] In `routes/ncr-view.js`, add `app.get('/ncrs/:id/live-status', auth.ensureAuthenticated, …)` returning `{ncr_id, status, updated_at, event_count}` from `Ncr.findById(id, {status, updated_at, 'events': 1}).lean()`; 404 when the NCR is missing. Same authorization as `GET /ncrs/:id` on this route (the web route checks sign-in only — do not widen it; see the Notes)
+- [X] T055 [US6] Move the body of `views/ncr-detail.jade` (everything inside the page's main content container, excluding the layout `block js`) into `views/ncr-detail-body.jade`, and have `ncr-detail.jade` include it. Render output must be unchanged: check with `e2e/us1-create-and-submit-ncr.spec.js`
+- [X] T056 [US6] In `routes/ncr-view.js`, extract the locals built for `GET /ncrs/:id` (`ncr`, `isQa`, and `getRenderObject`) into a helper and add `app.get('/ncrs/:id/fragment', …)` that renders `ncr-detail-body` with the same locals, without the layout (`res.render('ncr-detail-body', …)` is a partial when the layout is set per-view; confirm by checking `routesUtilities.getRenderObject`)
+- [X] T057 [US6] In `views/ncr-detail.jade` `block js`, move the page's inline handlers into a function `bindNcrPage($scope)` that binds within `$scope` (default `document`), so the body can be re-bound after a swap. Use event delegation where a handler is bound per element
+- [X] T058 [US6] In `views/ncr-detail.jade` `block js`, start `startLiveRefresh(pollNcr)` (from `lib/live-refresh.js`). `pollNcr` calls `./live-status`; when `updated_at` or `event_count` changed since the last poll, and the page has no dirty form control (value differs from its loaded value) and no visible `.modal`, it fetches `./fragment` and replaces `#ncr-body` (or the container used in T055), then calls `bindNcrPage(#ncr-body)`. If dirty or a modal is open, it leaves the swap pending and retries on the next tick (FR-033)
+- [X] T059 [P] [US6] Confirm no other script on `views/ncr-detail.jade` (for example the `location.reload()` calls at lines 407–602 after actions) conflicts with the poll. Those reloads remain; they run after explicit user actions
 
 **Checkpoint**: US6 complete. NCR page updates without losing typed text.
 
@@ -204,14 +204,14 @@
 
 **Purpose**: Documentation, API contract, lint and the full verification pass.
 
-- [ ] T060 [P] Update `tools/openapi/openapi.yaml`: add `GET /travelers/{id}/live-status/`, `GET /ncrs/{id}/live-status` and `GET /ncrs/{id}/fragment` (web routes, documented for completeness); add the `INPUTS_MISSING` 409 body and the `missing_inputs` field on `OPEN_NCRS` (contracts/traveler-completion-refusal.json)
-- [ ] T061 [P] Update the spec 124 entry in `CLAUDE.md`: the traveler-input reference is typed on the NCR form only through "Initiate NCR"; a submission is also refused when an input has no value (`INPUTS_MISSING`); the REST behaviour change for blank inputs
-- [ ] T062 [P] Update `e2e/README.md` if it lists the scenario files or the copy-reference helper; remove references to retired scenarios
-- [ ] T063 Remove dead code left by the change: any helper in `public/javascripts/lib/traveler.js` or `e2e/fixtures/ncr-ui.js` that only served the copy-reference popover; any unused export in `lib/traveler-ncr.js`
-- [ ] T064 Run `npx eslint .` and fix any new findings (constitution II)
-- [ ] T065 Run `npm run unit` and confirm all `lib/traveler-ncr.test.js` cases (new and existing) pass
-- [ ] T066 Run `npm run e2e -- e2e/us-traveler-input-flow.spec.js e2e/us-traveler-live-status.spec.js e2e/us-ncr-live-refresh.spec.js e2e/us-traveler-ncr-gating.spec.js e2e/us-traveler-ncr-input-linking.spec.js` and record the result in `specs/125-traveler-ncr-input-flow/baseline.txt` under "After"
-- [ ] T067 Walk through `specs/125-traveler-ncr-input-flow/quickstart.md` sections 2–4 by hand and record any deviation in the same file
+- [X] T060 [P] Update `tools/openapi/openapi.yaml`: add `GET /travelers/{id}/live-status/`, `GET /ncrs/{id}/live-status` and `GET /ncrs/{id}/fragment` (web routes, documented for completeness); add the `INPUTS_MISSING` 409 body and the `missing_inputs` field on `OPEN_NCRS` (contracts/traveler-completion-refusal.json)
+- [X] T061 [P] Update the spec 124 entry in `CLAUDE.md`: the traveler-input reference is typed on the NCR form only through "Initiate NCR"; a submission is also refused when an input has no value (`INPUTS_MISSING`); the REST behaviour change for blank inputs
+- [X] T062 [P] Update `e2e/README.md` if it lists the scenario files or the copy-reference helper; remove references to retired scenarios
+- [X] T063 Remove dead code left by the change: any helper in `public/javascripts/lib/traveler.js` or `e2e/fixtures/ncr-ui.js` that only served the copy-reference popover; any unused export in `lib/traveler-ncr.js`
+- [X] T064 Run `npx eslint .` and fix any new findings (constitution II)
+- [X] T065 Run `npm run unit` and confirm all `lib/traveler-ncr.test.js` cases (new and existing) pass
+- [X] T066 Run `npm run e2e -- e2e/us-traveler-input-flow.spec.js e2e/us-traveler-live-status.spec.js e2e/us-ncr-live-refresh.spec.js e2e/us-traveler-ncr-gating.spec.js e2e/us-traveler-ncr-input-linking.spec.js` and record the result in `specs/125-traveler-ncr-input-flow/baseline.txt` under "After" — done: 142 passed, 1 pre-existing failure (see baseline.txt)
+- [ ] T067 Walk through `specs/125-traveler-ncr-input-flow/quickstart.md` sections 2–4 by hand and record any deviation in the same file — NOT DONE by hand; the e2e suite covers those sections (see baseline.txt)
 
 ---
 

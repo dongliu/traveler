@@ -15,3 +15,33 @@ Phase 3-5 (US1, US2, US3) after:
   e2e us-traveler-input-flow.spec.js      -> 12 passed
   e2e us-traveler-ncr-input-linking.spec  -> 6 passed (AS1 and AS2 updated for spec 125)
   e2e us-traveler-ncr-gating.spec.js      -> 37 passed (46 before; 9 spec-124 reference-path scenarios retired, 3 rewritten for the Initiate path)
+
+== AFTER implementation (final run) ==
+Unit:  TRAVELER_CONFIG_REL_PATH=docker npm run unit -> 375 passing, 0 failing (352 baseline + 23 new)
+E2E:   npm run e2e (full suite) -> 142 passed, 1 failed (143 total; baseline 46 for gating alone)
+       The 1 failure is PRE-EXISTING and unrelated to this feature:
+       e2e/us2-ce-cs-disposition.spec.js AS1 expects a "Submit Disposition" link on the NCR page.
+       HEAD's views/ncr-detail.jade has only "Create Disposition" (no such link), and the spec was last
+       changed in 88c28aad. Left as it is.
+Lint:  changed files have no more problems than HEAD (checked per file with eslint -f json).
+       public/javascripts/traveler.js has the pre-existing 'validateLog' no-undef error.
+
+== Deviations from tasks.md (recorded as they happened) ==
+- T007/T008: the emptiness rule is in utilities/routes.js (valueIsEmpty, currentValues, missingInputs),
+  not lib/traveler-ncr.js, because lib depends on utilities and resetTouched needs the same rule.
+  The refusal is submitRefusal() in lib/traveler-ncr.js, not a separate assertInputsComplete.
+- resetTouched (utilities/routes.js): touchedInputs now counts only inputs whose latest value is non-blank.
+  This is what keeps the stored finishedInput and the submission gate in agreement (spec 125 FR-019).
+- T047 (live-status route) was built with US4, because the submit button's reasons come from it.
+- T052: traveler.js and the NCR page load live-refresh.js as an ES module import (dynamic import on the
+  NCR page), so no separate script tag is needed.
+- T027/T026: the gating spec's 9 spec-124 reference-path scenarios were removed, not rewritten; three
+  others were rewritten to use the Initiate NCR path (the form opened with ?traveler_input_ref=).
+- The NCR live-status revision is embedded in the page from the same fields the route returns
+  (status, updated_at, events length), so the first poll does not miss a change made before it.
+- Pre-existing, noticed and not changed: GET /ncrs/:id (web) checks sign-in only, not NCR read access.
+  The new /ncrs/:id/live-status and /fragment routes match it.
+
+== Not done ==
+- T067 (walk through quickstart.md by hand): not done. The e2e suite covers quickstart sections 2-4,
+  but no manual browser pass has been recorded.

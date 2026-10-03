@@ -66,6 +66,39 @@ module.exports = function(app) {
     }
   });
 
+  // The revision token the NCR page polls every 30 seconds (spec 125 US6): a change
+  // in status, in its last update, or in its number of events means the body is stale.
+  app.get('/ncrs/:id/live-status', auth.ensureAuthenticated, async function(req, res) {
+    try {
+      const ncr = await Ncr.findById(req.params.id, { status: 1, updated_at: 1, events: 1 }).lean();
+      if (!ncr) return res.status(404).json({ success: false, message: 'NCR not found' });
+      return res.status(200).json({
+        ncr_id: String(ncr._id),
+        status: ncr.status,
+        updated_at: ncr.updated_at || null,
+        event_count: (ncr.events || []).length,
+      });
+    } catch (err) {
+      logger.error('NCR live status failed:', err);
+      return res.status(500).json({ success: false, message: 'Error loading NCR' });
+    }
+  });
+
+  // The body of the NCR page, rendered as the page renders it, for the page to swap in
+  // place (spec 125 US6). Same access as the page itself; no layout.
+  app.get('/ncrs/:id/fragment', auth.ensureAuthenticated, async function(req, res) {
+    try {
+      const ncr = await Ncr.findById(req.params.id).lean();
+      if (!ncr) return res.status(404).send('NCR not found');
+      const isQa = await isQaStaffMember(req.session.userid);
+      const renderObj = routesUtilities.getRenderObject(req, { ncr, isQa });
+      return res.render('ncr-detail-body', renderObj);
+    } catch (err) {
+      logger.error('NCR fragment failed:', err);
+      return res.status(500).send('Error loading NCR');
+    }
+  });
+
   app.get('/ncrs/:id', auth.ensureAuthenticated, async function(req, res) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();

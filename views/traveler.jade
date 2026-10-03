@@ -175,8 +175,10 @@ block underTopBtn
           else
             != ''
         if (locals.traveler.status === 1)
+          // what still holds the submission back: filled in by the page (spec 125 FR-020)
+          ul#submit-blockers.help-block
           .btn-group
-            button.btn.btn-primary#complete2 Submit for completion
+            button.btn.btn-primary#complete2(disabled) Submit for completion
           .well
             form.form-inline
               input#username.input(type='text', placeholder='Last, First', name='name')

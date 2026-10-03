@@ -29,3 +29,6 @@ if (locals.traveler.status !== undefined)
       span
       em #{traveler.totalInput}
       = ' inputs'
+      if locals.traveler.status === 1
+        = ' '
+        span#live-status-updated.muted

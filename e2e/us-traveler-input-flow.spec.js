@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { runId } = require('./fixtures/run-id');
 const { execFixtureCli } = require('./fixtures/exec-cli');
+const { fillAndSaveInput } = require('./fixtures/ncr-ui');
 
 // Spec 125 — the traveler input flow: a per-input choice of Input or Initiate
 // NCR, the hold on an input with an open NCR, the submission gate, and the
@@ -220,5 +221,119 @@ test.describe('US3 — NCRs are started from inside a traveler only', () => {
     await expect(page.locator('#traveler-link-context')).toBeVisible();
     await expect(page.locator('#traveler-link-text')).toContainText(`Input C ${id}`);
     await expect(page.locator('input[type="text"][name="traveler_input_ref"]')).toHaveCount(0);
+  });
+});
+
+/** Three text inputs (A, B, C): a traveler that is quick to fill in. */
+function textInputs(id) {
+  return [
+    { name: 'input_a', label: `Input A ${id}` },
+    { name: 'input_b', label: `Input B ${id}` },
+    { name: 'input_c', label: `Input C ${id}` },
+  ];
+}
+
+async function travelerStatus(travelerId) {
+  return (await execFixtureCli('get-traveler', { travelerId })).status;
+}
+
+async function apiContext(playwright) {
+  const { resolveEnv } = require('./fixtures/env');
+  const { apiBaseUrl } = resolveEnv();
+  const password = require('../docker/api.json').api_users.api_write;
+  return playwright.request.newContext({
+    baseURL: apiBaseUrl,
+    extraHTTPHeaders: {
+      Authorization: `Basic ${Buffer.from(`api_write:${password}`).toString('base64')}`,
+    },
+  });
+}
+
+test.describe('US4 — submission needs every NCR closed and every input filled in', () => {
+  test('Submit for completion is disabled while an input has no value, and names the input', async ({ page }) => {
+    const id = runId();
+    const { travelerId } = await createTraveler({ inputs: textInputs(id) });
+    await page.goto(`/travelers/${travelerId}/`);
+
+    await expect(page.locator('#complete2')).toBeDisabled();
+    await expect(page.locator('#submit-blockers')).toContainText(`Input A ${id}`);
+  });
+
+  test('Submit lists each open NCR with a link, and enables once the NCR is Closed', async ({ page }) => {
+    const id = runId();
+    const { travelerId } = await createTraveler({ inputs: textInputs(id) });
+    // every input is filled first, so the only reason left is the open NCR
+    await page.goto(`/travelers/${travelerId}/`);
+    await fillAndSaveInput(page, 'input_a', 'a');
+    await fillAndSaveInput(page, 'input_b', 'b');
+    await fillAndSaveInput(page, 'input_c', 'c');
+    const { ncrId, ncr_number: ncrNumber } = await linkNcr(travelerId, 'input_b', `Input B ${id}`);
+    await page.reload();
+
+    await expect(page.locator('#complete2')).toBeDisabled();
+    await expect(page.locator('#submit-blockers')).toContainText(ncrNumber);
+    await expect(page.locator('#submit-blockers a[href*="/ncrs/"]')).toHaveCount(1);
+
+    await execFixtureCli('set-ncr-status', { ncrId, status: 'Closed' });
+    await page.reload();
+    await expect(page.locator('#complete2')).toBeEnabled();
+  });
+
+  test('Submit is disabled while an input is being entered, and enabled once it is saved or reset', async ({ page }) => {
+    const id = runId();
+    const { travelerId } = await createTraveler({ inputs: textInputs(id) });
+    await page.goto(`/travelers/${travelerId}/`);
+    await fillAndSaveInput(page, 'input_a', 'a');
+    await fillAndSaveInput(page, 'input_b', 'b');
+    await fillAndSaveInput(page, 'input_c', 'c');
+    await expect(page.locator('#complete2')).toBeEnabled();
+
+    await unitOf(page, 'input_a').locator('.input-value-link').click();
+    await page.fill('input[name="input_a"]', 'changed but not saved');
+    await expect(page.locator('#complete2')).toBeDisabled();
+
+    await page.click('button[value="reset"]');
+    await expect(page.locator('#complete2')).toBeEnabled();
+  });
+
+  test('when every input has a value and every NCR is Closed, submission goes through', async ({ page }) => {
+    const id = runId();
+    const { travelerId } = await createTraveler({ inputs: textInputs(id) });
+    await page.goto(`/travelers/${travelerId}/`);
+    await fillAndSaveInput(page, 'input_a', 'a');
+    await fillAndSaveInput(page, 'input_b', 'b');
+    await fillAndSaveInput(page, 'input_c', 'c');
+
+    await expect(page.locator('#complete2')).toBeEnabled();
+    await page.click('#complete2');
+    await expect.poll(() => travelerStatus(travelerId), { timeout: 15000 }).toBe(1.5);
+  });
+
+  test('the REST API refuses a submission while an input is empty, and accepts it once every input has a value', async ({ page, playwright }) => {
+    const id = runId();
+    const { travelerId } = await createTraveler({ inputs: textInputs(id) });
+    const api = await apiContext(playwright);
+
+    let res = await api.put(`/apis/travelers/${travelerId}/status/`, {
+      data: { status: 1.5, userId: PRIMARY },
+    });
+    expect(res.status()).toBe(409);
+    const body = await res.json();
+    expect(body.code).toBe('INPUTS_MISSING');
+    expect(body.open_ncrs).toEqual([]);
+    expect(body.missing_inputs.map(i => i.name)).toEqual(['input_a', 'input_b', 'input_c']);
+    expect(await travelerStatus(travelerId)).toBe(1);
+
+    await page.goto(`/travelers/${travelerId}/`);
+    await fillAndSaveInput(page, 'input_a', 'a');
+    await fillAndSaveInput(page, 'input_b', 'b');
+    await fillAndSaveInput(page, 'input_c', 'c');
+
+    res = await api.put(`/apis/travelers/${travelerId}/status/`, {
+      data: { status: 1.5, userId: PRIMARY },
+    });
+    expect(res.status()).toBe(200);
+    expect(await travelerStatus(travelerId)).toBe(1.5);
+    await api.dispose();
   });
 });

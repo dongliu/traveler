@@ -149,6 +149,17 @@ paths:
                 $ref: "#/components/schemas/Traveler"
         '401':
            $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: >-
+            Refused: the traveler cannot be submitted for completion approval (or
+            completed straight from active) while a linked NCR is not Closed
+            (code OPEN_NCRS, with open_ncrs) or an input has no value (code
+            INPUTS_MISSING, with missing_inputs). Applies to every role and to the
+            status routes (spec 124, spec 125).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionRefusal"
 
   /apis/travelers/{id}/keyvalue/:
     get:
@@ -1094,6 +1105,51 @@ components:
           type: array
           items: 
             type: string
+
+    SubmissionRefusal:
+      type: object
+      description: >-
+        A 409 refusal of a submission for completion. OPEN_NCRS keeps open_ncrs and
+        adds missing_inputs when inputs are also missing; INPUTS_MISSING has an empty
+        open_ncrs and lists missing_inputs.
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: Conflict
+        code:
+          type: string
+          enum: [OPEN_NCRS, INPUTS_MISSING]
+        message:
+          type: string
+        open_ncrs:
+          type: array
+          items:
+            type: object
+            properties:
+              ncr_id:
+                type: string
+              ncr_number:
+                type: string
+              status:
+                type: string
+              input_name:
+                type: string
+                nullable: true
+              input_label:
+                type: string
+                nullable: true
+        missing_inputs:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              label:
+                type: string
 
     FormCreateOptions:
       type: object

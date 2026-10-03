@@ -356,6 +356,19 @@ async function travelerStatus(travelerId) {
   return (await execFixtureCli('get-traveler', { travelerId })).status;
 }
 
+/** The four inputs fourInputs() builds. */
+const ALL_INPUT_NAMES = ['input_a', 'input_b', 'input_c', 'check_d'];
+
+/** Gives each named input a saved value through the traveler's data route (spec 125 FR-019). */
+async function fillAllInputs(page, travelerId, names) {
+  for (const name of names) {
+    const res = await page.request.post(`/travelers/${travelerId}/data/`, {
+      data: { name, value: `value ${name}`, type: name === 'check_d' ? 'checkbox' : 'text' },
+    });
+    expect(res.status()).toBe(204);
+  }
+}
+
 test.describe(
   'US3 — an open NCR blocks submission for completion approval',
   () => {
@@ -368,6 +381,7 @@ test.describe(
 
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
       const ncr = await createLinkedNcr(id, {
         travelerId,
         inputName: 'input_a',
@@ -375,27 +389,33 @@ test.describe(
       });
 
       await page.goto(`/travelers/${travelerId}/`);
-      await page.click('#complete2');
-
-      const alert = page.locator('#message .alert-error');
-      await expect(alert).toBeVisible();
-      await expect(alert).toContainText(
-        'cannot be submitted for completion approval'
-      );
-      const link = alert.locator('.open-ncrs a');
-      await expect(link).toHaveText(ncr.ncr_number);
-      await expect(link).toHaveAttribute(
+      // the button is not offered while an NCR is open (spec 125 FR-019), and the
+      // reason is listed, with a link to the NCR
+      await expect(page.locator('#complete2')).toBeDisabled();
+      const reasons = page.locator('#submit-blockers');
+      await expect(reasons.locator('a')).toHaveText(ncr.ncr_number);
+      await expect(reasons.locator('a')).toHaveAttribute(
         'href',
         new RegExp(`/ncrs/${ncr.ncrId}$`)
       );
-      await expect(alert.locator('.open-ncrs li')).toContainText('Submitted');
-      await expect(alert.locator('.open-ncrs li')).toContainText(
-        `Input A ${id}`
-      );
+      await expect(reasons.locator('li')).toContainText('Submitted');
+      await expect(reasons.locator('li')).toContainText(`Input A ${id}`);
 
-      // the traveler stays active, and the form was not left disabled
+      // the server refuses a submission sent past the page, for every role
+      const res = await page.request.put(`/travelers/${travelerId}/status`, {
+        data: { status: 1.5 },
+      });
+      expect(res.status()).toBe(409);
+      expect((await res.json()).code).toBe('OPEN_NCRS');
+
+      // the traveler stays active; the held input offers no Input option, the others do
       expect(await travelerStatus(travelerId)).toBe(1);
-      await expect(page.locator('input[name="input_a"]')).toBeEnabled();
+      await expect(
+        page.locator('.controls', { has: page.locator('input[name="input_a"]') }).first().locator('.input-value-link')
+      ).toHaveCount(0);
+      await expect(
+        page.locator('.controls', { has: page.locator('input[name="input_b"]') }).first().locator('.input-value-link')
+      ).toHaveCount(1);
     });
 
     test('every linked NCR must be Closed before the traveler can be submitted', async ({
@@ -403,6 +423,7 @@ test.describe(
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
       const first = await createLinkedNcr(id, {
         travelerId,
         inputName: 'input_a',
@@ -415,8 +436,8 @@ test.describe(
       });
 
       await page.goto(`/travelers/${travelerId}/`);
-      await page.click('#complete2');
-      await expect(page.locator('.open-ncrs li')).toHaveCount(2);
+      await expect(page.locator('#complete2')).toBeDisabled();
+      await expect(page.locator('#submit-blockers li')).toHaveCount(2);
 
       // closing one is not enough
       await execFixtureCli('set-ncr-status', {
@@ -424,9 +445,9 @@ test.describe(
         status: 'Closed',
       });
       await page.reload();
-      await page.click('#complete2');
-      await expect(page.locator('.open-ncrs li')).toHaveCount(1);
-      await expect(page.locator('.open-ncrs a')).toHaveText(second.ncr_number);
+      await expect(page.locator('#complete2')).toBeDisabled();
+      await expect(page.locator('#submit-blockers li')).toHaveCount(1);
+      await expect(page.locator('#submit-blockers a')).toHaveText(second.ncr_number);
       expect(await travelerStatus(travelerId)).toBe(1);
 
       // with every linked NCR Closed, submission goes through
@@ -435,6 +456,7 @@ test.describe(
         status: 'Closed',
       });
       await page.reload();
+      await expect(page.locator('#complete2')).toBeEnabled();
       await page.click('#complete2');
       await expect
         .poll(() => travelerStatus(travelerId), { timeout: 10000 })
@@ -446,6 +468,7 @@ test.describe(
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
       const other = await createTraveler({ inputs: fourInputs(id) });
       await createLinkedNcr(id, {
         travelerId: other.travelerId,
@@ -465,6 +488,7 @@ test.describe(
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
 
       // first submission: no NCR, so it goes through
       await page.goto(`/travelers/${travelerId}/`);
@@ -482,10 +506,8 @@ test.describe(
       });
 
       await page.goto(`/travelers/${travelerId}/`);
-      await page.click('#complete2');
-      await expect(
-        page.locator('#message .alert-error .open-ncrs li')
-      ).toHaveCount(1);
+      await expect(page.locator('#complete2')).toBeDisabled();
+      await expect(page.locator('#submit-blockers li')).toHaveCount(1);
       expect(await travelerStatus(travelerId)).toBe(1);
     });
 
@@ -1110,10 +1132,12 @@ test.describe(
     });
 
     test('both status routes refuse while an NCR is open — including the direct active-to-completed route — and allow it once the NCR is Closed', async ({
+      page,
       playwright,
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
       const ncr = await createLinkedNcr(id, {
         travelerId,
         inputName: 'input_a',

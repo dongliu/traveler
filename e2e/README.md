@@ -95,7 +95,10 @@ straight away with a message saying which one, instead of failing test by test.
 | `us-wbs-notification-registry` | WBS-to-email notification mappings |
 | `us-wbs-hierarchical-notification-lookup` | picking notification recipients up the WBS hierarchy |
 | `us-traveler-ncr-input-linking` | NCRs raised from a traveler input |
-| `us-traveler-ncr-gating` | linking an NCR to an input by reference, blocking traveler submission on open NCRs, and the closure PDF |
+| `us-traveler-ncr-gating` | blocking traveler submission on open NCRs, the input hold, the Basic-auth API gate, and the closure PDF (spec 124; the reference-typing path was removed by spec 125) |
+| `us-traveler-input-flow` | per-input Input / Initiate NCR choice, the open-NCR hold, the submission gate on open NCRs and missing inputs, and the traveler-only start of an NCR (spec 125) |
+| `us-traveler-live-status` | the 30-second refresh on an open active traveler page (spec 125, real time waits) |
+| `us-ncr-live-refresh` | the 30-second refresh on an open NCR page (spec 125, real time waits) |
 
 ## Writing a test
 

@@ -388,6 +388,13 @@ export function renderNcrLinks() {
     appendInitiateNcrLink(element);
   });
 
+  loadNcrBadges();
+}
+
+// Loads this traveler's NCR links and closure reports and draws them on their
+// inputs. Used when the page loads and by the 30-second refresh (spec 125 US5). It
+// never changes whether an input is locked, so it is safe while one is being entered.
+export function loadNcrBadges() {
   const linksRequest = $.ajax({
     url: './ncr-links/',
     type: 'GET',

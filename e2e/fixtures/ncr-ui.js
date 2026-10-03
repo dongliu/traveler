@@ -25,6 +25,12 @@ async function fillAndSaveInput(page, inputName, value) {
     .filter({ has: page.locator(`[name="${inputName}"]`) })
     .last()
     .locator('.input-value-link');
+  // wait until the page has drawn either the option or the enabled field, so a
+  // slow redraw is not mistaken for an input that is locked
+  const field = page.locator(`input[name="${inputName}"]`);
+  await expect(async () => {
+    expect((await option.isVisible()) || (await field.isEnabled())).toBe(true);
+  }).toPass({ timeout: 10000 });
   if (await option.isVisible()) {
     await option.click();
   }
