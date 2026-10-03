@@ -19,6 +19,15 @@ function todayIsoDate() {
 async function fillAndSaveInput(page, inputName, value) {
   const successAlerts = page.locator('#message .alert-success');
   const before = await successAlerts.count();
+  // an input is editable only after its Input option is chosen (spec 125)
+  const option = page
+    .locator('#form .controls')
+    .filter({ has: page.locator(`[name="${inputName}"]`) })
+    .last()
+    .locator('.input-value-link');
+  if (await option.isVisible()) {
+    await option.click();
+  }
   await page.fill(`input[name="${inputName}"]`, value);
   await page.click('button[value="save"]');
   await expect(successAlerts).toHaveCount(before + 1, { timeout: 10000 });

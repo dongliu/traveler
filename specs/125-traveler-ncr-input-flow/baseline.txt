@@ -10,3 +10,8 @@ Client-side behaviour is tested only by Playwright (mocha has no DOM); see T012.
 T012: Client behaviour is verified by Playwright only (mocha has no DOM). live-refresh timing via page.clock in T045 and T053.
 
 Phase 2 after: TRAVELER_CONFIG_REL_PATH=docker npm run unit -> 375 passing (352 baseline + 23 new), 0 failing.
+
+Phase 3-5 (US1, US2, US3) after:
+  e2e us-traveler-input-flow.spec.js      -> 12 passed
+  e2e us-traveler-ncr-input-linking.spec  -> 6 passed (AS1 and AS2 updated for spec 125)
+  e2e us-traveler-ncr-gating.spec.js      -> 37 passed (46 before; 9 spec-124 reference-path scenarios retired, 3 rewritten for the Initiate path)

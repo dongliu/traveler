@@ -11,6 +11,8 @@ import {
   renderHistory,
   appendInitiateNcrLink,
   isInputBlockedByOpenNcr,
+  enterInputMode,
+  leaveInputMode,
 } from './lib/traveler.js';
 
 // temporary solution for the dirty forms
@@ -634,11 +636,30 @@ $(function() {
     }
   }
 
+  // "Input": make this one input editable and hide its Initiate NCR option (spec 125 FR-009)
+  $('#form').on('click', '.input-value-link', function(e) {
+    e.preventDefault();
+    const $controls = $(this).closest('.controls');
+    enterInputMode($controls);
+    $controls
+      .find('input,textarea')
+      .filter(':enabled')
+      .first()
+      .trigger('focus');
+  });
+
+  // a disabled "Initiate NCR" option (another input is being entered) does nothing
+  $('#form').on('click', '.initiate-ncr-link.disabled', function(e) {
+    e.preventDefault();
+  });
+
   $('#form').on('click', 'button[value="save"]', function(e) {
     e.preventDefault();
     // ajax to save the current value
     var $this = $(this);
-    var inputs = $this.closest('.controls').find('input,textarea');
+    // captured now: .done removes the Save button, which takes its unit out of reach
+    var $unit = $this.closest('.controls');
+    var inputs = $unit.find('input,textarea');
     var input = inputs[0];
     if (inputs[0].type === 'radio') {
       for (var i = 0; i < inputs.size(); i++) {
@@ -717,7 +738,7 @@ $(function() {
         }
       })
       .always(function() {
-        $('#form input,textarea').prop('disabled', false);
+        leaveInputMode($unit);
         $('#complete').prop('disabled', false);
       });
   });
@@ -743,7 +764,7 @@ $(function() {
       markValidity(inputs[i]);
     }
 
-    $('#form input,textarea').prop('disabled', false);
+    leaveInputMode($this.closest('.controls'));
     $('#complete').prop('disabled', false);
     $(this)
       .closest('.control-group-buttons')
@@ -910,7 +931,7 @@ $(function() {
         }
       })
       .always(function() {
-        $('#form input,textarea').prop('disabled', false);
+        leaveInputMode($(input).closest('.controls'));
         $('#complete').prop('disabled', false);
       });
   });
@@ -918,7 +939,12 @@ $(function() {
   $('#form').on('click', 'button[value="cancel"]', function(e) {
     e.preventDefault();
     // cannot reset the file input value
-    $('#form input,textarea').prop('disabled', false);
+    leaveInputMode(
+      $(this)
+        .closest('.control-group-wrap')
+        .find('.controls')
+        .first()
+    );
     $('#complete').prop('disabled', false);
     $(this)
       .closest('.control-group-buttons')

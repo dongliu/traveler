@@ -30,6 +30,8 @@ async function createFillableTraveler(overrides = {}) {
 
 /** Fills in the traveler's one input via the real UI and clicks Save, waiting for the success message. */
 async function fillAndSaveInput(page, value) {
+  // the input is editable only after its Input option is chosen (spec 125)
+  await page.locator('.input-value-link').click();
   await page.fill('input[name="field_1"]', value);
   await page.click('button[value="save"]');
   await expect(page.locator('#message .alert-success').last()).toBeVisible({ timeout: 10000 });
@@ -55,15 +57,15 @@ async function completeNcrCreation(page, partNumber) {
 }
 
 test.describe('Traveler-Initiated NCRs Linked to a Specific Input', () => {
-  test('AS1 - no Initiate NCR action until the input has a value; appears immediately after Save with no reload', async ({ page }) => {
+  test('AS1 - Initiate NCR is offered on an input with no value (spec 125 FR-013), and still offered after a value is saved', async ({ page }) => {
     const { travelerId } = await createFillableTraveler();
     await page.goto(`/travelers/${travelerId}/`);
 
-    await expect(page.locator('.initiate-ncr-link')).toHaveCount(0);
+    await expect(page.locator('.initiate-ncr-link')).toHaveCount(1);
 
     await fillAndSaveInput(page, 'a measured value');
 
-    await expect(page.locator('.initiate-ncr-link')).toBeVisible();
+    await expect(page.locator('.initiate-ncr-link')).toHaveCount(1);
   });
 
   test('AS2 - Initiate NCR opens creation pre-linked, banner names the input, and the created NCR carries the traveler_link', async ({ page }) => {
@@ -74,9 +76,10 @@ test.describe('Traveler-Initiated NCRs Linked to a Specific Input', () => {
     await page.click('.initiate-ncr-link');
     await page.waitForURL(/\/ncrs\/new\?/);
 
-    // spec 124: the banner became the "Traveler Input" reference field + preview
+    // spec 125 FR-004: the traveler and input are fixed context, carried in a hidden field
     await expect(page.locator('#traveler_input_ref')).toHaveValue(new RegExp(`^${travelerId}::field_1$`));
-    await expect(page.locator('#traveler-ref-preview')).toContainText(inputLabel);
+    await expect(page.locator('input[type="text"][name="traveler_input_ref"]')).toHaveCount(0);
+    await expect(page.locator('#traveler-link-text')).toContainText(inputLabel);
 
     const id = runId();
     const ncrId = await completeNcrCreation(page, `PN-${id}`);

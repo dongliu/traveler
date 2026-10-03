@@ -65,18 +65,18 @@
 
 ### Tests for User Story 1 (write first; must fail)
 
-- [ ] T013 [P] [US1] Create `e2e/us-traveler-input-flow.spec.js` with a `describe` for US1 and scenarios for spec US1 acceptance 1–7: options on every input type; read-only until **Input**; **Input** hides **Initiate NCR** and reveals Save/Reset; Save returns both options with the new value; Reset discards the change; one input in Input mode at a time; non-active traveler shows neither option. Use the fixture helpers in `e2e/fixtures/ncr-ui.js`
-- [ ] T014 [P] [US1] Update `e2e/us-traveler-ncr-input-linking.spec.js`: the "Initiate NCR appears only after a value is saved" scenario is replaced by "Initiate NCR is offered on an empty input" (spec 125 FR-013)
+- [X] T013 [P] [US1] Create `e2e/us-traveler-input-flow.spec.js` with a `describe` for US1 and scenarios for spec US1 acceptance 1–7: options on every input type; read-only until **Input**; **Input** hides **Initiate NCR** and reveals Save/Reset; Save returns both options with the new value; Reset discards the change; one input in Input mode at a time; non-active traveler shows neither option. Use the fixture helpers in `e2e/fixtures/ncr-ui.js`
+- [X] T014 [P] [US1] Update `e2e/us-traveler-ncr-input-linking.spec.js`: the "Initiate NCR appears only after a value is saved" scenario is replaced by "Initiate NCR is offered on an empty input" (spec 125 FR-013)
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] In `public/javascripts/lib/traveler.js`, change `renderNcrLinks` so `appendInitiateNcrLink` is called for every counted input, not only for names in `traveler.touchedInputs` (spec FR-013). Keep the existing `traveler.status === 1` guard in `appendInitiateNcrLink`
-- [ ] T016 [US1] In `public/javascripts/lib/traveler.js`, add `appendInputLink(element)` that renders an **Input** button in the same `.ncr-links` container as the Initiate link, with class `input-value-link`. Render it on load, for every counted input on an active traveler
-- [ ] T017 [US1] In `public/javascripts/lib/traveler.js` around the `traveler.status === 1` block near line 573, stop enabling every `#form input,textarea` on load. Leave all controls disabled until **Input** is chosen (FR-008)
-- [ ] T018 [US1] In `public/javascripts/traveler.js`, add a click handler for `.input-value-link` that: enables that input's controls only (`.controls` of the element); hides the sibling `.initiate-ncr-link`; disables every other input's `input-value-link` and `initiate-ncr-link` (one at a time, FR-012); shows the existing Save and Reset buttons. Cover file inputs (`input:file`) and rich-text inputs (TinyMCE, `views/inputview/rich.jade`) by re-enabling their wrapper, not just the native element
-- [ ] T019 [US1] In `public/javascripts/traveler.js`, update the Save handler (around lines 637–707) and the upload handler (around lines 842–900): after success, restore the input to default state (controls disabled, both options shown, the input's **Input** link re-rendered). Do not re-add the Initiate link if one already exists (`appendInitiateNcrLink` already guards this)
-- [ ] T020 [US1] In `public/javascripts/traveler.js`, update the Reset handler (around lines 725–751) the same way as T019
-- [ ] T021 [P] [US1] Add styles for `.input-value-link` and the option group in `public/stylesheets/style.css`, matching the existing `.initiate-ncr-link` button
+- [X] T015 [US1] In `public/javascripts/lib/traveler.js`, change `renderNcrLinks` so `appendInitiateNcrLink` is called for every counted input, not only for names in `traveler.touchedInputs` (spec FR-013). Keep the existing `traveler.status === 1` guard in `appendInitiateNcrLink`
+- [X] T016 [US1] In `public/javascripts/lib/traveler.js`, add `appendInputLink(element)` that renders an **Input** button in the same `.ncr-links` container as the Initiate link, with class `input-value-link`. Render it on load, for every counted input on an active traveler
+- [X] T017 [US1] In `public/javascripts/lib/traveler.js` around the `traveler.status === 1` block near line 573, stop enabling every `#form input,textarea` on load. Leave all controls disabled until **Input** is chosen (FR-008)
+- [X] T018 [US1] In `public/javascripts/traveler.js`, add a click handler for `.input-value-link` that: enables that input's controls only (`.controls` of the element); hides the sibling `.initiate-ncr-link`; disables every other input's `input-value-link` and `initiate-ncr-link` (one at a time, FR-012); shows the existing Save and Reset buttons. Cover file inputs (`input:file`) and rich-text inputs (TinyMCE, `views/inputview/rich.jade`) by re-enabling their wrapper, not just the native element
+- [X] T019 [US1] In `public/javascripts/traveler.js`, update the Save handler (around lines 637–707) and the upload handler (around lines 842–900): after success, restore the input to default state (controls disabled, both options shown, the input's **Input** link re-rendered). Do not re-add the Initiate link if one already exists (`appendInitiateNcrLink` already guards this)
+- [X] T020 [US1] In `public/javascripts/traveler.js`, update the Reset handler (around lines 725–751) the same way as T019
+- [X] T021 [P] [US1] Add styles for `.input-value-link` and the option group in `public/stylesheets/style.css`, matching the existing `.initiate-ncr-link` button
 
 **Checkpoint**: US1 is independently testable. Run `npm run e2e -- e2e/us-traveler-input-flow.spec.js -g "US1"`.
 
@@ -90,13 +90,13 @@
 
 ### Tests for User Story 2 (write first; must fail)
 
-- [ ] T022 [P] [US2] Add to `e2e/us-traveler-input-flow.spec.js` a `describe` for US2 covering spec US2 acceptance 1–5: **Input** absent while an NCR is open; still absent with two NCRs where one is closed; returns when all are closed; **Initiate NCR** still present; removing the only open NCR (admin delete, `e2e/us-admin-ncr-deletion.spec.js` fixture) releases the hold
+- [X] T022 [P] [US2] Add to `e2e/us-traveler-input-flow.spec.js` a `describe` for US2 covering spec US2 acceptance 1–5: **Input** absent while an NCR is open; still absent with two NCRs where one is closed; returns when all are closed; **Initiate NCR** still present; removing the only open NCR (admin delete, `e2e/us-admin-ncr-deletion.spec.js` fixture) releases the hold
 
 ### Implementation for User Story 2
 
-- [ ] T023 [US2] In `public/javascripts/lib/traveler.js`, in the `linksRequest.done` handler (around lines 452–460), keep the existing `openNcrInputNames` population (any status other than `Closed`) and, after it, re-run the Input-option rendering so an input whose NCR is open does not show **Input**
-- [ ] T024 [US2] In `public/javascripts/lib/traveler.js`, in `appendInputLink` (from T016), return early when `isInputBlockedByOpenNcr(element.name)` is true. Re-check on each `renderNcrLinks` run
-- [ ] T025 [US2] In `public/javascripts/lib/traveler.js`, render the waiting marker on an input with an open NCR (the existing `.ncr-links-existing` box) with the words "waiting on an open NCR" so it is visible without the badge colour (spec User Story 4 scenario 2, carried over from spec 124)
+- [X] T023 [US2] In `public/javascripts/lib/traveler.js`, in the `linksRequest.done` handler (around lines 452–460), keep the existing `openNcrInputNames` population (any status other than `Closed`) and, after it, re-run the Input-option rendering so an input whose NCR is open does not show **Input**
+- [X] T024 [US2] In `public/javascripts/lib/traveler.js`, in `appendInputLink` (from T016), return early when `isInputBlockedByOpenNcr(element.name)` is true. Re-check on each `renderNcrLinks` run
+- [X] T025 [US2] In `public/javascripts/lib/traveler.js`, render the waiting marker on an input with an open NCR (the existing `.ncr-links-existing` box) with the words "waiting on an open NCR" so it is visible without the badge colour (spec User Story 4 scenario 2, carried over from spec 124)
 
 **Checkpoint**: US1 and US2 both work. The hold is visible on load.
 
@@ -110,18 +110,18 @@
 
 ### Tests for User Story 3 (write first; must fail)
 
-- [ ] T026 [P] [US3] In `e2e/us-traveler-ncr-gating.spec.js`, replace the scenario "a Copy NCR reference control is offered at every input" with "no Copy NCR reference control appears on any traveler input" (spec 125 FR-002); retire the copy-popover, paste-and-validate, and "typed reference" scenarios (spec 124 US1). Keep the Initiate-NCR scenarios
-- [ ] T027 [P] [US3] Add to `e2e/us-traveler-input-flow.spec.js` a `describe` for US3: `/ncrs/new` has no `#traveler_input_ref` input (spec FR-001); "Initiate NCR" opens the form with a read-only "Linked to" line and no editable field (FR-004); a standalone NCR has no traveler link (FR-005)
-- [ ] T028 [P] [US3] In `e2e/us-traveler-ncr-input-linking.spec.js`, keep the AS2 assertion that `#traveler_input_ref` carries the reference, but change the selector to the hidden field (`input[type=hidden][name=traveler_input_ref]`). Add an assertion that no visible text input for it exists
+- [X] T026 [P] [US3] In `e2e/us-traveler-ncr-gating.spec.js`, replace the scenario "a Copy NCR reference control is offered at every input" with "no Copy NCR reference control appears on any traveler input" (spec 125 FR-002); retire the copy-popover, paste-and-validate, and "typed reference" scenarios (spec 124 US1). Keep the Initiate-NCR scenarios
+- [X] T027 [P] [US3] Add to `e2e/us-traveler-input-flow.spec.js` a `describe` for US3: `/ncrs/new` has no `#traveler_input_ref` input (spec FR-001); "Initiate NCR" opens the form with a read-only "Linked to" line and no editable field (FR-004); a standalone NCR has no traveler link (FR-005)
+- [X] T028 [P] [US3] In `e2e/us-traveler-ncr-input-linking.spec.js`, keep the AS2 assertion that `#traveler_input_ref` carries the reference, but change the selector to the hidden field (`input[type=hidden][name=traveler_input_ref]`). Add an assertion that no visible text input for it exists
 
 ### Implementation for User Story 3
 
-- [ ] T029 [US3] In `public/javascripts/lib/traveler.js`, delete `appendCopyRefControl`, `buildRefPopupContent`, `copyToClipboard`, `refButtonAnchor`, `closeRefPopup`, `bindRefPopupDismiss`, the `$openRefButton` state, and the call to `appendCopyRefControl` in `renderNcrLinks`. Remove any now-unused imports or exports that reference them
-- [ ] T030 [P] [US3] In `public/stylesheets/style.css`, remove the `.copy-ncr-ref`, `.ncr-ref-popover`, `.ncr-ref-popup`, `.ncr-ref-value`, `.ncr-ref-copy`, `.ncr-ref-status`, `.ncr-ref-row` rules
-- [ ] T031 [US3] In `views/ncr-create.jade`, delete the "Traveler Input" control group (the `label(for='traveler_input_ref')` block, its `input#traveler_input_ref`, its help text, and `#traveler-ref-preview`) around lines 69–75
-- [ ] T032 [US3] In `views/ncr-create.jade` script, delete the handlers that read, validate and preview `#traveler_input_ref` on input and blur (around lines 130–180) and the `payload.traveler_input_ref` assignment from the field (around lines 257–260). Keep the `traveler_input_ref` URL-parameter read (`initialRef`)
-- [ ] T033 [US3] In `views/ncr-create.jade`, when `initialRef` is present: call `$.getJSON(prefix + '/api/ncrs/traveler-input', { ref: initialRef })` (the existing route in `routes/ncr.js`, mounted at `/api/ncrs` in `app.js`, the same URL the form already uses at line ~153); on success render a read-only line "Linked to: <traveler title> — <input label>" and add `<input type="hidden" id="traveler_input_ref" name="traveler_input_ref">` with the reference; on failure show the server's message and disable the submit button. Submit sends the hidden value
-- [ ] T034 [US3] Confirm `routes/ncr.js` POST `/` still accepts `traveler_input_ref` and the deprecated `traveler_id`/`traveler_input_name` alias unchanged (spec Assumptions: REST keeps its link). Add a comment to `requestedTravelerRef` noting the web form no longer sends the field except through "Initiate NCR"
+- [X] T029 [US3] In `public/javascripts/lib/traveler.js`, delete `appendCopyRefControl`, `buildRefPopupContent`, `copyToClipboard`, `refButtonAnchor`, `closeRefPopup`, `bindRefPopupDismiss`, the `$openRefButton` state, and the call to `appendCopyRefControl` in `renderNcrLinks`. Remove any now-unused imports or exports that reference them
+- [X] T030 [P] [US3] In `public/stylesheets/style.css`, remove the `.copy-ncr-ref`, `.ncr-ref-popover`, `.ncr-ref-popup`, `.ncr-ref-value`, `.ncr-ref-copy`, `.ncr-ref-status`, `.ncr-ref-row` rules
+- [X] T031 [US3] In `views/ncr-create.jade`, delete the "Traveler Input" control group (the `label(for='traveler_input_ref')` block, its `input#traveler_input_ref`, its help text, and `#traveler-ref-preview`) around lines 69–75
+- [X] T032 [US3] In `views/ncr-create.jade` script, delete the handlers that read, validate and preview `#traveler_input_ref` on input and blur (around lines 130–180) and the `payload.traveler_input_ref` assignment from the field (around lines 257–260). Keep the `traveler_input_ref` URL-parameter read (`initialRef`)
+- [X] T033 [US3] In `views/ncr-create.jade`, when `initialRef` is present: call `$.getJSON(prefix + '/api/ncrs/traveler-input', { ref: initialRef })` (the existing route in `routes/ncr.js`, mounted at `/api/ncrs` in `app.js`, the same URL the form already uses at line ~153); on success render a read-only line "Linked to: <traveler title> — <input label>" and add `<input type="hidden" id="traveler_input_ref" name="traveler_input_ref">` with the reference; on failure show the server's message and disable the submit button. Submit sends the hidden value
+- [X] T034 [US3] Confirm `routes/ncr.js` POST `/` still accepts `traveler_input_ref` and the deprecated `traveler_id`/`traveler_input_name` alias unchanged (spec Assumptions: REST keeps its link). Add a comment to `requestedTravelerRef` noting the web form no longer sends the field except through "Initiate NCR"
 
 **Checkpoint**: US3 complete. No traveler reference can be typed in the web UI.
 
