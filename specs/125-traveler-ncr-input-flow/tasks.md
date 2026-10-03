@@ -26,8 +26,8 @@
 
 **Purpose**: Confirm a clean baseline before changing anything.
 
-- [ ] T001 Run `npm run unit` and `npx eslint .` on the current branch and record the pass/fail counts in `specs/125-traveler-ncr-input-flow/baseline.txt` so later regressions are attributable
-- [ ] T002 Confirm the Docker stack is up (`docker compose up`) and `.env` has `E2E_USER`, `E2E_PASS`, `E2E_USER2`, `E2E_PASS2`; run `npm run e2e -- e2e/us-traveler-ncr-gating.spec.js` and record its result in `specs/125-traveler-ncr-input-flow/baseline.txt`
+- [X] T001 Run `npm run unit` and `npx eslint .` on the current branch and record the pass/fail counts in `specs/125-traveler-ncr-input-flow/baseline.txt` so later regressions are attributable
+- [X] T002 Confirm the Docker stack is up (`docker compose up`) and `.env` has `E2E_USER`, `E2E_PASS`, `E2E_USER2`, `E2E_PASS2`; run `npm run e2e -- e2e/us-traveler-ncr-gating.spec.js` and record its result in `specs/125-traveler-ncr-input-flow/baseline.txt`
 
 ---
 
@@ -39,19 +39,19 @@
 
 ### Tests for Phase 2 (write first; must fail)
 
-- [ ] T003 Add unit tests in `test-unit/lib/traveler-ncr.test.js` for `valueIsEmpty`: `null`, `undefined`, `''`, `[]` are empty; `'0'`, `0`, `false`, `['a']` are not
-- [ ] T004 Add unit tests in `test-unit/lib/traveler-ncr.test.js` for `missingInputs(traveler)`: an input in `labels` with no `TravelerData` entry is missing; an entry with an empty value is missing; an entry with a non-empty value is not; a traveler with no labels returns `[]`
-- [ ] T005 Add unit tests in `test-unit/lib/traveler-ncr.test.js` for `assertSubmittable(travelerId)`: passes with no open NCRs and no missing inputs; throws `OPEN_NCRS` (409) listing `open_ncrs` and `missing_inputs` when both exist; throws `INPUTS_MISSING` (409) with `open_ncrs: []` when only inputs are missing; throws `OPEN_NCRS` with `missing_inputs` present when NCRs are open and inputs are missing
-- [ ] T006 Add unit tests in `test-unit/lib/traveler-ncr.test.js` for `buildLiveStatus(travelerId)`: the payload has no `value` field anywhere; `revision` changes when a `TravelerData.inputOn` changes; `options` is `[]` when the traveler is not active and omits `input` when `waiting_on_ncr`; `submit_ready` is `false` when either list is non-empty
+- [X] T003 Add unit tests in `test-unit/lib/traveler-ncr.test.js` for `valueIsEmpty`: `null`, `undefined`, `''`, `[]` are empty; `'0'`, `0`, `false`, `['a']` are not
+- [X] T004 Add unit tests in `test-unit/lib/traveler-ncr.test.js` for `missingInputs(traveler)`: an input in `labels` with no `TravelerData` entry is missing; an entry with an empty value is missing; an entry with a non-empty value is not; a traveler with no labels returns `[]`
+- [X] T005 Add unit tests in `test-unit/lib/traveler-ncr.test.js` for `assertSubmittable(travelerId)`: passes with no open NCRs and no missing inputs; throws `OPEN_NCRS` (409) listing `open_ncrs` and `missing_inputs` when both exist; throws `INPUTS_MISSING` (409) with `open_ncrs: []` when only inputs are missing; throws `OPEN_NCRS` with `missing_inputs` present when NCRs are open and inputs are missing
+- [X] T006 Add unit tests in `test-unit/lib/traveler-ncr.test.js` for `buildLiveStatus(travelerId)`: the payload has no `value` field anywhere; `revision` changes when a `TravelerData.inputOn` changes; `options` is `[]` when the traveler is not active and omits `input` when `waiting_on_ncr`; `submit_ready` is `false` when either list is non-empty
 
 ### Implementation for Phase 2
 
-- [ ] T007 Implement `valueIsEmpty(value)` and `missingInputs(traveler)` in `lib/traveler-ncr.js`, reading `traveler.labels` and `TravelerData` through `traveler.data` (research R1); export them
-- [ ] T008 Implement `assertInputsComplete(travelerId)` in `lib/traveler-ncr.js`, raising `TravelerNcrError` with code `INPUTS_MISSING` (409) and `missing_inputs`; export it
-- [ ] T009 Implement `assertSubmittable(travelerId)` in `lib/traveler-ncr.js`: runs `assertNoOpenNcrs` then `assertInputsComplete`, returning the combined refusal per research R3; export it. Depends on T007, T008
-- [ ] T010 Implement `buildLiveStatus(travelerId)` in `lib/traveler-ncr.js` returning the shape in `contracts/traveler-live-status.json` (per-input `revision` from `TravelerData.inputOn`; no values). Depends on T007
-- [ ] T011 [P] Create `public/javascripts/lib/live-refresh.js` exporting `startLiveRefresh(callback, { intervalMs = 30000 } = {})`: runs `callback` every interval; skips a tick while the previous call is in flight; stops while `document.hidden` and runs once when visible again; returns a stop function (research R8)
-- [ ] T012 [P] Record in `specs/125-traveler-ncr-input-flow/baseline.txt` that `startLiveRefresh` and the other client behaviour are tested only by the Playwright specs (T045 for the traveler page, T053 for the NCR page), using `page.clock` for 30-second timing. The mocha setup has no DOM, so no `live-refresh` unit test file is created
+- [X] T007 Implement `valueIsEmpty(value)`, `currentValues(dataRows)` and `missingInputs(labels, dataRows)` in `utilities/routes.js` (`traveler` namespace) — see the T008 note. Read the latest `TravelerData` entry per name (research R1, revised)
+- [X] T008 Implement the missing-input refusal as `submitRefusal` in `lib/traveler-ncr.js` (code `INPUTS_MISSING`, 409, with `missing_inputs`). Deviation: the emptiness rule lives in `utilities/routes.js` (`valueIsEmpty`, `currentValues`, `missingInputs`) so `resetTouched` and the gate share one definition, since `lib` depends on `utilities`, not the reverse
+- [X] T009 Implement `assertSubmittable(travelerId)` in `lib/traveler-ncr.js`: runs `assertNoOpenNcrs` then `assertInputsComplete`, returning the combined refusal per research R3; export it. Depends on T007, T008
+- [X] T010 Implement `buildLiveStatus(travelerId)` in `lib/traveler-ncr.js` returning the shape in `contracts/traveler-live-status.json` (per-input `revision` from `TravelerData.inputOn`; no values). Depends on T007
+- [X] T011 [P] Create `public/javascripts/lib/live-refresh.js` exporting `startLiveRefresh(callback, { intervalMs = 30000 } = {})`: runs `callback` every interval; skips a tick while the previous call is in flight; stops while `document.hidden` and runs once when visible again; returns a stop function (research R8)
+- [X] T012 [P] Record in `specs/125-traveler-ncr-input-flow/baseline.txt` that `startLiveRefresh` and the other client behaviour are tested only by the Playwright specs (T045 for the traveler page, T053 for the NCR page), using `page.clock` for 30-second timing. The mocha setup has no DOM, so no `live-refresh` unit test file is created
 
 **Checkpoint**: Foundation ready. Server rules and the timer exist and are unit-tested.
 

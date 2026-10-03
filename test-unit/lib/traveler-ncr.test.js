@@ -856,3 +856,219 @@ describe('lib/traveler-ncr — attachClosurePdf', () => {
     expect(result.status).to.equal('not_applicable');
   });
 });
+
+// ── input values and the submission gate (spec 125) ──────────────────────────
+
+describe('lib/traveler-ncr — input values and the submission gate (spec 125)', () => {
+  const routesUtilities = require('../../utilities/routes');
+  const { valueIsEmpty, currentValues, missingInputs } = routesUtilities.traveler;
+  const { Traveler, TravelerData } = require('../../model/traveler');
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  describe('valueIsEmpty (T003)', () => {
+    const empties = [
+      ['null', null],
+      ['undefined', undefined],
+      ["''", ''],
+      ['whitespace only', '   '],
+      ['[] (a checkbox set with nothing ticked)', []],
+    ];
+    empties.forEach(([label, value]) => {
+      it(`${label} is empty`, () => {
+        expect(valueIsEmpty(value)).to.equal(true);
+      });
+    });
+
+    const filled = [
+      ['0', 0],
+      ['false', false],
+      ["'0'", '0'],
+      ["['a']", ['a']],
+      ["'text'", 'text'],
+    ];
+    filled.forEach(([label, value]) => {
+      it(`${label} is a value`, () => {
+        expect(valueIsEmpty(value)).to.equal(false);
+      });
+    });
+  });
+
+  describe('currentValues and missingInputs (T004)', () => {
+    it('keeps only the most recent entry for each name', () => {
+      const rows = [
+        { name: 'a', value: 'old', inputOn: new Date(1000) },
+        { name: 'a', value: 'new', inputOn: new Date(2000) },
+      ];
+      expect(currentValues(rows).get('a').value).to.equal('new');
+    });
+
+    it('a later blank save replaces an earlier value, so the input is missing again', () => {
+      const rows = [
+        { name: 'a', value: 'x', inputOn: new Date(1000) },
+        { name: 'a', value: '', inputOn: new Date(2000) },
+      ];
+      expect(missingInputs({ a: 'A' }, rows)).to.deep.equal([{ name: 'a', label: 'A' }]);
+    });
+
+    it('lists, in label order, every input with no entry or an empty current value', () => {
+      const labels = { a: 'A', b: 'B', c: 'C', d: 'D' };
+      const rows = [
+        { name: 'a', value: 'filled', inputOn: new Date(1) },
+        { name: 'b', value: '', inputOn: new Date(1) },
+        { name: 'd', value: [], inputOn: new Date(1) },
+      ];
+      expect(missingInputs(labels, rows)).to.deep.equal([
+        { name: 'b', label: 'B' },
+        { name: 'c', label: 'C' },
+        { name: 'd', label: 'D' },
+      ]);
+    });
+
+    it('a traveler with no labels has no missing inputs', () => {
+      expect(missingInputs({}, [])).to.deep.equal([]);
+      expect(missingInputs(undefined, [])).to.deep.equal([]);
+    });
+  });
+
+  /**
+   * Stubs the three reads the gate and the live status make: the traveler, its
+   * TravelerData entries, and its linked NCRs. The NCR stub honours the one
+   * filter that matters here — `status: {$ne: 'Closed'}` — so the same stub
+   * serves findOpenNcrs and the full linked-NCR list.
+   */
+  function stubReads({ traveler, dataRows = [], ncrRows = [] }) {
+    sandbox.stub(Traveler, 'findById').returns({ lean: () => Promise.resolve(traveler) });
+    sandbox.stub(TravelerData, 'find').returns({ lean: () => Promise.resolve(dataRows) });
+    sandbox.stub(Ncr, 'find').callsFake(filter => ({
+      lean: () =>
+        Promise.resolve(
+          ncrRows.filter(r => !(filter.status && filter.status.$ne && r.status === filter.status.$ne))
+        ),
+    }));
+  }
+
+  function fullTraveler(overrides = {}) {
+    return makeTraveler({ data: ['d1', 'd2'], ...overrides });
+  }
+
+  const filledRows = [
+    { name: 'field_1', value: 'one', inputOn: new Date(1000) },
+    { name: 'field_2', value: 'two', inputOn: new Date(1000) },
+  ];
+
+  describe('assertSubmittable (T005)', () => {
+    it('passes when every input has a value and no linked NCR is open', async () => {
+      stubReads({ traveler: fullTraveler(), dataRows: filledRows });
+      await travelerNcr.assertSubmittable(TRAVELER_ID);
+    });
+
+    it('refuses with INPUTS_MISSING (409) naming the empty inputs, with no open NCRs', async () => {
+      stubReads({ traveler: fullTraveler(), dataRows: [filledRows[0]] });
+      const err = await rejection(travelerNcr.assertSubmittable(TRAVELER_ID));
+      expect(err).to.be.instanceOf(TravelerNcrError);
+      expect(err.code).to.equal('INPUTS_MISSING');
+      expect(err.status).to.equal(409);
+      expect(err.extra.open_ncrs).to.deep.equal([]);
+      expect(err.extra.missing_inputs).to.deep.equal([{ name: 'field_2', label: 'Field Two' }]);
+    });
+
+    it('refuses with OPEN_NCRS and also lists missing inputs when both conditions fail', async () => {
+      stubReads({
+        traveler: fullTraveler(),
+        dataRows: [filledRows[0]],
+        ncrRows: [
+          { _id: 'id-1', ncr_number: 'NCR-2026-0001', status: 'Submitted', traveler_link: { input_name: 'field_1', input_label: 'Field One' } },
+        ],
+      });
+      const err = await rejection(travelerNcr.assertSubmittable(TRAVELER_ID));
+      expect(err.code).to.equal('OPEN_NCRS');
+      expect(err.extra.open_ncrs).to.have.length(1);
+      expect(err.extra.missing_inputs).to.deep.equal([{ name: 'field_2', label: 'Field Two' }]);
+    });
+
+    it('refuses with OPEN_NCRS and no missing_inputs key when only NCRs are open (contract: present only when inputs are missing)', async () => {
+      stubReads({
+        traveler: fullTraveler(),
+        dataRows: filledRows,
+        ncrRows: [
+          { _id: 'id-1', ncr_number: 'NCR-2026-0001', status: 'Submitted', traveler_link: { input_name: 'field_1', input_label: 'Field One' } },
+        ],
+      });
+      const err = await rejection(travelerNcr.assertSubmittable(TRAVELER_ID));
+      expect(err.code).to.equal('OPEN_NCRS');
+      expect(err.extra).to.not.have.property('missing_inputs');
+    });
+
+    it('a Closed NCR does not block', async () => {
+      stubReads({
+        traveler: fullTraveler(),
+        dataRows: filledRows,
+        ncrRows: [
+          { _id: 'id-1', ncr_number: 'NCR-2026-0001', status: 'Closed', traveler_link: { input_name: 'field_1' } },
+        ],
+      });
+      await travelerNcr.assertSubmittable(TRAVELER_ID);
+    });
+  });
+
+  describe('buildLiveStatus (T006)', () => {
+    it('describes each input with its options, state and revision, and holds no saved values', async () => {
+      stubReads({
+        traveler: fullTraveler(),
+        dataRows: [filledRows[0]],
+        ncrRows: [
+          { _id: 'id-1', ncr_number: 'NCR-2026-0001', status: 'Submitted', traveler_link: { input_name: 'field_2', input_label: 'Field Two' } },
+        ],
+      });
+      const live = await travelerNcr.buildLiveStatus(TRAVELER_ID);
+      expect(live.status).to.equal(1);
+      expect(live.total_input).to.equal(2);
+      const byName = Object.fromEntries(live.inputs.map(i => [i.name, i]));
+      expect(byName.field_1.options).to.deep.equal(['input', 'initiate_ncr']);
+      expect(byName.field_1.has_value).to.equal(true);
+      expect(byName.field_1.finished).to.equal(true);
+      // waiting on an open NCR: no Input option, Initiate NCR still offered
+      expect(byName.field_2.waiting_on_ncr).to.equal(true);
+      expect(byName.field_2.options).to.deep.equal(['initiate_ncr']);
+      expect(byName.field_2.finished).to.equal(false);
+      expect(live.open_ncrs.map(n => n.ncr_number)).to.deep.equal(['NCR-2026-0001']);
+      expect(live.finished_input).to.equal(1);
+      expect(live.submit_ready).to.equal(false);
+      // the payload carries no saved values
+      expect(JSON.stringify(live)).to.not.include('"value"');
+      expect(JSON.stringify(live)).to.not.include('"one"');
+    });
+
+    it('revision changes exactly when the saved entry changes', async () => {
+      const base = [{ name: 'field_1', value: 'one', inputOn: new Date(1000) }];
+      stubReads({ traveler: fullTraveler(), dataRows: base });
+      const first = await travelerNcr.buildLiveStatus(TRAVELER_ID);
+      sandbox.restore();
+      stubReads({
+        traveler: fullTraveler(),
+        dataRows: [...base, { name: 'field_1', value: 'two', inputOn: new Date(2000) }],
+      });
+      const second = await travelerNcr.buildLiveStatus(TRAVELER_ID);
+      const rev = s => s.inputs.find(i => i.name === 'field_1').revision;
+      expect(rev(first)).to.not.equal(rev(second));
+      expect(rev(first)).to.be.a('string');
+    });
+
+    it('a traveler that is not active offers no options on any input', async () => {
+      stubReads({ traveler: fullTraveler({ status: 1.5 }), dataRows: filledRows });
+      const live = await travelerNcr.buildLiveStatus(TRAVELER_ID);
+      live.inputs.forEach(i => expect(i.options).to.deep.equal([]));
+    });
+
+    it('submit_ready is true only when no NCR is open and every input has a value', async () => {
+      stubReads({ traveler: fullTraveler(), dataRows: filledRows });
+      expect((await travelerNcr.buildLiveStatus(TRAVELER_ID)).submit_ready).to.equal(true);
+      sandbox.restore();
+      stubReads({ traveler: fullTraveler(), dataRows: [filledRows[0]] });
+      expect((await travelerNcr.buildLiveStatus(TRAVELER_ID)).submit_ready).to.equal(false);
+    });
+  });
+});

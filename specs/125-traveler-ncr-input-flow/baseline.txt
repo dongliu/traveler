@@ -1,0 +1,12 @@
+Baseline before implementing 125-traveler-ncr-input-flow (branch 125-traveler-ncr-input-flow, base d3466708 + spec/plan/tasks commits)
+
+T001 unit:  TRAVELER_CONFIG_REL_PATH=docker npm run unit  -> 352 passing, 0 failing
+T001 lint:  whole repo already reports 2490 problems (2411 errors, 79 warnings) before any change; lint is compared per changed file
+T002 e2e:   npm run e2e -- e2e/us-traveler-ncr-gating.spec.js -> 46 passed (1.0m)
+
+Environment: docker compose stack up; web container mounts this worktree at /app (nodemon restarts on change).
+Client-side behaviour is tested only by Playwright (mocha has no DOM); see T012.
+
+T012: Client behaviour is verified by Playwright only (mocha has no DOM). live-refresh timing via page.clock in T045 and T053.
+
+Phase 2 after: TRAVELER_CONFIG_REL_PATH=docker npm run unit -> 375 passing (352 baseline + 23 new), 0 failing.

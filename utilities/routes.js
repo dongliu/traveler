@@ -366,6 +366,57 @@ var traveler = {
       return !open.has(name);
     }).length;
   },
+  /**
+   * Whether a saved input value counts as no value (spec 125): null, undefined,
+   * a blank or whitespace-only string, or an empty array (a checkbox set with
+   * nothing ticked). 0 and false are values.
+   * @param  {*} value the stored value of a TravelerData entry
+   * @return {Boolean}
+   */
+  valueIsEmpty: function(value) {
+    if (value === null || value === undefined) {
+      return true;
+    }
+    if (typeof value === 'string') {
+      return value.trim() === '';
+    }
+    return Array.isArray(value) && value.length === 0;
+  },
+  /**
+   * The current entry of each input: the most recent TravelerData entry for its
+   * name. Every save appends an entry (POST /travelers/:id/data/), so the latest
+   * one is the value the user sees.
+   * @param  {Array<{name, value, inputOn}>} dataRows
+   * @return {Map<String, {value, inputOn}>}
+   */
+  currentValues: function(dataRows) {
+    var latest = new Map();
+    (dataRows || []).forEach(function(row) {
+      var time = row.inputOn ? new Date(row.inputOn).getTime() : 0;
+      var prev = latest.get(row.name);
+      if (!prev || time >= prev.time) {
+        latest.set(row.name, { value: row.value, inputOn: row.inputOn, time: time });
+      }
+    });
+    return latest;
+  },
+  /**
+   * The inputs that have no value yet: no entry, or a current entry that is
+   * empty. Listed in the order of `labels`.
+   * @param  {Object}              labels   input name -> label, the counted inputs
+   * @param  {Array<{name, value, inputOn}>} dataRows the traveler's TravelerData
+   * @return {Array<{name: String, label: String}>}
+   */
+  missingInputs: function(labels, dataRows) {
+    var current = traveler.currentValues(dataRows);
+    return Object.keys(labels || {})
+      .filter(function(name) {
+        return !current.has(name) || traveler.valueIsEmpty(current.get(name).value);
+      })
+      .map(function(name) {
+        return { name: name, label: labels[name] };
+      });
+  },
   activeFormLabels: function(doc) {
     var activeForm;
     if (doc.forms.length === 1) {
@@ -552,7 +603,7 @@ var traveler = {
           $in: doc.data,
         },
       },
-      'name'
+      'name value inputOn'
     ).exec(function(dataErr, data) {
       if (dataErr) {
         logger.error(dataErr);
@@ -575,10 +626,13 @@ var traveler = {
         var labels = traveler.activeFormLabels(doc);
         // empty the current touched input list
         doc.touchedInputs = [];
-        data.forEach(function(d) {
+        // Only an input whose current value is not empty is touched: a blank save
+        // is not a submitted value (spec 125), so it is neither finished nor
+        // accepted by the submission gate.
+        traveler.currentValues(data).forEach(function(entry, name) {
           // check if the data is for the active form
-          if (Object.hasOwn(labels, d.name)) {
-            addInputName(d.name, doc.touchedInputs);
+          if (Object.hasOwn(labels, name) && !traveler.valueIsEmpty(entry.value)) {
+            addInputName(name, doc.touchedInputs);
           }
         });
         // finished input
