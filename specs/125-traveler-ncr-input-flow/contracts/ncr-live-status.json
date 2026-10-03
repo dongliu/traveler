@@ -1,0 +1,33 @@
+{
+  "endpoints": [
+    {
+      "endpoint": "GET /ncrs/:id/live-status",
+      "description": "New. The revision token the NCR page polls every 30 seconds (spec 125 FR-032). Read-only.",
+      "auth": "Session (auth.ensureAuthenticated) and the existing NCR read permission used by GET /ncrs/:id.",
+      "responses": {
+        "200": {
+          "ncr_id": "string",
+          "status": "string",
+          "updated_at": "ISO date string",
+          "event_count": "number — count of events, so an appended event changes the token even when updated_at does not"
+        },
+        "401": "Not signed in.",
+        "403": "No read access to the NCR.",
+        "404": "NCR not found."
+      },
+      "semantics": "The client compares the response with the last one. Only when status, updated_at or event_count changed, and the page has no unsaved entry or open dialog, does it fetch the fragment."
+    },
+    {
+      "endpoint": "GET /ncrs/:id/fragment",
+      "description": "New. The NCR page body rendered by views/ncr-detail-body.jade, for the page to swap in place (spec 125 FR-032, FR-033). Same rendering as the full page, without the layout.",
+      "auth": "As GET /ncrs/:id.",
+      "responses": {
+        "200": "text/html — the body partial.",
+        "401": "Not signed in.",
+        "403": "No read access to the NCR.",
+        "404": "NCR not found."
+      },
+      "semantics": "Replaces only the body region. The header, the navigation and any open dialog stay as they are. Not called while the page holds an unsaved entry."
+    }
+  ]
+}

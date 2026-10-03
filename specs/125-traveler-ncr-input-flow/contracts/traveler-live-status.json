@@ -1,0 +1,42 @@
+{
+  "endpoint": "GET /travelers/:id/live-status/",
+  "description": "New. The state the active traveler page polls every 30 seconds (spec 125 FR-026). Read-only. It returns no saved values: a client fetches GET /travelers/:id/data/ only for an input whose revision changed.",
+  "auth": "Session (auth.ensureAuthenticated), then reqUtils.canReadMw('id'). Same as GET /travelers/:id/ncr-links/.",
+  "request": {
+    "params": { "id": "traveler ObjectId" },
+    "query": {}
+  },
+  "responses": {
+    "200": {
+      "traveler_id": "string",
+      "status": "number — the traveler's status (0, 1, 1.5, 2, 3, 4)",
+      "finished_input": "number",
+      "total_input": "number",
+      "inputs": [
+        {
+          "name": "string",
+          "label": "string",
+          "has_value": "boolean",
+          "revision": "string — changes exactly when the saved value changes",
+          "open_ncr_count": "number",
+          "closed_ncr_count": "number",
+          "waiting_on_ncr": "boolean",
+          "finished": "boolean",
+          "options": "['input', 'initiate_ncr'] when status is 1, otherwise []; 'input' is absent when waiting_on_ncr"
+        }
+      ],
+      "open_ncrs": [
+        { "ncr_id": "string", "ncr_number": "string", "status": "string", "input_name": "string|null", "input_label": "string|null" }
+      ],
+      "missing_inputs": [ { "name": "string", "label": "string" } ],
+      "submit_ready": "boolean — open_ncrs and missing_inputs are both empty"
+    },
+    "401": "Not signed in.",
+    "403": "No read access to the traveler (canReadMw).",
+    "404": "Traveler not found (reqUtils.exist)."
+  },
+  "semantics": {
+    "poll_interval": "30 seconds, from the active traveler page only (FR-026, FR-031). Paused while the tab is hidden (FR-030).",
+    "failures": "The client keeps its last state and retries at the next tick. No error message per failed poll (FR-029)."
+  }
+}
