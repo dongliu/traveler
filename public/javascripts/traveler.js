@@ -13,6 +13,9 @@ import {
   isInputBlockedByOpenNcr,
   enterInputMode,
   leaveInputMode,
+  hasSavedValue,
+  markCompleted,
+  refreshOptions,
   loadNcrBadges,
   history as travelerHistory,
   fileHistory,
@@ -90,6 +93,8 @@ function notify() {
 var pageBinder = null;
 var liveBaseline = null;
 var stopLiveRefresh = null;
+// the last live state, so the reasons can be redrawn when an input is entered or saved
+var lastLiveStatus = null;
 
 // Pulls the traveler's live status and brings the page up to date with it (spec 125
 // FR-019, FR-026, FR-027): the finished count, the NCR badges when an NCR changed,
@@ -213,6 +218,8 @@ function applyChangedValues(names, revisions) {
         pageBinder.deserializeFieldFromValue(element, current.value);
         pageBinder.accessor.set(name, current.value);
       }
+      markCompleted($unit, field.type === 'file' ? true : hasSavedValue(current.value));
+      refreshOptions($unit);
       var html =
         '<b>history</b>: ' +
         (field.type === 'file' ? fileHistory(found) : travelerHistory(found));
@@ -244,6 +251,7 @@ function leaveActiveState() {
 // Enables "Submit for completion" only when every linked NCR is Closed and every
 // input has a value, and no input is being entered with unsaved changes (FR-019).
 function updateSubmitState(live) {
+  lastLiveStatus = live;
   var editing = $('#form .control-group-buttons').length > 0;
   var ready = live.submit_ready && !editing;
   $('#complete2, #complete').prop('disabled', !ready);
@@ -850,6 +858,9 @@ $(function() {
     e.preventDefault();
     const $controls = $(this).closest('.controls');
     enterInputMode($controls);
+    if (lastLiveStatus) {
+      updateSubmitState(lastLiveStatus);
+    }
     $controls
       .find('input,textarea')
       .filter(':enabled')
@@ -925,6 +936,7 @@ $(function() {
             $this.closest('.controls')
           );
         }
+        markCompleted($unit, hasSavedValue(binder.accessor.target[input.name]));
         var historyRecord = generateHistoryRecordHtml(
           input.type,
           binder.accessor.target[input.name],
@@ -1114,6 +1126,7 @@ $(function() {
             $this.closest('.control-group-wrap').find('.controls')
           );
         }
+        markCompleted($(input).closest('.controls'), true);
         $history.html(
           '<strong><a href=' +
             json.location +

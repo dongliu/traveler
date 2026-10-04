@@ -408,14 +408,13 @@ test.describe(
       expect(res.status()).toBe(409);
       expect((await res.json()).code).toBe('OPEN_NCRS');
 
-      // the traveler stays active; the held input offers no Input option, the others do
+      // the traveler stays active
       expect(await travelerStatus(travelerId)).toBe(1);
       await expect(
         page.locator('.controls', { has: page.locator('input[name="input_a"]') }).first().locator('.input-value-link')
       ).toHaveCount(0);
-      await expect(
-        page.locator('.controls', { has: page.locator('input[name="input_b"]') }).first().locator('.input-value-link')
-      ).toHaveCount(1);
+      // every input here has a value, so none offers an option at all
+      await expect(page.locator('.input-value-link')).toHaveCount(0);
     });
 
     test('every linked NCR must be Closed before the traveler can be submitted', async ({
@@ -590,7 +589,7 @@ async function createNcrByReference(page, id, travelerId, inputName) {
 test.describe(
   'US4 — an input with an open NCR does not count as finished',
   () => {
-    test('raising an NCR from a filled input lowers the finished count, lists the NCR in a warning box, and holds its Input option', async ({
+    test('an NCR raised against a filled input lowers the finished count, lists the NCR in a warning box, and holds its Input option', async ({
       page,
     }) => {
       const id = runId();
@@ -601,12 +600,9 @@ test.describe(
       expect(await storedFinished(travelerId)).toBe(2);
       await expect(page.locator('#finished-input')).toHaveText('2');
 
-      // raise an NCR from input A through the real UI
-      await page
-        .locator('.initiate-ncr-link')
-        .first()
-        .click();
-      await completeNcrCreation(page, `PN-${id}`);
+      // an NCR against the filled input A: a saved value locks the input and offers no
+      // Initiate NCR, so this one is raised through the API, as an integration would
+      await createNcrByReference(page, id, travelerId, 'input_a');
 
       await page.goto(`/travelers/${travelerId}/`);
       expect(await storedFinished(travelerId)).toBe(1);
@@ -665,20 +661,25 @@ test.describe(
       await expect(page.locator('.ncr-links-existing')).toHaveCount(1);
     });
 
-    test('a later save on another input does not quietly un-block an input that still has an open NCR', async ({
+    test('a later save on another input leaves an input that is still held by its open NCR uncounted and locked', async ({
       page,
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
       await page.goto(`/travelers/${travelerId}/`);
       await fillAndSaveInput(page, 'input_a', 'a measured value');
-      await fillAndSaveInput(page, 'input_b', 'another value');
-      await createNcrByReference(page, id, travelerId, 'input_a');
+      // an NCR against the still-empty input C holds it back
+      await createNcrByReference(page, id, travelerId, 'input_c');
       expect(await storedFinished(travelerId)).toBe(1);
 
       await page.goto(`/travelers/${travelerId}/`);
-      await fillAndSaveInput(page, 'input_b', 'edited value'); // every data save recounts
-      expect(await storedFinished(travelerId)).toBe(1);
+      await fillAndSaveInput(page, 'input_b', 'another value'); // every data save recounts
+      expect(await storedFinished(travelerId)).toBe(2);
+      await expect(page.locator('#finished-input')).toHaveText('2');
+      // C is still held: its Input option stays hidden until its NCR is Closed
+      await expect(
+        page.locator('.controls', { has: page.locator('input[name="input_c"]') }).first().locator('.input-value-link')
+      ).toHaveCount(0);
     });
 
     test('closing the NCR through the real close endpoint makes the input count again', async ({

@@ -76,7 +76,7 @@ test.describe('US1 — choose Input or Initiate NCR for each traveler input', ()
     await expect(page.locator('input[name="input_a"]')).toBeDisabled();
   });
 
-  test('saving stores the value and returns the input to both options', async ({ page }) => {
+  test('saving stores the value, and locks and completes the input: neither option is offered', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await page.goto(`/travelers/${travelerId}/`);
@@ -90,8 +90,8 @@ test.describe('US1 — choose Input or Initiate NCR for each traveler input', ()
 
     await expect(page.locator('input[name="input_a"]')).toHaveValue('a measured value');
     await expect(page.locator('input[name="input_a"]')).toBeDisabled();
-    await expect(unitOf(page, 'input_a').locator('.input-value-link')).toBeVisible();
-    await expect(unitOf(page, 'input_a').locator('.initiate-ncr-link')).toBeVisible();
+    await expect(unitOf(page, 'input_a').locator('.input-value-link')).toHaveCount(0);
+    await expect(unitOf(page, 'input_a').locator('.initiate-ncr-link')).toHaveCount(0);
   });
 
   test('Reset discards the unsaved change and returns the input to both options', async ({ page }) => {
@@ -279,20 +279,21 @@ test.describe('US4 — submission needs every NCR closed and every input filled 
     await expect(page.locator('#complete2')).toBeEnabled();
   });
 
-  test('Submit is disabled while an input is being entered, and enabled once it is saved or reset', async ({ page }) => {
+  test('Submit is disabled while an input is being entered, and enabled once that input is saved', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: textInputs(id) });
     await page.goto(`/travelers/${travelerId}/`);
-    await fillAndSaveInput(page, 'input_a', 'a');
     await fillAndSaveInput(page, 'input_b', 'b');
     await fillAndSaveInput(page, 'input_c', 'c');
-    await expect(page.locator('#complete2')).toBeEnabled();
+    // input A has no value yet, so submission is not offered
+    await expect(page.locator('#complete2')).toBeDisabled();
 
     await unitOf(page, 'input_a').locator('.input-value-link').click();
     await page.fill('input[name="input_a"]', 'changed but not saved');
     await expect(page.locator('#complete2')).toBeDisabled();
+    await expect(page.locator('#submit-blockers')).toContainText('save or reset it first');
 
-    await page.click('button[value="reset"]');
+    await page.click('button[value="save"]');
     await expect(page.locator('#complete2')).toBeEnabled();
   });
 

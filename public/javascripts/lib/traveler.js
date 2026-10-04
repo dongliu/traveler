@@ -226,19 +226,61 @@ function unitField($controls) {
 // Puts one input in its default state (spec 125 FR-008, FR-010): the field locked,
 // and both options shown. Save and Reset are removed with the edit they belonged to.
 export function lockUnit($controls) {
-  const field = unitField($controls);
   $controls.find('input,textarea').prop('disabled', true);
   $controls.children('.control-group-buttons').remove();
   $controls.closest('.control-group-wrap').children('.control-group-buttons').remove();
-  if (field) {
-    appendInputLink(field);
-    appendInitiateNcrLink(field);
+  refreshOptions($controls);
+}
+
+// Whether a value counts as entered. Blank does not, as on the server (valueIsEmpty).
+export function hasSavedValue(value) {
+  if (value === null || value === undefined) {
+    return false;
   }
-  $controls
-    .find('.input-value-link, .initiate-ncr-link')
-    .show()
-    .removeClass('disabled')
-    .prop('disabled', false);
+  if (typeof value === 'string') {
+    return value.trim() !== '';
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+  return true;
+}
+
+// An input is completed once a value has been entered for it (spec 125). A completed
+// input is locked and offers neither Input nor Initiate NCR.
+export function markCompleted($controls, completed) {
+  $controls.attr('data-completed', completed ? 'true' : null);
+}
+
+export function isCompleted($controls) {
+  return $controls.attr('data-completed') === 'true';
+}
+
+// Puts an input's options in line with its state (spec 125). A completed input offers
+// neither option. Otherwise it offers Input (not while an NCR against it is open) and
+// Initiate NCR. An input being entered keeps the options it has, hidden.
+export function refreshOptions($controls) {
+  const field = unitField($controls);
+  if (!field) {
+    return;
+  }
+  if ($controls.find('input,textarea').filter(':enabled').length > 0) {
+    return;
+  }
+  if (isCompleted($controls)) {
+    $controls.find('.input-value-link, .initiate-ncr-link').remove();
+    return;
+  }
+  appendInputLink(field);
+  appendInitiateNcrLink(field);
+  // while another input is being entered, every option stays unusable (spec 125 FR-012)
+  const otherEntering = $('#form input, #form textarea').filter(':enabled').length > 0;
+  const $options = $controls.find('.input-value-link, .initiate-ncr-link');
+  if (otherEntering) {
+    $options.addClass('disabled').prop('disabled', true);
+  } else {
+    $options.show().removeClass('disabled').prop('disabled', false);
+  }
 }
 
 // Puts one input into Input mode (spec 125 FR-009): its field becomes editable,
@@ -290,7 +332,7 @@ export function syncInputOptions() {
       }
     } else {
       $ncrLinks.find('.input-waiting').remove();
-      appendInputLink(field);
+      refreshOptions($controls);
     }
   });
 }
@@ -493,6 +535,7 @@ export function renderHistory(binder, travelerStatus = null) {
               return 1;
             });
             if (element.type === 'file') {
+              markCompleted($controlsElement, true);
               $(element)
                 .closest('.controls')
                 .append(
@@ -502,6 +545,7 @@ export function renderHistory(binder, travelerStatus = null) {
                 );
             } else {
               currentValue = found[0].value;
+              markCompleted($controlsElement, hasSavedValue(currentValue));
               if (found[0].inputType === 'radio') {
                 // Update element to match the value
                 for (let i = 0; i < inputElements.size(); i++) {

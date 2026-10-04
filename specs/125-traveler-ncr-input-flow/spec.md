@@ -66,9 +66,10 @@ options with the new value.
 2. **Given** an input showing both options, **When** the user chooses
    **Input**, **Then** **Initiate NCR** is hidden for that input, the input's
    controls become editable, and Save and Reset are offered
-3. **Given** an input in Input mode, **When** the user saves a new value,
-   **Then** the value is stored, the input returns to showing both options, and
-   the traveler's finished-input figure is updated
+3. **Given** an input in Input mode, **When** the user saves a value,
+   **Then** the value is stored, the input is locked and completed: it offers
+   neither **Input** nor **Initiate NCR**, and the traveler's finished-input
+   figure is updated
 4. **Given** an input in Input mode, **When** the user chooses Reset, **Then**
    the unsaved change is discarded, the stored value is shown, and both options
    return
@@ -109,9 +110,11 @@ User Story 5.
    **When** a user views the traveler, **Then** **Input** is still not offered
 3. **Given** every NCR linked to the input is Closed (or has been removed),
    **When** a user next views the traveler, **Then** **Input** is offered again
-   and the input counts as finished if it has a saved value
-4. **Given** an input has an open NCR, **When** a user views it, **Then**
-   **Initiate NCR** is still offered, so an additional NCR can be raised
+   if the input has no saved value (a completed input stays locked), and the
+   input counts as finished if it has a saved value
+4. **Given** an input with no saved value has an open NCR, **When** a user views
+   it, **Then** **Initiate NCR** is still offered, so an additional NCR can be
+   raised
    against the same input
 5. **Given** an input's only open NCR is removed by an administrator, **When**
    the traveler is next viewed, **Then** the input is no longer on hold
@@ -346,15 +349,19 @@ typed text is still there when the refresh runs.
   **Input** for it.
 - **FR-009**: Choosing **Input** MUST hide **Initiate NCR** for that input and
   make its value editable, with Save and Reset available.
-- **FR-010**: Saving MUST store the value and Reset MUST discard unsaved changes.
-  Either MUST return the input to showing both options, unless an open NCR
-  applies (FR-013).
+- **FR-010**: Saving MUST store the value and lock the input: once an input has a
+  saved value it is completed, and it MUST offer neither **Input** nor
+  **Initiate NCR**. Reset MUST discard unsaved changes and return the input to
+  showing both options, unless it has a saved value or an open NCR applies
+  (FR-013, FR-015).
 - **FR-011**: Choosing **Initiate NCR** MUST open the NCR creation form linked to
   that input, as it does today.
 - **FR-012**: Only one input MUST be in Input mode at a time. While one is, the
   options on the other inputs MUST NOT be usable.
-- **FR-013**: **Initiate NCR** MUST be offered for every input regardless of
-  whether it has a value (superseding `specs/123` FR-001 and FR-002).
+- **FR-013**: **Initiate NCR** MUST be offered for every input that has no saved
+  value, before **Input** is chosen. It is not offered once a value is saved
+  (FR-010), and it is hidden while **Input** is in use. This supersedes
+  `specs/123` FR-001 and FR-002, which offered it only after a value existed.
 - **FR-014**: On a traveler that is not active, neither option MUST be offered.
 
 **Open NCR holds the input (User Story 2)**
@@ -464,8 +471,10 @@ typed text is still there when the refresh runs.
   review process.
 - **Input options apply on active travelers only.** Values on other travelers
   stay read-only as they are today, and the options are not shown there.
-- **"Input" is per input and is re-offered after Save or Reset.** Once saved or
-  reset with no open NCR, the input shows both options again.
+- **A saved value completes its input.** A completed input is locked and offers
+  neither option. Only a Reset before saving returns an input to showing both
+  options. An input can be completed only once, so an NCR can be raised against an
+  input only while it has no saved value.
 - **Several NCRs may be raised against one input.** This keeps `specs/123`
   FR-008. Only the **Input** option is held back, per the request.
 - **Server-side value saves are not blocked by an open NCR.** The request

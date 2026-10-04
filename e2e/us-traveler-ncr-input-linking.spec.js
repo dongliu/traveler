@@ -57,7 +57,7 @@ async function completeNcrCreation(page, partNumber) {
 }
 
 test.describe('Traveler-Initiated NCRs Linked to a Specific Input', () => {
-  test('AS1 - Initiate NCR is offered on an input with no value (spec 125 FR-013), and still offered after a value is saved', async ({ page }) => {
+  test('AS1 - Initiate NCR is offered until a value is saved (spec 125 FR-013), and is gone once it is: the input is locked and completed', async ({ page }) => {
     const { travelerId } = await createFillableTraveler();
     await page.goto(`/travelers/${travelerId}/`);
 
@@ -65,13 +65,13 @@ test.describe('Traveler-Initiated NCRs Linked to a Specific Input', () => {
 
     await fillAndSaveInput(page, 'a measured value');
 
-    await expect(page.locator('.initiate-ncr-link')).toHaveCount(1);
+    await expect(page.locator('.initiate-ncr-link')).toHaveCount(0);
+    await expect(page.locator('.input-value-link')).toHaveCount(0);
   });
 
   test('AS2 - Initiate NCR opens creation pre-linked, banner names the input, and the created NCR carries the traveler_link', async ({ page }) => {
     const { travelerId, inputLabel } = await createFillableTraveler();
     await page.goto(`/travelers/${travelerId}/`);
-    await fillAndSaveInput(page, 'a measured value');
 
     await page.click('.initiate-ncr-link');
     await page.waitForURL(/\/ncrs\/new\?/);

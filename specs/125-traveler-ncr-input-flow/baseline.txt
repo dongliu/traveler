@@ -45,3 +45,13 @@ Lint:  changed files have no more problems than HEAD (checked per file with esli
 == Not done ==
 - T067 (walk through quickstart.md by hand): not done. The e2e suite covers quickstart sections 2-4,
   but no manual browser pass has been recorded.
+
+== Change: a saved value completes and locks the input ==
+- Save no longer returns an input to both options. A completed input (non-blank saved value) is locked and
+  offers neither Input nor Initiate NCR. Reset before saving still returns both options.
+- Consequence: an NCR can be raised only against an input with no saved value (spec 125 FR-010, FR-013).
+- Unit: 375 passing. E2E full suite: 141 passed, 2 failed:
+    * us2-ce-cs-disposition AS1 — the pre-existing stale "Submit Disposition" expectation (unchanged).
+    * us-traveler-ncr-gating "an NCR raised against a filled input ..." — failed once with API 500
+      "NCR-QA group is not configured". That is the known transient QA-group race that
+      us2-ce-cs-disposition.spec.js documents. The test passes on its own (gating spec: 37 passed).
