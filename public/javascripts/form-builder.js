@@ -12,39 +12,7 @@ import {
   binding_checkbox_set_events,
 } from './lib/checkbox-set.js';
 import { table_edit, binding_table_events } from './lib/table-builder.js';
-
-const mceConfig = {
-  base_url: '/tinymce',
-  suffix: '.min',
-
-  // Required in v6+
-  model: 'dom',
-
-  plugins: [
-    'advlist', 'autolink', 'lists', 'link', 'image',
-    'charmap', 'preview', 'anchor', 'searchreplace',
-    'visualblocks', 'code', 'fullscreen', 'insertdatetime',
-    'table', 'help', 'wordcount'
-  ],
-
-  toolbar: 'undo redo | charmap | link image | bullist numlist outdent indent | formatselect bold italic underline strikethrough | removeformat',
-
-  // v6+: Promise-based upload handler
-  images_upload_handler: async (blobInfo) => {
-    const formData = new FormData();
-    formData.append('file', blobInfo.blob(), blobInfo.filename());
-
-    const response = await fetch('./uploads/', { method: 'POST', body: formData });
-    if (!response.ok) throw new Error('Upload failed');
-
-    const data = await response.json();
-    return data.location;  // must return the URL string
-  },
-
-  setup: (editor) => {
-    editor.on('change', () => editor.save()); // sync with jQuery/form
-  }
-}
+import { mceConfig } from './lib/mce-config.js';
 
 let initHtml = '';
 

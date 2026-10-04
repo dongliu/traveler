@@ -3,6 +3,7 @@
 /* global input, UID, tinymce */
 
 import { updateSectionNumbers } from './form-builder-shared.js';
+import { mceConfig } from './mce-config.js';
 
 // ── HTML escape ───────────────────────────────────────────────────────────────
 
@@ -139,6 +140,22 @@ function buildInTableControls($table) {
 
 // ── Cell editing modal ────────────────────────────────────────────────────────
 
+// Bootstrap 2's modal focus trap (enforceFocus) pulls focus back into #modal
+// whenever focus lands outside it. TinyMCE attaches its link/image dialogs to
+// the body, so without this their inputs cannot be typed into. Keep the trap
+// for everything else, but let focus stay inside TinyMCE's dialog container.
+if ($.fn.modal) {
+  $.fn.modal.Constructor.prototype.enforceFocus = function () {
+    const that = this;
+    $(document).on('focusin.modal', function (e) {
+      if ($(e.target).closest('.tox-silver-sink').length) return;
+      if (that.$element[0] !== e.target && !that.$element.has(e.target).length) {
+        that.$element.focus();
+      }
+    });
+  };
+}
+
 const CELL_EDITOR_ID = 'cell-instruction-editor';
 
 function destroyInstructionEditor() {
@@ -262,19 +279,7 @@ function renderCellConfig(cellType, $cellConfig, $cell) {
           </div>
         </div>`);
       setTimeout(function () {
-        $(`#${CELL_EDITOR_ID}`).tinymce({
-          base_url: '/tinymce',
-          license_key: 'gpl',
-          promotion: false,
-          suffix: '.min',
-          model: 'dom',
-          plugins: ['lists', 'link', 'charmap'],
-          toolbar: 'undo redo | bold italic | bullist numlist | link charmap',
-          menubar: false,
-          setup: (editor) => {
-            editor.on('change', () => editor.save());
-          },
-        });
+        $(`#${CELL_EDITOR_ID}`).tinymce(mceConfig);
       }, 0);
       break;
     }
