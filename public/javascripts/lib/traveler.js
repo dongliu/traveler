@@ -232,9 +232,10 @@ export function lockUnit($controls) {
   refreshOptions($controls);
 }
 
-// Whether a value counts as entered. Blank does not, as on the server (valueIsEmpty).
+// Whether a value counts as entered. Blank does not, and neither does an unticked
+// box, as on the server (valueIsEmpty).
 export function hasSavedValue(value) {
-  if (value === null || value === undefined) {
+  if (value === null || value === undefined || value === false) {
     return false;
   }
   if (typeof value === 'string') {

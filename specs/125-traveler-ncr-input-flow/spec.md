@@ -488,7 +488,7 @@ typed text is still there when the refresh runs.
 - **"Input" count for the submission rule** is the set of inputs counted in the
   traveler's own input total (the "N inputs" figure on the traveler). Display-only
   elements are not inputs.
-- **"Has a value" means a saved, non-empty value**, using the same saved data as
+- **"Has a value" means a saved, non-empty value**. A blank or whitespace-only text, a checkbox set with nothing ticked, and a single checkbox that is not ticked (saved as `false`) are empty; `0` is a value. Using the same saved data as
   the traveler's finished-input figure.
 - **Live status uses a 30-second interval for both pages.** The interval is
   fixed, not user-configurable. The traveler page does not refresh once the

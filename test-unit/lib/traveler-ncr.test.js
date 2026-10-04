@@ -875,6 +875,7 @@ describe('lib/traveler-ncr — input values and the submission gate (spec 125)',
       ["''", ''],
       ['whitespace only', '   '],
       ['[] (a checkbox set with nothing ticked)', []],
+      ['false (a single checkbox that is not ticked)', false],
     ];
     empties.forEach(([label, value]) => {
       it(`${label} is empty`, () => {
@@ -884,7 +885,6 @@ describe('lib/traveler-ncr — input values and the submission gate (spec 125)',
 
     const filled = [
       ['0', 0],
-      ['false', false],
       ["'0'", '0'],
       ["['a']", ['a']],
       ["'text'", 'text'],

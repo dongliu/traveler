@@ -55,3 +55,11 @@ Lint:  changed files have no more problems than HEAD (checked per file with esli
     * us-traveler-ncr-gating "an NCR raised against a filled input ..." — failed once with API 500
       "NCR-QA group is not configured". That is the known transient QA-group race that
       us2-ce-cs-disposition.spec.js documents. The test passes on its own (gating spec: 37 passed).
+
+== Change: an unticked box is empty ==
+- A single checkbox that is not ticked is saved as false. It now counts as empty on the server (valueIsEmpty) and
+  in the page (hasSavedValue), so saving it leaves the input uncompleted with both options (before, it was
+  completed and locked with no options). 0 stays a value.
+- After a save with no value (blank text or unticked box) the input is not completed: it keeps Input and Initiate NCR,
+  and its field returns to read-only until Input is clicked again.
+- Unit: traveler-ncr tests 110 passing. e2e us-traveler-input-flow: 18 passed (new case: blank save and unticked box).

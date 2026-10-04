@@ -338,3 +338,26 @@ test.describe('US4 — submission needs every NCR closed and every input filled 
     await api.dispose();
   });
 });
+
+test.describe('US1 — saving nothing does not complete an input', () => {
+  test('saving a blank text input or an unticked box keeps both options: the input is not completed', async ({ page }) => {
+    const id = runId();
+    const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+    await page.goto(`/travelers/${travelerId}/`);
+
+    // a blank text value
+    await chooseInput(page, 'input_a');
+    await page.click('button[value="save"]');
+    await expect(unitOf(page, 'input_a').locator('.input-value-link')).toBeVisible();
+    await expect(unitOf(page, 'input_a').locator('.initiate-ncr-link')).toBeVisible();
+
+    // an unticked single checkbox (saved as false)
+    await chooseInput(page, 'check_d');
+    await page.click('button[value="save"]');
+    await expect(unitOf(page, 'check_d').locator('.input-value-link')).toBeVisible();
+    await expect(unitOf(page, 'check_d').locator('.initiate-ncr-link')).toBeVisible();
+
+    // nothing counts as finished, so submission is still held back
+    expect((await execFixtureCli('get-traveler', { travelerId })).finishedInput).toBe(0);
+  });
+});

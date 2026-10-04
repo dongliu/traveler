@@ -368,13 +368,13 @@ var traveler = {
   },
   /**
    * Whether a saved input value counts as no value (spec 125): null, undefined,
-   * a blank or whitespace-only string, or an empty array (a checkbox set with
-   * nothing ticked). 0 and false are values.
+   * a blank or whitespace-only string, an empty array (a checkbox set with nothing
+   * ticked), or false (a single checkbox that is not ticked). 0 is a value.
    * @param  {*} value the stored value of a TravelerData entry
    * @return {Boolean}
    */
   valueIsEmpty: function(value) {
-    if (value === null || value === undefined) {
+    if (value === null || value === undefined || value === false) {
       return true;
     }
     if (typeof value === 'string') {
