@@ -20,6 +20,8 @@ module.exports = defineConfig({
   ],
   outputDir: path.join(__dirname, '..', 'test-results'),
   globalSetup: require.resolve('./global-setup.js'),
+  // removes the travelers, NCRs and binders the run created (see global-teardown.js)
+  globalTeardown: require.resolve('./global-teardown.js'),
 
   // Single project, logged in as the primary persona (E2E_USER) by default.
   // Deliberately NOT split into "primary"/"secondary" projects — Playwright

@@ -63,3 +63,16 @@ Lint:  changed files have no more problems than HEAD (checked per file with esli
 - After a save with no value (blank text or unticked box) the input is not completed: it keeps Input and Initiate NCR,
   and its field returns to read-only until Input is clicked again.
 - Unit: traveler-ncr tests 110 passing. e2e us-traveler-input-flow: 18 passed (new case: blank save and unticked box).
+
+== E2E teardown (cleanup of records a run created) ==
+- global-setup: records the run start with the fixture CLI's run-marker (E2E_RUN_STARTED_AT).
+- global-teardown: purge-run removes the travelers, NCRs and binders created at or after that start by the
+  two test identities, with their uploaded files, closure PDFs, notes and input data. E2E_KEEP_RECORDS=1 keeps them.
+- Full suite run: teardown removed binders 1, ncrs 60, travelers 65, travelerData 57, closurePdfs 10, files 13.
+  count-records for dong and bob returned to the pre-run baseline (1517 travelers, 1337 NCRs, 24 binders).
+- Full suite after the change: 143 passed, 1 failed (the pre-existing us2-ce-cs-disposition expectation).
+- Mistake, disclosed: a manual purge-run with a 30-minute window (intended for a kept run) also removed earlier
+  leftover records of dong and bob from this session: travelers 99, ncrs 73, binders 1, travelerData 89,
+  closurePdfs 10, files 13. Counts after it: 1436 travelers, 1270 NCRs, 23 binders.
+- Pre-existing leftovers from before this change are still in the database (dong and bob hold them). They are not
+  removed by the teardown, since it only purges records created during a run.

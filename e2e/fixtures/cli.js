@@ -19,6 +19,7 @@
 process.env.TRAVELER_CONFIG_REL_PATH = process.env.TRAVELER_CONFIG_REL_PATH || 'docker';
 
 const fs = require('fs');
+const path = require('path');
 const mongoose = require('mongoose');
 const config = require('../../config/config');
 
@@ -370,7 +371,106 @@ async function fileExists({ filePath }) {
   return { exists: fs.existsSync(filePath) };
 }
 
+// ── e2e run cleanup ──────────────────────────────────────────────────────
+
+// The start of an e2e run, on the database side. A purge keys on the ObjectId time of
+// each record, which is set at insert and is not changed by backdate-ncr.
+async function runMarker() {
+  return { runStartedAt: new Date().toISOString() };
+}
+
+// The smallest ObjectId a record inserted at or after runStartedAt can have (one second of margin).
+function idSince(runStartedAt) {
+  const seconds = Math.floor(new Date(runStartedAt).getTime() / 1000) - 1;
+  return mongoose.Types.ObjectId.createFromTime(seconds);
+}
+
+// Deletes a file a record points at, if it is still there. A missing file is not an error.
+function removeFileIfPresent(filePath) {
+  if (!filePath) {
+    return false;
+  }
+  try {
+    fs.unlinkSync(path.resolve(filePath));
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function assertCreators(creators) {
+  if (!Array.isArray(creators) || creators.length === 0) {
+    throw new Error('the test identities (creators) are required');
+  }
+}
+
+// Removes what one run created: records inserted at or after runStartedAt, by one of the
+// test identities, with their uploaded files, closure PDFs, notes and input data. Nothing
+// else is touched, so a record made by anyone outside the run is left alone.
+async function purgeRun({ runStartedAt, creators }) {
+  if (!runStartedAt) {
+    throw new Error('runStartedAt is required');
+  }
+  assertCreators(creators);
+  require('../../model/user');
+  const { Traveler, TravelerData, TravelerNote, TravelerNcrPdf } = require('../../model/traveler');
+  const { Ncr } = require('../../model/ncr');
+  const { Binder } = require('../../model/binder');
+  const since = idSince(runStartedAt);
+  const removed = { binders: 0, ncrs: 0, travelers: 0, travelerData: 0, notes: 0, closurePdfs: 0, files: 0 };
+  const dropFile = filePath => {
+    if (removeFileIfPresent(filePath)) {
+      removed.files += 1;
+    }
+  };
+
+  // binders first: they hold travelers
+  const binders = await Binder.find({ _id: { $gte: since }, createdBy: { $in: creators } }, '_id').lean();
+  removed.binders = (await Binder.deleteMany({ _id: { $in: binders.map(b => b._id) } })).deletedCount;
+
+  // NCRs, with their attachments and the closure PDFs made when they closed
+  const ncrs = await Ncr.find({ _id: { $gte: since }, originator_id: { $in: creators } }, 'attachments').lean();
+  const ncrIds = ncrs.map(n => n._id);
+  ncrs.forEach(n => (n.attachments || []).forEach(a => dropFile(a.file_path)));
+  const ncrPdfs = await TravelerNcrPdf.find({ ncr_id: { $in: ncrIds } }, 'file').lean();
+  ncrPdfs.forEach(p => dropFile(p.file && p.file.path));
+  removed.closurePdfs += (await TravelerNcrPdf.deleteMany({ ncr_id: { $in: ncrIds } })).deletedCount;
+  removed.ncrs = (await Ncr.deleteMany({ _id: { $in: ncrIds } })).deletedCount;
+
+  // travelers, with their uploaded files, notes, closure PDFs and input data
+  const travelers = await Traveler.find({ _id: { $gte: since }, createdBy: { $in: creators } }, '_id').lean();
+  for (const traveler of travelers) {
+    const data = await TravelerData.find({ traveler: traveler._id }, 'file').lean();
+    data.forEach(d => dropFile(d.file && d.file.path));
+    removed.travelerData += (await TravelerData.deleteMany({ traveler: traveler._id })).deletedCount;
+    removed.notes += (await TravelerNote.deleteMany({ traveler: traveler._id })).deletedCount;
+    const pdfs = await TravelerNcrPdf.find({ traveler: traveler._id }, 'file').lean();
+    pdfs.forEach(p => dropFile(p.file && p.file.path));
+    removed.closurePdfs += (await TravelerNcrPdf.deleteMany({ traveler: traveler._id })).deletedCount;
+  }
+  removed.travelers = (await Traveler.deleteMany({ _id: { $in: travelers.map(t => t._id) } })).deletedCount;
+  return removed;
+}
+
+// How many travelers, NCRs and binders the test identities hold in total. Taken before and
+// after a run to show that the run left nothing behind.
+async function countRecords({ creators }) {
+  assertCreators(creators);
+  require('../../model/user');
+  const { Traveler } = require('../../model/traveler');
+  const { Ncr } = require('../../model/ncr');
+  const { Binder } = require('../../model/binder');
+  return {
+    travelers: await Traveler.countDocuments({ createdBy: { $in: creators } }),
+    ncrs: await Ncr.countDocuments({ originator_id: { $in: creators } }),
+    binders: await Binder.countDocuments({ createdBy: { $in: creators } }),
+  };
+}
+
 const COMMANDS = {
+  'run-marker': runMarker,
+  'purge-run': purgeRun,
+  'count-records': countRecords,
   'grant-role': grantRole,
   'remove-role': removeRole,
   'reset-user-roles': resetUserRoles,

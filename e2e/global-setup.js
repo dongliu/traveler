@@ -1,6 +1,7 @@
 const path = require('path');
 const { chromium } = require('@playwright/test');
 const { resolveEnv } = require('./fixtures/env');
+const { execFixtureCli } = require('./fixtures/exec-cli');
 
 const AUTH_DIR = path.join(__dirname, '.auth');
 
@@ -19,6 +20,11 @@ module.exports = async function globalSetup() {
 
   await checkReachable('web app', env.webBaseUrl);
   await checkReachable('mail catcher', `${env.mailBaseUrl}/api/v1/messages`);
+
+  // The run's start, on the database side: global teardown purges what this run created
+  // after it (see global-teardown.js). Workers inherit the variable.
+  const { runStartedAt } = await execFixtureCli('run-marker');
+  process.env.E2E_RUN_STARTED_AT = runStartedAt;
 
   await loginAndSaveState(env.webBaseUrl, env.primaryUser, path.join(AUTH_DIR, 'primary.json'));
   await loginAndSaveState(env.webBaseUrl, env.secondaryUser, path.join(AUTH_DIR, 'secondary.json'));

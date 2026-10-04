@@ -121,6 +121,21 @@ straight away with a message saying which one, instead of failing test by test.
 The suite creates data and changes roles in the database behind your local stack.
 Run it only against that stack, never against a shared or production database.
 
+## Cleanup
+
+After the run, `global-teardown.js` removes the travelers, NCRs and binders that the run
+created, with their uploaded files, closure PDFs, notes and input data. It runs even when
+tests fail.
+
+- Only records inserted after the run started, and created by the two test identities
+  (`E2E_USER` and `E2E_USER2`), are removed. The run's start is recorded in global setup on
+  the database side (the fixture CLI's `run-marker`), and matched against each record's
+  ObjectId time. Backdating an NCR does not change that time.
+- Records made by anyone else, or before the run, are never touched.
+- Set `E2E_KEEP_RECORDS=1` to keep the run's records for debugging. The teardown then says so.
+- The fixture CLI's `count-records` shows how many travelers, NCRs and binders the test
+  identities hold in total, which is useful for checking that a run left nothing behind.
+
 ## Results and debugging
 
 - `playwright-report/index.html`: a pass/fail report; failed tests link to their
