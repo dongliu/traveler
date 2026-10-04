@@ -112,10 +112,10 @@ User Story 5.
    **When** a user next views the traveler, **Then** **Input** is offered again
    if the input has no saved value (a completed input stays locked), and the
    input counts as finished if it has a saved value
-4. **Given** an input with no saved value has an open NCR, **When** a user views
-   it, **Then** **Initiate NCR** is still offered, so an additional NCR can be
-   raised
-   against the same input
+4. **Given** an input has an open NCR, **When** a user views it, **Then**
+   neither **Input** nor **Initiate NCR** is offered. When that NCR is Closed,
+   both are offered again, if the input has no saved value (a completed input
+   stays locked)
 5. **Given** an input's only open NCR is removed by an administrator, **When**
    the traveler is next viewed, **Then** the input is no longer on hold
 
@@ -370,8 +370,10 @@ typed text is still there when the refresh runs.
   **Input** option MUST NOT be offered for it.
 - **FR-016**: The **Input** option MUST be offered again once every NCR linked to
   the input is Closed or removed.
-- **FR-017**: **Initiate NCR** MUST remain offered on an input that has an open
-  NCR, so that another NCR can be raised.
+- **FR-017**: **Initiate NCR** MUST NOT be offered on an input that has an open
+  NCR. No second NCR is raised while one is open. When every NCR linked to the
+  input is Closed, **Initiate NCR** is offered again, together with **Input**, if
+  the input has no saved value (FR-010, FR-016).
 - **FR-018**: An input with a linked NCR that is not Closed MUST NOT count as
   finished, even when it has a saved value (`specs/124` FR-017, unchanged).
 

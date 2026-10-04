@@ -150,14 +150,14 @@ async function linkNcr(travelerId, inputName, inputLabel, status = 'Submitted') 
 }
 
 test.describe('US2 — an input with an open NCR waits until the NCR is closed', () => {
-  test('an open NCR on an input removes its Input option, keeps Initiate NCR, and shows the NCR', async ({ page }) => {
+  test('an open NCR on an input removes its Input and Initiate NCR options, and shows the NCR', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await linkNcr(travelerId, 'input_b', `Input B ${id}`);
     await page.goto(`/travelers/${travelerId}/`);
 
     await expect(unitOf(page, 'input_b').locator('.input-value-link')).toHaveCount(0);
-    await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toBeVisible();
+    await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toHaveCount(0);
     await expect(unitOf(page, 'input_b').locator('.ncr-link-badge')).toBeVisible();
     // the other inputs are unaffected
     await expect(unitOf(page, 'input_a').locator('.input-value-link')).toHaveCount(1);
@@ -183,17 +183,32 @@ test.describe('US2 — an input with an open NCR waits until the NCR is closed',
     await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toBeVisible();
   });
 
-  test('closing the NCR brings Input back once the page is refreshed', async ({ page }) => {
+  test('closing the NCR brings both Input and Initiate NCR back once the page is refreshed', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     const { ncrId } = await linkNcr(travelerId, 'input_b', `Input B ${id}`);
     await page.goto(`/travelers/${travelerId}/`);
     await expect(unitOf(page, 'input_b').locator('.input-value-link')).toHaveCount(0);
+    await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toHaveCount(0);
 
     await execFixtureCli('set-ncr-status', { ncrId, status: 'Closed' });
     await page.reload();
 
     await expect(unitOf(page, 'input_b').locator('.input-value-link')).toHaveCount(1);
+    await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toHaveCount(1);
+  });
+
+  test('an open NCR on an input that is still empty leaves no way to raise a second one', async ({ page }) => {
+    const id = runId();
+    const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+    await linkNcr(travelerId, 'input_c', `Input C ${id}`);
+    await page.goto(`/travelers/${travelerId}/`);
+
+    await expect(unitOf(page, 'input_c').locator('.initiate-ncr-link')).toHaveCount(0);
+    await expect(unitOf(page, 'input_c').locator('.input-value-link')).toHaveCount(0);
+    await expect(unitOf(page, 'input_c').locator('.ncr-link-badge')).toHaveCount(1);
+    // an input with no NCR still offers both
+    await expect(unitOf(page, 'input_a').locator('.initiate-ncr-link')).toHaveCount(1);
   });
 });
 

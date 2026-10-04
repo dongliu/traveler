@@ -195,6 +195,10 @@ export function appendInitiateNcrLink(element) {
   if (traveler.status !== 1) {
     return;
   }
+  // While an NCR against the input is open, no further one is offered (spec 125 FR-017).
+  if (isInputBlockedByOpenNcr(element.name)) {
+    return;
+  }
   const $ncrLinks = getOrCreateNcrLinksContainer($(element).closest('.controls'));
   if ($ncrLinks.find('.initiate-ncr-link').length > 0) {
     return;
@@ -326,7 +330,8 @@ export function syncInputOptions() {
     }
     const $ncrLinks = getOrCreateNcrLinksContainer($controls);
     if (isInputBlockedByOpenNcr(field.name)) {
-      $controls.find('.input-value-link').remove();
+      // neither option while an NCR is open: Input is held back and no second NCR is raised (FR-015, FR-017)
+      $controls.find('.input-value-link, .initiate-ncr-link').remove();
       // the input is shown as waiting, in words, not only by the NCR badge's colour
       if ($ncrLinks.find('.input-waiting').length === 0) {
         $ncrLinks.prepend('<span class="input-waiting help-inline">Waiting on an open NCR</span>');
