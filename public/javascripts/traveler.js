@@ -247,6 +247,7 @@ function leaveActiveState() {
   $('#form input, #form textarea').prop('disabled', true);
   $('#complete2').prop('disabled', true);
   $('#submit-blockers').empty();
+  $('#submit-blockers-box').hide();
 }
 
 // Enables "Submit for completion" only when every linked NCR is Closed and every
@@ -261,30 +262,105 @@ function updateSubmitState(live) {
 
 // Lists what still holds the submission back: each open NCR with a link to it, and
 // each input with no value. Every value is set with .text()/.attr(), never HTML.
-function renderSubmitBlockers(live, editing) {
-  var $list = $('#submit-blockers');
-  $list.empty();
-  (live.open_ncrs || []).forEach(function(ncr) {
-    var $item = $('<li></li>');
-    $('<a></a>')
-      .attr('href', prefix + '/ncrs/' + encodeURIComponent(ncr.ncr_id))
-      .attr('target', linkTarget)
-      .text(ncr.ncr_number)
-      .appendTo($item);
-    $item.append(
-      document.createTextNode(
-        ' is not Closed (' + ncr.status + (ncr.input_label ? ', ' + ncr.input_label : '') + ')'
-      )
-    );
-    $list.append($item);
+// The reasons the submission is held back (spec 125 FR-020), one per input: an input with
+// open NCRs is listed once, with all of them; an input with no value and no open NCR is
+// listed once. An open NCR that belongs to no counted input gives its own reason.
+function submitReasons(openNcrs, missingInputs) {
+  var labels = {};
+  var ncrsByInput = {};
+  var inputOrder = [];
+  var loose = [];
+  (missingInputs || []).forEach(function(input) {
+    labels[input.name] = input.label;
   });
-  (live.missing_inputs || []).forEach(function(input) {
-    $list.append($('<li></li>').text(input.label + ' has no value'));
+  (openNcrs || []).forEach(function(ncr) {
+    if (!ncr.input_name) {
+      loose.push(ncr);
+      return;
+    }
+    if (!Object.prototype.hasOwnProperty.call(ncrsByInput, ncr.input_name)) {
+      ncrsByInput[ncr.input_name] = [];
+      inputOrder.push(ncr.input_name);
+    }
+    ncrsByInput[ncr.input_name].push(ncr);
+    if (!labels[ncr.input_name] && ncr.input_label) {
+      labels[ncr.input_name] = ncr.input_label;
+    }
+  });
+  var reasons = [];
+  inputOrder.forEach(function(name) {
+    reasons.push({ kind: 'ncr', label: labels[name] || name, ncrs: ncrsByInput[name] });
+  });
+  loose.forEach(function(ncr) {
+    reasons.push({ kind: 'ncr', label: null, ncrs: [ncr] });
+  });
+  (missingInputs || []).forEach(function(input) {
+    if (!Object.prototype.hasOwnProperty.call(ncrsByInput, input.name)) {
+      reasons.push({ kind: 'value', label: input.label });
+    }
+  });
+  return reasons;
+}
+
+// Appends one reason to a list. Every value is set with .text()/.attr(), never HTML.
+function appendReason($list, reason) {
+  var $item = $('<li></li>');
+  if (reason.kind === 'value') {
+    $item.text(reason.label + ' has no value yet');
+  } else {
+    var n = reason.ncrs.length;
+    var lead = reason.label
+      ? reason.label + ' is held by ' + (n > 1 ? n + ' open NCRs' : 'an open NCR') + ': '
+      : 'Open NCR: ';
+    $item.append(document.createTextNode(lead));
+    reason.ncrs.forEach(function(ncr, i) {
+      if (i > 0) {
+        $item.append(document.createTextNode(', '));
+      }
+      $('<a></a>')
+        .attr('href', prefix + '/ncrs/' + encodeURIComponent(ncr.ncr_id))
+        .attr('target', linkTarget)
+        .text(ncr.ncr_number)
+        .appendTo($item);
+      $item.append(document.createTextNode(' (' + ncr.status + ')'));
+    });
+  }
+  $list.append($item);
+}
+
+// Shows the count of reasons in the collapsed box, or hides the box when there are none.
+function showBlockersBox(count) {
+  var $box = $('#submit-blockers-box');
+  if (count === 0) {
+    $box.hide();
+    return;
+  }
+  $('#submit-blockers-count').text(count === 1 ? '1 reason' : count + ' reasons');
+  $box.show();
+}
+
+function renderSubmitBlockers(live, editing) {
+  var $list = $('#submit-blockers').empty();
+  var reasons = submitReasons(live.open_ncrs, live.missing_inputs);
+  reasons.forEach(function(reason) {
+    appendReason($list, reason);
   });
   if (editing) {
     $list.append($('<li></li>').text('An input is being entered: save or reset it first'));
   }
+  showBlockersBox(reasons.length + (editing ? 1 : 0));
 }
+
+// The label of the collapsed details follows the state, so it always offers the next step.
+$(function() {
+  $('#submit-blockers-details')
+    .on('show', function() {
+      $('.submit-blockers-toggle').text('hide details');
+    })
+    .on('hide', function() {
+      $('.submit-blockers-toggle').text('show details');
+    });
+});
 
 // Tells the user a traveler cannot be put forward for completion approval and
 // lists each NCR that is still open, each linking to the NCR. Every value from
@@ -294,28 +370,10 @@ function showOpenNcrs(response) {
   $alert.append('<button class="close" data-dismiss="alert">x</button>');
   $alert.append($('<div class="open-ncrs-message"></div>').text(response.message));
   var $list = $('<ul class="open-ncrs"></ul>');
-  (response.open_ncrs || []).forEach(function(ncr) {
-    var $item = $('<li></li>');
-    $('<a></a>')
-      .attr('href', prefix + '/ncrs/' + encodeURIComponent(ncr.ncr_id))
-      .attr('target', linkTarget)
-      .text(ncr.ncr_number)
-      .appendTo($item);
-    $item.append(
-      document.createTextNode(
-        ' — ' + ncr.status + (ncr.input_label ? ' — ' + ncr.input_label : '')
-      )
-    );
-    $list.append($item);
+  submitReasons(response.open_ncrs, response.missing_inputs).forEach(function(reason) {
+    appendReason($list, reason);
   });
   $alert.append($list);
-  if (response.missing_inputs && response.missing_inputs.length) {
-    var $missing = $('<ul class="missing-inputs"></ul>');
-    response.missing_inputs.forEach(function(input) {
-      $missing.append($('<li></li>').text(input.label + ' has no value'));
-    });
-    $alert.append($missing);
-  }
   $('#message').append($alert);
   $(window).scrollTop($alert.offset().top - 40);
 }

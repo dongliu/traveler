@@ -384,9 +384,12 @@ typed text is still there when the refresh runs.
   or removed; every input on the traveler has a saved, non-empty value; and no
   input is in Input mode with unsaved changes.
 - **FR-020**: While any condition in FR-019 is not met, **Submit for completion**
-  MUST be disabled, and the page MUST list each open linked NCR (number,
-  status, input label, with a link) and each input that has no value (by
-  label).
+  MUST be disabled, and the page MUST give the reasons. There is one reason per
+  input: an input with an open linked NCR is listed once, with each of its open
+  NCRs (number, status, a link to it), and an input with no value and no open NCR
+  is listed once. An open NCR that belongs to no counted input is listed on its
+  own. The reasons MUST be collapsed by default, with the count shown, and open
+  on request, since a traveler can have many of them.
 - **FR-021**: The system MUST refuse a submission for completion, whatever the
   route it arrives by (the traveler page or the REST API), while any condition
   in FR-019 is not met. The refusal MUST list the open NCRs and the inputs

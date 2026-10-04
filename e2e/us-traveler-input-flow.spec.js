@@ -1,3 +1,4 @@
+/* global $ -- used inside page.evaluate, where jQuery is the page's global */
 const { test, expect } = require('@playwright/test');
 const { runId } = require('./fixtures/run-id');
 const { execFixtureCli } = require('./fixtures/exec-cli');
@@ -374,5 +375,48 @@ test.describe('US1 — saving nothing does not complete an input', () => {
 
     // nothing counts as finished, so submission is still held back
     expect((await execFixtureCli('get-traveler', { travelerId })).finishedInput).toBe(0);
+  });
+});
+
+test.describe('US4 — the reasons are collapsed by default, and there is one per input', () => {
+  test('the reasons stay collapsed until the user asks for them', async ({ page }) => {
+    const id = runId();
+    const { travelerId } = await createTraveler({ inputs: textInputs(id) });
+    await page.goto(`/travelers/${travelerId}/`);
+
+    await expect(page.locator('#submit-blockers-box')).toBeVisible();
+    await expect(page.locator('#submit-blockers-count')).toHaveText('3 reasons');
+    await expect(page.locator('#submit-blockers-details')).not.toHaveClass(/\bin\b/);
+
+    // Bootstrap ignores a toggle while the section is still moving, so each step waits for its event
+    const shown = page.evaluate(() => new Promise(resolve => $('#submit-blockers-details').one('shown', resolve)));
+    await page.locator('.submit-blockers-toggle').click();
+    await shown;
+    await expect(page.locator('#submit-blockers-details')).toHaveClass(/\bin\b/);
+    await expect(page.locator('.submit-blockers-toggle')).toHaveText('hide details');
+    await expect(page.locator('#submit-blockers li')).toHaveCount(3);
+
+    const hidden = page.evaluate(() => new Promise(resolve => $('#submit-blockers-details').one('hidden', resolve)));
+    await page.locator('.submit-blockers-toggle').click();
+    await hidden;
+    await expect(page.locator('#submit-blockers-details')).not.toHaveClass(/\bin\b/);
+    await expect(page.locator('.submit-blockers-toggle')).toHaveText('show details');
+  });
+
+  test('an input with open NCRs and no value gives one reason, listing each of its NCRs', async ({ page }) => {
+    const id = runId();
+    const { travelerId } = await createTraveler({ inputs: textInputs(id) });
+    await linkNcr(travelerId, 'input_b', `Input B ${id}`, 'Submitted');
+    await linkNcr(travelerId, 'input_b', `Input B ${id}`, 'Submitted');
+    await page.goto(`/travelers/${travelerId}/`);
+    await page.locator('.submit-blockers-toggle').click();
+
+    // A and C have no value; B has two open NCRs and no value, and is listed once
+    await expect(page.locator('#submit-blockers li')).toHaveCount(3);
+    const inputB = page.locator('#submit-blockers li', { hasText: `Input B ${id}` });
+    await expect(inputB).toHaveCount(1);
+    await expect(inputB.locator('a')).toHaveCount(2);
+    await expect(inputB).not.toContainText('has no value');
+    await expect(page.locator('#submit-blockers li', { hasText: `Input A ${id} has no value yet` })).toHaveCount(1);
   });
 });
