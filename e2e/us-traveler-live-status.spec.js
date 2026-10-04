@@ -138,3 +138,22 @@ test.describe('US5 — the traveler page refreshes its live status every 30 seco
     expect(polls).toBe(0);
   });
 });
+
+test.describe('US5 — an NCR link shows the NCR\'s current status', () => {
+  test('an NCR moving between open statuses elsewhere updates its badge on the open page', async ({ page }) => {
+    const id = runId();
+    const travelerId = await createTraveler(textInputs(id));
+    await page.goto(`/travelers/${travelerId}/`);
+    await fillAndSaveInput(page, 'input_a', 'a');
+    await fillAndSaveInput(page, 'input_b', 'b');
+    await fillAndSaveInput(page, 'input_c', 'c');
+    const { ncrId } = await linkNcr(travelerId, 'input_b', `Input B ${id}`, 'Submitted');
+    await page.reload();
+    await expect(page.locator('.ncr-link-badge .badge')).toHaveText('Submitted');
+
+    // the count of NCRs and their ids stay the same: only the status moves
+    await execFixtureCli('set-ncr-status', { ncrId, status: 'Dispositioned' });
+
+    await expect(page.locator('.ncr-link-badge .badge')).toHaveText('Dispositioned', { timeout: TICK_WAIT });
+  });
+});

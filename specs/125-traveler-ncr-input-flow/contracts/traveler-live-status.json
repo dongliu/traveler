@@ -3,7 +3,9 @@
   "description": "New. The state the active traveler page polls every 30 seconds (spec 125 FR-026). Read-only. It returns no saved values: a client fetches GET /travelers/:id/data/ only for an input whose revision changed.",
   "auth": "Session (auth.ensureAuthenticated), then reqUtils.canReadMw('id'). Same as GET /travelers/:id/ncr-links/.",
   "request": {
-    "params": { "id": "traveler ObjectId" },
+    "params": {
+      "id": "traveler ObjectId"
+    },
     "query": {}
   },
   "responses": {
@@ -26,10 +28,31 @@
         }
       ],
       "open_ncrs": [
-        { "ncr_id": "string", "ncr_number": "string", "status": "string", "input_name": "string|null", "input_label": "string|null" }
+        {
+          "ncr_id": "string",
+          "ncr_number": "string",
+          "status": "string",
+          "input_name": "string|null",
+          "input_label": "string|null"
+        }
       ],
-      "missing_inputs": [ { "name": "string", "label": "string" } ],
-      "submit_ready": "boolean — open_ncrs and missing_inputs are both empty"
+      "missing_inputs": [
+        {
+          "name": "string",
+          "label": "string"
+        }
+      ],
+      "submit_ready": "boolean — open_ncrs and missing_inputs are both empty",
+      "linked_ncrs": [
+        {
+          "ncr_id": "string",
+          "ncr_number": "string",
+          "status": "string — the NCR's current status, open or Closed",
+          "input_name": "string|null",
+          "input_label": "string|null"
+        }
+      ],
+      "linked_ncrs_note": "Every NCR linked to this traveler, with its status. The page redraws its NCR links when any entry changes (a status change between open states included)."
     },
     "401": "Not signed in.",
     "403": "No read access to the traveler (canReadMw).",

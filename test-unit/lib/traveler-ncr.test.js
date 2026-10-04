@@ -1063,6 +1063,29 @@ describe('lib/traveler-ncr — input values and the submission gate (spec 125)',
       live.inputs.forEach(i => expect(i.options).to.deep.equal([]));
     });
 
+    it('lists every linked NCR with its current status, Closed ones included, and changes when a status moves between open states', async () => {
+      const linked = [
+        { _id: 'id-1', ncr_number: 'NCR-2026-0001', status: 'Submitted', traveler_link: { input_name: 'field_1', input_label: 'Field One' } },
+        { _id: 'id-2', ncr_number: 'NCR-2026-0002', status: 'Closed', traveler_link: { input_name: 'field_2', input_label: 'Field Two' } },
+      ];
+      stubReads({ traveler: fullTraveler(), dataRows: filledRows, ncrRows: linked });
+      const before = await travelerNcr.buildLiveStatus(TRAVELER_ID);
+      expect(before.linked_ncrs).to.deep.equal([
+        { ncr_id: 'id-1', ncr_number: 'NCR-2026-0001', status: 'Submitted', input_name: 'field_1', input_label: 'Field One' },
+        { ncr_id: 'id-2', ncr_number: 'NCR-2026-0002', status: 'Closed', input_name: 'field_2', input_label: 'Field Two' },
+      ]);
+      sandbox.restore();
+      stubReads({
+        traveler: fullTraveler(),
+        dataRows: filledRows,
+        ncrRows: [{ ...linked[0], status: 'Dispositioned' }, linked[1]],
+      });
+      const after = await travelerNcr.buildLiveStatus(TRAVELER_ID);
+      expect(after.linked_ncrs[0].status).to.equal('Dispositioned');
+      // the open set and the counts are the same: only the status moved
+      expect(after.open_ncrs.map(n => n.ncr_id)).to.deep.equal(before.open_ncrs.map(n => n.ncr_id));
+    });
+
     it('submit_ready is true only when no NCR is open and every input has a value', async () => {
       stubReads({ traveler: fullTraveler(), dataRows: filledRows });
       expect((await travelerNcr.buildLiveStatus(TRAVELER_ID)).submit_ready).to.equal(true);

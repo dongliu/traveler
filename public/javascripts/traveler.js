@@ -124,14 +124,15 @@ function liveRevisions(live) {
   return revisions;
 }
 
-// Changes exactly when an NCR's status, or the NCRs an input has, change.
+// Changes exactly when an NCR's status, or the NCRs an input has, change. A status change
+// between open states (for example Submitted to Dispositioned) changes the signature too.
 function liveNcrSignature(live) {
   return JSON.stringify([
     live.inputs.map(function(input) {
       return [input.name, input.open_ncr_count, input.closed_ncr_count];
     }),
-    live.open_ncrs.map(function(ncr) {
-      return ncr.ncr_id;
+    live.linked_ncrs.map(function(ncr) {
+      return [ncr.ncr_id, ncr.status, ncr.input_name];
     }),
   ]);
 }

@@ -76,3 +76,10 @@ Lint:  changed files have no more problems than HEAD (checked per file with esli
   closurePdfs 10, files 13. Counts after it: 1436 travelers, 1270 NCRs, 23 binders.
 - Pre-existing leftovers from before this change are still in the database (dong and bob hold them). They are not
   removed by the teardown, since it only purges records created during a run.
+
+== Fix: NCR link badge follows status changes ==
+- The page redrew NCR links only when counts or the set of open NCR ids changed, so a status move between open
+  states (Submitted to Dispositioned) left the badge stale. The live status now lists every linked NCR with its
+  status (linked_ncrs), and the page compares that list.
+- e2e us-traveler-live-status: new test, failed before the fix (badge stayed Submitted), passes after.
+- Unit: traveler-ncr tests 111 passing. e2e (live-status, input-flow, input-linking, ncr-live-refresh, gating): 70 passed.
