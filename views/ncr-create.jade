@@ -66,12 +66,14 @@ block content
           label.control-label(for='po_reference') PO Reference
           .controls
             input#po_reference(type='text', name='po_reference', maxlength='255')
-        .control-group
-          label.control-label(for='traveler_input_ref') Traveler Input
+        // Shown only when the form was opened from a traveler input's "Initiate NCR"
+        // action. It is fixed context: the reference is carried in a hidden field
+        // and cannot be typed or changed here (spec 125 FR-003, FR-004).
+        #traveler-link-context.control-group(style='display: none')
+          label.control-label Linked to
           .controls
-            input#traveler_input_ref.input-xlarge(type='text', name='traveler_input_ref', maxlength='256', placeholder='traveler_id::input_name', autocomplete='off')
-            span.help-block Optional. Use <strong>Copy NCR reference</strong> on an input in a traveler, then paste it here.
-            #traveler-ref-preview.help-block
+            span#traveler-link-text.help-inline
+            input#traveler_input_ref(type='hidden', name='traveler_input_ref')
         .control-group
           label.control-label(for='ce_cs_name') CE/CS Name
             span.text-error *
@@ -131,49 +133,24 @@ block js
       var maxDate = new Date().toISOString().split('T')[0];
       $('#discovery_date').attr('max', maxDate);
 
-      // Traveler input reference (optional): pre-filled by a traveler's
-      // "Initiate NCR" action (?traveler_input_ref=...) or pasted by the user.
-      // The preview only helps the user confirm what the reference points at;
-      // the server resolves and enforces it again on submit.
-      var lookupTimer = null;
-      var lookupSeq = 0;
-      function showRefPreview(text, isError) {
-        $('#traveler-ref-preview')
-          .text(text)
-          .toggleClass('text-error', !!isError)
-          .toggleClass('text-success', !isError && !!text);
-      }
-      function lookupTravelerRef() {
-        var ref = $('#traveler_input_ref').val().trim();
-        var seq = ++lookupSeq;
-        if (!ref) {
-          showRefPreview('');
-          return;
-        }
-        $.getJSON(prefix + '/api/ncrs/traveler-input', { ref: ref })
-          .done(function (data) {
-            if (seq !== lookupSeq) return;
-            showRefPreview('Traveler "' + data.traveler.title + '" — Input "' + data.input.label + '"', false);
-          })
-          .fail(function (xhr) {
-            if (seq !== lookupSeq) return;
-            var resp = xhr.responseJSON || {};
-            showRefPreview(resp.message || 'This reference could not be checked.', true);
-          });
-      }
+      // Opened from a traveler input's "Initiate NCR" action (?traveler_input_ref=...):
+      // the link is fixed context, shown as text. The server resolves and enforces
+      // the reference again on submit, so this page only has to describe it.
       var initialRef = new URLSearchParams(location.search).get('traveler_input_ref');
       if (initialRef) {
         $('#traveler_input_ref').val(initialRef);
-        lookupTravelerRef();
+        $.getJSON(prefix + '/api/ncrs/traveler-input', { ref: initialRef })
+          .done(function (data) {
+            $('#traveler-link-text').text('Traveler "' + data.traveler.title + '" — Input "' + data.input.label + '"');
+            $('#traveler-link-context').show();
+          })
+          .fail(function (xhr) {
+            var resp = xhr.responseJSON || {};
+            $('#traveler-link-text').text(resp.message || 'This traveler input could not be checked.');
+            $('#traveler-link-context').show().find('#traveler-link-text').addClass('text-error');
+            $('#submit-btn').prop('disabled', true);
+          });
       }
-      $('#traveler_input_ref').on('input', function () {
-        clearTimeout(lookupTimer);
-        lookupTimer = setTimeout(lookupTravelerRef, 300);
-      });
-      $('#traveler_input_ref').on('blur', function () {
-        clearTimeout(lookupTimer);
-        lookupTravelerRef();
-      });
 
       if (travelerGlobal.usernames) {
         travelerGlobal.usernames.initialize();

@@ -25,6 +25,7 @@ const singleFileUpload = multer({
 });
 const routesUtilities = require('../utilities/routes');
 const mqttUtilities = require('../utilities/mqtt');
+const { buildLiveStatus } = require('../lib/traveler-ncr');
 
 const auth = require('../lib/auth');
 
@@ -1215,6 +1216,29 @@ module.exports = function(app) {
         }
         return res.status(200).json(docs);
       });
+    }
+  );
+
+  // The state the active traveler page polls every 30 seconds (spec 125): input
+  // values are not included, only what the page needs to show each input's options,
+  // its NCRs and whether the traveler can be submitted.
+  app.get(
+    '/travelers/:id/live-status/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    function(req, res) {
+      buildLiveStatus(req.params.id)
+        .then(function(live) {
+          if (!live) {
+            return res.status(404).send('traveler not found');
+          }
+          return res.status(200).json(live);
+        })
+        .catch(function(err) {
+          logger.error(err);
+          return res.status(500).send(err.message);
+        });
     }
   );
 

@@ -19,330 +19,9 @@ block head
     .badge-Closed { background-color: #777; }
 
 block content
-  - var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
-
-  .container(style='margin-top: 10px')
-    .row-fluid
-      .span8
-        h3
-          | #{ncr.ncr_number}&nbsp;
-          span.label(class='badge-#{ncr.status.replace(/ /g, "")}')= ncr.status
-      .span4.text-right
-        if ncr.status === 'Submitted'
-          a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Create Disposition
-        if ncr.status === 'Dispositioned'
-          a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
-        if ncr.status === 'Approval Requested'
-          a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
-        if ncr.status === 'Final Approval'
-          a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR
-
-    .row-fluid
-      .span6
-        fieldset
-          legend Part Information
-          dl.dl-horizontal
-            dt Part Name
-            dd= ncr.part_name
-            dt Part Number
-            dd= ncr.part_number
-            dt Part Revision
-            dd= ncr.part_revision
-            dt Quantity
-            dd= ncr.quantity
-            dt Supplier
-            dd= ncr.supplier_name
-
-      .span6
-        fieldset
-          legend Reference
-          dl.dl-horizontal
-            dt WBS Number
-            dd= ncr.wbs_number
-            if ncr.specification_drawing_reference
-              dt Spec / Drawing
-              dd= ncr.specification_drawing_reference
-            if ncr.po_reference
-              dt PO Reference
-              dd= ncr.po_reference
-            if ncr.traveler_link && ncr.traveler_link.initiated_from_traveler
-              dt Traveler
-              dd
-                a(href='#{prefix}/travelers/#{ncr.traveler_link.traveler_id}/') View Traveler
-              dt Input
-              dd= ncr.traveler_link.input_label
-            dt CE/CS
-            dd= ncr.ce_cs_name
-            dt Originator
-            dd= ncr.originator_name
-            dt Created
-            dd= new Date(ncr.creation_timestamp).toLocaleDateString()
-            dt Designate
-            dd#designate-display
-              if ncr.originator_designate_name
-                = ncr.originator_designate_name
-              else
-                span.muted None
-              if locals.userid === ncr.originator_id && ncr.status !== 'Closed'
-                | &nbsp;
-                a#designate-toggle.btn.btn-mini(href='#')= ncr.originator_designate_name ? 'Change' : 'Assign'
-                if ncr.originator_designate_name
-                  | &nbsp;
-                  button#designate-remove-btn.btn.btn-mini.btn-danger(type='button') Remove
-          if locals.userid === ncr.originator_id && ncr.status !== 'Closed'
-            #designate-error.alert.alert-error(style='display:none; margin-top:6px')
-              span#designate-error-msg
-            #designate-form(style='display:none; margin-top:6px; padding:8px; background:#fff; border-radius:3px')
-              .control-group
-                label Designate Name
-                input#designate-name-input.input(type='text', placeholder='Last, First', autocomplete='off')
-              .designate-actions(style='position:relative; z-index:1000;')
-                button#designate-submit-btn.btn.btn-sm.btn-primary(type='button') Save
-                button#designate-cancel-btn.btn.btn-sm(type='button') Cancel
-
-    .row-fluid
-      .span12
-        fieldset
-          legend Nonconformance Details
-          dl.dl-horizontal
-            if ncr.discovery_date
-              dt Discovery Date
-              dd= new Date(ncr.discovery_date).toLocaleDateString()
-            if ncr.discovery_context
-              dt Context
-              dd= ncr.discovery_context.replace(/_/g, ' ')
-            dt Description
-            dd= ncr.description_of_nonconformance
-
-    if ncr.disposition && ncr.disposition.parts_disposition
-      .row-fluid
-        .span12
-          fieldset
-            legend Disposition
-            dl.dl-horizontal
-              dt Parts Disposition
-              dd= ncr.disposition.parts_disposition
-              dt Submitted By
-              dd= ncr.ce_cs_name
-              if ncr.disposition.ce_cs_timestamp
-                dt Submitted On
-                dd= new Date(ncr.disposition.ce_cs_timestamp).toLocaleString()
-              if ncr.disposition.rework_repair_instructions
-                dt Rework / Repair Instructions
-                dd= ncr.disposition.rework_repair_instructions
-
-    if (ncr.additional_approvers && ncr.additional_approvers.length) || canManageApprovers
-      .row-fluid
-        .span12
-          fieldset
-            legend Approval Status
-            table.table.table-bordered.table-condensed
-              thead
-                tr
-                  th Approver
-                  th Status
-                  th Timestamp
-                  th Comments
-                  if canManageApprovers
-                    th(style='width: 80px')
-              tbody#approver-status-list
-                if !ncr.additional_approvers || ncr.additional_approvers.length === 0
-                  tr
-                    td(colspan=canManageApprovers ? '5' : '4').muted No additional approvers were designated.
-                else
-                  each approver in ncr.additional_approvers
-                    tr
-                      td= approver.approver_name
-                      td
-                        span.label= approver.approval_status
-                      td= approver.approval_timestamp ? new Date(approver.approval_timestamp).toLocaleString() : '—'
-                      td= approver.comments || '—'
-                      if canManageApprovers
-                        td
-                          button.btn.btn-sm.btn-danger.remove-approver-btn(type='button', data-approver-id=approver.approver_id)
-                            | Remove
-
-          if canManageApprovers
-            fieldset
-              legend Manage Approvers
-              p.help-block Add an approver, or remove one from the table above, while this NCR awaits approval.
-              #approver-mgmt-error.alert.alert-error(style='display:none')
-                span#approver-mgmt-error-msg
-              .control-group
-                .controls
-                  input#new-approver-id.input-medium(type='text', placeholder='Last, First', autocomplete='off')
-                  button#add-approver-btn.btn.btn-sm(type='button', style='margin-left: 5px')
-                    i.fa.fa-plus
-                    | &nbsp; Add Approver
-
-    if ncr.preventive_actions && ncr.preventive_actions.length
-      .row-fluid
-        .span12
-          fieldset
-            legend Preventive Actions
-            #pa-error.alert.alert-error(style='display:none')
-              span#pa-error-msg
-            each pa in ncr.preventive_actions
-              .well(data-pa-id=String(pa._id), style='margin-bottom:10px')
-                p
-                  strong= pa.action_description
-                dl.dl-horizontal
-                  dt Status
-                  dd
-                    span.label(class='pa-status-badge')= pa.status || 'Open'
-                  dt Owner
-                  dd
-                    if pa.owner_name
-                      = pa.owner_name + ' '
-                      span.muted (#{pa.target_completion_date ? new Date(pa.target_completion_date).toLocaleDateString() : 'no target date'})
-                    else
-                      span.muted Unassigned
-                  if pa.actual_completion_date
-                    dt Completed
-                    dd= new Date(pa.actual_completion_date).toLocaleDateString()
-                  if pa.comments && pa.comments.length
-                    dt Comments
-                    dd
-                      ul
-                        each c in pa.comments
-                          li= c
-
-                .btn-toolbar(style='margin-top:6px')
-                  if isQa
-                    button.btn.btn-sm.btn-info.pa-assign-btn(type='button')
-                      i.fa.fa-user
-                      | &nbsp; #{pa.owner_id ? 'Reassign Owner' : 'Assign Owner'}
-                  if pa.owner_id === locals.userid && (!pa.status || pa.status !== 'Completed')
-                    button.btn.btn-sm.btn-primary.pa-update-btn(type='button')
-                      i.fa.fa-pencil
-                      | &nbsp; Update Status
-                  if isQa && pa.status !== 'Completed'
-                    button.btn.btn-sm.btn-success.pa-close-btn(type='button')
-                      i.fa.fa-check
-                      | &nbsp; Close PA
-
-                .pa-assign-form(style='display:none; margin-top:8px; padding:8px; background:#fff; border-radius:3px')
-                  .control-group
-                    label Owner Username
-                    input.pa-owner-id(type='text', value=pa.owner_id || '')
-                  .control-group
-                    label Owner Name
-                    input.pa-owner-name(type='text', value=pa.owner_name || '')
-                  .control-group
-                    label Owner Email
-                    input.pa-owner-email(type='email', value=pa.owner_email || '')
-                  .control-group
-                    label Target Completion Date
-                    input.pa-target-date(type='date', value=pa.target_completion_date ? new Date(pa.target_completion_date).toISOString().slice(0,10) : '')
-                  button.btn.btn-sm.btn-primary.pa-assign-submit(type='button') Save
-                  button.btn.btn-sm.pa-cancel(type='button') Cancel
-
-                .pa-update-form(style='display:none; margin-top:8px; padding:8px; background:#fff; border-radius:3px')
-                  .control-group
-                    label New Status
-                    select.pa-new-status
-                      option(value='Open') Open
-                      option(value='In Progress') In Progress
-                      option(value='Overdue') Overdue
-                      option(value='Completed') Completed
-                  .control-group
-                    label Comment (optional)
-                    textarea.pa-comment(rows='2')
-                  button.btn.btn-sm.btn-primary.pa-update-submit(type='button') Save
-                  button.btn.btn-sm.pa-cancel(type='button') Cancel
-
-    if ncr.closure_record && ncr.closure_record.closure_date
-      .row-fluid
-        .span12
-          fieldset
-            legend Closure
-            dl.dl-horizontal
-              dt Closed By
-              dd= ncr.closure_record.closed_by_name
-              dt Closure Date
-              dd= new Date(ncr.closure_record.closure_date).toLocaleDateString()
-
-    if ncr.attachments && ncr.attachments.length
-      .row-fluid
-        .span12
-          fieldset
-            legend Attachments
-            ul.unstyled
-              each file in ncr.attachments
-                li(style='margin-bottom:4px')
-                  a(href='#{prefix}/api/ncrs/#{ncr._id}/attachments/#{file.file_id}')
-                    i.fa.fa-paperclip
-                    | &nbsp;
-                    = file.file_name
-                  | &nbsp;
-                  span.muted
-                    = 'uploaded by ' + (file.uploaded_by_name || file.uploaded_by || 'unknown')
-                    | ,&nbsp;
-                    = new Date(file.upload_timestamp).toLocaleString()
-
-    .row-fluid
-      .span12
-        fieldset
-          legend
-            | Event Timeline&nbsp;
-            a.btn.btn-mini#timeline-toggle(href='#') Show
-          .event-timeline#event-timeline(style='display:none')
-            each event in ncr.events.slice().reverse()
-              .event-entry
-                span.badge= event.event_type
-                | &nbsp;
-                strong= event.actor_name || 'System'
-                if event.actor_role
-                  |  (#{event.actor_role})
-                | &nbsp;&mdash;&nbsp;
-                = new Date(event.timestamp).toLocaleString()
-                if event.previous_status && event.new_status
-                  .muted
-                    small #{event.previous_status || 'None'} &rarr; #{event.new_status}
-                if event.event_type && event.event_type.indexOf('notification.') === 0 && event.recipients && event.recipients.length
-                  - var totalRecipientCount = event.recipients.length + (event.cc ? event.cc.length : 0)
-                  table.table.table-condensed(style='margin:6px 0 0; font-size:11px; width:auto')
-                    thead
-                      tr
-                        th(style='padding:2px 8px') Field
-                        th(style='padding:2px 8px')= totalRecipientCount > 1 ? 'Recipients' : 'Recipient'
-                        th(style='padding:2px 8px') Status
-                        th(style='padding:2px 8px') Delivered At
-                    tbody
-                      each r in event.recipients
-                        tr
-                          td(style='padding:2px 8px; color:#666') To
-                          td(style='padding:2px 8px')= r.recipient_email || r.recipient_id || '—'
-                          td(style='padding:2px 8px')
-                            if r.delivery_status === 'Delivered'
-                              span.label.label-success= r.delivery_status
-                            else if r.delivery_status === 'Failed'
-                              span.label.label-important= r.delivery_status
-                              if r.error_message
-                                |  &nbsp;
-                                span.muted(style='font-size:10px')= r.error_message
-                            else
-                              span.label= r.delivery_status || 'Unknown'
-                          td(style='padding:2px 8px')= r.delivery_timestamp ? new Date(r.delivery_timestamp).toLocaleString() : '—'
-                      if event.cc && event.cc.length
-                        each r in event.cc
-                          tr
-                            td(style='padding:2px 8px; color:#666') CC
-                            td(style='padding:2px 8px')= r.recipient_email || '—'
-                            td(style='padding:2px 8px')
-                              if r.delivery_status === 'Delivered'
-                                span.label.label-success= r.delivery_status
-                              else if r.delivery_status === 'Failed'
-                                span.label.label-important= r.delivery_status
-                                if r.error_message
-                                  |  &nbsp;
-                                  span.muted(style='font-size:10px')= r.error_message
-                              else
-                                span.label= r.delivery_status || 'Unknown'
-                            td(style='padding:2px 8px')= r.delivery_timestamp ? new Date(r.delivery_timestamp).toLocaleString() : '—'
-                if event.payload
-                  a.event-payload-toggle(href='#', style='font-size:11px; margin-left:8px') [payload]
-                  pre.event-payload(style='display:none; font-size:11px; margin:4px 0 0; white-space:pre-wrap; word-break:break-all; background:#f5f5f5; padding:6px; border-radius:3px')= JSON.stringify(event.payload, null, 2)
+  small#ncr-live-updated.muted.pull-right
+  #ncr-page-body
+    include ncr-detail-body.jade
 
 block js
   script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
@@ -433,7 +112,7 @@ block js
         });
       });
 
-      $('#timeline-toggle').on('click', function(e) {
+      $(document).on('click', '#timeline-toggle', function(e) {
         e.preventDefault();
         var $tl = $('#event-timeline');
         if ($tl.is(':visible')) {
@@ -485,22 +164,22 @@ block js
       // this form has no other field to blur through first. Close it on
       // mousedown (which fires before click) so the buttons are reliably
       // clickable on the first attempt.
-      $('#designate-submit-btn, #designate-cancel-btn').on('mousedown', function() {
+      $(document).on('mousedown', '#designate-submit-btn, #designate-cancel-btn', function() {
         $('#designate-name-input').typeahead('close');
       });
 
-      $('#designate-toggle').on('click', function(e) {
+      $(document).on('click', '#designate-toggle', function(e) {
         e.preventDefault();
         $('#designate-error').hide();
         $('#designate-form').toggle();
       });
 
-      $('#designate-cancel-btn').on('click', function() {
+      $(document).on('click', '#designate-cancel-btn', function() {
         $('#designate-form').hide();
         $('#designate-error').hide();
       });
 
-      $('#designate-submit-btn').on('click', function() {
+      $(document).on('click', '#designate-submit-btn', function() {
         var name = $('#designate-name-input').val().trim();
         var users = (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames)
           ? travelerGlobal.usernames.get(name)
@@ -526,7 +205,7 @@ block js
         });
       });
 
-      $('#designate-remove-btn').on('click', function() {
+      $(document).on('click', '#designate-remove-btn', function() {
         if (!confirm('Remove the current Designate from this NCR?')) return;
         $.ajax({
           url: '#{prefix}/api/ncrs/#{ncr._id}/designate',
@@ -553,11 +232,11 @@ block js
         $('#approver-mgmt-error').show();
       }
 
-      $('#add-approver-btn').on('mousedown', function() {
+      $(document).on('mousedown', '#add-approver-btn', function() {
         $('#new-approver-id').typeahead('close');
       });
 
-      $('#add-approver-btn').on('click', function() {
+      $(document).on('click', '#add-approver-btn', function() {
         var input = $('#new-approver-id').val().trim();
         if (!input) return;
         var id = input;
@@ -589,7 +268,7 @@ block js
         });
       });
 
-      $('#approver-status-list').on('click', '.remove-approver-btn', function() {
+      $(document).on('click', '#approver-status-list .remove-approver-btn', function() {
         var approverId = $(this).data('approver-id');
         if (!confirm('Remove this approver from the NCR?')) return;
 
@@ -606,5 +285,61 @@ block js
             btn.prop('disabled', false);
           }
         });
+      });
+    })(jQuery);
+  script(type='text/javascript').
+    (function($) {
+      var ncrId = '#{ncr._id}';
+      // the revision the page was drawn with, as the live-status route reports it
+      var liveRevision = [!{JSON.stringify(ncr.status)}, !{JSON.stringify(ncr.updated_at || null)}, !{JSON.stringify((ncr.events || []).length)}].join('|');
+
+      function revisionOf(live) {
+        return [live.status, live.updated_at, live.event_count].join('|');
+      }
+
+      // A form control that differs from how the page drew it, or a dialog that is open,
+      // is an entry in progress: the body is not replaced over it (spec 125 FR-033).
+      function isBusy() {
+        var editing = $('#ncr-page-body').find('input, textarea').filter(function() {
+          if (this.type === 'checkbox' || this.type === 'radio') {
+            return this.checked !== this.defaultChecked;
+          }
+          return this.value !== this.defaultValue;
+        }).length > 0;
+        return editing || $('.modal:visible').length > 0;
+      }
+
+      function refreshBody(revision) {
+        return $.ajax({
+          url: '#{prefix}/ncrs/' + ncrId + '/fragment',
+          type: 'GET',
+          dataType: 'html',
+        }).done(function(html) {
+          if (isBusy()) {
+            return; // an entry was started while the body was fetched: try again next time
+          }
+          $('#ncr-page-body').html(html);
+          liveRevision = revision;
+          $('#ncr-live-updated').text('Updated ' + new Date().toLocaleTimeString());
+        });
+      }
+
+      function pollNcr() {
+        return $.ajax({
+          url: '#{prefix}/ncrs/' + ncrId + '/live-status',
+          type: 'GET',
+          dataType: 'json',
+        }).done(function(live) {
+          var revision = revisionOf(live);
+          if (revision === liveRevision || isBusy()) {
+            return;
+          }
+          refreshBody(revision);
+        });
+      }
+
+      // the refresh is shared with the traveler page, so both pause and resume alike
+      import('#{prefix}/javascripts/lib/live-refresh.js').then(function(mod) {
+        mod.startLiveRefresh(pollNcr);
       });
     })(jQuery);

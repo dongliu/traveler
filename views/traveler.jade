@@ -175,8 +175,17 @@ block underTopBtn
           else
             != ''
         if (locals.traveler.status === 1)
+          // what still holds the submission back, one reason per input (spec 125 FR-020).
+          // Collapsed by default: the count is shown, the details open on request.
+          .help-block#submit-blockers-box(style='display: none')
+            | Submit for completion is held back: 
+            span#submit-blockers-count
+            | 
+            a.submit-blockers-toggle(href='#submit-blockers-details', data-toggle='collapse') show details
+            #submit-blockers-details.collapse
+              ul#submit-blockers
           .btn-group
-            button.btn.btn-primary#complete2 Submit for completion
+            button.btn.btn-primary#complete2(disabled) Submit for completion
           .well
             form.form-inline
               input#username.input(type='text', placeholder='Last, First', name='name')

@@ -57,192 +57,12 @@ function fourInputs(id) {
 test.describe('US1 — link an NCR to a traveler input by reference', () => {
   test.use({ permissions: ['clipboard-read', 'clipboard-write'] });
 
-  test('a Copy NCR reference control is offered at every input — filled or not, and inside a checkbox set', async ({
-    page,
-  }) => {
-    const id = runId();
-    const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
-    await page.goto(`/travelers/${travelerId}/`);
-    await fillAndSaveInput(page, 'input_a', 'a measured value');
 
-    // A (filled), B and C (unfilled), D (a checkbox in a set)
-    await expect(page.locator('.copy-ncr-ref')).toHaveCount(4);
-    // "Initiate NCR" stays limited to the one filled input (spec 123)
-    await expect(page.locator('.initiate-ncr-link')).toHaveCount(1);
-  });
 
-  test('the control sits to the right of its input, on the same row', async ({
-    page,
-  }) => {
-    const id = runId();
-    const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
-    await page.goto(`/travelers/${travelerId}/`);
 
-    // Measure only once the page has stopped moving: each input's notes row is
-    // added after the first paint and pushes the inputs below it down, so a
-    // position read before then is stale by the time the button is read.
-    await expect(page.locator('.copy-ncr-ref')).toHaveCount(4);
-    await expect(page.locator('.note-buttons')).toHaveCount(4);
 
-    // a text input (A) and a checkbox (D): the button is beside the field, not below it
-    for (const [index, field] of [
-      [0, 'input[name="input_a"]'],
-      [3, 'input[name="check_d"]'],
-    ]) {
-      const input = await page.locator(field).boundingBox();
-      const control = await page
-        .locator('.copy-ncr-ref')
-        .nth(index)
-        .boundingBox();
-      expect(control.x).toBeGreaterThanOrEqual(input.x + input.width);
-      // the two overlap vertically — one row
-      expect(control.y).toBeLessThan(input.y + input.height);
-      expect(control.y + control.height).toBeGreaterThan(input.y);
-    }
-  });
 
-  test('clicking the control reveals the reference in a popup, with a button that copies it', async ({
-    page,
-  }) => {
-    const id = runId();
-    const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
-    await page.goto(`/travelers/${travelerId}/`);
 
-    // nothing is shown, and nothing copied, until the control is clicked
-    await expect(page.locator('.ncr-ref-popover')).toHaveCount(0);
-    await page
-      .locator('.copy-ncr-ref')
-      .first()
-      .click();
-    const popup = page.locator('.ncr-ref-popover');
-    await expect(popup).toBeVisible();
-    await expect(popup.locator('.ncr-ref-value')).toHaveValue(
-      `${travelerId}::input_a`
-    );
-
-    // the Copy button in the popup puts the reference on the clipboard
-    await popup.locator('.ncr-ref-copy').click();
-    await expect(popup.locator('.ncr-ref-copy')).toContainText('Copied');
-    const copied = await page.evaluate(() => navigator.clipboard.readText());
-    expect(copied).toBe(`${travelerId}::input_a`);
-  });
-
-  test('the reference in the popup is selected, so it can also be copied by hand', async ({
-    page,
-  }) => {
-    const id = runId();
-    const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
-    await page.goto(`/travelers/${travelerId}/`);
-    await page
-      .locator('.copy-ncr-ref')
-      .first()
-      .click();
-
-    const selected = await page
-      .locator('.ncr-ref-popover .ncr-ref-value')
-      .evaluate(field => field.value.slice(field.selectionStart, field.selectionEnd));
-    expect(selected).toBe(`${travelerId}::input_a`);
-    await page.keyboard.press('ControlOrMeta+c');
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-      `${travelerId}::input_a`
-    );
-  });
-
-  test('the popup closes on Escape, on a click elsewhere, and on the control again; one is open at a time', async ({
-    page,
-  }) => {
-    const id = runId();
-    const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
-    await page.goto(`/travelers/${travelerId}/`);
-    const controls = page.locator('.copy-ncr-ref');
-    const popup = page.locator('.ncr-ref-popover');
-
-    await controls.nth(0).click();
-    await expect(popup).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(popup).toHaveCount(0);
-
-    await controls.nth(0).click();
-    await expect(popup).toBeVisible();
-    await controls.nth(0).click();
-    await expect(popup).toHaveCount(0);
-
-    await controls.nth(0).click();
-    await expect(popup).toBeVisible();
-    await page.locator('h3', { hasText: 'Traveler title' }).click();
-    await expect(popup).toHaveCount(0);
-
-    // opening another input's popup replaces the first (the first popup covers
-    // the rows just below its own, so use the last input, which it leaves clear)
-    await controls.nth(0).click();
-    await controls.nth(3).click();
-    await expect(popup).toHaveCount(1);
-    await expect(popup.locator('.ncr-ref-value')).toHaveValue(
-      `${travelerId}::check_d`
-    );
-  });
-
-  test('a pasted reference shows the traveler and input, and the submitted NCR is linked to that exact input', async ({
-    page,
-  }) => {
-    const id = runId();
-    const { travelerId, title } = await createTraveler({
-      inputs: fourInputs(id),
-    });
-    await page.goto(`/travelers/${travelerId}/`);
-    await page
-      .locator('.copy-ncr-ref')
-      .nth(1)
-      .click(); // input B, unfilled
-    await page.locator('.ncr-ref-popover .ncr-ref-copy').click();
-    const reference = await page.evaluate(() => navigator.clipboard.readText());
-    expect(reference).toBe(`${travelerId}::input_b`);
-
-    await page.goto('/ncrs/new');
-    await page.fill('#traveler_input_ref', reference);
-    await page.locator('#traveler_input_ref').blur();
-    await expect(page.locator('#traveler-ref-preview')).toContainText(title);
-    await expect(page.locator('#traveler-ref-preview')).toContainText(
-      `Input B ${id}`
-    );
-
-    const ncrId = await completeNcrCreation(page, `PN-${id}`);
-    const { ncr } = await execFixtureCli('get-ncr', {
-      ncrId,
-      fields: ['ncr_number', 'traveler_link'],
-    });
-    expect(ncr.traveler_link).toMatchObject({
-      traveler_id: travelerId,
-      input_name: 'input_b',
-      input_label: `Input B ${id}`,
-      initiated_from_traveler: true,
-    });
-
-    // the link shows on the traveler, at that input
-    await page.goto(`/travelers/${travelerId}/`);
-    await expect(page.locator('.ncr-link-badge')).toContainText(ncr.ncr_number);
-  });
-
-  test('"Initiate NCR" on a filled input opens the form with the same reference field already filled', async ({
-    page,
-  }) => {
-    const id = runId();
-    const { travelerId, title } = await createTraveler({
-      inputs: fourInputs(id),
-    });
-    await page.goto(`/travelers/${travelerId}/`);
-    await fillAndSaveInput(page, 'input_a', 'a measured value');
-
-    await page.click('.initiate-ncr-link');
-    await page.waitForURL(/\/ncrs\/new\?traveler_input_ref=/);
-    await expect(page.locator('#traveler_input_ref')).toHaveValue(
-      `${travelerId}::input_a`
-    );
-    await expect(page.locator('#traveler-ref-preview')).toContainText(title);
-    await expect(page.locator('#traveler-ref-preview')).toContainText(
-      `Input A ${id}`
-    );
-  });
 
   test('leaving the reference blank still creates a standalone NCR with no traveler link', async ({
     page,
@@ -261,49 +81,7 @@ test.describe('US1 — link an NCR to a traveler input by reference', () => {
     expect(link.initiated_from_traveler).toBeFalsy();
   });
 
-  test('a malformed or unresolvable reference is refused with a specific message and creates nothing', async ({
-    page,
-  }) => {
-    const id = runId();
-    const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
-    await page.goto('/ncrs/new');
-    await fillNcrForm(page, `PN-${id}`);
 
-    const cases = [
-      ['abc', 'Enter the reference as traveler_id::input_name.'],
-      ['::input_a', 'Enter the reference as traveler_id::input_name.'],
-      [`${travelerId}::`, 'Enter the reference as traveler_id::input_name.'],
-      [`${travelerId}::no_such_input`, 'has no input named "no_such_input"'],
-      [
-        `${UNKNOWN_TRAVELER_ID}::input_a`,
-        'No traveler matches this reference.',
-      ],
-    ];
-    for (const [reference, expected] of cases) {
-      await page.fill('#traveler_input_ref', reference);
-      await page.click('#submit-btn');
-      await expect(page.locator('#ncr-error')).toBeVisible({ timeout: 10000 });
-      await expect(page.locator('#ncr-error-msg')).toContainText(expected);
-      await expect(page.locator('#ncr-success')).toBeHidden();
-    }
-  });
-
-  test('a reference wrapped in stray whitespace still works', async ({
-    page,
-  }) => {
-    const id = runId();
-    const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
-    await page.goto('/ncrs/new');
-    await page.fill('#traveler_input_ref', `   ${travelerId}::input_c   `);
-
-    const ncrId = await completeNcrCreation(page, `PN-${id}`);
-    const { ncr } = await execFixtureCli('get-ncr', {
-      ncrId,
-      fields: ['traveler_link'],
-    });
-    expect(ncr.traveler_link.traveler_id).toBe(travelerId);
-    expect(ncr.traveler_link.input_name).toBe('input_c');
-  });
 });
 
 test.describe('US1 — the API enforces the rules, not just the form', () => {
@@ -431,13 +209,13 @@ test.describe(
     ];
 
     for (const [status, label] of NON_ACTIVE) {
-      test(`a ${label} traveler: no Initiate NCR action, and a reference to it is refused naming the status`, async ({
+      test(`a ${label} traveler: no Input or Initiate NCR option, and an NCR started from it is refused naming the status`, async ({
         page,
       }) => {
         const id = runId();
         const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
         // fill an input while the traveler is active, then move it out of active, so
-        // the missing action is down to the status and not to an empty input
+        // the missing options are down to the status and not to an empty input
         await page.goto(`/travelers/${travelerId}/`);
         await fillAndSaveInput(page, 'input_a', 'a measured value');
         await execFixtureCli('set-traveler-status', { travelerId, status });
@@ -453,22 +231,16 @@ test.describe(
             : `/travelers/${travelerId}/`
         );
         await expect(page.locator('.initiate-ncr-link')).toHaveCount(0);
-        // the reference can still be copied from any traveler, whatever its status
-        await expect(page.locator('.copy-ncr-ref').first()).toBeVisible();
+        await expect(page.locator('.input-value-link')).toHaveCount(0);
 
-        await page.goto('/ncrs/new');
-        await page.fill('#traveler_input_ref', `${travelerId}::input_a`);
-        await page.locator('#traveler_input_ref').blur();
-        await expect(page.locator('#traveler-ref-preview')).toContainText(
+        // the form opened from the input's Initiate NCR action names the refusal
+        await page.goto(
+          `/ncrs/new?traveler_input_ref=${encodeURIComponent(`${travelerId}::input_a`)}`
+        );
+        await expect(page.locator('#traveler-link-text')).toContainText(
           `is ${label}`
         );
-
-        await fillNcrForm(page, `PN-${id}`);
-        await page.click('#submit-btn');
-        await expect(page.locator('#ncr-error-msg')).toContainText(
-          `is ${label}`
-        );
-        await expect(page.locator('#ncr-success')).toBeHidden();
+        await expect(page.locator('#submit-btn')).toBeDisabled();
       });
     }
 
@@ -478,10 +250,11 @@ test.describe(
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
 
-      await page.goto('/ncrs/new');
-      await page.fill('#traveler_input_ref', `${travelerId}::input_a`);
-      await page.locator('#traveler_input_ref').blur();
-      await expect(page.locator('#traveler-ref-preview')).toContainText(
+      // the form is opened from input A while the traveler is still active
+      await page.goto(
+        `/ncrs/new?traveler_input_ref=${encodeURIComponent(`${travelerId}::input_a`)}`
+      );
+      await expect(page.locator('#traveler-link-text')).toContainText(
         `Input A ${id}`
       );
 
@@ -496,37 +269,33 @@ test.describe(
       await expect(page.locator('#ncr-success')).toBeHidden();
     });
 
-    test('an active traveler is accepted on both paths — by reference and via Initiate NCR', async ({
+    test('an active traveler accepts an NCR started from an input, linked to that input', async ({
       page,
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
 
-      // by reference
-      await page.goto('/ncrs/new');
-      await page.fill('#traveler_input_ref', `${travelerId}::input_b`);
-      const byReference = await completeNcrCreation(page, `PN-${id}-ref`);
-
-      // via the traveler's own "Initiate NCR" action
+      // an empty input can be the subject of an NCR: no value is needed first
       await page.goto(`/travelers/${travelerId}/`);
-      await fillAndSaveInput(page, 'input_a', 'a measured value');
-      await page.click('.initiate-ncr-link');
+      await page
+        .locator('.controls', { has: page.locator('input[name="input_b"]') })
+        .first()
+        .locator('.initiate-ncr-link')
+        .click();
       await page.waitForURL(/\/ncrs\/new\?traveler_input_ref=/);
-      const viaInitiate = await completeNcrCreation(page, `PN-${id}-init`);
+      await expect(page.locator('#traveler-link-text')).toContainText(
+        `Input B ${id}`
+      );
+      const ncrId = await completeNcrCreation(page, `PN-${id}`);
 
-      for (const [ncrId, inputName] of [
-        [byReference, 'input_b'],
-        [viaInitiate, 'input_a'],
-      ]) {
-        const { ncr } = await execFixtureCli('get-ncr', {
-          ncrId,
-          fields: ['traveler_link'],
-        });
-        expect(ncr.traveler_link).toMatchObject({
-          traveler_id: travelerId,
-          input_name: inputName,
-        });
-      }
+      const { ncr } = await execFixtureCli('get-ncr', {
+        ncrId,
+        fields: ['traveler_link'],
+      });
+      expect(ncr.traveler_link).toMatchObject({
+        traveler_id: travelerId,
+        input_name: 'input_b',
+      });
     });
 
     test('the API and the lookup endpoint refuse a non-active traveler with 409 TRAVELER_NOT_ACTIVE', async ({
@@ -587,6 +356,19 @@ async function travelerStatus(travelerId) {
   return (await execFixtureCli('get-traveler', { travelerId })).status;
 }
 
+/** The four inputs fourInputs() builds. */
+const ALL_INPUT_NAMES = ['input_a', 'input_b', 'input_c', 'check_d'];
+
+/** Gives each named input a saved value through the traveler's data route (spec 125 FR-019). */
+async function fillAllInputs(page, travelerId, names) {
+  for (const name of names) {
+    const res = await page.request.post(`/travelers/${travelerId}/data/`, {
+      data: { name, value: `value ${name}`, type: name === 'check_d' ? 'checkbox' : 'text' },
+    });
+    expect(res.status()).toBe(204);
+  }
+}
+
 test.describe(
   'US3 — an open NCR blocks submission for completion approval',
   () => {
@@ -599,6 +381,7 @@ test.describe(
 
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
       const ncr = await createLinkedNcr(id, {
         travelerId,
         inputName: 'input_a',
@@ -606,27 +389,32 @@ test.describe(
       });
 
       await page.goto(`/travelers/${travelerId}/`);
-      await page.click('#complete2');
-
-      const alert = page.locator('#message .alert-error');
-      await expect(alert).toBeVisible();
-      await expect(alert).toContainText(
-        'cannot be submitted for completion approval'
-      );
-      const link = alert.locator('.open-ncrs a');
-      await expect(link).toHaveText(ncr.ncr_number);
-      await expect(link).toHaveAttribute(
+      // the button is not offered while an NCR is open (spec 125 FR-019), and the
+      // reason is listed, with a link to the NCR
+      await expect(page.locator('#complete2')).toBeDisabled();
+      const reasons = page.locator('#submit-blockers');
+      await expect(reasons.locator('a')).toHaveText(ncr.ncr_number);
+      await expect(reasons.locator('a')).toHaveAttribute(
         'href',
         new RegExp(`/ncrs/${ncr.ncrId}$`)
       );
-      await expect(alert.locator('.open-ncrs li')).toContainText('Submitted');
-      await expect(alert.locator('.open-ncrs li')).toContainText(
-        `Input A ${id}`
-      );
+      await expect(reasons.locator('li')).toContainText('Submitted');
+      await expect(reasons.locator('li')).toContainText(`Input A ${id}`);
 
-      // the traveler stays active, and the form was not left disabled
+      // the server refuses a submission sent past the page, for every role
+      const res = await page.request.put(`/travelers/${travelerId}/status`, {
+        data: { status: 1.5 },
+      });
+      expect(res.status()).toBe(409);
+      expect((await res.json()).code).toBe('OPEN_NCRS');
+
+      // the traveler stays active
       expect(await travelerStatus(travelerId)).toBe(1);
-      await expect(page.locator('input[name="input_a"]')).toBeEnabled();
+      await expect(
+        page.locator('.controls', { has: page.locator('input[name="input_a"]') }).first().locator('.input-value-link')
+      ).toHaveCount(0);
+      // every input here has a value, so none offers an option at all
+      await expect(page.locator('.input-value-link')).toHaveCount(0);
     });
 
     test('every linked NCR must be Closed before the traveler can be submitted', async ({
@@ -634,6 +422,7 @@ test.describe(
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
       const first = await createLinkedNcr(id, {
         travelerId,
         inputName: 'input_a',
@@ -646,8 +435,8 @@ test.describe(
       });
 
       await page.goto(`/travelers/${travelerId}/`);
-      await page.click('#complete2');
-      await expect(page.locator('.open-ncrs li')).toHaveCount(2);
+      await expect(page.locator('#complete2')).toBeDisabled();
+      await expect(page.locator('#submit-blockers li')).toHaveCount(2);
 
       // closing one is not enough
       await execFixtureCli('set-ncr-status', {
@@ -655,9 +444,9 @@ test.describe(
         status: 'Closed',
       });
       await page.reload();
-      await page.click('#complete2');
-      await expect(page.locator('.open-ncrs li')).toHaveCount(1);
-      await expect(page.locator('.open-ncrs a')).toHaveText(second.ncr_number);
+      await expect(page.locator('#complete2')).toBeDisabled();
+      await expect(page.locator('#submit-blockers li')).toHaveCount(1);
+      await expect(page.locator('#submit-blockers a')).toHaveText(second.ncr_number);
       expect(await travelerStatus(travelerId)).toBe(1);
 
       // with every linked NCR Closed, submission goes through
@@ -666,6 +455,7 @@ test.describe(
         status: 'Closed',
       });
       await page.reload();
+      await expect(page.locator('#complete2')).toBeEnabled();
       await page.click('#complete2');
       await expect
         .poll(() => travelerStatus(travelerId), { timeout: 10000 })
@@ -677,6 +467,7 @@ test.describe(
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
       const other = await createTraveler({ inputs: fourInputs(id) });
       await createLinkedNcr(id, {
         travelerId: other.travelerId,
@@ -696,6 +487,7 @@ test.describe(
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
 
       // first submission: no NCR, so it goes through
       await page.goto(`/travelers/${travelerId}/`);
@@ -713,10 +505,8 @@ test.describe(
       });
 
       await page.goto(`/travelers/${travelerId}/`);
-      await page.click('#complete2');
-      await expect(
-        page.locator('#message .alert-error .open-ncrs li')
-      ).toHaveCount(1);
+      await expect(page.locator('#complete2')).toBeDisabled();
+      await expect(page.locator('#submit-blockers li')).toHaveCount(1);
       expect(await travelerStatus(travelerId)).toBe(1);
     });
 
@@ -799,7 +589,7 @@ async function createNcrByReference(page, id, travelerId, inputName) {
 test.describe(
   'US4 — an input with an open NCR does not count as finished',
   () => {
-    test('raising an NCR from a filled input lowers the finished count and lists the NCR in a warning box; editing still works', async ({
+    test('an NCR raised against a filled input lowers the finished count, lists the NCR in a warning box, and holds its Input option', async ({
       page,
     }) => {
       const id = runId();
@@ -810,12 +600,9 @@ test.describe(
       expect(await storedFinished(travelerId)).toBe(2);
       await expect(page.locator('#finished-input')).toHaveText('2');
 
-      // raise an NCR from input A through the real UI
-      await page
-        .locator('.initiate-ncr-link')
-        .first()
-        .click();
-      await completeNcrCreation(page, `PN-${id}`);
+      // an NCR against the filled input A: a saved value locks the input and offers no
+      // Initiate NCR, so this one is raised through the API, as an integration would
+      await createNcrByReference(page, id, travelerId, 'input_a');
 
       await page.goto(`/travelers/${travelerId}/`);
       expect(await storedFinished(travelerId)).toBe(1);
@@ -832,12 +619,18 @@ test.describe(
       await expect(box.locator('.ncr-link-badge')).toHaveCount(1);
       await expect(page.locator('body')).not.toContainText('Not finished');
 
-      // editing the input is still allowed, and the figure does not move
-      await fillAndSaveInput(page, 'input_a', 'a corrected value');
+      // editing is held back while the NCR is open: input A offers no Input option,
+      // and the figure does not move (spec 125 US2)
+      await expect(
+        page
+          .locator('.controls', { has: page.locator('input[name="input_a"]') })
+          .first()
+          .locator('.input-value-link')
+      ).toHaveCount(0);
       expect(await storedFinished(travelerId)).toBe(1);
     });
 
-    test('an unfilled input linked by reference stays unfinished after it is filled in', async ({
+    test('an NCR raised against an unfilled input leaves the finished count unchanged, and holds its Input option', async ({
       page,
     }) => {
       const id = runId();
@@ -847,36 +640,46 @@ test.describe(
       expect(await storedFinished(travelerId)).toBe(1);
 
       // an NCR against the still-empty input C changes nothing yet
-      await createNcrByReference(page, id, travelerId, 'input_c');
+      await page
+        .locator('.controls', { has: page.locator('input[name="input_c"]') })
+        .first()
+        .locator('.initiate-ncr-link')
+        .click();
+      await page.waitForURL(/\/ncrs\/new\?traveler_input_ref=/);
+      await completeNcrCreation(page, `PN-${id}`);
       expect(await storedFinished(travelerId)).toBe(1);
 
-      // filling C in: neither the page nor the server counts it while its NCR is open
+      // while C's NCR is open, C offers no Input option (spec 125 US2)
       await page.goto(`/travelers/${travelerId}/`);
       await expect(page.locator('#finished-input')).toHaveText('1');
-      await fillAndSaveInput(page, 'input_c', 'now filled');
-      await expect(page.locator('#finished-input')).toHaveText('1');
-      expect(await storedFinished(travelerId)).toBe(1);
-
-      await page.reload();
-      await expect(page.locator('#finished-input')).toHaveText('1');
-      // C's open NCR is listed in its warning box (no other input has one)
+      await expect(
+        page
+          .locator('.controls', { has: page.locator('input[name="input_c"]') })
+          .first()
+          .locator('.input-value-link')
+      ).toHaveCount(0);
       await expect(page.locator('.ncr-links-existing')).toHaveCount(1);
     });
 
-    test('a later save on another input does not quietly un-block an input that still has an open NCR', async ({
+    test('a later save on another input leaves an input that is still held by its open NCR uncounted and locked', async ({
       page,
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
       await page.goto(`/travelers/${travelerId}/`);
       await fillAndSaveInput(page, 'input_a', 'a measured value');
-      await fillAndSaveInput(page, 'input_b', 'another value');
-      await createNcrByReference(page, id, travelerId, 'input_a');
+      // an NCR against the still-empty input C holds it back
+      await createNcrByReference(page, id, travelerId, 'input_c');
       expect(await storedFinished(travelerId)).toBe(1);
 
       await page.goto(`/travelers/${travelerId}/`);
-      await fillAndSaveInput(page, 'input_b', 'edited value'); // every data save recounts
-      expect(await storedFinished(travelerId)).toBe(1);
+      await fillAndSaveInput(page, 'input_b', 'another value'); // every data save recounts
+      expect(await storedFinished(travelerId)).toBe(2);
+      await expect(page.locator('#finished-input')).toHaveText('2');
+      // C is still held: its Input option stays hidden until its NCR is Closed
+      await expect(
+        page.locator('.controls', { has: page.locator('input[name="input_c"]') }).first().locator('.input-value-link')
+      ).toHaveCount(0);
     });
 
     test('closing the NCR through the real close endpoint makes the input count again', async ({
@@ -1330,10 +1133,12 @@ test.describe(
     });
 
     test('both status routes refuse while an NCR is open — including the direct active-to-completed route — and allow it once the NCR is Closed', async ({
+      page,
       playwright,
     }) => {
       const id = runId();
       const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
+      await fillAllInputs(page, travelerId, ALL_INPUT_NAMES);
       const ncr = await createLinkedNcr(id, {
         travelerId,
         inputName: 'input_a',

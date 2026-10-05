@@ -1,0 +1,85 @@
+Baseline before implementing 125-traveler-ncr-input-flow (branch 125-traveler-ncr-input-flow, base d3466708 + spec/plan/tasks commits)
+
+T001 unit:  TRAVELER_CONFIG_REL_PATH=docker npm run unit  -> 352 passing, 0 failing
+T001 lint:  whole repo already reports 2490 problems (2411 errors, 79 warnings) before any change; lint is compared per changed file
+T002 e2e:   npm run e2e -- e2e/us-traveler-ncr-gating.spec.js -> 46 passed (1.0m)
+
+Environment: docker compose stack up; web container mounts this worktree at /app (nodemon restarts on change).
+Client-side behaviour is tested only by Playwright (mocha has no DOM); see T012.
+
+T012: Client behaviour is verified by Playwright only (mocha has no DOM). live-refresh timing via page.clock in T045 and T053.
+
+Phase 2 after: TRAVELER_CONFIG_REL_PATH=docker npm run unit -> 375 passing (352 baseline + 23 new), 0 failing.
+
+Phase 3-5 (US1, US2, US3) after:
+  e2e us-traveler-input-flow.spec.js      -> 12 passed
+  e2e us-traveler-ncr-input-linking.spec  -> 6 passed (AS1 and AS2 updated for spec 125)
+  e2e us-traveler-ncr-gating.spec.js      -> 37 passed (46 before; 9 spec-124 reference-path scenarios retired, 3 rewritten for the Initiate path)
+
+== AFTER implementation (final run) ==
+Unit:  TRAVELER_CONFIG_REL_PATH=docker npm run unit -> 375 passing, 0 failing (352 baseline + 23 new)
+E2E:   npm run e2e (full suite) -> 142 passed, 1 failed (143 total; baseline 46 for gating alone)
+       The 1 failure is PRE-EXISTING and unrelated to this feature:
+       e2e/us2-ce-cs-disposition.spec.js AS1 expects a "Submit Disposition" link on the NCR page.
+       HEAD's views/ncr-detail.jade has only "Create Disposition" (no such link), and the spec was last
+       changed in 88c28aad. Left as it is.
+Lint:  changed files have no more problems than HEAD (checked per file with eslint -f json).
+       public/javascripts/traveler.js has the pre-existing 'validateLog' no-undef error.
+
+== Deviations from tasks.md (recorded as they happened) ==
+- T007/T008: the emptiness rule is in utilities/routes.js (valueIsEmpty, currentValues, missingInputs),
+  not lib/traveler-ncr.js, because lib depends on utilities and resetTouched needs the same rule.
+  The refusal is submitRefusal() in lib/traveler-ncr.js, not a separate assertInputsComplete.
+- resetTouched (utilities/routes.js): touchedInputs now counts only inputs whose latest value is non-blank.
+  This is what keeps the stored finishedInput and the submission gate in agreement (spec 125 FR-019).
+- T047 (live-status route) was built with US4, because the submit button's reasons come from it.
+- T052: traveler.js and the NCR page load live-refresh.js as an ES module import (dynamic import on the
+  NCR page), so no separate script tag is needed.
+- T027/T026: the gating spec's 9 spec-124 reference-path scenarios were removed, not rewritten; three
+  others were rewritten to use the Initiate NCR path (the form opened with ?traveler_input_ref=).
+- The NCR live-status revision is embedded in the page from the same fields the route returns
+  (status, updated_at, events length), so the first poll does not miss a change made before it.
+- Pre-existing, noticed and not changed: GET /ncrs/:id (web) checks sign-in only, not NCR read access.
+  The new /ncrs/:id/live-status and /fragment routes match it.
+
+== Not done ==
+- T067 (walk through quickstart.md by hand): not done. The e2e suite covers quickstart sections 2-4,
+  but no manual browser pass has been recorded.
+
+== Change: a saved value completes and locks the input ==
+- Save no longer returns an input to both options. A completed input (non-blank saved value) is locked and
+  offers neither Input nor Initiate NCR. Reset before saving still returns both options.
+- Consequence: an NCR can be raised only against an input with no saved value (spec 125 FR-010, FR-013).
+- Unit: 375 passing. E2E full suite: 141 passed, 2 failed:
+    * us2-ce-cs-disposition AS1 — the pre-existing stale "Submit Disposition" expectation (unchanged).
+    * us-traveler-ncr-gating "an NCR raised against a filled input ..." — failed once with API 500
+      "NCR-QA group is not configured". That is the known transient QA-group race that
+      us2-ce-cs-disposition.spec.js documents. The test passes on its own (gating spec: 37 passed).
+
+== Change: an unticked box is empty ==
+- A single checkbox that is not ticked is saved as false. It now counts as empty on the server (valueIsEmpty) and
+  in the page (hasSavedValue), so saving it leaves the input uncompleted with both options (before, it was
+  completed and locked with no options). 0 stays a value.
+- After a save with no value (blank text or unticked box) the input is not completed: it keeps Input and Initiate NCR,
+  and its field returns to read-only until Input is clicked again.
+- Unit: traveler-ncr tests 110 passing. e2e us-traveler-input-flow: 18 passed (new case: blank save and unticked box).
+
+== E2E teardown (cleanup of records a run created) ==
+- global-setup: records the run start with the fixture CLI's run-marker (E2E_RUN_STARTED_AT).
+- global-teardown: purge-run removes the travelers, NCRs and binders created at or after that start by the
+  two test identities, with their uploaded files, closure PDFs, notes and input data. E2E_KEEP_RECORDS=1 keeps them.
+- Full suite run: teardown removed binders 1, ncrs 60, travelers 65, travelerData 57, closurePdfs 10, files 13.
+  count-records for dong and bob returned to the pre-run baseline (1517 travelers, 1337 NCRs, 24 binders).
+- Full suite after the change: 143 passed, 1 failed (the pre-existing us2-ce-cs-disposition expectation).
+- Mistake, disclosed: a manual purge-run with a 30-minute window (intended for a kept run) also removed earlier
+  leftover records of dong and bob from this session: travelers 99, ncrs 73, binders 1, travelerData 89,
+  closurePdfs 10, files 13. Counts after it: 1436 travelers, 1270 NCRs, 23 binders.
+- Pre-existing leftovers from before this change are still in the database (dong and bob hold them). They are not
+  removed by the teardown, since it only purges records created during a run.
+
+== Fix: NCR link badge follows status changes ==
+- The page redrew NCR links only when counts or the set of open NCR ids changed, so a status move between open
+  states (Submitted to Dispositioned) left the badge stale. The live status now lists every linked NCR with its
+  status (linked_ncrs), and the page compares that list.
+- e2e us-traveler-live-status: new test, failed before the fix (badge stayed Submitted), passes after.
+- Unit: traveler-ncr tests 111 passing. e2e (live-status, input-flow, input-linking, ncr-live-refresh, gating): 70 passed.

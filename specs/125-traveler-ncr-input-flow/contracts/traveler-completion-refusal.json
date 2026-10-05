@@ -1,0 +1,21 @@
+{
+  "endpoints": [
+    "PUT /travelers/:id/status (page, lib/traveler.js)",
+    "PUT /apis/travelers/:id/status/ (REST, routes/api.js)",
+    "POST /apis/update/traveler/:id/ (REST, routes/api.js)"
+  ],
+  "trigger": "Target status 1.5, or 2 straight from active, while any linked NCR is not Closed OR any counted input has no saved non-empty value (spec 125 FR-019, FR-021). Resubmission after being sent back is checked the same way (FR-023). No override for any role (FR-022).",
+  "response_409_open_ncrs": {
+    "code": "OPEN_NCRS",
+    "message": "string — unchanged text",
+    "open_ncrs": [ { "ncr_id": "string", "ncr_number": "string", "status": "string", "input_name": "string|null", "input_label": "string|null" } ],
+    "missing_inputs": "[{ name, label }] — present, possibly empty, when any input is missing a value"
+  },
+  "response_409_inputs_missing": {
+    "code": "INPUTS_MISSING",
+    "message": "string — 'Every input needs a value before this traveler can be submitted.'",
+    "open_ncrs": [],
+    "missing_inputs": [ { "name": "string", "label": "string" } ]
+  },
+  "compatibility": "Additive. OPEN_NCRS keeps its meaning and its open_ncrs field. Callers that branch on the code they already know are unaffected. A caller that submits a traveler with a blank input now receives INPUTS_MISSING (409). This is a behaviour change, documented in CLAUDE.md and tools/openapi/openapi.yaml."
+}

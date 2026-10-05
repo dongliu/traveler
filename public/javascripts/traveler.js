@@ -11,7 +11,16 @@ import {
   renderHistory,
   appendInitiateNcrLink,
   isInputBlockedByOpenNcr,
+  enterInputMode,
+  leaveInputMode,
+  hasSavedValue,
+  markCompleted,
+  refreshOptions,
+  loadNcrBadges,
+  history as travelerHistory,
+  fileHistory,
 } from './lib/traveler.js';
+import { startLiveRefresh } from './lib/live-refresh.js';
 
 // temporary solution for the dirty forms
 function cleanForm() {
@@ -78,6 +87,281 @@ function notify() {
   });
 }
 
+// The live state of an active traveler page (spec 125 US5). `pageBinder` fills the
+// form, `liveBaseline` is the last state the page applied, and `stopLiveRefresh`
+// stops the 30-second refresh. All three are set once the page is ready.
+var pageBinder = null;
+var liveBaseline = null;
+var stopLiveRefresh = null;
+// the last live state, so the reasons can be redrawn when an input is entered or saved
+var lastLiveStatus = null;
+
+// Pulls the traveler's live status and brings the page up to date with it (spec 125
+// FR-019, FR-026, FR-027): the finished count, the NCR badges when an NCR changed,
+// the saved value of any input that changed elsewhere (never one being entered), and
+// "Submit for completion". A failed pull leaves the page as it was (FR-029). Also
+// run after a save, reset or upload.
+function refreshLiveStatus() {
+  return $.ajax({
+    url: './live-status/',
+    type: 'GET',
+    dataType: 'json',
+  }).done(function(live) {
+    if (live.status !== 1) {
+      leaveActiveState();
+      return;
+    }
+    applyLiveStatus(live);
+    $('#live-status-updated').text('Updated ' + new Date().toLocaleTimeString());
+  });
+}
+
+function liveRevisions(live) {
+  var revisions = {};
+  live.inputs.forEach(function(input) {
+    revisions[input.name] = input.revision;
+  });
+  return revisions;
+}
+
+// Changes exactly when an NCR's status, or the NCRs an input has, change. A status change
+// between open states (for example Submitted to Dispositioned) changes the signature too.
+function liveNcrSignature(live) {
+  return JSON.stringify([
+    live.inputs.map(function(input) {
+      return [input.name, input.open_ncr_count, input.closed_ncr_count];
+    }),
+    live.linked_ncrs.map(function(ncr) {
+      return [ncr.ncr_id, ncr.status, ncr.input_name];
+    }),
+  ]);
+}
+
+function applyLiveStatus(live) {
+  $('#finished-input').text(live.finished_input);
+  updateSubmitState(live);
+  var signature = liveNcrSignature(live);
+  var revisions = liveRevisions(live);
+  if (liveBaseline === null) {
+    liveBaseline = { signature: signature, revisions: revisions };
+    return;
+  }
+  if (signature !== liveBaseline.signature) {
+    $('#form .ncr-links-existing').remove();
+    loadNcrBadges();
+    liveBaseline.signature = signature;
+  }
+  var changed = live.inputs
+    .map(function(input) {
+      return input.name;
+    })
+    .filter(function(name) {
+      return liveBaseline.revisions[name] !== revisions[name];
+    });
+  if (changed.length > 0) {
+    applyChangedValues(changed, revisions);
+  }
+}
+
+// The input unit (.controls) that holds the named field.
+function unitForName(name) {
+  return $('#form')
+    .find('[name="' + name + '"]')
+    .first()
+    .closest('.controls');
+}
+
+// An input is being entered when it is in Input mode: its controls are enabled, or its
+// Save and Reset are showing. Such an input is never overwritten by a refresh.
+function isBeingEntered($unit) {
+  return (
+    $unit.children('.control-group-buttons').length > 0 ||
+    $unit.find('input,textarea').filter(':enabled').length > 0
+  );
+}
+
+// Shows the latest saved value and history of each input that changed elsewhere.
+// An input being entered is left alone, and picked up on a later refresh.
+function applyChangedValues(names, revisions) {
+  return $.ajax({
+    url: './data/',
+    type: 'GET',
+    dataType: 'json',
+  }).done(function(data) {
+    names.forEach(function(name) {
+      var $unit = unitForName(name);
+      if ($unit.length === 0 || isBeingEntered($unit)) {
+        return;
+      }
+      liveBaseline.revisions[name] = revisions[name];
+      var found = data
+        .filter(function(entry) {
+          return entry.name === name;
+        })
+        .sort(function(a, b) {
+          return a.inputOn > b.inputOn ? -1 : 1;
+        });
+      if (found.length === 0) {
+        return;
+      }
+      var field = $unit.find('input,textarea')[0];
+      var current = found[0];
+      if (field.type !== 'file') {
+        var element = field;
+        if (current.inputType === 'radio') {
+          element =
+            $unit
+              .find('input')
+              .filter(function() {
+                return this.value === current.value;
+              })[0] || field;
+        }
+        pageBinder.deserializeFieldFromValue(element, current.value);
+        pageBinder.accessor.set(name, current.value);
+      }
+      markCompleted($unit, field.type === 'file' ? true : hasSavedValue(current.value));
+      refreshOptions($unit);
+      var html =
+        '<b>history</b>: ' +
+        (field.type === 'file' ? fileHistory(found) : travelerHistory(found));
+      var $history = $unit.children('.input-history');
+      if ($history.length > 0) {
+        $history.html(html);
+      } else {
+        $unit.append('<div class="input-history">' + html + '</div>');
+      }
+    });
+  });
+}
+
+// The traveler is no longer active, for example because it was submitted elsewhere:
+// stop refreshing, offer none of the input options, and keep the form read-only
+// (spec 125 FR-028).
+function leaveActiveState() {
+  if (stopLiveRefresh) {
+    stopLiveRefresh();
+    stopLiveRefresh = null;
+  }
+  $('#form .input-value-link, #form .initiate-ncr-link').remove();
+  $('#form .control-group-buttons').remove();
+  $('#form input, #form textarea').prop('disabled', true);
+  $('#complete2').prop('disabled', true);
+  $('#submit-blockers').empty();
+  $('#submit-blockers-box').hide();
+}
+
+// Enables "Submit for completion" only when every linked NCR is Closed and every
+// input has a value, and no input is being entered with unsaved changes (FR-019).
+function updateSubmitState(live) {
+  lastLiveStatus = live;
+  var editing = $('#form .control-group-buttons').length > 0;
+  var ready = live.submit_ready && !editing;
+  $('#complete2, #complete').prop('disabled', !ready);
+  renderSubmitBlockers(live, editing);
+}
+
+// Lists what still holds the submission back: each open NCR with a link to it, and
+// each input with no value. Every value is set with .text()/.attr(), never HTML.
+// The reasons the submission is held back (spec 125 FR-020), one per input: an input with
+// open NCRs is listed once, with all of them; an input with no value and no open NCR is
+// listed once. An open NCR that belongs to no counted input gives its own reason.
+function submitReasons(openNcrs, missingInputs) {
+  var labels = {};
+  var ncrsByInput = {};
+  var inputOrder = [];
+  var loose = [];
+  (missingInputs || []).forEach(function(input) {
+    labels[input.name] = input.label;
+  });
+  (openNcrs || []).forEach(function(ncr) {
+    if (!ncr.input_name) {
+      loose.push(ncr);
+      return;
+    }
+    if (!Object.prototype.hasOwnProperty.call(ncrsByInput, ncr.input_name)) {
+      ncrsByInput[ncr.input_name] = [];
+      inputOrder.push(ncr.input_name);
+    }
+    ncrsByInput[ncr.input_name].push(ncr);
+    if (!labels[ncr.input_name] && ncr.input_label) {
+      labels[ncr.input_name] = ncr.input_label;
+    }
+  });
+  var reasons = [];
+  inputOrder.forEach(function(name) {
+    reasons.push({ kind: 'ncr', label: labels[name] || name, ncrs: ncrsByInput[name] });
+  });
+  loose.forEach(function(ncr) {
+    reasons.push({ kind: 'ncr', label: null, ncrs: [ncr] });
+  });
+  (missingInputs || []).forEach(function(input) {
+    if (!Object.prototype.hasOwnProperty.call(ncrsByInput, input.name)) {
+      reasons.push({ kind: 'value', label: input.label });
+    }
+  });
+  return reasons;
+}
+
+// Appends one reason to a list. Every value is set with .text()/.attr(), never HTML.
+function appendReason($list, reason) {
+  var $item = $('<li></li>');
+  if (reason.kind === 'value') {
+    $item.text(reason.label + ' has no value yet');
+  } else {
+    var n = reason.ncrs.length;
+    var lead = reason.label
+      ? reason.label + ' is held by ' + (n > 1 ? n + ' open NCRs' : 'an open NCR') + ': '
+      : 'Open NCR: ';
+    $item.append(document.createTextNode(lead));
+    reason.ncrs.forEach(function(ncr, i) {
+      if (i > 0) {
+        $item.append(document.createTextNode(', '));
+      }
+      $('<a></a>')
+        .attr('href', prefix + '/ncrs/' + encodeURIComponent(ncr.ncr_id))
+        .attr('target', linkTarget)
+        .text(ncr.ncr_number)
+        .appendTo($item);
+      $item.append(document.createTextNode(' (' + ncr.status + ')'));
+    });
+  }
+  $list.append($item);
+}
+
+// Shows the count of reasons in the collapsed box, or hides the box when there are none.
+function showBlockersBox(count) {
+  var $box = $('#submit-blockers-box');
+  if (count === 0) {
+    $box.hide();
+    return;
+  }
+  $('#submit-blockers-count').text(count === 1 ? '1 reason' : count + ' reasons');
+  $box.show();
+}
+
+function renderSubmitBlockers(live, editing) {
+  var $list = $('#submit-blockers').empty();
+  var reasons = submitReasons(live.open_ncrs, live.missing_inputs);
+  reasons.forEach(function(reason) {
+    appendReason($list, reason);
+  });
+  if (editing) {
+    $list.append($('<li></li>').text('An input is being entered: save or reset it first'));
+  }
+  showBlockersBox(reasons.length + (editing ? 1 : 0));
+}
+
+// The label of the collapsed details follows the state, so it always offers the next step.
+$(function() {
+  $('#submit-blockers-details')
+    .on('show', function() {
+      $('.submit-blockers-toggle').text('hide details');
+    })
+    .on('hide', function() {
+      $('.submit-blockers-toggle').text('show details');
+    });
+});
+
 // Tells the user a traveler cannot be put forward for completion approval and
 // lists each NCR that is still open, each linking to the NCR. Every value from
 // the response is set with .text()/.attr(), never concatenated into HTML.
@@ -86,19 +370,8 @@ function showOpenNcrs(response) {
   $alert.append('<button class="close" data-dismiss="alert">x</button>');
   $alert.append($('<div class="open-ncrs-message"></div>').text(response.message));
   var $list = $('<ul class="open-ncrs"></ul>');
-  (response.open_ncrs || []).forEach(function(ncr) {
-    var $item = $('<li></li>');
-    $('<a></a>')
-      .attr('href', prefix + '/ncrs/' + encodeURIComponent(ncr.ncr_id))
-      .attr('target', linkTarget)
-      .text(ncr.ncr_number)
-      .appendTo($item);
-    $item.append(
-      document.createTextNode(
-        ' — ' + ncr.status + (ncr.input_label ? ' — ' + ncr.input_label : '')
-      )
-    );
-    $list.append($item);
+  submitReasons(response.open_ncrs, response.missing_inputs).forEach(function(reason) {
+    appendReason($list, reason);
   });
   $alert.append($list);
   $('#message').append($alert);
@@ -122,7 +395,7 @@ function setStatus(s) {
         return;
       }
       var body = jqXHR.responseJSON;
-      if (jqXHR.status === 409 && body && body.code === 'OPEN_NCRS') {
+      if (jqXHR.status === 409 && body && (body.code === 'OPEN_NCRS' || body.code === 'INPUTS_MISSING')) {
         showOpenNcrs(body);
         // shown above; keep ajax-helper's generic alert (raw JSON) off the page
         jqXHR.handledByCaller = true;
@@ -299,6 +572,13 @@ $(function() {
   var binder = new Binder.FormBinder(document.forms[0]);
 
   renderHistory(binder, travelerStatus);
+  pageBinder = binder;
+  if (travelerStatus === 1) {
+    // an active traveler's submit button starts disabled and is set from the server's
+    // state, then kept current every 30 seconds (spec 125 US5)
+    refreshLiveStatus();
+    stopLiveRefresh = startLiveRefresh(refreshLiveStatus);
+  }
 
   $('#form').on('click', 'a.new-note', function(e) {
     e.preventDefault();
@@ -401,14 +681,12 @@ $(function() {
 
   function completeClick(e) {
     e.preventDefault();
-    if (
-      $('#validation').css('display') === 'none' &&
-      !isValid(document.getElementById('form'))
-    ) {
-      showConfirmation(complete);
-    } else {
-      complete();
+    // Enabled only once every input has a value and every linked NCR is Closed
+    // (spec 125 FR-019); a disabled button does nothing, and the server checks again.
+    if ($(this).prop('disabled')) {
+      return;
     }
+    complete();
   }
 
   // deserialize the values here
@@ -626,7 +904,7 @@ $(function() {
     $('#form input,textarea')
       .not($(inputs))
       .prop('disabled', true);
-    $('#complete').prop('disabled', true);
+    $('#complete, #complete2').prop('disabled', true);
     if ($controls.children('.control-group-buttons').length === 0) {
       $controls.prepend(
         '<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>'
@@ -634,11 +912,33 @@ $(function() {
     }
   }
 
+  // "Input": make this one input editable and hide its Initiate NCR option (spec 125 FR-009)
+  $('#form').on('click', '.input-value-link', function(e) {
+    e.preventDefault();
+    const $controls = $(this).closest('.controls');
+    enterInputMode($controls);
+    if (lastLiveStatus) {
+      updateSubmitState(lastLiveStatus);
+    }
+    $controls
+      .find('input,textarea')
+      .filter(':enabled')
+      .first()
+      .trigger('focus');
+  });
+
+  // a disabled "Initiate NCR" option (another input is being entered) does nothing
+  $('#form').on('click', '.initiate-ncr-link.disabled', function(e) {
+    e.preventDefault();
+  });
+
   $('#form').on('click', 'button[value="save"]', function(e) {
     e.preventDefault();
     // ajax to save the current value
     var $this = $(this);
-    var inputs = $this.closest('.controls').find('input,textarea');
+    // captured now: .done removes the Save button, which takes its unit out of reach
+    var $unit = $this.closest('.controls');
+    var inputs = $unit.find('input,textarea');
     var input = inputs[0];
     if (inputs[0].type === 'radio') {
       for (var i = 0; i < inputs.size(); i++) {
@@ -695,6 +995,7 @@ $(function() {
             $this.closest('.controls')
           );
         }
+        markCompleted($unit, hasSavedValue(binder.accessor.target[input.name]));
         var historyRecord = generateHistoryRecordHtml(
           input.type,
           binder.accessor.target[input.name],
@@ -717,8 +1018,8 @@ $(function() {
         }
       })
       .always(function() {
-        $('#form input,textarea').prop('disabled', false);
-        $('#complete').prop('disabled', false);
+        leaveInputMode($unit);
+        refreshLiveStatus();
       });
   });
 
@@ -743,8 +1044,8 @@ $(function() {
       markValidity(inputs[i]);
     }
 
-    $('#form input,textarea').prop('disabled', false);
-    $('#complete').prop('disabled', false);
+    leaveInputMode($this.closest('.controls'));
+    refreshLiveStatus();
     $(this)
       .closest('.control-group-buttons')
       .remove();
@@ -757,7 +1058,7 @@ $(function() {
     $('#form input,textarea')
       .not($this)
       .prop('disabled', true);
-    $('#complete').prop('disabled', true);
+    $('#complete, #complete2').prop('disabled', true);
     var file = this.files[0];
     if (file === undefined) {
       $cgw.children('.control-group-buttons').remove();
@@ -884,6 +1185,7 @@ $(function() {
             $this.closest('.control-group-wrap').find('.controls')
           );
         }
+        markCompleted($(input).closest('.controls'), true);
         $history.html(
           '<strong><a href=' +
             json.location +
@@ -910,16 +1212,21 @@ $(function() {
         }
       })
       .always(function() {
-        $('#form input,textarea').prop('disabled', false);
-        $('#complete').prop('disabled', false);
+        leaveInputMode($(input).closest('.controls'));
+        refreshLiveStatus();
       });
   });
 
   $('#form').on('click', 'button[value="cancel"]', function(e) {
     e.preventDefault();
     // cannot reset the file input value
-    $('#form input,textarea').prop('disabled', false);
-    $('#complete').prop('disabled', false);
+    leaveInputMode(
+      $(this)
+        .closest('.control-group-wrap')
+        .find('.controls')
+        .first()
+    );
+    refreshLiveStatus();
     $(this)
       .closest('.control-group-buttons')
       .remove();

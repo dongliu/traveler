@@ -167,162 +167,23 @@ function inputReference(element) {
   return `${traveler._id}::${element.name}`;
 }
 
-// Copies text to the clipboard. The async Clipboard API needs a secure context
-// (https or localhost), so a plain-http deployment falls back to a temporary
-// textarea and execCommand. Resolves to whether either way worked.
-function copyToClipboard(text) {
-  if (window.isSecureContext && navigator.clipboard && navigator.clipboard.writeText) {
-    return navigator.clipboard.writeText(text).then(() => true, () => false);
-  }
-  const $textarea = $('<textarea readonly></textarea>')
-    .css({ position: 'fixed', top: 0, left: 0, opacity: 0 })
-    .val(text)
-    .appendTo('body');
-  $textarea[0].select();
-  let copied = false;
-  try {
-    copied = document.execCommand('copy');
-  } catch (err) {
-    copied = false;
-  }
-  $textarea.remove();
-  return Promise.resolve(copied);
-}
-
-// The button whose popup is open, if any. Only one popup is open at a time.
-let $openRefButton = null;
-
-function closeRefPopup({ restoreFocus = false } = {}) {
-  if (!$openRefButton) {
+// Appends the "Input" option into one field's NCR links container, ahead of the
+// Initiate NCR option (spec 125 FR-007). Not offered on a traveler that is not
+// active, nor while an NCR against the field is open (FR-015).
+export function appendInputLink(element) {
+  if (traveler.status !== 1 || !element) {
     return;
   }
-  const $button = $openRefButton;
-  $openRefButton = null;
-  $button.popover('hide').attr('aria-expanded', 'false');
-  if (restoreFocus) {
-    $button.trigger('focus');
-  }
-}
-
-// Registered once, on first use: a mousedown outside the open popup (and its
-// button) or Escape closes it. mousedown rather than click, so dragging a text
-// selection out of the popup does not dismiss it.
-let refPopupDismissBound = false;
-function bindRefPopupDismiss() {
-  if (refPopupDismissBound) {
+  if (isInputBlockedByOpenNcr(element.name)) {
     return;
   }
-  refPopupDismissBound = true;
-  $(document).on('mousedown', function(e) {
-    if ($openRefButton && $(e.target).closest('.ncr-ref-popover, .copy-ncr-ref').length === 0) {
-      closeRefPopup();
-    }
-  });
-  $(document).on('keydown', function(e) {
-    if (e.key === 'Escape' && $openRefButton) {
-      closeRefPopup({ restoreFocus: true });
-    }
-  });
-}
-
-// The contents of one reference popup: the reference in a read-only field, so it
-// can be selected and copied by hand, and a Copy button that puts it on the
-// clipboard. Built afresh on every open (Bootstrap empties the popup when it is
-// reshown, which would drop handlers bound to a kept element).
-function buildRefPopupContent(reference) {
-  const $content = $('<div class="ncr-ref-popup"></div>');
-  const $value = $('<input type="text" readonly class="ncr-ref-value" aria-label="NCR reference">').val(
-    reference
+  const $ncrLinks = getOrCreateNcrLinksContainer($(element).closest('.controls'));
+  if ($ncrLinks.find('.input-value-link').length > 0) {
+    return;
+  }
+  $ncrLinks.prepend(
+    '<button type="button" class="input-value-link btn btn-small btn-primary"><i class="fa fa-pencil"></i> Input</button>'
   );
-  const $copy = $('<button type="button" class="ncr-ref-copy btn btn-primary"></button>')
-    .append('<i class="fa fa-clipboard"></i> ')
-    .append('<span class="ncr-ref-copy-text">Copy</span>');
-  const $status = $('<div class="ncr-ref-status help-block" role="status"></div>');
-  $content.append(
-    '<div class="help-block">Paste this into the NCR form to link an NCR to this input.</div>',
-    $('<div class="input-append"></div>').append($value, $copy),
-    $status
-  );
-
-  let resetTimer = null;
-  $copy.on('click', function() {
-    copyToClipboard(reference).then(function(copied) {
-      $value[0].select();
-      clearTimeout(resetTimer);
-      if (!copied) {
-        $status.text('Could not copy automatically. Press Ctrl+C (⌘C on a Mac) to copy the selected text.');
-        return;
-      }
-      $status.text('');
-      $copy.find('.ncr-ref-copy-text').text('Copied');
-      resetTimer = setTimeout(function() {
-        $copy.find('.ncr-ref-copy-text').text('Copy');
-      }, 1500);
-    });
-  });
-  return $content;
-}
-
-// Finds the element the reference button goes right after, so that it sits on
-// the input's own row: the input itself, or the wrapper it is drawn inside — the
-// unit box of a number-with-unit input, or the label of a checkbox / radio —
-// then past a short inline hint (a number's range) that belongs to the input.
-function refButtonAnchor(element) {
-  let $anchor = $(element).closest('.input-append, label.checkbox, label.radio');
-  if ($anchor.length === 0) {
-    $anchor = $(element);
-  } else if ($anchor.is('label')) {
-    // a label is block-level: let the button share its line
-    $anchor.addClass('ncr-ref-row');
-  }
-  const $hint = $anchor.next('.help-inline');
-  return $hint.length > 0 ? $hint : $anchor;
-}
-
-// Adds the "Copy NCR reference" button to the right of one input, on the same
-// row. Clicking it opens a popup that reveals traveler_id::input_name, ready to
-// be copied (with the popup's Copy button, or by selecting the text) and pasted
-// into the NCR form. Offered on EVERY input, filled or not, on a traveler in any
-// status.
-export function appendCopyRefControl(element) {
-  if (!element.name) {
-    return;
-  }
-  const $controls = $(element).closest('.controls');
-  if ($controls.find('.copy-ncr-ref').length > 0) {
-    return;
-  }
-  const reference = inputReference(element);
-  const $button = $(
-    '<button type="button" class="copy-ncr-ref btn btn-mini" aria-haspopup="dialog" aria-expanded="false"></button>'
-  ).append('<i class="fa fa-clipboard"></i> Copy NCR reference');
-  $button.popover({
-    trigger: 'manual',
-    html: true,
-    container: 'body',
-    placement: 'bottom',
-    title: 'NCR reference',
-    content: () => buildRefPopupContent(reference),
-    template:
-      '<div class="popover ncr-ref-popover" role="dialog"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
-  });
-  $button.on('click', function() {
-    const wasOpen = $openRefButton && $openRefButton[0] === $button[0];
-    closeRefPopup();
-    if (wasOpen) {
-      return;
-    }
-    bindRefPopupDismiss();
-    $button.popover('show').attr('aria-expanded', 'true');
-    $openRefButton = $button;
-    // leave the reference selected so Ctrl/Cmd+C works straight away
-    const value = $button.data('popover').tip().find('.ncr-ref-value')[0];
-    if (value) {
-      value.focus();
-      value.select();
-    }
-  });
-  refButtonAnchor(element).after($button);
 }
 
 // Appends the "Initiate NCR" action into one field's .controls div — used
@@ -334,6 +195,10 @@ export function appendInitiateNcrLink(element) {
   if (traveler.status !== 1) {
     return;
   }
+  // While an NCR against the input is open, no further one is offered (spec 125 FR-017).
+  if (isInputBlockedByOpenNcr(element.name)) {
+    return;
+  }
   const $ncrLinks = getOrCreateNcrLinksContainer($(element).closest('.controls'));
   if ($ncrLinks.find('.initiate-ncr-link').length > 0) {
     return;
@@ -342,6 +207,140 @@ export function appendInitiateNcrLink(element) {
   $ncrLinks.append(
     `<a class="initiate-ncr-link btn btn-warning btn-small" href="${href}" target="${linkTarget}"><i class="fa fa-exclamation-triangle"></i> Initiate NCR</a>`
   );
+}
+
+// The counted inputs of the traveler form, one per field: each .controls that
+// holds a field. A checkbox set's own container is skipped, because each of its
+// checkboxes sits in a .controls of its own (spec 125 FR-007).
+export function inputUnits() {
+  return $('#form .controls').filter(function() {
+    const $controls = $(this);
+    return (
+      $controls.children('.checkbox-set-controls').length === 0 &&
+      $controls.find('input,textarea').length > 0
+    );
+  });
+}
+
+// The field a unit's options and NCR rows are keyed on: its first input or textarea.
+function unitField($controls) {
+  return $controls.find('input,textarea')[0];
+}
+
+// Puts one input in its default state (spec 125 FR-008, FR-010): the field locked,
+// and both options shown. Save and Reset are removed with the edit they belonged to.
+export function lockUnit($controls) {
+  $controls.find('input,textarea').prop('disabled', true);
+  $controls.children('.control-group-buttons').remove();
+  $controls.closest('.control-group-wrap').children('.control-group-buttons').remove();
+  refreshOptions($controls);
+}
+
+// Whether a value counts as entered. Blank does not, and neither does an unticked
+// box, as on the server (valueIsEmpty).
+export function hasSavedValue(value) {
+  if (value === null || value === undefined || value === false) {
+    return false;
+  }
+  if (typeof value === 'string') {
+    return value.trim() !== '';
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+  return true;
+}
+
+// An input is completed once a value has been entered for it (spec 125). A completed
+// input is locked and offers neither Input nor Initiate NCR.
+export function markCompleted($controls, completed) {
+  $controls.attr('data-completed', completed ? 'true' : null);
+}
+
+export function isCompleted($controls) {
+  return $controls.attr('data-completed') === 'true';
+}
+
+// Puts an input's options in line with its state (spec 125). A completed input offers
+// neither option. Otherwise it offers Input (not while an NCR against it is open) and
+// Initiate NCR. An input being entered keeps the options it has, hidden.
+export function refreshOptions($controls) {
+  const field = unitField($controls);
+  if (!field) {
+    return;
+  }
+  if ($controls.find('input,textarea').filter(':enabled').length > 0) {
+    return;
+  }
+  if (isCompleted($controls)) {
+    $controls.find('.input-value-link, .initiate-ncr-link').remove();
+    return;
+  }
+  appendInputLink(field);
+  appendInitiateNcrLink(field);
+  // while another input is being entered, every option stays unusable (spec 125 FR-012)
+  const otherEntering = $('#form input, #form textarea').filter(':enabled').length > 0;
+  const $options = $controls.find('.input-value-link, .initiate-ncr-link');
+  if (otherEntering) {
+    $options.addClass('disabled').prop('disabled', true);
+  } else {
+    $options.show().removeClass('disabled').prop('disabled', false);
+  }
+}
+
+// Puts one input into Input mode (spec 125 FR-009): its field becomes editable,
+// its Initiate NCR option is hidden, and Save and Reset are offered. While it is
+// in Input mode, every other input's options are unusable (FR-012).
+export function enterInputMode($controls) {
+  inputUnits()
+    .not($controls)
+    .find('.input-value-link, .initiate-ncr-link')
+    .addClass('disabled')
+    .prop('disabled', true);
+  $controls.find('.input-value-link, .initiate-ncr-link').hide();
+  $controls.find('input,textarea').prop('disabled', false);
+  // a file input is saved by its own Upload and Cancel buttons, which the change handler adds
+  const isFile = $controls.find('input[type="file"]').length > 0;
+  if (!isFile && $controls.children('.control-group-buttons').length === 0) {
+    $controls.prepend(
+      '<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>'
+    );
+  }
+}
+
+// Ends Input mode after a save, a reset or a cancelled upload (spec 125 FR-010):
+// the input is locked again with both options, and every other input's options
+// are usable once more.
+export function leaveInputMode($controls) {
+  lockUnit($controls);
+  inputUnits()
+    .find('.input-value-link, .initiate-ncr-link')
+    .removeClass('disabled')
+    .prop('disabled', false);
+}
+
+// Brings each input's Input option in line with its open NCRs: hidden while one
+// is open, offered otherwise (spec 125 FR-015, FR-016).
+export function syncInputOptions() {
+  inputUnits().each(function() {
+    const $controls = $(this);
+    const field = unitField($controls);
+    if (!field) {
+      return;
+    }
+    const $ncrLinks = getOrCreateNcrLinksContainer($controls);
+    if (isInputBlockedByOpenNcr(field.name)) {
+      // neither option while an NCR is open: Input is held back and no second NCR is raised (FR-015, FR-017)
+      $controls.find('.input-value-link, .initiate-ncr-link').remove();
+      // the input is shown as waiting, in words, not only by the NCR badge's colour
+      if ($ncrLinks.find('.input-waiting').length === 0) {
+        $ncrLinks.prepend('<span class="input-waiting help-inline">Waiting on an open NCR</span>');
+      }
+    } else {
+      $ncrLinks.find('.input-waiting').remove();
+      refreshOptions($controls);
+    }
+  });
 }
 
 // The names of the inputs that have a linked NCR which is not Closed, filled in
@@ -408,9 +407,8 @@ function renderNcrRows($controls, ncrs, reports) {
   getOrCreateNcrLinksContainer($controls).append($box);
 }
 
-// Renders the per-input NCR display: the "Copy NCR reference" control (on
-// every input), the "Initiate NCR" action (for any input already in
-// traveler.touchedInputs) and, fetched from GET ./ncr-links/, a link+status
+// Renders the per-input NCR display: the "Input" and "Initiate NCR" options (on
+// every input, spec 125) and, fetched from GET ./ncr-links/, a link+status
 // badge for every NCR already linked to that input, listed one per row in a
 // warning box, each closed NCR followed by its close report (the PDF fetched from
 // GET ./ncr-pdfs/) — mirrors renderNotes()'s DOM-injection mechanics exactly.
@@ -426,16 +424,25 @@ export function renderNcrLinks() {
       return;
     }
     const element = inputElements[0];
-    appendCopyRefControl(element);
     // Make the container now rather than when the NCR list arrives: the notes are
     // added later, by their own request, and the list belongs above them, right
     // under the input, however the two requests happen to finish.
     getOrCreateNcrLinksContainer($controlsElement);
-    if (traveler.touchedInputs && traveler.touchedInputs.indexOf(element.name) !== -1) {
-      appendInitiateNcrLink(element);
+    if (traveler.status === 1) {
+      // every input, whatever its value, starts locked with its two options (spec 125)
+      lockUnit($controlsElement);
     }
+    appendInputLink(element);
+    appendInitiateNcrLink(element);
   });
 
+  loadNcrBadges();
+}
+
+// Loads this traveler's NCR links and closure reports and draws them on their
+// inputs. Used when the page loads and by the 30-second refresh (spec 125 US5). It
+// never changes whether an input is locked, so it is safe while one is being entered.
+export function loadNcrBadges() {
   const linksRequest = $.ajax({
     url: './ncr-links/',
     type: 'GET',
@@ -458,6 +465,7 @@ export function renderNcrLinks() {
           openNcrInputNames.add(e.input_name);
         }
       });
+      syncInputOptions();
     })
     .fail(function(jqXHR) {
       if (jqXHR.status !== 401) {
@@ -533,6 +541,7 @@ export function renderHistory(binder, travelerStatus = null) {
               return 1;
             });
             if (element.type === 'file') {
+              markCompleted($controlsElement, true);
               $(element)
                 .closest('.controls')
                 .append(
@@ -542,6 +551,7 @@ export function renderHistory(binder, travelerStatus = null) {
                 );
             } else {
               currentValue = found[0].value;
+              markCompleted($controlsElement, hasSavedValue(currentValue));
               if (found[0].inputType === 'radio') {
                 // Update element to match the value
                 for (let i = 0; i < inputElements.size(); i++) {
@@ -569,10 +579,8 @@ export function renderHistory(binder, travelerStatus = null) {
         }
       });
 
-      // check if active here
-      if (travelerStatus === 1) {
-        $('#form input,textarea').prop('disabled', false);
-      }
+      // An active traveler's inputs stay locked until their Input option is chosen
+      // (spec 125); renderNcrLinks locks them with their options.
 
       markFormValidity(document.getElementById('form'));
 

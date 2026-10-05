@@ -14,7 +14,7 @@ const {
   TravelerNcrError,
   errorBody,
   isSubmissionTransition,
-  assertNoOpenNcrs,
+  assertSubmittable,
 } = require('../lib/traveler-ncr');
 
 var Form = mongoose.model('Form');
@@ -344,7 +344,7 @@ module.exports = function(app) {
       // approval (spec 124).
       if (isSubmissionTransition(doc.status, req.body.status)) {
         try {
-          await assertNoOpenNcrs(doc._id);
+          await assertSubmittable(doc._id);
         } catch (err) {
           if (err instanceof TravelerNcrError) {
             return res.status(err.status).json(errorBody(err));
@@ -739,7 +739,7 @@ module.exports = function(app) {
           if (!isSubmissionTransition(traveler.status, status)) {
             return updateTraveler();
           }
-          return assertNoOpenNcrs(traveler._id).then(updateTraveler, function(
+          return assertSubmittable(traveler._id).then(updateTraveler, function(
             err
           ) {
             if (err instanceof TravelerNcrError) {

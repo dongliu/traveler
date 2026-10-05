@@ -61,6 +61,10 @@ function badId(res, param) {
 }
 
 /**
+ * The web form sends no traveler reference of its own: it carries one only when
+ * it was opened from a traveler input's "Initiate NCR" action (spec 125). The REST
+ * API keeps accepting the link for integrations.
+ *
  * The traveler input reference a create request asks for: `traveler_input_ref`,
  * or — for one release, deprecated — the spec-123 body fields `traveler_id` +
  * `traveler_input_name` folded into one. Both go through the same resolver, so
