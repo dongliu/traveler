@@ -96,7 +96,6 @@ Test Scenario ──drives──> browser (Playwright) ──acts on──> runn
 Suite run ──aggregates all Test Scenarios──> Run Report (includes Created Artifacts with cleanupStatus: failed)
 ```
 
-No "Notification Verification" entity is defined for this feature (unlike
-the `002-playwright-e2e-tests` reference suite) — see research.md Decision 3
-and spec.md's Assumptions: no workflow on this branch sends outbound
-notification email yet.
+No "Notification Verification" entity is defined for this feature, because no
+workflow on this branch sends outbound notification email yet — see research.md
+Decision 3 and spec.md's Assumptions.

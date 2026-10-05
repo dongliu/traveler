@@ -6,15 +6,12 @@ This research resolves every open technical question needed to fill the
 plan's Technical Context before design. Each decision was grounded by reading
 the actual repo (`app.js`, `docker-compose.yml`, `docker/*.json`,
 `routes/*.js`, `model/*.js`, `lib/req-utils.js`, `lib/review.js`,
-`views/ldaplogin.jade`) rather than assumed. Where this design diverges from
-the sibling `002-playwright-e2e-tests` suite on `124-traveler-input-ncr-gating`
-(read as reference material per the feature request), the divergence and its
-reason are called out explicitly.
+`views/ldaplogin.jade`) rather than assumed.
 
 ## Decision 1: Test runner and browser automation library
 
 **Decision**: `@playwright/test`, running as a host-side Node process (not
-inside a container). Same decision, same rationale, as the reference suite.
+inside a container).
 
 **Rationale**: Explicitly requested by the feature description. It bundles
 its own browser binaries, test runner, assertion library, HTML/JSON
@@ -47,11 +44,8 @@ database-bypass fixture CLI.
 
 **Rationale**: Reading `routes/user.js`, `routes/group.js`,
 `routes/form.js`, `routes/traveler.js`, and `routes/binder.js` closely shows
-that — unlike the NCR workflow on `124-traveler-input-ncr-gating`, where
-several fixtures (CE/CS assignment, `ncr-qa` group membership, backdating,
-Traveler-linked NCR construction) had **no** existing route and genuinely
-required bypassing the app — every fixture this spec's User Story 3 lists
-already has a legitimate, role-gated application route. `PUT /users/:id`
+that every fixture this spec's User Story 3 lists already has a legitimate,
+role-gated application route. `PUT /users/:id`
 (`routes/user.js:298`) lets an admin session set a user's `roles` array
 directly; the `/share/` routes already exist on all three shareable entity
 types; `PUT /travelers/:id/status` (`routes/traveler.js:1088`) accepts any
@@ -86,9 +80,8 @@ definitions, and no test-only code path added to the app.
   driven by id/name directly once a member already exists.
 
 **Alternatives considered**:
-- *A `docker compose exec`-based fixture CLI reusing `model/*.js` directly*
-  (the reference suite's approach): rejected specifically for this branch —
-  it would duplicate logic the app's own routes already expose correctly,
+- *A `docker compose exec`-based fixture CLI reusing `model/*.js` directly*:
+  rejected for this branch — it would duplicate logic the app's own routes already expose correctly,
   and would add a `docker` CLI dependency and a parallel Mongoose connection
   bootstrap for zero net capability gain, since no fixture in this spec needs
   a field or state genuinely unreachable through an existing route. This
@@ -108,10 +101,9 @@ definitions, and no test-only code path added to the app.
 **Rationale**: Verified that no route on this branch calls
 `lib/email.js`'s `sendNotification` (`grep -rl sendNotification` matches only
 `lib/email.js` itself, its own unit test, and an unrelated SMTP-connectivity
-CLI tool). Unlike the NCR reference suite, which verifies notification
-emails extensively because NCR actions genuinely send them, this branch's
-form/traveler/review workflows send none — building Mailpit/mail-catcher
-integration here would test a capability the app doesn't yet exercise. If a
+CLI tool). This branch's form/traveler/review workflows send no notification
+email, so building a mail-capture integration here would test a capability the
+app doesn't yet exercise. If a
 future feature wires `sendNotification` into a route, that feature's own
 plan should revisit this decision; nothing in this design precludes adding
 it later (see spec.md Assumptions).
@@ -156,8 +148,7 @@ fixtures.
   requesting changes) untested as written.
 - *A pool of N identities*: rejected as unnecessary — every persona
   difference beyond "a second real user" already lives at the data layer
-  (roles, group membership), matching the reference suite's own conclusion
-  for the same reason.
+  (roles, group membership).
 
 ## Decision 5: Cross-run data isolation (no shared-database reset)
 
@@ -212,18 +203,16 @@ Playwright project. `fullyParallel` is left at Playwright's default
 (`false`): tests within one spec file run serially; different files run in
 parallel across workers.
 
-**Rationale**: Adopted directly from the reference suite's Decision 7, which
-discovered this the hard way during implementation: Playwright runs every
-matched spec file under *every configured project*, so a two-project
-(`primary`/`secondary`) setup would run each user story's file twice for no
-reason, and would race on any scenario that shares mutable state within a
-file (e.g. a form created in one test and reused by a later assertion in the
-same file). Adopting the corrected design up front, rather than
-rediscovering the same bug, avoids both problems from the start.
+**Rationale**: Playwright runs every matched spec file under *every configured
+project*, so a two-project (`primary`/`secondary`) setup would run each user
+story's file twice for no reason, and would race on any scenario that shares
+mutable state within a file (e.g. a form created in one test and reused by a
+later assertion in the same file). Defaulting to one project with local
+overrides, and serial execution within a file, avoids both problems.
 
 **Alternatives considered**:
-- *Two Playwright projects*: rejected per the double-run/race reasoning
-  above, already proven out on the reference suite.
+- *Two Playwright projects*: rejected per the double-run and race reasoning
+  above.
 
 ## Decision 8: Cleanup of run-created forms, released forms, travelers, and binders
 

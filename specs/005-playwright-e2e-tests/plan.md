@@ -16,12 +16,9 @@ treats as non-negotiable. Every precondition the suite's scenarios need
 (role grants, group membership, share/access grants, a traveler or form
 pre-positioned at a given lifecycle status) is provisioned through the
 running app's own authenticated routes, called directly over HTTP with
-Playwright's `request` fixture — not through a database-bypass fixture CLI.
-This is a deliberate departure from the sibling `002-playwright-e2e-tests`
-suite on `124-traveler-input-ncr-gating`: verification against this repo's
-actual routes (see research.md Decision 2) found that, unlike that branch's
-NCR workflow, every fixture this spec needs already has a legitimate,
-role-gated application route, so no test-only bypass is required here. Every
+Playwright's `request` fixture. Verification against this repo's routes (see
+research.md Decision 2) found that every fixture this spec needs already has a
+role-gated application route, so no test-only bypass is required. Every
 form, released form, traveler, and binder a run creates is archived by its
 owner once its scenario finishes (research.md Decision 8). The app has no
 permanent-delete route for these records, so archiving is the cleanup
@@ -121,19 +118,15 @@ No changes to `lib/`, `model/`, `routes/`, or `views/` — this feature is
 purely additive test tooling. `package.json` gains one devDependency
 (`@playwright/test`) and one script (`"e2e": "playwright test"`, run from
 `e2e/playwright.config.js`). `.gitignore` gains `playwright-report/`,
-`test-results/`, and `e2e/.auth/`. This repo has no `.env.example` today
-(unlike the NCR branch); `docker.md`'s existing `.env` documentation gains a
+`test-results/`, and `e2e/.auth/`. This repo has no `.env.example` today;
+`docker.md`'s existing `.env` documentation gains a
 short section for the four new variables (`E2E_USER`, `E2E_PASS`,
 `E2E_USER2`, `E2E_PASS2`) alongside its existing `WEB_PORT`/`API_PORT`
 guidance, rather than introducing a new file convention.
 
 **Structure Decision**: Single new top-level `e2e/` directory, mirroring the
 existing top-level `test-unit/` (mocha) directory — consistent with this
-repo's pattern of one top-level directory per test type/tool, and matching
-the same structural choice the `002-playwright-e2e-tests` reference suite
-made on `124-traveler-input-ncr-gating`, since the underlying app and Docker
-layout are the same. No `test-e2e/`-style manual-script directory exists here
-to avoid colliding with, so there is no naming ambiguity to resolve.
+repo's pattern of one top-level directory per test type/tool.
 
 ## Complexity Tracking
 

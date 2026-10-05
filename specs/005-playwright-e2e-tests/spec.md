@@ -6,16 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "design and implement an approach to do e2e test with playwright in the local docker setup. check the artifacts for the spec `specs/002-playwright-e2e-tests` in `124-traveler-input-ncr-gating` branch."
-
-> **Note**: `124-traveler-input-ncr-gating` is a sibling feature branch that added an
-> NCR (non-conformance report) workflow on top of this application, and its own
-> `specs/002-playwright-e2e-tests` designed and built a Playwright suite for that
-> combined app. This branch does not include the NCR workflow, so this spec adapts
-> the same proven approach — driving the running local Docker stack with Playwright,
-> provisioning fixtures programmatically, and producing a pass/fail run report — to
-> this repository's own workflows: form authoring/release, traveler data entry and
-> approval, and the shared permission model.
+**Input**: User description: "design and implement an approach to do e2e test with playwright in the local docker setup."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -55,8 +46,9 @@ other scenario.
    reviewer instead requests changes, **Then** the form reverts to "draft",
    its review requests are cleared, and it is not releasable until
    resubmitted and re-approved.
-5. **Given** a released form, **When** the underlying draft form is later
-   edited, **Then** the previously released snapshot remains unchanged.
+5. **Given** a released form, **When** someone attempts to edit its source
+   form, **Then** the edit is rejected because a released form cannot be
+   edited, and the released snapshot remains unchanged.
 6. **Given** a new form submitted without a title, **When** a user attempts
    to create it, **Then** the creation is rejected and no form is saved.
 7. **Given** a released form, **When** its owner archives it, **Then** the
@@ -439,10 +431,13 @@ failing step and its cause without re-running.
 - No workflow in this branch currently sends outbound notification emails as
   part of form, traveler, or review actions — the mail-sending library exists
   as infrastructure but is not yet called from any route — so this suite does
-  not include email-notification verification. This differs from the
-  reference NCR suite (which verifies notification emails extensively) and
-  should not preclude adding such coverage later if notification sending is
-  introduced.
+  not include email-notification verification. It should not preclude adding
+  such coverage later if notification sending is introduced.
+- The suite has two test identities, so User Story 4's "a different,
+  non-shared user still cannot" is proven with the secondary identity before a
+  share is granted or after it is revoked. Proving exclusion of an unrelated
+  third person would need a third LDAP test account, which this design does not
+  assume.
 - Device-linked inputs (optional, disabled by default in this local setup)
   are out of scope for this suite.
 - This suite targets local developer execution, as stated in the feature
