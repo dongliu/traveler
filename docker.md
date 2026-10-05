@@ -108,3 +108,30 @@ docker compose build --no-cache
 
 Run `docker image list` to see the images on your local.
 `docker image remove image_name` to clean the image from your local.
+
+## end-to-end tests
+
+The Playwright suite in `e2e/` runs against the stack above. Add these to the
+`.env` file, next to `WEB_PORT` and `API_PORT`:
+
+```
+E2E_USER=<LDAP login of the primary test user>
+E2E_PASS=<its password>
+E2E_USER2=<LDAP login of the secondary test user>
+E2E_PASS2=<its password>
+E2E_USER_NAME=<primary user's AD display name>
+E2E_USER2_NAME=<secondary user's AD display name>
+```
+
+The primary user must already hold the `admin` role. The suite checks this at
+startup and stops if it is missing. The secondary user needs no roles; the suite
+grants and removes roles itself.
+
+Run the suite with
+
+```
+npm run e2e
+```
+
+Pass a file or a scenario name after `--` to run part of it, for example
+`npm run e2e -- e2e/us1-form-lifecycle.spec.js -g AS3`.

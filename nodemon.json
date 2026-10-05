@@ -12,7 +12,10 @@
     "test",
     "sbin",
     "etc",
-    "logs"
+    "logs",
+    "e2e",
+    "playwright-report",
+    "test-results"
   ],
   "verbose": true,
   "execMap": {

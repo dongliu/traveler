@@ -62,3 +62,7 @@ npm-debug.log*
 
 # local env
 .env
+# end-to-end tests (Playwright) #
+playwright-report/
+test-results/
+e2e/.auth/
