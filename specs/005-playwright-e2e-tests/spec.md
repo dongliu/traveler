@@ -105,24 +105,29 @@ state — independent of any other scenario.
 
 ---
 
-### User Story 3 - Programmatic Test Fixture Provisioning (Priority: P1)
+### User Story 3 - Programmatic Test Fixture Provisioning and Cleanup (Priority: P1)
 
 Someone running the suite for the first time, or against a freshly reset local
 environment, should not have to open a database browser and hand-edit
 documents (grant a role, add a reviewer, pre-create a released form) before
-the tests will pass.
+the tests will pass. And once a run finishes, the forms, released forms,
+travelers, and binders it created should be cleaned out of the active lists,
+so repeated runs do not accumulate test data in the shared database.
 
 **Why this priority**: Without automated fixture provisioning the suite
 cannot run unattended, which defeats the purpose of an automated suite. Every
 other scenario in this spec depends on some precondition (a role, a document
 already sitting in a given state or access configuration) that this story
-must be able to produce on demand.
+must be able to produce on demand. Cleanup is equally load-bearing: a suite
+that leaves its own forms and travelers active in the shared database makes
+every later run's list and filter assertions less reliable.
 
 **Independent Test**: Can be fully tested by provisioning each fixture type in
 isolation (a role grant, a pre-released form, a share/access grant on a
-document, a traveler pre-positioned in a given lifecycle state) and confirming
-the resulting state matches what manual setup would have produced, without any
-other scenario depending on it.
+document, a traveler pre-positioned in a given lifecycle state), then
+cleaning them up and confirming the resulting state matches what manual setup
+and manual cleanup would have produced, without any other scenario depending
+on it.
 
 **Acceptance Scenarios**:
 
@@ -145,6 +150,25 @@ other scenario depending on it.
    **Then** fixtures and documents created by the previous run do not cause
    the new run's scenarios to fail or produce ambiguous results (e.g. two
    forms matching a search filter that expects exactly one).
+6. **Given** a scenario created one or more forms, released forms, travelers,
+   or binders, **When** that scenario finishes — whether it passed or failed —
+   **Then** every artifact it created is cleaned out (archived) before the next
+   scenario that depends on the active lists starts.
+7. **Given** a scenario fails partway through, **When** cleanup runs,
+   **Then** it covers everything the scenario created up to the point of
+   failure, so no artifact is left active because the scenario did not finish.
+8. **Given** the artifacts a scenario created depend on one another (a binder
+   that contains travelers, a traveler created from a released form), **When**
+   cleanup runs, **Then** the dependent artifacts are cleaned out before the
+   artifacts they depend on.
+9. **Given** cleanup cannot clean out one of the artifacts (for example, the
+   owning session is no longer valid), **When** the run finishes, **Then** the
+   run report lists that artifact by its identifier and title, separately from
+   scenario pass/fail results, so a person can clean it out by hand.
+10. **Given** a run has finished, **When** a person lists the active forms,
+    travelers, and binders filtered by that run's identifying tag, **Then** none
+    appear, while the same records remain visible in the archived lists for
+    inspection.
 
 ---
 
@@ -266,6 +290,13 @@ failing step and its cause without re-running.
 - What happens when optional device-input configuration is absent, as it is by
   default in this local setup? Device-linked input scenarios are out of scope
   for this suite rather than failing on a missing optional feature.
+- What happens when the suite process is killed or crashes before cleanup
+  finishes? The artifacts it left behind carry that run's identifying tag, so
+  they are identifiable, never counted by a later run's assertions, and can be
+  cleaned out by a later invocation that targets that tag.
+- What happens when an artifact is still under review, or a traveler is still
+  submitted for completion, at the time cleanup runs? Cleanup still cleans it
+  out; the review requests and status of that artifact do not prevent it.
 
 ## Requirements *(mandatory)*
 
@@ -309,6 +340,17 @@ failing step and its cause without re-running.
 - **FR-012**: The suite MUST run unattended — no scenario may require a
   browser extension, an AI agent, or a human driving the browser during
   execution.
+- **FR-013**: The suite MUST clean out every form, released form, traveler,
+  and binder it creates once the scenario that created it finishes, whether
+  that scenario passed or failed, acting through the session of the persona
+  that owns each artifact.
+- **FR-014**: Cleanup MUST retire records by archiving them — the
+  application's own end-of-life state for forms, released forms, travelers,
+  and binders. It MUST NOT permanently delete any record, because the
+  application provides no supported way to do so for these records.
+- **FR-015**: The suite MUST report, separately from scenario pass/fail
+  results, any run-created artifact that cleanup could not clean out,
+  identifying it by its identifier and title.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -321,9 +363,13 @@ failing step and its cause without re-running.
   scenario runs — a role grant, a pre-released form, a document at a specific
   share/access configuration, or a traveler pre-positioned in a given
   lifecycle status — replacing manual database edits.
+- **Created Artifact**: A form, released form, traveler, or binder a run
+  created, recorded with its identifier, title, owning persona, and whether
+  it has been cleaned out — the list cleanup works through once a scenario
+  finishes.
 - **Run Report**: The consolidated output of a suite execution — per-scenario
-  pass/fail, an overall summary, and links to any failure diagnostics
-  produced.
+  pass/fail, an overall summary, links to any failure diagnostics produced,
+  and any artifacts cleanup could not clean out.
 
 ## Success Criteria *(mandatory)*
 
@@ -349,6 +395,10 @@ failing step and its cause without re-running.
 - **SC-006**: The full suite completes within a bounded, predictable time
   (target: under 15 minutes) so it is practical to run after every
   significant change rather than only occasionally.
+- **SC-007**: After any completed run, a search for active (non-archived)
+  forms, released forms, travelers, and binders carrying that run's
+  identifying tag returns zero results, while every record the run created
+  is still retrievable from the archived lists.
 
 ## Assumptions
 
@@ -366,7 +416,18 @@ failing step and its cause without re-running.
 - Data isolation between runs is achieved by scoping each run's created data
   distinctly (e.g. unique identifying values per run) rather than requiring a
   full database reset before every run, since resetting the shared local
-  database is outside this feature's control.
+  database is outside this feature's control. Cleanup (User Story 3) keeps
+  that data out of active lists once a run finishes, so the tag-based scoping
+  is a safety net for interrupted runs rather than the main isolation
+  mechanism.
+- "Clean out" means archiving. The application offers no supported way to
+  permanently delete forms, released forms, travelers, or binders; permanent
+  deletion would require direct database writes outside the application,
+  which this suite deliberately avoids. If permanent deletion is wanted later,
+  that is a separate, explicit decision.
+- Cleanup acts through the session of the persona that created and owns each
+  artifact, because archiving is restricted to the owner (or an administrator,
+  for some record types).
 - Session-based authentication against the LDAP service already configured
   for local Docker development is the login path exercised.
 - The manager and admin roles grant blanket write access across forms,
