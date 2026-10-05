@@ -54,7 +54,7 @@ test.describe('User Story 1 - form authoring and release', () => {
     expect(JSON.stringify(reviews.body)).toContain(form.id);
   });
 
-  test('AS3 reviewer approves, then owner releases into a snapshot', async () => {
+  test('AS3 release is refused until the reviewer approves, then owner releases into a snapshot', async () => {
     const html = '<p>e2e released snapshot</p>';
     const form = await createForm('primary', {
       title: `e2e release ${runId()}`,
@@ -63,8 +63,17 @@ test.describe('User Story 1 - form authoring and release', () => {
     await grantRole('primary', 'secondary', 'reviewer');
     await submitForReview('primary', form.id);
     await addReviewRequest('primary', form.id, 'secondary');
-    await submitReviewResult('secondary', form.id, 'approve');
 
+    const early = await send(
+      'primary',
+      'PUT',
+      `/forms/${form.id}/released`,
+      {}
+    );
+    expect(early.status).toBe(400);
+    expect((await getForm('primary', form.id)).status).toBe(0.5);
+
+    await submitReviewResult('secondary', form.id, 'approve');
     const releasedId = await releaseForm('primary', form.id);
     const released = await getReleasedForm('primary', releasedId);
     expect(released.status).toBe(1);
