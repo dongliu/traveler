@@ -22,6 +22,10 @@ npx mocha test/lib/
 
 # Run a single test file
 npx mocha test/lib/req-utils-test.js
+
+# End-to-end tests (Playwright; needs the docker stack running and E2E_* settings)
+npm run e2e
+npm run e2e -- e2e/us1-form-lifecycle.spec.js
 ```
 
 ## Architecture
