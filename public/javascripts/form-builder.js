@@ -1331,16 +1331,21 @@ function binding_events() {
     const cloned = $cgr.clone();
     $('.control-group-buttons', $(cloned)).remove();
     $(cloned).removeClass('control-focus');
-    if ($('span.fe-type', $cgr).text() === 'table') {
-      // Each table cell input needs its own unique name
-      $('input, textarea', $(cloned)).each(function() {
+    // Each input needs its own name, except radio buttons, which share a name
+    // within their group
+    const renamedRadioGroups = {};
+    $('input, textarea', $(cloned)).each(function() {
+      const originalName = $(this).attr('name');
+      if ($(this).attr('type') === 'radio' && originalName) {
+        if (!renamedRadioGroups[originalName]) {
+          renamedRadioGroups[originalName] = UID.generateShort();
+        }
+        $(this).attr('name', renamedRadioGroups[originalName]);
+      } else {
         $(this).attr('name', UID.generateShort());
-        $(this).removeAttr('data-userkey');
-      });
-    } else {
-      $('input, textarea', $(cloned)).attr('name', UID.generateShort());
-      $('input, textarea', $(cloned)).removeAttr('data-userkey');
-    }
+      }
+      $(this).removeAttr('data-userkey');
+    });
     $('legend', $(cloned)).attr('id', UID.generateShort());
     $(that)
       .closest('.control-group-wrap')
