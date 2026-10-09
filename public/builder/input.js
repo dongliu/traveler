@@ -187,7 +187,7 @@
 
   // checkbox_set_button.jade compiled template
   templatizer['checkbox_set_button'] = function tmpl_checkbox_set_button() {
-    return '<div class="checkbox-set-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit the checkbox" class="btn btn-info">Edit</a><a data-toggle="tooltip" title="remove the checkbox" class="btn btn-warning">Remove</a></div></div>';
+    return '<div class="pull-right checkbox-set-buttons"><div class="btn-group"><a data-toggle="tooltip" title="edit the checkbox" class="btn btn-info">Edit</a><a data-toggle="tooltip" title="remove the checkbox" class="btn btn-warning">Remove</a><a data-toggle="tooltip" title="move the checkbox up" class="btn">Up</a><a data-toggle="tooltip" title="move the checkbox down" class="btn">Down</a></div></div>';
   };
 
   // figure.jade compiled template

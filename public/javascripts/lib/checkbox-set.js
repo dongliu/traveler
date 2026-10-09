@@ -69,17 +69,30 @@ export function checkbox_set_edit($cgr) {
   });
 }
 
+function refreshMoveButtonState($checkbox) {
+  const $buttons = $('.checkbox-set-buttons', $checkbox);
+  $('a.btn[title="move the checkbox up"]', $buttons).toggleClass(
+    'disabled',
+    $checkbox.prev('.checkbox-in-set').length === 0
+  );
+  $('a.btn[title="move the checkbox down"]', $buttons).toggleClass(
+    'disabled',
+    $checkbox.next('.checkbox-in-set').length === 0
+  );
+}
+
 export function binding_checkbox_set_events() {
   $('#output').on(
     'mouseenter',
     '.control-group-wrap[data-status="editing"] .checkbox-in-set',
     function(e) {
       e.preventDefault();
-      if ($('.checkbox-set-buttons', $(this)).length > 0) {
-        $('.checkbox-set-buttons', $(this)).show();
-      } else {
-        $(this).append(input.checkbox_set_button());
+      const $checkbox = $(this);
+      if ($('.checkbox-set-buttons', $checkbox).length === 0) {
+        $checkbox.prepend(input.checkbox_set_button());
       }
+      $('.checkbox-set-buttons', $checkbox).show();
+      refreshMoveButtonState($checkbox);
     }
   );
 
@@ -112,6 +125,36 @@ export function binding_checkbox_set_events() {
       const $checkbox = $this.closest('.checkbox-in-set');
       const $target = $this.closest('.checkbox-set-controls');
       checkbox_edit($checkbox, $target);
+    }
+  );
+
+  $('#output').on(
+    'click',
+    '.checkbox-in-set a.btn[title="move the checkbox up"]',
+    function(e) {
+      e.preventDefault();
+      if ($(this).hasClass('disabled')) return;
+      const $checkbox = $(this).closest('.checkbox-in-set');
+      const $prev = $checkbox.prev('.checkbox-in-set');
+      if ($prev.length > 0) {
+        $checkbox.insertBefore($prev);
+        refreshMoveButtonState($checkbox);
+      }
+    }
+  );
+
+  $('#output').on(
+    'click',
+    '.checkbox-in-set a.btn[title="move the checkbox down"]',
+    function(e) {
+      e.preventDefault();
+      if ($(this).hasClass('disabled')) return;
+      const $checkbox = $(this).closest('.checkbox-in-set');
+      const $next = $checkbox.next('.checkbox-in-set');
+      if ($next.length > 0) {
+        $checkbox.insertAfter($next);
+        refreshMoveButtonState($checkbox);
+      }
     }
   );
 }
