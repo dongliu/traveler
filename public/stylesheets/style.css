@@ -337,6 +337,12 @@ figcaption {
   margin-bottom: 0px;
 }
 
+/* contain the right-pinned .checkbox-set-buttons float so it doesn't bleed
+   into the next checkbox line */
+.checkbox-in-set {
+  overflow: hidden;
+}
+
 /**
  * Sidenav for sections
  */
