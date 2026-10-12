@@ -280,8 +280,8 @@ describe('csv', function() {
   describe('#buildTravelerCsv', function() {
     var HEADER =
       '_id,url,title,status,createdBy,createdOn,updatedBy,updatedOn,archivedOn,owner,tags,totalInput,finishedInput,subsystem,device,activity,machineArea,sector,windchillId';
-    var DATA_HEADER = 'Field Name,Label,Type,Value,Input By,Input On';
-    var FILES_HEADER = 'Id,Original File Name,File Name,Encoding,Mimetype';
+    var DATA_HEADER = 'name,label,inputType,value,inputBy,inputOn';
+    var FILES_HEADER = '_id,value,filePath,fileEncoding,fileMimetype';
     var URL = 'https://traveler.example.org/travelers/abc123/view';
     var FIELDS = [
       {
@@ -342,17 +342,20 @@ describe('csv', function() {
         fields: FIELDS,
       });
       var lines = output.split('\n');
-      lines[0].should.equal(HEADER);
-      lines[1].should.equal(
+      lines[0].should.equal('#SECTION: meta');
+      lines[1].should.equal(HEADER);
+      lines[2].should.equal(
         'abc123,https://traveler.example.org/travelers/abc123/view,Pump Assembly Torque Check,active,jdoe,2026-08-30T14:02:11.000Z,smith,2026-09-14T09:41:03.000Z,,jdoe,torque;pump,36,12,Cryogenics,CM-02,Acceptance test,Linac tunnel,S4,WC-0012345'
       );
-      lines[2].should.equal('');
-      lines[3].should.equal(DATA_HEADER);
-      lines[4].should.equal('torque,Torque Reading,number,42,jdoe,1787234591');
-      lines[5].should.equal('notes,Inspector Notes,textarea,,,');
-      lines[6].should.equal('');
-      lines[7].should.equal(FILES_HEADER);
-      lines.should.have.lengthOf(8);
+      lines[3].should.equal('');
+      lines[4].should.equal('#SECTION: inputs');
+      lines[5].should.equal(DATA_HEADER);
+      lines[6].should.equal('torque,Torque Reading,number,42,jdoe,1787234591');
+      lines[7].should.equal('notes,Inspector Notes,textarea,,,');
+      lines[8].should.equal('');
+      lines[9].should.equal('#SECTION: files');
+      lines[10].should.equal(FILES_HEADER);
+      lines.should.have.lengthOf(11);
     });
 
     it('should not write the old four-row metadata block', function() {
@@ -374,12 +377,15 @@ describe('csv', function() {
         fields: [],
       });
       var lines = output.split('\n');
-      lines.should.have.lengthOf(6);
-      lines[0].should.equal(HEADER);
-      lines[2].should.equal('');
-      lines[3].should.equal(DATA_HEADER);
-      lines[4].should.equal('');
-      lines[5].should.equal(FILES_HEADER);
+      lines.should.have.lengthOf(9);
+      lines[0].should.equal('#SECTION: meta');
+      lines[1].should.equal(HEADER);
+      lines[3].should.equal('');
+      lines[4].should.equal('#SECTION: inputs');
+      lines[5].should.equal(DATA_HEADER);
+      lines[6].should.equal('');
+      lines[7].should.equal('#SECTION: files');
+      lines[8].should.equal(FILES_HEADER);
     });
 
     it('should add a Files row for each file submission, in the same order as the data rows', function() {
@@ -402,15 +408,16 @@ describe('csv', function() {
         ]),
       });
       var lines = output.split('\n');
-      lines[6].should.equal(
+      lines[8].should.equal(
         'photo,Photo,file,507f1f77bcf86cd799439011,jdoe,1787234591'
       );
-      lines[7].should.equal('');
-      lines[8].should.equal(FILES_HEADER);
-      lines[9].should.equal(
+      lines[9].should.equal('');
+      lines[10].should.equal('#SECTION: files');
+      lines[11].should.equal(FILES_HEADER);
+      lines[12].should.equal(
         '507f1f77bcf86cd799439011,inspection.jpg,a1b2c3d4,7bit,image/jpeg'
       );
-      lines.should.have.lengthOf(10);
+      lines.should.have.lengthOf(13);
     });
 
     it('should skip an unanswered file field and a non-file field in the Files section', function() {
@@ -430,7 +437,7 @@ describe('csv', function() {
       });
       var lines = output.split('\n');
       lines[lines.length - 1].should.equal(FILES_HEADER);
-      lines.should.have.lengthOf(9);
+      lines.should.have.lengthOf(12);
     });
 
     it('should show a hostile original or on-disk file name as text in the Files section', function() {
@@ -464,9 +471,9 @@ describe('csv', function() {
         url: URL,
         fields: [],
       });
-      var cells = output.split('\n')[1].split(',');
+      var cells = output.split('\n')[2].split(',');
       cells[3].should.equal('completed');
-      output.split('\n')[1].should.not.match(/,\d(\.\d)?,jdoe,/);
+      output.split('\n')[2].should.not.match(/,\d(\.\d)?,jdoe,/);
     });
 
     it('should write dates as ISO 8601 UTC and tags joined with semicolons', function() {
@@ -479,7 +486,7 @@ describe('csv', function() {
           url: URL,
           fields: [],
         })
-        .split('\n')[1]
+        .split('\n')[2]
         .split(',');
       cells[5].should.equal('2026-08-30T14:02:11.000Z');
       cells[7].should.equal('2026-09-14T09:41:03.000Z');
@@ -490,7 +497,7 @@ describe('csv', function() {
     it('should leave a missing value as an empty cell, and keep the url', function() {
       var cells = csv
         .buildTravelerCsv({ record: {}, url: URL, fields: [] })
-        .split('\n')[1]
+        .split('\n')[2]
         .split(',');
       cells.should.have.lengthOf(19);
       cells[0].should.equal('');
@@ -507,7 +514,7 @@ describe('csv', function() {
           url: URL,
           fields: [],
         })
-        .split('\n')[1]
+        .split('\n')[2]
         .split(',');
       cells[11].should.equal('0');
       cells[12].should.equal('0');
