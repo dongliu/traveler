@@ -285,9 +285,10 @@ describe('lib/ncr-email — sendQaNotification format (spec email 3)', () => {
     html.should.include('Please complete the QA section');
   });
 
-  it('includes an NCR link when ncrUrl is provided', async () => {
+  it('includes a concurrence link when ncrUrl is provided', async () => {
     await sendQaNotification(makeNcr(), ['qa@test.com'], null, 'http://app/ncrs/5');
-    capturedHtml().should.include('href="http://app/ncrs/5"');
+    capturedHtml().should.include('href="http://app/ncrs/5/concurrence"');
+    capturedHtml().should.include('and submit concurrence');
   });
 
   it('omits the link when ncrUrl is absent', async () => {
