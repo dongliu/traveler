@@ -29,13 +29,6 @@ function textInputs(id) {
   ];
 }
 
-function unitOf(page, name) {
-  return page
-    .locator('#form .controls')
-    .filter({ has: page.locator(`[name="${name}"]`) })
-    .last();
-}
-
 async function linkNcr(travelerId, inputName, inputLabel, status) {
   const id = runId();
   return execFixtureCli('create-traveler-linked-ncr', {
@@ -79,7 +72,7 @@ test.describe('US5 — the traveler page refreshes its live status every 30 seco
     await fillAndSaveInput(page, 'input_a', 'first');
 
     // this user is in the middle of entering input C
-    await unitOf(page, 'input_c').locator('.input-value-link').click();
+    await expect(page.locator('input[name="input_c"]')).toBeEnabled();
     await page.fill('input[name="input_c"]', 'half typed');
 
     // another session saves input A
@@ -93,15 +86,19 @@ test.describe('US5 — the traveler page refreshes its live status every 30 seco
     await expect(page.locator('input[name="input_c"]')).toBeEnabled();
   });
 
-  test('a traveler that stops being active loses its input options and its submit button on the next refresh', async ({ page }) => {
+  test('a traveler that stops being active loses its editable inputs and its submit button on the next refresh', async ({ page }) => {
     const id = runId();
     const travelerId = await createTraveler(textInputs(id));
     await page.goto(`/travelers/${travelerId}/`);
-    await expect(page.locator('.input-value-link')).toHaveCount(3);
+    for (const name of ['input_a', 'input_b', 'input_c']) {
+      await expect(page.locator(`input[name="${name}"]`)).toBeEnabled();
+    }
 
     await execFixtureCli('set-traveler-status', { travelerId, status: 1.5 });
 
-    await expect(page.locator('.input-value-link')).toHaveCount(0, { timeout: TICK_WAIT });
+    for (const name of ['input_a', 'input_b', 'input_c']) {
+      await expect(page.locator(`input[name="${name}"]`)).toBeDisabled({ timeout: TICK_WAIT });
+    }
     await expect(page.locator('.initiate-ncr-link')).toHaveCount(0);
     await expect(page.locator('#complete2')).toBeDisabled();
   });
@@ -111,13 +108,17 @@ test.describe('US5 — the traveler page refreshes its live status every 30 seco
     const travelerId = await createTraveler(textInputs(id));
     await page.route('**/live-status/', route => route.abort());
     await page.goto(`/travelers/${travelerId}/`);
-    await expect(page.locator('.input-value-link')).toHaveCount(3);
+    for (const name of ['input_a', 'input_b', 'input_c']) {
+      await expect(page.locator(`input[name="${name}"]`)).toBeEnabled();
+    }
 
     // let at least one refresh fail
     await page.waitForTimeout(TICK_WAIT);
 
     await expect(page.locator('#message .alert-error')).toHaveCount(0);
-    await expect(page.locator('.input-value-link')).toHaveCount(3);
+    for (const name of ['input_a', 'input_b', 'input_c']) {
+      await expect(page.locator(`input[name="${name}"]`)).toBeEnabled();
+    }
     await expect(page.locator('#complete2')).toBeDisabled();
   });
 

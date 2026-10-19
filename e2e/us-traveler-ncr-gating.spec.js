@@ -231,7 +231,6 @@ test.describe(
             : `/travelers/${travelerId}/`
         );
         await expect(page.locator('.initiate-ncr-link')).toHaveCount(0);
-        await expect(page.locator('.input-value-link')).toHaveCount(0);
 
         // the form opened from the input's Initiate NCR action names the refusal
         await page.goto(
@@ -410,11 +409,9 @@ test.describe(
 
       // the traveler stays active
       expect(await travelerStatus(travelerId)).toBe(1);
-      await expect(
-        page.locator('.controls', { has: page.locator('input[name="input_a"]') }).first().locator('.input-value-link')
-      ).toHaveCount(0);
-      // every input here has a value, so none offers an option at all
-      await expect(page.locator('.input-value-link')).toHaveCount(0);
+      await expect(page.locator('input[name="input_a"]')).toBeDisabled();
+      // every input here has a value, so none offers Initiate NCR either
+      await expect(page.locator('.initiate-ncr-link')).toHaveCount(0);
     });
 
     test('every linked NCR must be Closed before the traveler can be submitted', async ({
@@ -619,18 +616,13 @@ test.describe(
       await expect(box.locator('.ncr-link-badge')).toHaveCount(1);
       await expect(page.locator('body')).not.toContainText('Not finished');
 
-      // editing is held back while the NCR is open: input A offers no Input option,
+      // editing is held back while the NCR is open: input A is locked,
       // and the figure does not move (spec 125 US2)
-      await expect(
-        page
-          .locator('.controls', { has: page.locator('input[name="input_a"]') })
-          .first()
-          .locator('.input-value-link')
-      ).toHaveCount(0);
+      await expect(page.locator('input[name="input_a"]')).toBeDisabled();
       expect(await storedFinished(travelerId)).toBe(1);
     });
 
-    test('an NCR raised against an unfilled input leaves the finished count unchanged, and holds its Input option', async ({
+    test('an NCR raised against an unfilled input leaves the finished count unchanged, and locks the input', async ({
       page,
     }) => {
       const id = runId();
@@ -649,15 +641,10 @@ test.describe(
       await completeNcrCreation(page, `PN-${id}`);
       expect(await storedFinished(travelerId)).toBe(1);
 
-      // while C's NCR is open, C offers no Input option (spec 125 US2)
+      // while C's NCR is open, C stays locked (spec 125 US2)
       await page.goto(`/travelers/${travelerId}/`);
       await expect(page.locator('#finished-input')).toHaveText('1');
-      await expect(
-        page
-          .locator('.controls', { has: page.locator('input[name="input_c"]') })
-          .first()
-          .locator('.input-value-link')
-      ).toHaveCount(0);
+      await expect(page.locator('input[name="input_c"]')).toBeDisabled();
       await expect(page.locator('.ncr-links-existing')).toHaveCount(1);
     });
 
@@ -676,10 +663,8 @@ test.describe(
       await fillAndSaveInput(page, 'input_b', 'another value'); // every data save recounts
       expect(await storedFinished(travelerId)).toBe(2);
       await expect(page.locator('#finished-input')).toHaveText('2');
-      // C is still held: its Input option stays hidden until its NCR is Closed
-      await expect(
-        page.locator('.controls', { has: page.locator('input[name="input_c"]') }).first().locator('.input-value-link')
-      ).toHaveCount(0);
+      // C is still held: it stays locked until its NCR is Closed
+      await expect(page.locator('input[name="input_c"]')).toBeDisabled();
     });
 
     test('closing the NCR through the real close endpoint makes the input count again', async ({

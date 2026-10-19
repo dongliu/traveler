@@ -39,74 +39,85 @@ function unitOf(page, name) {
     .last();
 }
 
-/** Chooses Input on one input, if its option is offered. */
-async function chooseInput(page, name) {
-  const option = unitOf(page, name).locator('.input-value-link');
-  await expect(option).toBeVisible();
-  await option.click();
+/**
+ * Begins editing one input directly (spec 125, revised: no separate "Input"
+ * step to click first) — without necessarily changing its final value, so a
+ * test can also exercise "save with nothing entered." A text field is typed
+ * into then backspaced to blank; a checkbox is ticked then unticked. Either
+ * way this fires the same DOM event (`input`/`click`) formInputMade listens
+ * for, which puts the input in Input mode (Save/Reset shown).
+ */
+async function beginEditing(page, name) {
+  const field = unitOf(page, name).locator(`[name="${name}"]`);
+  await expect(field).toBeEnabled();
+  const type = await field.getAttribute('type');
+  if (type === 'checkbox') {
+    await field.click();
+    await field.click();
+  } else {
+    await field.click();
+    await field.pressSequentially('x');
+    await field.press('Backspace');
+  }
 }
 
-test.describe('US1 — choose Input or Initiate NCR for each traveler input', () => {
-  test('every input offers Input and Initiate NCR, and none is editable until Input is chosen', async ({ page }) => {
+test.describe('US1 — enter a value or Initiate NCR for each traveler input', () => {
+  test('every input offers Initiate NCR and is directly editable, with no separate Input step', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await page.goto(`/travelers/${travelerId}/`);
 
-    await expect(page.locator('.input-value-link')).toHaveCount(4);
     await expect(page.locator('.initiate-ncr-link')).toHaveCount(4);
     for (const name of ['input_a', 'input_b', 'input_c']) {
-      await expect(page.locator(`input[name="${name}"]`)).toBeDisabled();
+      await expect(page.locator(`input[name="${name}"]`)).toBeEnabled();
     }
-    await expect(page.locator('input[name="check_d"]')).toBeDisabled();
+    await expect(page.locator('input[name="check_d"]')).toBeEnabled();
   });
 
-  test('Input makes that one input editable, hides its Initiate NCR, and offers Save and Reset', async ({ page }) => {
+  test('entering a value hides that input\'s Initiate NCR, offers Save and Reset, and holds back every other input', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await page.goto(`/travelers/${travelerId}/`);
 
-    await chooseInput(page, 'input_b');
+    await beginEditing(page, 'input_b');
 
     await expect(page.locator('input[name="input_b"]')).toBeEnabled();
     await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toBeHidden();
     await expect(unitOf(page, 'input_b').locator('button[value="save"]')).toBeVisible();
     await expect(unitOf(page, 'input_b').locator('button[value="reset"]')).toBeVisible();
-    // one input at a time: the other inputs' options are not usable
-    await expect(unitOf(page, 'input_a').locator('.input-value-link')).toBeDisabled();
+    // one input at a time: every other input is held back
     await expect(unitOf(page, 'input_a').locator('.initiate-ncr-link')).toHaveClass(/disabled/);
     await expect(page.locator('input[name="input_a"]')).toBeDisabled();
   });
 
-  test('saving stores the value, and locks and completes the input: neither option is offered', async ({ page }) => {
+  test('saving stores the value, and locks and completes the input: no option is offered', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await page.goto(`/travelers/${travelerId}/`);
 
-    await chooseInput(page, 'input_a');
     const successAlerts = page.locator('#message .alert-success');
     const before = await successAlerts.count();
+    await expect(page.locator('input[name="input_a"]')).toBeEnabled();
     await page.fill('input[name="input_a"]', 'a measured value');
     await page.click('button[value="save"]');
     await expect(successAlerts).toHaveCount(before + 1, { timeout: 10000 });
 
     await expect(page.locator('input[name="input_a"]')).toHaveValue('a measured value');
     await expect(page.locator('input[name="input_a"]')).toBeDisabled();
-    await expect(unitOf(page, 'input_a').locator('.input-value-link')).toHaveCount(0);
     await expect(unitOf(page, 'input_a').locator('.initiate-ncr-link')).toHaveCount(0);
   });
 
-  test('Reset discards the unsaved change and returns the input to both options', async ({ page }) => {
+  test('Reset discards the unsaved change and returns the input to being directly editable, with Initiate NCR offered again', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await page.goto(`/travelers/${travelerId}/`);
 
-    await chooseInput(page, 'input_c');
+    await expect(page.locator('input[name="input_c"]')).toBeEnabled();
     await page.fill('input[name="input_c"]', 'not saved');
     await page.click('button[value="reset"]');
 
     await expect(page.locator('input[name="input_c"]')).toHaveValue('');
-    await expect(page.locator('input[name="input_c"]')).toBeDisabled();
-    await expect(unitOf(page, 'input_c').locator('.input-value-link')).toBeVisible();
+    await expect(page.locator('input[name="input_c"]')).toBeEnabled();
     await expect(unitOf(page, 'input_c').locator('.initiate-ncr-link')).toBeVisible();
   });
 
@@ -120,12 +131,11 @@ test.describe('US1 — choose Input or Initiate NCR for each traveler input', ()
     await expect(link).toHaveAttribute('href', new RegExp(`traveler_input_ref=${travelerId}%3A%3Ainput_b`));
   });
 
-  test('a traveler that is not active offers neither option on any input', async ({ page }) => {
+  test('a traveler that is not active offers no Initiate NCR on any input', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id), status: 1.5 });
     await page.goto(`/travelers/${travelerId}/`);
 
-    await expect(page.locator('.input-value-link')).toHaveCount(0);
     await expect(page.locator('.initiate-ncr-link')).toHaveCount(0);
   });
 });
@@ -151,51 +161,52 @@ async function linkNcr(travelerId, inputName, inputLabel, status = 'Submitted') 
 }
 
 test.describe('US2 — an input with an open NCR waits until the NCR is closed', () => {
-  test('an open NCR on an input removes its Input and Initiate NCR options, and shows the NCR', async ({ page }) => {
+  test('an open NCR on an input locks it, removes its Initiate NCR option, and shows the NCR', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await linkNcr(travelerId, 'input_b', `Input B ${id}`);
     await page.goto(`/travelers/${travelerId}/`);
 
-    await expect(unitOf(page, 'input_b').locator('.input-value-link')).toHaveCount(0);
+    await expect(page.locator('input[name="input_b"]')).toBeDisabled();
     await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toHaveCount(0);
     await expect(unitOf(page, 'input_b').locator('.ncr-link-badge')).toBeVisible();
     // the other inputs are unaffected
-    await expect(unitOf(page, 'input_a').locator('.input-value-link')).toHaveCount(1);
+    await expect(page.locator('input[name="input_a"]')).toBeEnabled();
+    await expect(unitOf(page, 'input_a').locator('.initiate-ncr-link')).toHaveCount(1);
   });
 
-  test('two NCRs with one still open keep Input held back', async ({ page }) => {
+  test('two NCRs with one still open keep the input locked', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await linkNcr(travelerId, 'input_b', `Input B ${id}`, 'Closed');
     await linkNcr(travelerId, 'input_b', `Input B ${id}`, 'Submitted');
     await page.goto(`/travelers/${travelerId}/`);
 
-    await expect(unitOf(page, 'input_b').locator('.input-value-link')).toHaveCount(0);
+    await expect(page.locator('input[name="input_b"]')).toBeDisabled();
   });
 
-  test('a closed NCR does not hold Input back', async ({ page }) => {
+  test('a closed NCR does not lock the input', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await linkNcr(travelerId, 'input_b', `Input B ${id}`, 'Closed');
     await page.goto(`/travelers/${travelerId}/`);
 
-    await expect(unitOf(page, 'input_b').locator('.input-value-link')).toHaveCount(1);
+    await expect(page.locator('input[name="input_b"]')).toBeEnabled();
     await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toBeVisible();
   });
 
-  test('closing the NCR brings both Input and Initiate NCR back once the page is refreshed', async ({ page }) => {
+  test('closing the NCR unlocks the input and brings Initiate NCR back once the page is refreshed', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     const { ncrId } = await linkNcr(travelerId, 'input_b', `Input B ${id}`);
     await page.goto(`/travelers/${travelerId}/`);
-    await expect(unitOf(page, 'input_b').locator('.input-value-link')).toHaveCount(0);
+    await expect(page.locator('input[name="input_b"]')).toBeDisabled();
     await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toHaveCount(0);
 
     await execFixtureCli('set-ncr-status', { ncrId, status: 'Closed' });
     await page.reload();
 
-    await expect(unitOf(page, 'input_b').locator('.input-value-link')).toHaveCount(1);
+    await expect(page.locator('input[name="input_b"]')).toBeEnabled();
     await expect(unitOf(page, 'input_b').locator('.initiate-ncr-link')).toHaveCount(1);
   });
 
@@ -206,9 +217,9 @@ test.describe('US2 — an input with an open NCR waits until the NCR is closed',
     await page.goto(`/travelers/${travelerId}/`);
 
     await expect(unitOf(page, 'input_c').locator('.initiate-ncr-link')).toHaveCount(0);
-    await expect(unitOf(page, 'input_c').locator('.input-value-link')).toHaveCount(0);
+    await expect(page.locator('input[name="input_c"]')).toBeDisabled();
     await expect(unitOf(page, 'input_c').locator('.ncr-link-badge')).toHaveCount(1);
-    // an input with no NCR still offers both
+    // an input with no NCR still offers Initiate NCR
     await expect(unitOf(page, 'input_a').locator('.initiate-ncr-link')).toHaveCount(1);
   });
 });
@@ -224,7 +235,7 @@ test.describe('US3 — NCRs are started from inside a traveler only', () => {
 
     await page.goto(`/travelers/${travelerId}/`);
     await expect(page.locator('.copy-ncr-ref')).toHaveCount(0);
-    await expect(page.locator('.input-value-link')).toHaveCount(4);
+    await expect(page.locator('.initiate-ncr-link')).toHaveCount(4);
   });
 
   test('opening the form from Initiate NCR shows the traveler and input as fixed context', async ({ page }) => {
@@ -304,7 +315,7 @@ test.describe('US4 — submission needs every NCR closed and every input filled 
     // input A has no value yet, so submission is not offered
     await expect(page.locator('#complete2')).toBeDisabled();
 
-    await unitOf(page, 'input_a').locator('.input-value-link').click();
+    await expect(page.locator('input[name="input_a"]')).toBeEnabled();
     await page.fill('input[name="input_a"]', 'changed but not saved');
     await expect(page.locator('#complete2')).toBeDisabled();
     await expect(page.locator('#submit-blockers')).toContainText('save or reset it first');
@@ -356,21 +367,21 @@ test.describe('US4 — submission needs every NCR closed and every input filled 
 });
 
 test.describe('US1 — saving nothing does not complete an input', () => {
-  test('saving a blank text input or an unticked box keeps both options: the input is not completed', async ({ page }) => {
+  test('saving a blank text input or an unticked box keeps it directly editable with Initiate NCR offered: the input is not completed', async ({ page }) => {
     const id = runId();
     const { travelerId } = await createTraveler({ inputs: fourInputs(id) });
     await page.goto(`/travelers/${travelerId}/`);
 
-    // a blank text value
-    await chooseInput(page, 'input_a');
+    // a blank text value: type then delete it, to enter Input mode without providing a value
+    await beginEditing(page, 'input_a');
     await page.click('button[value="save"]');
-    await expect(unitOf(page, 'input_a').locator('.input-value-link')).toBeVisible();
+    await expect(page.locator('input[name="input_a"]')).toBeEnabled();
     await expect(unitOf(page, 'input_a').locator('.initiate-ncr-link')).toBeVisible();
 
-    // an unticked single checkbox (saved as false)
-    await chooseInput(page, 'check_d');
+    // an unticked single checkbox (saved as false): tick then untick, to enter Input mode
+    await beginEditing(page, 'check_d');
     await page.click('button[value="save"]');
-    await expect(unitOf(page, 'check_d').locator('.input-value-link')).toBeVisible();
+    await expect(page.locator('input[name="check_d"]')).toBeEnabled();
     await expect(unitOf(page, 'check_d').locator('.initiate-ncr-link')).toBeVisible();
 
     // nothing counts as finished, so submission is still held back

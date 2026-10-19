@@ -30,8 +30,8 @@ async function createFillableTraveler(overrides = {}) {
 
 /** Fills in the traveler's one input via the real UI and clicks Save, waiting for the success message. */
 async function fillAndSaveInput(page, value) {
-  // the input is editable only after its Input option is chosen (spec 125)
-  await page.locator('.input-value-link').click();
+  // the input is directly editable (spec 125, revised: no separate "Input" step)
+  await expect(page.locator('input[name="field_1"]')).toBeEnabled();
   await page.fill('input[name="field_1"]', value);
   await page.click('button[value="save"]');
   await expect(page.locator('#message .alert-success').last()).toBeVisible({ timeout: 10000 });
@@ -66,7 +66,7 @@ test.describe('Traveler-Initiated NCRs Linked to a Specific Input', () => {
     await fillAndSaveInput(page, 'a measured value');
 
     await expect(page.locator('.initiate-ncr-link')).toHaveCount(0);
-    await expect(page.locator('.input-value-link')).toHaveCount(0);
+    await expect(page.locator('input[name="field_1"]')).toBeDisabled();
   });
 
   test('AS2 - Initiate NCR opens creation pre-linked, banner names the input, and the created NCR carries the traveler_link', async ({ page }) => {

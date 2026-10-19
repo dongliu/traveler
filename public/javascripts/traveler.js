@@ -171,12 +171,15 @@ function unitForName(name) {
     .closest('.controls');
 }
 
-// An input is being entered when it is in Input mode: its controls are enabled, or its
-// Save and Reset are showing. Such an input is never overwritten by a refresh.
+// An input is being entered when its Save/Reset (a child of .controls) or its
+// Upload/Cancel (a child of the enclosing .control-group-wrap, for a file
+// input) are showing — not merely when its field is enabled, since an
+// untouched, not-yet-completed field is directly editable by default (spec
+// 125, revised). Such an input is never overwritten by a refresh.
 function isBeingEntered($unit) {
   return (
     $unit.children('.control-group-buttons').length > 0 ||
-    $unit.find('input,textarea').filter(':enabled').length > 0
+    $unit.closest('.control-group-wrap').children('.control-group-buttons').length > 0
   );
 }
 
@@ -242,7 +245,7 @@ function leaveActiveState() {
     stopLiveRefresh();
     stopLiveRefresh = null;
   }
-  $('#form .input-value-link, #form .initiate-ncr-link').remove();
+  $('#form .initiate-ncr-link').remove();
   $('#form .control-group-buttons').remove();
   $('#form input, #form textarea').prop('disabled', true);
   $('#complete2').prop('disabled', true);
@@ -906,26 +909,17 @@ $(function() {
       .prop('disabled', true);
     $('#complete, #complete2').prop('disabled', true);
     if ($controls.children('.control-group-buttons').length === 0) {
+      // first interaction with this input (spec 125 FR-009, revised: the field
+      // is directly editable, with no separate "Input" step to click first)
+      enterInputMode($controls);
       $controls.prepend(
         '<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>'
       );
+      if (lastLiveStatus) {
+        updateSubmitState(lastLiveStatus);
+      }
     }
   }
-
-  // "Input": make this one input editable and hide its Initiate NCR option (spec 125 FR-009)
-  $('#form').on('click', '.input-value-link', function(e) {
-    e.preventDefault();
-    const $controls = $(this).closest('.controls');
-    enterInputMode($controls);
-    if (lastLiveStatus) {
-      updateSubmitState(lastLiveStatus);
-    }
-    $controls
-      .find('input,textarea')
-      .filter(':enabled')
-      .first()
-      .trigger('focus');
-  });
 
   // a disabled "Initiate NCR" option (another input is being entered) does nothing
   $('#form').on('click', '.initiate-ncr-link.disabled', function(e) {
@@ -1134,9 +1128,15 @@ $(function() {
     $validation.empty();
 
     if ($cgw.children('.control-group-buttons').length === 0) {
+      // first interaction with this input (spec 125 FR-009, revised: the field
+      // is directly editable, with no separate "Input" step to click first)
+      enterInputMode($this.closest('.controls'));
       $cgw.prepend(
         '<div class="pull-right control-group-buttons"><button value="upload" class="btn btn-primary">Upload</button> <button value="cancel" class="btn">Cancel</button></div>'
       );
+      if (lastLiveStatus) {
+        updateSubmitState(lastLiveStatus);
+      }
     }
   });
 
