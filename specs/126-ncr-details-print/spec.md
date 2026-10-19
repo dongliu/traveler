@@ -20,7 +20,7 @@ A user printing (or saving as PDF) a completed traveler sees, after the traveler
 
 **Acceptance Scenarios**:
 
-1. **Given** a completed traveler with NCRs linked to more than one of its inputs, **When** the user prints it (or saves it as a PDF), **Then** every one of those NCRs' details appears in the output, gathered together after the traveler's own content, one after another.
+1. **Given** a completed traveler with NCRs linked to more than one of its inputs, **When** the user prints it (or saves it as a PDF), **Then** every one of those NCRs' details appears in the output, gathered together after the traveler's own content, one after another, in the same top-to-bottom order as the inputs they were raised against appear on the traveler's form — not, for example, in the order the NCRs happen to have been created.
 2. **Given** an NCR included in the printed output, **When** the user reads that NCR's section, **Then** it shows the NCR's substantive detail (identification, part/supplier/reference information, nonconformance description, people involved, disposition, review/approval, preventive actions, closure information, and attachment file names) but does not show that NCR's event history.
 3. **Given** a completed traveler with no NCRs linked to any of its inputs, **When** the user prints it, **Then** the output states that no NCRs exist for the traveler rather than silently showing nothing.
 4. **Given** a traveler that is not completed, **When** the user views it, **Then** nothing about this feature changes — NCR details are only ever added to a completed traveler's printed output, the same scope the print/"Create PDF" action is already limited to today.
@@ -62,7 +62,7 @@ A user printing a completed traveler sees the traveler's own review/approval his
 - **FR-007**: When a traveler has no review history on record, the printed output MUST state that explicitly rather than omitting the section without explanation.
 - **FR-008**: This additional content MUST be produced through the same printing/"Create PDF" action already available for a completed traveler, adding no new steps.
 - **FR-009**: NCR and review free-text content MUST be rendered as plain readable text, never interpreted as active markup, so content a user typed cannot alter the structure of the printed page.
-- **FR-010**: NCRs MUST appear in a consistent, predictable order every time the same traveler is printed.
+- **FR-010**: NCRs MUST appear in the same order as the inputs they were raised against appear on the traveler's form, top to bottom; when more than one NCR was raised against the same input, those MUST appear together, in the order they were raised.
 - **FR-011**: This feature MUST NOT change which travelers the print/"Create PDF" action is available for, or any of the output's existing behavior (e.g., its validation/notes/details show-hide controls) — it only adds the NCR and review content described above.
 
 ### Key Entities
@@ -75,7 +75,7 @@ A user printing a completed traveler sees the traveler's own review/approval his
 
 ### Measurable Outcomes
 
-- **SC-001**: For a completed traveler with any number of linked NCRs, printing it includes 100% of those NCRs' details, gathered together after the traveler's own content, with no event-history listing for any of them.
+- **SC-001**: For a completed traveler with any number of linked NCRs, printing it includes 100% of those NCRs' details, gathered together after the traveler's own content, in the same top-to-bottom order as the traveler's own inputs, with no event-history listing for any of them.
 - **SC-002**: For a completed traveler with review history, printing it shows every recorded review outcome without the user performing any action beyond the single print/"Create PDF" action already in use today.
 - **SC-003**: Printing a completed traveler with no linked NCRs, or no review history, clearly states so rather than presenting an unexplained gap.
 - **SC-004**: Printed output never renders NCR or review free-text content as active markup, verified by printing a traveler/NCR whose text fields contain characters that look like markup and confirming the page's structure is unaffected.
@@ -87,4 +87,4 @@ A user printing a completed traveler sees the traveler's own review/approval his
 - "No Event History" refers specifically to an NCR's own chronological event/action log; every other category of its detail already shown on its own detail record is included.
 - "Review records... by default" means the review history is always part of the printed output automatically — unlike the page's existing validation/notes/details controls, which stay as optional, user-toggled content and are unaffected by this feature.
 - The review history shown is the traveler's complete recorded history — every outcome, including a later-voided or superseded one (clearly marked as such) — the same full history already available elsewhere for this traveler, not narrowed to only the result(s) behind the final approval.
-- NCRs are listed in chronological order (oldest first), giving a consistent, predictable reading order.
+- NCRs are listed in the same order their linked inputs appear on the traveler's form (top to bottom) — the same order a reader scanning the traveler itself would encounter them — not by when each NCR was raised. An NCR whose linked input is no longer on the form (e.g., the form changed since) is listed after every NCR whose input is still recognized, in the order it was raised relative to other such NCRs.
