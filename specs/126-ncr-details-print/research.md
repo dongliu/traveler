@@ -132,6 +132,17 @@ recorded result is included, voided or not (marked as such), not filtered
 to only the one(s) behind the final approval — the same complete history
 `views/traveler.jade`'s own "Completed review(s)" accordion already shows.
 
+The route wraps `reviewRecordRows`'s output as a single `Section` before
+returning it — `lib/ncr-pdf.js#tableSection('Approvals', ['Reviewer','Outcome','Date','Comments'], rows, [3,2,2,4])`
+— rather than returning the raw row array. `tableSection` already existed
+inside `lib/ncr-pdf.js` (used internally by `buildNcrPdfModel`) but was not
+exported; it now is, so this is its first external caller, not a
+reimplementation of "empty rows become a note." This means
+`GET /travelers/:id/review-records/` returns exactly one `Section` object
+(not an array) — the same shape each `ncr-print-details/` entry's own
+`sections` array already carries — so the client never needs to reshape
+either response before drawing it (R5).
+
 **Rationale**: FR-006/FR-007. A pure function is directly unit-testable
 (Constitution I) and keeps "Approved vs Rejected, how voided is marked" in
 one place. `__review.policy` is left out of the output for the same reason
@@ -144,9 +155,12 @@ misrepresent how the traveler was really approved.
 element construction and `.text()` for every value a `Section` carries
 (`$('<td>').text(value)`, not `` $(`<td>${value}</td>`) `` or `.html(...)`)
 — never by concatenating a value into an HTML string. A small local
-renderer, `renderSections(container, sections)`, draws the generic
-`{heading, rows|table|note}` shape (R1/R4) this way once, reused for both
-the NCR and review containers.
+renderer, `renderSection(container, section)`, draws one Section's generic
+`{heading, rows|table|note}` shape this way; `#review-records` gets exactly
+one call (the single Section `/review-records/` already returns), and
+`#ncr-print-sections` gets one call per `/ncr-print-details/` entry
+(preceded by that entry's own `ncrTitle` drawn as a sub-heading) — the same
+small function, called once per Section either way.
 
 **Rationale**: FR-009 ("never interpreted as markup") has to be earned
 client-side here, the opposite of the server-rendered direction (where

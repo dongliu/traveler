@@ -34,17 +34,13 @@
       "response": {
         "success_200": {
           "statusCode": 200,
-          "body": [
-            {
-              "reviewerName": "string — resolved name, or the raw reviewer id if it no longer resolves to a User",
-              "outcome": "'Approved' | 'Rejected'",
-              "date": "ISO-8601 date-time — the result's submittedOn",
-              "comment": "string",
-              "voided": "boolean"
-            }
-          ],
+          "body": {
+            "heading": "'Approvals'",
+            "table_or_note": "{ table: { head: ['Reviewer','Outcome','Date','Comments'], rows: Array<[String,String,String,String]>, widths: [3,2,2,4] } } when there is at least one recorded result, else { note: 'None recorded' }"
+          },
+          "note_on_shape": "A single Section object (research.md R1's Section shape), not an array — pre-wrapped server-side so the client can pass this endpoint's response straight to the same renderSection(container, section) call used for each ncr-print-details/ entry, with no client-side reshaping (revised from an earlier draft of this contract, which had the client build the table itself).",
           "ordering": "The order the results were recorded in (traveler.__review.reviewResults' own order) — every recorded result, not filtered to current-version/non-voided only (research.md R4)",
-          "empty_case": "[] when the traveler has no review history — the client renders a 'no approvals' line (FR-007)"
+          "empty_case": "{ heading: 'Approvals', note: 'None recorded' } when the traveler has no review history (FR-007)"
         },
         "errors": {
           "not_found_404": "reqUtils.exist('id', Traveler) — existing behaviour",
@@ -53,6 +49,7 @@
       },
       "notes": [
         "Resolution: one batched User.find({_id: {$in: [...uniqueReviewerIds]}}, 'name').lean() call, then lib/traveler-ncr.js#reviewRecordRows(traveler, reviewerNames) (research.md R4) — the same reviewer-name-resolution pattern routes/form.js already uses for a Form's own review results; routes/traveler.js never did this for travelers before this feature.",
+        "Wrapping: lib/ncr-pdf.js#tableSection('Approvals', ['Reviewer','Outcome','Date','Comments'], rows, [3,2,2,4]) — tableSection is now exported from lib/ncr-pdf.js (it already existed there, used internally by buildNcrPdfModel; this feature is its first external caller) so the empty-rows-becomes-a-note behaviour is not re-implemented a second time.",
         "__review.policy is never returned: allApproved() does not actually read it, so surfacing it would misrepresent how the traveler was really approved."
       ]
     }
@@ -68,7 +65,7 @@
   "client_contract": {
     "file": "public/javascripts/traveler-print.js",
     "fetches": "Both endpoints above, in the existing $(function() {...}) ready handler, alongside the discrepancy log's own existing fetch.",
-    "render_targets": "views/traveler-print.jade gains two empty containers, #ncr-print-sections and #review-records, that a small local renderSections(container, sections) function (research.md R5) fills — the generic Section shape drawn once, reused for both.",
+    "render_targets": "views/traveler-print.jade gains two empty containers, #ncr-print-sections and #review-records. A small local renderSection(container, section) function (research.md R5) draws one Section into one container; #review-records gets exactly one call (the single Section the review-records/ endpoint already returns), #ncr-print-sections gets one call per ncr-print-details/ entry (preceded by that entry's own ncrTitle as a sub-heading) — no client-side reshaping of either response, only drawing.",
     "escaping": "Every Section value is inserted via jQuery .text() (or an equivalent safe DOM-building call), never .html() or a template-string built from a value — this is what satisfies FR-009 (no NCR/review free text is ever interpreted as markup) on the client, since there is no server-side auto-escaping step for this content.",
     "print_gating": "#create-pdf stays disabled until both fetches above have resolved (research.md R7) — ensures the one existing print action (FR-008) always produces a complete record (FR-001/FR-006) rather than racing the user's click."
   }

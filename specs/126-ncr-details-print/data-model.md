@@ -11,19 +11,25 @@ page's own script calls; nothing new is persisted.
 | Endpoint | Returns | Built from |
 |---|---|---|
 | `GET /travelers/:id/ncr-print-details/` | `Array<{ ncrTitle: String, sections: Array<Section> }>` | `findAllLinkedNcrs(travelerId)` → `orderNcrsByFormPosition(ncrs, activeFormLabels(traveler))` (research.md R3, ordered to match the traveler's own form top to bottom — not creation time) → each mapped through `buildNcrPdfModel(ncr, { travelerTitle }).sections`, `'Event History'` filtered out (R1). Empty array when the traveler has no linked NCRs — the client shows a "no NCRs" line (FR-005) rather than nothing. |
-| `GET /travelers/:id/review-records/` | `Array<{ reviewerName, outcome: 'Approved'\|'Rejected', date, comment, voided }>` | `reviewRecordRows(traveler, reviewerNames)` (R4), `reviewerNames` resolved via one batched `User.find`. Empty array when there is no review history — the client shows a "no approvals" line (FR-007) rather than nothing. |
+| `GET /travelers/:id/review-records/` | A single `Section` (not an array) | `reviewRecordRows(traveler, reviewerNames)` (R4) → wrapped via `lib/ncr-pdf.js#tableSection('Approvals', ['Reviewer','Outcome','Date','Comments'], rows, [3,2,2,4])` (now exported — see below), `reviewerNames` resolved via one batched `User.find`. `tableSection` already turns an empty `rows` into `{heading, note: 'None recorded'}` (FR-007) — not reimplemented here. |
 
 Both are read-only, authenticated the same way every other `/travelers/:id/*`
 page-support endpoint already is (`auth.ensureAuthenticated`,
 `reqUtils.exist('id', Traveler)`, `reqUtils.canReadMw('id')`).
 
-### `Section` (existing shape, from `lib/ncr-pdf.js`, unchanged)
+### `Section` (existing shape, from `lib/ncr-pdf.js`)
 
 ```js
 { heading: String, rows: Array<[String, String]> }   // label/value pairs
 { heading: String, table: { head: Array<String>, rows: Array<Array<String>>, widths?: Array<Number> } }
 { heading: String, note: String }                      // a single line, e.g. "None recorded"
 ```
+
+This shape itself is unchanged; what changes is that `lib/ncr-pdf.js` now
+also exports `tableSection` (already used internally by `buildNcrPdfModel`,
+not previously exported) so the new `/review-records/` route can wrap
+`reviewRecordRows`'s output the same way, rather than re-implementing the
+"empty rows become a note" rule a second time.
 
 Every value is already a display-ready string (`lib/ncr-pdf.js`'s own
 `text()`/`formatDate()`), so the client-side renderer only ever inserts
@@ -69,7 +75,7 @@ discrepancy log's own fetch:
 
 ```js
 $.getJSON('./ncr-print-details/')   // -> Array<{ncrTitle, sections}>
-$.getJSON('./review-records/')      // -> Array<{reviewerName, outcome, date, comment, voided}>
+$.getJSON('./review-records/')      // -> a single Section: {heading: 'Approvals', table: {...} | note: 'None recorded'}
 ```
 
 Both resolving is what enables `#create-pdf` (research.md R7); a failure on

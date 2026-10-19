@@ -84,7 +84,7 @@ Checked against `.specify/memory/constitution.md` v1.1.0.
 | Principle | Status | How this plan meets it |
 |---|---|---|
 | I. Automated Testing | Pass | Unit tests for the two new `lib/traveler-ncr.js` functions. A new Playwright e2e spec covers both new endpoints' JSON shape and the rendered page's resulting content (NCRs present/absent, review records present/absent including a voided one, no Event History, markup-like text rendered literally, `#create-pdf` staying disabled until both fetches resolve) — the constitution's "E2E recommended for critical user journeys," and the only meaningful way to verify client-side-rendered content in this codebase (research.md R8). |
-| II. Code Quality and Consistency | Pass | NCR detail is not re-derived: both new endpoints reuse `lib/ncr-pdf.js#buildNcrPdfModel`, the one existing source of truth for "what is an NCR's substantive detail," the same way the NCR closure PDF already does (research.md R1). The two new traveler-level rules live in `lib/traveler-ncr.js`, the module that already owns this traveler's NCR-related rules, not inline in a route. One small client-side `renderSections` function draws both new sections instead of two near-duplicate blocks. |
+| II. Code Quality and Consistency | Pass | NCR detail is not re-derived: both new endpoints reuse `lib/ncr-pdf.js#buildNcrPdfModel`, the one existing source of truth for "what is an NCR's substantive detail," the same way the NCR closure PDF already does (research.md R1). The two new traveler-level rules live in `lib/traveler-ncr.js`, the module that already owns this traveler's NCR-related rules, not inline in a route. One small client-side `renderSection` function draws both new sections instead of two near-duplicate blocks. |
 | III. Security-First Architecture | Pass | Both new endpoints are read-only extensions of the existing, already-authenticated `/travelers/:id/*` middleware chain — no new input is accepted. All NCR/review free text is inserted client-side via `.text()`, never `.html()` or an HTML string built from a value (research.md R5) — a deliberate choice, made explicit because this codebase already has a nearby counter-example (`public/javascripts/lib/traveler.js`'s `history()`/`notes()` build HTML via unescaped string templates) that this feature's own new code does not repeat. Attachment file names only, never a path or a link (research.md R6). |
 | IV. Versioning & Breaking Changes | Pass | Purely additive: two new endpoints, two new containers and a few new lines of script on an existing page. `GET /travelers/:id/print` itself is unchanged — no response-shape change for any existing caller. |
 | V. Documentation | Pass | `contracts/traveler-print-ncr-and-review.json` documents both new endpoints and the two new `lib/` functions to the same standard as existing contracts. CLAUDE.md gets a 126 "Recent Changes" entry once implemented. |
@@ -127,7 +127,7 @@ views/
 public/javascripts/
 └── traveler-print.js           # + two $.getJSON calls (the two new endpoints) in the existing ready handler,
                                  #   alongside the existing discrepancy-log fetch
-                                 # + renderSections(container, sections): draws the generic
+                                 # + renderSection(container, section): draws the generic
                                  #   {heading, rows|table|note} shape via safe DOM construction (.text())
                                  # + #create-pdf stays disabled until both new fetches resolve (research.md R7)
 
