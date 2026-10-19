@@ -40,6 +40,7 @@ const {
   assignDesignate,
   removeDesignate,
   listNcrs,
+  getStatusCounts,
   getNcrById,
   assignPaOwner,
   updatePaStatus,
@@ -1221,6 +1222,108 @@ describe('lib/ncr-service — listNcrs', () => {
     await listNcrs({}, makeUser({ roles: ['manager'] }));
 
     findStub.firstCall.args[0].should.not.have.property('$or');
+  });
+});
+
+// ── getStatusCounts ──────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — getStatusCounts', () => {
+  it('covers every status, including Closed, with no page limit applied to the query', async () => {
+    const aggregateStub = sinon.stub(Ncr, 'aggregate').resolves([
+      { _id: 'Submitted', count: 3 },
+      { _id: 'Closed', count: 2 },
+    ]);
+
+    const result = await getStatusCounts({}, makeUser({ id: 'orig1', roles: [] }));
+
+    result.counts.should.deep.equal({
+      Submitted: 3,
+      Dispositioned: 0,
+      'Approval Requested': 0,
+      'Returned for Comment': 0,
+      'Final Approval': 0,
+      Closed: 2,
+    });
+    result.total.should.equal(5);
+    const pipeline = aggregateStub.firstCall.args[0];
+    pipeline.should.deep.equal([
+      { $match: aggregateStub.firstCall.args[0][0].$match },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+  });
+
+  it('never truncates: the sum of every status always equals the total, whatever the volume', async () => {
+    sinon.stub(Ncr, 'aggregate').resolves([
+      { _id: 'Submitted', count: 150 },
+      { _id: 'Dispositioned', count: 80 },
+      { _id: 'Closed', count: 40 },
+    ]);
+
+    const result = await getStatusCounts({}, makeUser({ roles: ['manager'] }));
+
+    const sum = Object.values(result.counts).reduce((a, b) => a + b, 0);
+    sum.should.equal(result.total);
+    result.total.should.equal(270);
+  });
+
+  it('scopes results to the originator when the user has no elevated role, same as listNcrs', async () => {
+    const aggregateStub = sinon.stub(Ncr, 'aggregate').resolves([]);
+
+    await getStatusCounts({}, makeUser({ id: 'orig1', roles: [] }));
+
+    const match = aggregateStub.firstCall.args[0][0].$match;
+    match.$or.should.deep.include({ originator_id: 'orig1' });
+  });
+
+  it('does not scope results for managers', async () => {
+    const aggregateStub = sinon.stub(Ncr, 'aggregate').resolves([]);
+
+    await getStatusCounts({}, makeUser({ roles: ['manager'] }));
+
+    aggregateStub.firstCall.args[0][0].$match.should.not.have.property('$or');
+  });
+
+  it('applies the non-status filters (part_number, supplier_name, disposition, date range) like listNcrs', async () => {
+    const aggregateStub = sinon.stub(Ncr, 'aggregate').resolves([]);
+
+    await getStatusCounts(
+      {
+        part_number: 'PN-1',
+        supplier_name: 'Acme',
+        parts_disposition: 'Scrap',
+        from_date: '2026-01-01',
+        to_date: '2026-01-31',
+      },
+      makeUser({ roles: ['manager'] })
+    );
+
+    const match = aggregateStub.firstCall.args[0][0].$match;
+    match.part_number.should.equal('PN-1');
+    match.supplier_name.should.equal('Acme');
+    match['disposition.parts_disposition'].should.equal('Scrap');
+    match.discovery_date.$gte.should.be.instanceOf(Date);
+    match.discovery_date.$lte.should.be.instanceOf(Date);
+  });
+
+  it('ignores a status/includeClosed filter if one is passed — every status is always counted', async () => {
+    const aggregateStub = sinon.stub(Ncr, 'aggregate').resolves([]);
+
+    await getStatusCounts({ status: 'Submitted', includeClosed: false }, makeUser({ roles: ['manager'] }));
+
+    const match = aggregateStub.firstCall.args[0][0].$match;
+    match.should.not.have.property('status');
+  });
+
+  it('counts a status value that is not one of the known NCR_STATUSES toward the total, not silently dropped', async () => {
+    sinon.stub(Ncr, 'aggregate').resolves([
+      { _id: 'Submitted', count: 1 },
+      { _id: 'SomeLegacyStatus', count: 1 },
+    ]);
+
+    const result = await getStatusCounts({}, makeUser({ roles: ['manager'] }));
+
+    result.total.should.equal(2);
+    result.counts.Submitted.should.equal(1);
   });
 });
 

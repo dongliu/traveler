@@ -194,19 +194,16 @@ block js
           parts_disposition: $('#f-disposition').val(),
           from_date: $('#f-from').val(),
           to_date: $('#f-to').val(),
-          includeClosed: true,
-          limit: 1000,
         });
-        $.getJSON(prefix + '/api/ncrs?' + q, function (data) {
-          var counts = { 'Submitted':0,'Dispositioned':0,'Approval Requested':0,'Returned for Comment':0,'Final Approval':0,'Closed':0 };
-          (data.ncrs || []).forEach(function (n) { if (counts.hasOwnProperty(n.status)) counts[n.status]++; });
+        $.getJSON(prefix + '/api/ncrs/status-counts?' + q, function (data) {
+          var counts = data.counts || {};
           $('.count-all').text(data.total || 0);
-          $('.count-Submitted').text(counts['Submitted']);
-          $('.count-Dispositioned').text(counts['Dispositioned']);
-          $('.count-ApprovalRequested').text(counts['Approval Requested']);
-          $('.count-Returned').text(counts['Returned for Comment']);
-          $('.count-Final').text(counts['Final Approval']);
-          $('.count-Closed').text(counts['Closed']);
+          $('.count-Submitted').text(counts['Submitted'] || 0);
+          $('.count-Dispositioned').text(counts['Dispositioned'] || 0);
+          $('.count-ApprovalRequested').text(counts['Approval Requested'] || 0);
+          $('.count-Returned').text(counts['Returned for Comment'] || 0);
+          $('.count-Final').text(counts['Final Approval'] || 0);
+          $('.count-Closed').text(counts['Closed'] || 0);
         });
       }
 
