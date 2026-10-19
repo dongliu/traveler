@@ -1,0 +1,76 @@
+Baseline recorded 2026-10-18, before implementing 126-ncr-details-print.
+
+No new npm dependency is introduced by this feature.
+
+## Unit tests (T001)
+
+Command: TRAVELER_CONFIG_REL_PATH=docker npm run unit
+Result: 376 passing, 0 failing.
+
+## Lint (T001)
+
+Command: npx eslint .
+Result: 2490 pre-existing problems (2411 errors, 79 warnings) across the
+whole repo, in files unrelated to this feature. The bar for this feature is:
+no *new* violation in any file it touches (lib/traveler-ncr.js,
+lib/ncr-pdf.js, routes/traveler.js, views/traveler-print.jade,
+public/javascripts/traveler-print.js, e2e/fixtures/cli.js).
+
+## E2E baseline (T002)
+
+Docker stack: already up (project `upton-ncr`, web on host port 3201, API
+on 3202, matching this repo's `.env`), bind-mounted to this exact worktree
+directory — nodemon picks up code changes live.
+
+Command: npm run e2e -- e2e/us-traveler-ncr-gating.spec.js
+Result: 37 passed (52.4s), 0 failing. No pre-existing failures to note.
+
+## Post-implementation verification (Phase 4 Polish)
+
+### Lint (T019)
+
+Command: npx eslint .
+Result: 2486 problems (2407 errors, 79 warnings) — fewer errors than the
+baseline above (2490), because `public/javascripts/traveler-print.js`'s
+pre-existing `traveler` no-undef violations were fixed as part of declaring
+it a proper global alongside `moment`/`Binder`/`prefix`. No new violation was
+introduced by any file this feature touched.
+
+Also added an `ignores` entry to `eslint.config.mjs` (`node_modules/`,
+`coverage/`, `playwright-report/`, `test-results/`) — these generated/test
+output directories did not exist at the T001 baseline (before any e2e run in
+this session created them), so without this entry eslint began scanning
+Playwright's bundled trace-viewer JS and inflating the problem count by
+~50 unrelated errors. This brings eslint's ignore behaviour in line with
+`.gitignore`, which already excludes the same directories.
+
+### Unit tests + coverage (T020)
+
+Command: TRAVELER_CONFIG_REL_PATH=docker npm run unit
+Result: 388 passing, 0 failing (12 more than the 376 baseline — the new
+findAllLinkedNcrs/orderNcrsByFormPosition/reviewRecordRows tests).
+
+Command: TRAVELER_CONFIG_REL_PATH=docker npx c8 --include lib/traveler-ncr.js npx mocha test-unit/lib/traveler-ncr.test.js
+Result: 98.89% statements, 93.12% branches, 100% functions, 98.89% lines —
+well above the 80% bar.
+
+### npm audit (T021)
+
+Command: npm audit --omit=dev
+Result: 68 vulnerabilities (14 low, 16 moderate, 28 high, 10 critical) — all
+pre-existing in dependencies this feature did not touch or add; no new
+dependency was introduced, so this figure is unchanged from before this
+feature's work.
+
+### Full e2e suite (T022)
+
+Command: npm run e2e
+Result: 155 tests, 153 passed, 2 failed. `e2e/us-traveler-print-ncr-details.spec.js`
+(this feature's own 7 tests) passed in full. The 2 failures —
+`us-admin-ncr-deletion.spec.js` AS2 and `us2-ce-cs-disposition.spec.js` AS1 —
+are pre-existing flakes unrelated to this feature (neither spec touches
+anything this feature changed); confirmed by stashing every change this
+feature made and re-running `us2-ce-cs-disposition.spec.js`'s AS1 test in
+isolation, which still timed out waiting for "Submit Disposition" the same
+way. `us-admin-ncr-deletion.spec.js` AS2 passed on a subsequent re-run,
+confirming it is flaky rather than a regression.

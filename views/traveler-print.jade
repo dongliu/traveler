@@ -21,7 +21,7 @@ html
           br
           if (locals.traveler.status !== undefined && locals.traveler.status === 2)
             .btn-group
-              button.btn.btn-primary#create-pdf Create PDF
+              button.btn.btn-primary#create-pdf(disabled='disabled') Create PDF
             .btn-group(data-toggle='buttons-radio')
               button.btn.btn-info#show-validation Show validation
               button.btn.btn-info#hide-validation.active Hide validation
@@ -36,6 +36,8 @@ html
           include ./traveler/status.jade
           if (locals.traveler.devices && traveler.devices.length > 0)
             h4 Part Number: !{traveler.devices}
+          //- h3 Approvals
+          #review-records
           #validation.well.hide
           #details.hide
             if (locals.traveler.description !== undefined)
@@ -63,13 +65,15 @@ html
             table#discrepancy-log-table.table.table-bordered.table-hover
           form.form-horizontal#form
             div.control-group#traveler-legend
-              legend Traveler
+              h4 Traveler
             if (traveler.forms.length === 1)
               != traveler.forms[0].html
             else if (traveler.forms.id(traveler.activeForm))
               != traveler.forms.id(traveler.activeForm).html
             else
               != ''
+          h3 Nonconformance Reports
+          #ncr-print-sections
           hr
           div
             p

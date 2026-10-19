@@ -3,6 +3,9 @@ import pluginJs from '@eslint/js';
 
 export default [
   {
+    ignores: ['node_modules/**', 'coverage/**', 'playwright-report/**', 'test-results/**'],
+  },
+  {
     files: ['**/*.js'],
     languageOptions: {
       sourceType: 'commonjs',

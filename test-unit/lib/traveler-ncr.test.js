@@ -1014,6 +1014,144 @@ describe('lib/traveler-ncr — input values and the submission gate (spec 125)',
     });
   });
 
+  describe('findAllLinkedNcrs (126)', () => {
+    let find;
+
+    function stubRows(rows) {
+      find = sandbox
+        .stub(Ncr, 'find')
+        .returns({ sort: () => ({ lean: () => Promise.resolve(rows) }) });
+    }
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('asks for every linked NCR, any status, no field projection, sorted oldest-first', async () => {
+      stubRows([]);
+      await travelerNcr.findAllLinkedNcrs(TRAVELER_ID);
+      expect(find.calledOnce).to.equal(true);
+      expect(find.firstCall.args[0]).to.deep.equal({
+        'traveler_link.traveler_id': TRAVELER_ID,
+        'traveler_link.initiated_from_traveler': true,
+      });
+      // no status filter (contrast with openNcrFilter), no projection argument
+      expect(find.firstCall.args.length).to.equal(1);
+    });
+
+    it('resolves to whatever the query returns', async () => {
+      const rows = [{ _id: 'id-1' }];
+      stubRows(rows);
+      const result = await travelerNcr.findAllLinkedNcrs(TRAVELER_ID);
+      expect(result).to.deep.equal(rows);
+    });
+  });
+
+  describe('orderNcrsByFormPosition (126)', () => {
+    const { orderNcrsByFormPosition } = travelerNcr;
+
+    function ncr(id, inputName) {
+      return { _id: id, traveler_link: { input_name: inputName } };
+    }
+
+    it('reorders NCRs to the order their inputs appear in labels, not array order', () => {
+      const ncrs = [ncr('on-b', 'b'), ncr('on-a', 'a')];
+      const labels = { a: 'A', b: 'B' };
+      const result = orderNcrsByFormPosition(ncrs, labels);
+      expect(result.map(n => n._id)).to.deep.equal(['on-a', 'on-b']);
+    });
+
+    it('sorts an NCR whose input is not a key of labels after every recognized one', () => {
+      const ncrs = [ncr('removed-input', 'gone'), ncr('on-a', 'a')];
+      const labels = { a: 'A' };
+      const result = orderNcrsByFormPosition(ncrs, labels);
+      expect(result.map(n => n._id)).to.deep.equal(['on-a', 'removed-input']);
+    });
+
+    it('keeps the given relative order of two NCRs linked to the same input (stable sort)', () => {
+      const ncrs = [ncr('first', 'a'), ncr('second', 'a')];
+      const result = orderNcrsByFormPosition(ncrs, { a: 'A' });
+      expect(result.map(n => n._id)).to.deep.equal(['first', 'second']);
+    });
+
+    it('does not mutate the array it was given', () => {
+      const ncrs = [ncr('on-b', 'b'), ncr('on-a', 'a')];
+      const original = ncrs.slice();
+      orderNcrsByFormPosition(ncrs, { a: 'A', b: 'B' });
+      expect(ncrs).to.deep.equal(original);
+    });
+
+    it('tolerates no labels at all', () => {
+      const ncrs = [ncr('x', 'a')];
+      expect(orderNcrsByFormPosition(ncrs, {}).map(n => n._id)).to.deep.equal(['x']);
+      expect(orderNcrsByFormPosition(ncrs, undefined).map(n => n._id)).to.deep.equal(['x']);
+    });
+  });
+
+  describe('reviewRecordRows (126)', () => {
+    const { reviewRecordRows } = travelerNcr;
+
+    it('maps result 1 to Approved and result 2 to Rejected', () => {
+      const traveler = {
+        __review: {
+          reviewResults: [
+            { reviewerId: 'u1', result: '1', submittedOn: 'd1', comment: 'ok' },
+            { reviewerId: 'u2', result: '2', submittedOn: 'd2', comment: 'no' },
+          ],
+        },
+      };
+      const rows = reviewRecordRows(traveler, new Map());
+      expect(rows[0].outcome).to.equal('Approved');
+      expect(rows[1].outcome).to.equal('Rejected');
+    });
+
+    it('keeps a voided entry, marked, not dropped and not treated as current', () => {
+      const traveler = {
+        __review: {
+          reviewResults: [
+            { reviewerId: 'u1', result: '2', voided: true, submittedOn: 'd1' },
+          ],
+        },
+      };
+      const rows = reviewRecordRows(traveler, new Map());
+      expect(rows).to.have.length(1);
+      expect(rows[0].voided).to.equal(true);
+    });
+
+    it('resolves a reviewerId present in reviewerNames, falls back to the raw id otherwise', () => {
+      const traveler = {
+        __review: {
+          reviewResults: [
+            { reviewerId: 'u1', result: '1', submittedOn: 'd1' },
+            { reviewerId: 'unknown', result: '1', submittedOn: 'd2' },
+          ],
+        },
+      };
+      const names = new Map([['u1', 'Alice']]);
+      const rows = reviewRecordRows(traveler, names);
+      expect(rows[0].reviewerName).to.equal('Alice');
+      expect(rows[1].reviewerName).to.equal('unknown');
+    });
+
+    it('returns rows in the given order, not re-sorted', () => {
+      const traveler = {
+        __review: {
+          reviewResults: [
+            { reviewerId: 'z', result: '1', submittedOn: 'd1' },
+            { reviewerId: 'a', result: '1', submittedOn: 'd2' },
+          ],
+        },
+      };
+      const rows = reviewRecordRows(traveler, new Map());
+      expect(rows.map(r => r.reviewerName)).to.deep.equal(['z', 'a']);
+    });
+
+    it('returns [] without throwing when there is no review history at all', () => {
+      expect(reviewRecordRows({}, new Map())).to.deep.equal([]);
+      expect(reviewRecordRows({ __review: {} }, new Map())).to.deep.equal([]);
+    });
+  });
+
   describe('buildLiveStatus (T006)', () => {
     it('describes each input with its options, state and revision, and holds no saved values', async () => {
       stubReads({
