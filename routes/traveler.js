@@ -25,7 +25,12 @@ const singleFileUpload = multer({
 });
 const routesUtilities = require('../utilities/routes');
 const mqttUtilities = require('../utilities/mqtt');
-const { buildLiveStatus } = require('../lib/traveler-ncr');
+const {
+  buildLiveStatus,
+  findAllLinkedNcrs,
+  orderNcrsByFormPosition,
+  reviewRecordRows,
+} = require('../lib/traveler-ncr');
 
 const auth = require('../lib/auth');
 
@@ -1272,6 +1277,79 @@ module.exports = function(app) {
             };
           });
           return res.status(200).json(links);
+        });
+    }
+  );
+
+  // Every NCR linked to this traveler, print-ready, in the traveler's own
+  // top-to-bottom form order (spec 126). Fetched client-side by the print
+  // page; GET /travelers/:id/print itself is unchanged.
+  app.get(
+    '/travelers/:id/ncr-print-details/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    function(req, res) {
+      const traveler = req[req.params.id];
+      findAllLinkedNcrs(req.params.id)
+        .then(function(ncrs) {
+          const labels = routesUtilities.traveler.activeFormLabels(traveler);
+          const ordered = orderNcrsByFormPosition(ncrs, labels);
+          const { buildNcrPdfModel } = require('../lib/ncr-pdf');
+          const details = ordered.map(function(ncr) {
+            const model = buildNcrPdfModel(ncr, { travelerTitle: traveler.title });
+            return {
+              ncrTitle: ncr.ncr_number,
+              sections: model.sections.filter(function(section) {
+                return section.heading !== 'Event History';
+              }),
+            };
+          });
+          return res.status(200).json(details);
+        })
+        .catch(function(err) {
+          logger.error(err);
+          return res.status(500).send(err.message);
+        });
+    }
+  );
+
+  // The traveler's own complete review/approval history, reviewer ids
+  // resolved to names (spec 126), pre-wrapped as a single Section so the
+  // client draws it with the same renderSection call as an NCR's own sections.
+  app.get(
+    '/travelers/:id/review-records/',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.canReadMw('id'),
+    function(req, res) {
+      const traveler = req[req.params.id];
+      const results = (traveler.__review && traveler.__review.reviewResults) || [];
+      const reviewerIds = [...new Set(results.map(function(r) { return r.reviewerId; }))];
+      User.find({ _id: { $in: reviewerIds } }, 'name')
+        .lean()
+        .then(function(users) {
+          const names = new Map(users.map(function(u) { return [u._id, u.name]; }));
+          const rows = reviewRecordRows(traveler, names);
+          const { tableSection } = require('../lib/ncr-pdf');
+          const section = tableSection(
+            'Approvals',
+            ['Reviewer', 'Outcome', 'Date', 'Comments'],
+            rows.map(function(row) {
+              return [
+                row.reviewerName,
+                row.voided ? `${row.outcome} (voided)` : row.outcome,
+                row.date,
+                row.comment,
+              ];
+            }),
+            [3, 2, 2, 4]
+          );
+          return res.status(200).json(section);
+        })
+        .catch(function(err) {
+          logger.error(err);
+          return res.status(500).send(err.message);
         });
     }
   );

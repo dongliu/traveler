@@ -331,6 +331,20 @@ async function getBinder({ binderId }) {
   return { finishedInput: binder.finishedInput, totalInput: binder.totalInput };
 }
 
+// Sets a traveler's own review/approval history directly — provisioning
+// review records for the print page (spec 126) without driving the full
+// review-request-and-submission flow, which is existing, already-tested
+// behaviour this feature does not touch.
+async function setTravelerReviewResults({ travelerId, reviewResults }) {
+  require('../../model/user');
+  const { Traveler } = require('../../model/traveler');
+  await Traveler.updateOne(
+    { _id: travelerId },
+    { $set: { '__review.reviewResults': reviewResults } }
+  );
+  return { travelerId, count: reviewResults.length };
+}
+
 // Sets an NCR's status directly (e.g. to 'Closed'), bypassing the workflow.
 // Deliberately does NOT go through closeNcr(), so it neither attaches a PDF
 // nor refreshes the traveler's progress — use the real close endpoint for that.
@@ -483,6 +497,7 @@ const COMMANDS = {
   'set-traveler-status': setTravelerStatus,
   'get-traveler': getTraveler,
   'set-ncr-status': setNcrStatus,
+  'set-traveler-review-results': setTravelerReviewResults,
   'create-binder-with-traveler': createBinderWithTraveler,
   'get-binder': getBinder,
   'get-ncr': getNcr,

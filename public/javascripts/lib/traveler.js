@@ -167,25 +167,6 @@ function inputReference(element) {
   return `${traveler._id}::${element.name}`;
 }
 
-// Appends the "Input" option into one field's NCR links container, ahead of the
-// Initiate NCR option (spec 125 FR-007). Not offered on a traveler that is not
-// active, nor while an NCR against the field is open (FR-015).
-export function appendInputLink(element) {
-  if (traveler.status !== 1 || !element) {
-    return;
-  }
-  if (isInputBlockedByOpenNcr(element.name)) {
-    return;
-  }
-  const $ncrLinks = getOrCreateNcrLinksContainer($(element).closest('.controls'));
-  if ($ncrLinks.find('.input-value-link').length > 0) {
-    return;
-  }
-  $ncrLinks.prepend(
-    '<button type="button" class="input-value-link btn btn-small btn-primary"><i class="fa fa-pencil"></i> Input</button>'
-  );
-}
-
 // Appends the "Initiate NCR" action into one field's .controls div — used
 // both by renderNcrLinks() at page load (for every already-touched input)
 // and, after a first-time save, so the action appears with no page reload.
@@ -227,10 +208,11 @@ function unitField($controls) {
   return $controls.find('input,textarea')[0];
 }
 
-// Puts one input in its default state (spec 125 FR-008, FR-010): the field locked,
-// and both options shown. Save and Reset are removed with the edit they belonged to.
+// Returns one input to its default, non-editing state (spec 125 FR-010, revised):
+// Save/Reset (or Upload/Cancel) are removed with the edit they belonged to, and
+// refreshOptions puts the field's own editable/locked state and Initiate NCR back
+// in line with whether it is now completed or blocked by an open NCR.
 export function lockUnit($controls) {
-  $controls.find('input,textarea').prop('disabled', true);
   $controls.children('.control-group-buttons').remove();
   $controls.closest('.control-group-wrap').children('.control-group-buttons').remove();
   refreshOptions($controls);
@@ -261,66 +243,74 @@ export function isCompleted($controls) {
   return $controls.attr('data-completed') === 'true';
 }
 
-// Puts an input's options in line with its state (spec 125). A completed input offers
-// neither option. Otherwise it offers Input (not while an NCR against it is open) and
-// Initiate NCR. An input being entered keeps the options it has, hidden.
+// Puts an input's field and its Initiate NCR option in line with its state (spec
+// 125, revised: no separate "Input" step — a field is directly editable, not
+// gated behind a button click). A completed input, or one with an open NCR
+// against it, is locked and offers no Initiate NCR. Otherwise the field is
+// directly editable and Initiate NCR is offered, held back while another input
+// is actively being entered (FR-012). An input actively being entered (its
+// Save/Reset or Upload/Cancel showing) is left exactly as it is.
 export function refreshOptions($controls) {
   const field = unitField($controls);
   if (!field) {
     return;
   }
-  if ($controls.find('input,textarea').filter(':enabled').length > 0) {
+  // actively being entered — Save/Reset lives in .controls, Upload/Cancel (for
+  // a file input) in the enclosing .control-group-wrap; leave it alone either way
+  if (
+    $controls.children('.control-group-buttons').length > 0 ||
+    $controls.closest('.control-group-wrap').children('.control-group-buttons').length > 0
+  ) {
     return;
   }
-  if (isCompleted($controls)) {
-    $controls.find('.input-value-link, .initiate-ncr-link').remove();
+  if (isCompleted($controls) || isInputBlockedByOpenNcr(field.name)) {
+    $controls.find('.initiate-ncr-link').remove();
+    $controls.find('input,textarea').prop('disabled', true);
     return;
   }
-  appendInputLink(field);
+  $controls.find('input,textarea').prop('disabled', false);
   appendInitiateNcrLink(field);
-  // while another input is being entered, every option stays unusable (spec 125 FR-012)
-  const otherEntering = $('#form input, #form textarea').filter(':enabled').length > 0;
-  const $options = $controls.find('.input-value-link, .initiate-ncr-link');
+  // while another input is being entered, Initiate NCR stays unusable (spec 125 FR-012)
+  const otherEntering = $('#form .control-group-buttons').length > 0;
+  const $ncrLink = $controls.find('.initiate-ncr-link');
   if (otherEntering) {
-    $options.addClass('disabled').prop('disabled', true);
+    $ncrLink.addClass('disabled').prop('disabled', true);
   } else {
-    $options.show().removeClass('disabled').prop('disabled', false);
+    $ncrLink.show().removeClass('disabled').prop('disabled', false);
   }
 }
 
-// Puts one input into Input mode (spec 125 FR-009): its field becomes editable,
-// its Initiate NCR option is hidden, and Save and Reset are offered. While it is
-// in Input mode, every other input's options are unusable (FR-012).
+// Begins Input mode for one input, once the user starts entering a value
+// directly into its already-editable field (spec 125 FR-009, revised: there is
+// no separate "Input" step to click first). Hides its own Initiate NCR option;
+// while it is in Input mode, every other input's Initiate NCR option is
+// unusable (FR-012). Called once, by the caller that first notices the user
+// has started editing (formInputMade, or the file input's own change handler).
 export function enterInputMode($controls) {
   inputUnits()
     .not($controls)
-    .find('.input-value-link, .initiate-ncr-link')
+    .find('.initiate-ncr-link')
     .addClass('disabled')
     .prop('disabled', true);
-  $controls.find('.input-value-link, .initiate-ncr-link').hide();
-  $controls.find('input,textarea').prop('disabled', false);
-  // a file input is saved by its own Upload and Cancel buttons, which the change handler adds
-  const isFile = $controls.find('input[type="file"]').length > 0;
-  if (!isFile && $controls.children('.control-group-buttons').length === 0) {
-    $controls.prepend(
-      '<div class="pull-right control-group-buttons"><button value="save" class="btn btn-primary">Save</button> <button value="reset" class="btn">Reset</button></div>'
-    );
-  }
+  $controls.find('.initiate-ncr-link').hide();
 }
 
 // Ends Input mode after a save, a reset or a cancelled upload (spec 125 FR-010):
-// the input is locked again with both options, and every other input's options
-// are usable once more.
+// the input's field and Initiate NCR option are put back in line with its state
+// (editable, or locked if now completed or blocked). Every other input's field
+// and Initiate NCR option are put back in line with their own state too — they
+// were disabled/held back only because this one was being entered (FR-012).
 export function leaveInputMode($controls) {
   lockUnit($controls);
   inputUnits()
-    .find('.input-value-link, .initiate-ncr-link')
-    .removeClass('disabled')
-    .prop('disabled', false);
+    .not($controls)
+    .each(function() {
+      refreshOptions($(this));
+    });
 }
 
-// Brings each input's Input option in line with its open NCRs: hidden while one
-// is open, offered otherwise (spec 125 FR-015, FR-016).
+// Brings each input's field and Initiate NCR option in line with its open NCRs:
+// locked and waiting while one is open, offered otherwise (spec 125 FR-015, FR-016).
 export function syncInputOptions() {
   inputUnits().each(function() {
     const $controls = $(this);
@@ -330,8 +320,9 @@ export function syncInputOptions() {
     }
     const $ncrLinks = getOrCreateNcrLinksContainer($controls);
     if (isInputBlockedByOpenNcr(field.name)) {
-      // neither option while an NCR is open: Input is held back and no second NCR is raised (FR-015, FR-017)
-      $controls.find('.input-value-link, .initiate-ncr-link').remove();
+      // locked while an NCR is open: Input is held back and no second NCR is raised (FR-015, FR-017)
+      $controls.find('.initiate-ncr-link').remove();
+      $controls.find('input,textarea').prop('disabled', true);
       // the input is shown as waiting, in words, not only by the NCR badge's colour
       if ($ncrLinks.find('.input-waiting').length === 0) {
         $ncrLinks.prepend('<span class="input-waiting help-inline">Waiting on an open NCR</span>');
@@ -407,10 +398,11 @@ function renderNcrRows($controls, ncrs, reports) {
   getOrCreateNcrLinksContainer($controls).append($box);
 }
 
-// Renders the per-input NCR display: the "Input" and "Initiate NCR" options (on
-// every input, spec 125) and, fetched from GET ./ncr-links/, a link+status
-// badge for every NCR already linked to that input, listed one per row in a
-// warning box, each closed NCR followed by its close report (the PDF fetched from
+// Renders the per-input NCR display: the field's own editable/locked state and
+// its Initiate NCR option (on every input, spec 125, revised — no separate
+// "Input" step) and, fetched from GET ./ncr-links/, a link+status badge for
+// every NCR already linked to that input, listed one per row in a warning box,
+// each closed NCR followed by its close report (the PDF fetched from
 // GET ./ncr-pdfs/) — mirrors renderNotes()'s DOM-injection mechanics exactly.
 export function renderNcrLinks() {
   $('#form .controls').each(function(index, controlsElement) {
@@ -423,17 +415,15 @@ export function renderNcrLinks() {
     if (!inputElements.length) {
       return;
     }
-    const element = inputElements[0];
     // Make the container now rather than when the NCR list arrives: the notes are
     // added later, by their own request, and the list belongs above them, right
     // under the input, however the two requests happen to finish.
     getOrCreateNcrLinksContainer($controlsElement);
     if (traveler.status === 1) {
-      // every input, whatever its value, starts locked with its two options (spec 125)
-      lockUnit($controlsElement);
+      // every input starts in line with its state: directly editable and
+      // offering Initiate NCR, unless already completed or blocked (spec 125)
+      refreshOptions($controlsElement);
     }
-    appendInputLink(element);
-    appendInitiateNcrLink(element);
   });
 
   loadNcrBadges();
@@ -579,8 +569,9 @@ export function renderHistory(binder, travelerStatus = null) {
         }
       });
 
-      // An active traveler's inputs stay locked until their Input option is chosen
-      // (spec 125); renderNcrLinks locks them with their options.
+      // An active traveler's inputs are directly editable unless already
+      // completed or blocked by an open NCR (spec 125); renderNcrLinks puts
+      // each one in line with its state.
 
       markFormValidity(document.getElementById('form'));
 

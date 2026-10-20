@@ -19,6 +19,7 @@ const {
   assignDesignate,
   removeDesignate,
   listNcrs,
+  getStatusCounts,
   getNcrById,
   assignPaOwner,
   updatePaStatus,
@@ -202,6 +203,32 @@ router.get('/', auth.ensureAuthenticated, async (req, res) => {
     return res.status(200).json({ success: true, ...result });
   } catch (err) {
     logger.error('NCR list failed:', err);
+    return res.status(500).json({ success: false, error: 'Internal Server Error', message: err.message });
+  }
+});
+
+// Per-status counts for the dashboard's status-card summary (every status,
+// including Closed, uncapped by a page limit) — scoped like GET / but never
+// filtered to one status itself. Registered before '/:id' so 'status-counts'
+// is not taken for an NCR id.
+router.get('/status-counts', auth.ensureAuthenticated, async (req, res) => {
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      roles: res.locals.roles || [],
+    };
+    const filters = {
+      part_number: req.query.part_number,
+      supplier_name: req.query.supplier_name,
+      from_date: req.query.from_date,
+      to_date: req.query.to_date,
+      parts_disposition: req.query.parts_disposition,
+    };
+    const result = await getStatusCounts(filters, user);
+    return res.status(200).json({ success: true, ...result });
+  } catch (err) {
+    logger.error('NCR status counts failed:', err);
     return res.status(500).json({ success: false, error: 'Internal Server Error', message: err.message });
   }
 });

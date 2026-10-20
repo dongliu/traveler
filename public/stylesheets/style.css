@@ -711,8 +711,3 @@ form.form-horizontal .tinymce table th,
 form.form-horizontal .tinymce table td {
   border: 1pt solid black;
 }
-
-/* spec 125: the Input option sits beside Initiate NCR in an input's NCR links row */
-.ncr-links .input-value-link {
-  margin-right: 6px;
-}
