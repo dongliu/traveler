@@ -1110,6 +1110,68 @@ describe('lib/ncr-service — closeNcr', () => {
     emails.should.deep.equal(['orig@test.com']);
     result.status.should.equal('Closed');
   });
+
+  it('includes a Preventive Action owner\'s already-stored email in final distribution, even when they have never logged in', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      preventive_actions: [
+        { action_description: 'Fix it', status: 'Open', owner_id: 'owner1', owner_email: 'owner1@test.com' },
+      ],
+    }));
+    // owner1 has no local User record -- stubUserFind only resolves the Originator.
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+
+    await closeNcr('id1', {}, originator);
+
+    const emails = sendFinalDistributionStub.lastCall.args[1];
+    emails.should.include('owner1@test.com');
+  });
+
+  it('does not double-email a Preventive Action owner who also resolves via the existing User lookup', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      preventive_actions: [
+        { action_description: 'Fix it', status: 'Open', owner_id: 'owner1', owner_email: 'owner1@test.com' },
+      ],
+    }));
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'owner1', name: 'Owner', email: 'owner1@test.com' },
+    ]);
+
+    await closeNcr('id1', {}, originator);
+
+    const emails = sendFinalDistributionStub.lastCall.args[1];
+    emails.filter(e => e === 'owner1@test.com').should.have.lengthOf(1);
+  });
+
+  it('final distribution reaches CE/CS, Designate, and Approver through the existing User lookup, once Story 1 has provisioned them', async () => {
+    stubFindById(newNcr({
+      status: 'Final Approval',
+      originator_id: 'orig1',
+      ce_cs_id: 'ces1',
+      originator_designate_id: 'des1',
+      additional_approvers: [{ approver_id: 'appr1', approval_status: 'Approved' }],
+    }));
+    // Standing in for "a User record already exists because Story 1 provisioned
+    // it when each of these people was added" -- no new ensureUserExists call is
+    // needed in closeNcr itself for these three roles.
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'ces1', name: 'CES', email: 'ces@test.com' },
+      { _id: 'des1', name: 'Designate', email: 'des@test.com' },
+      { _id: 'appr1', name: 'Approver', email: 'appr1@test.com' },
+    ]);
+
+    await closeNcr('id1', {}, originator);
+
+    const emails = sendFinalDistributionStub.lastCall.args[1];
+    emails.should.include('ces@test.com');
+    emails.should.include('des@test.com');
+    emails.should.include('appr1@test.com');
+  });
 });
 
 // ── assignDesignate ─────────────────────────────────────────────────────────
