@@ -65,6 +65,25 @@ LDAP-search-then-save flow and to the specific `doc.sharedWith`/
 applies to an NCR stakeholder or a Form reviewer. A new, smaller, purpose-built
 helper is simpler than carving a reusable piece out of `addUserFromAD`.
 
+**Found during implementation**: `ensureUserExists` throwing when no email
+is available (FR-008) cannot be allowed to propagate out of every call
+site unconditionally — two pre-existing, deliberately-written unit tests
+(`submitConcurrence` adding an approver by id/name alone, with no email
+resolvable anywhere) prove that CE/CS and an additional Approver have
+never required a resolvable email to be added, only to be notified; only
+the Originator Designate already requires one (validated before
+`ensureUserExists` is ever reached there). Making the *add itself* start
+failing for CE/CS/Approver when no email exists would have been a
+regression this feature does not intend. `lib/ncr-service.js` therefore
+wraps those two call sites' use of `ensureUserExists` in
+`ensureUserExistsIfPossible`, a tiny local helper that swallows
+specifically the `status: 400` "no email available" error (re-throwing
+anything else) — FR-008 is satisfied (no record is ever created with an
+undeliverable address), without narrowing what CE/CS/Approver additions
+have always accepted. `assignDesignate` calls `ensureUserExists` directly
+(no wrapper needed): its email is already required before that point, so
+the 400 path is unreachable there in practice.
+
 ## R3 — Review's permission check is untouched; only the "no record exists" refusal is removed
 
 **Decision**: `lib/review.js#addReviewRequest` currently does

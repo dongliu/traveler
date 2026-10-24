@@ -124,6 +124,14 @@ function stubUserFind(results) {
   return sinon.stub(User, 'find').returns({ lean: () => Promise.resolve(results) });
 }
 
+// User.findById is stubbed by default in beforeEach (resolving null, i.e. "never
+// logged in") so every existing test that touches a provisioning call site keeps
+// working without having to know about it; this just reconfigures that same stub.
+function stubUserFindById(doc) {
+  User.findById.resolves(doc);
+  return User.findById;
+}
+
 function stubGroupFindOne(result) {
   const chain = { populate: function() { return chain; }, lean: () => Promise.resolve(result) };
   Group.findOne.returns(chain);
@@ -148,6 +156,11 @@ function stubWbsMatch(matches) {
 
 beforeEach(() => {
   sinon.stub(Ncr.prototype, 'save').resolves();
+  sinon.stub(User.prototype, 'save').resolves();
+  // Default: nobody has a local User record yet ("never logged in") --
+  // exercises ensureUserExists's create path by default; tests that care
+  // about the "already has a record" path override via stubUserFindById.
+  sinon.stub(User, 'findById').resolves(null);
   // Default: ncr-qa group not configured — no user is a QA staff member
   const nullChain = { populate: function() { return nullChain; }, lean: () => Promise.resolve(null) };
   sinon.stub(Group, 'findOne').returns(nullChain);
@@ -205,6 +218,21 @@ describe('lib/ncr-service — createNcr', () => {
     const ncr = await createNcr(data, makeUser());
 
     ncr.events.some(e => e.event_type === 'notification.disposition_request').should.be.true;
+  });
+
+  it('provisions a User record for a CE/CS who has never logged in, and still creates the NCR', async () => {
+    sinon.stub(Ncr, 'findOne').resolves(null);
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
+    stubUserFindById(null);
+    const data = minimalNcrData({ ce_cs_id: 'ces1', ce_cs_name: 'CE Person', ce_cs_email: 'ces@test.com' });
+
+    const ncr = await createNcr(data, makeUser());
+
+    ncr.events.some(e => e.event_type === 'notification.disposition_request').should.be.true;
+    User.prototype.save.calledOnce.should.be.true;
+    const created = User.prototype.save.thisValues[0];
+    created._id.should.equal('ces1');
+    created.email.should.equal('ces@test.com');
   });
 
   it('sends no email at all when the ncr-qa group is not configured, even when ce_cs_email is provided', async () => {
@@ -470,6 +498,24 @@ describe('lib/ncr-service — submitConcurrence', () => {
     userFindStub.called.should.be.false;
     const sentEmails = sendApprovalRequestStub.lastCall.args[1];
     sentEmails.should.include('appr1@ad.example.com');
+  });
+
+  it('provisions a User record for an additional Approver who has never logged in', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned' }));
+    stubUserFindById(null);
+
+    const result = await submitConcurrence(
+      'id1',
+      [{ approver_id: 'appr1', approver_name: 'Approver One', approver_email: 'appr1@ad.example.com' }],
+      qaUser
+    );
+
+    result.additional_approvers[0].approver_email.should.equal('appr1@ad.example.com');
+    User.prototype.save.calledOnce.should.be.true;
+    const created = User.prototype.save.thisValues[0];
+    created._id.should.equal('appr1');
+    created.email.should.equal('appr1@ad.example.com');
   });
 
   it('falls back to a local User lookup for email only when approver_email is not submitted', async () => {
@@ -745,6 +791,24 @@ describe('lib/ncr-service — addApprover', () => {
     const result = await addApprover('id1', { approver_id: 'appr2', approver_name: 'Approver Two' }, qaUser);
 
     result.additional_approvers[0].approver_email.should.equal('fallback@test.com');
+  });
+
+  it('provisions a User record for the approver being added, when they have never logged in', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
+    stubFindById(newNcr({ status: 'Approval Requested', additional_approvers: [] }));
+    stubUserFindById(null);
+
+    const result = await addApprover(
+      'id1',
+      { approver_id: 'appr2', approver_name: 'Approver Two', approver_email: 'appr2@ad.example.com' },
+      qaUser
+    );
+
+    result.additional_approvers[0].approver_email.should.equal('appr2@ad.example.com');
+    User.prototype.save.calledOnce.should.be.true;
+    const created = User.prototype.save.thisValues[0];
+    created._id.should.equal('appr2');
+    created.email.should.equal('appr2@ad.example.com');
   });
 
   it('is also allowed while the NCR is Returned for Comment (issuance has not happened)', async () => {
@@ -1101,6 +1165,19 @@ describe('lib/ncr-service — assignDesignate', () => {
     event.payload.designate_id.should.equal('des1');
     result.events.some(e => e.event_type === 'notification.designate_assigned').should.be.true;
     sendDesignateAssignedStub.lastCall.args[1].should.equal('des@test.com');
+  });
+
+  it('provisions a User record for the incoming Designate, when they have never logged in', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'orig1' }));
+    stubUserFindById(null);
+
+    const result = await assignDesignate('id1', validDesignateData, originator);
+
+    result.originator_designate_id.should.equal('des1');
+    User.prototype.save.calledOnce.should.be.true;
+    const created = User.prototype.save.thisValues[0];
+    created._id.should.equal('des1');
+    created.email.should.equal('des@test.com');
   });
 
   it('replaces an existing Designate when assigning a different one', async () => {

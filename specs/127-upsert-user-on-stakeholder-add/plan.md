@@ -122,14 +122,21 @@ lib/
 │                                   # find by _id; create-if-missing from the given directory
 │                                   # fields; leave an existing record untouched; reject when
 │                                   # the record would need creating but has no email
-├── ncr-service.js                # createNcr(): ensureUserExists for CE/CS (data.ce_cs_id/_name/_email)
-│                                   #   when ce_cs_id is present — Originator needs no call, they are
-│                                   #   always the logged-in session user (research.md R1)
-│                                   # assignDesignate(): ensureUserExists for the incoming Designate
-│                                   #   (designateData.designate_id/_name/_email)
-│                                   # submitConcurrence(): ensureUserExists for each entry in
-│                                   #   additional_approvers before it's saved
-│                                   # addApprover(): ensureUserExists for the one approver being added
+├── ncr-service.js                # + ensureUserExistsIfPossible(identity): swallows only
+│                                   #   ensureUserExists's 400 ("no email available") so CE/CS and
+│                                   #   Approver adds, which have never required an email, don't
+│                                   #   start failing when one isn't resolvable (research.md R2)
+│                                   # createNcr(): ensureUserExistsIfPossible for CE/CS
+│                                   #   (data.ce_cs_id/_name/_email) when ce_cs_id is present —
+│                                   #   Originator needs no call, they are always the logged-in
+│                                   #   session user (research.md R1)
+│                                   # assignDesignate(): ensureUserExists (direct, not the wrapper)
+│                                   #   for the incoming Designate (designateData.designate_id/_name/_email)
+│                                   #   — its email is already required before this point
+│                                   # submitConcurrence(): ensureUserExistsIfPossible for each entry
+│                                   #   in additional_approvers before it's saved
+│                                   # addApprover(): ensureUserExistsIfPossible for the one approver
+│                                   #   being added
 │                                   # closeNcr(): final-distribution email list also includes each
 │                                   #   preventive_actions[].owner_email directly, not only the
 │                                   #   id-based findUsers() result (research.md R5)

@@ -21,20 +21,28 @@ field.
 **Validation rules** (from FR-008/FR-009):
 - A record is only ever *created*, never updated — an existing record's
   `name`/`email`/`roles`/anything else is never modified by this helper.
-- Creating a record always requires a non-empty `email`; `id` and `name`
-  are required because the four callers below already require them
-  (CE/CS, Approver, Designate, and reviewer identity are all required
-  fields on their respective requests already).
+- Creating a record always requires a non-empty `email`.
+
+**`ensureUserExistsIfPossible` — `lib/ncr-service.js`**: a tiny wrapper
+used at the two call sites where an email has never been a precondition
+of the surrounding add (CE/CS, Approver) — it calls `ensureUserExists` and
+swallows only its `status: 400` ("no email available") error, re-throwing
+anything else. This is what keeps FR-008 ("never create an undeliverable
+record") from becoming a new reason those two adds can fail, which two
+pre-existing unit tests show was never a requirement before this feature
+(research.md R2). `assignDesignate` calls `ensureUserExists` directly, not
+through this wrapper — its email is already a required field validated
+earlier in that function, so the 400 path can't actually be hit there.
 
 ## Call sites (existing functions, each gains one call)
 
 | Call site | File : function | Person's `{id, name, email}` source | Notes |
 |---|---|---|---|
-| NCR CE/CS | `lib/ncr-service.js` : `createNcr` | `data.ce_cs_id` / `data.ce_cs_name` / `data.ce_cs_email` | Only when `data.ce_cs_id` is present (it's optional on NCR creation). |
-| NCR additional Approver (initial designation) | `lib/ncr-service.js` : `submitConcurrence` | each entry of `additionalApprovers[]`: `approver_id` / `approver_name` / `approver_email` | Runs once per approver in the array before `ncr.additional_approvers` is saved. |
-| NCR additional Approver (added later) | `lib/ncr-service.js` : `addApprover` | `approverData.approver_id` / `.approver_name` / `.approver_email` | Same helper, single entry. |
-| NCR Originator Designate | `lib/ncr-service.js` : `assignDesignate` | `designateData.designate_id` / `.designate_name` / `.designate_email` | Already-required fields on this request; no behavior change to the request's own validation. |
-| Form reviewer | `lib/review.js` : `addReviewRequest` | `req.body.uid` / `req.body.name` / `req.body.email` (new field, see Contracts) | Replaces the current hard `400` refusal when no `User` record exists; the existing review-permission check still runs immediately after. |
+| NCR CE/CS | `lib/ncr-service.js` : `createNcr` | `data.ce_cs_id` / `data.ce_cs_name` / `data.ce_cs_email` | Only when `data.ce_cs_id` is present (it's optional on NCR creation). Via `ensureUserExistsIfPossible` — a missing email does not block NCR creation. |
+| NCR additional Approver (initial designation) | `lib/ncr-service.js` : `submitConcurrence` | each entry of `additionalApprovers[]`: `approver_id` / `approver_name` / `approver_email` | Runs once per approver in the array before `ncr.additional_approvers` is saved. Via `ensureUserExistsIfPossible`. |
+| NCR additional Approver (added later) | `lib/ncr-service.js` : `addApprover` | `approverData.approver_id` / `.approver_name` / `.approver_email` | Same helper, single entry. Via `ensureUserExistsIfPossible`. |
+| NCR Originator Designate | `lib/ncr-service.js` : `assignDesignate` | `designateData.designate_id` / `.designate_name` / `.designate_email` | Already-required fields on this request; no behavior change to the request's own validation. Calls `ensureUserExists` directly. |
+| Form reviewer | `lib/review.js` : `addReviewRequest` | `req.body.uid` / `req.body.name` / `req.body.email` (new field, see Contracts) | Replaces the current hard `400` refusal when no `User` record exists; the existing review-permission check still runs immediately after. Calls `ensureUserExists` directly — `uid`/`name` are already required on this request, and a missing `email` here means the add is refused, same as today's outright refusal for this one case. |
 
 **Not a call site** (explicitly out of scope, per spec Assumptions):
 - NCR Originator (`createNcr`'s own `user` parameter) — always the

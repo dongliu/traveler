@@ -9,24 +9,32 @@
       "If not found and email is missing or empty, throw a 400-shaped validation error -- never create a record with no deliverable address (FR-008).",
       "If not found and email is present, create new User({ _id: id, name, email }) with roles: [] (the same shape the first-login flow in lib/auth/ldap.js already creates), save it, and return it."
     ],
+    "wrapper": {
+      "name": "ensureUserExistsIfPossible",
+      "file": "lib/ncr-service.js",
+      "description": "Calls ensureUserExists and swallows only its 400 ('no email available') error, re-throwing anything else. Used by createNcr/submitConcurrence/addApprover, where an email has never been a precondition of the add -- see research.md R2."
+    },
     "callers": [
       {
         "file": "lib/ncr-service.js",
         "function": "createNcr",
         "when": "data.ce_cs_id is present",
-        "args": "{ id: data.ce_cs_id, name: data.ce_cs_name, email: data.ce_cs_email }"
+        "args": "{ id: data.ce_cs_id, name: data.ce_cs_name, email: data.ce_cs_email }",
+        "via": "ensureUserExistsIfPossible"
       },
       {
         "file": "lib/ncr-service.js",
         "function": "submitConcurrence",
         "when": "for each entry of additionalApprovers[] before ncr.additional_approvers is saved",
-        "args": "{ id: entry.approver_id, name: entry.approver_name, email: entry.approver_email }"
+        "args": "{ id: entry.approver_id, name: entry.approver_name, email: entry.approver_email }",
+        "via": "ensureUserExistsIfPossible"
       },
       {
         "file": "lib/ncr-service.js",
         "function": "addApprover",
         "when": "always, for the one approver being added",
-        "args": "{ id: approverData.approver_id, name: approverData.approver_name, email: approverData.approver_email }"
+        "args": "{ id: approverData.approver_id, name: approverData.approver_name, email: approverData.approver_email }",
+        "via": "ensureUserExistsIfPossible"
       },
       {
         "file": "lib/ncr-service.js",
