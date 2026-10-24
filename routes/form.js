@@ -1094,7 +1094,7 @@ module.exports = function(app) {
         const users = await Promise.all(
           f.__review.reviewRequests.map(user => User.findOne({ _id: user._id }))
         );
-        const emails = users.map(user => user.email);
+        const emails = users.filter(Boolean).map(user => user.email);
         sendNotification({
           recipients: emails,
           subject: 'New Review Request',

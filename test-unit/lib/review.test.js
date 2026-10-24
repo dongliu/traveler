@@ -22,8 +22,30 @@ const sendNotificationStub = emailModule.sendNotification.isSinonProxy
 sendNotificationStub.resolves();
 sinon.stub(formModule, 'releaseForm').resolves();
 
+// Stub getPermissions too -- config.permission/config.auth are only ever
+// populated by config.load(), which nothing in this process calls before
+// lib/review.js's addReviewRequest would need them (config.load() is only
+// ever called by app.js at real startup, or by other test files' own
+// describe-scoped before() hooks, which reload lib/permission.js fresh
+// without lib/review.js following along). Defaulting to "has review
+// permission" keeps addReviewRequest's own, unrelated permission check out
+// of this file's way; a dedicated test overrides it to assert the opposite.
+const permissionModule = require('../../lib/permission');
+const getPermissionsStub = permissionModule.getPermissions.isSinonProxy
+  ? permissionModule.getPermissions
+  : sinon.stub(permissionModule, 'getPermissions');
+getPermissionsStub.returns([permissionModule.Review_forms]);
+
+// addReviewRequest reads config.auth.default_roles directly (not through
+// getPermissions), so the stub above alone isn't enough -- config.auth is
+// only otherwise populated by config.load(), which nothing in this process
+// calls before this file's tests run. Set it directly, the same way
+// test-unit/lib/ncr-service.test.js already sets config.wbsYaml.
+const configModule = require('../../config/config.js');
+configModule.auth = { default_roles: [] };
+
 delete require.cache[require.resolve('../../lib/review.js')];
-const { addReviewResult } = require('../../lib/review.js');
+const { addReviewResult, addReviewRequest } = require('../../lib/review.js');
 
 const User = mongoose.model('User');
 
@@ -180,5 +202,94 @@ describe('lib/review — rejectionFlow', () => {
 
       newDoc.save.called.should.be.false;
     });
+  });
+});
+
+// ── addReviewRequest (lib/review.js) ─────────────────────────────────────────
+
+describe('lib/review — addReviewRequest', () => {
+  // User.findById and User.prototype.save may already be stubbed by another
+  // test-unit/**/*.test.js file's own top-level beforeEach (Mocha loads every
+  // such file into one process) -- reuse an existing stub (reconfiguring it
+  // for this test) instead of re-wrapping, the same "isSinonProxy" idiom
+  // stubUsers() above and test-unit/lib/ncr-email.test.js already use.
+  beforeEach(() => {
+    if (!User.findById.isSinonProxy) {
+      sinon.stub(User, 'findById');
+    }
+    if (!User.prototype.save.isSinonProxy) {
+      sinon.stub(User.prototype, 'save');
+    }
+    User.prototype.save.resolves();
+  });
+
+  afterEach(() => sinon.restore());
+
+  // addReviewRequest calls User.findById(...).exec(), while ensureUserExists
+  // (lib/user-directory.js) calls User.findById(...) directly with a plain
+  // await -- both reach the same stub, so its return value must satisfy
+  // both calling conventions, the way a real Mongoose Query object (thenable
+  // AND .exec()-able) does.
+  function queryResolving(value) {
+    const promise = Promise.resolve(value);
+    promise.exec = () => Promise.resolve(value);
+    return promise;
+  }
+
+  function makeRequestReq(body = {}) {
+    return {
+      body: { uid: 'newperson', name: 'New Person', email: 'new@test.com', ...body },
+      session: { userid: 'owner1' },
+      protocol: 'http',
+      get: sinon.stub().returns('localhost:3001'),
+    };
+  }
+
+  function makeRequestDoc(overrides = {}) {
+    return {
+      _id: 'doc123',
+      title: 'Test Form',
+      requestReview: sinon.stub().resolves(),
+      ...overrides,
+    };
+  }
+
+  it('provisions a User record for a reviewer who has never logged in, and adds the request', async () => {
+    User.findById.returns(queryResolving(null));
+    const doc = makeRequestDoc();
+
+    const res = makeRes();
+    await addReviewRequest(makeRequestReq(), res, doc);
+
+    res.status.calledWith(201).should.be.true;
+    doc.requestReview.calledOnce.should.be.true;
+    User.prototype.save.calledOnce.should.be.true;
+    const created = User.prototype.save.thisValues[0];
+    created._id.should.equal('newperson');
+    created.email.should.equal('new@test.com');
+  });
+
+  it('refuses the add with a 400 when the reviewer has never logged in and no email was submitted', async () => {
+    User.findById.returns(queryResolving(null));
+    const doc = makeRequestDoc();
+
+    const res = makeRes();
+    await addReviewRequest(makeRequestReq({ email: undefined }), res, doc);
+
+    res.status.calledWith(400).should.be.true;
+    doc.requestReview.called.should.be.false;
+    User.prototype.save.called.should.be.false;
+  });
+
+  it('leaves an existing reviewer record untouched and behaves exactly as before this feature', async () => {
+    const existing = { _id: 'newperson', name: 'New Person', email: 'old@test.com', roles: ['user'] };
+    User.findById.returns(queryResolving(existing));
+    const doc = makeRequestDoc();
+
+    const res = makeRes();
+    await addReviewRequest(makeRequestReq(), res, doc);
+
+    res.status.calledWith(201).should.be.true;
+    User.prototype.save.called.should.be.false;
   });
 });
