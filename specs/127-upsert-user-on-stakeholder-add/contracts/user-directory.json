@@ -1,0 +1,64 @@
+{
+  "helper": {
+    "name": "ensureUserExists",
+    "file": "lib/user-directory.js",
+    "signature": "ensureUserExists({ id: String, name: String, email: String }) -> Promise<UserDocument>",
+    "description": "Guarantees a local User record exists for a person already resolved from the AD/directory typeahead, without a second server-side directory lookup (research.md R1/R2).",
+    "behavior": [
+      "User.findById(id) first. If found, return it unchanged -- never overwrite name/email/roles on an existing record (FR-009).",
+      "If not found and email is missing or empty, throw a 400-shaped validation error -- never create a record with no deliverable address (FR-008).",
+      "If not found and email is present, create new User({ _id: id, name, email }) with roles: [] (the same shape the first-login flow in lib/auth/ldap.js already creates), save it, and return it."
+    ],
+    "callers": [
+      {
+        "file": "lib/ncr-service.js",
+        "function": "createNcr",
+        "when": "data.ce_cs_id is present",
+        "args": "{ id: data.ce_cs_id, name: data.ce_cs_name, email: data.ce_cs_email }"
+      },
+      {
+        "file": "lib/ncr-service.js",
+        "function": "submitConcurrence",
+        "when": "for each entry of additionalApprovers[] before ncr.additional_approvers is saved",
+        "args": "{ id: entry.approver_id, name: entry.approver_name, email: entry.approver_email }"
+      },
+      {
+        "file": "lib/ncr-service.js",
+        "function": "addApprover",
+        "when": "always, for the one approver being added",
+        "args": "{ id: approverData.approver_id, name: approverData.approver_name, email: approverData.approver_email }"
+      },
+      {
+        "file": "lib/ncr-service.js",
+        "function": "assignDesignate",
+        "when": "always, for the incoming Designate",
+        "args": "{ id: designateData.designate_id, name: designateData.designate_name, email: designateData.designate_email }"
+      },
+      {
+        "file": "lib/review.js",
+        "function": "addReviewRequest",
+        "when": "replaces today's hard 400 refusal when User.findById(uid) returns null",
+        "args": "{ id: req.body.uid, name: req.body.name, email: req.body.email }",
+        "note": "Every check after this point (role/permission check via config.auth.default_roles and Review_forms) is unchanged -- see research.md R3."
+      }
+    ],
+    "not_called_for": [
+      "NCR Originator (createNcr's own session user -- always already has a User record via login)",
+      "NCR Preventive Action Owner (free text, not directory-sourced)",
+      "NCR QA Staff (resolved via ncr-qa Group membership)",
+      "Traveler manPower / Form createdBy (session-derived, already logged in)"
+    ]
+  },
+  "changed_request_body": {
+    "endpoint": "POST /forms/:id/review/requests",
+    "handled_by": "lib/review.js#addReviewRequest, called from routes/form.js",
+    "added_field": {
+      "name": "email",
+      "type": "String",
+      "required": false,
+      "source": "public/javascripts/review.js's $('#add') click handler sets data.email = userSelected.mail (the Bloodhound AD cache entry's mail attribute, already resolved client-side, previously never sent)"
+    },
+    "existing_fields_unchanged": ["uid", "name"],
+    "behavior_change": "When uid has no local User record: previously always refused with a 400 telling an admin the person must log in first. Now: ensureUserExists creates the record from {uid, name, email} if email was sent (add proceeds to the existing, unchanged permission check); if email was not sent (older client) or the directory entry had none, the add is refused with the same validation-error shape as any other missing-required-field case, which is no worse than today's outright refusal for that one case."
+  }
+}
