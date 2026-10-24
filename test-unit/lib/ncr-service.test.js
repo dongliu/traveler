@@ -25,6 +25,7 @@ const sendIssuanceStub = sinon.stub(ncrEmailModule, 'sendIssuance').resolves([])
 const sendFinalDistributionStub = sinon.stub(ncrEmailModule, 'sendFinalDistribution').resolves([]);
 sinon.stub(ncrEmailModule, 'sendPaAssigned').resolves([]);
 const sendDesignateAssignedStub = sinon.stub(ncrEmailModule, 'sendDesignateAssigned').resolves([]);
+const sendDesignateRemovedStub = sinon.stub(ncrEmailModule, 'sendDesignateRemoved').resolves([]);
 
 delete require.cache[require.resolve('../../lib/ncr-service.js')];
 const {
@@ -1138,6 +1139,10 @@ describe('lib/ncr-service — removeDesignate', () => {
       originator_designate_id: 'des1',
       originator_designate_name: 'Des Person',
     }));
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'des1', name: 'Des Person', email: 'des@test.com' },
+    ]);
 
     const result = await removeDesignate('id1', originator);
 
@@ -1157,6 +1162,39 @@ describe('lib/ncr-service — removeDesignate', () => {
     const event = result.events.find(e => e.event_type === 'delegate.removed');
     event.should.exist;
     (event.payload.previous_designate_id === undefined || event.payload.previous_designate_id === null).should.be.true;
+  });
+
+  it('notifies both the Originator and the removed Designate by email', async () => {
+    stubFindById(newNcr({
+      status: 'Submitted',
+      originator_id: 'orig1',
+      originator_designate_id: 'des1',
+      originator_designate_name: 'Des Person',
+    }));
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'des1', name: 'Des Person', email: 'des@test.com' },
+    ]);
+    sendDesignateRemovedStub.resetHistory();
+
+    const result = await removeDesignate('id1', originator);
+
+    sendDesignateRemovedStub.calledOnce.should.be.true;
+    const emails = sendDesignateRemovedStub.lastCall.args[1];
+    emails.should.contain('orig@test.com');
+    emails.should.contain('des@test.com');
+    sendDesignateRemovedStub.lastCall.args[2].should.equal('Des Person');
+    result.events.some(e => e.event_type === 'notification.designate_removed').should.be.true;
+  });
+
+  it('does not send a removal email when no Designate was assigned', async () => {
+    stubFindById(newNcr({ status: 'Submitted', originator_id: 'orig1' }));
+    sendDesignateRemovedStub.resetHistory();
+
+    const result = await removeDesignate('id1', originator);
+
+    sendDesignateRemovedStub.called.should.be.false;
+    result.events.some(e => e.event_type === 'notification.designate_removed').should.be.false;
   });
 });
 

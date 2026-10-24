@@ -647,7 +647,7 @@ router.patch('/:id/designate', auth.ensureAuthenticated, async (req, res) => {
         user,
         webBaseUrl
       )
-      : await removeDesignate(req.params.id, user);
+      : await removeDesignate(req.params.id, user, webBaseUrl);
 
     return res.status(200).json({
       success: true,

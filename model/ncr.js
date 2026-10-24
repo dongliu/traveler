@@ -55,6 +55,7 @@ const NCR_EVENT_TYPES = [
   'notification.final_distribution',
   'notification.pa_assigned',
   'notification.designate_assigned',
+  'notification.designate_removed',
   'attachment.uploaded',
 ];
 
