@@ -24,7 +24,11 @@ of the four places a person is added from the typeahead (NCR CE/CS, NCR
 additional Approver, NCR Originator Designate, and a Form's review
 request), plus one line of client script so the Form reviewer-add flow —
 which today sends no email at all — gains access to the email the
-Bloodhound directory cache already has. No schema changes, no new
+Bloodhound directory cache already has. Separately, NCR closure's final
+distribution is fixed to stop discarding the Preventive Action owner's
+email it already has stored (`owner_email`) in favor of an id-only lookup
+— a narrower fix, independent of provisioning, since PA Owner isn't
+sourced from the directory lookup at all. No schema changes, no new
 endpoints, no change to how or when any notification is sent.
 
 ## Technical Context
@@ -86,7 +90,7 @@ Checked against `.specify/memory/constitution.md` v1.1.0.
 
 | Principle | Status | How this plan meets it |
 |---|---|---|
-| I. Automated Testing | Pass | Unit tests for the new `ensureUserExists` helper (creates when missing, leaves an existing record untouched, rejects a missing email) and for each of the four call sites, each with a "stakeholder has never logged in" regression case. The one path only verifiable end-to-end (a Form reviewer-add via the typeahead, for a brand-new person, now succeeding) gets a new Playwright e2e scenario (research.md R4). |
+| I. Automated Testing | Pass | Unit tests for the new `ensureUserExists` helper (creates when missing, leaves an existing record untouched, rejects a missing email), for each of the four call sites with a "stakeholder has never logged in" regression case, and for `closeNcr`'s independent PA-owner fix (research.md R5). The one path only verifiable end-to-end (a Form reviewer-add via the typeahead, for a brand-new person, now succeeding) gets a new Playwright e2e scenario (research.md R4). |
 | II. Code Quality and Consistency | Pass | One new, small, pure-ish library module (`lib/user-directory.js`) holding the one piece of shared logic, instead of four near-duplicate "find-or-create" blocks inlined into `lib/ncr-service.js` and `lib/review.js`. No logic is duplicated between NCR and Review call sites. |
 | III. Security-First Architecture | Pass | A directory entry with no email is rejected the same way a missing required field already is (FR-008) — no record is ever created with an undeliverable address. The existing review-permission check in `addReviewRequest` is untouched and still runs after provisioning (research.md R3) — this feature removes an availability gap, not an authorization check. An already-existing `User` record is never overwritten (FR-009), so this can't be used to silently change someone's stored name/email/roles. |
 | IV. Versioning & Breaking Changes | Pass | Additive and backward-compatible: no endpoint's request or response shape changes except that the Form review-request body gains one new, optional-on-the-wire `email` field (ignored by any older client that doesn't send it, in which case today's existing permission/availability behavior for that one person is unchanged). No field is removed from `model/ncr.js` or `model/review.js`. |
@@ -102,7 +106,7 @@ Checked against `.specify/memory/constitution.md` v1.1.0.
 specs/127-upsert-user-on-stakeholder-add/
 ├── spec.md
 ├── plan.md                      # this file
-├── research.md                  # Phase 0 decisions R1-R5
+├── research.md                  # Phase 0 decisions R1-R6
 ├── data-model.md                # Phase 1: the one new helper + its four call sites
 ├── contracts/
 │   └── user-directory.json      # ensureUserExists contract + the one changed request body
@@ -126,6 +130,9 @@ lib/
 │                                   # submitConcurrence(): ensureUserExists for each entry in
 │                                   #   additional_approvers before it's saved
 │                                   # addApprover(): ensureUserExists for the one approver being added
+│                                   # closeNcr(): final-distribution email list also includes each
+│                                   #   preventive_actions[].owner_email directly, not only the
+│                                   #   id-based findUsers() result (research.md R5)
 └── review.js                     # addReviewRequest(): replaces the hard "please add user id ..."
                                     #   400 with ensureUserExists({id: uid, name, email}), then runs
                                     #   the SAME existing permission check as before (research.md R3)
@@ -142,7 +149,9 @@ public/javascripts/
 
 test-unit/lib/
 ├── user-directory.test.js        # NEW: ensureUserExists unit tests
-├── ncr-service.test.js            # + "never logged in" coverage at the four NCR call sites
+├── ncr-service.test.js            # + "never logged in" coverage at the four NCR call sites,
+│                                     #   and a closeNcr case: a never-logged-in PA owner still
+│                                     #   receives final distribution (research.md R5)
 └── review.test.js                 # + "never logged in" coverage for addReviewRequest, if this
                                      #   file exists already, else a new test-unit/lib/review.test.js
 
@@ -161,7 +170,7 @@ applicable, email). No new routes, no new views, no schema migration.
 
 ## Phase 0 and Phase 1 outputs
 
-- [research.md](research.md): decisions R1-R5.
+- [research.md](research.md): decisions R1-R6.
 - [data-model.md](data-model.md): the new `ensureUserExists` helper and its
   four call sites, plus the one changed request body.
 - [contracts/](contracts/): `ensureUserExists`'s contract and the Form

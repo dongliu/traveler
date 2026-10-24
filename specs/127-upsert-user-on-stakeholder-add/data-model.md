@@ -54,6 +54,24 @@ field.
 |---|---|---|---|
 | `POST /forms/:id/review/requests` | `email` | No (absence preserves today's exact behavior for that one request — `ensureUserExists` then refuses only if no `User` record exists *and* no email was given, same as today's outright refusal, just with the accurate reason) | Populated client-side in `public/javascripts/review.js` from `userSelected.mail` (already present in the Bloodhound AD cache; previously resolved but never sent). |
 
+## `closeNcr` final-distribution fix (no model/contract change)
+
+`lib/ncr-service.js#closeNcr` currently collects `ce_cs_id`,
+`qa_staff_identity`, every `additional_approvers[].approver_id`, and every
+`preventive_actions[].owner_id` into one id set and resolves all of them
+through a single `findUsers()` call — discarding any email already
+captured and stored on the document itself. Once CE/CS and Approver are
+provisioned at add-time (above), that id-based lookup becomes reliable for
+them. Preventive Action Owner is not provisioned by this feature (no
+directory identity exists for it — see Assumptions), so FR-004's
+requirement that a never-logged-in PA owner still receives the final
+distribution email is met a different way: `closeNcr`'s email list is
+changed to also include each PA owner's already-stored `owner_email`
+directly, alongside (not replacing) the existing id-based resolution.
+No model field changes — `owner_email` already exists and is already
+populated by `assignPaOwner`; this only stops `closeNcr` from throwing it
+away. See `research.md` R5.
+
 ## Defensive fix (no model/contract change)
 
 `routes/form.js:1094-1097` — resolving each `reviewRequest._id` to a `User`

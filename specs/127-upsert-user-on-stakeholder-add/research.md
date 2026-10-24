@@ -108,7 +108,45 @@ request carries an email.
 journeys") and consistency with how this codebase already treats
 client-script-only logic.
 
-## R5 — Defensive fix alongside, not instead of, the root cause
+## R5 — `closeNcr`'s final distribution: prefer an already-stored email over an id-only lookup, for Preventive Action owners specifically
+
+**Decision**: `lib/ncr-service.js#closeNcr` builds one `recipientIds` set (CE/CS,
+QA staff, every `additional_approvers[].approver_id`, every
+`preventive_actions[].owner_id` — Originator and Originator Designate are
+resolved the same way) and resolves every id in it through a single
+`findUsers()` call, discarding any email that was already captured and
+stored on the document itself (`approver_email`, `owner_email`). For CE/CS
+and the Originator Designate, R1-R2's provisioning at add-time is what
+makes this id-based lookup reliable (FR-003/FR-004) — there's nothing
+stored to prefer instead, for CE/CS in particular, since `ce_cs_email` was
+never persisted to begin with. Preventive Action Owner is different: it is
+explicitly *not* provisioned by this feature (it's free text, not a
+directory identity — see spec Assumptions), yet FR-004 still requires a
+never-logged-in PA owner to receive the final distribution email. Since
+`preventive_actions[].owner_email` is already captured and stored at
+assignment time, `closeNcr`'s email list is changed to include each PA
+owner's stored `owner_email` directly, in addition to (not instead of) the
+existing id-based resolution — so an owner with no local `User` record is
+no longer silently dropped, with no provisioning and no schema change
+required for this one field.
+
+**Rationale**: FR-004's explicit inclusion of Preventive Action Owner.
+This is a narrower, independent fix from `ensureUserExists` — it corrects
+`closeNcr`'s own carelessness (discarding data it already has), rather
+than adding a new guarantee that an identity exists. It generalizes the
+same fix spec 003 already made for the Originator Designate in
+`removeDesignate` (prefer the NCR's own stored email over a `User` lookup
+when the person may never have logged in) to this one remaining place it
+wasn't yet applied.
+
+**Alternative considered**: Mark FR-004's Preventive Action Owner
+guarantee as a known gap and drop it from scope entirely, matching PA
+Owner's exclusion everywhere else in this feature. Rejected: the email is
+already sitting on the document, so leaving the gap open would be a
+strictly worse outcome than this feature's own title promises
+("deliver the emails correctly") for a fix this cheap and this low-risk.
+
+## R6 — Defensive fix alongside, not instead of, the root cause
 
 **Decision**: `routes/form.js` (around the point where a Form moves to
 status 0.5 / submitted for review) maps every `reviewRequest._id` through

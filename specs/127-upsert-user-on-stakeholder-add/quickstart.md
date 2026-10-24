@@ -27,7 +27,9 @@ unchanged (no overwrite); throws when no document exists and `email` is
 missing. `createNcr`, `submitConcurrence`, `addApprover`, and
 `assignDesignate` each gain a regression case where the CE/CS, Approver, or
 Designate has never logged in before being added, and the add still
-succeeds.
+succeeds. `closeNcr` gains a regression case where a Preventive Action
+owner has never logged in, and final distribution still reaches them via
+their already-stored `owner_email`.
 
 ## 2. Manual walk-through — NCR
 
@@ -40,13 +42,18 @@ succeeds.
    Originator Designate, and add another never-logged-in person as an
    additional Approver.
    - Expect: both adds succeed exactly as they do today.
-4. Drive the NCR through disposition, concurrence (no additional approvers
+4. During disposition, enter a never-logged-in person's id/name/email as a
+   Preventive Action owner.
+   - Expect: the assignment succeeds exactly as it does today (this field
+     is not changed by this feature — only closure's own lookup is).
+5. Drive the NCR through disposition, concurrence (no additional approvers
    needed to reach Issuance quickly), and closure.
    - Expect: the Issuance email reaches the Originator and Designate; the
-     Final Distribution email on closure reaches the CE/CS, Designate, and
-     any Approver — all of them, including whichever of them has never
-     logged in. Before this feature, whichever of them had never logged in
-     would have been silently missing from at least one of these.
+     Final Distribution email on closure reaches the CE/CS, Designate, the
+     Approver, and the Preventive Action owner — all of them, including
+     whichever has never logged in. Before this feature, whichever of them
+     had never logged in would have been silently missing from at least
+     one of these.
 
 ## 3. Manual walk-through — Form reviewer
 
