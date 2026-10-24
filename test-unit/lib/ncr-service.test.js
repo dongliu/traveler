@@ -1094,6 +1094,7 @@ describe('lib/ncr-service — assignDesignate', () => {
 
     result.originator_designate_id.should.equal('des1');
     result.originator_designate_name.should.equal('Des Person');
+    result.originator_designate_email.should.equal('des@test.com');
     const event = result.events.find(e => e.event_type === 'delegate.assigned');
     event.should.exist;
     event.actor_id.should.equal('orig1');
@@ -1132,22 +1133,21 @@ describe('lib/ncr-service — removeDesignate', () => {
     await expectRejection(removeDesignate('id1', originator), 409);
   });
 
-  it('clears the Designate and records a delegate.removed event with the outgoing identity', async () => {
+  it('clears the Designate (including email) and records a delegate.removed event with the outgoing identity', async () => {
     stubFindById(newNcr({
       status: 'Submitted',
       originator_id: 'orig1',
       originator_designate_id: 'des1',
       originator_designate_name: 'Des Person',
+      originator_designate_email: 'des@test.com',
     }));
-    stubUserFind([
-      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
-      { _id: 'des1', name: 'Des Person', email: 'des@test.com' },
-    ]);
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
 
     const result = await removeDesignate('id1', originator);
 
     (result.originator_designate_id === undefined || result.originator_designate_id === null).should.be.true;
     (result.originator_designate_name === undefined || result.originator_designate_name === null).should.be.true;
+    (result.originator_designate_email === undefined || result.originator_designate_email === null).should.be.true;
     const event = result.events.find(e => e.event_type === 'delegate.removed');
     event.should.exist;
     event.payload.previous_designate_id.should.equal('des1');
@@ -1164,17 +1164,17 @@ describe('lib/ncr-service — removeDesignate', () => {
     (event.payload.previous_designate_id === undefined || event.payload.previous_designate_id === null).should.be.true;
   });
 
-  it('notifies both the Originator and the removed Designate by email', async () => {
+  it('notifies both the Originator and the removed Designate by email, using the Designate email stored on the NCR even when the Designate has no User record (never logged in)', async () => {
     stubFindById(newNcr({
       status: 'Submitted',
       originator_id: 'orig1',
       originator_designate_id: 'des1',
       originator_designate_name: 'Des Person',
+      originator_designate_email: 'des@test.com',
     }));
-    stubUserFind([
-      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
-      { _id: 'des1', name: 'Des Person', email: 'des@test.com' },
-    ]);
+    // Only the Originator resolves via the User collection -- the Designate
+    // never logged in and so has no User record, which is the bug this guards.
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
     sendDesignateRemovedStub.resetHistory();
 
     const result = await removeDesignate('id1', originator);
