@@ -106,7 +106,6 @@ const NcrSchema = new Schema({
   originator_name: String,
   originator_designate_id: String,
   originator_designate_name: String,
-  originator_designate_email: String,
   creation_timestamp: Date,
   discovery_date: Date,
   discovery_context: {

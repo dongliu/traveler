@@ -2,10 +2,12 @@
 
 **Feature**: [spec.md](spec.md) | **Date**: 2026-10-24
 
-No new MongoDB collection and no new or removed field on `model/ncr.js` or
-`model/review.js`. This feature changes *when* a `User` document is
-created, not what any document stores. The one piece of new shape is the
-helper's own input/output contract, plus the one request body that gains a
+No new MongoDB collection. This feature mainly changes *when* a `User`
+document is created, not what any document stores — with one follow-up
+exception: `model/ncr.js`'s `originator_designate_email` is removed
+(research.md R7), once provisioning made it fully redundant rather than
+merely safe to stop relying on. The other two pieces of new shape are the
+helper's own input/output contract and the one request body that gains a
 field.
 
 ## `ensureUserExists({ id, name, email })` — `lib/user-directory.js`

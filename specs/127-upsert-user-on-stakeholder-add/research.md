@@ -186,3 +186,32 @@ crash risk for older review requests would otherwise remain even after
 this feature lands. Fixing it is a one-line, low-risk addition directly in
 scope of "every notification tied to a reviewer added this way must not
 fail the surrounding request."
+
+## R7 — `originator_designate_email` removed from `model/ncr.js` (follow-up)
+
+**Decision**: Once R1/R2's provisioning shipped, `originator_designate_email`
+had exactly one remaining reader: `removeDesignate`, which used it to
+email the outgoing Designate (the comment at the time explained why —
+"may never have logged into the app... use the email captured
+client-side... rather than relying on a User lookup"). That reasoning no
+longer holds: `assignDesignate` already calls `ensureUserExists` for the
+Designate, so a `User` record is guaranteed to exist for them by the time
+`removeDesignate` could ever need their email. `removeDesignate` now
+resolves both the Originator and the outgoing Designate through the same
+`findUsers([originator_id, previousDesignateId])` call `assignDesignate`'s
+own issuance path already uses elsewhere, and the field is dropped from
+`model/ncr.js` entirely — it was never displayed in any view, never
+returned by `PATCH /:id/designate`'s response, and never read by Issuance
+or Final Distribution (those already resolved the Designate by id, not by
+this field). This directly fulfills FR-005 for this one field, rather than
+merely satisfying it in principle.
+
+**Not extended to `approver_email`/`owner_email`**: `approver_email` is
+read inline in multiple places (`submitConcurrence`, `qaResubmit`,
+`addApprover`) immediately after being set, not just once at removal time
+like the Designate's email was — removing it is a larger, separable
+change for the same marginal benefit. `owner_email` (Preventive Action
+Owner) cannot be removed at all: PA Owner is never provisioned (R5 — it's
+free text, not a directory identity), and `owner_email` is also read
+directly by the NCR detail view to populate an editable field
+(`views/ncr-detail-body.jade`), not just for notifications.
