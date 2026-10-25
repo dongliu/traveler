@@ -68,6 +68,10 @@ const NcrEventSchema = new Schema({
   timestamp: { type: Date, required: true },
   previous_status: String,
   new_status: String,
+  // Which approval round (Ncr.current_approval_round at the time) this event
+  // belongs to. Only set on approval-round-scoped events; absent otherwise,
+  // same as previous_status/new_status are absent where they don't apply.
+  round: Number,
   payload: Schema.Types.Mixed,
   recipients: [
     {
@@ -95,7 +99,6 @@ const NCR_STATUSES = [
   'Submitted',
   'Dispositioned',
   'Approval Requested',
-  'Returned for Comment',
   'Final Approval',
   'Closed',
 ];
@@ -151,6 +154,12 @@ const NcrSchema = new Schema({
   qa_staff_identity: String,
   qa_staff_name: String,
   qa_concurrence_timestamp: Date,
+
+  // Sequence number (starting at 1) of the approval round `additional_approvers`
+  // currently represents. Set the first time QA concurs with >=1 approver,
+  // incremented each later time -- never on a zero-approver concurrence, which
+  // never starts a round. See specs/129-ncr-approval-round/data-model.md.
+  current_approval_round: Number,
 
   additional_approvers: [
     {

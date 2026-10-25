@@ -9,7 +9,6 @@ block head
   link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
 
 block content
-  - var isReturnedForComment = (ncr.status === 'Returned for Comment')
   - var myEntry = (ncr.additional_approvers || []).filter(function(a){ return a.approver_id === locals.userid; })[0]
   - var canActAsApprover = !!myEntry && ncr.status === 'Approval Requested' && myEntry.approval_status === 'Pending'
 
@@ -54,7 +53,7 @@ block content
           dt Concurred On
           dd= new Date(ncr.qa_concurrence_timestamp).toLocaleString()
 
-    - var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
+    - var canManageApprovers = isQa && ncr.status === 'Approval Requested'
 
     fieldset
       legend Approver Status
@@ -120,14 +119,6 @@ block content
                 label.control-label(for='comments') Return Comments
                 textarea#comments(rows='4', maxlength='2000', placeholder='Required when returning for comment')
 
-    if isQa && isReturnedForComment
-      fieldset
-        legend QA Action
-        p.help-block An approver returned this NCR for comment. Address the comments and resubmit to all returned-for-comment approvers.
-        button#resubmit-btn.btn.btn-primary(type='button')
-          i.fa.fa-refresh
-          | &nbsp; Resubmit to Approvers
-
     .form-actions
       a.btn(href='#{prefix}/ncrs/#{ncr._id}') Back to NCR
 
@@ -185,12 +176,6 @@ block js
         }
         send({ action: 'return_for_comment', comments: c }, $(this), function () {
           return 'Returned for comment. QA Staff has been notified.';
-        });
-      });
-
-      $('#resubmit-btn').on('click', function () {
-        send({ _endpoint: '/resubmit' }, $(this), function () {
-          return 'Resubmitted to approvers. New approval requests sent.';
         });
       });
 

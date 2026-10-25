@@ -261,13 +261,13 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(ncr.events.some(e => e.event_type === 'notification.issuance')).toBe(true);
   });
 
-  // ── AS7: return for comment, QA resubmits ────────────────────────────────
+  // ── AS7: return for comment stops the round; QA starts a new one ────────
 
-  test('AS7 - approver returns for comment, QA staff resubmits to approvers', async ({ page, browser }) => {
+  test('AS7 - approver returns for comment, which stops the round and sends the NCR back to Dispositioned', async ({ page, browser }) => {
     const RETURN_COMMENT = 'Rework instructions are unclear about the sanding grit — please clarify with CE/CS.';
     const { ncrId } = await createDispositionedNcr();
 
-    // QA concurs with bob as approver via API
+    // QA concurs with bob as approver via API -- round 1
     const concRes = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
       data: { additional_approvers: [{ approver_id: APPROVER_ID }] },
     });
@@ -283,20 +283,23 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await approverPage.close();
 
     let ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] })).ncr;
-    expect(ncr.status).toBe('Returned for Comment');
+    expect(ncr.status).toBe('Dispositioned');
     expect(ncr.additional_approvers[0].approval_status).toBe('Returned for Comment');
 
-    // QA staff resubmits
+    // There is no more "Resubmit to Approvers" action -- the round is over.
     await page.goto(`/ncrs/${ncrId}/approve`);
-    await expect(page.locator('button:has-text("Resubmit to Approvers")')).toBeVisible();
-    await page.click('button:has-text("Resubmit to Approvers")');
-    await expect(page.locator('.alert-success')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('.alert-success')).toContainText('Resubmitted');
+    await expect(page.locator('button:has-text("Resubmit to Approvers")')).toHaveCount(0);
 
-    ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers', 'events'] })).ncr;
+    // QA starts a new round from Dispositioned -- round 2, same mechanism as the first round.
+    const concRes2 = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
+      data: { additional_approvers: [{ approver_id: APPROVER_ID }] },
+    });
+    expect(concRes2.status()).toBe(200);
+
+    ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers', 'current_approval_round'] })).ncr;
     expect(ncr.status).toBe('Approval Requested');
     expect(ncr.additional_approvers[0].approval_status).toBe('Pending');
-    expect(ncr.events.some(e => e.event_type === 'qa.resubmitted')).toBe(true);
+    expect(ncr.current_approval_round).toBe(2);
   });
 
   // ── AS9: no rejection path (spec/implementation gap) ─────────────────────
@@ -417,11 +420,11 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(ncr.events.some(e => e.event_type === 'notification.issuance')).toBe(true);
   });
 
-  test('QA can manage approvers while Returned for Comment, and removing the blocking approver unblocks back to Approval Requested', async ({ page, browser }) => {
+  test('QA cannot manage approvers or unblock anything once a round is stopped -- QA must start a new round from Dispositioned', async ({ page, browser }) => {
     const { ncrId } = await createDispositionedNcr();
     await concurWithApprovers(page, ncrId, [APPROVER_ID, 'guobao']);
 
-    // bob returns for comment, blocking the NCR
+    // bob returns for comment, stopping the round outright
     const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
     const returnRes = await approverPage.request.patch(`/api/ncrs/${ncrId}/approve`, {
       data: { action: 'return_for_comment', comments: 'Please clarify the rework instructions.' },
@@ -429,29 +432,54 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(returnRes.status()).toBe(200);
     await approverPage.close();
 
-    let ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status'] })).ncr;
-    expect(ncr.status).toBe('Returned for Comment');
+    const ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status'] })).ncr;
+    expect(ncr.status).toBe('Dispositioned');
 
-    // QA still sees Manage Approvers with both rows while blocked
+    // Manage Approvers is gone -- the round is over, there is nothing to manage.
     await page.goto(`/ncrs/${ncrId}/approve`);
-    await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toBeVisible();
-    await expect(page.locator('.remove-approver-btn')).toHaveCount(2);
+    await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toHaveCount(0);
 
-    // Remove bob's (the blocking) row specifically -- concurWithApprovers
-    // doesn't submit an approver_name, so the table falls back to showing
-    // the raw approver_id.
-    const bobRow = page.locator('#approver-status-list tr', { hasText: APPROVER_ID });
-    page.once('dialog', dialog => dialog.accept());
-    await bobRow.locator('.remove-approver-btn').click();
+    // No approver can be added or removed once the round is no longer open.
+    const removeRes = await page.request.delete(`/api/ncrs/${ncrId}/approvers/guobao`);
+    expect(removeRes.status()).toBe(409);
+  });
 
-    await page.waitForURL(new RegExp(`/ncrs/${ncrId}/approve$`));
+  // ── Round history: events are tagged with the round they belong to ──────
 
-    ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] })).ncr;
-    expect(ncr.status).toBe('Approval Requested');
-    expect(ncr.additional_approvers).toHaveLength(1);
-    expect(ncr.additional_approvers[0].approver_id).toBe('guobao');
-    // Manage Approvers remains visible now that status is back to Approval Requested
-    await expect(page.locator('fieldset:has(legend:text("Manage Approvers"))')).toBeVisible();
+  test('approval-round events are tagged with their round number across a stopped round and a new one', async ({ page, browser }) => {
+    const { ncrId } = await createDispositionedNcr();
+
+    // Round 1: bob returns for comment, stopping it.
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]);
+    const approverPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    const returnRes = await approverPage.request.patch(`/api/ncrs/${ncrId}/approve`, {
+      data: { action: 'return_for_comment', comments: 'Needs another look.' },
+    });
+    expect(returnRes.status()).toBe(200);
+
+    // Round 2: bob is designated again and approves -- the only approver, so it completes.
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]);
+    const approveRes = await approverPage.request.patch(`/api/ncrs/${ncrId}/approve`, {
+      data: { action: 'approve' },
+    });
+    expect(approveRes.status()).toBe(200);
+    await approverPage.close();
+
+    const eventsRes = await page.request.get(`/api/ncrs/${ncrId}/events`);
+    expect(eventsRes.status()).toBe(200);
+    const { events } = await eventsRes.json();
+    const returnedEvent = events.find(e => e.event_type === 'approval.returned_for_comment');
+    expect(returnedEvent.round).toBe(1);
+    const secondConcurEvent = events.filter(e => e.event_type === 'qa.concurred')[1];
+    expect(secondConcurEvent.round).toBe(2);
+    const approvedEvent = events.find(e => e.event_type === 'approval.approved');
+    expect(approvedEvent.round).toBe(2);
+
+    await page.goto(`/ncrs/${ncrId}`);
+    await page.click('#timeline-toggle');
+    const timelineText = await page.locator('#event-timeline').innerText();
+    expect(timelineText).toContain('Round 1');
+    expect(timelineText).toContain('Round 2');
   });
 
   test('API: add-approver is rejected for a non-QA user, a non-Approval-Requested NCR, and a duplicate approver', async ({ page, browser }) => {

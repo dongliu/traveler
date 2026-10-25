@@ -135,10 +135,8 @@ test.describe('US2 — button permission-gated', () => {
     await bobPage.close();
   });
 
-  test('a status with no next action (Returned for Comment) shows no button, even to a QA staff member', async ({ page }) => {
-    const { ncrId } = await createNcrInStatus('Returned for Comment', {
-      additional_approvers: [{ approver_id: APPROVER_ID, approval_status: 'Returned for Comment', comments: 'needs rework' }],
-    });
+  test('a status with no next action (Closed) shows no button, even to a QA staff member', async ({ page }) => {
+    const { ncrId } = await createNcrInStatus('Closed');
 
     await page.goto(`/ncrs/${ncrId}`);
     await expectNoActionButton(page);

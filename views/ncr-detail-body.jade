@@ -1,4 +1,4 @@
-- var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
+- var canManageApprovers = isQa && ncr.status === 'Approval Requested'
 - var canCreateDisposition = ncr.status === 'Submitted' && ncr.ce_cs_id === locals.userid
 - var canConcur = ncr.status === 'Dispositioned' && isQa
 - var canApprove = ncr.status === 'Approval Requested' && (ncr.additional_approvers || []).some(function(a) { return a.approver_id === locals.userid })
@@ -284,6 +284,9 @@
               if event.previous_status && event.new_status
                 .muted
                   small #{event.previous_status || 'None'} &rarr; #{event.new_status}
+              if event.round
+                .muted
+                  small Round #{event.round}
               if event.event_type && event.event_type.indexOf('notification.') === 0 && event.recipients && event.recipients.length
                 - var totalRecipientCount = event.recipients.length + (event.cc ? event.cc.length : 0)
                 table.table.table-condensed(style='margin:6px 0 0; font-size:11px; width:auto')

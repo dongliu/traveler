@@ -12,7 +12,6 @@ const {
   submitConcurrence,
   submitApproval,
   returnForComment,
-  qaResubmit,
   addApprover,
   removeApprover,
   closeNcr,
@@ -499,30 +498,6 @@ router.patch('/:id/approve', auth.ensureAuthenticated, async (req, res) => {
     });
   } catch (err) {
     return mapServiceError(err, res, 'Approval');
-  }
-});
-
-router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
-  if (!isValidId(req.params.id)) return badId(res, 'id');
-  try {
-    const user = {
-      id: req.session.userid,
-      name: res.locals.username,
-      roles: res.locals.roles || [],
-    };
-    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
-    const ncr = await qaResubmit(req.params.id, user, webBaseUrl);
-    return res.status(200).json({
-      success: true,
-      ncr: {
-        ncr_id: ncr._id,
-        ncr_number: ncr.ncr_number,
-        status: ncr.status,
-        additional_approvers: ncr.additional_approvers,
-      },
-    });
-  } catch (err) {
-    return mapServiceError(err, res, 'QA resubmit');
   }
 });
 
