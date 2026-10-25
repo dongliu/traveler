@@ -26,6 +26,7 @@ const sendFinalDistributionStub = sinon.stub(ncrEmailModule, 'sendFinalDistribut
 sinon.stub(ncrEmailModule, 'sendPaAssigned').resolves([]);
 const sendDesignateAssignedStub = sinon.stub(ncrEmailModule, 'sendDesignateAssigned').resolves([]);
 const sendDesignateRemovedStub = sinon.stub(ncrEmailModule, 'sendDesignateRemoved').resolves([]);
+const sendQaRejectionStub = sinon.stub(ncrEmailModule, 'sendQaRejection').resolves([]);
 
 delete require.cache[require.resolve('../../lib/ncr-service.js')];
 const {
@@ -675,6 +676,36 @@ describe('lib/ncr-service — rejectConcurrence', () => {
     rejectedEvent.payload.comments.should.equal('Description is missing the lot number.');
     rejectedEvent.previous_status.should.equal('Dispositioned');
     rejectedEvent.new_status.should.equal('Rejected');
+  });
+
+  it('sends the rejection notification to QA staff, the Originator, and the Designate when one is assigned', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned', originator_id: 'orig1', originator_designate_id: 'des1' }));
+    stubUserFind([
+      { _id: 'orig1', name: 'Origin', email: 'orig@test.com' },
+      { _id: 'des1', name: 'Designate', email: 'des@test.com' },
+    ]);
+
+    const result = await rejectConcurrence('id1', 'needs rework', qaUser);
+
+    const emails = sendQaRejectionStub.lastCall.args[1];
+    emails.should.include('qa@test.com');
+    emails.should.include('orig@test.com');
+    emails.should.include('des@test.com');
+    result.events.some(e => e.event_type === 'notification.qa_rejection').should.be.true;
+  });
+
+  it('omits the Designate from the rejection notification when none is assigned', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned', originator_id: 'orig1' }));
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+
+    await rejectConcurrence('id1', 'needs rework', qaUser);
+
+    const emails = sendQaRejectionStub.lastCall.args[1];
+    emails.should.have.lengthOf(2);
+    emails.should.include('qa@test.com');
+    emails.should.include('orig@test.com');
   });
 });
 

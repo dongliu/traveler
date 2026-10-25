@@ -414,6 +414,56 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(res.status()).toBe(403);
   });
 
+  test('rejecting notifies QA staff, the Originator, and the Designate', async ({ page }) => {
+    // bob is a pre-existing ncr-qa member in this dev database -- remove
+    // them so their inclusion below is attributable to being the Designate,
+    // not to also being a QA group member (same technique used elsewhere
+    // in this suite), restoring membership afterward.
+    await execFixtureCli('remove-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    try {
+      const { ncrId } = await createDispositionedNcr({
+        ncrData: { originator_designate_id: APPROVER_ID, originator_designate_name: APPROVER_DISPLAY_NAME },
+      });
+
+      const res = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
+        data: { action: 'reject', comments: 'Needs correction before QA can concur.' },
+      });
+      expect(res.status()).toBe(200);
+
+      const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['events'] });
+      const notificationEvent = ncr.events.find(e => e.event_type === 'notification.qa_rejection');
+      expect(notificationEvent).toBeTruthy();
+      const recipientEmails = notificationEvent.recipients.map(r => r.recipient_email);
+      expect(recipientEmails).toContain('bob@example.com');
+      notificationEvent.recipients.forEach(r => expect(r.delivery_status).toBe('Delivered'));
+    } finally {
+      await execFixtureCli('add-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    }
+  });
+
+  test('omits the Designate from the rejection notification recipients when none is assigned', async ({ page }) => {
+    // Remove bob from ncr-qa for this test too, so their absence from the
+    // recipient list is attributable to there being no Designate, not to
+    // their (unrelated) QA group membership being removed for this check.
+    await execFixtureCli('remove-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    try {
+      const { ncrId } = await createDispositionedNcr(); // no originator_designate_id
+
+      const res = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
+        data: { action: 'reject', comments: 'Needs correction before QA can concur.' },
+      });
+      expect(res.status()).toBe(200);
+
+      const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['events'] });
+      const notificationEvent = ncr.events.find(e => e.event_type === 'notification.qa_rejection');
+      expect(notificationEvent).toBeTruthy();
+      const recipientEmails = notificationEvent.recipients.map(r => r.recipient_email);
+      expect(recipientEmails).not.toContain('bob@example.com');
+    } finally {
+      await execFixtureCli('add-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    }
+  });
+
   // ── Manage Approvers: QA can add/remove approvers before issuance ────────
 
   /** Concurs via the API with the given approver ids (username-only), returning the resulting NCR. */

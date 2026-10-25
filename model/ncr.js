@@ -51,6 +51,7 @@ const NCR_EVENT_TYPES = [
   'notification.initial',
   'notification.disposition_request',
   'notification.qa_notification',
+  'notification.qa_rejection',
   'notification.approval_request',
   'notification.issuance',
   'notification.final_distribution',
