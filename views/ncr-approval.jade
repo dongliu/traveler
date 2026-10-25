@@ -108,18 +108,17 @@ block content
       fieldset
         legend Your Decision
         .control-group
-          .controls
+          .controls.clearfix
             button#approve-btn.btn.btn-success(type='button')
               i.fa.fa-check
               | &nbsp; Approve
+            button#return-btn.btn.btn-warning.pull-right(type='button')
+              i.fa.fa-undo
+              | &nbsp; Return for Comment
         .control-group
           label.control-label(for='comments') Return Comments
           .controls
             textarea#comments(rows='4', maxlength='2000', placeholder='Required when returning for comment')
-            br
-            button#return-btn.btn.btn-warning(type='button', style='margin-top: 4px')
-              i.fa.fa-undo
-              | &nbsp; Return for Comment
 
     if isQa && isReturnedForComment
       fieldset
