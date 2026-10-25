@@ -33,7 +33,7 @@ Single Express MVC project at repo root — extends the existing `views/`, `e2e/
 
 **Purpose**: Confirm a clean baseline before changing anything. No new dependency to install.
 
-- [ ] T001 Confirm the Docker stack is up (`docker compose up`); run `npm run e2e -- e2e/us3-qa-concurrence-and-approver-coordination.spec.js` (the closest existing coverage — it already exercises `dong`-as-QA-staff and `bob`-as-approver on this same page) and record its result in `specs/128-ncr-action-button-visibility/baseline.txt`. Note any pre-existing failure by name so it is not misattributed later.
+- [X] T001 Confirm the Docker stack is up (`docker compose up`); run `npm run e2e -- e2e/us3-qa-concurrence-and-approver-coordination.spec.js` (the closest existing coverage — it already exercises `dong`-as-QA-staff and `bob`-as-approver on this same page) and record its result in `specs/128-ncr-action-button-visibility/baseline.txt`. Note any pre-existing failure by name so it is not misattributed later.
 
 ---
 
@@ -47,12 +47,12 @@ Single Express MVC project at repo root — extends the existing `views/`, `e2e/
 
 > Write first; confirm it fails before implementing.
 
-- [ ] T002 [US1] Create `e2e/us-ncr-next-action-visibility.spec.js` (header comment and `runId`/`execFixtureCli` imports in the style of `e2e/us3-qa-concurrence-and-approver-coordination.spec.js`; reuse that file's `QA_STAFF_ID = 'dong'`/`APPROVER_ID = 'bob'` convention). Add a helper `createNcrInStatus(status, overrides)` wrapping `create-traveler-linked-ncr` (originator `guobao`, ce_cs `dong`) + `set-ncr-status`, parameterized by target status and any extra fields (e.g. `additional_approvers`). Add `test.describe('US1 — button repositioned')` with one test: create an NCR in `Submitted` status with `dong` as CE/CS, `page.goto` its detail page as `dong`, and assert (a) no `a:has-text("Create Disposition")` exists inside the header row next to the NCR number (scope the negative assertion to a locator for that row, not the whole page, so it actually proves the old position is empty rather than merely that the button exists somewhere), and (b) `a:has-text("Create Disposition")` **is** present, and appears after the Event Timeline fieldset's start in document order but visually above it (assert via `page.locator('a:has-text(\"Create Disposition\")')`'s bounding box `y` versus `#event-timeline`'s legend's bounding box `y` — the button's `y` must be less than the Event Timeline legend's `y`, i.e. above it, while still being below the header `h3`'s `y`).
+- [X] T002 [US1] Create `e2e/us-ncr-next-action-visibility.spec.js` (header comment and `runId`/`execFixtureCli` imports in the style of `e2e/us3-qa-concurrence-and-approver-coordination.spec.js`; reuse that file's `QA_STAFF_ID = 'dong'`/`APPROVER_ID = 'bob'` convention). Add a helper `createNcrInStatus(status, overrides)` wrapping `create-traveler-linked-ncr` (originator `guobao`, ce_cs `dong`) + `set-ncr-status`, parameterized by target status and any extra fields (e.g. `additional_approvers`). Add `test.describe('US1 — button repositioned')` with one test: create an NCR in `Submitted` status with `dong` as CE/CS, `page.goto` its detail page as `dong`, and assert (a) no `a:has-text("Create Disposition")` exists inside the header row next to the NCR number (scope the negative assertion to a locator for that row, not the whole page, so it actually proves the old position is empty rather than merely that the button exists somewhere), and (b) `a:has-text("Create Disposition")` **is** present, and appears after the Event Timeline fieldset's start in document order but visually above it (assert via `page.locator('a:has-text(\"Create Disposition\")')`'s bounding box `y` versus `#event-timeline`'s legend's bounding box `y` — the button's `y` must be less than the Event Timeline legend's `y`, i.e. above it, while still being below the header `h3`'s `y`).
 
 ### Implementation for User Story 1
 
-- [ ] T003 [US1] In `views/ncr-detail-body.jade`, remove the `.span4.text-right` column (lines 9-17) from the top header `.row-fluid`, leaving only `.span8` (the `h3`/NCR-number/status-badge) in that row. (makes part of T002 pass — the "not in the header" half)
-- [ ] T004 [US1] In the same file, immediately before the `.row-fluid` that starts Event Timeline (currently line 261), insert a new `.row-fluid` containing a `.span12` with the four `if`-gated `a.btn...` lines moved from the removed block verbatim (same labels, hrefs, Bootstrap classes — `btn-primary`/`btn-success`/`btn-warning`/`btn-danger` — only their container changed, per FR-002). At this task, keep the original bare `if ncr.status === '...'` conditions (User Story 2 replaces them with the `can*` booleans) — this task is positioning only. (makes the rest of T002 pass)
+- [X] T003 [US1] In `views/ncr-detail-body.jade`, remove the `.span4.text-right` column (lines 9-17) from the top header `.row-fluid`, leaving only `.span8` (the `h3`/NCR-number/status-badge) in that row. (makes part of T002 pass — the "not in the header" half)
+- [X] T004 [US1] In the same file, immediately before the `.row-fluid` that starts Event Timeline (currently line 261), insert a new `.row-fluid` containing a `.span12` with the four `if`-gated `a.btn...` lines moved from the removed block verbatim (same labels, hrefs, Bootstrap classes — `btn-primary`/`btn-success`/`btn-warning`/`btn-danger` — only their container changed, per FR-002). At this task, keep the original bare `if ncr.status === '...'` conditions (User Story 2 replaces them with the `can*` booleans) — this task is positioning only. (makes the rest of T002 pass)
 
 **Checkpoint**: User Story 1 is functional and independently testable — the button has moved, with no change yet to who sees it.
 
@@ -70,17 +70,17 @@ Single Express MVC project at repo root — extends the existing `views/`, `e2e/
 
 > Write first; confirm they fail before implementing.
 
-- [ ] T005 [US2] In `e2e/us-ncr-next-action-visibility.spec.js`, add `test.describe('US2 — button permission-gated')` with four tests, each creating its own NCR via `createNcrInStatus` (T002's helper):
+- [X] T005 [US2] In `e2e/us-ncr-next-action-visibility.spec.js`, add `test.describe('US2 — button permission-gated')` with four tests, each creating its own NCR via `createNcrInStatus` (T002's helper):
   1. **Submitted**, ce_cs `dong`: as `dong`, the detail page shows "Create Disposition"; as `bob`, it shows no action button at all (assert absence of all four button texts, or more simply that no `.btn` with an `href` to `/disposition`, `/concurrence`, `/approve`, or `/close` for this NCR exists).
   2. **Dispositioned**: as `dong` (QA staff), shows "QA Concurrence". Then `remove-group-member` for `bob` from `ncr-qa` (guarding with a `try/finally` that always `add-group-member`s it back, per that fixture's existing precedent in `us3-qa-concurrence-and-approver-coordination.spec.js`), and as `bob`, confirm no action button.
   3. **Approval Requested**, `additional_approvers: [{ approver_id: 'bob', approval_status: 'Pending' }]`: as `bob`, shows "Approve / Return"; as `dong` (not a designated approver on this NCR), shows no action button.
   4. **Final Approval**, originator `dong`: as `dong`, shows "Close NCR"; as `bob` (neither Originator nor Designate on this NCR), shows no action button.
-- [ ] T006 [P] [US2] In the same file, add one more test confirming FR-002/the "no regression for no-action statuses" edge case: an NCR in `Returned for Comment` (or `Closed`) status shows no action button for `dong` even though `dong` is QA staff / would otherwise qualify for some other status's button.
+- [X] T006 [P] [US2] In the same file, add one more test confirming FR-002/the "no regression for no-action statuses" edge case: an NCR in `Returned for Comment` (or `Closed`) status shows no action button for `dong` even though `dong` is QA staff / would otherwise qualify for some other status's button.
 
 ### Implementation for User Story 2
 
-- [ ] T007 [US2] In `views/ncr-detail-body.jade`, add the four `can*` boolean declarations immediately after the existing `canManageApprovers` declaration (line 1), exactly as specified in data-model.md: `canCreateDisposition = ncr.status === 'Submitted' && ncr.ce_cs_id === locals.userid`; `canConcur = ncr.status === 'Dispositioned' && isQa`; `canApprove = ncr.status === 'Approval Requested' && ncr.additional_approvers.some(a => a.approver_id === locals.userid)`; `canClose = ncr.status === 'Final Approval' && (locals.userid === ncr.originator_id || locals.userid === ncr.originator_designate_id)`.
-- [ ] T008 [US2] In the relocated button block (T004), replace each `if ncr.status === '...'` with its matching `can*` boolean (`if canCreateDisposition`, `if canConcur`, `if canApprove`, `if canClose`), and wrap the whole `.row-fluid` in `if canCreateDisposition || canConcur || canApprove || canClose` so the row itself isn't emitted (no stray empty space) when nobody is authorized for the current status's action. (makes T005/T006 pass)
+- [X] T007 [US2] In `views/ncr-detail-body.jade`, add the four `can*` boolean declarations immediately after the existing `canManageApprovers` declaration (line 1), exactly as specified in data-model.md: `canCreateDisposition = ncr.status === 'Submitted' && ncr.ce_cs_id === locals.userid`; `canConcur = ncr.status === 'Dispositioned' && isQa`; `canApprove = ncr.status === 'Approval Requested' && ncr.additional_approvers.some(a => a.approver_id === locals.userid)`; `canClose = ncr.status === 'Final Approval' && (locals.userid === ncr.originator_id || locals.userid === ncr.originator_designate_id)`.
+- [X] T008 [US2] In the relocated button block (T004), replace each `if ncr.status === '...'` with its matching `can*` boolean (`if canCreateDisposition`, `if canConcur`, `if canApprove`, `if canClose`), and wrap the whole `.row-fluid` in `if canCreateDisposition || canConcur || canApprove || canClose` so the row itself isn't emitted (no stray empty space) when nobody is authorized for the current status's action. (makes T005/T006 pass)
 
 **Checkpoint**: Both user stories are functional and independently testable — the button is both repositioned and shown only to whoever can actually use it.
 
@@ -90,10 +90,10 @@ Single Express MVC project at repo root — extends the existing `views/`, `e2e/
 
 **Purpose**: Verification and the checks the constitution requires.
 
-- [ ] T009 Run `npx eslint .` and confirm no new errors (this feature touches no `.js` file other than the new e2e spec).
-- [ ] T010 With the stack running, run the full e2e suite `npm run e2e` and confirm `e2e/us-ncr-next-action-visibility.spec.js` passes and no other spec regressed — in particular `e2e/us3-qa-concurrence-and-approver-coordination.spec.js` and `e2e/us-originator-designate.spec.js`, which both exercise the NCR detail page this feature changes.
-- [ ] T011 Walk through `specs/128-ncr-action-button-visibility/quickstart.md` section 1 manually against the running stack.
-- [ ] T012 Add a `CLAUDE.md` "Recent Changes" entry for `128-ncr-action-button-visibility`.
+- [X] T009 Run `npx eslint .` and confirm no new errors (this feature touches no `.js` file other than the new e2e spec).
+- [X] T010 With the stack running, run the full e2e suite `npm run e2e` and confirm `e2e/us-ncr-next-action-visibility.spec.js` passes and no other spec regressed — in particular `e2e/us3-qa-concurrence-and-approver-coordination.spec.js` and `e2e/us-originator-designate.spec.js`, which both exercise the NCR detail page this feature changes.
+- [X] T011 Walk through `specs/128-ncr-action-button-visibility/quickstart.md` section 1 manually against the running stack.
+- [X] T012 Add a `CLAUDE.md` "Recent Changes" entry for `128-ncr-action-button-visibility`.
 
 ---
 

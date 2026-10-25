@@ -1,0 +1,9 @@
+Baseline recorded 2026-10-24, before any 128-ncr-action-button-visibility implementation
+changes, on branch upton-ncr-10-23.
+
+npm run e2e -- e2e/us3-qa-concurrence-and-approver-coordination.spec.js
+  24 passed (26.2s)
+  (closest existing coverage: NCR detail page, dong-as-QA-staff, bob-as-approver --
+  the area this feature's button repositioning/gating touches)
+
+No new npm dependency is introduced by this feature.

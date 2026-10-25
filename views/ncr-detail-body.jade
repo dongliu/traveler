@@ -1,20 +1,15 @@
 - var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
+- var canCreateDisposition = ncr.status === 'Submitted' && ncr.ce_cs_id === locals.userid
+- var canConcur = ncr.status === 'Dispositioned' && isQa
+- var canApprove = ncr.status === 'Approval Requested' && (ncr.additional_approvers || []).some(function(a) { return a.approver_id === locals.userid })
+- var canClose = ncr.status === 'Final Approval' && (locals.userid === ncr.originator_id || locals.userid === ncr.originator_designate_id)
 
 .container(style='margin-top: 10px')
   .row-fluid
-    .span8
+    .span12
       h3
         | #{ncr.ncr_number}&nbsp;
         span.label(class='badge-#{ncr.status.replace(/ /g, "")}')= ncr.status
-    .span4.text-right
-      if ncr.status === 'Submitted'
-        a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Create Disposition
-      if ncr.status === 'Dispositioned'
-        a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
-      if ncr.status === 'Approval Requested'
-        a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
-      if ncr.status === 'Final Approval'
-        a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR
 
   .row-fluid
     .span6
@@ -257,6 +252,18 @@
                   = 'uploaded by ' + (file.uploaded_by_name || file.uploaded_by || 'unknown')
                   | ,&nbsp;
                   = new Date(file.upload_timestamp).toLocaleString()
+
+  if canCreateDisposition || canConcur || canApprove || canClose
+    .row-fluid#ncr-next-action(style='margin-bottom: 15px')
+      .span12
+        if canCreateDisposition
+          a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Create Disposition
+        if canConcur
+          a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
+        if canApprove
+          a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
+        if canClose
+          a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR
 
   .row-fluid
     .span12
