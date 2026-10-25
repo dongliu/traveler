@@ -466,6 +466,17 @@ describe('lib/ncr-service — submitConcurrence', () => {
     result.events.some(e => e.event_type === 'notification.approval_request').should.be.true;
   });
 
+  it('links the approval-request email to the /approve page, not the plain NCR detail page', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    const ncr = newNcr({ status: 'Dispositioned' });
+    stubFindById(ncr);
+    stubUserFind([{ _id: 'appr1', name: 'Approver One', email: 'a1@test.com' }]);
+
+    await submitConcurrence('id1', [{ approver_id: 'appr1' }], qaUser, 'http://app');
+
+    sendApprovalRequestStub.lastCall.args[2].should.equal(`http://app/ncrs/${ncr._id}/approve`);
+  });
+
   it('stores the client-submitted approver_name (resolved client-side via AD typeahead) without querying the local User collection', async () => {
     stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
     stubFindById(newNcr({ status: 'Dispositioned' }));
@@ -720,6 +731,21 @@ describe('lib/ncr-service — qaResubmit', () => {
     const sentEmails = sendApprovalRequestStub.lastCall.args[1];
     sentEmails.should.include('appr1@ad.example.com');
   });
+
+  it('links the approval-request email to the /approve page, not the plain NCR detail page', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA', email: 'qa@test.com' }] });
+    const ncr = newNcr({
+      status: 'Returned for Comment',
+      additional_approvers: [
+        { approver_id: 'appr1', approver_email: 'appr1@ad.example.com', approval_status: 'Returned for Comment' },
+      ],
+    });
+    stubFindById(ncr);
+
+    await qaResubmit('id1', qaUser, 'http://app');
+
+    sendApprovalRequestStub.lastCall.args[2].should.equal(`http://app/ncrs/${ncr._id}/approve`);
+  });
 });
 
 // ── addApprover ──────────────────────────────────────────────────────────────
@@ -781,6 +807,21 @@ describe('lib/ncr-service — addApprover', () => {
     result.events.some(e => e.event_type === 'notification.approval_request').should.be.true;
     const sentEmails = sendApprovalRequestStub.lastCall.args[1];
     sentEmails.should.include('appr2@ad.example.com');
+  });
+
+  it('links the approval-request email to the /approve page, not the plain NCR detail page', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1' }] });
+    const ncr = newNcr({ status: 'Approval Requested', additional_approvers: [] });
+    stubFindById(ncr);
+
+    await addApprover(
+      'id1',
+      { approver_id: 'appr2', approver_name: 'Approver Two', approver_email: 'appr2@ad.example.com' },
+      qaUser,
+      'http://app'
+    );
+
+    sendApprovalRequestStub.lastCall.args[2].should.equal(`http://app/ncrs/${ncr._id}/approve`);
   });
 
   it('falls back to a User lookup for email when approver_email is not submitted', async () => {
