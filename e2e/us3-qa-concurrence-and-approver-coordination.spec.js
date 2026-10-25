@@ -395,6 +395,42 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(ncr.events.some(e => e.event_type === 'notification.disposition_request')).toBe(true);
   });
 
+  test('a resubmitted NCR shows its previous disposition, which disappears once a new disposition is submitted', async ({ page, browser }) => {
+    const { ncrId } = await createDispositionedNcr({
+      ncrData: {
+        originator_id: APPROVER_ID, originator_name: APPROVER_DISPLAY_NAME,
+        part_revision: 'A', quantity: 1,
+      },
+    });
+
+    const rejectRes = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
+      data: { action: 'reject', comments: 'Needs correction.' },
+    });
+    expect(rejectRes.status()).toBe(200);
+
+    const bobPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    await bobPage.goto(`/ncrs/${ncrId}/resubmit`);
+    await bobPage.click('button:has-text("Resubmit NCR")');
+    await expect(bobPage.locator('#ncr-success')).toBeVisible();
+    await bobPage.close();
+
+    // While Submitted (awaiting a fresh disposition), the stale, pre-rejection
+    // disposition shows labeled "Previous Disposition", not "Disposition".
+    await page.goto(`/ncrs/${ncrId}`);
+    await expect(page.getByRole('group', { name: 'Previous Disposition', exact: true })).toContainText('Rework');
+    await expect(page.getByRole('group', { name: 'Disposition', exact: true })).toHaveCount(0);
+
+    // Dong (the assigned CE/CS) submits a fresh disposition.
+    const dispRes = await page.request.patch(`/api/ncrs/${ncrId}/disposition`, {
+      data: { parts_disposition: 'Use-As-Is' },
+    });
+    expect(dispRes.status()).toBe(200);
+
+    await page.goto(`/ncrs/${ncrId}`);
+    await expect(page.getByRole('group', { name: 'Disposition', exact: true })).toContainText('Use-As-Is');
+    await expect(page.getByRole('group', { name: 'Previous Disposition', exact: true })).toHaveCount(0);
+  });
+
   test('a user who is neither Originator nor Designate cannot resubmit', async ({ page }) => {
     const { ncrId } = await createDispositionedNcr(); // originator_id: 'guobao' by default
     const rejectRes = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {

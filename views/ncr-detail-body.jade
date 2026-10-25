@@ -92,7 +92,7 @@
     .row-fluid
       .span12
         fieldset
-          legend Disposition
+          legend= ncr.status === 'Submitted' ? 'Previous Disposition' : 'Disposition'
           dl.dl-horizontal
             dt Parts Disposition
             dd= ncr.disposition.parts_disposition
