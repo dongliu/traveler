@@ -8,16 +8,22 @@ flowchart TD
 
     EngDisposition --> QAConcurrence[<b>QA CONCURRENCE</b><br/>S/G EMAIL -WITH LINK TO NCR- TO QA<br/>REQUESTING CONCURRENCE]
 
-    QAConcurrence --> MoreApprovals{MORE APPROVALS<br/>PER QA?}
+    QAConcurrence --> QADecision{QA CONCURRENCE<br/>DECISION}
 
-    MoreApprovals -- Y --> ApprovalReq[<b>APPROVAL REQUEST</b><br/>S/G EMAIL -WITH LINK TO NCR- TO APPROVERS]
+    QADecision -- MORE APPROVERS --> ApprovalReq[<b>APPROVAL REQUEST</b><br/>S/G EMAIL -WITH LINK TO NCR- TO APPROVERS]
 
     ApprovalReq --> Approved{APPROVED?}
 
     Approved -- N --> QAConcurrence
 
-    MoreApprovals -- N --> Issuance
+    QADecision -- NO ADDITIONAL APPROVERS --> Issuance
     Approved -- Y --> Issuance[<b>NCR ISSUANCE</b><br/>S/G EMAIL -WITH LINK TO NCR- TO ORIGINATOR/DELEGATE<br/>REQUESTING EXECUTION OF ENG. DISPOSITION AND<br/>NCR CLOSE OUT WHEN COMPLETED]
+
+    QADecision -- REJECT WITH COMMENTS --> QARejected[<b>QA REJECTION</b><br/>S/G EMAIL -WITH LINK TO NCR- TO QA,<br/>ORIGINATOR, AND ORIGINATOR DELEGATE -IF ANY-<br/>REQUESTING NCR UPDATE]
+
+    QARejected --> OriginatorUpdate[<b>ORIGINATOR/DELEGATE UPDATES NCR</b><br/>ON SUBMISSION, NCR RETURNS TO<br/><i>SUBMITTED</i> STATUS]
+
+    OriginatorUpdate --> EngDisposition
 
     Issuance --> PrevAction[<b>PREVENTIVE ACTION HANDLING</b><br/>LIST OF PREVENTIVE ACTIONS -IF IDENTIFIED- IS<br/>MAINTAINED AND TRACKED TO CLOSURE BY QA]
 
