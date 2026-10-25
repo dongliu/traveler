@@ -146,11 +146,11 @@ Single Express MVC project at repo root — extends the existing `model/`, `lib/
 
 **Purpose**: Verification and the checks the constitution requires.
 
-- [ ] T042 Run `npx eslint .` and confirm no new errors.
-- [ ] T043 Run `TRAVELER_CONFIG_REL_PATH=docker npm run unit` and confirm the full suite passes (not just `ncr-service.test.js`/`ncr-email.test.js` in isolation).
-- [ ] T044 With the Docker stack running, run `npm run e2e -- e2e/us3-qa-concurrence-and-approver-coordination.spec.js` and `npm run e2e -- e2e/us-ncr-next-action-visibility.spec.js` and confirm both pass; spot-check `npm run e2e -- e2e/us-originator-designate.spec.js` and `npm run e2e -- e2e/us1-create-and-submit-ncr.spec.js` for any unexpected regression touching NCR status handling.
-- [ ] T045 Walk through `specs/130-qa-reject-ncr/quickstart.md`'s by-hand section manually against the running stack.
-- [ ] T046 Add a `CLAUDE.md` "Recent Changes" entry for `130-qa-reject-ncr`, following the format of entries 124-129, explicitly calling out the `PATCH /api/ncrs/:id/resubmit` path reuse (research.md D5 — a different action than the one spec 129 removed, not a revert of that removal).
+- [X] T042 Run `npx eslint .` and confirm no new errors.
+- [X] T043 Run `TRAVELER_CONFIG_REL_PATH=docker npm run unit` and confirm the full suite passes (not just `ncr-service.test.js`/`ncr-email.test.js` in isolation).
+- [X] T044 With the Docker stack running, run `npm run e2e -- e2e/us3-qa-concurrence-and-approver-coordination.spec.js` and `npm run e2e -- e2e/us-ncr-next-action-visibility.spec.js` and confirm both pass; spot-check `npm run e2e -- e2e/us-originator-designate.spec.js` and `npm run e2e -- e2e/us1-create-and-submit-ncr.spec.js` for any unexpected regression touching NCR status handling.
+- [X] T045 Walk through `specs/130-qa-reject-ncr/quickstart.md`'s by-hand section manually against the running stack.
+- [X] T046 Add a `CLAUDE.md` "Recent Changes" entry for `130-qa-reject-ncr`, following the format of entries 124-129, explicitly calling out the `PATCH /api/ncrs/:id/resubmit` path reuse (research.md D5 — a different action than the one spec 129 removed, not a revert of that removal).
 
 ---
 
