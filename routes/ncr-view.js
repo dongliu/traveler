@@ -26,6 +26,20 @@ module.exports = function(app) {
     }
   });
 
+  app.get('/ncrs/:id/resubmit', auth.ensureAuthenticated, async function(req, res) {
+    try {
+      const ncr = await Ncr.findById(req.params.id).lean();
+      if (!ncr) return res.status(404).send('NCR not found');
+      if (ncr.status !== 'Rejected') return res.redirect(`${req.proxied ? req.proxied_prefix : ''}/ncrs/${req.params.id}`);
+      const isOriginatorOrDesignate = ncr.originator_id === req.session.userid || ncr.originator_designate_id === req.session.userid;
+      const renderObj = routesUtilities.getRenderObject(req, { ncr, isOriginatorOrDesignate });
+      return res.render('ncr-resubmit', renderObj);
+    } catch (err) {
+      logger.error('NCR resubmit view failed:', err);
+      return res.status(500).send('Error loading NCR');
+    }
+  });
+
   app.get('/ncrs/:id/approve', auth.ensureAuthenticated, async function(req, res) {
     try {
       const ncr = await Ncr.findById(req.params.id).lean();

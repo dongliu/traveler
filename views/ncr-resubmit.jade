@@ -1,0 +1,184 @@
+extends layout
+
+block head
+  meta(charset='utf-8')
+  title #{ncr.ncr_number} — Update and Resubmit
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap.css')
+  link(rel='stylesheet', href='#{prefix}/bootstrap/css/bootstrap-responsive.css')
+  link(rel='stylesheet', href='#{prefix}/stylesheets/style.css')
+
+block content
+  .container(style='margin-top: 10px')
+    h3 Update and Resubmit Nonconformance Report
+    h4
+      strong= ncr.ncr_number
+      |  &mdash; #{ncr.part_name} (#{ncr.part_number})
+
+    if ncr.qa_rejection_comments
+      .alert.alert-block
+        strong QA Rejection Comments:&nbsp;
+        | #{ncr.qa_rejection_comments}
+
+    if !isOriginatorOrDesignate
+      .alert.alert-warning#resubmit-access-warning
+        strong Restricted:&nbsp;
+        | Only the Originator
+        if ncr.originator_name
+          |  (#{ncr.originator_name})
+        | &nbsp;or their Designate can update and resubmit this NCR. You are viewing a read-only summary.
+      .well
+        dl.dl-horizontal
+          dt Part Name
+          dd= ncr.part_name
+          dt Part Number
+          dd= ncr.part_number
+          dt Description of Nonconformance
+          dd= ncr.description_of_nonconformance
+
+    if isOriginatorOrDesignate
+      #ncr-success.alert.alert-success(style='display:none')
+        strong NCR resubmitted.&nbsp;
+        | CE/CS has been notified for engineering disposition.
+        |  &nbsp;
+        a(id='ncr-detail-link', href='#{prefix}/ncrs/#{ncr._id}') View NCR
+      #ncr-error.alert.alert-error(style='display:none')
+        strong Error: &nbsp;
+        span#ncr-error-msg
+      form#ncr-resubmit-form.form-horizontal
+        fieldset
+          legend Part Information
+          .control-group
+            label.control-label(for='part_name') Part Name
+              span.text-error *
+            .controls
+              input#part_name(type='text', name='part_name', maxlength='255', required, value=ncr.part_name)
+          .control-group
+            label.control-label(for='part_number') Part Number
+              span.text-error *
+            .controls
+              input#part_number(type='text', name='part_number', maxlength='50', required, value=ncr.part_number)
+          .control-group
+            label.control-label(for='part_revision') Part Revision
+              span.text-error *
+            .controls
+              input#part_revision(type='text', name='part_revision', maxlength='20', required, value=ncr.part_revision)
+          .control-group
+            label.control-label(for='quantity') Quantity
+              span.text-error *
+            .controls
+              input#quantity(type='number', name='quantity', min='1', required, value=ncr.quantity)
+          .control-group
+            label.control-label(for='supplier_name') Supplier Name
+              span.text-error *
+            .controls
+              input#supplier_name(type='text', name='supplier_name', maxlength='255', required, value=ncr.supplier_name)
+        fieldset
+          legend Reference Information
+          .control-group
+            label.control-label(for='wbs_number') WBS Number
+              span.text-error *
+            .controls
+              input#wbs_number(type='text', name='wbs_number', maxlength='50', required, value=ncr.wbs_number)
+            .control-group
+              label.control-label(for='specification_drawing_reference') Specification / Drawing Ref.
+              .controls
+                input#specification_drawing_reference(type='text', name='specification_drawing_reference', maxlength='255', value=ncr.specification_drawing_reference)
+            .control-group
+              label.control-label(for='po_reference') PO Reference
+              .controls
+                input#po_reference(type='text', name='po_reference', maxlength='255', value=ncr.po_reference)
+        fieldset
+          legend Nonconformance Details
+          .control-group
+            label.control-label Discovery Date
+              span.text-error *
+            .controls
+              input#discovery_date(type='date', name='discovery_date', required, value=ncr.discovery_date ? new Date(ncr.discovery_date).toISOString().split('T')[0] : '')
+          .control-group
+            label.control-label Discovery Context
+              span.text-error *
+            .controls
+              label.radio
+                input(type='radio', name='discovery_context', value='incoming_inspection', checked=ncr.discovery_context === 'incoming_inspection', required)
+                | &nbsp; Incoming Inspection
+              label.radio
+                input(type='radio', name='discovery_context', value='in_house_assembly', checked=ncr.discovery_context === 'in_house_assembly')
+                | &nbsp; In-House Assembly
+              label.radio
+                input(type='radio', name='discovery_context', value='in_house_inspection', checked=ncr.discovery_context === 'in_house_inspection')
+                | &nbsp; In-House Inspection
+          .control-group
+            label.control-label(for='description_of_nonconformance') Description of Nonconformance
+              span.text-error *
+            .controls
+              textarea#description_of_nonconformance(name='description_of_nonconformance', rows='5', maxlength='2000', required)= ncr.description_of_nonconformance
+              span#desc-counter.help-block 0 / 2000
+        .control-group
+          .controls
+            .btn-group
+              button#resubmit-btn.btn.btn-primary(type='submit') Resubmit NCR
+            .btn-group(style='margin-left: 5px')
+              a.btn(href='#{prefix}/ncrs/#{ncr._id}') Cancel
+
+block js
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-3.7.1.min.js')
+  script(type='text/javascript', src='#{prefix}/javascripts/jquery-migrate-config.js')
+  script(type='text/javascript', src='#{prefix}/jquery-3.7.1/jquery-migrate-3.6.0.js')
+  script(type='text/javascript', src='#{prefix}/bootstrap/js/bootstrap.min.js')
+  if isOriginatorOrDesignate
+    script.
+      $(function () {
+        var ncrId = '#{ncr._id}';
+        var maxDate = new Date().toISOString().split('T')[0];
+        $('#discovery_date').attr('max', maxDate);
+
+        $('#desc-counter').text($('#description_of_nonconformance').val().length + ' / 2000');
+        $('#description_of_nonconformance').on('input', function () {
+          $('#desc-counter').text($(this).val().length + ' / 2000');
+        });
+
+        $('#ncr-resubmit-form').on('submit', function (e) {
+          e.preventDefault();
+          var payload = {
+            part_name: $('#part_name').val().trim(),
+            part_number: $('#part_number').val().trim(),
+            part_revision: $('#part_revision').val().trim(),
+            quantity: parseInt($('#quantity').val(), 10),
+            supplier_name: $('#supplier_name').val().trim(),
+            wbs_number: $('#wbs_number').val().trim(),
+            specification_drawing_reference: $('#specification_drawing_reference').val().trim() || undefined,
+            po_reference: $('#po_reference').val().trim() || undefined,
+            discovery_date: $('#discovery_date').val(),
+            discovery_context: $('input[name="discovery_context"]:checked').val(),
+            description_of_nonconformance: $('#description_of_nonconformance').val().trim(),
+          };
+
+          $('#resubmit-btn').prop('disabled', true).text('Submitting...');
+          $('#ncr-error').hide();
+
+          $.ajax({
+            url: prefix + '/api/ncrs/' + ncrId + '/resubmit',
+            method: 'PATCH',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function () {
+              $('#ncr-resubmit-form').hide();
+              $('#ncr-success').show();
+            },
+            error: function (xhr) {
+              var resp = xhr.responseJSON || {};
+              var msg = resp.message || resp.error || 'Submission failed. Please try again.';
+              if (resp.details) {
+                var fields = Object.keys(resp.details).map(function (k) {
+                  return k + ': ' + resp.details[k].join(', ');
+                });
+                msg += ' — ' + fields.join('; ');
+              }
+              $('#ncr-error-msg').text(msg);
+              $('#ncr-error').show();
+              $('#resubmit-btn').prop('disabled', false).text('Resubmit NCR');
+            },
+          });
+        });
+      });

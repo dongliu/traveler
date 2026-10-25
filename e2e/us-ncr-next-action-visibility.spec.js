@@ -39,12 +39,13 @@ async function createNcrInStatus(status, ncrDataOverrides = {}) {
   return { ncrId, ncrNumber };
 }
 
-/** Asserts no action button (any of the four) is present anywhere on the page. */
+/** Asserts no action button (any of the five) is present anywhere on the page. */
 async function expectNoActionButton(pageHandle) {
   await expect(pageHandle.locator('a:has-text("Create Disposition")')).toHaveCount(0);
   await expect(pageHandle.locator('a:has-text("QA Concurrence")')).toHaveCount(0);
   await expect(pageHandle.locator('a:has-text("Approve / Return")')).toHaveCount(0);
   await expect(pageHandle.locator('a:has-text("Close NCR")')).toHaveCount(0);
+  await expect(pageHandle.locator('a:has-text("Resubmit")')).toHaveCount(0);
 }
 
 test.describe('US1 — button repositioned', () => {
@@ -127,6 +128,19 @@ test.describe('US2 — button permission-gated', () => {
 
     await page.goto(`/ncrs/${ncrId}`);
     await expect(page.locator('a:has-text("Close NCR")')).toBeVisible();
+
+    // bob is neither Originator nor Designate on this NCR.
+    const bobPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    await bobPage.goto(`/ncrs/${ncrId}`);
+    await expectNoActionButton(bobPage);
+    await bobPage.close();
+  });
+
+  test('Rejected: only the Originator or their Designate sees Resubmit', async ({ page, browser }) => {
+    const { ncrId } = await createNcrInStatus('Rejected', { originator_id: QA_STAFF_ID, originator_name: 'Dong Liu' });
+
+    await page.goto(`/ncrs/${ncrId}`);
+    await expect(page.locator('a:has-text("Resubmit")')).toBeVisible();
 
     // bob is neither Originator nor Designate on this NCR.
     const bobPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });

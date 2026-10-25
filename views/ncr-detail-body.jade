@@ -3,6 +3,7 @@
 - var canConcur = ncr.status === 'Dispositioned' && isQa
 - var canApprove = ncr.status === 'Approval Requested' && (ncr.additional_approvers || []).some(function(a) { return a.approver_id === locals.userid })
 - var canClose = ncr.status === 'Final Approval' && (locals.userid === ncr.originator_id || locals.userid === ncr.originator_designate_id)
+- var canResubmit = ncr.status === 'Rejected' && (locals.userid === ncr.originator_id || locals.userid === ncr.originator_designate_id)
 
 .container(style='margin-top: 10px')
   .row-fluid
@@ -267,7 +268,7 @@
                   | ,&nbsp;
                   = new Date(file.upload_timestamp).toLocaleString()
 
-  if canCreateDisposition || canConcur || canApprove || canClose
+  if canCreateDisposition || canConcur || canApprove || canClose || canResubmit
     .row-fluid#ncr-next-action(style='margin-bottom: 15px')
       .span12
         if canCreateDisposition
@@ -278,6 +279,8 @@
           a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
         if canClose
           a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR
+        if canResubmit
+          a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/resubmit') Resubmit
 
   .row-fluid
     .span12

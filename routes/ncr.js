@@ -16,6 +16,7 @@ const {
   addApprover,
   removeApprover,
   closeNcr,
+  resubmitNcr,
   assignDesignate,
   removeDesignate,
   listNcrs,
@@ -487,6 +488,66 @@ router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
     });
   } catch (err) {
     return mapServiceError(err, res, 'Concurrence');
+  }
+});
+
+router.patch('/:id/resubmit', auth.ensureAuthenticated, async (req, res) => {
+  if (!isValidId(req.params.id)) return badId(res, 'id');
+  const errors = {};
+  const b = {
+    part_name: sanitizeStr(req.body.part_name),
+    part_number: sanitizeStr(req.body.part_number),
+    part_revision: sanitizeStr(req.body.part_revision),
+    quantity: req.body.quantity,
+    supplier_name: sanitizeStr(req.body.supplier_name),
+    wbs_number: sanitizeStr(req.body.wbs_number),
+    specification_drawing_reference: sanitizeStr(req.body.specification_drawing_reference),
+    po_reference: sanitizeStr(req.body.po_reference),
+    description_of_nonconformance: sanitizeStr(req.body.description_of_nonconformance),
+    discovery_date: req.body.discovery_date,
+    discovery_context: req.body.discovery_context,
+  };
+
+  if (!b.part_name) errors.part_name = ['Required'];
+  if (!b.part_number) errors.part_number = ['Required'];
+  if (!b.part_revision) errors.part_revision = ['Required'];
+  if (!b.quantity || Number(b.quantity) < 1)
+    errors.quantity = ['Must be greater than 0'];
+  if (!b.supplier_name) errors.supplier_name = ['Required'];
+  if (!b.wbs_number) errors.wbs_number = ['Required'];
+  if (!b.description_of_nonconformance)
+    errors.description_of_nonconformance = ['Required'];
+  if (!b.discovery_date)
+    errors.discovery_date = ['Required'];
+  else if (new Date(b.discovery_date) > new Date())
+    errors.discovery_date = ['Cannot be in the future'];
+  if (!b.discovery_context || !DISCOVERY_CONTEXTS.includes(b.discovery_context))
+    errors.discovery_context = [`Must be one of: ${DISCOVERY_CONTEXTS.join(', ')}`];
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ success: false, error: 'Validation Error', message: 'Validation failed', details: errors });
+  }
+
+  try {
+    const user = {
+      id: req.session.userid,
+      name: res.locals.username,
+      email: res.locals.userEmail || '',
+    };
+    const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+    const ncr = await resubmitNcr(req.params.id, b, user, webBaseUrl);
+    return res.status(200).json({
+      success: true,
+      ncr: {
+        ncr_id: ncr._id,
+        ncr_number: ncr.ncr_number,
+        status: ncr.status,
+        previous_status: 'Rejected',
+      },
+      message: 'NCR resubmitted successfully. CE/CS notified for engineering disposition.',
+    });
+  } catch (err) {
+    return mapServiceError(err, res, 'Resubmission');
   }
 });
 

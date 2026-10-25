@@ -366,6 +366,54 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(res.status()).toBe(409);
   });
 
+  test('Originator resubmits a Rejected NCR, which returns to Submitted and re-notifies CE/CS', async ({ page, browser }) => {
+    // bob plays the Originator here (a real, loggable-in identity) rather
+    // than the file's usual default originator (guobao, never logged in as).
+    const { ncrId } = await createDispositionedNcr({
+      ncrData: {
+        originator_id: APPROVER_ID, originator_name: APPROVER_DISPLAY_NAME,
+        part_revision: 'A', quantity: 1,
+      },
+    });
+
+    const rejectRes = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
+      data: { action: 'reject', comments: 'Description needs the affected lot number.' },
+    });
+    expect(rejectRes.status()).toBe(200);
+
+    const bobPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+    await bobPage.goto(`/ncrs/${ncrId}/resubmit`);
+    await bobPage.fill('#description_of_nonconformance', 'Corrected description including lot number ABC123.');
+    await bobPage.click('button:has-text("Resubmit NCR")');
+    await expect(bobPage.locator('#ncr-success')).toBeVisible();
+    await bobPage.close();
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'description_of_nonconformance', 'events'] });
+    expect(ncr.status).toBe('Submitted');
+    expect(ncr.description_of_nonconformance).toContain('ABC123');
+    expect(ncr.events.some(e => e.event_type === 'ncr.resubmitted')).toBe(true);
+    expect(ncr.events.some(e => e.event_type === 'notification.disposition_request')).toBe(true);
+  });
+
+  test('a user who is neither Originator nor Designate cannot resubmit', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr(); // originator_id: 'guobao' by default
+    const rejectRes = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
+      data: { action: 'reject', comments: 'Needs correction.' },
+    });
+    expect(rejectRes.status()).toBe(200);
+
+    // dong (QA staff, this file's default page persona) is neither Originator nor Designate on this NCR.
+    const res = await page.request.patch(`/api/ncrs/${ncrId}/resubmit`, {
+      data: {
+        part_name: 'Bracket', part_number: 'BA-1', part_revision: 'A', quantity: 1,
+        supplier_name: 'Acme', wbs_number: E2E_WBS,
+        description_of_nonconformance: 'Attempted resubmission by a non-Originator.',
+        discovery_date: todayIsoDate(), discovery_context: 'incoming_inspection',
+      },
+    });
+    expect(res.status()).toBe(403);
+  });
+
   // ── Manage Approvers: QA can add/remove approvers before issuance ────────
 
   /** Concurs via the API with the given approver ids (username-only), returning the resulting NCR. */

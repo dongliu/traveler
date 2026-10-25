@@ -38,6 +38,7 @@ const {
   addApprover,
   removeApprover,
   closeNcr,
+  resubmitNcr,
   assignDesignate,
   removeDesignate,
   listNcrs,
@@ -1245,6 +1246,70 @@ describe('lib/ncr-service — closeNcr', () => {
     emails.should.include('ces@test.com');
     emails.should.include('des@test.com');
     emails.should.include('appr1@test.com');
+  });
+});
+
+// ── resubmitNcr ──────────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — resubmitNcr', () => {
+  const originator = makeUser({ id: 'orig1' });
+
+  it('throws 404 when NCR not found', async () => {
+    stubFindById(null);
+    await expectRejection(resubmitNcr('id1', minimalNcrData(), originator), 404);
+  });
+
+  it('throws 403 when user is neither the Originator nor the Designate', async () => {
+    stubFindById(newNcr({ status: 'Rejected', originator_id: 'someoneElse', originator_designate_id: 'someoneElseToo' }));
+    await expectRejection(resubmitNcr('id1', minimalNcrData(), originator), 403);
+  });
+
+  it('throws 409 when NCR is not Rejected', async () => {
+    stubFindById(newNcr({ status: 'Dispositioned', originator_id: 'orig1' }));
+    await expectRejection(resubmitNcr('id1', minimalNcrData(), originator), 409);
+  });
+
+  it('overwrites the editable fields, transitions to Submitted, and records the resubmission event', async () => {
+    // Shared, module-level stub -- reset its call history before asserting (same convention as createNcr's own tests).
+    sendDispositionRequestStub.resetHistory();
+    stubFindById(newNcr({
+      status: 'Rejected',
+      originator_id: 'orig1',
+      part_name: 'Old Name',
+      ce_cs_id: 'ces1',
+      ce_cs_name: 'CES',
+    }));
+    stubUserFind([{ _id: 'ces1', name: 'CES', email: 'ces@test.com' }]);
+
+    const result = await resubmitNcr('id1', minimalNcrData({ part_name: 'Corrected Name' }), originator);
+
+    result.status.should.equal('Submitted');
+    result.part_name.should.equal('Corrected Name');
+    result.ce_cs_id.should.equal('ces1');
+    const resubmittedEvent = result.events.find(e => e.event_type === 'ncr.resubmitted');
+    resubmittedEvent.should.exist;
+    resubmittedEvent.previous_status.should.equal('Rejected');
+    resubmittedEvent.new_status.should.equal('Submitted');
+    resubmittedEvent.actor_role.should.equal('originator');
+    sendDispositionRequestStub.calledOnce.should.be.true;
+    result.events.some(e => e.event_type === 'notification.disposition_request').should.be.true;
+  });
+
+  it('does not send a disposition request when no CE/CS email is on record', async () => {
+    stubFindById(newNcr({ status: 'Rejected', originator_id: 'orig1' }));
+
+    const result = await resubmitNcr('id1', minimalNcrData(), originator);
+
+    result.events.some(e => e.event_type === 'notification.disposition_request').should.be.false;
+  });
+
+  it('allows the Designate (not just the Originator) to resubmit', async () => {
+    const designate = makeUser({ id: 'des1', name: 'Des Person' });
+    stubFindById(newNcr({ status: 'Rejected', originator_id: 'orig1', originator_designate_id: 'des1' }));
+
+    const result = await resubmitNcr('id1', minimalNcrData(), designate);
+
+    result.status.should.equal('Submitted');
   });
 });
 

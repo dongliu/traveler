@@ -29,6 +29,7 @@ const PreventiveActionSchema = new Schema({
 
 const NCR_EVENT_TYPES = [
   'ncr.submitted',
+  'ncr.resubmitted',
   'disposition.submitted',
   'delegate.assigned',
   'delegate.removed',
