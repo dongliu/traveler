@@ -32,6 +32,7 @@ const {
   createNcr,
   submitDisposition,
   submitConcurrence,
+  rejectConcurrence,
   submitApproval,
   returnForComment,
   addApprover,
@@ -625,6 +626,54 @@ describe('lib/ncr-service — submitConcurrence', () => {
     round1Event.should.exist;
     round1Event.payload.approver_id.should.equal('appr2');
     round1Event.payload.comments.should.equal('needs rework');
+  });
+});
+
+// ── rejectConcurrence ────────────────────────────────────────────────────────
+
+describe('lib/ncr-service — rejectConcurrence', () => {
+  const qaUser = makeUser({ id: 'qa1', name: 'QA Person', roles: ['qa_staff'] });
+
+  it('throws 403 when user is not QA Staff', async () => {
+    await expectRejection(rejectConcurrence('id1', 'needs rework', makeUser({ roles: [] })), 403);
+  });
+
+  it('throws 404 when NCR not found', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(null);
+    await expectRejection(rejectConcurrence('id1', 'needs rework', qaUser), 404);
+  });
+
+  it('throws 409 when NCR is not Dispositioned', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Submitted' }));
+    await expectRejection(rejectConcurrence('id1', 'needs rework', qaUser), 409);
+  });
+
+  it('throws 400 when comments is blank or missing', async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned' }));
+    await expectRejection(rejectConcurrence('id1', '', qaUser), 400);
+    await expectRejection(rejectConcurrence('id1', undefined, qaUser), 400);
+  });
+
+  it("transitions to Rejected and records QA's identity, comment, and timestamp", async () => {
+    stubGroupFindOne({ _id: 'ncr-qa', members: [{ _id: 'qa1', name: 'QA Person', email: 'qa@test.com' }] });
+    stubFindById(newNcr({ status: 'Dispositioned', originator_id: 'orig1' }));
+    stubUserFind([{ _id: 'orig1', name: 'Origin', email: 'orig@test.com' }]);
+
+    const result = await rejectConcurrence('id1', 'Description is missing the lot number.', qaUser);
+
+    result.status.should.equal('Rejected');
+    result.qa_rejection_comments.should.equal('Description is missing the lot number.');
+    result.qa_staff_identity.should.equal('qa1');
+    result.qa_staff_name.should.equal('QA Person');
+    (result.qa_concurrence_timestamp == null).should.be.false;
+    const rejectedEvent = result.events.find(e => e.event_type === 'qa.rejected');
+    rejectedEvent.should.exist;
+    rejectedEvent.payload.comments.should.equal('Description is missing the lot number.');
+    rejectedEvent.previous_status.should.equal('Dispositioned');
+    rejectedEvent.new_status.should.equal('Rejected');
   });
 });
 
@@ -1444,6 +1493,7 @@ describe('lib/ncr-service — getStatusCounts', () => {
     result.counts.should.deep.equal({
       Submitted: 3,
       Dispositioned: 0,
+      Rejected: 0,
       'Approval Requested': 0,
       'Final Approval': 0,
       Closed: 2,

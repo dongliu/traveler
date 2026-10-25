@@ -98,6 +98,7 @@ const NcrEventSchema = new Schema({
 const NCR_STATUSES = [
   'Submitted',
   'Dispositioned',
+  'Rejected',
   'Approval Requested',
   'Final Approval',
   'Closed',
@@ -154,6 +155,10 @@ const NcrSchema = new Schema({
   qa_staff_identity: String,
   qa_staff_name: String,
   qa_concurrence_timestamp: Date,
+  // QA's comment from the most recent 'Reject with Comments' action (spec
+  // 130). A "latest state" field, not a history list -- every rejection's
+  // comment is also permanently retained on its own qa.rejected event.
+  qa_rejection_comments: String,
 
   // Sequence number (starting at 1) of the approval round `additional_approvers`
   // currently represents. Set the first time QA concurs with >=1 approver,

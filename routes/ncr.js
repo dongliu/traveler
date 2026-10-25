@@ -10,6 +10,7 @@ const {
   createNcr,
   submitDisposition,
   submitConcurrence,
+  rejectConcurrence,
   submitApproval,
   returnForComment,
   addApprover,
@@ -411,6 +412,39 @@ function mapServiceError(err, res, action) {
 
 router.patch('/:id/concurrence', auth.ensureAuthenticated, async (req, res) => {
   if (!isValidId(req.params.id)) return badId(res, 'id');
+
+  if (req.body.action === 'reject') {
+    const comments = sanitizeStr(req.body.comments);
+    if (!comments) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation Error',
+        message: 'Validation failed',
+        details: { comments: ['Required when action is reject'] },
+      });
+    }
+    try {
+      const user = {
+        id: req.session.userid,
+        name: res.locals.username,
+        roles: res.locals.roles || [],
+      };
+      const webBaseUrl = `${req.protocol}://${req.get('host')}${req.proxied ? req.proxied_prefix : ''}`;
+      const ncr = await rejectConcurrence(req.params.id, comments, user, webBaseUrl);
+      return res.status(200).json({
+        success: true,
+        ncr: {
+          ncr_id: ncr._id,
+          ncr_number: ncr.ncr_number,
+          status: ncr.status,
+          qa_rejection_comments: ncr.qa_rejection_comments,
+        },
+      });
+    } catch (err) {
+      return mapServiceError(err, res, 'Rejection');
+    }
+  }
+
   const additionalApprovers = req.body.additional_approvers;
   if (additionalApprovers !== undefined && !Array.isArray(additionalApprovers)) {
     return res.status(400).json({

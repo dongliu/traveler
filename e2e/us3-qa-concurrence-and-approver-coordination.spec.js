@@ -303,22 +303,67 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     expect(ncr.current_approval_round).toBe(2);
   });
 
-  // ── AS9: no rejection path (spec/implementation gap) ─────────────────────
+  // ── QA Reject with Comments (spec 130) ────────────────────────────────────
 
-  test('AS9 - concurrence endpoint ignores unrecognised action field and does not perform rejection', async ({ page }) => {
+  test('QA rejects a Dispositioned NCR with a required comment, moving it to Rejected status', async ({ page }) => {
     const { ncrId } = await createDispositionedNcr();
+    const REJECT_COMMENT = 'Description of nonconformance is missing the affected lot number.';
+
+    await page.goto(`/ncrs/${ncrId}/concurrence`);
+    await page.fill('#reject-comments', REJECT_COMMENT);
+    await page.click('button:has-text("Reject with Comments")');
+    await expect(page.locator('#conc-success')).toBeVisible();
+
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'qa_rejection_comments', 'events'] });
+    expect(ncr.status).toBe('Rejected');
+    expect(ncr.qa_rejection_comments).toBe(REJECT_COMMENT);
+    const rejectedEvent = ncr.events.find(e => e.event_type === 'qa.rejected');
+    expect(rejectedEvent).toBeTruthy();
+    expect(rejectedEvent.payload.comments).toBe(REJECT_COMMENT);
+  });
+
+  test('rejecting with a blank comment is refused', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+
+    await page.goto(`/ncrs/${ncrId}/concurrence`);
+    await expect(page.locator('button:has-text("Reject with Comments")')).toBeDisabled();
+
+    // Direct API call bypassing the disabled button also refused.
     const res = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
-      data: { action: 'reject', comments: 'Needs more detail', additional_approvers: [] },
+      data: { action: 'reject', comments: '' },
     });
-    // Endpoint either succeeds (ignoring the unrecognised action) or returns
-    // an error — in either case, the NCR must NOT have a qa.rejected event.
-    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'events'] });
-    expect(ncr.events.some(e => e.event_type === 'qa.rejected')).toBe(false);
-    // If the request succeeded, NCR should have moved to Final Approval (no approvers),
-    // not to a rejected state.
-    if (res.status() === 200) {
-      expect(ncr.status).toBe('Final Approval');
+    expect(res.status()).toBe(400);
+    const { ncr } = await execFixtureCli('get-ncr', { ncrId, fields: ['status'] });
+    expect(ncr.status).toBe('Dispositioned');
+  });
+
+  test('API rejects a reject action from a non-QA user', async ({ browser }) => {
+    const { ncrId } = await createDispositionedNcr();
+
+    // bob is a pre-existing member of the shared ncr-qa group in this dev
+    // database -- remove them for this assertion only, restoring
+    // membership afterward (same pattern used elsewhere in this suite).
+    await execFixtureCli('remove-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
+    try {
+      const bobPage = await browser.newPage({ storageState: SECONDARY_AUTH_STATE });
+      const res = await bobPage.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
+        data: { action: 'reject', comments: 'Needs more detail' },
+      });
+      expect(res.status()).toBe(403);
+      await bobPage.close();
+    } finally {
+      await execFixtureCli('add-group-member', { groupId: 'ncr-qa', userId: APPROVER_ID });
     }
+  });
+
+  test('API rejects a reject action when the NCR is not Dispositioned', async ({ page }) => {
+    const { ncrId } = await createDispositionedNcr();
+    await concurWithApprovers(page, ncrId, [APPROVER_ID]); // -> Approval Requested
+
+    const res = await page.request.patch(`/api/ncrs/${ncrId}/concurrence`, {
+      data: { action: 'reject', comments: 'Needs more detail' },
+    });
+    expect(res.status()).toBe(409);
   });
 
   // ── Manage Approvers: QA can add/remove approvers before issuance ────────

@@ -104,6 +104,20 @@
               dt Rework / Repair Instructions
               dd= ncr.disposition.rework_repair_instructions
 
+  if ncr.status === 'Rejected' && ncr.qa_rejection_comments
+    .row-fluid
+      .span12
+        fieldset
+          legend QA Rejection
+          dl.dl-horizontal
+            dt Comments
+            dd= ncr.qa_rejection_comments
+            dt Rejected By
+            dd= ncr.qa_staff_name
+            if ncr.qa_concurrence_timestamp
+              dt Rejected On
+              dd= new Date(ncr.qa_concurrence_timestamp).toLocaleString()
+
   if (ncr.additional_approvers && ncr.additional_approvers.length) || canManageApprovers
     .row-fluid
       .span12

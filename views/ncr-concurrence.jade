@@ -79,6 +79,18 @@ block content
                 i.fa.fa-plus
                 | &nbsp; Add
 
+    fieldset
+      legend Reject with Comments
+      p.help-block.
+        Alternatively, reject this NCR outright with a required comment
+        explaining why. This sends the NCR back to the Originator/Designate
+        for correction instead of moving it forward for approval.
+      .control-group
+        label.control-label(for='reject-comments') Comments
+          span.text-error *
+        .controls
+          textarea#reject-comments.input-block-level(rows='3', maxlength='2000', placeholder='Explain what needs to be corrected...')
+
     #conc-success.alert.alert-success(style='display:none')
       strong Concurrence submitted.&nbsp;
       span#conc-success-msg
@@ -90,6 +102,7 @@ block content
 
     .form-actions
       button#concur-btn.btn.btn-primary(type='button') Concur
+      button#reject-btn.btn.btn-danger(type='button', style='margin-left: 5px', disabled) Reject with Comments
       a.btn(href='#{prefix}/ncrs/#{ncr._id}', style='margin-left: 5px') Cancel
 
 block js
@@ -175,12 +188,41 @@ block js
             $('#conc-detail-link').attr('href', prefix + '/ncrs/' + ncrId);
             $('#conc-success').show();
             $('#concur-btn').hide();
+            $('#reject-btn').hide();
           },
           error: function (xhr) {
             var resp = xhr.responseJSON || {};
             $('#conc-error-msg').text(resp.message || resp.error || 'Submission failed.');
             $('#conc-error').show();
             $('#concur-btn').prop('disabled', false).text('Concur');
+          },
+        });
+      });
+
+      $('#reject-comments').on('input', function () {
+        $('#reject-btn').prop('disabled', $(this).val().trim().length === 0);
+      });
+
+      $('#reject-btn').on('click', function () {
+        $('#conc-error').hide();
+        $('#reject-btn').prop('disabled', true).text('Submitting...');
+        $.ajax({
+          url: prefix + '/api/ncrs/' + ncrId + '/concurrence',
+          method: 'PATCH',
+          contentType: 'application/json',
+          data: JSON.stringify({ action: 'reject', comments: $('#reject-comments').val().trim() }),
+          success: function () {
+            $('#conc-success-msg').text('NCR rejected; sent back to the Originator/Designate for correction.');
+            $('#conc-detail-link').attr('href', prefix + '/ncrs/' + ncrId);
+            $('#conc-success').show();
+            $('#concur-btn').hide();
+            $('#reject-btn').hide();
+          },
+          error: function (xhr) {
+            var resp = xhr.responseJSON || {};
+            $('#conc-error-msg').text(resp.message || resp.error || 'Submission failed.');
+            $('#conc-error').show();
+            $('#reject-btn').prop('disabled', false).text('Reject with Comments');
           },
         });
       });
