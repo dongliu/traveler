@@ -1,0 +1,26 @@
+Baseline recorded 2026-10-25, before any 130-qa-reject-ncr implementation
+changes, on branch upton-ncr-10-23-approval.
+
+TRAVELER_CONFIG_REL_PATH=docker npx mocha test-unit/lib/ncr-service.test.js
+  156 passing (118ms)
+  (direct coverage of submitConcurrence, submitDisposition, closeNcr, and
+  every other function this feature extends or adds alongside)
+
+TRAVELER_CONFIG_REL_PATH=docker npx mocha test-unit/lib/ncr-email.test.js
+  53 passing (16ms)
+  (closest existing coverage of the email-sending helpers this feature adds
+  a new one alongside, e.g. sendInitialNotification's "everyone on one
+  to: line" pattern that the new rejection notification reuses)
+
+npm run e2e -- e2e/us3-qa-concurrence-and-approver-coordination.spec.js
+  25 passed (26.9s)
+  (closest existing e2e coverage of the QA Concurrence decision point this
+  feature adds a third option to; includes AS9, which today asserts that
+  no qa.rejected event is ever produced -- that assertion is expected to
+  need rewriting once this feature ships, since it will no longer hold)
+
+npm run e2e -- e2e/us-ncr-next-action-visibility.spec.js
+  6 passed (7.0s)
+  (closest existing e2e coverage of the #ncr-next-action button this
+  feature adds a fourth permission-gated case to, alongside Create
+  Disposition / QA Concurrence / Approve or Return / Close NCR)
