@@ -245,9 +245,10 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await expect(approverPage.locator('#approve-btn')).toBeVisible();
     await expect(approverPage.locator('button:has-text("Return for Comment")')).toBeVisible();
 
+    // Submitting a decision reloads the page to show the NCR's latest state.
     await approverPage.click('#approve-btn');
-    await expect(approverPage.locator('.alert-success')).toBeVisible({ timeout: 10000 });
-    await expect(approverPage.locator('.alert-success')).toContainText('All approvers have approved');
+    await expect(approverPage.locator('.label-info')).toHaveText('Final Approval', { timeout: 10000 });
+    await expect(approverPage.locator('#approve-btn')).toHaveCount(0);
 
     await approverPage.close();
 
@@ -278,8 +279,8 @@ test.describe('US3 - QA Concurrence and Approver Coordination', () => {
     await approverPage.goto(`/ncrs/${ncrId}/approve`);
     await approverPage.fill('#comments', RETURN_COMMENT);
     await approverPage.click('button:has-text("Return for Comment")');
-    await expect(approverPage.locator('.alert-success')).toBeVisible({ timeout: 10000 });
-    await expect(approverPage.locator('.alert-success')).toContainText('Returned for comment');
+    // Submitting a decision reloads the page to show the NCR's latest state.
+    await expect(approverPage.locator('.label-info')).toHaveText('Dispositioned', { timeout: 10000 });
     await approverPage.close();
 
     let ncr = (await execFixtureCli('get-ncr', { ncrId, fields: ['status', 'additional_approvers'] })).ncr;

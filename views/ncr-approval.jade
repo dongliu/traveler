@@ -94,11 +94,6 @@ block content
               i.fa.fa-plus
               | &nbsp; Add Approver
 
-    #app-success.alert.alert-success(style='display:none')
-      strong Done.&nbsp;
-      span#app-success-msg
-      |  &nbsp;
-      a(id='app-detail-link', href='#') View NCR
     #app-error.alert.alert-error(style='display:none')
       strong Error:&nbsp;
       span#app-error-msg
@@ -134,7 +129,7 @@ block js
     $(function () {
       var ncrId = '#{ncr._id}';
 
-      function send(payload, btn, successMsgFn) {
+      function send(payload, btn) {
         $('#app-error').hide();
         var orig = btn.text();
         btn.prop('disabled', true).text('Submitting...');
@@ -143,12 +138,8 @@ block js
           method: 'PATCH',
           contentType: 'application/json',
           data: JSON.stringify(payload),
-          success: function (data) {
-            $('#app-success-msg').text(successMsgFn(data));
-            $('#app-detail-link').attr('href', prefix + '/ncrs/' + ncrId);
-            $('#app-success').show();
-            $('fieldset legend:contains("Your Decision")').closest('fieldset').hide();
-            $('fieldset legend:contains("QA Action")').closest('fieldset').hide();
+          success: function () {
+            location.reload();
           },
           error: function (xhr) {
             var resp = xhr.responseJSON || {};
@@ -160,11 +151,7 @@ block js
       }
 
       $('#approve-btn').on('click', function () {
-        send({ action: 'approve' }, $(this), function (data) {
-          return data.ncr.status === 'Final Approval'
-            ? 'You approved. All approvers have approved — NCR moved to Final Approval.'
-            : 'You approved. Awaiting other approvers.';
-        });
+        send({ action: 'approve' }, $(this));
       });
 
       $('#return-btn').on('click', function () {
@@ -174,9 +161,7 @@ block js
           $('#app-error').show();
           return;
         }
-        send({ action: 'return_for_comment', comments: c }, $(this), function () {
-          return 'Returned for comment. QA Staff has been notified.';
-        });
+        send({ action: 'return_for_comment', comments: c }, $(this));
       });
 
       if (typeof travelerGlobal !== 'undefined' && travelerGlobal.usernames) {
