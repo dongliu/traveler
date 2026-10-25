@@ -2375,8 +2375,9 @@ describe('public-travelers', function() {
         sector: 'S4',
         windchillId: 'WC-0012345',
       });
-      made.lines[0].should.equal(csvLib.TRAVELER_COLUMNS.join(','));
-      made.lines[1].should.equal(
+      made.lines[0].should.equal('#SECTION: meta');
+      made.lines[1].should.equal(csvLib.TRAVELER_COLUMNS.join(','));
+      made.lines[2].should.equal(
         made.doc.id +
           ',' +
           URL +
@@ -2386,8 +2387,8 @@ describe('public-travelers', function() {
 
     it('should write the identifier as the 24-character text of the id', function() {
       var made = exportOf({ title: 'x' });
-      made.lines[1].split(',')[0].should.match(/^[0-9a-f]{24}$/);
-      made.lines[1].split(',')[0].should.equal(String(made.doc._id));
+      made.lines[2].split(',')[0].should.match(/^[0-9a-f]{24}$/);
+      made.lines[2].split(',')[0].should.equal(String(made.doc._id));
     });
 
     it('should write the status by name for every status, and initialized when none was set', function() {
@@ -2400,11 +2401,11 @@ describe('public-travelers', function() {
         [4, 'archived'],
       ].forEach(function(pair) {
         exportOf({ title: 't', status: pair[0] })
-          .lines[1].split(',')[3]
+          .lines[2].split(',')[3]
           .should.equal(pair[1]);
       });
       exportOf({ title: 't' })
-        .lines[1].split(',')[3]
+        .lines[2].split(',')[3]
         .should.equal('initialized');
     });
 
@@ -2415,7 +2416,7 @@ describe('public-travelers', function() {
         archived: true,
         archivedOn: new Date('2026-09-20T01:02:03.004Z'),
       });
-      var cells = made.lines[1].split(',');
+      var cells = made.lines[2].split(',');
       cells[3].should.equal('archived');
       cells[8].should.equal('2026-09-20T01:02:03.004Z');
     });
@@ -2426,17 +2427,17 @@ describe('public-travelers', function() {
         status: 1,
         archived: false,
         archivedOn: new Date('2026-01-01T00:00:00.000Z'),
-      }).lines[1].split(',');
+      }).lines[2].split(',');
       cells[3].should.equal('active');
       cells[8].should.equal('');
     });
 
     it('should use the creator as the owner when there is none, and the owner when there is one', function() {
       exportOf({ title: 't', createdBy: 'liud' })
-        .lines[1].split(',')[9]
+        .lines[2].split(',')[9]
         .should.equal('liud');
       exportOf({ title: 't', createdBy: 'liud', owner: 'smith' })
-        .lines[1].split(',')[9]
+        .lines[2].split(',')[9]
         .should.equal('smith');
     });
 
@@ -2460,11 +2461,10 @@ describe('public-travelers', function() {
           inputOn: 1787234591,
         },
       ]);
-      made.lines[2].should.equal('');
-      made.lines[3].should.equal(
-        'Field Name,Label,Type,Value,Input By,Input On'
-      );
-      made.lines[4].should.equal('torque,Torque,number,42,jdoe,1787234591');
+      made.lines[3].should.equal('');
+      made.lines[4].should.equal('#SECTION: inputs');
+      made.lines[5].should.equal('name,label,inputType,value,inputBy,inputOn');
+      made.lines[6].should.equal('torque,Torque,number,42,jdoe,1787234591');
     });
   });
 
@@ -2537,7 +2537,7 @@ describe('public-travelers', function() {
         .should.include(',DEV-1/DEV-2,');
       var single = csvLib
         .buildTravelerCsv({ record: record, url: 'u', fields: [] })
-        .split('\n')[1]
+        .split('\n')[2]
         .split(',');
       single[DEVICE_CELL].should.equal('DEV-1/DEV-2');
     });
@@ -2554,7 +2554,7 @@ describe('public-travelers', function() {
           url: 'u',
           fields: [],
         })
-        .split('\n')[1]
+        .split('\n')[2]
         .split(',');
       single[DEVICE_CELL].should.equal('CM-02');
     });
