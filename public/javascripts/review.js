@@ -219,6 +219,7 @@ $(function() {
     // retrieve the selected user and set data with uid
     data.name = userSelected.displayName;
     data.uid = userSelected.uid;
+    data.email = userSelected.mail;
     addTo(data, reviewTable, 'users');
     $('form[name="user"]')[0].reset();
   });

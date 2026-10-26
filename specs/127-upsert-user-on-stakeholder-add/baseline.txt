@@ -1,0 +1,15 @@
+Baseline recorded 2026-10-24, before any 127-upsert-user-on-stakeholder-add implementation changes, on branch upton-ncr-10-23.
+
+TRAVELER_CONFIG_REL_PATH=docker npm run unit
+  402 passing
+
+npx eslint .
+  2486 problems (2407 errors, 79 warnings) -- pre-existing, repo-wide, unrelated to this feature
+  (same count observed before this feature's work began in this session)
+
+No new npm dependency is introduced by this feature.
+
+npm run e2e -- e2e/us-originator-designate.spec.js
+  11 passed (15.2s)
+  (closest existing coverage: NCR Originator Designate assign/remove, Issuance/Final
+  Distribution reaching the Designate -- the area this feature's US1/US2 extend)

@@ -29,6 +29,7 @@ const PreventiveActionSchema = new Schema({
 
 const NCR_EVENT_TYPES = [
   'ncr.submitted',
+  'ncr.resubmitted',
   'disposition.submitted',
   'delegate.assigned',
   'delegate.removed',
@@ -50,11 +51,13 @@ const NCR_EVENT_TYPES = [
   'notification.initial',
   'notification.disposition_request',
   'notification.qa_notification',
+  'notification.qa_rejection',
   'notification.approval_request',
   'notification.issuance',
   'notification.final_distribution',
   'notification.pa_assigned',
   'notification.designate_assigned',
+  'notification.designate_removed',
   'attachment.uploaded',
 ];
 
@@ -67,6 +70,10 @@ const NcrEventSchema = new Schema({
   timestamp: { type: Date, required: true },
   previous_status: String,
   new_status: String,
+  // Which approval round (Ncr.current_approval_round at the time) this event
+  // belongs to. Only set on approval-round-scoped events; absent otherwise,
+  // same as previous_status/new_status are absent where they don't apply.
+  round: Number,
   payload: Schema.Types.Mixed,
   recipients: [
     {
@@ -93,8 +100,8 @@ const NcrEventSchema = new Schema({
 const NCR_STATUSES = [
   'Submitted',
   'Dispositioned',
+  'Rejected',
   'Approval Requested',
-  'Returned for Comment',
   'Final Approval',
   'Closed',
 ];
@@ -150,6 +157,16 @@ const NcrSchema = new Schema({
   qa_staff_identity: String,
   qa_staff_name: String,
   qa_concurrence_timestamp: Date,
+  // QA's comment from the most recent 'Reject with Comments' action (spec
+  // 130). A "latest state" field, not a history list -- every rejection's
+  // comment is also permanently retained on its own qa.rejected event.
+  qa_rejection_comments: String,
+
+  // Sequence number (starting at 1) of the approval round `additional_approvers`
+  // currently represents. Set the first time QA concurs with >=1 approver,
+  // incremented each later time -- never on a zero-approver concurrence, which
+  // never starts a round. See specs/129-ncr-approval-round/data-model.md.
+  current_approval_round: Number,
 
   additional_approvers: [
     {

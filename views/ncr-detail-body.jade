@@ -1,20 +1,16 @@
-- var canManageApprovers = isQa && (ncr.status === 'Approval Requested' || ncr.status === 'Returned for Comment')
+- var canManageApprovers = isQa && ncr.status === 'Approval Requested'
+- var canCreateDisposition = ncr.status === 'Submitted' && ncr.ce_cs_id === locals.userid
+- var canConcur = ncr.status === 'Dispositioned' && isQa
+- var canApprove = ncr.status === 'Approval Requested' && (ncr.additional_approvers || []).some(function(a) { return a.approver_id === locals.userid })
+- var canClose = ncr.status === 'Final Approval' && (locals.userid === ncr.originator_id || locals.userid === ncr.originator_designate_id)
+- var canResubmit = ncr.status === 'Rejected' && (locals.userid === ncr.originator_id || locals.userid === ncr.originator_designate_id)
 
 .container(style='margin-top: 10px')
   .row-fluid
-    .span8
+    .span12
       h3
         | #{ncr.ncr_number}&nbsp;
         span.label(class='badge-#{ncr.status.replace(/ /g, "")}')= ncr.status
-    .span4.text-right
-      if ncr.status === 'Submitted'
-        a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Create Disposition
-      if ncr.status === 'Dispositioned'
-        a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
-      if ncr.status === 'Approval Requested'
-        a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
-      if ncr.status === 'Final Approval'
-        a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR
 
   .row-fluid
     .span6
@@ -75,9 +71,8 @@
             .control-group
               label Designate Name
               input#designate-name-input.input(type='text', placeholder='Last, First', autocomplete='off')
-            .designate-actions(style='position:relative; z-index:1000;')
-              button#designate-submit-btn.btn.btn-sm.btn-primary(type='button') Save
-              button#designate-cancel-btn.btn.btn-sm(type='button') Cancel
+              button#designate-submit-btn.btn.btn-sm.btn-primary(type='button', style='margin-left: 5px') Save
+              button#designate-cancel-btn.btn.btn-sm(type='button', style='margin-left: 5px') Cancel
 
   .row-fluid
     .span12
@@ -97,7 +92,7 @@
     .row-fluid
       .span12
         fieldset
-          legend Disposition
+          legend= ncr.status === 'Submitted' ? 'Previous Disposition' : 'Disposition'
           dl.dl-horizontal
             dt Parts Disposition
             dd= ncr.disposition.parts_disposition
@@ -109,6 +104,20 @@
             if ncr.disposition.rework_repair_instructions
               dt Rework / Repair Instructions
               dd= ncr.disposition.rework_repair_instructions
+
+  if ncr.status === 'Rejected' && ncr.qa_rejection_comments
+    .row-fluid
+      .span12
+        fieldset
+          legend QA Rejection
+          dl.dl-horizontal
+            dt Comments
+            dd= ncr.qa_rejection_comments
+            dt Rejected By
+            dd= ncr.qa_staff_name
+            if ncr.qa_concurrence_timestamp
+              dt Rejected On
+              dd= new Date(ncr.qa_concurrence_timestamp).toLocaleString()
 
   if (ncr.additional_approvers && ncr.additional_approvers.length) || canManageApprovers
     .row-fluid
@@ -259,6 +268,20 @@
                   | ,&nbsp;
                   = new Date(file.upload_timestamp).toLocaleString()
 
+  if canCreateDisposition || canConcur || canApprove || canClose || canResubmit
+    .row-fluid#ncr-next-action(style='margin-bottom: 15px')
+      .span12
+        if canCreateDisposition
+          a.btn.btn-primary(href='#{prefix}/ncrs/#{ncr._id}/disposition') Create Disposition
+        if canConcur
+          a.btn.btn-success(href='#{prefix}/ncrs/#{ncr._id}/concurrence') QA Concurrence
+        if canApprove
+          a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/approve') Approve / Return
+        if canClose
+          a.btn.btn-danger(href='#{prefix}/ncrs/#{ncr._id}/close') Close NCR
+        if canResubmit
+          a.btn.btn-warning(href='#{prefix}/ncrs/#{ncr._id}/resubmit') Resubmit
+
   .row-fluid
     .span12
       fieldset
@@ -278,6 +301,9 @@
               if event.previous_status && event.new_status
                 .muted
                   small #{event.previous_status || 'None'} &rarr; #{event.new_status}
+              if event.round
+                .muted
+                  small Round #{event.round}
               if event.event_type && event.event_type.indexOf('notification.') === 0 && event.recipients && event.recipients.length
                 - var totalRecipientCount = event.recipients.length + (event.cc ? event.cc.length : 0)
                 table.table.table-condensed(style='margin:6px 0 0; font-size:11px; width:auto')

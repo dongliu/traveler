@@ -364,6 +364,53 @@ async function getNcr({ ncrId, fields }) {
   return { ncr };
 }
 
+async function deleteUser({ userId }) {
+  const { User } = require('../../model/user');
+  await User.findByIdAndDelete(userId);
+  return { userId, deleted: true };
+}
+
+// A minimal, directly-constructed Form, bypassing the builder UI entirely --
+// the same "provision a precondition, don't exercise business logic"
+// convention createFillableTraveler already follows for Travelers. No
+// existing e2e fixture reaches the Form/review workflow at all today.
+async function createReviewForm({ createdBy, title, documentNumber }) {
+  // model/form.js -> model/review.js expects User already registered (it
+  // does mongoose.model('User') at require-time, not lazily) -- same
+  // reasoning as createFillableTraveler's own require order.
+  require('../../model/user');
+  const { Form } = require('../../model/form');
+  const form = new Form({
+    title: title || 'E2E Review Form',
+    html: '<div></div>',
+    documentNumber: documentNumber || `E2E-FORM-${Date.now()}`,
+    createdBy,
+    owner: createdBy,
+    status: 0,
+  });
+  await form.save();
+  return { formId: form._id.toString(), v: form._v };
+}
+
+// Moves a Form to any status directly, and/or seeds __review.reviewRequests,
+// bypassing the status route's transition rules and the add-request route's
+// own checks entirely -- for arranging test preconditions, the same
+// documented purpose setTravelerStatus already serves for Travelers. Does
+// not touch _v (findByIdAndUpdate skips the addVersion save-middleware), so
+// a v returned by createReviewForm or a prior real status-route call stays
+// valid for a later real PUT /forms/:id/status call.
+async function setFormStatus({ formId, status, reviewRequests }) {
+  require('../../model/user');
+  const { Form } = require('../../model/form');
+  const update = { status };
+  if (reviewRequests !== undefined) {
+    update['__review.reviewRequests'] = reviewRequests;
+  }
+  const form = await Form.findByIdAndUpdate(formId, update, { new: true });
+  if (!form) throw new Error(`Form not found: ${formId}`);
+  return { formId: form._id.toString(), status: form.status };
+}
+
 async function getUser({ userId }) {
   const { User } = require('../../model/user');
   const user = await User.findById(userId).lean();
@@ -502,6 +549,9 @@ const COMMANDS = {
   'get-binder': getBinder,
   'get-ncr': getNcr,
   'get-user': getUser,
+  'delete-user': deleteUser,
+  'create-review-form': createReviewForm,
+  'set-form-status': setFormStatus,
   'get-group': getGroup,
   'file-exists': fileExists,
 };
