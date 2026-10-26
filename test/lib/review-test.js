@@ -154,6 +154,35 @@ describe('review', function() {
       sendStub.firstCall.args[0].cc.should.equal('owner1@example.org');
     });
 
+    it("falls back to createdBy for the cc/greeting when owner is unset, matching reqUtils.isOwner", async function() {
+      doc.owner = undefined;
+      doc.createdBy = 'owner1';
+      const reviewerDoc = {
+        _id: 'jdoe',
+        name: 'Jane Doe',
+        email: 'jdoe@example.org',
+        roles: ['reviewer'],
+      };
+      const ownerDoc = {
+        _id: 'owner1',
+        name: 'Owner One',
+        email: 'owner1@example.org',
+      };
+      const findByIdStub = sinon.stub(User, 'findById');
+      findByIdStub
+        .withArgs('jdoe')
+        .returns({ exec: sinon.stub().resolves(reviewerDoc) });
+      findByIdStub
+        .withArgs('owner1')
+        .returns({ exec: sinon.stub().resolves(ownerDoc) });
+
+      await reviewLib.addReviewRequest(req, res, doc);
+
+      const call = sendStub.firstCall.args[0];
+      call.cc.should.equal('owner1@example.org');
+      call.text.should.include('requested by Owner One');
+    });
+
     it('auto-creates a user from a unique directory match, but leaves the Reviewer-role check unaffected', async function() {
       sinon
         .stub(User, 'findById')
