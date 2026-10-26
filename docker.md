@@ -1,20 +1,16 @@
-# use docker to set up traveler development environment
+Follow this instruction to set up a local development environment for traveler.
 
-## install docker
+## install docker on your dev environment
 
-See <https://docs.docker.com/get-docker/> for instructions.
+Follow <https://docs.docker.com/get-started/introduction/get-docker-desktop/> for instructions.
 
-After installation finished, start the docker desktop, configure it for CPU,
-memory, and storage that you want it to use on your machine.
+After installation finished, start the docker desktop, configure it for CPU, memory, and storage that you want it to use on your dev machine.
 
-Check if the docker desktop has `docker compose` installed on your machine. If
-not, you need to install docker compose, see
-<https://docs.docker.com/compose/install/>.
+Check if the docker desktop has `docker compose` installed on your environment. Compose is a default component of the docker desktop for recent releases. If not, you need to install docker compose, see <https://docs.docker.com/compose/install/>.
 
 ## create development network
 
-Clone this repo to your local environment. Make sure you have the `traveler-dev`
-network in the docker.
+Make sure you have the `traveler-dev` network in the docker.
 
 ```
 docker network list
@@ -30,59 +26,35 @@ docker network create -d bridge --subnet 172.18.1.0/24 traveler-dev
 
 See <https://github.com/dongliu/traveler-mongo> for mongodb and mongo express.
 
-See <https://github.com/dongliu/traveler-ldap> for open LDAP and a php LDAP
-admin web interface.
+See <https://github.com/dongliu/traveler-ldap> for open ldap and a php ldap admin web interface.
 
-## config local environment (optional)
+see <https://github.com/dongliu/traveler-mail> for email support.
 
-Create a `.env` file at the root of the the project, and include
+Please follow the `README.md` in each of the repo for how to verify if the service is up and running. You can see the status containers from your docker desktop UI, and check the log if there is any issue.
 
-```
-COMPOSE_PROJECT_NAME=ernest
-WEB_PORT=3301
-API_PORT=3302
-MONGO_EXPRESS_PORT=8381
-```
+## build and run the traveler application
 
-The default values of these variables can be found at `docker-compose.yml`. The
-`WEB_PORT` used must be consistent with that in `docker/auth.json`, otherwise
-auth will not work properly.
-
-The `COMPOSE_PROJECT_NAME` variable is optional. When it is set, then there need
-to a directory to be copied from the `traveler-mongo` directory, and renamed as
-something like `ernest-mongo`, where the mongodb data will be saved.
-
-## build and run the application
-
-Start the traveler-ldap docker containers from its own directory.
-
-The traveler application can be run by running
+Clone this repo to your local environment, and switch the the branch you want to test. The traveler application can be run by
 
 ```
 docker compose up
 ```
 
-The traveler application can be accessed at <http://localhost:WEB_PORT>. The
-mongoDB containers will start as dependency of the traveler application.
+The traveler application web UI can be accessed at <http://localhost:3001> .
 
-If you want to server the application or the api on https, add `ssl_key` and
-`ssl_cert` configurations in the `app.json` and `api.json` files. You will need
-valid key and cert files in the `docker` directory, and set the values of
-`ssl_key` and `ssl_cert` to the name of the files.
+See <https://github.com/dongliu/traveler-ldap/blob/master/seed/traveler.ldif> for all the users available in the local LDAP service. You can use any of those user to log into the local traveler web application. You can also add new users to the local LDAP service via its web UI.
 
-When you run for the first time, docker will build the image for you. If the
-application does not start successfully, try
+If you want to server the application or the api on https, add `ssl_key` and `ssl_cert` configurations in the `app.json` and `api.json` files. You will need valid key and cert files in the `docker` directory, and set the values of `ssl_key` and `ssl_cert` to the name of the files.
+
+When you run for the first time, docker will build the image for you. If the application does not start successfully, try
 
 ```
 docker compose --verbose up
 ```
 
-for detailed information. You should also check the logs of mongodb and open
-ldap service to see if there is an issue with those services. You can ssh into
-the running container with `docker exec -it traveler_web_1 /bin/sh`, where
-`traveler_web_1` is the running container name.
+for detailed information. You should also check the logs of mongodb and open ldap service to see if there is an issue with those services. You can ssh into the running container with `docker exec -it traveler_web_1 /bin/sh`, where `traveler_web_1` is the running container name.
 
-`docker container list` shows all the containers running on your local.
+`docker container list` shows all the containers running on your local in console. But docker desktop is easier to use.
 
 Run
 
@@ -92,13 +64,11 @@ docker compose down
 
 to stop the application.
 
-You can run with `docker compose up -d` in a detached mode. Then you can run
-`docker compose logs -f` to check the application log.
+You can run with `docker compose up -d` in a detached mode. Then you can run `docker compose logs -f` to check the application log.
 
 ## rebuild without cache
 
-When the `Dockerfile` is updated, e.g., using a new node.js version, run the
-following command to rebuild the image.
+When the `Dockerfile` is updated, e.g., using a new node.js version, or when the node prod packages are updated, run the following command to rebuild the image.
 
 ```
 docker compose build --no-cache
@@ -106,32 +76,4 @@ docker compose build --no-cache
 
 ## clean the traveler docker image
 
-Run `docker image list` to see the images on your local.
-`docker image remove image_name` to clean the image from your local.
-
-## end-to-end tests
-
-The Playwright suite in `e2e/` runs against the stack above. Add these to the
-`.env` file, next to `WEB_PORT` and `API_PORT`:
-
-```
-E2E_USER=<LDAP login of the primary test user>
-E2E_PASS=<its password>
-E2E_USER2=<LDAP login of the secondary test user>
-E2E_PASS2=<its password>
-E2E_USER_NAME=<primary user's AD display name>
-E2E_USER2_NAME=<secondary user's AD display name>
-```
-
-The primary user must already hold the `admin` role. The suite checks this at
-startup and stops if it is missing. The secondary user needs no roles; the suite
-grants and removes roles itself.
-
-Run the suite with
-
-```
-npm run e2e
-```
-
-Pass a file or a scenario name after `--` to run part of it, for example
-`npm run e2e -- e2e/us1-form-lifecycle.spec.js -g AS3`.
+Run `docker image list` to see the images on your local. `docker image remove image_name` to clean the image from your local.
