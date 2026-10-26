@@ -10,13 +10,13 @@
 
 ---
 
-## Finding 2: `lib/email.js` Must Read From the New Config Namespace
+## Finding 2: `lib/email.js` Must Read From the New Config Namespace, and Gains `cc`
 
-**Decision**: Update `lib/email.js`'s five references to `config.app.smtp_host` / `smtp_port` / `smtp_ssl` / `smtp_tls` / `notification_email_address` to read from `config.email.*` instead. Add a `config.email.disclaimer` read point for callers that need to append it.
+**Decision**: Update `lib/email.js`'s five references to `config.app.smtp_host` / `smtp_port` / `smtp_ssl` / `smtp_tls` / `notification_email_address` to read from `config.email.*` instead. Add a `config.email.disclaimer` read point for callers that need to append it. Separately, `sendNotification({ subject, recipients, from, text, html })` has no `cc` parameter today — extend its signature to accept an optional `cc` and forward it to `nodemailer`'s `sendMail` unchanged (same pass-through treatment as `to`/`from`), since `specs/email.md`'s review-request template requires cc'ing the form owner and nothing else in the codebase currently needs `cc`.
 
-**Rationale**: `lib/email.js` (`initTransport`, `sendNotification`) is the single existing integration point for all outgoing mail in the codebase. Updating its config reads is the entire "move" — no other file currently reads these settings.
+**Rationale**: `lib/email.js` (`initTransport`, `sendNotification`) is the single existing integration point for all outgoing mail in the codebase. Updating its config reads is the entire config "move"; adding `cc` to its existing contract (rather than building a second, review-specific send path) keeps that single-integration-point property intact.
 
-**Alternatives considered**: Leave `lib/email.js` reading `config.app` and only move the JSON file — rejected; it would silently break mail sending (the fields would be `undefined`) while technically satisfying "the file exists."
+**Alternatives considered**: Leave `lib/email.js` reading `config.app` and only move the JSON file — rejected; it would silently break mail sending (the fields would be `undefined`) while technically satisfying "the file exists." Building the cc'd send directly against `nodemailer` from `lib/review.js` — rejected; duplicates transport/pooling logic `lib/email.js` already owns.
 
 ---
 
@@ -52,7 +52,7 @@
 
 ## Finding 6: Email Content Construction
 
-**Decision**: Compose the subject/body for the review-request email directly in `lib/review.js` from data already in scope at the call site — `doc.title` (form title), `doc.owner` (resolved via `User.findById` for the owner's name/email to CC), the reviewer's `name`/email, and the form URL `${req.proxied ? authConfig.proxied_service : authConfig.service}/forms/${doc._id}/` (the existing `formBuilder` route in `routes/form.js` that a reviewer already lands on and sees their pending review via the `isReviewer`/`review` render locals — not the owner-only `/forms/:id/review/` management page). Follow `specs/email.md`'s "review request" layout verbatim (title, from, to, cc, greeting, body, disclaimer, closing), appending `config.email.disclaimer`. Send via `lib/email.js`'s existing `sendNotification({ subject, recipients, from, text })` — no changes to that function's public contract.
+**Decision**: Compose the subject/body for the review-request email directly in `lib/review.js` from data already in scope at the call site — `doc.title` (form title), `doc.owner` (resolved via `User.findById` for the owner's name/email to CC), the reviewer's `name`/email, and the form URL `${req.proxied ? authConfig.proxied_service : authConfig.service}/forms/${doc._id}/` (the existing `formBuilder` route in `routes/form.js` that a reviewer already lands on and sees their pending review via the `isReviewer`/`review` render locals — not the owner-only `/forms/:id/review/` management page). Follow `specs/email.md`'s "review request" layout verbatim (title, from, to, cc, greeting, body, disclaimer, closing), appending `config.email.disclaimer`. Send via `lib/email.js`'s `sendNotification({ subject, recipients, from, cc, text })` — using the `cc` parameter added in Finding 2.
 
 **Rationale**: The email body is five fixed lines with simple substitutions — well within plain string building, no new templating dependency needed. Confirms the correct reviewer-facing URL (the `isOwnerMw`-gated `/forms/:id/review/` page is for the *owner* to manage reviewers, not for the reviewer to act).
 

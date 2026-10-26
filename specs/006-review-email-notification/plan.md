@@ -73,7 +73,8 @@ lib/
 ├── review.js                # addReviewRequest(): AD auto-create-on-miss (role check untouched),
                               # send review-request email, call addReviewNotification()
 └── email.js                 # read smtp_*/notification_email_address/disclaimer from
-                              # config.email instead of config.app
+                              # config.email instead of config.app; add `cc` param to
+                              # sendNotification()
 
 config/
 ├── config.js                 # add required `module.exports.email = require(...)` loader line
