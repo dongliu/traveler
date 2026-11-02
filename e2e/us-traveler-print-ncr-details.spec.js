@@ -12,6 +12,14 @@ const { execFixtureCli } = require('./fixtures/exec-cli');
 
 const PRIMARY = 'dong';
 
+// Mirrors the allowed-mimetype set applied server-side (lib/upload.js), same
+// fixture already used by e2e/us-ncr-attachments.spec.js.
+const ALLOWED_PDF = {
+  name: 'inspection-report.pdf',
+  mimeType: 'application/pdf',
+  buffer: Buffer.from('%PDF-1.4 fake pdf bytes'),
+};
+
 /**
  * Creates a real, writable, completed traveler with two text inputs through
  * the fixture CLI. Completed (status 2) because the print page's own
@@ -205,5 +213,57 @@ test.describe('US2 — review records, automatically', () => {
 
     releaseReviewRecords();
     await expect(page.locator('#create-pdf')).toBeEnabled();
+  });
+});
+
+test.describe('US3 — a linked NCR\'s attachments are clickable, not just named', () => {
+  test('an attachment\'s file name in the NCR print section links to its download', async ({ page }) => {
+    const id = runId();
+    const travelerId = await createTwoInputTraveler(id);
+    const { ncrId } = await createLinkedNcr(id, {
+      travelerId,
+      inputName: 'input_a',
+      inputLabel: `Input A ${id}`,
+    });
+
+    const uploadRes = await page.request.post(`/api/ncrs/${ncrId}/attachments`, {
+      multipart: { attachments: ALLOWED_PDF },
+    });
+    expect(uploadRes.ok()).toBe(true);
+
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/ncr-print-details/')),
+      page.goto(`/travelers/${travelerId}/print`),
+    ]);
+
+    const fileLink = page.locator('#ncr-print-sections').locator(`a:has-text("${ALLOWED_PDF.name}")`);
+    await expect(fileLink).toBeVisible();
+    await expect(fileLink).toHaveAttribute('href', new RegExp(`/api/ncrs/${ncrId}/attachments/`));
+
+    const downloadPromise = page.waitForEvent('download');
+    await fileLink.click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe(ALLOWED_PDF.name);
+  });
+
+  test('an NCR with no attachments shows "None recorded" under Attachments instead of an empty table', async ({ page }) => {
+    const id = runId();
+    const travelerId = await createTwoInputTraveler(id);
+    await createLinkedNcr(id, {
+      travelerId,
+      inputName: 'input_a',
+      inputLabel: `Input A ${id}`,
+    });
+
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/ncr-print-details/')),
+      page.goto(`/travelers/${travelerId}/print`),
+    ]);
+
+    const attachmentsSection = page.locator('#ncr-print-sections .print-section', {
+      has: page.locator('h4', { hasText: 'Attachments' }),
+    });
+    await expect(attachmentsSection).toContainText('None recorded');
+    expect(await attachmentsSection.locator('a').count()).toBe(0);
   });
 });
