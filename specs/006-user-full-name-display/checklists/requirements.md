@@ -32,4 +32,4 @@
 ## Notes
 
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`
-- No [NEEDS CLARIFICATION] markers were needed: scope, fallback behavior, and exposure/privacy impact all had reasonable, low-risk defaults documented in the Assumptions section of spec.md.
+- No [NEEDS CLARIFICATION] markers were needed in the initial draft. A `/speckit-clarify` session on 2026-11-01 subsequently resolved three higher-impact open questions (REST API field backward compatibility, CSV export scope, and the public dashboard's privacy exposure) — see the Clarifications section of spec.md. Remaining scope and fallback-behavior defaults remain documented in the Assumptions section.
