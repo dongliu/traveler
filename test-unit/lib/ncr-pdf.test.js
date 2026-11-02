@@ -267,6 +267,43 @@ describe('lib/ncr-pdf — buildNcrPdfModel', () => {
     expect(JSON.stringify(model)).to.not.contain('/secret/uploads');
   });
 
+  it('gives each attachment a download link built from the NCR id and its own file id, never its server path', () => {
+    const model = buildNcrPdfModel(
+      fullNcr({
+        _id: '507f1f77bcf86cd799439099',
+        attachments: [
+          {
+            file_name: 'inspection-report.pdf',
+            file_id: '64f0000000000000000000a1',
+            file_path: '/secret/uploads/abc123',
+          },
+          {
+            file_name: 'photo.jpg',
+            file_id: '64f0000000000000000000a2',
+            file_path: '/secret/uploads/def456',
+          },
+        ],
+      })
+    );
+    const { table } = section(model, 'Attachments');
+    expect(table.rowLinks).to.deep.equal([
+      '/api/ncrs/507f1f77bcf86cd799439099/attachments/64f0000000000000000000a1',
+      '/api/ncrs/507f1f77bcf86cd799439099/attachments/64f0000000000000000000a2',
+    ]);
+    expect(JSON.stringify(model)).to.not.contain('/secret/uploads');
+  });
+
+  it('gives a legacy attachment with no file id a null link instead of a broken one', () => {
+    const model = buildNcrPdfModel(
+      fullNcr({
+        _id: '507f1f77bcf86cd799439099',
+        attachments: [{ file_name: 'old-scan.pdf' }],
+      })
+    );
+    const { table } = section(model, 'Attachments');
+    expect(table.rowLinks).to.deep.equal([null]);
+  });
+
   it('lists every event in order with its time, actor and status change', () => {
     const { table } = section(buildNcrPdfModel(fullNcr()), 'Event History');
     expect(table.head).to.deep.equal(['Time', 'Event', 'Actor', 'Status']);
@@ -388,5 +425,20 @@ describe('lib/ncr-pdf — renderNcrPdf', () => {
   it('keeps a short NCR to a page or two', async () => {
     const pdf = await renderNcrPdf(buildNcrPdfModel(fullNcr()));
     expect(pageCount(pdf)).to.be.within(1, 3);
+  });
+
+  it('embeds a clickable link for each attachment, pointing at its download URL', async () => {
+    const model = buildNcrPdfModel(
+      fullNcr({
+        _id: '507f1f77bcf86cd799439099',
+        attachments: [
+          { file_name: 'inspection-report.pdf', file_id: '64f0000000000000000000a1' },
+        ],
+      })
+    );
+    const pdf = await renderNcrPdf(model);
+    expect(pdf.toString('latin1')).to.contain(
+      '/URI (/api/ncrs/507f1f77bcf86cd799439099/attachments/64f0000000000000000000a1)'
+    );
   });
 });

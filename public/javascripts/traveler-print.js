@@ -1,5 +1,5 @@
 /*global clearInterval: false, clearTimeout: false, document: false, event: false, frames: false, history: false, Image: false, location: false, name: false, navigator: false, Option: false, parent: false, screen: false, setInterval: false, setTimeout: false, window: false, XMLHttpRequest: false, FormData: false */
-/*global moment: false, Binder: false, prefix: false, traveler: false*/
+/*global moment: false, Binder: false, prefix: false, traveler: false, linkTarget: false*/
 
 import { renderHistory } from './lib/traveler.js';
 
@@ -18,6 +18,11 @@ function loadDiscrepancyLog(discrepancyForm) {
 // into `container`, entirely via safe DOM construction — every value from a
 // Section is inserted with .text(), never .html() or a built HTML string,
 // since this content is never escaped server-side (it is fetched as JSON).
+// A table may carry `rowLinks` (one entry per row, e.g. Attachments): when
+// set for a row, that row's first cell renders as a link instead of plain
+// text. The href itself still only ever reaches the DOM through .attr(), and
+// is built server-side from trusted ids (lib/ncr-pdf.js), never from the file
+// name or other user-controlled text.
 function renderSection(container, section) {
   var $section = $('<div>').addClass('print-section');
   $section.append($('<h4>').text(section.heading));
@@ -31,10 +36,23 @@ function renderSection(container, section) {
       $headRow.append($('<th>').text(label));
     });
     var $tbody = $('<tbody>').appendTo($table);
-    section.table.rows.forEach(function(row) {
+    var rowLinks = section.table.rowLinks || [];
+    section.table.rows.forEach(function(row, rowIndex) {
       var $row = $('<tr>').appendTo($tbody);
-      row.forEach(function(value) {
-        $row.append($('<td>').text(value));
+      var rowLink = rowLinks[rowIndex];
+      row.forEach(function(value, colIndex) {
+        var $cell = $('<td>');
+        if (colIndex === 0 && rowLink) {
+          $cell.append(
+            $('<a>')
+              .attr('href', prefix + rowLink)
+              .attr('target', linkTarget)
+              .text(value)
+          );
+        } else {
+          $cell.text(value);
+        }
+        $row.append($cell);
       });
     });
     $section.append($table);
