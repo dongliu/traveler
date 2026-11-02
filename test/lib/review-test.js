@@ -221,6 +221,27 @@ describe('review', function() {
       res.status.calledWith(400).should.be.true;
     });
 
+    it('skips sending and records an unsent notification when email is disabled', async function() {
+      config.email = undefined;
+      const reviewerDoc = {
+        _id: 'jdoe',
+        name: 'Jane Doe',
+        email: 'jdoe@example.org',
+        roles: ['reviewer'],
+      };
+      sinon
+        .stub(User, 'findById')
+        .returns({ exec: sinon.stub().resolves(reviewerDoc) });
+
+      await reviewLib.addReviewRequest(req, res, doc);
+
+      doc.requestReview.calledOnce.should.be.true;
+      sendStub.called.should.be.false;
+      doc.addReviewNotification.calledWith('jdoe@example.org', false).should.be
+        .true;
+      res.status.calledWith(201).should.be.true;
+    });
+
     it('rejects without creating a user when the directory lookup is ambiguous', async function() {
       sinon
         .stub(User, 'findById')

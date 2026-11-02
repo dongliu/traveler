@@ -67,7 +67,12 @@ module.exports.load = function() {
   module.exports.api = require('../' + configPath + '/api.json');
   module.exports.app = require('../' + configPath + '/app.json');
   module.exports.auth = require('../' + configPath + '/auth.json');
-  module.exports.email = require('../' + configPath + '/email.json');
+  module.exports.email = optionalRequire(
+    '../' + configPath + '/email.json',
+    'Email notifications are disabled. To enable them, copy and edit: `cp config/email_change.json ' +
+      configPath +
+      '/email.json`'
+  );
   module.exports.alias = require('../' + configPath + '/alias.json');
   module.exports.mongo = require('../' + configPath + '/mongo.json');
   module.exports.service = require('../' + configPath + '/service.json');
