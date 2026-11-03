@@ -28,6 +28,7 @@ const shareLib = require('../lib/share');
 const tag = require('../lib/tag');
 const formModel = require('../model/form');
 const reviewLib = require('../lib/review');
+const userNames = require('../lib/user-names');
 
 const Form = mongoose.model('Form');
 const FormFile = mongoose.model('FormFile');
@@ -46,6 +47,61 @@ function checkReviewer(form, userid) {
     form.__review.reviewRequests &&
     form.__review.reviewRequests.id(userid)
   );
+}
+
+// the top-level fields of a Form that identify a person by account id; see
+// specs/006-user-full-name-display/contracts/internal-json-endpoints.md
+const PERSON_FIELDS = ['createdBy', 'updatedBy', 'owner'];
+
+function formPersonIds(form) {
+  return userNames
+    .collectIds(form, PERSON_FIELDS)
+    .concat(userNames.collectSharedWithIds(form.sharedWith));
+}
+
+function applyFormPersonNames(form, names) {
+  userNames.applyNames(form, PERSON_FIELDS, names);
+  userNames.applySharedWithNames(form.sharedWith, names);
+  return form;
+}
+
+// decorates a list of forms (already plain, or Mongoose documents) with
+// createdByName/updatedByName/ownerName/sharedWith[].name, in one batched
+// lookup, and returns plain objects so the added fields survive res.json()
+async function withFormNames(forms) {
+  const plainForms = forms.map(userNames.toPlain);
+  const ids = [];
+  plainForms.forEach(function collect(form) {
+    formPersonIds(form).forEach(function push(id) {
+      ids.push(id);
+    });
+  });
+  const names = await userNames.resolveNames(ids, User);
+  plainForms.forEach(function apply(form) {
+    applyFormPersonNames(form, names);
+  });
+  return plainForms;
+}
+
+// same, for a single review object ({ reviewRequests, reviewResults }, or
+// {} when a form has never been under review)
+async function withReviewNames(review) {
+  const plain = userNames.toPlain(review) || {};
+  const names = await userNames.resolveNames(
+    userNames.collectReviewIds(plain),
+    User
+  );
+  return userNames.applyReviewNames(plain, names);
+}
+
+// same, for a single form's sharedWith list (/forms/:id/share/users/json)
+async function withSharedNames(sharedWith) {
+  const plain = (sharedWith || []).map(userNames.toPlain);
+  const names = await userNames.resolveNames(
+    userNames.collectSharedWithIds(plain),
+    User
+  );
+  return userNames.applySharedWithNames(plain, names);
 }
 
 module.exports = function(app) {
@@ -72,7 +128,7 @@ module.exports = function(app) {
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(await withFormNames(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -143,7 +199,7 @@ module.exports = function(app) {
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(await withFormNames(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -171,7 +227,7 @@ module.exports = function(app) {
         },
         'title formType status tags mapping createdBy createdOn updatedBy updatedOn publicAccess sharedWith sharedGroup _v'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(await withFormNames(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -193,7 +249,7 @@ module.exports = function(app) {
         },
         'title formType status tags createdBy createdOn updatedBy updatedOn transferredOn publicAccess sharedWith sharedGroup'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(await withFormNames(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -211,7 +267,7 @@ module.exports = function(app) {
       )
         .lean()
         .exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(await withFormNames(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -243,7 +299,7 @@ module.exports = function(app) {
         },
         'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(await withFormNames(forms));
     } catch (error) {
       debug(`error: ${error}`);
       return res.status(500).send(error.message);
@@ -285,7 +341,7 @@ module.exports = function(app) {
         },
         'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(await withFormNames(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -328,7 +384,7 @@ module.exports = function(app) {
         search,
         'title formType status tags updatedBy updatedOn _v'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(await withFormNames(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -352,7 +408,7 @@ module.exports = function(app) {
           $ne: true,
         },
       }).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(await withFormNames(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -422,8 +478,9 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.canReadMw('id'),
-    function(req, res) {
-      return res.status(200).json(req[req.params.id]);
+    async function(req, res) {
+      const [withNames] = await withFormNames([req[req.params.id]]);
+      return res.status(200).json(withNames);
     }
   );
 
@@ -485,9 +542,7 @@ module.exports = function(app) {
           req.proxied ? authConfig.proxied_service : authConfig.service
         }/formfiles/${newFile.id}`;
         res.set('Location', url);
-        return res
-          .status(201)
-          .json({location: url});
+        return res.status(201).json({ location: url });
       } catch (error) {
         logger.error(error);
         return res.status(500).send(error.message);
@@ -532,8 +587,10 @@ module.exports = function(app) {
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
     reqUtils.archived('id', false),
-    function(req, res) {
+    async function(req, res) {
       const doc = req[req.params.id];
+      const names = await userNames.resolveNames(formPersonIds(doc), User);
+      applyFormPersonNames(doc, names);
       return res.render(
         'form-config',
         routesUtilities.getRenderObject(req, {
@@ -629,9 +686,9 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
-    function(req, res) {
+    async function(req, res) {
       const form = req[req.params.id];
-      return res.status(200).json(form.__review || {});
+      return res.status(200).json(await withReviewNames(form.__review));
     }
   );
 
@@ -717,10 +774,10 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Form),
     reqUtils.isOwnerMw('id'),
-    function(req, res) {
+    async function(req, res) {
       const form = req[req.params.id];
       if (req.params.list === 'users') {
-        return res.status(200).json(form.sharedWith || []);
+        return res.status(200).json(await withSharedNames(form.sharedWith));
       }
       if (req.params.list === 'groups') {
         return res.status(200).json(form.sharedGroup || []);

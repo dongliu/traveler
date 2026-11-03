@@ -8,6 +8,7 @@ var _ = require('lodash');
 var form = require('../model/form');
 var reqUtils = require('../lib/req-utils');
 var publicTravelers = require('../lib/public-travelers');
+var userNames = require('../lib/user-names');
 var logger = require('../lib/loggers').getLogger();
 const mqttUtilities = require('../utilities/mqtt.js');
 const DataError = require('../lib/error').DataError;
@@ -19,6 +20,64 @@ var Binder = mongoose.model('Binder');
 var TravelerData = mongoose.model('TravelerData');
 var TravelerNote = mongoose.model('TravelerNote');
 var Log = mongoose.model('Log');
+var User = mongoose.model('User');
+
+/**
+ * The ids referenced by a document's top-level person fields, its
+ * sharedWith list, and its review requests/results (whichever the document
+ * happens to have) — see
+ * specs/006-user-full-name-display/contracts/internal-json-endpoints.md.
+ */
+function personIds(doc, fields) {
+  return userNames
+    .collectIds(doc, fields)
+    .concat(userNames.collectSharedWithIds(doc.sharedWith))
+    .concat(userNames.collectReviewIds(doc.__review));
+}
+
+function applyPersonNames(doc, fields, names) {
+  userNames.applyNames(doc, fields, names);
+  userNames.applySharedWithNames(doc.sharedWith, names);
+  userNames.applyReviewNames(doc.__review, names);
+  return doc;
+}
+
+/**
+ * Decorate `data` (a single document, or an array of them) with
+ * `<field>Name` for each of `fields`, plus `sharedWith[].name` and the
+ * review-request names where present, in one batched lookup. The existing
+ * fields keep their current value and meaning (FR-007) — this only adds
+ * fields. Returns a document shaped like `data` (array in, array out;
+ * single doc in, single doc out), or `data` unchanged when it is falsy
+ * (e.g. the 404/410 case `performMongoResponse` already handles).
+ * @param  {Object|Object[]} data
+ * @param  {String[]} fields
+ * @return {Promise<Object|Object[]>}
+ */
+function withPersonNames(data, fields) {
+  if (!data) {
+    return Promise.resolve(data);
+  }
+  var isList = Array.isArray(data);
+  var list = (isList ? data : [data]).map(userNames.toPlain);
+  var ids = [];
+  list.forEach(function collect(doc) {
+    personIds(doc, fields).forEach(function push(id) {
+      ids.push(id);
+    });
+  });
+  return userNames.resolveNames(ids, User).then(function apply(names) {
+    list.forEach(function applyDoc(doc) {
+      applyPersonNames(doc, fields, names);
+    });
+    return isList ? list : list[0];
+  });
+}
+
+var TRAVELER_PERSON_FIELDS = ['createdBy', 'clonedBy', 'updatedBy', 'owner'];
+var FORM_PERSON_FIELDS = ['createdBy', 'updatedBy', 'owner'];
+var RELEASED_FORM_PERSON_FIELDS = ['releasedBy', 'archivedBy'];
+var BINDER_PERSON_FIELDS = ['createdBy', 'clonedBy', 'updatedBy', 'owner'];
 
 var WRITE_API_USER = 'api_write';
 
@@ -106,7 +165,10 @@ function performFindEntityReferencedContentsByParentEntityId(
 module.exports = function(app) {
   // paged, filterable list of public travelers; the same listing is served to
   // the web app at /publictravelers/list (see lib/public-travelers.js)
-  app.get('/apis/publictravelers/', publicTravelers.listHandler(Traveler));
+  app.get(
+    '/apis/publictravelers/',
+    publicTravelers.listHandler(Traveler, { User: User })
+  );
 
   app.get('/apis/travelers/', function(req, res) {
     var search = {
@@ -140,7 +202,14 @@ module.exports = function(app) {
     )
       .lean()
       .exec(function(err, travelers) {
-        performMongoResponse(err, travelers, res);
+        if (err) {
+          return performMongoResponse(err, travelers, res);
+        }
+        return withPersonNames(travelers, TRAVELER_PERSON_FIELDS).then(function(
+          decorated
+        ) {
+          performMongoResponse(err, decorated, res);
+        });
       });
   });
 
@@ -213,43 +282,92 @@ module.exports = function(app) {
       };
     }
     Form.find(search, function(err, forms) {
-      performMongoResponse(err, forms, res);
+      if (err) {
+        return performMongoResponse(err, forms, res);
+      }
+      return withPersonNames(forms, FORM_PERSON_FIELDS).then(function(
+        decorated
+      ) {
+        performMongoResponse(err, decorated, res);
+      });
     });
   });
 
   app.get('/apis/forms/:id/', function(req, res) {
     Form.findById(req.params.id, function(err, forms) {
-      performMongoResponse(err, forms, res);
+      if (err) {
+        return performMongoResponse(err, forms, res);
+      }
+      return withPersonNames(forms, FORM_PERSON_FIELDS).then(function(
+        decorated
+      ) {
+        performMongoResponse(err, decorated, res);
+      });
     });
   });
 
   app.get('/apis/forms/:id/released/', function(req, res) {
     ReleasedForm.find({ 'base._id': req.params.id }).exec(function(err, forms) {
-      performMongoResponse(err, forms, res);
+      if (err) {
+        return performMongoResponse(err, forms, res);
+      }
+      return withPersonNames(forms, RELEASED_FORM_PERSON_FIELDS).then(function(
+        decorated
+      ) {
+        performMongoResponse(err, decorated, res);
+      });
     });
   });
 
   app.get('/apis/releasedForms/', function(req, res) {
     ReleasedForm.find({}, function(err, releasedForms) {
-      performMongoResponse(err, releasedForms, res);
+      if (err) {
+        return performMongoResponse(err, releasedForms, res);
+      }
+      return withPersonNames(releasedForms, RELEASED_FORM_PERSON_FIELDS).then(
+        function(decorated) {
+          performMongoResponse(err, decorated, res);
+        }
+      );
     });
   });
 
   app.get('/apis/releasedForms/:id/', function(req, res) {
     ReleasedForm.findById(req.params.id, function(err, releasedForms) {
-      performMongoResponse(err, releasedForms, res);
+      if (err) {
+        return performMongoResponse(err, releasedForms, res);
+      }
+      return withPersonNames(releasedForms, RELEASED_FORM_PERSON_FIELDS).then(
+        function(decorated) {
+          performMongoResponse(err, decorated, res);
+        }
+      );
     });
   });
 
   app.get('/apis/binders/', function(req, res) {
     Binder.find({}, function(err, binders) {
-      performMongoResponse(err, binders, res);
+      if (err) {
+        return performMongoResponse(err, binders, res);
+      }
+      return withPersonNames(binders, BINDER_PERSON_FIELDS).then(function(
+        decorated
+      ) {
+        performMongoResponse(err, decorated, res);
+      });
     });
   });
 
   app.get('/apis/binders/:id/', function(req, res) {
     Binder.findById(req.params.id, function(err, binder) {
-      performMongoResponse(err, binder, res);
+      if (err) {
+        return performMongoResponse(err, binder, res);
+      }
+      return withPersonNames(binder, BINDER_PERSON_FIELDS).then(function(
+        decorated
+      ) {
+        performMongoResponse(err, decorated, res);
+      });
     });
   });
 
@@ -309,7 +427,14 @@ module.exports = function(app) {
 
   app.get('/apis/travelers/:id/', function(req, res) {
     Traveler.findById(req.params.id, function(travelerErr, traveler) {
-      performMongoResponse(travelerErr, traveler, res);
+      if (travelerErr) {
+        return performMongoResponse(travelerErr, traveler, res);
+      }
+      return withPersonNames(traveler, TRAVELER_PERSON_FIELDS).then(function(
+        decorated
+      ) {
+        performMongoResponse(travelerErr, decorated, res);
+      });
     });
   });
 

@@ -11,6 +11,7 @@ const authConfig = require('../config/config').auth;
 const reqUtils = require('../lib/req-utils');
 const shareLib = require('../lib/share');
 const routesUtilities = require('../utilities/routes');
+const userNames = require('../lib/user-names');
 
 const valueProgressHtml = jade.compileFile(
   `${__dirname}/../views/binder-value-progress.jade`
@@ -27,6 +28,72 @@ const Group = mongoose.model('Group');
 const Binder = mongoose.model('Binder');
 const Traveler = mongoose.model('Traveler');
 
+// the top-level fields of a Binder that identify a person by account id;
+// see specs/006-user-full-name-display/contracts/internal-json-endpoints.md
+const PERSON_FIELDS = ['createdBy', 'clonedBy', 'updatedBy', 'owner'];
+
+function collectWorkAddedByIds(works) {
+  return (works || [])
+    .filter(function hasAddedBy(work) {
+      return work && work.addedBy;
+    })
+    .map(function id(work) {
+      return work.addedBy;
+    });
+}
+
+function applyWorkAddedByNames(works, names) {
+  (works || []).forEach(function applyWork(work) {
+    if (work && work.addedBy) {
+      work.addedByName = names[work.addedBy];
+    }
+  });
+  return works;
+}
+
+function binderPersonIds(binder) {
+  return userNames
+    .collectIds(binder, PERSON_FIELDS)
+    .concat(userNames.collectSharedWithIds(binder.sharedWith))
+    .concat(collectWorkAddedByIds(binder.works));
+}
+
+function applyBinderPersonNames(binder, names) {
+  userNames.applyNames(binder, PERSON_FIELDS, names);
+  userNames.applySharedWithNames(binder.sharedWith, names);
+  applyWorkAddedByNames(binder.works, names);
+  return binder;
+}
+
+// decorates a list of binders (already plain, or Mongoose documents) with
+// createdByName/clonedByName/updatedByName/ownerName/sharedWith[].name/
+// works[].addedByName, in one batched lookup, returning plain objects so
+// the added fields survive res.json()
+async function withBinderNames(binders) {
+  const plainBinders = binders.map(userNames.toPlain);
+  const ids = [];
+  plainBinders.forEach(function collect(binder) {
+    binderPersonIds(binder).forEach(function push(id) {
+      ids.push(id);
+    });
+  });
+  const names = await userNames.resolveNames(ids, User);
+  plainBinders.forEach(function apply(binder) {
+    applyBinderPersonNames(binder, names);
+  });
+  return plainBinders;
+}
+
+// same, for a single binder's sharedWith list (/binders/:id/share/users/json)
+async function withSharedNames(sharedWith) {
+  const plain = (sharedWith || []).map(userNames.toPlain);
+  const names = await userNames.resolveNames(
+    userNames.collectSharedWithIds(plain),
+    User
+  );
+  return userNames.applySharedWithNames(plain, names);
+}
+
 module.exports = function(app) {
   app.get('/binders/', auth.ensureAuthenticated, function(req, res) {
     res.render('binders', routesUtilities.getRenderObject(req));
@@ -41,12 +108,12 @@ module.exports = function(app) {
       owner: {
         $exists: false,
       },
-    }).exec(function(err, docs) {
+    }).exec(async function(err, docs) {
       if (err) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      return res.status(200).json(docs);
+      return res.status(200).json(await withBinderNames(docs));
     });
   });
 
@@ -55,11 +122,14 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Binder),
     reqUtils.canWriteMw('id'),
-    function(req, res) {
+    async function(req, res) {
+      const binder = req[req.params.id];
+      const names = await userNames.resolveNames(binderPersonIds(binder), User);
+      applyBinderPersonNames(binder, names);
       return res.render(
         'binder-config',
         routesUtilities.getRenderObject(req, {
-          binder: req[req.params.id],
+          binder,
         })
       );
     }
@@ -187,10 +257,10 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Binder),
     reqUtils.canReadMw('id'),
-    function(req, res) {
+    async function(req, res) {
       const binder = req[req.params.id];
       if (req.params.list === 'users') {
-        return res.status(200).json(binder.sharedWith || []);
+        return res.status(200).json(await withSharedNames(binder.sharedWith));
       }
       if (req.params.list === 'groups') {
         return res.status(200).json(binder.sharedGroup || []);
@@ -367,12 +437,12 @@ module.exports = function(app) {
       status: {
         $ne: 3,
       },
-    }).exec(function(err, binders) {
+    }).exec(async function(err, binders) {
       if (err) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      res.status(200).json(binders);
+      res.status(200).json(await withBinderNames(binders));
     });
   });
 
@@ -418,12 +488,12 @@ module.exports = function(app) {
 
     Binder.find(search)
       .lean()
-      .exec(function(err, binders) {
+      .exec(async function(err, binders) {
         if (err) {
           console.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(binders);
+        return res.status(200).json(await withBinderNames(binders));
       });
   });
 
@@ -448,12 +518,12 @@ module.exports = function(app) {
         status: {
           $ne: 3,
         },
-      }).exec(function(pErr, binders) {
+      }).exec(async function(pErr, binders) {
         if (pErr) {
           console.error(pErr);
           return res.status(500).send(pErr.message);
         }
-        return res.status(200).json(binders);
+        return res.status(200).json(await withBinderNames(binders));
       });
     });
   });
@@ -489,12 +559,12 @@ module.exports = function(app) {
         _id: {
           $in: binderIds,
         },
-      }).exec(function(pErr, binders) {
+      }).exec(async function(pErr, binders) {
         if (pErr) {
           console.error(pErr);
           return res.status(500).send(pErr.message);
         }
-        res.status(200).json(binders);
+        res.status(200).json(await withBinderNames(binders));
       });
     });
   });
@@ -506,12 +576,12 @@ module.exports = function(app) {
     Binder.find({
       createdBy: req.session.userid,
       status: 3,
-    }).exec(function(err, binders) {
+    }).exec(async function(err, binders) {
       if (err) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      return res.status(200).json(binders);
+      return res.status(200).json(await withBinderNames(binders));
     });
   });
 
@@ -533,11 +603,14 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Binder),
     reqUtils.canReadMw('id'),
-    function(req, res) {
+    async function(req, res) {
+      const binder = req[req.params.id];
+      const names = await userNames.resolveNames(binderPersonIds(binder), User);
+      applyBinderPersonNames(binder, names);
       res.render(
         'binder',
         routesUtilities.getRenderObject(req, {
-          binder: req[req.params.id],
+          binder,
         })
       );
     }
@@ -549,8 +622,9 @@ module.exports = function(app) {
     reqUtils.exist('id', Binder),
     reqUtils.canReadMw('id'),
     reqUtils.exist('id', Binder),
-    function(req, res) {
-      res.status(200).json(req[req.params.id]);
+    async function(req, res) {
+      const [withName] = await withBinderNames([req[req.params.id]]);
+      res.status(200).json(withName);
     }
   );
 
@@ -674,7 +748,11 @@ module.exports = function(app) {
       }
 
       return res.status(200).json({
-        works: merged,
+        works: await userNames.withFieldNames(
+          merged,
+          ['createdBy', 'owner', 'addedBy'],
+          User
+        ),
         inputProgress: inputProgressHtml({ binder }),
         travelerProgress: travelerProgressHtml({ binder }),
         valueProgress: valueProgressHtml({ binder }),
@@ -791,12 +869,12 @@ module.exports = function(app) {
       status: {
         $ne: 3,
       },
-    }).exec(function(err, binders) {
+    }).exec(async function(err, binders) {
       if (err) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      res.status(200).json(binders);
+      res.status(200).json(await withBinderNames(binders));
     });
   });
 };

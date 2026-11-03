@@ -159,13 +159,15 @@ const columns = [
         : tags.join(' ');
     },
   },
-  textColumn('Owner', 'owner'),
+  textColumn('Owner', 'ownerName'),
   {
     sTitle: 'Created',
     mData: 'createdOn',
     sDefaultContent: '',
     mRender(data, type, full) {
-      return type === 'display' ? personAndDate(full.createdBy, data) : data;
+      return type === 'display'
+        ? personAndDate(full.createdByName, data)
+        : data;
     },
   },
   {
@@ -173,7 +175,9 @@ const columns = [
     mData: 'updatedOn',
     sDefaultContent: '',
     mRender(data, type, full) {
-      return type === 'display' ? personAndDate(full.updatedBy, data) : data;
+      return type === 'display'
+        ? personAndDate(full.updatedByName, data)
+        : data;
     },
   },
   {

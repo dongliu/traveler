@@ -36,6 +36,28 @@ function fakeModel(itemRows, countRows, failWith) {
   return model;
 }
 
+/**
+ * A fake User model: only find(query, projection).exec() is provided, so a
+ * test also proves attachNames/resolveNames never use any other model
+ * method.
+ */
+function fakeUserModel(users) {
+  var model = { calls: [] };
+  model.find = function find(query, projection) {
+    model.calls.push({ query: query, projection: projection });
+    return {
+      exec: function exec() {
+        var ids = (query && query._id && query._id.$in) || [];
+        var matches = users.filter(function match(user) {
+          return ids.indexOf(user._id) !== -1;
+        });
+        return Promise.resolve(matches);
+      },
+    };
+  };
+  return model;
+}
+
 function itemsCall(model) {
   return model.calls.filter(function items(call) {
     return !call.isCounts;
@@ -817,6 +839,53 @@ describe('public-travelers', function() {
         }
       );
     });
+
+    it('should resolve createdByName/updatedByName/ownerName from the given User model, in one batched query', function() {
+      var model = fakeModel(
+        [{ _id: 'a', title: 'A', createdBy: 'liud', updatedBy: 'smith' }],
+        [{ _id: 1, n: 1 }]
+      );
+      var userModel = fakeUserModel([
+        { _id: 'liud', name: 'Dong Liu' },
+        { _id: 'smith', name: 'John Smith' },
+      ]);
+      return publicTravelers
+        .list(model, params, userModel)
+        .then(function(result) {
+          var traveler = result.travelers[0];
+          traveler.createdByName.should.equal('Dong Liu');
+          traveler.updatedByName.should.equal('John Smith');
+          // owner falls back to createdBy, as toRecord already does
+          traveler.ownerName.should.equal('Dong Liu');
+          userModel.calls.length.should.equal(1);
+        });
+    });
+
+    it('should fall back to the account id when the User model has no matching record', function() {
+      var model = fakeModel(
+        [{ _id: 'a', title: 'A', createdBy: 'ghost' }],
+        [{ _id: 1, n: 1 }]
+      );
+      var userModel = fakeUserModel([]);
+      return publicTravelers
+        .list(model, params, userModel)
+        .then(function(result) {
+          result.travelers[0].createdByName.should.equal('ghost');
+        });
+    });
+
+    it('should fall back to the account id without querying when no User model is given', function() {
+      var model = fakeModel(
+        [{ _id: 'a', title: 'A', createdBy: 'liud' }],
+        [{ _id: 1, n: 1 }]
+      );
+      return publicTravelers.list(model, params).then(function(result) {
+        result.travelers[0].createdByName.should.equal('liud');
+        // still only the two Traveler aggregate calls (items + counts); no
+        // User lookup was attempted at all
+        model.calls.length.should.equal(2);
+      });
+    });
   });
 
   describe('#listHandler (real HTTP)', function() {
@@ -824,9 +893,9 @@ describe('public-travelers', function() {
     var port;
     var errorStub;
 
-    function start(model) {
+    function start(model, options) {
       var app = express();
-      app.get('/list', publicTravelers.listHandler(model));
+      app.get('/list', publicTravelers.listHandler(model, options));
       return new Promise(function(resolve) {
         server = http.createServer(app).listen(0, '127.0.0.1', function() {
           port = server.address().port;
@@ -912,9 +981,36 @@ describe('public-travelers', function() {
             'machineArea',
             'sector',
             'windchillId',
+            'createdByName',
+            'updatedByName',
+            'ownerName',
           ]);
           body.travelers[0].owner.should.equal('liud');
+          // no User model was given to listHandler, so each name field
+          // falls back to its own account identifier (see #attachNames)
+          body.travelers[0].createdByName.should.equal('liud');
+          body.travelers[0].ownerName.should.equal('liud');
           model.calls.length.should.equal(2);
+        });
+    });
+
+    it('should resolve names through options.User, end to end', function() {
+      var model = fakeModel(
+        [{ _id: 'a', title: 'A', status: 1, createdBy: 'liud' }],
+        [{ _id: 1, n: 1 }]
+      );
+      var userModel = fakeUserModel([{ _id: 'liud', name: 'Dong Liu' }]);
+      return start(model, { User: userModel })
+        .then(function() {
+          return get('/list');
+        })
+        .then(function(res) {
+          var body = JSON.parse(res.text);
+          body.travelers[0].createdByName.should.equal('Dong Liu');
+          // the Traveler fake's aggregate is still the only Traveler method
+          // used, and the User fake's find is the only User method used
+          model.calls.length.should.equal(2);
+          userModel.calls.length.should.equal(1);
         });
     });
 
@@ -1758,8 +1854,10 @@ describe('public-travelers', function() {
             status: 'active',
             statusCode: 1,
             createdBy: 'liud',
+            createdByName: 'Dong Liu',
             createdOn: new Date('2026-08-30T14:02:11.000Z'),
             updatedBy: 'smith',
+            updatedByName: 'John Smith',
             updatedOn: new Date('2026-09-14T09:41:03.000Z'),
             owner: 'liud',
             tags: ['leak-check', 'vacuum'],
@@ -1774,8 +1872,11 @@ describe('public-travelers', function() {
           }),
         ])
         .split('\n')[1];
+      // createdBy/updatedBy show the resolved full name, not the account
+      // id, per contracts/public-travelers-api.md's CSV section; owner is
+      // unaffected (it was not named in that decision)
       line.should.equal(
-        '64f1a2b3c4d5e6f7a8b9c0d1,Cryomodule leak check,active,liud,2026-08-30T14:02:11.000Z,smith,2026-09-14T09:41:03.000Z,,liud,leak-check;vacuum,36,12,Cryogenics,CM-02,Acceptance test,Linac tunnel,S4,WC-0012345'
+        '64f1a2b3c4d5e6f7a8b9c0d1,Cryomodule leak check,active,Dong Liu,2026-08-30T14:02:11.000Z,John Smith,2026-09-14T09:41:03.000Z,,liud,leak-check;vacuum,36,12,Cryogenics,CM-02,Acceptance test,Linac tunnel,S4,WC-0012345'
       );
     });
 

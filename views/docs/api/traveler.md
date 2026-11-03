@@ -10,6 +10,7 @@
   "__v": 26,
   "_id": "53bbf46e2ace2f7f111d76c8",
   "createdBy": "liud",
+  "createdByName": "Dong Liu",
   "createdOn": "2014-07-08T13:38:54.529Z",
   "description": "",
   "finishedInput": 2,
@@ -18,6 +19,7 @@
   "title": "test validation",
   "totalInput": 7,
   "updatedBy": "liud",
+  "updatedByName": "Dong Liu",
   "updatedOn": "2014-08-12T13:56:02.090Z",
   "archived": false,
   "notes": [
@@ -44,3 +46,5 @@
 ```
 
 The traveler details JSON object contains more information than the object in a traveler list. The "forms" property contains a list of the forms that were used in this traveler. Currently, only one form is allowed for a traveler. The "data" property contains the data id's that were collected in the traveler. The "notes" property holds the note id's that were inputed in the traveler.
+
+`createdBy`, `clonedBy` (when present), `updatedBy`, and `owner` (when present) are account identifiers; each has a `createdByName`/`clonedByName`/`updatedByName`/`ownerName` sibling field holding the full name on file for that account, falling back to the account identifier itself when no name is on file. The original fields keep their account identifier value unchanged.

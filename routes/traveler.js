@@ -70,7 +70,53 @@ const { TravelerError } = require('../lib/error');
 const { stateTransition } = require('../model/traveler');
 const csv = require('../lib/csv');
 const publicTravelers = require('../lib/public-travelers');
+const userNames = require('../lib/user-names');
 const logger = require('../lib/loggers').getLogger();
+
+// the top-level fields of a Traveler that identify a person by account id;
+// see specs/006-user-full-name-display/contracts/internal-json-endpoints.md
+const PERSON_FIELDS = ['createdBy', 'clonedBy', 'updatedBy', 'owner'];
+
+function travelerPersonIds(traveler) {
+  return userNames
+    .collectIds(traveler, PERSON_FIELDS)
+    .concat(userNames.collectSharedWithIds(traveler.sharedWith));
+}
+
+function applyTravelerPersonNames(traveler, names) {
+  userNames.applyNames(traveler, PERSON_FIELDS, names);
+  userNames.applySharedWithNames(traveler.sharedWith, names);
+  return traveler;
+}
+
+// decorates a list of travelers (already plain, or Mongoose documents) with
+// createdByName/clonedByName/updatedByName/ownerName/sharedWith[].name, in
+// one batched lookup, returning plain objects so the added fields survive
+// res.json()
+async function withTravelerNames(travelers) {
+  const plainTravelers = travelers.map(userNames.toPlain);
+  const ids = [];
+  plainTravelers.forEach(function collect(traveler) {
+    travelerPersonIds(traveler).forEach(function push(id) {
+      ids.push(id);
+    });
+  });
+  const names = await userNames.resolveNames(ids, User);
+  plainTravelers.forEach(function apply(traveler) {
+    applyTravelerPersonNames(traveler, names);
+  });
+  return plainTravelers;
+}
+
+// same, for a single traveler's sharedWith list (/travelers/:id/share/users/json)
+async function withSharedNames(sharedWith) {
+  const plain = (sharedWith || []).map(userNames.toPlain);
+  const names = await userNames.resolveNames(
+    userNames.collectSharedWithIds(plain),
+    User
+  );
+  return userNames.applySharedWithNames(plain, names);
+}
 
 function createTraveler(form, req, res) {
   routesUtilities.traveler.createTraveler(
@@ -201,12 +247,12 @@ module.exports = function(app) {
       'title description status devices device tags sharedWith sharedGroup publicAccess locations createdOn updatedOn updatedBy manPower finishedInput totalInput mapping'
     )
       .lean()
-      .exec(function(err, docs) {
+      .exec(async function(err, docs) {
         if (err) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(docs);
+        return res.status(200).json(await withTravelerNames(docs));
       });
   });
 
@@ -224,12 +270,12 @@ module.exports = function(app) {
       'title description status devices device tags sharedWith sharedGroup publicAccess locations createdOn transferredOn updatedOn updatedBy manPower finishedInput totalInput'
     )
       .lean()
-      .exec(function(err, travelers) {
+      .exec(async function(err, travelers) {
         if (err) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(travelers);
+        return res.status(200).json(await withTravelerNames(travelers));
       });
   });
 
@@ -262,12 +308,12 @@ module.exports = function(app) {
         'title description status devices device tags locations createdBy createdOn owner updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
       )
         .lean()
-        .exec(function(tErr, travelers) {
+        .exec(async function(tErr, travelers) {
           if (tErr) {
             logger.error(tErr);
             return res.status(500).send(tErr.message);
           }
-          return res.status(200).json(travelers);
+          return res.status(200).json(await withTravelerNames(travelers));
         });
     });
   });
@@ -308,12 +354,12 @@ module.exports = function(app) {
         'title description status devices device tags locations createdBy createdOn owner updatedBy updatedOn sharedWith sharedGroup publicAccess manPower finishedInput totalInput'
       )
         .lean()
-        .exec(function(tErr, travelers) {
+        .exec(async function(tErr, travelers) {
           if (tErr) {
             logger.error(tErr);
             return res.status(500).send(tErr.message);
           }
-          return res.status(200).json(travelers);
+          return res.status(200).json(await withTravelerNames(travelers));
         });
     });
   });
@@ -329,7 +375,7 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     // a CSV download from the web app starts with a UTF-8 byte order mark, so
     // that a spreadsheet application reads international characters correctly
-    publicTravelers.listHandler(Traveler, { bom: true })
+    publicTravelers.listHandler(Traveler, { bom: true, User })
   );
 
   /*  app.get('/currenttravelers/json', auth.ensureAuthenticated, function (req, res) {
@@ -405,12 +451,12 @@ module.exports = function(app) {
       'title description status devices device locations archivedOn updatedBy updatedOn sharedWith sharedGroup manPower finishedInput totalInput'
     )
       .lean()
-      .exec(function(err, travelers) {
+      .exec(async function(err, travelers) {
         if (err) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(travelers);
+        return res.status(200).json(await withTravelerNames(travelers));
       });
   });
 
@@ -473,22 +519,24 @@ module.exports = function(app) {
       }
 
       if (reqUtils.canWrite(req, doc)) {
-        return routesUtilities
-          .getDeviceValue(doc.devices)
-          .then(function(value) {
-            doc.devices = value;
-            return res.render(
-              'traveler',
-              routesUtilities.getRenderObject(req, {
-                isOwner: reqUtils.isOwner(req, doc),
-                traveler: doc,
-                formHTML:
-                  doc.forms.length === 1
-                    ? doc.forms[0].html
-                    : doc.forms.id(doc.activeForm).html,
-              })
-            );
-          });
+        return Promise.all([
+          routesUtilities.getDeviceValue(doc.devices),
+          userNames.resolveNames(travelerPersonIds(doc), User),
+        ]).then(function([value, names]) {
+          doc.devices = value;
+          applyTravelerPersonNames(doc, names);
+          return res.render(
+            'traveler',
+            routesUtilities.getRenderObject(req, {
+              isOwner: reqUtils.isOwner(req, doc),
+              traveler: doc,
+              formHTML:
+                doc.forms.length === 1
+                  ? doc.forms[0].html
+                  : doc.forms.id(doc.activeForm).html,
+            })
+          );
+        });
       }
 
       if (reqUtils.canRead(req, doc)) {
@@ -511,12 +559,16 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     function(req, res) {
       const doc = req[req.params.id];
-      routesUtilities.getDeviceValue(doc.devices).then(function(value) {
+      Promise.all([
+        routesUtilities.getDeviceValue(doc.devices),
+        userNames.resolveNames(travelerPersonIds(doc), User),
+      ]).then(function([value, names]) {
         res.devices = value;
+        applyTravelerPersonNames(doc, names);
         return res.render(
           'traveler-viewer',
           routesUtilities.getRenderObject(req, {
-            traveler: req[req.params.id],
+            traveler: doc,
           })
         );
       });
@@ -529,12 +581,16 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     function(req, res) {
       const doc = req[req.params.id];
-      routesUtilities.getDeviceValue(doc.devices).then(function(value) {
+      Promise.all([
+        routesUtilities.getDeviceValue(doc.devices),
+        userNames.resolveNames(travelerPersonIds(doc), User),
+      ]).then(function([value, names]) {
         res.devices = value;
+        applyTravelerPersonNames(doc, names);
         return res.render(
           'traveler-print',
           routesUtilities.getRenderObject(req, {
-            traveler: req[req.params.id],
+            traveler: doc,
           })
         );
       });
@@ -816,7 +872,7 @@ module.exports = function(app) {
     reqUtils.exist('id', Traveler),
     reqUtils.canReadMw('id'),
     function(req, res) {
-      retrieveLogs(req[req.params.id], function(err, logs) {
+      retrieveLogs(req[req.params.id], async function(err, logs) {
         if (err) {
           return res.status(500).send(err.message);
         }
@@ -826,7 +882,9 @@ module.exports = function(app) {
             log.file = true;
           }
         });
-        return res.status(200).json(logs);
+        return res
+          .status(200)
+          .json(await userNames.withFieldNames(logs, ['inputBy'], User));
       });
     }
   );
@@ -996,12 +1054,17 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     reqUtils.archived('id', false),
-    function(req, res) {
+    async function(req, res) {
       const doc = req[req.params.id];
       if (
         reqUtils.isOwner(req, doc) ||
         routesUtilities.checkUserRole(req, 'admin')
       ) {
+        const names = await userNames.resolveNames(
+          travelerPersonIds(doc),
+          User
+        );
+        applyTravelerPersonNames(doc, names);
         return res.render(
           'traveler-config',
           routesUtilities.getRenderObject(req, {
@@ -1047,7 +1110,9 @@ module.exports = function(app) {
       if (!isAdmin && [0, 1, 1.5].indexOf(doc.status) === -1) {
         return res
           .status(400)
-          .send(`request is not allowed for item ${req.params.id} status ${doc.status}`);
+          .send(
+            `request is not allowed for item ${req.params.id} status ${doc.status}`
+          );
       }
       if (reqUtils.isOwner(req, doc) || isAdmin) {
         Object.keys(req.body).forEach(k => {
@@ -1172,14 +1237,20 @@ module.exports = function(app) {
       if (!newdevice) {
         return res.status(400).send('the new device name not accepted');
       }
-      const parts = newdevice.split('/').map(s => s.trim()).filter(Boolean);
+      const parts = newdevice
+        .split('/')
+        .map(s => s.trim())
+        .filter(Boolean);
       if (parts.length === 0) {
         return res.status(400).send('the new device name not accepted');
       }
       const doc = req[req.params.id];
       doc.updatedBy = req.session.userid;
       doc.updatedOn = Date.now();
-      const added = parts.reduce((acc, part) => acc.concat(doc.devices.addToSet(part)), []);
+      const added = parts.reduce(
+        (acc, part) => acc.concat(doc.devices.addToSet(part)),
+        []
+      );
       if (added.length === 0) {
         return res.status(204).send();
       }
@@ -1231,12 +1302,14 @@ module.exports = function(app) {
           },
         },
         'name value inputType file.mimetype file.encoding inputBy inputOn'
-      ).exec(function(dataErr, docs) {
+      ).exec(async function(dataErr, docs) {
         if (dataErr) {
           logger.error(dataErr);
           return res.status(500).send(dataErr.message);
         }
-        return res.status(200).json(docs);
+        return res
+          .status(200)
+          .json(await userNames.withFieldNames(docs, ['inputBy'], User));
       });
     }
   );
@@ -1306,12 +1379,16 @@ module.exports = function(app) {
           },
         },
         'name value inputBy inputOn updatedBy updatedOn'
-      ).exec(function(noteErr, docs) {
+      ).exec(async function(noteErr, docs) {
         if (noteErr) {
           logger.error(noteErr);
           return res.status(500).send(noteErr.message);
         }
-        return res.status(200).json(docs);
+        return res
+          .status(200)
+          .json(
+            await userNames.withFieldNames(docs, ['inputBy', 'updatedBy'], User)
+          );
       });
     }
   );
@@ -1552,10 +1629,10 @@ module.exports = function(app) {
     auth.ensureAuthenticated,
     reqUtils.exist('id', Traveler),
     reqUtils.isOwnerMw('id'),
-    function(req, res) {
+    async function(req, res) {
       const traveler = req[req.params.id];
       if (req.params.list === 'users') {
-        return res.status(200).json(traveler.sharedWith || []);
+        return res.status(200).json(await withSharedNames(traveler.sharedWith));
       }
       if (req.params.list === 'groups') {
         return res.status(200).json(traveler.sharedGroup || []);

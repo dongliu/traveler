@@ -96,22 +96,22 @@ function longDateColumn(title, key) {
   };
 }
 
-function personColumn(title, key) {
+// Shows a person's full name instead of their account id, falling back to
+// the id when no name is on file (the server attaches a sibling name field
+// next to `key` wherever a response includes a person-identifying field —
+// by default `<key>Name`, e.g. `createdBy` -> `createdByName`; pass
+// `nameKey` explicitly for the few fields keyed by `_id` itself, where the
+// server sets `.name` directly instead — see
+// specs/006-user-full-name-display/contracts/internal-json-endpoints.md).
+// The resolved value is used for display, sort, and filter alike, so a
+// viewer searches and sorts by what they see on screen.
+function personColumn(title, key, nameKey = `${key}Name`) {
   return {
     sTitle: title,
-    mData: key,
-    sDefaultContent: '',
-    mRender(data, type) {
-      if (type === 'sort' || type === 'filter') {
-        return data;
-      }
-      if (data) {
-        return `<img class="user" data-src="holder.js/27x40?size=20&text=${data
-          .substr(0, 1)
-          .toUpperCase()}">`;
-      }
-      return '';
+    mData(source) {
+      return source[nameKey] || source[key] || '';
     },
+    sDefaultContent: '',
     bFilter: true,
   };
 }
@@ -573,7 +573,7 @@ const formReviewLinkColumn = {
   bSortable: false,
 };
 
-const reviewerIdColumn = personColumn('Reviewer', '_id');
+const reviewerIdColumn = personColumn('Reviewer', '_id', 'name');
 
 const requestedOnColumn = dateColumn('Requested on', 'requestedOn');
 
@@ -600,7 +600,7 @@ const reviewRequestedOnColumn = {
 
 const reviewRequestedByColumn = {
   sTitle: 'Requested by',
-  mData(source, type) {
+  mData(source) {
     if (!source.__review) {
       return '';
     }
@@ -614,38 +614,26 @@ const reviewRequestedByColumn = {
     if (!request) {
       return '';
     }
-    return `<a target="${linkTarget}" href="/users/${
-      request.requestedBy
-    }"><img class="user" data-src="holder.js/27x40?size=20&text=${request.requestedBy
-      .substr(0, 1)
-      .toUpperCase()}" title="${request.requestedBy}"></a>`;
+    return request.requestedByName || request.requestedBy || '';
   },
   bFilter: true,
 };
 
 const reviewersColumn = {
   sTitle: 'Reviewers',
-  mData(source, type) {
-    if (source.__review) {
-      const requests = source.__review.reviewRequests;
-      if (!requests) {
-        return '';
-      }
-      if (requests.length === 0) {
-        return '';
-      }
-      const reviews = requests.map(function(r) {
-        if (type === 'filter' || type === 'sort') {
-          return r._id;
-        }
-        return `<a target="${linkTarget}" href="/users/${r._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${r._id.substr(0, 1).toUpperCase()}" title="${r._id}"></a>`;
-      });
-      if (type === 'filter' || type === 'sort') {
-        return reviews.join('; ');
-      }
-      return reviews.join(' ');
+  mData(source) {
+    if (!source.__review) {
+      return '';
     }
-    return '';
+    const requests = source.__review.reviewRequests;
+    if (!requests || requests.length === 0) {
+      return '';
+    }
+    return requests
+      .map(function(r) {
+        return r.name || r._id;
+      })
+      .join('; ');
   },
   bFilter: true,
 };
@@ -676,17 +664,14 @@ const createdByColumn = personColumn('Created by', 'createdBy');
 const ownerColumn = {
   sTitle: 'Owner',
   sDefaultContent: '',
-  mData(source, type) {
-    const owner = source.owner || source.createdBy;
-    if (type === 'sort' || type === 'filter') {
-      return owner;
-    }
-    if (owner) {
-      return `<a target="${linkTarget}" href="/users/${owner}"><img class="user" data-src="holder.js/27x40?size=20&text=${owner
-        .substr(0, 1)
-        .toUpperCase()}" title="${owner}"></a>`;
-    }
-    return '';
+  mData(source) {
+    return (
+      source.ownerName ||
+      source.owner ||
+      source.createdByName ||
+      source.createdBy ||
+      ''
+    );
   },
   bFilter: true,
 };
@@ -1141,27 +1126,26 @@ const deviceColumn = {
   bFilter: true,
 };
 
+// Each item is either a plain string, or a {_id, ...} person reference —
+// shows that person's full name when one has been resolved (`.name`, e.g.
+// sharedWith) or already stored (`.username`, e.g. manPower, captured at
+// write time from the person's own full name), falling back to the id.
+function personLabel(u) {
+  if (!u._id) {
+    return u;
+  }
+  return u.name || u.username || u._id;
+}
+
 function usersColumn(title, prop) {
   return {
     sTitle: title,
-    mData(source, type) {
+    mData(source) {
       if (source[prop]) {
         if (source[prop].length === 0) {
           return '';
         }
-        const names = source[prop].map(function(u) {
-          if (!u._id) {
-            return u;
-          }
-          if (type === 'filter' || type === 'sort') {
-            return u.username;
-          }
-          return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
-        });
-        if (type === 'filter' || type === 'sort') {
-          return names.join('; ');
-        }
-        return names.join(' ');
+        return source[prop].map(personLabel).join(' ');
       }
       return '';
     },
@@ -1172,24 +1156,12 @@ function usersColumn(title, prop) {
 function usersFilteredColumn(title, filter) {
   return {
     sTitle: title,
-    mData(source, type) {
+    mData(source) {
       const users = filter(source);
       if (users.length === 0) {
         return '';
       }
-      const names = users.map(function(u) {
-        if (!u._id) {
-          return u;
-        }
-        if (type === 'filter' || type === 'sort') {
-          return u.username;
-        }
-        return `<a target="${linkTarget}" href="/users/${u._id}"><img class="user" data-src="holder.js/27x40?size=20&text=${u._id.substr(0, 1).toUpperCase()}"></a>`;
-      });
-      if (type === 'filter' || type === 'sort') {
-        return names.join('; ');
-      }
-      return names.join(' ');
+      return users.map(personLabel).join(' ');
     },
     bFilter: true,
   };
@@ -1258,7 +1230,7 @@ const statusColumn = {
 };
 
 /* shared user columns */
-const useridColumn = personColumn('User', '_id');
+const useridColumn = personColumn('User', '_id', 'name');
 
 const useridNoLinkColumn = {
   sTitle: 'User id',
@@ -1279,7 +1251,7 @@ const useridLinkColumn = {
 
 const userNameNoLinkColumn = {
   sTitle: 'Full name',
-  mData: 'username',
+  mData: 'name',
   sDefaultContent: '',
   bFilter: true,
 };
