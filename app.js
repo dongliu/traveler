@@ -171,12 +171,6 @@ require('./routes/device')(app);
 require('./routes/ldaplogin')(app);
 require('./routes/doc')(app);
 
-app.get('/api', function(req, res) {
-  res.render('api', {
-    prefix: req.proxied ? req.proxied_prefix : '',
-  });
-});
-
 // app.get('/', auth.ensureAuthenticated, routes.main);
 app.get('/login', auth.ensureAuthenticated, function(req, res) {
   if (req.session.userid) {
