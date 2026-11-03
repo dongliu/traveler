@@ -2,10 +2,10 @@
 /* global updateAjaxURL: false, prefix: false, Holder: false */
 /* global travelerGlobal: false */
 
-function inArray(name, ao) {
+function inArray(uid, ao) {
   let i;
   for (i = 0; i < ao.length; i += 1) {
-    if (ao[i].name === name) {
+    if (ao[i]._id === uid) {
       return true;
     }
   }
@@ -81,6 +81,8 @@ $(function() {
 
   travelerGlobal.usernames.initialize();
 
+  let userSelected;
+
   $('#username').typeahead(
     {
       minLength: 1,
@@ -94,6 +96,10 @@ $(function() {
       source: travelerGlobal.usernames,
     }
   );
+
+  $('#username').on('typeahead:select', function(e, suggestion) {
+    userSelected = suggestion;
+  });
 
   const userColumns = [
     selectColumn,
@@ -132,26 +138,26 @@ $(function() {
 
   $('#add').click(function(e) {
     e.preventDefault();
-    const name = $('#username').val();
-    if (inArray(name, userTable.fnGetData())) {
+    if (!userSelected) {
+      console.error('Please select a user from the list.');
+      return;
+    }
+    const { displayName: name, uid } = userSelected;
+    if (inArray(uid, userTable.fnGetData())) {
       // show message
       $('#message').append(
         `<div class="alert alert-info"><button class="close" data-dismiss="alert">x</button>The user named <strong>${name}</strong> is already in the user list. </div>`
       );
     } else {
-      const user = travelerGlobal.usernames.get(name);
-      if (user === null) {
-        console.error(`Unknown user ${name}.  Please select from the list.`);
-        return;
-      }
-      const uid = user[0].sAMAccountName;
       $.ajax({
         url: '/users/',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({
-          name: uid,
+          uid,
+          name,
           manager: $('#manager').prop('checked'),
+          reviewer: $('#reviwer').prop('checked'),
           admin: $('#admin').prop('checked'),
         }),
         success(data, status, jqXHR) {
@@ -168,6 +174,7 @@ $(function() {
       });
     }
     document.forms[0].reset();
+    userSelected = undefined;
   });
 
   $('#user-update').click(function() {

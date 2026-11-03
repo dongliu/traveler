@@ -9,7 +9,8 @@ helpers live in `fixtures/`.
 
 The stack is defined by [docker-compose.yml](../docker-compose.yml) in the repo
 root. `docker compose up` starts three services. The LDAP login service and the
-mail service run outside this repo, on the external `traveler-dev` network.
+mail service (Mailpit) run outside this repo, on the external `traveler-dev`
+network — see [docker.md](../docker.md) for how to set each of them up.
 
 ### Services in docker-compose.yml
 
@@ -31,7 +32,7 @@ Networks:
 | Dependency                                                                       | Where                                                                                        | Used for                                                       |
 | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | OpenLDAP from the [traveler-ldap](https://github.com/dongliu/traveler-ldap) repo | `ldap://ldap-service`, base DN `dc=example,dc=org`; phpLDAPadmin at <https://localhost:6443> | Login and user/group lookups                                   |
-| `mail-service` (SMTP on port 1025)                                               | `smtp_host` in `docker/app.json`                                                             | Outbound notification mail. The e2e suite does not check mail. |
+| Mailpit from the [traveler-mail](https://github.com/dongliu/traveler-mail) repo  | SMTP on port 1025 (`smtp_host`/`smtp_port` in `docker/email.json`); web UI/API on port 8025 (`MAIL_PORT` in `.env`) | Outbound notification mail — see [Checking mail](#checking-mail) below |
 | traveler-mongo                                                                   | Seed and data directories next to this repo                                                  | Database seed and storage                                      |
 
 ### Ports
@@ -73,6 +74,7 @@ written in this file. Put them in `.env` as `E2E_PASS` and `E2E_PASS2`.
 
 ```
 WEB_PORT=3301                    # must match docker/auth.json
+MAIL_PORT=8025                   # Mailpit web UI/API, see Checking mail below
 E2E_USER=dong
 E2E_PASS=<dong's password from seed/traveler.ldif>
 E2E_USER_NAME=Dong Liu
@@ -82,6 +84,50 @@ E2E_USER2_NAME=Bob Dalesio
 ```
 
 The suite reads `.env`, and shell variables override it.
+
+## Checking mail
+
+The app sends mail (review-request notifications, etc.) through the
+`mail-service` SMTP relay, which is [Mailpit](https://github.com/axllent/mailpit)
+from the [traveler-mail](https://github.com/dongliu/traveler-mail) repo. Mailpit
+keeps every message it receives and never actually delivers anywhere, so it
+doubles as the test mailbox.
+
+- **By hand**: open `http://localhost:$MAIL_PORT` (`8025` by default) in a
+  browser to see every message the stack has sent, oldest-looking-newest first.
+  It is shared by everyone using this `traveler-dev` network, so it will
+  usually have mail from other work in it too — search or filter rather than
+  assuming an empty inbox.
+- **From a spec**: [review-notification.spec.js](review-notification.spec.js)
+  does *not* query Mailpit directly. It instead reads the notification record
+  the app itself keeps on the form (`GET /forms/:id/review/json`'s
+  `reviewNotifications` array — `recipient`, `success`, `sentOn`, `type`).
+  `success` is only `true` once the SMTP relay (Mailpit) has actually accepted
+  the message, so this is a real delivery check, not a mock — it is just
+  checked through the app's own record instead of Mailpit's API. Prefer this
+  pattern; it needs no extra fixture and keeps working if the mail relay ever
+  changes.
+- **Querying Mailpit directly**: only reach for this when a test needs to
+  assert the actual subject/body the recipient would see (the notification
+  record above doesn't carry that). Mailpit exposes a read-only HTTP API —
+  there is no fixture for it yet, but a spec can call it directly with
+  Playwright's own `request` helper:
+
+  ```js
+  const { request } = require('@playwright/test');
+
+  const mail = await request.newContext({
+    baseURL: `http://localhost:${process.env.MAIL_PORT || 8025}`,
+  });
+  const res = await mail.get('/api/v1/search', {
+    params: { query: `to:${reviewerEmail}` },
+  });
+  const { messages } = await res.json();
+  ```
+
+  Filter by something unique to the run (an address, or text from the subject
+  such as the form id) — the inbox is shared and is never cleared by the
+  suite.
 
 ## One-time setup: admin role for dong
 
@@ -103,6 +149,7 @@ From the repo root:
 npm run e2e                                              # everything
 npm run e2e -- e2e/us1-form-lifecycle.spec.js            # one file
 npm run e2e -- e2e/us1-form-lifecycle.spec.js -g AS3     # one scenario
+npm run e2e -- e2e/review-notification.spec.js           # reviewer-notification coverage
 ```
 
 If the web app is unreachable, or a login fails, the run stops at once with a

@@ -11,12 +11,14 @@ describe('email', function() {
   let createTransport;
 
   beforeEach(function() {
-    config.app = {
+    config.email = {
       smtp_host: 'smtp.example.com',
       smtp_port: 25,
       smtp_ssl: false,
       smtp_tls: true,
       notification_email_address: 'traveler-noreply@example.com',
+      disclaimer:
+        'This is an automated message from eTraveler. Please do not reply.',
     };
     fakeTransport = {
       sendMail: sinon.stub().resolves({ accepted: ['a@example.com'] }),
@@ -82,6 +84,27 @@ describe('email', function() {
         'a@example.com',
         'b@example.com',
       ]);
+    });
+
+    it('should forward cc when provided', async function() {
+      await email.sendNotification({
+        subject: 'Hello',
+        recipients: 'a@example.com',
+        cc: 'owner@example.com',
+        text: 'hi',
+      });
+      fakeTransport.sendMail.firstCall.args[0].cc.should.equal(
+        'owner@example.com'
+      );
+    });
+
+    it('should omit cc when not provided', async function() {
+      await email.sendNotification({
+        subject: 'Hello',
+        recipients: 'a@example.com',
+        text: 'hi',
+      });
+      fakeTransport.sendMail.firstCall.args[0].should.not.have.property('cc');
     });
 
     it('should skip sending when recipients is an empty array', async function() {
