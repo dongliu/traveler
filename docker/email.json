@@ -1,0 +1,8 @@
+{
+  "smtp_host": "mail-service",
+  "smtp_port": 1025,
+  "smtp_ssl": false,
+  "smtp_tls": false,
+  "notification_email_address": "traveler-noreply@example.com",
+  "disclaimer": "This is an automated message from eTraveler. Please do not reply."
+}

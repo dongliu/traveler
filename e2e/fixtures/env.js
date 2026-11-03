@@ -55,6 +55,7 @@ function authServicePort() {
 
 const WEB_PORT = setting('WEB_PORT', authServicePort());
 const API_PORT = setting('API_PORT', '3002');
+const MONGO_EXPRESS_PORT = setting('MONGO_EXPRESS_PORT', '8081');
 const baseURL = `http://localhost:${WEB_PORT}`;
 
 const personas = {
@@ -84,6 +85,7 @@ module.exports = {
   ROOT,
   WEB_PORT,
   API_PORT,
+  MONGO_EXPRESS_PORT,
   baseURL,
   personas,
   missingSettings,

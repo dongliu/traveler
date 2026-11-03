@@ -126,20 +126,21 @@ function updateUserProfile(user, res) {
 }
 
 function addUser(req, res) {
+  const { uid } = req.body;
   if (authConfig.type === 'ldapWithDnLookup') {
-    ldapClient.searchForUser(req.body.name, function(err, ldapUser) {
+    ldapClient.searchForUser(uid, function(err, ldapUser) {
       if (err !== null) {
         console.log(err.message);
         res.locals.error = 'Username not found.';
-        return res.status(404).send(`Username ${req.body.name} not found.`);
+        return res.status(404).send(`User id ${uid} not found.`);
       }
       // dn = ldapUser.dn;
       storeUser(req, res, ldapUser);
     });
   } else {
-    const nameFilter = ad.nameFilter.replace('_name', req.body.name);
+    const searchFilter = ad.searchFilter.replace('_id', uid);
     const opts = {
-      filter: nameFilter,
+      filter: searchFilter,
       attributes: ad.objAttributes,
       scope: 'sub',
     };
@@ -151,11 +152,11 @@ function addUser(req, res) {
       }
 
       if (result.length === 0) {
-        return res.status(404).send(`${req.body.name} is not found in AD!`);
+        return res.status(404).send(`${uid} is not found in AD!`);
       }
 
       if (result.length > 1) {
-        return res.status(400).send(`${req.body.name} is not unique!`);
+        return res.status(400).send(`${uid} is not unique!`);
       }
 
       storeUser(req, res, result[0]);
@@ -229,14 +230,12 @@ module.exports = function(app) {
       return res.status(403).send('only admin allowed');
     }
 
-    if (!req.body.name) {
-      return res.status(400).send('need to know name');
+    if (!req.body.uid) {
+      return res.status(400).send('need to know uid');
     }
 
-    // check if already in db
-    User.findOne({
-      name: req.body.name,
-    }).exec(function(err, user) {
+    // check if already in db, by uid (the user model's id is all lower case)
+    User.findById(req.body.uid.toLowerCase()).exec(function(err, user) {
       if (err) {
         return res.status(500).send(err.message);
       }

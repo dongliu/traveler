@@ -33,6 +33,26 @@ const reviewResult = new Schema({
   comment: String,
 });
 
+const reviewNotification = new Schema({
+  recipient: {
+    type: String,
+    required: true,
+  },
+  sentOn: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+  success: {
+    type: Boolean,
+    required: true,
+  },
+  type: {
+    type: String,
+    default: 'request',
+  },
+});
+
 const review = new Schema({
   policy: {
     type: String,
@@ -42,6 +62,7 @@ const review = new Schema({
   },
   reviewRequests: [reviewRequest],
   reviewResults: [reviewResult],
+  reviewNotifications: [reviewNotification],
 });
 
 async function removeReviewRequest(doc, id) {
@@ -154,6 +175,19 @@ function addReview(schema) {
       return newDoc;
     } catch (error) {
       logger.error(`update review db error: ${error}`);
+      throw error;
+    }
+  };
+
+  schema.methods.addReviewNotification = async function(recipient, success) {
+    const doc = this;
+    try {
+      doc.__review.reviewNotifications.push({ recipient, success });
+      const newDoc = await doc.save();
+      debug(`doc saved as ${newDoc}`);
+      return newDoc;
+    } catch (error) {
+      logger.error(`add review notification db error: ${error}`);
       throw error;
     }
   };

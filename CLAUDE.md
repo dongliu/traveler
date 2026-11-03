@@ -40,7 +40,7 @@ npm run e2e -- e2e/us1-form-lifecycle.spec.js
 
 ### Configuration
 
-All runtime config lives outside the repo in `../etc/traveler-config/` (or the path in env var `TRAVELER_CONFIG_REL_PATH`). The `/config/config.js` loader merges JSON files from that directory: `ad.json`, `api.json`, `app.json`, `auth.json`, `mongo.json`, `service.json`, `ui.json`, and optionally `mqtt.json`. The `/config/` directory in the repo contains only defaults/examples.
+All runtime config lives outside the repo in `../etc/traveler-config/` (or the path in env var `TRAVELER_CONFIG_REL_PATH`). The `/config/config.js` loader merges JSON files from that directory: `ad.json`, `api.json`, `app.json`, `auth.json`, `email.json`, `mongo.json`, `service.json`, `ui.json`, and optionally `mqtt.json`. The `/config/` directory in the repo contains only defaults/examples. `email.json` is required (not optional like `mqtt.json`) and holds the outgoing-mail settings (`smtp_host`, `smtp_port`, `smtp_ssl`, `smtp_tls`, `notification_email_address`, `disclaimer`) that `lib/email.js` reads — these used to live in `app.json`.
 
 ### Models (`/model/`)
 
@@ -54,7 +54,7 @@ Mongoose schemas. Two categories:
 - `user.js`, `history.js`
 
 **Attachable feature models** mixed into entity schemas via `addReview(schema)`, `addShare(schema)`, etc.:
-- `review.js` — Approval workflow. Stores `reviewRequests` (who was asked) and `reviewResults` (what they decided). `reviewRequests._id` is the reviewer's userid. `allApproved()` checks the latest result per reviewer against current `_v`.
+- `review.js` — Approval workflow. Stores `reviewRequests` (who was asked), `reviewResults` (what they decided), and `reviewNotifications` (who was emailed, when, and whether it succeeded — `addReviewNotification(recipient, success)`). `reviewRequests._id` is the reviewer's userid. `allApproved()` checks the latest result per reviewer against current `_v`.
 - `share.js` — Fine-grained access: `sharedWith` (per-user), `sharedGroup` (per-group), `publicAccess`.
 - `history.js` — Audit trail via `saveWithHistory(userid)`.
 
@@ -71,7 +71,8 @@ Each route file exports `function(app)` and is mounted in `app.js`. Key files:
 
 - `req-utils.js` — Middleware factories used heavily in routes: `exist(param, Model)`, `canReadMw(param)`, `isOwnerMw(param)`, `requireAdmin()`, `status(param, [allowed])`, `isAdmin(req)`, `isOwner(req, doc)`.
 - `public-travelers.js` — Paged, filterable list of public travelers (JSON or CSV), one `listHandler(Traveler, options)` mounted on both the web app (`/publictravelers/list`) and the REST API (`/apis/publictravelers/`). The public tier itself is `reqUtils.publicAccessMatch()` in `req-utils.js`, next to `getAccess`; never write a `publicAccess` query condition elsewhere.
-- `review.js` — `addReviewResult`, `addReviewRequest`, `removeReviewRequest` — shared between form and traveler routes.
+- `review.js` — `addReviewResult`, `addReviewRequest`, `removeReviewRequest` — shared between form and traveler routes. `addReviewRequest` auto-provisions a minimal `User` (name/email from AD) when the given reviewer id has no account yet — the separate requirement that the account hold the `Reviewer` role is untouched — then, once the request succeeds, sends the review-request email (`specs/email.md`) via `lib/email.js` and records the attempt with `doc.addReviewNotification(...)`.
+- `email.js` — `sendNotification({ subject, recipients, from, cc, text, html })` over a pooled SMTP transport built from `config.email`. Failures are logged and swallowed, never thrown — callers get `false` back instead of a rejected promise.
 - `auth/index.js` — Sets `res.locals.roles`, `res.locals.permissions`, `res.locals.userid` from session. `isAdmin` in views is derived from `roles.indexOf('admin') !== -1` in `views/layout.jade`.
 - `role.js` — Role constants: `Manager`, `Admin`, `Reviewer`.
 - `loggers.js` — Winston logger. Use `require('../lib/loggers').getLogger()`.
