@@ -163,27 +163,6 @@ describe('email', function() {
     });
   });
 
-  describe('disabled (no email.json configured)', function() {
-    beforeEach(function() {
-      config.email = undefined;
-    });
-
-    it('#sendNotification should resolve false without creating a transport', async function() {
-      const ok = await email.sendNotification({
-        recipients: 'a@example.com',
-        text: 'hi',
-      });
-      ok.should.be.false;
-      createTransport.called.should.be.false;
-    });
-
-    it('#verify should resolve false without creating a transport', async function() {
-      const ok = await email.verify();
-      ok.should.be.false;
-      createTransport.called.should.be.false;
-    });
-  });
-
   describe('#verify', function() {
     it('should resolve true when the server is reachable', async function() {
       const ok = await email.verify();

@@ -40,7 +40,7 @@ npm run e2e -- e2e/us1-form-lifecycle.spec.js
 
 ### Configuration
 
-All runtime config lives outside the repo in `../etc/traveler-config/` (or the path in env var `TRAVELER_CONFIG_REL_PATH`). The `/config/config.js` loader merges JSON files from that directory: `ad.json`, `api.json`, `app.json`, `auth.json`, `mongo.json`, `service.json`, `ui.json`, plus the optional `email.json` and `mqtt.json`. The `/config/` directory in the repo contains only defaults/examples. `email.json`, when present, holds the outgoing-mail settings (`smtp_host`, `smtp_port`, `smtp_ssl`, `smtp_tls`, `notification_email_address`, `disclaimer`) that `lib/email.js` reads — these used to live in `app.json`. Like `mqtt.json`, it's loaded with `optionalRequire`; when it's absent, `config.email` is `undefined`, `lib/email.js` (`sendNotification`/`verify`) short-circuits to `false` without attempting an SMTP connection, and `lib/review.js` skips sending review-request emails (recording the notification attempt as unsent) — the app starts normally either way.
+All runtime config lives outside the repo in `../etc/traveler-config/` (or the path in env var `TRAVELER_CONFIG_REL_PATH`). The `/config/config.js` loader merges JSON files from that directory: `ad.json`, `api.json`, `app.json`, `auth.json`, `email.json`, `mongo.json`, `service.json`, `ui.json`, and optionally `mqtt.json`. The `/config/` directory in the repo contains only defaults/examples. `email.json` is required (not optional like `mqtt.json`) and holds the outgoing-mail settings (`smtp_host`, `smtp_port`, `smtp_ssl`, `smtp_tls`, `notification_email_address`, `disclaimer`) that `lib/email.js` reads — these used to live in `app.json`.
 
 ### Models (`/model/`)
 
