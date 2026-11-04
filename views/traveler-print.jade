@@ -40,16 +40,16 @@ html
           #details.hide
             if (locals.traveler.description !== undefined)
               h4 Description: #{traveler.description}
-            p Created by #{traveler.createdBy}
+            p Created by #{traveler.createdByName}
               = ' '
               if (locals.traveler.clonedBy !== undefined)
-                | cloned by #{traveler.clonedBy} on
+                | cloned by #{traveler.clonedByName} on
               else
                 | on
               = ' '
               span.time #{traveler.createdOn}
             if (locals.traveler.updatedBy !== undefined)
-              p Updated by #{traveler.updatedBy} on
+              p Updated by #{traveler.updatedByName} on
                 = ' '
                 span.time #{traveler.updatedOn}
           br

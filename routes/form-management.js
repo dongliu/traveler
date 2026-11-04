@@ -3,9 +3,11 @@ const debug = require('debug')('traveler:released-form');
 const _ = require('lodash');
 const auth = require('../lib/auth');
 const routesUtilities = require('../utilities/routes');
+const userNames = require('../lib/user-names');
 
 const Form = mongoose.model('Form');
 const ReleasedForm = mongoose.model('ReleasedForm');
+const User = mongoose.model('User');
 const { statusMap } = require('../model/released-form');
 const reqUtils = require('../lib/req-utils');
 const logger = require('../lib/loggers').getLogger();
@@ -13,6 +15,14 @@ const config = require('../config/config');
 const { stateTransition } = require('../model/released-form');
 
 const authConfig = config.auth;
+
+// the top-level fields of a ReleasedForm that identify a person by account
+// id; see specs/006-user-full-name-display/contracts/internal-json-endpoints.md
+const PERSON_FIELDS = ['releasedBy', 'archivedBy'];
+
+function withReleasedFormNames(forms) {
+  return userNames.withFieldNames(forms, PERSON_FIELDS, User);
+}
 
 module.exports = function(app) {
   app.get(
@@ -34,12 +44,23 @@ module.exports = function(app) {
           status: 0.5,
         },
         'title formType status tags mapping _v __review'
-      ).exec(function(err, forms) {
+      ).exec(async function(err, forms) {
         if (err) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(forms);
+        const plainForms = forms.map(userNames.toPlain);
+        const ids = [];
+        plainForms.forEach(function collect(form) {
+          userNames.collectReviewIds(form.__review).forEach(function push(id) {
+            ids.push(id);
+          });
+        });
+        const names = await userNames.resolveNames(ids, User);
+        plainForms.forEach(function apply(form) {
+          form.__review = userNames.applyReviewNames(form.__review, names);
+        });
+        return res.status(200).json(plainForms);
       });
     }
   );
@@ -50,12 +71,12 @@ module.exports = function(app) {
         status: 1,
       },
       'title formType status tags ver releasedOn releasedBy subsystem device activity'
-    ).exec(function(err, forms) {
+    ).exec(async function(err, forms) {
       if (err) {
         logger.error(err);
         return res.status(500).send(err.message);
       }
-      return res.status(200).json(forms);
+      return res.status(200).json(await withReleasedFormNames(forms));
     });
   });
 
@@ -68,12 +89,12 @@ module.exports = function(app) {
         status: 2,
       },
       'title formType status tags ver archivedOn archivedBy'
-    ).exec(function(err, forms) {
+    ).exec(async function(err, forms) {
       if (err) {
         logger.error(err);
         return res.status(500).send(err.message);
       }
-      return res.status(200).json(forms);
+      return res.status(200).json(await withReleasedFormNames(forms));
     });
   });
 
@@ -228,12 +249,12 @@ module.exports = function(app) {
         formType: 'normal',
       },
       'title formType status tags _v releasedOn releasedBy'
-    ).exec(function(err, forms) {
+    ).exec(async function(err, forms) {
       if (err) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      return res.status(200).json(forms);
+      return res.status(200).json(await withReleasedFormNames(forms));
     });
   });
 
@@ -247,12 +268,12 @@ module.exports = function(app) {
           formType: 'discrepancy',
         },
         'title formType status tags _v releasedOn releasedBy'
-      ).exec(function(err, forms) {
+      ).exec(async function(err, forms) {
         if (err) {
           console.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(forms);
+        return res.status(200).json(await withReleasedFormNames(forms));
       });
     }
   );
@@ -261,8 +282,9 @@ module.exports = function(app) {
     '/released-forms/:id/json',
     auth.ensureAuthenticated,
     reqUtils.exist('id', ReleasedForm),
-    function(req, res) {
-      return res.status(200).json(req[req.params.id]);
+    async function(req, res) {
+      const [withNames] = await withReleasedFormNames([req[req.params.id]]);
+      return res.status(200).json(withNames);
     }
   );
 };

@@ -13,11 +13,14 @@
       "status": "active",
       "statusCode": 1,
       "createdBy": "liud",
+      "createdByName": "Dong Liu",
       "createdOn": "2026-08-30T14:02:11.000Z",
       "updatedBy": "smith",
+      "updatedByName": "John Smith",
       "updatedOn": "2026-09-14T09:41:03.000Z",
       "archivedOn": null,
       "owner": "liud",
+      "ownerName": "Dong Liu",
       "tags": ["leak-check", "vacuum"],
       "totalInput": 36,
       "finishedInput": 12,
@@ -50,17 +53,22 @@ archived are left out unless they are asked for (see the filters below). The
 list is read-only.
 
 Each traveler is a JSON object with its id (`_id`), title, status, createdBy,
-createdOn, updatedBy, updatedOn, archivedOn, owner, tags, totalInput,
-finishedInput, subsystem, device, activity, machineArea, sector, and
-windchillId. Every property is always present; a property with no value is an
-empty string, an empty list, `0`, or `null` (for a date). `status` is the name
-of the status (`initialized`, `active`, `submitted for completion`, `completed`,
-`frozen`, or `archived`) and `statusCode` its number (`0`, `1`, `1.5`, `2`, `3`,
-or `4`). `owner` is the creator when a traveler has no explicit owner.
-`archivedOn` is set only while a traveler is archived. `device` is the
-traveler's device; a traveler from before that property, which only has the
-older list of devices, has those names joined with `/`. Timestamps are ISO 8601
-UTC. The traveler id can be used to retrieve more details of a traveler,
+createdByName, createdOn, updatedBy, updatedByName, updatedOn, archivedOn,
+owner, ownerName, tags, totalInput, finishedInput, subsystem, device,
+activity, machineArea, sector, and windchillId. Every property is always
+present; a property with no value is an empty string, an empty list, `0`, or
+`null` (for a date). `status` is the name of the status (`initialized`,
+`active`, `submitted for completion`, `completed`, `frozen`, or `archived`)
+and `statusCode` its number (`0`, `1`, `1.5`, `2`, `3`, or `4`). `owner` is
+the creator when a traveler has no explicit owner. `createdByName`,
+`updatedByName`, and `ownerName` are the full name on file for `createdBy`,
+`updatedBy`, and `owner` respectively, falling back to the account identifier
+itself when no name is on file — `createdBy`, `updatedBy`, and `owner` always
+keep the account identifier, unchanged. `archivedOn` is set only while a
+traveler is archived. `device` is the traveler's device; a traveler from
+before that property, which only has the older list of devices, has those
+names joined with `/`. Timestamps are ISO 8601 UTC. The traveler id can be
+used to retrieve more details of a traveler,
 https://hostname:port/apis/travelers/:id/ for the JSON representation and
 http://hostname:port/travelers/:id/ for the HTML representation.
 
@@ -133,6 +141,12 @@ has a header row and then one row per traveler, in this order of columns:
 
 `_id, title, status, createdBy, createdOn, updatedBy, updatedOn, archivedOn, owner, tags, totalInput, finishedInput, subsystem, device, activity, machineArea, sector, windchillId`
 
+- The `createdBy` and `updatedBy` columns hold the full name on file for that
+  person, not the account identifier — falling back to the account identifier
+  itself when no name is on file. This is the one column-level difference from
+  the JSON output, where `createdBy`/`updatedBy` are always the account
+  identifier; `owner`'s column is unaffected and still holds the account
+  identifier in both forms.
 - Without `page` and `limit`, the file holds every traveler that matches, not
   one page. With either of them, it holds just that page, as in the JSON output.
   `limit` still has an upper bound of 500 in that case.

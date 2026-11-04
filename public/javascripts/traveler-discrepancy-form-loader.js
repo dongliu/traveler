@@ -99,6 +99,7 @@ var DiscrepancyFormLoader = (function(parent, $, _) {
             l.records.length > 0
           ) {
             logData.inputBy = l.inputBy;
+            logData.inputByName = l.inputByName;
             logData.inputOn = l.inputOn;
             l.records.forEach(function(r) {
               if (r.name) {
