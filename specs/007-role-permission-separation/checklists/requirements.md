@@ -33,9 +33,10 @@
 
 - All items pass on first validation pass. No [NEEDS CLARIFICATION] markers were needed: the
   feature description gave an exact, unambiguous permission list and role-to-permission mapping.
-  Three judgment calls with real behavioral consequences (the `reviewer` role's purpose shifting
-  away from form review, the removal of blanket manager/admin access, and leftover legacy role
-  entries) were resolved as documented assumptions in spec.md rather than clarification questions,
-  informed by the existing "upton" permission-focused branch and this repo's documented access
-  hierarchy. Revisit those assumptions with the requester before `/speckit-plan` if they don't
-  match intent.
+  Two judgment calls with real behavioral consequences (the removal of blanket manager/admin
+  access, and leftover legacy role entries) were resolved as documented assumptions in spec.md
+  rather than clarification questions, informed by the existing "upton" permission-focused branch
+  and this repo's documented access hierarchy. A third — whether the `reviewer` role should keep
+  its existing form-review ability — was flagged as an open assumption after the initial spec and
+  has since been confirmed: `reviewer` grants both Review_forms and Approve_travelers (see
+  spec.md's Assumptions and data-model.md's role-to-permission mapping).
