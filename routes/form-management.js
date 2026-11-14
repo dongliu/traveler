@@ -128,7 +128,7 @@ module.exports = function(app) {
     '/released-forms/:id/status',
     auth.ensureAuthenticated,
     reqUtils.exist('id', ReleasedForm),
-    reqUtils.isOwnerOrAdminMw('id'),
+    reqUtils.requireAdmin(),
     reqUtils.filter('body', ['status', 'version']),
     reqUtils.hasAll('body', ['status', 'version']),
     async function updateStatus(req, res) {

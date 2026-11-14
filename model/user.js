@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Roles } = require('../lib/role');
 
 const { Schema } = mongoose;
 const { ObjectId } = Schema.Types;
@@ -10,7 +11,12 @@ const user = new Schema({
   office: String,
   phone: String,
   mobile: String,
-  roles: [String],
+  // only the assignable roles (lib/role.js's Roles) may ever be stored here -
+  // 'user' is an implicit default applied at request time and is never
+  // persisted (see lib/auth/index.js). Note: Mongoose does not run this enum
+  // on findOneAndUpdate by default, so routes/user.js's PUT /users/:id also
+  // filters its roles input explicitly.
+  roles: [{ type: String, enum: Roles }],
   lastVisitedOn: Date,
   forms: [ObjectId],
   travelers: [ObjectId],

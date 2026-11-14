@@ -24,6 +24,7 @@ const authConfig = config.auth;
 
 const routesUtilities = require('../utilities/routes');
 const reqUtils = require('../lib/req-utils');
+const { Read_all_forms } = require('../lib/permission');
 const shareLib = require('../lib/share');
 const tag = require('../lib/tag');
 const formModel = require('../model/form');
@@ -257,7 +258,7 @@ module.exports = function(app) {
   });
 
   app.get('/allforms/json', auth.ensureAuthenticated, async function(req, res) {
-    if (!routesUtilities.checkUserRole(req, 'read_all_forms')) {
+    if (!routesUtilities.hasPermission(req, Read_all_forms)) {
       return res.status(401).json('You are not authorized to view all forms.');
     }
     try {
