@@ -2,7 +2,6 @@ var http = require('http');
 var express = require('express');
 var sinon = require('sinon');
 var publicTravelers = require('../../lib/public-travelers');
-var reqUtils = require('../../lib/req-utils');
 var chai = require('chai');
 var expect = chai.expect;
 var should = chai.should();
@@ -550,9 +549,9 @@ describe('public-travelers', function() {
   });
 
   describe('#buildBaseMatch', function() {
-    it('should start with the shared public-tier match, unchanged', function() {
-      var match = publicTravelers.buildBaseMatch({ includeArchived: false });
-      match.$and[0].should.deep.equal(reqUtils.publicAccessMatch());
+    it('should not restrict to a public tier', function() {
+      var match = publicTravelers.buildBaseMatch({ includeArchived: true });
+      match.should.deep.equal({});
     });
 
     it('should exclude archived travelers unless they are included', function() {
@@ -560,18 +559,17 @@ describe('public-travelers', function() {
       excluded.$and.should.deep.include({ archived: { $ne: true } });
       excluded.$and.should.deep.include({ status: { $ne: 4 } });
       var included = publicTravelers.buildBaseMatch({ includeArchived: true });
-      included.$and.should.deep.equal([reqUtils.publicAccessMatch()]);
+      included.should.deep.equal({});
     });
 
-    it('should not let any parameter change the public-tier match', function() {
+    it('should ignore an attempt to smuggle a publicAccess condition in', function() {
       var match = publicTravelers.buildBaseMatch({
         includeArchived: true,
         publicAccess: -1,
         $and: [],
         public: false,
       });
-      match.$and[0].should.deep.equal(reqUtils.publicAccessMatch());
-      match.$and.length.should.equal(1);
+      match.should.deep.equal({});
     });
   });
 
@@ -1348,7 +1346,7 @@ describe('public-travelers', function() {
           tags: [],
         })
       );
-      match.$and.length.should.equal(3);
+      match.$and.length.should.equal(2);
     });
 
     it('should match an update range on updatedOn, or on createdOn when never edited', function() {
@@ -1357,7 +1355,7 @@ describe('public-travelers', function() {
       var match = publicTravelers.buildBaseMatch(
         baseParams({ updatedFrom: from, updatedTo: to })
       );
-      var range = match.$and[3];
+      var range = match.$and[2];
       range.should.deep.equal({
         $or: [
           { updatedOn: { $gte: from, $lte: to } },
@@ -1371,7 +1369,7 @@ describe('public-travelers', function() {
       var from = new Date(2026, 8, 1);
       var range = publicTravelers.buildBaseMatch(
         baseParams({ updatedFrom: from })
-      ).$and[3];
+      ).$and[2];
       range.$or[0].updatedOn.should.deep.equal({ $gte: from });
       range.$or[1].createdOn.should.deep.equal({ $gte: from });
     });
@@ -1430,7 +1428,7 @@ describe('public-travelers', function() {
       var match = publicTravelers.buildBaseMatch(
         baseParams({ textFilters: { subsystem: 'a.b(c)[d]*' } })
       );
-      var condition = match.$and[3];
+      var condition = match.$and[2];
       condition.should.deep.equal({
         subsystem: { $regex: 'a\\.b\\(c\\)\\[d\\]\\*', $options: 'i' },
       });
@@ -1478,7 +1476,7 @@ describe('public-travelers', function() {
         baseParams({ tags: ['Leak-Check', 'vacuum'] })
       );
       match.$and
-        .slice(3)
+        .slice(2)
         .should.deep.equal([
           { tags: { $regex: '^Leak-Check$', $options: 'i' } },
           { tags: { $regex: '^vacuum$', $options: 'i' } },
@@ -1516,7 +1514,7 @@ describe('public-travelers', function() {
         .should.be.false;
     });
 
-    it('should never let a filter widen the public tier', function() {
+    it('should match a traveler with no public access at all, filters and all', function() {
       var match = publicTravelers.buildBaseMatch(
         baseParams({
           textFilters: { subsystem: 'cryo' },
@@ -1524,7 +1522,6 @@ describe('public-travelers', function() {
           updatedFrom: new Date(2020, 0, 1),
         })
       );
-      match.$and[0].should.deep.equal(reqUtils.publicAccessMatch());
       matches(
         {
           publicAccess: -1,
@@ -1533,7 +1530,15 @@ describe('public-travelers', function() {
           updatedOn: new Date(2026, 0, 1),
         },
         match
-      ).should.be.false;
+      ).should.be.true;
+      matches(
+        {
+          subsystem: 'cryo',
+          tags: ['vacuum'],
+          updatedOn: new Date(2026, 0, 1),
+        },
+        match
+      ).should.be.true;
     });
   });
 
@@ -1645,9 +1650,10 @@ describe('public-travelers', function() {
     it('should include archived travelers in the counts when the status filter asks for them', function() {
       var asked = publicTravelers.parseListQuery({ status: 'archived' });
       var counts = publicTravelers.buildCountsPipeline(asked)[0].$match;
-      counts.$and.should.not.deep.include({ archived: { $ne: true } });
+      matches({ archived: true }, counts).should.be.true;
       var items = publicTravelers.buildItemsPipeline(asked)[0].$match;
-      items.$and.should.deep.include(publicTravelers.buildStatusMatch([4]));
+      matches({ archived: true }, items).should.be.true;
+      matches({ status: 1 }, items).should.be.false;
     });
   });
 
@@ -2672,7 +2678,7 @@ describe('public-travelers', function() {
       }
 
       it('should look in the device, or in the older list when there is no device', function() {
-        var condition = filterMatch('dev').$and[1];
+        var condition = filterMatch('dev').$and[0];
         condition.should.deep.equal({
           $or: [
             { device: { $regex: 'dev', $options: 'i' } },
@@ -2732,7 +2738,7 @@ describe('public-travelers', function() {
           includeArchived: true,
           textFilters: { subsystem: 'cryo' },
         });
-        match.$and[1].should.deep.equal({
+        match.$and[0].should.deep.equal({
           subsystem: { $regex: 'cryo', $options: 'i' },
         });
       });

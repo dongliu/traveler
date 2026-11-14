@@ -369,7 +369,7 @@ module.exports = function(app) {
     res.render('public-travelers', routesUtilities.getRenderObject(req));
   });
 
-  // paged, filterable list of public travelers; the same listing is served to
+  // paged, filterable list of every traveler; the same listing is served to
   // the REST API at /apis/publictravelers/ (see lib/public-travelers.js)
   app.get(
     '/publictravelers/list',

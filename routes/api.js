@@ -163,7 +163,7 @@ function performFindEntityReferencedContentsByParentEntityId(
 }
 
 module.exports = function(app) {
-  // paged, filterable list of public travelers; the same listing is served to
+  // paged, filterable list of every traveler; the same listing is served to
   // the web app at /publictravelers/list (see lib/public-travelers.js)
   app.get(
     '/apis/publictravelers/',

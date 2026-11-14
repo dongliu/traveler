@@ -3,7 +3,7 @@
 /*global selectColumn: false, fnGetSelected: false, selectEvent: false*/
 
 /**
- * The public travelers dashboard. All the data comes from
+ * The all-travelers dashboard. All the data comes from
  * GET /publictravelers/list, which pages, filters, and orders on the server.
  * The DataTable is only a container for the rows of the current page (paging,
  * searching, and sorting are off), so the shared row-selection helpers and the
@@ -311,7 +311,7 @@ $(function() {
     bAutoWidth: false,
     sDom: 't',
     oLanguage: {
-      sEmptyTable: 'No public travelers match the current filters.',
+      sEmptyTable: 'No travelers match the current filters.',
     },
   });
 
