@@ -96,10 +96,10 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
     await page.waitForURL(new RegExp(`/ncrs/${ncrId}/disposition$`));
 
     await expect(page.locator('h3')).toContainText('Submit Engineering Disposition');
-    await expect(page.locator('.well')).toBeVisible();
+    await expect(page.getByRole('group', { name: 'Part Information' })).toBeVisible();
   });
 
-  test('AS1b - disposition page summary box shows Supplier, WBS, Context, and Description', async ({ page }) => {
+  test('AS1b - disposition page shows Supplier, WBS, Context, and Description from the full NCR detail view', async ({ page }) => {
     const id = runId();
     const { ncrId } = await createTestNcr({
       ncrData: {
@@ -111,7 +111,7 @@ test.describe('US2 - CE/CS Performs Engineering Disposition', () => {
 
     await page.goto(`/ncrs/${ncrId}/disposition`);
 
-    const summary = page.locator('.well');
+    const summary = page.locator('.container');
     await expect(summary).toContainText(`Summary Supplier ${id}`);
     await expect(summary).toContainText(`Summary WBS ${id}`);
     await expect(summary).toContainText('incoming inspection');

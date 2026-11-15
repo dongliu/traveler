@@ -20,38 +20,8 @@ block content
       | &nbsp;
       span.label.label-info= ncr.status
 
-    fieldset
-      legend NCR Summary
-      dl.dl-horizontal
-        dt Supplier
-        dd= ncr.supplier_name
-        dt WBS
-        dd= ncr.wbs_number
-        dt Description
-        dd= ncr.description_of_nonconformance
-
-    if ncr.disposition && ncr.disposition.parts_disposition
-      fieldset
-        legend Engineering Disposition
-        dl.dl-horizontal
-          dt Parts Disposition
-          dd= ncr.disposition.parts_disposition
-          dt Submitted By
-          dd= ncr.ce_cs_name
-          dt Root Cause
-          dd= ncr.disposition.root_cause_documentation
-          if ncr.disposition.rework_repair_instructions
-            dt Rework / Repair Instructions
-            dd= ncr.disposition.rework_repair_instructions
-
-    if ncr.qa_concurrence_timestamp
-      fieldset
-        legend QA Concurrence
-        dl.dl-horizontal
-          dt QA Staff
-          dd= ncr.qa_staff_name
-          dt Concurred On
-          dd= new Date(ncr.qa_concurrence_timestamp).toLocaleString()
+    - var showApprovalStatus = false
+    include ncr-detail-fields.jade
 
     - var canManageApprovers = isQa && ncr.status === 'Approval Requested'
 
