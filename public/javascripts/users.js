@@ -214,19 +214,26 @@ $(function() {
   $('#user-modify').click(function() {
     const selected = fnGetSelected(userTable, 'row-selected');
     if (selected.length) {
+      const selectedData = selected.map(function(row) {
+        return userTable.fnGetData(row);
+      });
+      const heldByAllSelected = function(role) {
+        return selectedData.every(function(data) {
+          return (data.roles || []).indexOf(role) !== -1;
+        });
+      };
       $('#modalLabel').html(
         `Modify the following ${selected.length} users' role? `
       );
       $('#modal .modal-body').empty();
       $('#modal .modal-body').append(
         '<form id="modal-roles" class="form-inline">' +
-          '<label class="checkbox"><input id="modal-manager" type="checkbox" value="manager">manager</label> ' +
-          '<label class="checkbox"><input id="modal-reviewer" type="checkbox" value="reviewer">reviewer</label> ' +
-          '<label class="checkbox"><input id="modal-admin" type="checkbox" value="admin">admin</label> ' +
+          `<label class="checkbox"><input id="modal-manager" type="checkbox" value="manager"${heldByAllSelected('manager') ? ' checked' : ''}>manager</label> ` +
+          `<label class="checkbox"><input id="modal-reviewer" type="checkbox" value="reviewer"${heldByAllSelected('reviewer') ? ' checked' : ''}>reviewer</label> ` +
+          `<label class="checkbox"><input id="modal-admin" type="checkbox" value="admin"${heldByAllSelected('admin') ? ' checked' : ''}>admin</label> ` +
           '</form>'
       );
-      selected.forEach(function(row) {
-        const data = userTable.fnGetData(row);
+      selectedData.forEach(function(data) {
         $('#modal .modal-body').append(
           `<div id="${data._id}">${data.name}</div>`
         );
