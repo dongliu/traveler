@@ -3,7 +3,7 @@
 Automated end-to-end tests, written with [Playwright](https://playwright.dev/).
 They drive a real browser (Chromium) against the local Docker stack, read the
 emails the app sends from Mailpit, and set up test data through a small fixture
-CLI. **This is the way to test the app end to end.** (`test-unit/` holds the
+CLI. **This is the way to test the app end to end.** (`tests/` holds the
 mocha unit tests.)
 
 The design is in [specs/002-playwright-e2e-tests/](../specs/002-playwright-e2e-tests/);

@@ -9,7 +9,7 @@ module.exports = {
   extension: ['js', 'cjs', 'mjs'],
 
   // Glob patterns for test files
-  spec: 'test-unit/**/*.test.js', // Runs files in 'test' directory ending with .spec.js
+  spec: 'tests/**/*.test.js', // Runs files in 'test' directory ending with .spec.js
 
   // Watch files for changes and re-run tests
   // 'watch-files': ['lib/**/*.js', 'test/**/*.js'],

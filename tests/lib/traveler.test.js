@@ -5,8 +5,8 @@ require('chai').should();
 process.env.TRAVELER_CONFIG_REL_PATH = 'docker';
 
 // model/traveler.js -> model/review.js registers against `User` at require
-// time (same reason test-unit/lib/traveler-ncr.test.js guards this -- Mocha
-// loads every test-unit/**/*.test.js file into one process, so whichever
+// time (same reason tests/lib/traveler-ncr.test.js guards this -- Mocha
+// loads every tests/**/*.test.js file into one process, so whichever
 // file runs first wins the registration and every other file must tolerate
 // it already being there).
 if (!mongoose.modelNames().includes('User')) {

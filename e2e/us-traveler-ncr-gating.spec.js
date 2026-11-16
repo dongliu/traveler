@@ -23,7 +23,7 @@ const {
 // (lib/req-utils.js getAccess). So no e2e persona can lack read access, and the
 // "no read access is answered exactly like a nonexistent traveler" rule
 // (spec FR-008) cannot be reached here — it is covered at unit level in
-// test-unit/lib/traveler-ncr.test.js, with canRead stubbed.
+// tests/lib/traveler-ncr.test.js, with canRead stubbed.
 //
 // Route/UI behaviour is covered here rather than in a supertest-style harness
 // because this repository has none (specs/124 research.md Decision 12).

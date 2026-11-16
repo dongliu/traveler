@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app",
-    "unit": "mocha test-unit/**/*.test.js",
+    "unit": "mocha tests/**/*.test.js",
     "e2e": "playwright test --config=e2e/playwright.config.js",
     "copy:tinymce": "cpx \"node_modules/tinymce/**/*\" public/tinymce",
     "copy:tinymce-jquery": "cpx \"node_modules/@tinymce/tinymce-jquery/**/*\" public/tinymce-jquery",

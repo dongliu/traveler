@@ -12,12 +12,12 @@ const User = mongoose.model('User');
 const { ensureUserExists } = require('../../lib/user-directory.js');
 
 // User.prototype.save and User.findById may already be stubbed by another
-// test-unit/**/*.test.js file's own top-level beforeEach -- Mocha loads every
+// tests/**/*.test.js file's own top-level beforeEach -- Mocha loads every
 // such file into one process, and an unguarded top-level hook applies to
 // every test in the whole run, not just this file's. Reuse an existing stub
 // (reconfiguring it for this test) instead of re-wrapping, the same
-// "isSinonProxy" idiom test-unit/lib/ncr-email.test.js and
-// test-unit/lib/review.test.js already use for this exact reason.
+// "isSinonProxy" idiom tests/lib/ncr-email.test.js and
+// tests/lib/review.test.js already use for this exact reason.
 beforeEach(() => {
   if (!User.prototype.save.isSinonProxy) {
     sinon.stub(User.prototype, 'save');

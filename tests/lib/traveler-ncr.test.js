@@ -123,7 +123,7 @@ describe('lib/traveler-ncr — shell', () => {
 });
 
 // A private sandbox: `sinon.restore()` would also restore the module-level
-// stubs test-unit/lib/ncr-service.test.js installs on the default sandbox.
+// stubs tests/lib/ncr-service.test.js installs on the default sandbox.
 const sandbox = sinon.createSandbox();
 
 /** Resolves to the error a promise rejects with; fails if it does not reject. */
