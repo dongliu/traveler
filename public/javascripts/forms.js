@@ -361,7 +361,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  sortByColumn(submittedFormTableConfig, updatedOnHideColumn, 'desc');
+  sortByColumn(submittedFormTableConfig, docNoColumn, 'asc');
   initTableIfExists(
     $('#submitted-form-table'),
     submittedFormTableConfig,
