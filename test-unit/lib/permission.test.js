@@ -19,6 +19,7 @@ describe('permission', () => {
       const permission = permissionLib.getPermissions(roles);
       permission.should.be.a('array');
       permission.should.include(permissionLib.Read_all_forms);
+      permission.should.include(permissionLib.Write_all_forms);
       permission.should.not.include(permissionLib.Manage_users);
     });
   });

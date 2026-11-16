@@ -1,6 +1,7 @@
 {
   "user": [
     "read_all_forms",
+    "write_all_forms",
     "write_active_travelers",
     "review_forms",
     "approve_travelers"
