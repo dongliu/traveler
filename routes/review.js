@@ -5,6 +5,7 @@ const routesUtilities = require('../utilities/routes');
 
 const { Review_forms, Approve_travelers } = require('../lib/permission');
 const { Traveler } = require('../model/traveler');
+const travelerLib = require('../lib/traveler');
 
 const User = mongoose.model('User');
 const Form = mongoose.model('Form');
@@ -88,10 +89,12 @@ module.exports = function(app) {
               $ne: true,
             },
           },
-          'title devices tags documentNumber referenceReleasedFormVer __review'
+          'title devices tags documentNumber referenceReleasedFormVer owner createdBy activeForm __review'
         )
           .populate('__review.reviewRequests.requestedBy', 'name')
-          .exec();
+          .populate('createdBy', 'name')
+          .lean();
+        await travelerLib.attachFormOwners(travelers);
         return res.status(200).json(travelers);
       } catch (error) {
         debug(`error: ${error}`);
