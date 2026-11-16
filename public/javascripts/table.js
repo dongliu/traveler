@@ -756,7 +756,7 @@ const releasedByColumn = personColumn('Released by', 'releasedBy');
 
 const transferredOnColumn = dateColumn('transferred', 'transferredOn');
 
-const archivedOnColumn = dateColumn('Archived', 'archivedOn');
+const archivedOnColumn = longDateColumn('Archived', 'archivedOn');
 const archivedByColumn = personColumn('Archived by', 'archivedBy');
 
 const deadlineColumn = dateColumn('Deadline', 'deadline');
