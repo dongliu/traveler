@@ -6,7 +6,7 @@ sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
 createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn:
 false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn:
 false, deviceColumn: false, fnGetSelected: false, selectEvent: false,
-filterEvent: false, ownerColumn: false, deadlineColumn: false,
+filterEvent: false, ownerColumn: false, travelerOwnerColumn: false, pulledByColumn: false, deadlineColumn: false,
 travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false,
 tagsColumn: false, sDomNoTNoR: false*/
 
@@ -110,7 +110,8 @@ $(function() {
     titleColumn,
     tagsColumn,
     deviceColumn,
-    ownerColumn,
+    travelerOwnerColumn,
+    pulledByColumn,
     statusColumn,
     lastEditColumn,
     travelerProgressColumn,
@@ -145,7 +146,8 @@ $(function() {
     titleColumn,
     tagsColumn,
     deviceColumn,
-    ownerColumn,
+    travelerOwnerColumn,
+    pulledByColumn,
     // statusColumn,
     lastEditColumn,
     travelerProgressColumn,

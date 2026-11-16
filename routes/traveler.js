@@ -319,39 +319,40 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/currenttravelers/json', auth.ensureAuthenticated, function(
+  app.get('/currenttravelers/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
-    const statusQuery = req.query.status;
-    const statusList = statusQuery.split(',').map(v => Number(v));
-    var search = {
-      archived: {
-        $ne: true,
-      },
-      status: {
-        $in: statusList,
-      },
-    };
-    if (req.query.hasOwnProperty('device')) {
-      search.devices = {
-        $in: [req.query.device],
+    try {
+      const statusQuery = req.query.status;
+      const statusList = statusQuery.split(',').map(v => Number(v));
+      var search = {
+        archived: {
+          $ne: true,
+        },
+        status: {
+          $in: statusList,
+        },
       };
+      if (req.query.hasOwnProperty('device')) {
+        search.devices = {
+          $in: [req.query.device],
+        };
+      }
+      const travelers = await Traveler.find(
+        search,
+        'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer tags dwr devices manPower owner activeForm'
+      )
+        .populate('createdBy', 'name')
+        .populate('updatedBy', 'name')
+        .lean();
+      await travelerLib.attachFormOwners(travelers);
+
+      return res.status(200).json(travelers);
+    } catch (err) {
+      logger.error(err);
+      return res.status(500).send(err.message);
     }
-    Traveler.find(
-      search,
-      'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer tags dwr devices manPower'
-    )
-      .populate('createdBy', 'name')
-      .populate('updatedBy', 'name')
-      .lean()
-      .exec(function(err, travelers) {
-        if (err) {
-          logger.error(err);
-          return res.status(500).send(err.message);
-        }
-        return res.status(200).json(travelers);
-      });
   });
 
   app.get('/archivedtravelers/json', auth.ensureAuthenticated, function(

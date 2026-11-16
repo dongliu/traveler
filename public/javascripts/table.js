@@ -692,6 +692,38 @@ const ownerColumn = {
   bFilter: true,
 };
 
+const travelerOwnerColumn = {
+  sTitle: 'Owner',
+  sDefaultContent: '',
+  mData(source, type) {
+    const owner = source.formOwner;
+    if (type === 'sort' || type === 'filter') {
+      return owner;
+    }
+    if (owner) {
+      return person(owner);
+    }
+    return '';
+  },
+  bFilter: true,
+};
+
+const pulledByColumn = {
+  sTitle: 'Pulled by',
+  sDefaultContent: '',
+  mData(source, type) {
+    const pulledBy = source.owner || source.createdBy;
+    if (type === 'sort' || type === 'filter') {
+      return pulledBy;
+    }
+    if (pulledBy) {
+      return person(pulledBy);
+    }
+    return '';
+  },
+  bFilter: true,
+};
+
 const releasedTemplatedOwnerColumn = {
   sTitle: 'Owner',
   sDefaultContent: '',
