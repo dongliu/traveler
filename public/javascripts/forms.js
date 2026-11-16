@@ -180,7 +180,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  sortByColumn(formTableConfig, updatedOnHideColumn, 'desc');
+  sortByColumn(formTableConfig, docNoColumn, 'asc');
   initTableIfExists($('#form-table'), formTableConfig, tables);
 
   /* form table ends */
