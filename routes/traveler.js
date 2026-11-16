@@ -1046,8 +1046,11 @@ module.exports = function(app) {
    * Only user who can write can update the status.
    * 1 => 1.5:
    * user who can write can submit the traveler for completion
-   * 1.5 => 2, 1.5 => 1 :
-   * only admin or manager can approve or reject submitted traveler
+   * 1.5 => 2:
+   * not available here -- only reachable through the review process
+   * (lib/review.js#allApproveFlow), once every assigned reviewer approves
+   * 1.5 => 1 :
+   * only admin or manager can reject submitted traveler
    * 2 => 1:
    * only admin or manager can return completed traveler for more work
    * 2 => 4 :

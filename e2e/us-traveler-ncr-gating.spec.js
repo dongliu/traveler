@@ -547,10 +547,24 @@ test.describe(
       // record, or a create and a submit that landed at the same instant). NCRs can
       // only be initiated against an active traveler, so this cannot arise in normal
       // operation; approving it is not blocked (spec 124 Assumptions).
+      //
+      // 1.5 -> 2 is only reachable through the review process (lib/review.js
+      // allApproveFlow) now, not through the generic status route, so this
+      // seeds a reviewRequest for PRIMARY directly (the real 1 -> 1.5 submission
+      // flow is what normally assigns one, but that flow is itself what this
+      // traveler is bypassing to reach its 1.5/open-NCR starting state) and
+      // approves through the real review-results endpoint.
       const id = runId();
       const { travelerId } = await createTraveler({
         inputs: fourInputs(id),
         status: 1.5,
+      });
+      await execFixtureCli('set-traveler-status', {
+        travelerId,
+        status: 1.5,
+        reviewRequests: [
+          { _id: PRIMARY, requestedOn: new Date().toISOString(), requestedBy: PRIMARY },
+        ],
       });
       await createLinkedNcr(id, {
         travelerId,
@@ -558,8 +572,8 @@ test.describe(
         inputLabel: `Input A ${id}`,
       });
 
-      const res = await page.request.put(`/travelers/${travelerId}/status`, {
-        data: { status: 2 },
+      const res = await page.request.post(`/travelers/${travelerId}/review/results`, {
+        data: { result: '1', comment: 'approved', v: 1 },
       });
       expect(res.status()).toBe(200);
       expect(await travelerStatus(travelerId)).toBe(2);
