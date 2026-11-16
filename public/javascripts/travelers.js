@@ -360,7 +360,7 @@ $(function() {
     sDom: sDomNoTools,
   };
   Table.sortByColumn(archivedTravelerTableConfig, docNoColumn, 'asc');
-  Table.initTableIfExists(
+  const archivedTravelerTable = Table.initTableIfExists(
     $('#archived-traveler-table'),
     archivedTravelerTableConfig,
     tables
@@ -396,12 +396,7 @@ $(function() {
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        updateStatusFromModal(
-          4,
-          'travelers',
-          activeTable
-          // archivedTravelerTable
-        );
+        updateStatusFromModal(4, 'travelers', activeTable, archivedTravelerTable);
       });
     }
   });
