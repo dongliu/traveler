@@ -470,9 +470,7 @@ module.exports = function(app) {
         'traveler',
         routesUtilities.getRenderObject(req, {
           isOwner: reqUtils.isOwner(req, doc),
-          canStart: doc.sharedWith.some(
-            doc => doc._id === req.session.userid
-          ),
+          canWrite: reqUtils.canWrite(req, doc),
           isReviewer: doc.isReviewer(req.session.userid),
           pendingReviewers,
           traveler: doc,
