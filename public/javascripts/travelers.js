@@ -7,7 +7,7 @@ createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn:
 false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn:
 false, deviceColumn: false, fnGetSelected: false, selectEvent: false,
 filterEvent: false, ownerColumn: false, travelerOwnerColumn: false, pulledByColumn: false, deadlineColumn: false,
-travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false,
+travelerProgressColumn: false, archivedOnColumn: false, archivedByColumn: false, binderLinkColumn: false,
 tagsColumn: false, sDomNoTNoR: false*/
 
 /*global archiveFromModal, transferFromModal, modalScroll, docNoColumn,
@@ -323,18 +323,16 @@ $(function() {
   var archivedTravelerAoColumns = [
     selectColumn,
     travelerLinkColumn,
-    titleColumn,
     docNoColumn,
     travelerVersionColumn,
-    archivedOnColumn,
-    statusColumn,
+    titleColumn,
+    tagsColumn,
     deviceColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
-    createdOnColumn,
-    filledByColumn,
-    updatedOnColumn,
-    travelerProgressColumn,
+    travelerOwnerColumn,
+    pulledByColumn,
+    statusColumn,
+    archivedByColumn,
+    archivedOnColumn,
   ];
   const archivedTravelerTableConfig = {
     sAjaxSource: '/archivedtravelers/json',
