@@ -134,7 +134,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(travelerTableConfig, updatedOnHideColumn, 'desc');
+  Table.sortByColumn(travelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists($('#traveler-table'), travelerTableConfig, tables);
 
   const reviewTravelerAoColumns = [
@@ -170,7 +170,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(reviewTravelerTableConfig, updatedOnHideColumn, 'desc');
+  Table.sortByColumn(reviewTravelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists($('#under-review-traveler-table'), reviewTravelerTableConfig, tables);
 
   /*transferred traveler table starts*/
@@ -216,7 +216,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(transferredTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.sortByColumn(transferredTravelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists(
     $('#transferred-traveler-table'),
     transferredTravelerTableConfig,
@@ -266,7 +266,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(sharedTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.sortByColumn(sharedTravelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists(
     $('#shared-traveler-table'),
     sharedTravelerTableConfig,
@@ -313,7 +313,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(groupSharedTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.sortByColumn(groupSharedTravelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists(
     $('#group-shared-traveler-table'),
     groupSharedTravelerTableConfig,
@@ -359,7 +359,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(archivedTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.sortByColumn(archivedTravelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists(
     $('#archived-traveler-table'),
     archivedTravelerTableConfig,

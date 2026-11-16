@@ -171,7 +171,7 @@ $(function() {
     aoColumns: releasedFormAoColumns,
     sDom: sDomNoTools,
   };
-  sortByColumn(releasedFormTableConfig, releasedOnHideColumn, 'desc');
+  sortByColumn(releasedFormTableConfig, docNoColumn, 'asc');
   initTableIfExists($('#released-form-table'), releasedFormTableConfig, tables);
   /* released form table ends */
 
@@ -207,7 +207,7 @@ $(function() {
     aoColumns: archivedReleasedFormAoColumns,
     sDom: sDomNoTools,
   };
-  sortByColumn(archivedReleasedFormTableConfig, archivedOnColumn, 'desc');
+  sortByColumn(archivedReleasedFormTableConfig, docNoColumn, 'asc');
   initTableIfExists(
     $('#archived-released-form-table'),
     archivedReleasedFormTableConfig,
