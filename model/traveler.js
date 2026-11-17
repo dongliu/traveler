@@ -131,6 +131,7 @@ var traveler = new Schema({
   clonedFrom: ObjectId,
   updatedBy: { type: String, ref: 'User' },
   updatedOn: Date,
+  archivedBy: { type: String, ref: 'User' },
   archivedOn: Date,
   owner: String,
   tags: [String],

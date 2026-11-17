@@ -19,27 +19,7 @@ block content
       | &nbsp;
       span.label.label-info= ncr.status
 
-    fieldset
-      legend Approved Disposition
-      dl.dl-horizontal
-        dt Parts Disposition
-        dd= ncr.disposition && ncr.disposition.parts_disposition
-        if ncr.disposition && ncr.disposition.root_cause_documentation
-          dt Root Cause
-          dd= ncr.disposition.root_cause_documentation
-        if ncr.disposition && ncr.disposition.rework_repair_instructions
-          dt Rework / Repair Instructions
-          dd= ncr.disposition.rework_repair_instructions
-
-    if ncr.preventive_actions && ncr.preventive_actions.length
-      fieldset
-        legend Preventive Actions
-        ol
-          each pa in ncr.preventive_actions
-            li
-              = pa.action_description
-              | &nbsp;
-              span.label= pa.status
+    include ncr-detail-fields.jade
 
     #close-success.alert.alert-success(style='display:none')
       strong NCR closed.&nbsp;

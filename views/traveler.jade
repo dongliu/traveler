@@ -39,12 +39,13 @@ block underTopBtn
         if (traveler.referenceReleasedFormVer)
           h4 #{viewConfig.terminology.form} version: #{traveler.referenceReleasedFormVer}
         //- if (locals.traveler.status !== undefined)
-        if (isOwner || isAdmin || isManager || canStart)
-          case traveler.status
-            when 0
+        case traveler.status
+          when 0
+            if (isOwner || isAdmin || isManager || canWrite)
               .btn-group
                 button.btn.btn-primary#work Start to work
-            when 2
+          when 2
+            if (isOwner || isAdmin || isManager || canWrite)
               .btn-group
                 a.btn.btn-primary#pdf(data-toggle='tooltip', title='create pdf in print view', href='print', target='#{viewConfig.linkTarget}') Create PDF
 

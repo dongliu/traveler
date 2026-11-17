@@ -2,7 +2,8 @@
  global prefix, ajax401, updateAjaxURL, disableAjaxCache: false formLinkColumn,
  titleColumn, sDomNoTools, filterEvent, formStatusColumn, tagsColumn, Holder,
  versionColumn, reviewRequestedByColumn, reviewRequestedOnColumn, docNoColumn,
- ownerColumn
+ ownerColumn, travelerLinkColumn, travelerVersionColumn, deviceColumn,
+ travelerOwnerColumn, pulledByColumn
  */
 
 import * as Table from './lib/table.js';
@@ -48,11 +49,13 @@ $(function() {
 
   const reviewTravelersAoColumns = [
     travelerLinkColumn,
-    titleColumn,
     docNoColumn,
     travelerVersionColumn,
-    deviceColumn,
+    titleColumn,
     tagsColumn,
+    deviceColumn,
+    travelerOwnerColumn,
+    pulledByColumn,
     reviewRequestedByColumn,
     reviewRequestedOnColumn,
   ];

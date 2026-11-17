@@ -264,11 +264,17 @@ async function createFillableTraveler({ createdBy, title, inputName, inputLabel,
 // Moves a traveler to any status directly, bypassing the status route's
 // transition and authorization rules — for arranging test preconditions
 // (e.g. a submitted/frozen traveler) and for simulating a status change that
-// happens while a form is open.
-async function setTravelerStatus({ travelerId, status }) {
+// happens while a form is open. Optionally seeds __review.reviewRequests in
+// the same update, for arranging a reviewer on a traveler that was not moved
+// to 1.5 through the real submission flow (which is what normally assigns one).
+async function setTravelerStatus({ travelerId, status, reviewRequests }) {
   require('../../model/user');
   const { Traveler } = require('../../model/traveler');
-  await Traveler.updateOne({ _id: travelerId }, { $set: { status } });
+  const update = { status };
+  if (reviewRequests !== undefined) {
+    update['__review.reviewRequests'] = reviewRequests;
+  }
+  await Traveler.updateOne({ _id: travelerId }, { $set: update });
   return { travelerId, status };
 }
 

@@ -5,9 +5,9 @@ process.env.TRAVELER_CONFIG_REL_PATH = 'docker';
 
 // Stub email.js's sendNotification *before* requiring ncr-email.js so the
 // destructured local inside ncr-email.js picks up the stub (same pattern as
-// test-unit/lib/ncr-service.test.js's ncr-email stubbing). Reuse an existing
+// tests/lib/ncr-service.test.js's ncr-email stubbing). Reuse an existing
 // stub if another test file (e.g. review.test.js) already wrapped it — Mocha
-// loads every test-unit/**/*.test.js file into one process, so a second
+// loads every tests/**/*.test.js file into one process, so a second
 // unconditional sinon.stub() on the same method throws "already wrapped".
 const emailModule = require('../../lib/email');
 const sendNotificationStub = emailModule.sendNotification.isSinonProxy

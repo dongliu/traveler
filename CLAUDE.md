@@ -18,8 +18,8 @@ docker compose up
 npx eslint .
 
 # Unit tests
-npm run unit               # all unit tests (mocha test-unit/**/*.test.js)
-npx mocha test-unit/lib/permission.test.js   # single test file
+npm run unit               # all unit tests (mocha tests/**/*.test.js)
+npx mocha tests/lib/permission.test.js   # single test file
 
 # Unit tests require this env var when run outside Docker
 TRAVELER_CONFIG_REL_PATH=docker npm run unit

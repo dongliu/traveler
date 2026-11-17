@@ -20,6 +20,10 @@ prepend topBtn
       | &nbsp;Generate report
   if (isAdmin)
     .btn-group
+      button.btn.btn-warning.archive(data-toggle='tooltip', title='archive the selected travelers')
+        i.fa.fa-archive.fa-lg
+        | &nbsp;Archive
+    .btn-group
       a.btn.btn-danger#delete(data-toggle='tooltip', title='delete selected travelers')
         i.fa.fa-trash.fa-lg
         | &nbsp;Delete
@@ -40,6 +44,8 @@ block underTopBtn
         if (viewConfig.transferOwnership)
           li
             a(href='#transferredtravelers', data-toggle='tab') Transferred travelers
+        li
+          a(href='#archivedtravelers', data-toggle='tab') Archived travelers
 
       .tab-content
         #travelers.tab-pane.active
@@ -60,6 +66,8 @@ block underTopBtn
             table#transferred-traveler-table.table.table-bordered.table-hover
         #under-review-travelers.tab-pane
           table#under-review-traveler-table.table.table-bordered.table-hover
+        #archivedtravelers.tab-pane
+          table#archived-traveler-table.table.table-bordered.table-hover
 
 append js
   script(type='module', src='#{prefix}/javascripts/travelers.js')

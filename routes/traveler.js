@@ -319,84 +319,89 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/currenttravelers/json', auth.ensureAuthenticated, function(
+  app.get('/currenttravelers/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
-    const statusQuery = req.query.status;
-    const statusList = statusQuery.split(',').map(v => Number(v));
-    var search = {
-      archived: {
-        $ne: true,
-      },
-      status: {
-        $in: statusList,
-      },
-    };
-    if (req.query.hasOwnProperty('device')) {
-      search.devices = {
-        $in: [req.query.device],
+    try {
+      const statusQuery = req.query.status;
+      const statusList = statusQuery.split(',').map(v => Number(v));
+      var search = {
+        archived: {
+          $ne: true,
+        },
+        status: {
+          $in: statusList,
+        },
       };
+      if (req.query.hasOwnProperty('device')) {
+        search.devices = {
+          $in: [req.query.device],
+        };
+      }
+      const travelers = await Traveler.find(
+        search,
+        'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer tags dwr devices manPower owner activeForm'
+      )
+        .populate('createdBy', 'name')
+        .populate('updatedBy', 'name')
+        .lean();
+      await travelerLib.attachFormOwners(travelers);
+
+      return res.status(200).json(travelers);
+    } catch (err) {
+      logger.error(err);
+      return res.status(500).send(err.message);
     }
-    Traveler.find(
-      search,
-      'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer tags dwr devices manPower'
-    )
-      .populate('createdBy', 'name')
-      .populate('updatedBy', 'name')
-      .lean()
-      .exec(function(err, travelers) {
-        if (err) {
-          logger.error(err);
-          return res.status(500).send(err.message);
-        }
-        return res.status(200).json(travelers);
-      });
   });
 
-  app.get('/archivedtravelers/json', auth.ensureAuthenticated, function(
+  app.get('/archivedtravelers/json', auth.ensureAuthenticated, async function(
     req,
     res
   ) {
-    const search = {
-      $and: [
-        {
-          $or: [
-            {
-              createdBy: req.session.userid,
-              owner: {
-                $exists: false,
+    try {
+      const search = {
+        $and: [
+          {
+            $or: [
+              {
+                createdBy: req.session.userid,
+                owner: {
+                  $exists: false,
+                },
               },
-            },
-            {
-              owner: req.session.userid,
-            },
-          ],
-        },
-        {
-          $or: [
-            {
-              archived: true,
-            },
-            {
-              status: 4,
-            },
-          ],
-        },
-      ],
-    };
-    Traveler.find(
-      search,
-      'title description status devices locations archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
-    )
-      .lean()
-      .exec(function(err, travelers) {
-        if (err) {
-          logger.error(err);
-          return res.status(500).send(err.message);
-        }
-        return res.status(200).json(travelers);
-      });
+              {
+                owner: req.session.userid,
+              },
+            ],
+          },
+          {
+            $or: [
+              {
+                archived: true,
+              },
+              {
+                status: 4,
+              },
+            ],
+          },
+        ],
+      };
+      const travelers = await Traveler.find(
+        search,
+        'title description status devices locations tags owner createdBy activeForm archivedBy archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
+      )
+        .populate('createdBy', 'name')
+        .populate('updatedBy', 'name')
+        .populate('archivedBy', 'name')
+        .lean();
+      await travelerLib.attachFormOwners(travelers);
+
+      return res.status(200).json(travelers);
+    } catch (err) {
+      logger.error(err);
+      return res.status(500).send(err.message);
+    }
   });
 
   // create new travelers
@@ -470,9 +475,7 @@ module.exports = function(app) {
         'traveler',
         routesUtilities.getRenderObject(req, {
           isOwner: reqUtils.isOwner(req, doc),
-          canStart: doc.sharedWith.some(
-            doc => doc._id === req.session.userid
-          ),
+          canWrite: reqUtils.canWrite(req, doc),
           isReviewer: doc.isReviewer(req.session.userid),
           pendingReviewers,
           traveler: doc,
@@ -1048,8 +1051,11 @@ module.exports = function(app) {
    * Only user who can write can update the status.
    * 1 => 1.5:
    * user who can write can submit the traveler for completion
-   * 1.5 => 2, 1.5 => 1 :
-   * only admin or manager can approve or reject submitted traveler
+   * 1.5 => 2:
+   * not available here -- only reachable through the review process
+   * (lib/review.js#allApproveFlow), once every assigned reviewer approves
+   * 1.5 => 1 :
+   * only admin or manager can reject submitted traveler
    * 2 => 1:
    * only admin or manager can return completed traveler for more work
    * 2 => 4 :

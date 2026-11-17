@@ -23,20 +23,7 @@ block content
           |  (#{ncr.ce_cs_name})
         | &nbsp;can open this page and submit the disposition for this NCR. You are viewing a read-only summary.
 
-    .well
-      dl.dl-horizontal
-        dt Supplier
-        dd= ncr.supplier_name
-        dt WBS
-        dd= ncr.wbs_number
-        if ncr.discovery_date
-          dt Discovery Date
-          dd= new Date(ncr.discovery_date).toLocaleDateString()
-        if ncr.discovery_context
-          dt Context
-          dd= ncr.discovery_context.replace(/_/g, ' ')
-        dt Description of Nonconformance
-        dd= ncr.description_of_nonconformance
+    include ncr-detail-fields.jade
 
     if isAssignedCeCs
       #disp-success.alert.alert-success(style='display:none')

@@ -1,0 +1,184 @@
+//- Read-only NCR detail sections shared by the role-specific action pages
+//- (disposition, concurrence, approval, resubmit, close) and by
+//- ncr-detail-body.jade, so the person taking the action can see the same
+//- information as the full NCR detail page without the Event Timeline or
+//- the detail page's own interactive management controls.
+//-
+//- Expects `ncr` and `prefix` in scope. An including page may set
+//- `showApprovalStatus = false` beforehand to suppress the Approval Status
+//- table when it already renders its own (e.g. with approver management).
+
+.row-fluid
+  .span6
+    fieldset
+      legend Part Information
+      dl.dl-horizontal
+        dt Part Name
+        dd= ncr.part_name
+        dt Part Number
+        dd= ncr.part_number
+        dt Part Revision
+        dd= ncr.part_revision
+        dt Quantity
+        dd= ncr.quantity
+        dt Supplier
+        dd= ncr.supplier_name
+
+  .span6
+    fieldset
+      legend Reference
+      dl.dl-horizontal
+        dt WBS Number
+        dd= ncr.wbs_number
+        if ncr.specification_drawing_reference
+          dt Spec / Drawing
+          dd= ncr.specification_drawing_reference
+        if ncr.po_reference
+          dt PO Reference
+          dd= ncr.po_reference
+        if ncr.traveler_link && ncr.traveler_link.initiated_from_traveler
+          dt Traveler
+          dd
+            a(href='#{prefix}/travelers/#{ncr.traveler_link.traveler_id}/') View Traveler
+          dt Input
+          dd= ncr.traveler_link.input_label
+        dt CE/CS
+        dd= ncr.ce_cs_name
+        dt Originator
+        dd= ncr.originator_name
+        dt Created
+        dd= new Date(ncr.creation_timestamp).toLocaleDateString()
+        dt Designate
+        dd
+          if ncr.originator_designate_name
+            = ncr.originator_designate_name
+          else
+            span.muted None
+
+.row-fluid
+  .span12
+    fieldset
+      legend Nonconformance Details
+      dl.dl-horizontal
+        if ncr.discovery_date
+          dt Discovery Date
+          dd= new Date(ncr.discovery_date).toLocaleDateString()
+        if ncr.discovery_context
+          dt Context
+          dd= ncr.discovery_context.replace(/_/g, ' ')
+        dt Description
+        dd= ncr.description_of_nonconformance
+
+if ncr.disposition && ncr.disposition.parts_disposition
+  .row-fluid
+    .span12
+      fieldset
+        legend= ncr.status === 'Submitted' ? 'Previous Disposition' : 'Disposition'
+        dl.dl-horizontal
+          dt Parts Disposition
+          dd= ncr.disposition.parts_disposition
+          dt Submitted By
+          dd= ncr.ce_cs_name
+          if ncr.disposition.ce_cs_timestamp
+            dt Submitted On
+            dd= new Date(ncr.disposition.ce_cs_timestamp).toLocaleString()
+          if ncr.disposition.root_cause_documentation
+            dt Root Cause
+            dd= ncr.disposition.root_cause_documentation
+          if ncr.disposition.rework_repair_instructions
+            dt Rework / Repair Instructions
+            dd= ncr.disposition.rework_repair_instructions
+
+if ncr.status === 'Rejected' && ncr.qa_rejection_comments
+  .row-fluid
+    .span12
+      fieldset
+        legend QA Rejection
+        dl.dl-horizontal
+          dt Comments
+          dd= ncr.qa_rejection_comments
+          dt Rejected By
+          dd= ncr.qa_staff_name
+          if ncr.qa_concurrence_timestamp
+            dt Rejected On
+            dd= new Date(ncr.qa_concurrence_timestamp).toLocaleString()
+
+if (typeof showApprovalStatus === 'undefined' || showApprovalStatus) && ncr.additional_approvers && ncr.additional_approvers.length
+  .row-fluid
+    .span12
+      fieldset
+        legend Approval Status
+        table.table.table-bordered.table-condensed
+          thead
+            tr
+              th Approver
+              th Status
+              th Timestamp
+              th Comments
+          tbody
+            each approver in ncr.additional_approvers
+              tr
+                td= approver.approver_name
+                td
+                  span.label= approver.approval_status
+                td= approver.approval_timestamp ? new Date(approver.approval_timestamp).toLocaleString() : '—'
+                td= approver.comments || '—'
+
+if ncr.preventive_actions && ncr.preventive_actions.length
+  .row-fluid
+    .span12
+      fieldset
+        legend Preventive Actions
+        each pa in ncr.preventive_actions
+          .well(style='margin-bottom:10px')
+            p
+              strong= pa.action_description
+            dl.dl-horizontal
+              dt Status
+              dd
+                span.label= pa.status || 'Open'
+              dt Owner
+              dd
+                if pa.owner_name
+                  = pa.owner_name + ' '
+                  span.muted (#{pa.target_completion_date ? new Date(pa.target_completion_date).toLocaleDateString() : 'no target date'})
+                else
+                  span.muted Unassigned
+              if pa.actual_completion_date
+                dt Completed
+                dd= new Date(pa.actual_completion_date).toLocaleDateString()
+              if pa.comments && pa.comments.length
+                dt Comments
+                dd
+                  ul
+                    each c in pa.comments
+                      li= c
+
+if ncr.closure_record && ncr.closure_record.closure_date
+  .row-fluid
+    .span12
+      fieldset
+        legend Closure
+        dl.dl-horizontal
+          dt Closed By
+          dd= ncr.closure_record.closed_by_name
+          dt Closure Date
+          dd= new Date(ncr.closure_record.closure_date).toLocaleDateString()
+
+if ncr.attachments && ncr.attachments.length
+  .row-fluid
+    .span12
+      fieldset
+        legend Attachments
+        ul.unstyled
+          each file in ncr.attachments
+            li(style='margin-bottom:4px')
+              a(href='#{prefix}/api/ncrs/#{ncr._id}/attachments/#{file.file_id}')
+                i.fa.fa-paperclip
+                | &nbsp;
+                = file.file_name
+              | &nbsp;
+              span.muted
+                = 'uploaded by ' + (file.uploaded_by_name || file.uploaded_by || 'unknown')
+                | ,&nbsp;
+                = new Date(file.upload_timestamp).toLocaleString()

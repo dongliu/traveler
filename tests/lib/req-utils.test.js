@@ -57,4 +57,41 @@ describe('req-utils', function() {
       nextSpy.calledOnce.should.be.true;
     });
   });
+
+  describe('#getAccess', () => {
+    function reqWithPermissions(permissions) {
+      return {
+        session: { userid: 'someone-else' },
+        res: { locals: { permissions } },
+      };
+    }
+    function formDoc(status) {
+      return { constructor: { modelName: 'Form' }, status, createdBy: 'owner' };
+    }
+
+    it('grants write access to a draft form with write_all_forms', () => {
+      const req = reqWithPermissions(['write_all_forms']);
+      reqUtils.getAccess(req, formDoc(0)).should.equal(1);
+    });
+
+    it('grants write access to a form submitted for review with write_all_forms', () => {
+      const req = reqWithPermissions(['write_all_forms']);
+      reqUtils.getAccess(req, formDoc(0.5)).should.equal(1);
+    });
+
+    it('does not grant write access to a released form with write_all_forms', () => {
+      const req = reqWithPermissions(['write_all_forms']);
+      reqUtils.getAccess(req, formDoc(1)).should.not.equal(1);
+    });
+
+    it('falls back to read-only access with just read_all_forms', () => {
+      const req = reqWithPermissions(['read_all_forms']);
+      reqUtils.getAccess(req, formDoc(0)).should.equal(0);
+    });
+
+    it('denies access with neither permission', () => {
+      const req = reqWithPermissions([]);
+      reqUtils.getAccess(req, formDoc(0)).should.equal(-1);
+    });
+  });
 });

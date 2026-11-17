@@ -6,8 +6,8 @@ sharedGroupColumn: false, fnAddFilterFoot: false, sDomNoTools: false,
 createdOnColumn: false, transferredOnColumn: false, travelerConfigLinkColumn:
 false, travelerShareLinkColumn: false, travelerLinkColumn: false, statusColumn:
 false, deviceColumn: false, fnGetSelected: false, selectEvent: false,
-filterEvent: false, ownerColumn: false, deadlineColumn: false,
-travelerProgressColumn: false, archivedOnColumn: false, binderLinkColumn: false,
+filterEvent: false, ownerColumn: false, travelerOwnerColumn: false, pulledByColumn: false, deadlineColumn: false,
+travelerProgressColumn: false, archivedOnColumn: false, archivedByColumn: false, binderLinkColumn: false,
 tagsColumn: false, sDomNoTNoR: false*/
 
 /*global archiveFromModal, transferFromModal, modalScroll, docNoColumn,
@@ -110,7 +110,8 @@ $(function() {
     titleColumn,
     tagsColumn,
     deviceColumn,
-    ownerColumn,
+    travelerOwnerColumn,
+    pulledByColumn,
     statusColumn,
     lastEditColumn,
     travelerProgressColumn,
@@ -133,7 +134,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(travelerTableConfig, updatedOnHideColumn, 'desc');
+  Table.sortByColumn(travelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists($('#traveler-table'), travelerTableConfig, tables);
 
   const reviewTravelerAoColumns = [
@@ -145,7 +146,8 @@ $(function() {
     titleColumn,
     tagsColumn,
     deviceColumn,
-    ownerColumn,
+    travelerOwnerColumn,
+    pulledByColumn,
     // statusColumn,
     lastEditColumn,
     travelerProgressColumn,
@@ -168,7 +170,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(reviewTravelerTableConfig, updatedOnHideColumn, 'desc');
+  Table.sortByColumn(reviewTravelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists($('#under-review-traveler-table'), reviewTravelerTableConfig, tables);
 
   /*transferred traveler table starts*/
@@ -214,7 +216,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(transferredTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.sortByColumn(transferredTravelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists(
     $('#transferred-traveler-table'),
     transferredTravelerTableConfig,
@@ -264,7 +266,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(sharedTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.sortByColumn(sharedTravelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists(
     $('#shared-traveler-table'),
     sharedTravelerTableConfig,
@@ -311,7 +313,7 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(groupSharedTravelerTableConfig, updatedOnColumn, 'desc');
+  Table.sortByColumn(groupSharedTravelerTableConfig, docNoColumn, 'asc');
   Table.initTableIfExists(
     $('#group-shared-traveler-table'),
     groupSharedTravelerTableConfig,
@@ -321,18 +323,16 @@ $(function() {
   var archivedTravelerAoColumns = [
     selectColumn,
     travelerLinkColumn,
-    titleColumn,
     docNoColumn,
     travelerVersionColumn,
-    archivedOnColumn,
-    statusColumn,
+    titleColumn,
+    tagsColumn,
     deviceColumn,
-    sharedWithColumn,
-    sharedGroupColumn,
-    createdOnColumn,
-    filledByColumn,
-    updatedOnColumn,
-    travelerProgressColumn,
+    travelerOwnerColumn,
+    pulledByColumn,
+    statusColumn,
+    archivedByColumn,
+    archivedOnColumn,
   ];
   const archivedTravelerTableConfig = {
     sAjaxSource: '/archivedtravelers/json',
@@ -357,8 +357,8 @@ $(function() {
     aaSorting: [],
     sDom: sDomNoTools,
   };
-  Table.sortByColumn(archivedTravelerTableConfig, updatedOnColumn, 'desc');
-  Table.initTableIfExists(
+  Table.sortByColumn(archivedTravelerTableConfig, docNoColumn, 'asc');
+  const archivedTravelerTable = Table.initTableIfExists(
     $('#archived-traveler-table'),
     archivedTravelerTableConfig,
     tables
@@ -394,12 +394,7 @@ $(function() {
       );
       $('#modal').modal('show');
       $('#submit').click(function() {
-        updateStatusFromModal(
-          4,
-          'travelers',
-          activeTable
-          // archivedTravelerTable
-        );
+        updateStatusFromModal(4, 'travelers', activeTable, archivedTravelerTable);
       });
     }
   });

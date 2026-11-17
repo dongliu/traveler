@@ -12,7 +12,7 @@ if (!mongoose.modelNames().includes('User')) {
 // lib/review.js so that the destructured locals inside review.js pick up the stubs.
 // Reuse an existing sendNotification stub if another test file (e.g.
 // ncr-email.test.js) already wrapped it — Mocha loads every
-// test-unit/**/*.test.js file into one process, so a second unconditional
+// tests/**/*.test.js file into one process, so a second unconditional
 // sinon.stub() on the same method throws "already wrapped".
 const emailModule = require('../../lib/email');
 const formModule = require('../../lib/form');
@@ -40,7 +40,7 @@ getPermissionsStub.returns([permissionModule.Review_forms]);
 // getPermissions), so the stub above alone isn't enough -- config.auth is
 // only otherwise populated by config.load(), which nothing in this process
 // calls before this file's tests run. Set it directly, the same way
-// test-unit/lib/ncr-service.test.js already sets config.wbsYaml.
+// tests/lib/ncr-service.test.js already sets config.wbsYaml.
 const configModule = require('../../config/config.js');
 configModule.auth = { default_roles: [] };
 
@@ -209,10 +209,10 @@ describe('lib/review — rejectionFlow', () => {
 
 describe('lib/review — addReviewRequest', () => {
   // User.findById and User.prototype.save may already be stubbed by another
-  // test-unit/**/*.test.js file's own top-level beforeEach (Mocha loads every
+  // tests/**/*.test.js file's own top-level beforeEach (Mocha loads every
   // such file into one process) -- reuse an existing stub (reconfiguring it
   // for this test) instead of re-wrapping, the same "isSinonProxy" idiom
-  // stubUsers() above and test-unit/lib/ncr-email.test.js already use.
+  // stubUsers() above and tests/lib/ncr-email.test.js already use.
   beforeEach(() => {
     if (!User.findById.isSinonProxy) {
       sinon.stub(User, 'findById');
