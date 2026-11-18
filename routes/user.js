@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const _ = require('lodash');
 const config = require('../config/config');
-const { Manager, Reviewer, Admin } = require('../lib/role');
+const { Manager, Reviewer, Admin, Roles } = require('../lib/role');
+const { Manage_users, getPermissions } = require('../lib/permission');
+const reqUtils = require('../lib/req-utils');
 const logger = require('../lib/loggers').getLogger();
 
 const { ad } = config;
@@ -215,6 +217,7 @@ module.exports = function(app) {
           routesUtilities.getRenderObject(req, {
             user,
             myRoles: req.session.roles,
+            permissions: getPermissions(['user'].concat(user.roles || [])),
           })
         );
       }
@@ -222,54 +225,49 @@ module.exports = function(app) {
     });
   });
 
-  app.post('/users/', auth.ensureAuthenticated, function(req, res) {
-    if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf('admin') === -1
-    ) {
-      return res.status(403).send('only admin allowed');
-    }
-
-    if (!req.body.uid) {
-      return res.status(400).send('need to know uid');
-    }
-
-    // check if already in db, by uid (the user model's id is all lower case)
-    User.findById(req.body.uid.toLowerCase()).exec(function(err, user) {
-      if (err) {
-        return res.status(500).send(err.message);
+  app.post(
+    '/users/',
+    auth.ensureAuthenticated,
+    reqUtils.requirePermission(Manage_users),
+    function(req, res) {
+      if (!req.body.uid) {
+        return res.status(400).send('need to know uid');
       }
-      if (user) {
-        const url = `${
-          req.proxied ? authConfig.proxied_service : authConfig.service
-        }/users/${user._id}`;
-        return res
-          .status(200)
-          .send(`The user is at <a target="_blank" href="${url}">${url}</a>`);
-      }
-      addUser(req, res);
-    });
-  });
 
-  app.get('/users/json', auth.ensureAuthenticated, function(req, res) {
-    if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf('admin') === -1
-    ) {
-      return res
-        .status(403)
-        .send('You are not authorized to access this resource. ');
+      // check if already in db, by uid (the user model's id is all lower case)
+      User.findById(req.body.uid.toLowerCase()).exec(function(err, user) {
+        if (err) {
+          return res.status(500).send(err.message);
+        }
+        if (user) {
+          const url = `${
+            req.proxied ? authConfig.proxied_service : authConfig.service
+          }/users/${user._id}`;
+          return res
+            .status(200)
+            .send(`The user is at <a target="_blank" href="${url}">${url}</a>`);
+        }
+        addUser(req, res);
+      });
     }
-    User.find().exec(function(err, users) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-      res.json(users);
-    });
-  });
+  );
+
+  app.get(
+    '/users/json',
+    auth.ensureAuthenticated,
+    reqUtils.requirePermission(Manage_users),
+    function(req, res) {
+      User.find().exec(function(err, users) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({
+            error: err.message,
+          });
+        }
+        res.json(users);
+      });
+    }
+  );
 
   app.get('/users/:id', auth.ensureAuthenticated, function(req, res) {
     User.findOne({
@@ -285,6 +283,7 @@ module.exports = function(app) {
           routesUtilities.getRenderObject(req, {
             user,
             myRoles: req.session.roles,
+            permissions: getPermissions(['user'].concat(user.roles || [])),
           })
         );
       }
@@ -294,35 +293,39 @@ module.exports = function(app) {
     });
   });
 
-  app.put('/users/:id', auth.ensureAuthenticated, function(req, res) {
-    if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf('admin') === -1
-    ) {
-      return res
-        .status(403)
-        .send('You are not authorized to access this resource. ');
-    }
-    if (!req.is('json')) {
-      return res.status(415).json({
-        error: 'json request expected.',
-      });
-    }
-    User.findOneAndUpdate(
-      {
-        _id: req.params.id,
-      },
-      req.body
-    ).exec(function(err) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({
-          error: err.message,
+  app.put(
+    '/users/:id',
+    auth.ensureAuthenticated,
+    reqUtils.requirePermission(Manage_users),
+    function(req, res) {
+      if (!req.is('json')) {
+        return res.status(415).json({
+          error: 'json request expected.',
         });
       }
-      return res.status(204).send();
-    });
-  });
+      const update = req.body;
+      if (Array.isArray(update.roles)) {
+        // only the assignable roles may be stored; 'user' and anything else
+        // is silently dropped, never rejected (contracts/role-management.md)
+        update.roles = update.roles.filter(r => Roles.includes(r));
+      }
+      User.findOneAndUpdate(
+        {
+          _id: req.params.id,
+        },
+        update,
+        { runValidators: true }
+      ).exec(function(err) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({
+            error: err.message,
+          });
+        }
+        return res.status(204).send();
+      });
+    }
+  );
 
   // get from the db not ad
   app.get('/users/:id/json', auth.ensureAuthenticated, function(req, res) {
@@ -339,36 +342,33 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/users/:id/ownership', auth.ensureAuthenticated, function(req, res) {
-    if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf('admin') === -1
-    ) {
-      return res
-        .status(403)
-        .send('You are not authorized to access this resource. ');
+  app.get(
+    '/users/:id/ownership',
+    auth.ensureAuthenticated,
+    reqUtils.requirePermission(Manage_users),
+    function(req, res) {
+      User.findOne({
+        _id: req.params.id,
+      }).exec(function(err, user) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({
+            error: err.message,
+          });
+        }
+        if (user) {
+          return res.render(
+            'ownership',
+            routesUtilities.getRenderObject(req, {
+              user,
+              myRoles: req.session.roles,
+            })
+          );
+        }
+        return res.status(404).send(`${req.params.name} not found`);
+      });
     }
-    User.findOne({
-      _id: req.params.id,
-    }).exec(function(err, user) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({
-          error: err.message,
-        });
-      }
-      if (user) {
-        return res.render(
-          'ownership',
-          routesUtilities.getRenderObject(req, {
-            user,
-            myRoles: req.session.roles,
-          })
-        );
-      }
-      return res.status(404).send(`${req.params.name} not found`);
-    });
-  });
+  );
 
   app.get(
     '/users/:id/travelers/json',
@@ -457,31 +457,28 @@ module.exports = function(app) {
     }
   );
 
-  app.get('/users/:id/refresh', auth.ensureAuthenticated, function(req, res) {
-    if (
-      req.session.roles === undefined ||
-      req.session.roles.indexOf('admin') === -1
-    ) {
-      return res
-        .status(403)
-        .send('You are not authorized to access this resource. ');
+  app.get(
+    '/users/:id/refresh',
+    auth.ensureAuthenticated,
+    reqUtils.requirePermission(Manage_users),
+    function(req, res) {
+      User.findOne({
+        _id: req.params.id,
+      }).exec(function(err, user) {
+        if (err) {
+          console.error(err);
+          return res.status(500).send(err.message);
+        }
+        if (user) {
+          updateUserProfile(user, res);
+        } else {
+          return res
+            .status(404)
+            .send(`${req.params.id} is not in the application.`);
+        }
+      });
     }
-    User.findOne({
-      _id: req.params.id,
-    }).exec(function(err, user) {
-      if (err) {
-        console.error(err);
-        return res.status(500).send(err.message);
-      }
-      if (user) {
-        updateUserProfile(user, res);
-      } else {
-        return res
-          .status(404)
-          .send(`${req.params.id} is not in the application.`);
-      }
-    });
-  });
+  );
 
   // resource /adusers
 

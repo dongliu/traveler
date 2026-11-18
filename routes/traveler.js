@@ -54,6 +54,7 @@ const auth = require('../lib/auth');
 
 const authConfig = config.auth;
 const reqUtils = require('../lib/req-utils');
+const { Approve_travelers } = require('../lib/permission');
 const shareLib = require('../lib/share');
 const tag = require('../lib/tag');
 const { DataError } = require('../lib/error');
@@ -368,7 +369,7 @@ module.exports = function(app) {
     res.render('public-travelers', routesUtilities.getRenderObject(req));
   });
 
-  // paged, filterable list of public travelers; the same listing is served to
+  // paged, filterable list of every traveler; the same listing is served to
   // the REST API at /apis/publictravelers/ (see lib/public-travelers.js)
   app.get(
     '/publictravelers/list',
@@ -1056,10 +1057,7 @@ module.exports = function(app) {
     reqUtils.archived('id', false),
     async function(req, res) {
       const doc = req[req.params.id];
-      if (
-        reqUtils.isOwner(req, doc) ||
-        routesUtilities.checkUserRole(req, 'admin')
-      ) {
+      if (reqUtils.isOwner(req, doc) || reqUtils.isAdmin(req)) {
         const names = await userNames.resolveNames(
           travelerPersonIds(doc),
           User
@@ -1106,7 +1104,7 @@ module.exports = function(app) {
     ]),
     function(req, res) {
       const doc = req[req.params.id];
-      const isAdmin = routesUtilities.checkUserRole(req, 'admin');
+      const isAdmin = reqUtils.isAdmin(req);
       if (!isAdmin && [0, 1, 1.5].indexOf(doc.status) === -1) {
         return res
           .status(400)
@@ -1181,10 +1179,7 @@ module.exports = function(app) {
       if (
         doc.status === 1.5 &&
         (req.body.status === 2 || req.body.status === 1) &&
-        !(
-          routesUtilities.checkUserRole(req, 'admin') ||
-          routesUtilities.checkUserRole(req, 'manager')
-        )
+        !routesUtilities.hasPermission(req, Approve_travelers)
       ) {
         return res
           .status(403)
@@ -1195,10 +1190,7 @@ module.exports = function(app) {
       if (
         doc.status === 2 &&
         (req.body.status === 4 || req.body.status === 1) &&
-        !(
-          routesUtilities.checkUserRole(req, 'admin') ||
-          routesUtilities.checkUserRole(req, 'manager')
-        )
+        !routesUtilities.hasPermission(req, Approve_travelers)
       ) {
         return res
           .status(403)

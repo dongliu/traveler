@@ -88,4 +88,48 @@ describe('req-utils', function() {
       reqUtils.publicAccessMatch().should.deep.equal(expected);
     });
   });
+
+  describe('#getAccess', function() {
+    function FakeTraveler() {}
+    FakeTraveler.modelName = 'Traveler';
+    function FakeForm() {}
+    FakeForm.modelName = 'Form';
+
+    function makeReqRes(roles, permissions) {
+      var req = {
+        session: { userid: 'someone-else', roles: roles },
+      };
+      var res = { locals: { roles: roles, permissions: permissions || [] } };
+      req.res = res;
+      return req;
+    }
+
+    it('still grants full access from holding the manager role alone (unchanged by this feature - see e2e/us4-access-control.spec.js AS5)', function() {
+      var doc = new FakeTraveler();
+      doc.publicAccess = -1;
+      var req = makeReqRes(['manager'], []);
+      reqUtils.getAccess(req, doc).should.equal(1);
+    });
+
+    it('still grants full access from holding the admin role alone (unchanged by this feature)', function() {
+      var doc = new FakeTraveler();
+      doc.publicAccess = -1;
+      var req = makeReqRes(['admin'], []);
+      reqUtils.getAccess(req, doc).should.equal(1);
+    });
+
+    it('grants write access to an active traveler via the write_active_travelers permission', function() {
+      var doc = new FakeTraveler();
+      doc.publicAccess = -1;
+      var req = makeReqRes(['manager'], ['write_active_travelers']);
+      reqUtils.getAccess(req, doc).should.equal(1);
+    });
+
+    it('grants read access to a form via the read_all_forms permission', function() {
+      var doc = new FakeForm();
+      doc.publicAccess = -1;
+      var req = makeReqRes([], ['read_all_forms']);
+      reqUtils.getAccess(req, doc).should.equal(0);
+    });
+  });
 });

@@ -53,7 +53,7 @@ block content
                 .btn-group
                   button.btn.btn-primary#complete Submit for completion
               when 1.5
-                if (isAdmin || isManager)
+                if (canApproveTravelers)
                   .btn-group
                     button.btn.btn-primary#approve Approve completion
                   .btn-group
@@ -62,7 +62,7 @@ block content
                   .btn-group
                     button.btn.btn-primary#resume Resume
               when 2
-                if (isAdmin || isManager)
+                if (canApproveTravelers)
                   .btn-group
                     button.btn.btn-warning#more More work
                 .btn-group

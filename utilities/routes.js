@@ -73,11 +73,26 @@ function checkUserRole(req, role) {
   }
 }
 
+/**
+ * check if the current request's effective permissions (res.locals.permissions,
+ * computed per-request in lib/auth/index.js) include the given permission
+ * @param  {Object} req
+ * @param  {String} permission one of lib/permission.js's permission constants
+ * @return {Boolean}
+ */
+function hasPermission(req, permission) {
+  return Boolean(
+    req.res &&
+      req.res.locals &&
+      Array.isArray(req.res.locals.permissions) &&
+      req.res.locals.permissions.indexOf(permission) !== -1
+  );
+}
+
 function getRenderObject(req, extraAttributes) {
   var renderObject = {
     prefix: req.proxied ? req.proxied_prefix : '',
     viewConfig: config.viewConfig,
-    roles: req.session.roles,
     helper: {
       upperCaseFirstLetter: function(text) {
         return text.charAt(0).toUpperCase() + text.slice(1);
@@ -432,7 +447,7 @@ var traveler = {
   canWriteActive: function(req, travelerDoc) {
     if (traveler.canWrite(req, travelerDoc)) {
       return true;
-    } else if (checkUserRole(req, 'write_active_travelers')) {
+    } else if (hasPermission(req, 'write_active_travelers')) {
       return true;
     }
 
@@ -512,6 +527,7 @@ module.exports = {
   filterBody: filterBody,
   filterBodyWithOptional: filterBodyWithOptional,
   checkUserRole: checkUserRole,
+  hasPermission: hasPermission,
   getRenderObject: getRenderObject,
   getDeviceValue: getDeviceValue,
   deviceRemovalAllowed: deviceRemovalAllowed,
