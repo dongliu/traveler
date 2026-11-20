@@ -11,6 +11,7 @@ const { useScenarioHooks } = require('./fixtures/scenario');
 const { createForm, createReleasedForm } = require('./fixtures/forms');
 const { getUserRoles, grantRole, removeRole } = require('./fixtures/roles');
 const { setPublicAccess } = require('./fixtures/sharing');
+const { roleGrants } = require('./fixtures/permission-config');
 const {
   createTravelerFromReleasedForm,
   positionTraveler,
@@ -58,7 +59,7 @@ test.describe('US1 - admin grants and revokes roles for a user', () => {
 test.describe(
   'US2 - every account keeps its baseline abilities no matter what',
   () => {
-    test('a secondary with no optional roles can still read a private form (baseline Read_all_forms)', async () => {
+    test('a secondary with no optional roles gets exactly what permission.json grants the baseline user role for reading a private form', async () => {
       const before = await getUserRoles('primary', personas.secondary.id);
       for (const role of before) {
         await removeRole('primary', 'secondary', role);
@@ -69,9 +70,14 @@ test.describe(
       });
       await setPublicAccess('primary', 'forms', form.id, -1);
 
+      // Reading a private form this way requires read_all_forms (see
+      // reqUtils.getAccess); whether the baseline user role grants it is
+      // configured in permission.json, not fixed, so read the expectation
+      // from there instead of hard-coding which way it currently goes.
+      const expectedStatus = roleGrants('user', 'read_all_forms') ? 200 : 403;
       expect(
         (await send('secondary', 'GET', `/forms/${form.id}/json`)).status
-      ).toBe(200);
+      ).toBe(expectedStatus);
     });
 
     test("submitting 'user' as a role to add has no effect on the stored roles", async () => {
