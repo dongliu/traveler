@@ -8,12 +8,19 @@ var ldapClient = require('../../lib/ldap-client');
 var auth = require('../../lib/auth');
 
 describe('lib/auth/index.js #sessionRolesFor', function() {
+  var originalAuth;
+
   beforeEach(function() {
+    originalAuth = config.auth;
     config.permission = {
       user: ['read_all_forms'],
       manager: ['approve_travelers'],
       admin: ['manage_users'],
     };
+  });
+
+  afterEach(function() {
+    config.auth = originalAuth;
   });
 
   it('keeps an assigned role that is a configured permission.json key', function() {
@@ -34,6 +41,21 @@ describe('lib/auth/index.js #sessionRolesFor', function() {
 
   it('de-duplicates repeated roles', function() {
     auth.sessionRolesFor(['manager', 'manager']).should.deep.equal(['manager']);
+  });
+
+  it('unions configured default roles into the result when default_roles is non-empty', function() {
+    config.auth = { default_roles: ['user'] };
+    auth.sessionRolesFor(['manager']).should.have.members(['manager', 'user']);
+  });
+
+  it('drops a configured default role that is not a permission.json key', function() {
+    config.auth = { default_roles: ['user', 'removed-role'] };
+    auth.sessionRolesFor([]).should.deep.equal(['user']);
+  });
+
+  it('de-duplicates a default role that is also assigned', function() {
+    config.auth = { default_roles: ['user'] };
+    auth.sessionRolesFor(['user']).should.deep.equal(['user']);
   });
 });
 
