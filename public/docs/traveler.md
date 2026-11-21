@@ -87,7 +87,7 @@ The travelers are listed in different tabs according to their status and ownersh
 <div id="transferredtravelers" class="tab-pane">All travelers transferredd to the current login user from other users</div>
 <div id="sharedtravelers" class="tab-pane">All travelers shared with the current login user</div>
 <div id="groupsharedtravelers" class="tab-pane">All travelers shared with the current login user's group</div>
-<div id="archivedtravelers" class="tab-pane">All travelers owned by the current login user and archived</div>
+<div id="archivedtravelers" class="tab-pane">All archived travelers, regardless of owner</div>
 </div>
 </div>
 

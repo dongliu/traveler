@@ -341,55 +341,7 @@ module.exports = function(app) {
       }
       const travelers = await Traveler.find(
         search,
-        'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer tags dwr devices manPower owner activeForm'
-      )
-        .populate('createdBy', 'name')
-        .populate('updatedBy', 'name')
-        .lean();
-      await travelerLib.attachFormOwners(travelers);
-
-      return res.status(200).json(travelers);
-    } catch (err) {
-      logger.error(err);
-      return res.status(500).send(err.message);
-    }
-  });
-
-  app.get('/archivedtravelers/json', auth.ensureAuthenticated, async function(
-    req,
-    res
-  ) {
-    try {
-      const search = {
-        $and: [
-          {
-            $or: [
-              {
-                createdBy: req.session.userid,
-                owner: {
-                  $exists: false,
-                },
-              },
-              {
-                owner: req.session.userid,
-              },
-            ],
-          },
-          {
-            $or: [
-              {
-                archived: true,
-              },
-              {
-                status: 4,
-              },
-            ],
-          },
-        ],
-      };
-      const travelers = await Traveler.find(
-        search,
-        'title description status devices locations tags owner createdBy activeForm archivedBy archivedOn updatedBy updatedOn deadline sharedWith sharedGroup manPower finishedInput totalInput documentNumber referenceReleasedFormVer'
+        'title status devices createdBy clonedBy createdOn updatedBy updatedOn finishedInput totalInput documentNumber referenceReleasedFormVer tags dwr devices manPower owner activeForm archivedBy archivedOn'
       )
         .populate('createdBy', 'name')
         .populate('updatedBy', 'name')

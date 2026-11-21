@@ -335,7 +335,7 @@ $(function() {
     archivedOnColumn,
   ];
   const archivedTravelerTableConfig = {
-    sAjaxSource: '/archivedtravelers/json',
+    sAjaxSource: '/currenttravelers/json?status=4',
     sAjaxDataProp: '',
     fnDrawCallback: function() {
       Holder.run({
