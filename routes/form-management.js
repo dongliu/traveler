@@ -4,6 +4,7 @@ const _ = require('lodash');
 const auth = require('../lib/auth');
 const routesUtilities = require('../utilities/routes');
 const userNames = require('../lib/user-names');
+const travelerMetadata = require('../lib/traveler-metadata');
 
 const Form = mongoose.model('Form');
 const ReleasedForm = mongoose.model('ReleasedForm');
@@ -193,6 +194,7 @@ module.exports = function(app) {
       });
       try {
         await f.saveWithHistory(req.session.userid);
+        await travelerMetadata.backfillFromReleasedForm(f);
         const out = {};
         fields.forEach(field => {
           out[field] = f.get(field);
