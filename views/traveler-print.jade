@@ -21,7 +21,7 @@ html
       .row
         .span10#print-control
           br
-          if (locals.traveler.status !== undefined && locals.traveler.status === 2)
+          if (locals.traveler.status !== undefined && (locals.traveler.status === 2 || locals.traveler.status === 4))
             .btn-group
               button.btn.btn-primary#create-pdf(disabled='disabled') Create PDF
             .btn-group(data-toggle='buttons-radio')

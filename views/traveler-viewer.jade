@@ -29,7 +29,7 @@ block underTopBtn
         include ./traveler/status.jade
         if (locals.traveler.devices && traveler.devices.length > 0)
           h4 Part Number: !{traveler.devices}
-        if (locals.traveler.status !== undefined && locals.traveler.status === 2)
+        if (locals.traveler.status !== undefined && (locals.traveler.status === 2 || locals.traveler.status === 4))
           .btn-group
                   a.btn.btn-primary#pdf(data-toggle='tooltip', title='create pdf in print view', href='print', target='#{viewConfig.linkTarget}') Create PDF
         if (locals.traveler.status !== undefined && locals.traveler.status > 0)
