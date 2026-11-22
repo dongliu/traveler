@@ -28,7 +28,18 @@ if (!mongoose.modelNames().includes('Form')) {
 }
 
 const Form = mongoose.model('Form');
-const { attachFormOwners } = require('../../lib/traveler.js');
+
+// postTravelerStatusChangedMessage is a plain property access inside
+// lib/traveler.js (not destructured), so stubbing the module export is
+// enough -- no cache-delete/re-require needed. Reuse an existing stub if
+// another tests/**/*.test.js file already wrapped it (Mocha loads every
+// such file into one process).
+const mqttModule = require('../../utilities/mqtt');
+if (!mqttModule.postTravelerStatusChangedMessage.isSinonProxy) {
+  sinon.stub(mqttModule, 'postTravelerStatusChangedMessage');
+}
+
+const { attachFormOwners, unarchiveTraveler } = require('../../lib/traveler.js');
 
 describe('lib/traveler — attachFormOwners', () => {
   afterEach(() => {
@@ -111,5 +122,157 @@ describe('lib/traveler — attachFormOwners', () => {
     const result = await attachFormOwners(travelers);
 
     result.should.equal(travelers);
+  });
+});
+
+// ── unarchiveTraveler (lib/traveler.js) ──────────────────────────────────────
+
+describe('lib/traveler — unarchiveTraveler', () => {
+  afterEach(() => {
+    sinon.restore();
+    // sinon.restore() is global, not scoped to this describe's own stubs --
+    // it also undoes the module-level postTravelerStatusChangedMessage stub
+    // above, so put it back for any test (in this file or another) that
+    // runs after this one.
+    if (!mqttModule.postTravelerStatusChangedMessage.isSinonProxy) {
+      sinon.stub(mqttModule, 'postTravelerStatusChangedMessage');
+    }
+  });
+
+  function makeReq(overrides = {}) {
+    return {
+      params: { id: 'id1' },
+      session: { userid: 'admin1' },
+      ...overrides,
+    };
+  }
+
+  function makeRes() {
+    const res = {};
+    res.status = sinon.stub().returns(res);
+    res.send = sinon.stub().returns(res);
+    return res;
+  }
+
+  function makeTravelerDoc(overrides = {}) {
+    return {
+      _id: 'id1',
+      status: 4,
+      save: sinon.stub().resolves(),
+      ...overrides,
+    };
+  }
+
+  it('restores to the recorded prior status when archived from Active', async () => {
+    const req = makeReq();
+    const res = makeRes();
+    const doc = makeTravelerDoc({ status: 4, statusBeforeArchive: 1 });
+    req.id1 = doc;
+
+    await unarchiveTraveler(req, res);
+
+    doc.status.should.equal(1);
+    (doc.statusBeforeArchive === undefined).should.be.true;
+    doc.save.calledOnce.should.be.true;
+    res.status.calledWith(200).should.be.true;
+  });
+
+  it('restores to the recorded prior status when archived from Completed', async () => {
+    const req = makeReq();
+    const res = makeRes();
+    const doc = makeTravelerDoc({ status: 4, statusBeforeArchive: 2 });
+    req.id1 = doc;
+
+    await unarchiveTraveler(req, res);
+
+    doc.status.should.equal(2);
+  });
+
+  it('restores to the recorded prior status when archived from Initialized', async () => {
+    const req = makeReq();
+    const res = makeRes();
+    const doc = makeTravelerDoc({ status: 4, statusBeforeArchive: 0 });
+    req.id1 = doc;
+
+    await unarchiveTraveler(req, res);
+
+    doc.status.should.equal(0);
+  });
+
+  it('falls back to Active when no prior status was recorded', async () => {
+    const req = makeReq();
+    const res = makeRes();
+    const doc = makeTravelerDoc({ status: 4, statusBeforeArchive: undefined });
+    req.id1 = doc;
+
+    await unarchiveTraveler(req, res);
+
+    doc.status.should.equal(1);
+  });
+
+  it('refuses when the traveler is not currently archived', async () => {
+    const req = makeReq();
+    const res = makeRes();
+    const doc = makeTravelerDoc({ status: 1 });
+    req.id1 = doc;
+
+    await unarchiveTraveler(req, res);
+
+    res.status.calledWith(409).should.be.true;
+    doc.save.called.should.be.false;
+  });
+});
+
+// ── updateStatus archiving (statusBeforeArchive capture) ────────────────────
+
+describe('lib/traveler — updateStatus archiving', () => {
+  let updateStatus;
+
+  before(() => {
+    sinon.stub(require('../../utilities/routes'), 'hasPermission').returns(true);
+    sinon
+      .stub(require('../../lib/traveler-ncr'), 'isSubmissionTransition')
+      .returns(false);
+    // isSubmissionTransition is destructured by lib/traveler.js at require
+    // time, so the module must be freshly required after stubbing it for
+    // the new value to be picked up (hasPermission, by contrast, is a plain
+    // property access and would already see the stub either way).
+    delete require.cache[require.resolve('../../lib/traveler.js')];
+    ({ updateStatus } = require('../../lib/traveler.js'));
+  });
+
+  after(() => {
+    sinon.restore();
+    if (!mqttModule.postTravelerStatusChangedMessage.isSinonProxy) {
+      sinon.stub(mqttModule, 'postTravelerStatusChangedMessage');
+    }
+    // Leave the require cache as this file found it, so nothing else in
+    // this process can end up with the stubbed closure above.
+    delete require.cache[require.resolve('../../lib/traveler.js')];
+  });
+
+  it('captures statusBeforeArchive when archiving', async () => {
+    const req = {
+      params: { id: 'id1' },
+      session: { userid: 'admin1' },
+      body: { status: 4 },
+    };
+    const res = {};
+    res.status = sinon.stub().returns(res);
+    res.send = sinon.stub().returns(res);
+    const doc = {
+      _id: 'id1',
+      status: 2,
+      statusBeforeArchive: undefined,
+      save: sinon.stub().callsFake(function(cb) {
+        cb(null);
+      }),
+    };
+    req.id1 = doc;
+
+    await updateStatus(req, res);
+
+    doc.statusBeforeArchive.should.equal(2);
+    doc.save.calledOnce.should.be.true;
   });
 });

@@ -133,6 +133,11 @@ var traveler = new Schema({
   updatedOn: Date,
   archivedBy: { type: String, ref: 'User' },
   archivedOn: Date,
+  // the status the traveler held immediately before being archived (0, 1,
+  // or 2 -- the only statuses status 4 is reachable from); absent means no
+  // prior status was recorded (never archived, or archived before this
+  // field existed)
+  statusBeforeArchive: { type: Number },
   owner: String,
   tags: [String],
   transferredOn: Date,

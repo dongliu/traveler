@@ -1024,6 +1024,20 @@ module.exports = function(app) {
     }
   );
 
+  // Admin-only: restore an Archived traveler to the status it held
+  // immediately before archiving. Deliberately no archived/canWrite guard --
+  // the whole point is acting on a document those guards would otherwise
+  // block.
+  app.put(
+    '/travelers/:id/unarchive',
+    auth.ensureAuthenticated,
+    reqUtils.exist('id', Traveler),
+    reqUtils.requireAdmin(),
+    function unarchiveTraveler(req, res) {
+      return travelerLib.unarchiveTraveler(req, res);
+    }
+  );
+
   // add tag routines
   tag.addTag(app, '/travelers/:id/tags/', Traveler);
   tag.removeTag(app, '/travelers/:id/tags/:tag', Traveler);

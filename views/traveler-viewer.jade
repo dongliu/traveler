@@ -32,6 +32,9 @@ block underTopBtn
         if (locals.traveler.status !== undefined && (locals.traveler.status === 2 || locals.traveler.status === 4))
           .btn-group
                   a.btn.btn-primary#pdf(data-toggle='tooltip', title='create pdf in print view', href='print', target='#{viewConfig.linkTarget}') Create PDF
+        if (isAdmin && locals.traveler.status === 4)
+          .btn-group
+            button.btn.btn-warning#unarchive(data-toggle='tooltip', title='restore this traveler to its status before archiving') Unarchive
         if (locals.traveler.status !== undefined && locals.traveler.status > 0)
           .btn-group(data-toggle='buttons-radio')
             button.btn.btn-info#show-validation Show validation
