@@ -40,6 +40,25 @@ module.exports.service = '';
 module.exports.travelerPackageFile = '';
 module.exports.ui = '';
 
+// docker-compose.yml maps the host-facing WEB_PORT (from .env) to the
+// container's fixed internal port; the app itself always listens on
+// app.app_port inside the container. auth.service/login_service are used
+// throughout routes/ to build absolute, browser-facing redirect URLs, so
+// when WEB_PORT differs from the port baked into the committed docker/
+// auth.json (e.g. a dev running multiple worktrees on different ports),
+// those URLs point at the wrong port. Only localhost URLs are touched --
+// a real external hostname (production, or a reverse-proxied service) has
+// nothing to do with the local docker-compose port mapping.
+function applyLocalWebPortOverride(value) {
+  if (!value || !process.env.WEB_PORT) {
+    return value;
+  }
+  return value.replace(
+    /^(https?:\/\/localhost):\d+/,
+    `$1:${process.env.WEB_PORT}`
+  );
+}
+
 function getPath(desiredPath, defaultPath) {
   // Check to see that desired path exists.
   try {
@@ -67,6 +86,12 @@ module.exports.load = function() {
   module.exports.api = require('../' + configPath + '/api.json');
   module.exports.app = require('../' + configPath + '/app.json');
   module.exports.auth = require('../' + configPath + '/auth.json');
+  module.exports.auth.service = applyLocalWebPortOverride(
+    module.exports.auth.service
+  );
+  module.exports.auth.login_service = applyLocalWebPortOverride(
+    module.exports.auth.login_service
+  );
   module.exports.alias = require('../' + configPath + '/alias.json');
   module.exports.mongo = require('../' + configPath + '/mongo.json');
   module.exports.service = require('../' + configPath + '/service.json');

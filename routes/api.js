@@ -354,7 +354,11 @@ module.exports = function(app) {
         }
       }
 
+      var oldStatus = doc.status;
       doc.status = req.body.status;
+      if (req.body.status === 4) {
+        doc.statusBeforeArchive = oldStatus;
+      }
       // user id
       doc.updatedBy = req.body.userId;
       doc.updatedOn = Date.now();

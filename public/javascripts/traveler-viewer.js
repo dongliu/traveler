@@ -39,6 +39,19 @@ $(function() {
     );
   });
 
+  $('#unarchive').click(function() {
+    $.ajax({
+      url: 'unarchive',
+      type: 'PUT',
+    })
+      .done(function() {
+        window.location.href = './';
+      })
+      .fail(function(jqXHR) {
+        alert(jqXHR.responseText);
+      });
+  });
+
   // update img
   $('#form')
     .find('img')

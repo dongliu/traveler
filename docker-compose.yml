@@ -28,6 +28,11 @@ services:
       - TRAVELER_CONFIG_REL_PATH=docker
       - DEBUG=traveler:*
       - DEBUG_COLORS=true
+      # host-facing port(s) from .env, so the app can build browser-facing
+      # URLs (see config/config.js) that match what docker-compose actually
+      # exposes on the host, instead of the hardcoded port baked into
+      # docker/auth.json
+      - WEB_PORT=${WEB_PORT-3001}
     depends_on:
       mongo:
         condition: service_healthy
