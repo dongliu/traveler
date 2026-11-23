@@ -1,6 +1,6 @@
 {
-  "user": ["read_all_forms", "write_active_travelers"],
+  "user": ["write_active_travelers"],
   "manager": ["approve_travelers"],
   "reviewer": ["review_forms"],
-  "admin": ["review_forms", "approve_travelers", "manage_users"]
+  "admin": ["read_all_forms", "review_forms", "approve_travelers", "manage_users"]
 }
