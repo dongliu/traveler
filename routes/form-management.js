@@ -63,7 +63,7 @@ module.exports = function(app) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(forms);
+        return res.status(200).json(reqUtils.trimDocumentNumber(forms));
       });
   });
 
@@ -83,7 +83,7 @@ module.exports = function(app) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(forms);
+        return res.status(200).json(reqUtils.trimDocumentNumber(forms));
       });
   });
 

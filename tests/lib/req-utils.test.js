@@ -94,4 +94,56 @@ describe('req-utils', function() {
       reqUtils.getAccess(req, formDoc(0)).should.equal(-1);
     });
   });
+
+  describe('#trimDocumentNumber', () => {
+    it('trims leading and trailing whitespace on a single object', () => {
+      const doc = { documentNumber: '  ABC-123  ' };
+      reqUtils.trimDocumentNumber(doc);
+      doc.documentNumber.should.equal('ABC-123');
+    });
+
+    it('trims documentNumber on every item in an array', () => {
+      const docs = [
+        { documentNumber: ' ABC-1 ' },
+        { documentNumber: 'ABC-2\t' },
+      ];
+      reqUtils.trimDocumentNumber(docs);
+      docs[0].documentNumber.should.equal('ABC-1');
+      docs[1].documentNumber.should.equal('ABC-2');
+    });
+
+    it('returns the same reference it was given', () => {
+      const doc = { documentNumber: ' ABC-1 ' };
+      reqUtils.trimDocumentNumber(doc).should.equal(doc);
+      const docs = [doc];
+      reqUtils.trimDocumentNumber(docs).should.equal(docs);
+    });
+
+    it('leaves an already-trimmed value unchanged', () => {
+      const doc = { documentNumber: 'ABC-123' };
+      reqUtils.trimDocumentNumber(doc);
+      doc.documentNumber.should.equal('ABC-123');
+    });
+
+    it('does nothing when documentNumber is absent', () => {
+      const doc = { title: 'no document number here' };
+      reqUtils.trimDocumentNumber(doc);
+      doc.should.not.have.property('documentNumber');
+    });
+
+    it('does not throw and leaves non-string documentNumber values alone', () => {
+      const withUndefined = { documentNumber: undefined };
+      const withNull = { documentNumber: null };
+      (() => reqUtils.trimDocumentNumber(withUndefined)).should.not.throw();
+      (() => reqUtils.trimDocumentNumber(withNull)).should.not.throw();
+      (withUndefined.documentNumber === undefined).should.be.true;
+      (withNull.documentNumber === null).should.be.true;
+    });
+
+    it('does not throw on null, undefined, or an empty array', () => {
+      (() => reqUtils.trimDocumentNumber(null)).should.not.throw();
+      (() => reqUtils.trimDocumentNumber(undefined)).should.not.throw();
+      reqUtils.trimDocumentNumber([]).should.deep.equal([]);
+    });
+  });
 });
