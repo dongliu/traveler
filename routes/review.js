@@ -2,6 +2,7 @@ const debug = require('debug')('traveler:route:review');
 const mongoose = require('mongoose');
 const auth = require('../lib/auth');
 const routesUtilities = require('../utilities/routes');
+const reqUtils = require('../lib/req-utils');
 
 const { Review_forms, Approve_travelers } = require('../lib/permission');
 const { Traveler } = require('../model/traveler');
@@ -65,7 +66,7 @@ module.exports = function(app) {
           .populate('__review.reviewRequests.requestedBy', 'name')
           .populate('createdBy', 'name')
           .exec();
-        return res.status(200).json(forms);
+        return res.status(200).json(reqUtils.trimDocumentNumber(forms));
       } catch (error) {
         debug(`error: ${error}`);
         return res.status(500).send(error.message);
@@ -95,7 +96,7 @@ module.exports = function(app) {
           .populate('createdBy', 'name')
           .lean();
         await travelerLib.attachFormOwners(travelers);
-        return res.status(200).json(travelers);
+        return res.status(200).json(reqUtils.trimDocumentNumber(travelers));
       } catch (error) {
         debug(`error: ${error}`);
         return res.status(500).send(error.message);

@@ -73,7 +73,7 @@ module.exports = function(app) {
       )
         .populate('createdBy', 'name')
         .exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(reqUtils.trimDocumentNumber(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -109,7 +109,7 @@ module.exports = function(app) {
         },
         'title formType status updatedOn documentNumber'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(reqUtils.trimDocumentNumber(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -135,7 +135,7 @@ module.exports = function(app) {
       )
         .populate('createdBy', 'name')
         .exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(reqUtils.trimDocumentNumber(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -157,7 +157,7 @@ module.exports = function(app) {
         )
           .populate('updatedBy', 'name')
           .exec();
-        return res.status(200).json(forms);
+        return res.status(200).json(reqUtils.trimDocumentNumber(forms));
       } catch (error) {
         logger.error(error);
         return res.status(500).send(error.message);
@@ -182,7 +182,7 @@ module.exports = function(app) {
       )
         .populate('updatedBy', 'name')
         .exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(reqUtils.trimDocumentNumber(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -200,7 +200,7 @@ module.exports = function(app) {
       )
         .lean()
         .exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(reqUtils.trimDocumentNumber(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -232,7 +232,7 @@ module.exports = function(app) {
         },
         'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(reqUtils.trimDocumentNumber(forms));
     } catch (error) {
       debug(`error: ${error}`);
       return res.status(500).send(error.message);
@@ -274,7 +274,7 @@ module.exports = function(app) {
         },
         'title formType status tags owner updatedBy updatedOn publicAccess sharedWith sharedGroup _v documentNumber'
       ).exec();
-      return res.status(200).json(forms);
+      return res.status(200).json(reqUtils.trimDocumentNumber(forms));
     } catch (error) {
       logger.error(error);
       return res.status(500).send(error.message);
@@ -296,7 +296,7 @@ module.exports = function(app) {
         )
           .populate('updatedBy', 'name')
           .exec();
-        return res.status(200).json(forms);
+        return res.status(200).json(reqUtils.trimDocumentNumber(forms));
       } catch (error) {
         logger.error(error);
         return res.status(500).send(error.message);

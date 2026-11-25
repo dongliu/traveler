@@ -154,7 +154,7 @@ var traveler = new Schema({
   referenceDiscrepancyForm: ObjectId,
   referenceReleasedForm: { type: ObjectId, ref: 'ReleasedForm' },
   referenceReleasedFormVer: String,
-  documentNumber: String,
+  documentNumber: { type: String, trim: true },
   forms: [form],
   discrepancyForms: [form],
   mapping: Schema.Types.Mixed,

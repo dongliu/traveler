@@ -207,7 +207,7 @@ module.exports = function(app) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(docs);
+        return res.status(200).json(reqUtils.trimDocumentNumber(docs));
       });
   });
 
@@ -230,7 +230,7 @@ module.exports = function(app) {
           logger.error(err);
           return res.status(500).send(err.message);
         }
-        return res.status(200).json(travelers);
+        return res.status(200).json(reqUtils.trimDocumentNumber(travelers));
       });
   });
 
@@ -268,7 +268,7 @@ module.exports = function(app) {
             logger.error(tErr);
             return res.status(500).send(tErr.message);
           }
-          return res.status(200).json(travelers);
+          return res.status(200).json(reqUtils.trimDocumentNumber(travelers));
         });
     });
   });
@@ -314,7 +314,7 @@ module.exports = function(app) {
             logger.error(tErr);
             return res.status(500).send(tErr.message);
           }
-          return res.status(200).json(travelers);
+          return res.status(200).json(reqUtils.trimDocumentNumber(travelers));
         });
     });
   });
@@ -349,7 +349,7 @@ module.exports = function(app) {
         .lean();
       await travelerLib.attachFormOwners(travelers);
 
-      return res.status(200).json(travelers);
+      return res.status(200).json(reqUtils.trimDocumentNumber(travelers));
     } catch (err) {
       logger.error(err);
       return res.status(500).send(err.message);

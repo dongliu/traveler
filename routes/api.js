@@ -64,6 +64,7 @@ function performMongoResponse(err, data, res, successCB) {
   if (!data) {
     return res.status(410).send('gone');
   }
+  reqUtils.trimDocumentNumber(data);
   if (successCB === undefined) {
     return res.status(200).json(data);
   } else {
