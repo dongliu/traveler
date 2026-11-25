@@ -87,6 +87,19 @@ function longDateColumn(title, key, visible = true) {
   };
 }
 
+function personSortValue(data) {
+  if (!data) {
+    return '';
+  }
+  if (typeof data === 'string') {
+    return data;
+  }
+  if (typeof data === 'number') {
+    return String(data);
+  }
+  return data.name || data.id || data._id || '';
+}
+
 function person(data) {
   if (data?.name) {
     return `<a href = "/users/${data._id || data.id}" target="${linkTarget}" >${
@@ -682,7 +695,7 @@ const ownerColumn = {
   mData(source, type) {
     const owner = source.owner || source.createdBy;
     if (type === 'sort' || type === 'filter') {
-      return owner;
+      return personSortValue(owner);
     }
     if (owner) {
       return person(owner);
@@ -698,7 +711,7 @@ const travelerOwnerColumn = {
   mData(source, type) {
     const owner = source.formOwner;
     if (type === 'sort' || type === 'filter') {
-      return owner;
+      return personSortValue(owner);
     }
     if (owner) {
       return person(owner);
@@ -714,7 +727,7 @@ const pulledByColumn = {
   mData(source, type) {
     const pulledBy = source.owner || source.createdBy;
     if (type === 'sort' || type === 'filter') {
-      return pulledBy;
+      return personSortValue(pulledBy);
     }
     if (pulledBy) {
       return person(pulledBy);
@@ -838,10 +851,26 @@ const titleColumn = {
   bFilter: true,
 };
 
+function naturalSortValue(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/(\d+)/g, (match) => match.padStart(12, '0'));
+}
+
 const docNoColumn = {
   sTitle: 'Doc No',
   sDefaultContent: '',
-  mData: 'documentNumber',
+  mData(source, type) {
+    const value = source.documentNumber || '';
+    if (type === 'sort') {
+      return naturalSortValue(value);
+    }
+    return value;
+  },
   bFilter: true,
 };
 
