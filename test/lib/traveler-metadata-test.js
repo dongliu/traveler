@@ -17,21 +17,19 @@ describe('lib/traveler-metadata.js #backfillFromReleasedForm', function() {
     sinon.restore();
   });
 
-  it('queries travelers by both the released form id and its version string', async function() {
-    const releasedForm = new ReleasedForm({ ver: '3' });
+  it('queries travelers by the released form id', async function() {
+    const releasedForm = new ReleasedForm({});
     sinon.stub(Traveler, 'find').resolves([]);
 
     await backfillFromReleasedForm(releasedForm);
 
     Traveler.find.calledWith({
       referenceReleasedForm: releasedForm._id,
-      referenceReleasedFormVer: releasedForm.ver,
     }).should.be.true;
   });
 
   it('fills in all three fields when a traveler has them all blank and the released form has them all set', async function() {
     const releasedForm = new ReleasedForm({
-      ver: '3',
       subsystem: 'Cryogenics',
       device: 'Magnet Assembly',
       activity: 'Inspection',
@@ -53,7 +51,6 @@ describe('lib/traveler-metadata.js #backfillFromReleasedForm', function() {
 
   it('resolves cleanly with no travelers to update', async function() {
     const releasedForm = new ReleasedForm({
-      ver: '3',
       subsystem: 'Cryogenics',
     });
     sinon.stub(Traveler, 'find').resolves([]);
@@ -63,7 +60,6 @@ describe('lib/traveler-metadata.js #backfillFromReleasedForm', function() {
 
   it('does not propagate a field that is itself blank on the released form', async function() {
     const releasedForm = new ReleasedForm({
-      ver: '3',
       subsystem: '',
       device: '',
       activity: '',
@@ -85,7 +81,6 @@ describe('lib/traveler-metadata.js #backfillFromReleasedForm', function() {
 
   it('never overwrites a field that already has a value, and skips save when nothing changed', async function() {
     const releasedForm = new ReleasedForm({
-      ver: '3',
       subsystem: 'Vacuum',
       device: 'Turbo Pump',
       activity: 'Repair',
@@ -107,7 +102,6 @@ describe('lib/traveler-metadata.js #backfillFromReleasedForm', function() {
 
   it('updates only the blank fields on a traveler that has a mix of blank and non-blank fields', async function() {
     const releasedForm = new ReleasedForm({
-      ver: '3',
       subsystem: 'Cryogenics',
       device: 'Magnet Assembly',
       activity: 'Inspection',
